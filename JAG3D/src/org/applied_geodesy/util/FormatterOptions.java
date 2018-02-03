@@ -1,0 +1,370 @@
+package org.applied_geodesy.util;
+
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.ParsePosition;
+import java.util.ArrayList;
+import java.util.EventListener;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import org.applied_geodesy.jag3d.ui.table.CellValueType;
+import org.applied_geodesy.util.unit.AngleUnit;
+import org.applied_geodesy.util.unit.LengthUnit;
+import org.applied_geodesy.util.unit.ScaleUnit;
+import org.applied_geodesy.util.unit.Unit;
+
+public class FormatterOptions {	
+	public class FormatterOption {
+		private final CellValueType type;
+		private NumberFormat format;
+		private Unit unit = null;
+		private FormatterOption(CellValueType type, NumberFormat format, Unit unit) {
+			this.type = type;
+			this.format = format;
+			this.unit = unit;
+		}
+		public void setUnit(Unit unit) {
+			if (this.unit == null || this.unit.getClass().equals(unit.getClass())) {
+				Unit oldUnit = this.unit;
+				if (!this.unit.equals(unit)) {
+					this.unit = unit;
+					fireUnitChanged(this.type, oldUnit, unit, this.getFractionDigits());
+				}
+			}
+		}
+		public Unit getUnit() {
+			return this.unit;
+		}
+		public int getFractionDigits() {
+			return this.format.getMaximumFractionDigits();
+		}
+		public final CellValueType getType() {
+			return this.type;
+		}
+		public void setFractionDigits(int d) {
+			if (d < 0)
+				return;
+			int o = this.format.getMaximumFractionDigits();
+			if (o != d) {
+				this.format.setMaximumFractionDigits(d);
+				this.format.setMinimumFractionDigits(d);
+				fireResolutionChanged(this.type, unit, o, d);
+			}
+		}
+		public Number parse(String source, ParsePosition parsePosition) throws ParseException {
+			return this.format.parse(source, parsePosition);
+		}
+		public Number parse(String source) throws ParseException {
+			return this.format.parse(source);
+		}
+		public NumberFormat getFormatter() {
+			return this.format;
+		}
+	}
+
+	private List<EventListener> listenerList = new ArrayList<EventListener>();
+	private Map<CellValueType, FormatterOption> formatterOptions = new HashMap<CellValueType, FormatterOption>();	
+	private static FormatterOptions options = new FormatterOptions();
+	
+	private FormatterOptions() {
+		this.init();
+	}
+	
+	private void init() {
+		LengthUnit LENGTH_UNIT = LengthUnit.METER;
+		AngleUnit  ANGLE_UNIT  = AngleUnit.GRADIAN;
+		ScaleUnit  SCALE_UNIT  = ScaleUnit.PARTS_PER_MILLION_WRT_ONE;
+		LengthUnit VECTOR_UNIT = LengthUnit.METER;
+		
+		LengthUnit LENGTH_UNCERTAINTY_UNIT = LengthUnit.MILLIMETER;
+		AngleUnit  ANGLE_UNCERTAINTY_UNIT  = AngleUnit.MILLIGRADIAN;
+		ScaleUnit  SCALE_UNCERTAINTY_UNIT  = ScaleUnit.PARTS_PER_MILLION_WRT_ZERO;
+		LengthUnit VECTOR_UNCERTAINTY_UNIT = LengthUnit.MILLIMETER;
+		
+		LengthUnit LENGTH_RESIDUAL_UNIT = LengthUnit.MILLIMETER;
+		AngleUnit  ANGLE_RESIDUAL_UNIT  = AngleUnit.MILLIGRADIAN;
+		ScaleUnit  SCALE_RESIDUAL_UNIT  = ScaleUnit.PARTS_PER_MILLION_WRT_ZERO;
+		
+		final NumberFormat lengthFormatter = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat angleFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat scaleFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat vectorFormatter = NumberFormat.getInstance(Locale.ENGLISH);
+		
+		final NumberFormat lengthUncertaintyFormatter = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat angleUncertaintyFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat scaleUncertaintyFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat vectorUncertaintyFormatter = NumberFormat.getInstance(Locale.ENGLISH);
+		
+		final NumberFormat lengthResidualFormatter = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat angleResidualFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat scaleResidualFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
+		
+		final NumberFormat statisticFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
+		
+		lengthFormatter.setGroupingUsed(false);
+		angleFormatter.setGroupingUsed(false);
+		scaleFormatter.setGroupingUsed(false);
+		vectorFormatter.setGroupingUsed(false);
+		
+		lengthUncertaintyFormatter.setGroupingUsed(false);
+		angleUncertaintyFormatter.setGroupingUsed(false);
+		scaleUncertaintyFormatter.setGroupingUsed(false);
+		vectorUncertaintyFormatter.setGroupingUsed(false);
+		
+		statisticFormatter.setGroupingUsed(false);
+		
+		lengthResidualFormatter.setGroupingUsed(false);
+		angleResidualFormatter.setGroupingUsed(false);
+		scaleResidualFormatter.setGroupingUsed(false);
+		
+		this.setFractionDigits(lengthFormatter, 5);
+		this.setFractionDigits(angleFormatter,  5);
+		this.setFractionDigits(scaleFormatter,  2);
+		this.setFractionDigits(vectorFormatter, 7);
+		
+		this.setFractionDigits(lengthUncertaintyFormatter, 1);
+		this.setFractionDigits(angleUncertaintyFormatter,  2);
+		this.setFractionDigits(scaleUncertaintyFormatter,  1);
+		this.setFractionDigits(vectorUncertaintyFormatter, 1);
+		
+		this.setFractionDigits(statisticFormatter, 2);
+		
+		this.setFractionDigits(lengthResidualFormatter, 1);
+		this.setFractionDigits(angleResidualFormatter, 2);
+		this.setFractionDigits(scaleResidualFormatter, 2);
+		
+		this.formatterOptions.put(CellValueType.LENGTH,             new FormatterOption(CellValueType.LENGTH,             lengthFormatter, LENGTH_UNIT));
+		this.formatterOptions.put(CellValueType.LENGTH_UNCERTAINTY, new FormatterOption(CellValueType.LENGTH_UNCERTAINTY, lengthUncertaintyFormatter, LENGTH_UNCERTAINTY_UNIT));
+		this.formatterOptions.put(CellValueType.LENGTH_RESIDUAL,    new FormatterOption(CellValueType.LENGTH_RESIDUAL,    lengthResidualFormatter, LENGTH_RESIDUAL_UNIT));
+		
+		this.formatterOptions.put(CellValueType.ANGLE,              new FormatterOption(CellValueType.ANGLE,              angleFormatter, ANGLE_UNIT));
+		this.formatterOptions.put(CellValueType.ANGLE_UNCERTAINTY,  new FormatterOption(CellValueType.ANGLE_UNCERTAINTY,  angleUncertaintyFormatter, ANGLE_UNCERTAINTY_UNIT));
+		this.formatterOptions.put(CellValueType.ANGLE_RESIDUAL,     new FormatterOption(CellValueType.ANGLE_RESIDUAL,     angleResidualFormatter, ANGLE_RESIDUAL_UNIT));
+				
+		this.formatterOptions.put(CellValueType.SCALE,              new FormatterOption(CellValueType.SCALE,              scaleFormatter, SCALE_UNIT));
+		this.formatterOptions.put(CellValueType.SCALE_UNCERTAINTY,  new FormatterOption(CellValueType.SCALE_UNCERTAINTY,  scaleUncertaintyFormatter, SCALE_UNCERTAINTY_UNIT));
+		this.formatterOptions.put(CellValueType.SCALE_RESIDUAL,     new FormatterOption(CellValueType.SCALE_RESIDUAL,     scaleResidualFormatter, SCALE_RESIDUAL_UNIT));
+		
+		this.formatterOptions.put(CellValueType.VECTOR,             new FormatterOption(CellValueType.VECTOR,             vectorFormatter, VECTOR_UNIT));
+		this.formatterOptions.put(CellValueType.VECTOR_UNCERTAINTY, new FormatterOption(CellValueType.VECTOR_UNCERTAINTY, vectorUncertaintyFormatter, VECTOR_UNCERTAINTY_UNIT));
+		
+		this.formatterOptions.put(CellValueType.STATISTIC,          new FormatterOption(CellValueType.STATISTIC,          statisticFormatter, null));
+	}
+	
+	private void setFractionDigits(NumberFormat format, int d) {
+		if (d < 0)
+			return;
+		format.setMaximumFractionDigits(d);
+		format.setMinimumFractionDigits(d);
+	}
+	
+	public Map<CellValueType, FormatterOption> getFormatterOptions() {
+		return this.formatterOptions;
+	}
+
+	public static FormatterOptions getInstance() {
+		return options;
+	}
+		
+	public double convertScaleToView(double d) {
+		return ((ScaleUnit)this.formatterOptions.get(CellValueType.SCALE).getUnit()).fromUnitless(d);
+	}
+	
+	public double convertScaleToModel(double d) {
+		return ((ScaleUnit)this.formatterOptions.get(CellValueType.SCALE).getUnit()).toUnitless(d);
+	}
+	
+	public double convertLengthToView(double d) {
+		return ((LengthUnit)this.formatterOptions.get(CellValueType.LENGTH).getUnit()).fromMeter(d);
+	}
+	
+	public double convertLengthToModel(double d) {
+		return ((LengthUnit)this.formatterOptions.get(CellValueType.LENGTH).getUnit()).toMeter(d);
+	}
+	
+	public double convertLengthResidualToView(double d) {
+		return ((LengthUnit)this.formatterOptions.get(CellValueType.LENGTH_RESIDUAL).getUnit()).fromMeter(d);
+	}
+	
+	public double convertLengthResidualToModel(double d) {
+		return ((LengthUnit)this.formatterOptions.get(CellValueType.LENGTH_RESIDUAL).getUnit()).toMeter(d);
+	}
+	
+	public double convertAngleToView(double d) {
+		return ((AngleUnit)this.formatterOptions.get(CellValueType.ANGLE).getUnit()).fromRadian(d);
+	}
+	
+	public double convertAngleToModel(double d) {
+		return ((AngleUnit)this.formatterOptions.get(CellValueType.ANGLE).getUnit()).toRadian(d);
+	}
+	
+	public double convertAngleResidualToView(double d) {
+		return ((AngleUnit)this.formatterOptions.get(CellValueType.ANGLE_RESIDUAL).getUnit()).fromRadian(d);
+	}
+	
+	public double convertAngleResidualToModel(double d) {
+		return ((AngleUnit)this.formatterOptions.get(CellValueType.ANGLE_RESIDUAL).getUnit()).toRadian(d);
+	}
+	
+	public double convertVectorToView(double d) {
+		return ((LengthUnit)this.formatterOptions.get(CellValueType.VECTOR).getUnit()).fromMeter(d);
+	}
+	
+	public double convertVectorToModel(double d) {
+		return ((LengthUnit)this.formatterOptions.get(CellValueType.VECTOR).getUnit()).toMeter(d);
+	}
+	
+	public double convertLengthUncertaintyToView(double d) {
+		return ((LengthUnit)this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getUnit()).fromMeter(d);
+	}
+	
+	public double convertLengthUncertaintyToModel(double d) {
+		return ((LengthUnit)this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getUnit()).toMeter(d);
+	}
+	
+	public double convertAngleUncertaintyToView(double d) {
+		return ((AngleUnit)this.formatterOptions.get(CellValueType.ANGLE_UNCERTAINTY).getUnit()).fromRadian(d);
+	}
+	
+	public double convertAngleUncertaintyToModel(double d) {
+		return ((AngleUnit)this.formatterOptions.get(CellValueType.ANGLE_UNCERTAINTY).getUnit()).toRadian(d);
+	}
+	
+	public double convertScaleUncertaintyToView(double d) {
+		return ((ScaleUnit)this.formatterOptions.get(CellValueType.SCALE_UNCERTAINTY).getUnit()).fromUnitless(d);
+	}
+	
+	public double convertScaleUncertaintyToModel(double d) {
+		return ((ScaleUnit)this.formatterOptions.get(CellValueType.SCALE_UNCERTAINTY).getUnit()).toUnitless(d);
+	}
+	
+	public double convertScaleResidualToView(double d) {
+		return ((ScaleUnit)this.formatterOptions.get(CellValueType.SCALE_RESIDUAL).getUnit()).fromUnitless(d);
+	}
+	
+	public double convertScaleResidualToModel(double d) {
+		return ((ScaleUnit)this.formatterOptions.get(CellValueType.SCALE_RESIDUAL).getUnit()).toUnitless(d);
+	}
+
+	public double convertVectorUncertaintyToView(double d) {
+		return ((LengthUnit)this.formatterOptions.get(CellValueType.VECTOR_UNCERTAINTY).getUnit()).fromMeter(d);
+	}
+	
+	public double convertVectorUncertaintyToModel(double d) {
+		return ((LengthUnit)this.formatterOptions.get(CellValueType.VECTOR_UNCERTAINTY).getUnit()).toMeter(d);
+	}
+	
+	public String toAngleFormat(double d, boolean displayUnit) {
+		return String.format(Locale.ENGLISH, "%s %s",
+				this.formatterOptions.get(CellValueType.ANGLE).getFormatter().format(this.convertAngleToView(d)), 
+				displayUnit ? this.formatterOptions.get(CellValueType.ANGLE).getUnit().getAbbreviation():"").trim();
+	}
+	
+	public String toLengthFormat(double d, boolean displayUnit) {
+		return String.format(Locale.ENGLISH, "%s %s",
+				this.formatterOptions.get(CellValueType.LENGTH).getFormatter().format(this.convertLengthToView(d)), 
+				displayUnit ? this.formatterOptions.get(CellValueType.LENGTH).getUnit().getAbbreviation():"").trim();
+	}
+	
+	public String toScaleFormat(double d, boolean displayUnit) {
+		return String.format(Locale.ENGLISH, "%s %s",
+				this.formatterOptions.get(CellValueType.SCALE).getFormatter().format(this.convertScaleToView(d)), 
+				displayUnit ? this.formatterOptions.get(CellValueType.SCALE).getUnit().getAbbreviation():"").trim();
+	}
+	
+	public String toVectorFormat(double d, boolean displayUnit) {
+		return String.format(Locale.ENGLISH, "%s %s",
+				this.formatterOptions.get(CellValueType.VECTOR).getFormatter().format(this.convertVectorToView(d)), 
+				displayUnit ? this.formatterOptions.get(CellValueType.VECTOR).getUnit().getAbbreviation():"").trim();
+	}
+	
+	public String toTestStatisticFormat(double d) {
+		return this.formatterOptions.get(CellValueType.STATISTIC).getFormatter().format(d).trim();
+	}
+	
+	public String toAngleUncertaintyFormat(double d, boolean displayUnit) {
+		return String.format(Locale.ENGLISH, "%s %s",
+				this.formatterOptions.get(CellValueType.ANGLE_UNCERTAINTY).getFormatter().format(this.convertAngleUncertaintyToView(d)), 
+				displayUnit ? this.formatterOptions.get(CellValueType.ANGLE_UNCERTAINTY).getUnit().getAbbreviation():"").trim();
+	}
+	
+	public String toLengthUncertaintyFormat(double d, boolean displayUnit) {
+		return String.format(Locale.ENGLISH, "%s %s",
+				this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getFormatter().format(this.convertLengthUncertaintyToView(d)), 
+				displayUnit ? this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getUnit().getAbbreviation():"").trim();
+	}
+	
+	public String toSquareRootLengthUncertaintyFormat(double d, boolean displayUnit) {
+		return String.format(Locale.ENGLISH, "%s %s",
+				this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getFormatter().format(this.convertLengthUncertaintyToView(d)), 
+				displayUnit ? "\u221A"+this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getUnit().getAbbreviation():"").trim();
+	}
+	
+	public String toLengthUncertaintyDividedBySquareRootLengthFormat(double d, boolean displayUnit) {
+		return String.format(Locale.ENGLISH, "%s %s",
+				this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getFormatter().format(this.convertLengthUncertaintyToView(d)), 
+				displayUnit ? this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getUnit().getAbbreviation() + "/\u221A" + this.formatterOptions.get(CellValueType.LENGTH).getUnit().getAbbreviation():"").trim();
+	}
+	
+	public String toAngleResidualFormat(double d, boolean displayUnit) {
+		return String.format(Locale.ENGLISH, "%s %s",
+				this.formatterOptions.get(CellValueType.ANGLE_RESIDUAL).getFormatter().format(this.convertAngleResidualToView(d)), 
+				displayUnit ? this.formatterOptions.get(CellValueType.ANGLE_RESIDUAL).getUnit().getAbbreviation():"").trim();
+	}
+	
+	public String toLengthResidualFormat(double d, boolean displayUnit) {
+		return String.format(Locale.ENGLISH, "%s %s",
+				this.formatterOptions.get(CellValueType.LENGTH_RESIDUAL).getFormatter().format(this.convertLengthResidualToView(d)), 
+				displayUnit ? this.formatterOptions.get(CellValueType.LENGTH_RESIDUAL).getUnit().getAbbreviation():"").trim();
+	}
+	
+	public String toScaleUncertaintyFormat(double d, boolean displayUnit) {
+		return String.format(Locale.ENGLISH, "%s %s",
+				this.formatterOptions.get(CellValueType.SCALE_UNCERTAINTY).getFormatter().format(this.convertScaleUncertaintyToView(d)), 
+				displayUnit ? this.formatterOptions.get(CellValueType.SCALE_UNCERTAINTY).getUnit().getAbbreviation():"").trim();
+	}
+	
+	public String toScaleResidualFormat(double d, boolean displayUnit) {
+		return String.format(Locale.ENGLISH, "%s %s",
+				this.formatterOptions.get(CellValueType.SCALE_RESIDUAL).getFormatter().format(this.convertScaleResidualToView(d)), 
+				displayUnit ? this.formatterOptions.get(CellValueType.SCALE_RESIDUAL).getUnit().getAbbreviation():"").trim();
+	}
+	
+	public String toVectorUncertaintyFormat(double d, boolean displayUnit) {
+		return String.format(Locale.ENGLISH, "%s %s",
+				this.formatterOptions.get(CellValueType.VECTOR_UNCERTAINTY).getFormatter().format(this.convertVectorUncertaintyToView(d)), 
+				displayUnit ? this.formatterOptions.get(CellValueType.SCALE_UNCERTAINTY).getUnit().getAbbreviation():"").trim();
+	}
+	
+	protected void fireUnitChanged(CellValueType type, Unit oldUnit, Unit newUnit, int res) {
+		FormatterEvent evt = new FormatterEvent(this, FormatterEventType.UNIT_CHANGED, type, oldUnit, newUnit, res);
+		Object listeners[] = this.listenerList.toArray();
+		for (int i=0; i<listeners.length; i++) {
+			if (listeners[i] instanceof FormatterChangedListener) {
+				((FormatterChangedListener)listeners[i]).formatterChanged(evt);
+			}
+		}
+	}
+	
+	protected void fireResolutionChanged(CellValueType type, Unit unit, int oldValue, int newValue) {
+		FormatterEvent evt = new FormatterEvent(this, FormatterEventType.RESOLUTION_CHANGED, type, unit, oldValue, newValue);
+		Object listeners[] = this.listenerList.toArray();
+		for (int i=0; i<listeners.length; i++) {
+			if (listeners[i] instanceof FormatterChangedListener) {
+				((FormatterChangedListener)listeners[i]).formatterChanged(evt);
+			}
+		}
+	}
+	
+	public void addFormatterChangedListener(FormatterChangedListener l) {
+		this.listenerList.add(l);
+	}
+	
+	public void removeFormatterChangedListener(FormatterChangedListener l) {
+		this.listenerList.remove(l);
+	}
+	
+}

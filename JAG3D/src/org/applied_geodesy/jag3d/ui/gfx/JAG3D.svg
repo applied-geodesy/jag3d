@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org) -->
+
+<!-- by Michael Loesler (http://derletztekick.com)   -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   width="500"
+   height="500"
+   id="svg2"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="JAG3D.svg">
+  <title
+     id="title2995">Java Graticule 3D</title>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1208"
+     inkscape:window-height="792"
+     id="namedview18"
+     showgrid="false"
+     inkscape:zoom="0.83416501"
+     inkscape:cx="149.54388"
+     inkscape:cy="235.64068"
+     inkscape:window-x="513"
+     inkscape:window-y="83"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2" />
+  <defs
+     id="defs4" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Java Graticule 3D</dc:title>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Michael Loesler</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>Michael Loesler</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:source>derletztekick.com</dc:source>
+        <dc:relation>Java Graticule 3D - Softwarelogo</dc:relation>
+        <dc:publisher>
+          <cc:Agent>
+            <dc:title>Michael Loesler</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+        <dc:identifier>Michael Loesler</dc:identifier>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/3.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <path
+     d="m 424.28742,-31.83738 c 0,-2.30461 38.07737,-174.97319 39.12352,-177.41264 0.61512,-1.43435 8.45641,34.18751 19.11972,86.85817 9.94234,49.10932 17.79875,89.5492 17.4587,89.86639 -0.34004,0.31715 -5.19321,-0.98921 -10.78484,-2.90304 -18.80418,-6.43604 -38.84392,-5.84686 -57.25204,1.68328 -4.21578,1.72455 -7.66506,2.58307 -7.66506,1.90784 z"
+     id="path5370"
+     style="fill:none;stroke:none"
+     inkscape:connector-curvature="0" />
+  <path
+     d="m 424.2854,-31.69055 c 0.008,-2.93422 37.46262,-179.10293 38.23146,-179.82007 0.4339,-0.40471 0.78894,0.006 0.78894,0.91124 0,0.90591 8.13005,40.06774 18.06677,87.02629 9.93672,46.95851 18.06672,85.7364 18.06672,86.17305 0,0.43665 -1.78858,1.65156 -3.97467,2.69978 -3.43757,1.64835 -5.34185,1.63576 -14.09205,-0.0932 -13.37843,-2.64338 -37.37142,-1.69088 -48.78026,1.93648 -5.25628,1.67124 -8.30932,2.09991 -8.30691,1.16642 l 0,-5e-5 z"
+     id="path5479"
+     style="fill:none;stroke:none"
+     inkscape:connector-curvature="0" />
+  <g
+     id="JAG3D"
+     transform="matrix(1.4705882,0,0,1.4705882,-44.117649,-44.1177)"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">
+    <g
+       transform="translate(-50,-602.36211)"
+       id="hbar">
+      <rect
+         width="20"
+         height="340"
+         x="792.36218"
+         y="-420"
+         transform="matrix(0,1,-1,0,0,0)"
+         id="rect5485-9"
+         style="fill:#f5f5f5;fill-opacity:1;stroke:none" />
+    </g>
+    <rect
+       width="20"
+       height="340"
+       x="190"
+       y="30.000072"
+       id="vbar"
+       style="fill:#f5f5f5;fill-opacity:1;stroke:none" />
+    <path
+       d="m 359.96581,199.85762 a 159.96587,159.96608 0 1 1 -7e-5,-0.0585 z"
+       id="ocircle"
+       style="fill:#be0000;fill-opacity:1;stroke:#f5f5f5;stroke-width:15;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
+    <path
+       d="m 248.45699,189.27636 a 49.629399,49.629466 0 1 1 -0.0436,-0.19527 z"
+       id="icircle"
+       style="fill:#aa0000;fill-opacity:1;fill-rule:evenodd;stroke:#f5f5f5;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
+    <path
+       d="m 180.52034,149.47973 19.47965,-98.95931 19.47966,98.95931 c -12.83939,-5.17686 -27.57391,-5.6543 -38.95931,0 z"
+       id="narrow"
+       style="fill:#f5f5f5;fill-opacity:1;stroke:#f5f5f5;stroke-width:1.04068577px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       inkscape:connector-curvature="0" />
+    <path
+       d="m 250.52034,180.52042 98.95931,19.47965 -98.95931,19.47966 c 5.17686,-12.83939 5.6543,-27.57391 0,-38.95931 z"
+       id="earrow"
+       style="fill:#f5f5f5;fill-opacity:1;stroke:#f5f5f5;stroke-width:1.04068577px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       inkscape:connector-curvature="0" />
+    <path
+       d="M 219.47965,250.52042 200,349.47969 180.52034,250.52042 c 12.83939,5.17686 27.57391,5.6543 38.95931,0 z"
+       id="sarrow"
+       style="fill:#f5f5f5;fill-opacity:1;stroke:#f5f5f5;stroke-width:1.04068577px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       inkscape:connector-curvature="0" />
+    <path
+       d="m 149.47965,219.47973 -98.95931,-19.47965 98.95931,-19.47966 c -5.17686,12.83939 -5.6543,27.57391 0,38.95931 z"
+       id="warrow"
+       style="fill:#f5f5f5;fill-opacity:1;stroke:#f5f5f5;stroke-width:1.04068577px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       inkscape:connector-curvature="0" />
+    <path
+       d="M 182.96656,177.39578 296.54108,103.459 219.33592,218.32505 c -21.19004,26.96704 -67.63794,-10.91113 -36.36936,-40.92927 z"
+       id="nearrow"
+       style="fill:#f5f5f5;fill-opacity:1;stroke:#f5f5f5;stroke-width:0.91783923px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>

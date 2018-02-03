@@ -1,0 +1,640 @@
+package org.applied_geodesy.jag3d.ui.tree;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
+import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog;
+import org.applied_geodesy.jag3d.ui.dnd.CongruenceAnalysisRowDnD;
+import org.applied_geodesy.jag3d.ui.dnd.GNSSObservationRowDnD;
+import org.applied_geodesy.jag3d.ui.dnd.PointRowDnD;
+import org.applied_geodesy.jag3d.ui.dnd.TerrestrialObservationRowDnD;
+import org.applied_geodesy.util.i18.I18N;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javafx.scene.control.cell.CheckBoxTreeCell;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.TransferMode;
+import javafx.scene.text.Text;
+
+public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue> {
+	public static final DataFormat TREE_ITEM_TYPE_DATA_FORMAT = new DataFormat(TreeItemType.class.toString());
+	public static final DataFormat GROUP_ID_DATA_FORMAT = new DataFormat(TreeItemValue.class.toString());
+	public static final DataFormat DIMENSION_DATA_FORMAT = new DataFormat(Integer.class.toString());
+	public static final DataFormat TERRESTRIAL_OBSERVATION_ROWS_DATA_FORMAT = new DataFormat(TerrestrialObservationRowDnD.class.toString());
+	public static final DataFormat GNSS_OBSERVATION_ROWS_DATA_FORMAT = new DataFormat(GNSSObservationRowDnD.class.toString());
+	public static final DataFormat POINT_ROWS_DATA_FORMAT = new DataFormat(PointRowDnD.class.toString());
+	public static final DataFormat CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT = new DataFormat(CongruenceAnalysisRowDnD.class.toString());
+
+	private static I18N i18n = I18N.getInstance();
+	private BooleanProperty ignoreEvent = new SimpleBooleanProperty(Boolean.FALSE);
+	private ContextMenu contextMenu;
+	private TextField textField;
+	private CheckBox checkBox;
+
+	private enum ContextMenuType {
+		ADD,
+		REMOVE,
+		EXPORT,
+		SEARCH_AND_REPLACE,
+		CHANGE_TO_REFERENCE_POINT_GROUP,
+		CHANGE_TO_STOCHASTIC_POINT_GROUP,
+		CHANGE_TO_DATUM_POINT_GROUP,
+		CHANGE_TO_NEW_POINT_GROUP;
+	}
+
+	private class DropEventHandler implements EventHandler<DragEvent> {
+		@Override
+		public void handle(DragEvent event) {
+			if (event.getEventType() == DragEvent.DRAG_OVER) {
+				if (acceptTransfer(event))
+					event.acceptTransferModes(TransferMode.MOVE);
+				//event.consume();
+			}
+			else if (event.getEventType() == DragEvent.DRAG_DROPPED) {
+
+				Dragboard db = event.getDragboard();
+				boolean success = false;
+				if (acceptTransfer(event)) {
+					success = true;
+					int groupId = -1;
+					List<?> droppedRows = null;
+
+					if (TreeItemType.isObservationTypeLeaf(getItem().getItemType()) && db.hasContent(TERRESTRIAL_OBSERVATION_ROWS_DATA_FORMAT)) {
+						groupId = ((ObservationTreeItemValue)getItem()).getGroupId();
+						droppedRows = (List<?>)db.getContent(TERRESTRIAL_OBSERVATION_ROWS_DATA_FORMAT);
+					}
+					else if (TreeItemType.isGNSSObservationTypeLeaf(getItem().getItemType()) && db.hasContent(GNSS_OBSERVATION_ROWS_DATA_FORMAT)) {
+						groupId = ((ObservationTreeItemValue)getItem()).getGroupId();
+						droppedRows = (List<?>)db.getContent(GNSS_OBSERVATION_ROWS_DATA_FORMAT);
+					}
+					else if (TreeItemType.isPointTypeLeaf(getItem().getItemType()) && db.hasContent(POINT_ROWS_DATA_FORMAT)) {
+						groupId = ((PointTreeItemValue)getItem()).getGroupId();
+						droppedRows = (List<?>)db.getContent(POINT_ROWS_DATA_FORMAT);
+					}
+					else if (TreeItemType.isCongruenceAnalysisTypeLeaf(getItem().getItemType()) && db.hasContent(CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT)) {
+						groupId = ((CongruenceAnalysisTreeItemValue)getItem()).getGroupId();
+						droppedRows = (List<?>)db.getContent(CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT);
+					}
+
+					if (droppedRows != null && groupId >= 0) {
+						for (int i=0; i<droppedRows.size(); i++) {
+							if (droppedRows.get(i) == null)
+								continue;
+							try {
+								if (droppedRows.get(i) instanceof TerrestrialObservationRowDnD) {
+									TerrestrialObservationRowDnD rowDnD = (TerrestrialObservationRowDnD)droppedRows.get(i);
+									SQLManager.getInstance().saveItem(groupId, rowDnD.toTerrestrialObservationRow());
+								}
+								else if (droppedRows.get(i) instanceof GNSSObservationRowDnD) {
+									GNSSObservationRowDnD rowDnD = (GNSSObservationRowDnD)droppedRows.get(i);
+									SQLManager.getInstance().saveItem(groupId, rowDnD.toGNSSObservationRow());
+								}
+								else if (droppedRows.get(i) instanceof PointRowDnD) {
+									PointRowDnD rowDnD = (PointRowDnD)droppedRows.get(i);
+									SQLManager.getInstance().saveItem(groupId, rowDnD.toPointRow());
+								}
+								else if (droppedRows.get(i) instanceof CongruenceAnalysisRowDnD) {
+									CongruenceAnalysisRowDnD rowDnD = (CongruenceAnalysisRowDnD)droppedRows.get(i);
+									SQLManager.getInstance().saveItem(groupId, rowDnD.toCongruenceAnalysisRow());
+								}
+							} catch (SQLException e) {
+								OptionDialog.showThrowableDialog (
+										i18n.getString("EditableMenuCheckBoxTreeCell.message.error.drop.title", "SQL-Error"),
+										i18n.getString("EditableMenuCheckBoxTreeCell.message.error.drop.header", "Error, could not drop selected rows to new table."),
+										i18n.getString("EditableMenuCheckBoxTreeCell.message.error.drop.message", "An exception is occured during database transaction."),
+										e);
+								e.printStackTrace();
+								success = false;
+								break;
+
+							}
+						}
+					}	
+				}
+				event.setDropCompleted(success);
+				//event.consume();
+
+				final TreeItem<TreeItemValue> targetTreeItem = getTreeItem();
+				if (targetTreeItem != null) {
+					getTreeView().getSelectionModel().clearSelection();
+					getTreeView().getSelectionModel().select(targetTreeItem);
+				}
+			}
+			event.consume();
+		}
+
+		private boolean acceptTransfer(DragEvent event) {
+			Dragboard db = event.getDragboard();
+			TreeItemValue itemValue = getItem();
+			TreeItemType itemType = itemValue != null && itemValue.getItemType() != null ? itemValue.getItemType() : null;
+
+			return (itemType != null && event.getGestureSource() instanceof TableView && 
+					db.hasContent(TREE_ITEM_TYPE_DATA_FORMAT) &&
+					db.hasContent(GROUP_ID_DATA_FORMAT) &&
+					db.hasContent(DIMENSION_DATA_FORMAT) &&
+
+					(
+							// Terrestrial observations
+							(db.hasContent(TERRESTRIAL_OBSERVATION_ROWS_DATA_FORMAT) && 
+									TreeItemType.isObservationTypeLeaf(itemType) &&
+									itemType == db.getContent(TREE_ITEM_TYPE_DATA_FORMAT) &&
+									itemValue instanceof ObservationTreeItemValue &&
+									((ObservationTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT))
+
+							||
+
+							// GNSS observations
+							(db.hasContent(GNSS_OBSERVATION_ROWS_DATA_FORMAT) && 
+									TreeItemType.isGNSSObservationTypeLeaf(itemType) &&
+									itemType == db.getContent(TREE_ITEM_TYPE_DATA_FORMAT) &&
+									itemValue instanceof ObservationTreeItemValue &&
+									((ObservationTreeItemValue)itemValue).getDimension() == (Integer)db.getContent(DIMENSION_DATA_FORMAT) &&
+									((ObservationTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT))
+
+							||
+
+							// points
+							(db.hasContent(POINT_ROWS_DATA_FORMAT) && 
+									TreeItemType.isPointTypeLeaf(itemType) && 
+									TreeItemType.isPointTypeLeaf((TreeItemType)db.getContent(TREE_ITEM_TYPE_DATA_FORMAT)) && 
+									itemValue instanceof PointTreeItemValue &&
+									((PointTreeItemValue)itemValue).getDimension() == (Integer)db.getContent(DIMENSION_DATA_FORMAT) &&
+									((PointTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT))
+					
+							||
+
+							// congruence analysis
+							(db.hasContent(CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT) && 
+									TreeItemType.isCongruenceAnalysisTypeLeaf(itemType) && 
+									itemType == db.getContent(TREE_ITEM_TYPE_DATA_FORMAT) &&
+									itemValue instanceof CongruenceAnalysisTreeItemValue &&
+									((CongruenceAnalysisTreeItemValue)itemValue).getDimension() == (Integer)db.getContent(DIMENSION_DATA_FORMAT) &&
+									((CongruenceAnalysisTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT))
+
+							)
+					);
+		}
+	}
+
+	private class PointGroupChangeListener implements ChangeListener<Toggle> {
+
+		@Override
+		public void changed(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
+
+			if (!isIgnoreEvent() && newValue != null 
+					&& newValue.getUserData() instanceof ContextMenuType
+					&& getTreeItem() != null && getTreeItem().getValue() != null 
+					&& getTreeItem().getValue() instanceof PointTreeItemValue) {// newValue instanceof RadioMenuItem &&
+				ContextMenuType menuItemType = (ContextMenuType)newValue.getUserData();
+				PointTreeItemValue itemValue = (PointTreeItemValue)getTreeItem().getValue();
+
+				int dimension = itemValue.getDimension();
+				PointType pointType = itemValue.getPointType();
+
+				switch(menuItemType) {
+				case CHANGE_TO_REFERENCE_POINT_GROUP:
+					if (pointType == PointType.REFERENCE_POINT)
+						return;
+
+					if (dimension == 1)
+						changePointGroupType(TreeItemType.REFERENCE_POINT_1D_LEAF);
+					else if (dimension == 2)
+						changePointGroupType(TreeItemType.REFERENCE_POINT_2D_LEAF);
+					else if (dimension == 3)
+						changePointGroupType(TreeItemType.REFERENCE_POINT_3D_LEAF);
+					break;
+				case CHANGE_TO_STOCHASTIC_POINT_GROUP:
+					if (pointType == PointType.STOCHASTIC_POINT)
+						return;
+
+					if (dimension == 1)
+						changePointGroupType(TreeItemType.STOCHASTIC_POINT_1D_LEAF);
+					else if (dimension == 2)
+						changePointGroupType(TreeItemType.STOCHASTIC_POINT_2D_LEAF);
+					else if (dimension == 3)
+						changePointGroupType(TreeItemType.STOCHASTIC_POINT_3D_LEAF);
+					break;
+				case CHANGE_TO_DATUM_POINT_GROUP:
+					if (pointType == PointType.DATUM_POINT)
+						return;
+
+					if (dimension == 1)
+						changePointGroupType(TreeItemType.DATUM_POINT_1D_LEAF);
+					else if (dimension == 2)
+						changePointGroupType(TreeItemType.DATUM_POINT_2D_LEAF);
+					else if (dimension == 3)
+						changePointGroupType(TreeItemType.DATUM_POINT_3D_LEAF);
+					break;
+				case CHANGE_TO_NEW_POINT_GROUP:
+					if (pointType == PointType.NEW_POINT)
+						return;
+
+					if (dimension == 1)
+						changePointGroupType(TreeItemType.NEW_POINT_1D_LEAF);
+					else if (dimension == 2)
+						changePointGroupType(TreeItemType.NEW_POINT_2D_LEAF);
+					else if (dimension == 3)
+						changePointGroupType(TreeItemType.NEW_POINT_3D_LEAF);
+					break;
+
+				default:
+					System.err.println(EditableMenuCheckBoxTreeCell.class.getSimpleName() + " : Error, unsupported context menu item type " + menuItemType);
+					break;
+				}
+			}
+		}
+	}
+
+	private class ContextMenuEventHandler implements EventHandler<ActionEvent> {
+
+		@Override
+		public void handle(ActionEvent event) {
+			if (!isIgnoreEvent() && event.getSource() instanceof MenuItem 
+					&& ((MenuItem)event.getSource()).getUserData() instanceof ContextMenuType
+					&& getTreeItem() != null && getTreeItem().getValue() != null) {
+				ContextMenuType contextMenuType = (ContextMenuType)((MenuItem)event.getSource()).getUserData();
+				TreeItem<TreeItemValue> selectedItem = getTreeItem();
+				TreeItemValue itemValue = selectedItem.getValue();
+
+				switch(contextMenuType) {
+				case ADD:
+					addNewEmptyGroup(itemValue.getItemType());
+					break;
+				case REMOVE:
+					removeSelectedGroups();
+					break;
+				case EXPORT:
+					System.out.println(this.getClass().getSimpleName() + " : " + contextMenuType);
+					break;
+				case SEARCH_AND_REPLACE:
+					searchAndReplace(selectedItem);
+					break;
+				default:
+					System.out.println(this.getClass().getSimpleName() + " : " + event);
+					break;
+
+				}
+			}
+		}
+	}			
+
+	public EditableMenuCheckBoxTreeCell() {
+		DropEventHandler dropEventHandler = new DropEventHandler();
+		this.setOnDragOver(dropEventHandler);
+		this.setOnDragDropped(dropEventHandler);		
+	}
+
+	private void initContextMenu(TreeItemType itemType) {
+		ContextMenuEventHandler listener = new ContextMenuEventHandler();
+
+		MenuItem addItem = new MenuItem(i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.add", "Add item"));
+		addItem.setUserData(ContextMenuType.ADD);
+		addItem.setOnAction(listener);
+
+		if (TreeItemType.isPointTypeDirectory(itemType) || 
+				TreeItemType.isObservationTypeDirectory(itemType) || 
+				TreeItemType.isGNSSObservationTypeDirectory(itemType) ||
+				TreeItemType.isCongruenceAnalysisTypeDirectory(itemType)) {
+			this.contextMenu = new ContextMenu(addItem);
+			return;
+		}
+
+		MenuItem removeItem = new MenuItem(i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.remove", "Remove items"));
+		removeItem.setUserData(ContextMenuType.REMOVE);
+		removeItem.setOnAction(listener);
+
+		MenuItem exportItem = new MenuItem(i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.export", "Export items"));
+		exportItem.setUserData(ContextMenuType.EXPORT);
+		exportItem.setOnAction(listener);
+		
+		MenuItem searchAndReplaceItem = new MenuItem(i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.search_and_replace", "Search and replace"));
+		searchAndReplaceItem.setUserData(ContextMenuType.SEARCH_AND_REPLACE);
+		searchAndReplaceItem.setOnAction(listener);
+
+		this.contextMenu = new ContextMenu(addItem, removeItem, searchAndReplaceItem, exportItem);
+
+		if (TreeItemType.isPointTypeLeaf(itemType)) {
+			ToggleGroup pointTypeToogleGroup = new ToggleGroup();
+
+			RadioMenuItem referencePointMenuItem = createRadioMenuItem(
+					i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.pointgroup.reference", "Reference point group"),
+					itemType == TreeItemType.REFERENCE_POINT_1D_LEAF || itemType == TreeItemType.REFERENCE_POINT_2D_LEAF || itemType == TreeItemType.REFERENCE_POINT_3D_LEAF,
+					pointTypeToogleGroup,
+					ContextMenuType.CHANGE_TO_REFERENCE_POINT_GROUP
+					);
+
+			RadioMenuItem stochasticPointMenuItem = createRadioMenuItem(
+					i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.pointgroup.stochastic", "Stochastic point group"),
+					itemType == TreeItemType.STOCHASTIC_POINT_1D_LEAF || itemType == TreeItemType.STOCHASTIC_POINT_2D_LEAF || itemType == TreeItemType.STOCHASTIC_POINT_3D_LEAF,
+					pointTypeToogleGroup,
+					ContextMenuType.CHANGE_TO_STOCHASTIC_POINT_GROUP
+					);
+
+			RadioMenuItem datumPointMenuItem = createRadioMenuItem(
+					i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.pointgroup.datum", "Datum point group"),
+					itemType == TreeItemType.DATUM_POINT_1D_LEAF || itemType == TreeItemType.DATUM_POINT_2D_LEAF || itemType == TreeItemType.DATUM_POINT_3D_LEAF,
+					pointTypeToogleGroup,
+					ContextMenuType.CHANGE_TO_DATUM_POINT_GROUP
+					);
+
+			RadioMenuItem newPointMenuItem = createRadioMenuItem(
+					i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.pointgroup.reference", "New point group"),
+					itemType == TreeItemType.NEW_POINT_1D_LEAF || itemType == TreeItemType.NEW_POINT_2D_LEAF || itemType == TreeItemType.NEW_POINT_3D_LEAF,
+					pointTypeToogleGroup,
+					ContextMenuType.CHANGE_TO_NEW_POINT_GROUP
+					);
+
+			pointTypeToogleGroup.selectedToggleProperty().addListener(new PointGroupChangeListener());
+			this.contextMenu.getItems().addAll(
+					new SeparatorMenuItem(),
+					referencePointMenuItem,
+					stochasticPointMenuItem,
+					datumPointMenuItem,
+					newPointMenuItem
+					);
+		}
+	}
+
+	private static RadioMenuItem createRadioMenuItem(String label, boolean selected, ToggleGroup group, ContextMenuType type) {
+		RadioMenuItem radioMenuItem = new RadioMenuItem(label);
+		radioMenuItem.setUserData(type);
+		radioMenuItem.setSelected(selected);
+		radioMenuItem.setToggleGroup(group);
+		return radioMenuItem;
+	}
+
+	@Override
+	public void commitEdit(TreeItemValue item) {
+		if (!this.isEditing() && !item.equals(this.getItem())) {
+			final TreeItem<TreeItemValue> treeItem = getTreeItem();
+			final TreeView<TreeItemValue> treeView = getTreeView();
+			if (treeView != null) {
+				// Inform the TreeView of the edit being ready to be committed.
+				treeView.fireEvent(new TreeView.EditEvent<TreeItemValue>(treeView, TreeView.<TreeItemValue> editCommitEvent(), treeItem, getItem(), item));
+				//treeView.getSelectionModel().select(treeItem);
+			}
+		}
+		super.commitEdit(item);
+	}    
+
+	@Override
+	public void startEdit() {
+		super.startEdit();
+
+		if (this.getGraphic() != null && this.getGraphic() instanceof CheckBox)
+			this.checkBox = (CheckBox)this.getGraphic();
+
+		if (this.textField == null)
+			this.createTextField();
+
+		if (this.getItem() != null) {
+			switch(this.getItem().getItemType()) {
+//			case ROOT: // root node is editable
+			case REFERENCE_POINT_1D_LEAF:
+			case REFERENCE_POINT_2D_LEAF:
+			case REFERENCE_POINT_3D_LEAF:		
+			case STOCHASTIC_POINT_1D_LEAF:
+			case STOCHASTIC_POINT_2D_LEAF:
+			case STOCHASTIC_POINT_3D_LEAF:			
+			case DATUM_POINT_1D_LEAF:
+			case DATUM_POINT_2D_LEAF:
+			case DATUM_POINT_3D_LEAF:			
+			case NEW_POINT_1D_LEAF:
+			case NEW_POINT_2D_LEAF:
+			case NEW_POINT_3D_LEAF:
+			case LEVELING_LEAF:
+			case DIRECTION_LEAF:
+			case HORIZONTAL_DISTANCE_LEAF:
+			case SLOPE_DISTANCE_LEAF:
+			case ZENITH_ANGLE_LEAF:
+			case GNSS_1D_LEAF:
+			case GNSS_2D_LEAF:
+			case GNSS_3D_LEAF:
+			case CONGRUENCE_ANALYSIS_1D_LEAF:
+			case CONGRUENCE_ANALYSIS_2D_LEAF:
+			case CONGRUENCE_ANALYSIS_3D_LEAF:
+				this.setText(null);
+				this.setGraphic(this.textField);
+				this.textField.setText(this.getString());
+				this.textField.selectAll();
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	@Override
+	public void cancelEdit() {
+		super.cancelEdit();
+		this.setText(this.getItem().toString());
+		this.setGraphic(this.checkBox);
+	}
+
+	@Override
+	public void updateItem(TreeItemValue item, boolean empty) {
+		super.updateItem(item, empty);
+
+		// Setze Kontextmenu
+		if (item != null) {
+			switch(item.getItemType()) {
+			case REFERENCE_POINT_1D_LEAF:
+			case REFERENCE_POINT_2D_LEAF:
+			case REFERENCE_POINT_3D_LEAF:		
+			case STOCHASTIC_POINT_1D_LEAF:
+			case STOCHASTIC_POINT_2D_LEAF:
+			case STOCHASTIC_POINT_3D_LEAF:			
+			case DATUM_POINT_1D_LEAF:
+			case DATUM_POINT_2D_LEAF:
+			case DATUM_POINT_3D_LEAF:			
+			case NEW_POINT_1D_LEAF:
+			case NEW_POINT_2D_LEAF:
+			case NEW_POINT_3D_LEAF:
+			case LEVELING_LEAF:
+			case DIRECTION_LEAF:
+			case HORIZONTAL_DISTANCE_LEAF:
+			case SLOPE_DISTANCE_LEAF:
+			case ZENITH_ANGLE_LEAF:
+			case GNSS_1D_LEAF:
+			case GNSS_2D_LEAF:
+			case GNSS_3D_LEAF:
+			case CONGRUENCE_ANALYSIS_1D_LEAF:
+			case CONGRUENCE_ANALYSIS_2D_LEAF:
+			case CONGRUENCE_ANALYSIS_3D_LEAF:
+				this.initContextMenu(item.getItemType());
+				this.setContextMenu(this.contextMenu);
+				break;
+			case REFERENCE_POINT_1D_DIRECTORY:
+			case REFERENCE_POINT_2D_DIRECTORY:
+			case REFERENCE_POINT_3D_DIRECTORY:		
+			case STOCHASTIC_POINT_1D_DIRECTORY:
+			case STOCHASTIC_POINT_2D_DIRECTORY:
+			case STOCHASTIC_POINT_3D_DIRECTORY:			
+			case DATUM_POINT_1D_DIRECTORY:
+			case DATUM_POINT_2D_DIRECTORY:
+			case DATUM_POINT_3D_DIRECTORY:			
+			case NEW_POINT_1D_DIRECTORY:
+			case NEW_POINT_2D_DIRECTORY:
+			case NEW_POINT_3D_DIRECTORY:
+			case LEVELING_DIRECTORY:
+			case DIRECTION_DIRECTORY:
+			case HORIZONTAL_DISTANCE_DIRECTORY:
+			case SLOPE_DISTANCE_DIRECTORY:
+			case ZENITH_ANGLE_DIRECTORY:
+			case GNSS_1D_DIRECTORY:
+			case GNSS_2D_DIRECTORY:
+			case GNSS_3D_DIRECTORY:
+			case CONGRUENCE_ANALYSIS_1D_DIRECTORY:
+			case CONGRUENCE_ANALYSIS_2D_DIRECTORY:
+			case CONGRUENCE_ANALYSIS_3D_DIRECTORY:
+				if (getTreeItem() != null && getTreeItem().isLeaf()) {
+					this.initContextMenu(item.getItemType());
+					this.setContextMenu(this.contextMenu);
+				}
+				else {
+					this.setContextMenu(null);
+				}
+				break;
+			default:
+				this.setContextMenu(null);
+				break;
+			}
+		}
+
+		if (empty)
+			setText(null);
+		else {
+			if (isEditing()) {
+				// Editierbare Nodes sind Root und alle Leafs, vgl. startEditing    		      		        		
+				if (this.textField != null) 
+					this.textField.setText(getString());
+				this.setText(null);
+				this.setGraphic(this.textField);
+			} 
+			else {
+				this.setText(getString());
+				if (getTreeItem() != null && getTreeItem().getValue() != null && 
+						(getTreeItem().getValue().getItemType() == TreeItemType.ROOT ||
+						getTreeItem().getValue().getItemType() == TreeItemType.UNSPECIFIC))
+					setGraphic(new Text());
+				else if (checkBox != null) {
+					setGraphic(checkBox);
+				}
+			}
+		}
+	}
+
+	private void createTextField() {
+		this.textField = new TextField("");
+
+		this.textField.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				if (getTreeItem() != null) {
+					TreeItemValue item = getTreeItem().getValue();
+					item.setName(textField.getText());
+					commitEdit(item);
+				}
+			}
+		});
+
+		this.textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+				if (!newValue) {
+					TreeItemValue item = getTreeItem().getValue();
+					item.setName(textField.getText());
+					commitEdit(item);
+				}
+			}
+		});
+
+		this.textField.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				if (event.getCode() == KeyCode.ESCAPE) {
+					textField.setText(getString());
+					cancelEdit();
+					event.consume();
+				}
+			}
+		}); 
+	}
+
+	private String getString() {
+		return this.getItem() == null ? "" : this.getItem().toString();
+	}
+
+	private void changePointGroupType(TreeItemType newItemType) {
+		List<TreeItem<TreeItemValue>> selectedItems = this.getTreeView().getSelectionModel().getSelectedItems();
+		if (newItemType != null && selectedItems != null && !selectedItems.isEmpty())
+			UITreeBuilder.getInstance().moveItems(newItemType, new ArrayList<TreeItem<TreeItemValue>>(selectedItems));
+	}
+
+	private void addNewEmptyGroup(TreeItemType itemType) {
+		TreeItemType parentType = null;
+		if ((parentType = TreeItemType.getDirectoryByLeafType(itemType)) != null && TreeItemType.getLeafByDirectoryType(itemType) == null) {
+			UITreeBuilder.getInstance().addEmptyGroup(parentType);
+		}
+		else if (TreeItemType.getDirectoryByLeafType(itemType) == null && TreeItemType.getLeafByDirectoryType(itemType) != null) {
+			parentType = itemType;
+			UITreeBuilder.getInstance().addEmptyGroup(parentType);
+		}
+	}
+
+	private void removeSelectedGroups() {
+		List<TreeItem<TreeItemValue>> selectedItems = this.getTreeView().getSelectionModel().getSelectedItems();
+		if (selectedItems != null && !selectedItems.isEmpty())
+			UITreeBuilder.getInstance().removeItems(new ArrayList<TreeItem<TreeItemValue>>(selectedItems));
+
+	}
+	
+	private void searchAndReplace(TreeItem<TreeItemValue> selectedItem) {
+		List<TreeItem<TreeItemValue>> selectedItems = this.getTreeView().getSelectionModel().getSelectedItems();
+
+		TreeItemValue selectedTreeItemValues[] = new TreeItemValue[selectedItems != null ? selectedItems.size() : 0];
+		for (int i=0; i<selectedItems.size(); i++) {
+			selectedTreeItemValues[i] = selectedItems.get(i).getValue();
+		}
+		
+//		this.getTreeView().getSelectionModel().clearSelection();
+		SearchAndReplaceDialog.showAndWait(selectedItem.getValue(), selectedTreeItemValues);
+//		this.getTreeView().getSelectionModel().select(selectedItem);
+	}
+
+	final BooleanProperty ignoreEventProperty() {
+		return this.ignoreEvent;
+	}
+
+	final boolean isIgnoreEvent() {
+		return this.ignoreEventProperty().get();
+	}
+
+	final void setIgnoreEvent(final boolean ignoreEvent) {
+		this.ignoreEventProperty().set(ignoreEvent);
+	}
+}
