@@ -8,7 +8,6 @@ import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.table.CellValueType;
 import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField;
-import org.applied_geodesy.jag3d.ui.textfield.LengthUnceraintySquareRootTextField;
 import org.applied_geodesy.jag3d.ui.textfield.UncertaintyTextField;
 import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField.ValueSupport;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
@@ -390,6 +389,7 @@ public class UIObservationPropertiesPane {
 
 	private Node createUncertaintiesPane() {
 		CellValueType constantUncertaintyCellValueType = null;
+		CellValueType squareRootDistanceDependentUncertaintyCellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		CellValueType distanceDependentUncertaintyCellValueType = null;
 		
 		double sigmaZeroPointOffset    = ObservationTreeItemValue.getDefaultUncertainty(this.type, ObservationGroupUncertaintyType.ZERO_POINT_OFFSET);
@@ -433,7 +433,7 @@ public class UIObservationPropertiesPane {
 		GridPane gridPane = this.createGridPane();
 
 		Label uncertaintyTypeALabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.ua.label", "\u03C3a"));
-		uncertaintyTypeALabel.setMinWidth(Control.USE_PREF_SIZE);
+		uncertaintyTypeALabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.zeroPointOffsetUncertaintyField = new UncertaintyTextField(sigmaZeroPointOffset, constantUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
 		this.zeroPointOffsetUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.ua.tooltip", "Choose constant part of combined uncertainty")));
 		this.zeroPointOffsetUncertaintyField.setUserData(ObservationGroupUncertaintyType.ZERO_POINT_OFFSET);
@@ -441,19 +441,20 @@ public class UIObservationPropertiesPane {
 		this.zeroPointOffsetUncertaintyField.setMinWidth(150);
 		this.zeroPointOffsetUncertaintyField.setMaxWidth(250);
 		
-		Label uncertaintyTypeBLabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.ub.label", "\u03C3b"));
-		uncertaintyTypeBLabel.setMinWidth(Control.USE_PREF_SIZE);
-		this.squareRootDistanceDependentUncertaintyField = new LengthUnceraintySquareRootTextField(sigmaSquareRootDistance, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO, true);
-		this.squareRootDistanceDependentUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.ub.tooltip", "Distance dependent part of combined uncertainty")));
+		Label uncertaintyTypeBLabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.ub.label", "\u03C3b(\u221Ad)"));
+		uncertaintyTypeBLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		//this.squareRootDistanceDependentUncertaintyField = new LengthUnceraintySquareRootTextField(sigmaSquareRootDistance, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO, true);
+		this.squareRootDistanceDependentUncertaintyField = new UncertaintyTextField(sigmaSquareRootDistance, squareRootDistanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO);
+		this.squareRootDistanceDependentUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.ub.tooltip", "Square root distance dependent part of combined uncertainty")));
 		this.squareRootDistanceDependentUncertaintyField.setUserData(ObservationGroupUncertaintyType.SQUARE_ROOT_DISTANCE_DEPENDENT);
 		this.squareRootDistanceDependentUncertaintyField.numberProperty().addListener(new NumberChangeListener(this.squareRootDistanceDependentUncertaintyField));
 		this.squareRootDistanceDependentUncertaintyField.setMinWidth(150);
 		this.squareRootDistanceDependentUncertaintyField.setMaxWidth(250);
 		
-		Label uncertaintyTypeCLabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.uc.label", "\u03C3c"));
-		uncertaintyTypeCLabel.setMinWidth(Control.USE_PREF_SIZE);
+		Label uncertaintyTypeCLabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.uc.label", "\u03C3c(d)"));
+		uncertaintyTypeCLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.distanceDependentUncertaintyField = new UncertaintyTextField(sigmaDistanceDependent, distanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO);
-		this.distanceDependentUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.uc.tooltip", "Squared distance dependent part of combined uncertainty")));
+		this.distanceDependentUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.uc.tooltip", "Distance dependent part of combined uncertainty")));
 		this.distanceDependentUncertaintyField.setUserData(ObservationGroupUncertaintyType.DISTANCE_DEPENDENT);
 		this.distanceDependentUncertaintyField.numberProperty().addListener(new NumberChangeListener(this.distanceDependentUncertaintyField));
 		this.distanceDependentUncertaintyField.setMinWidth(150);
