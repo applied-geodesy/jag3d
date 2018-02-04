@@ -19,6 +19,6 @@ public enum TestStatisticType {
 		for (TestStatisticType type : TestStatisticType.values()) 
 			if (type.getId() == id)
 				return type;
-		return null;
+		return NONE;
 	}
 }
