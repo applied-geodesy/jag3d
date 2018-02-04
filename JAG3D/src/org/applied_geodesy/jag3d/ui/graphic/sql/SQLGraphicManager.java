@@ -200,7 +200,7 @@ public class SQLGraphicManager {
 		LayerType layerType = observationLayer.getLayerType();
 		Map<PointPairKey, ObservableMeasurement> observationMap = new HashMap<PointPairKey, ObservableMeasurement>();
 
-		boolean selectAprioriValues = layerType == LayerType.OBSERVATION_APOSTERIORI;
+		boolean selectAprioriValues = layerType == LayerType.OBSERVATION_APRIORI;
 
 		String sql = "SELECT "
 				+ "\"start_point_name\", \"end_point_name\", \"type\", "
