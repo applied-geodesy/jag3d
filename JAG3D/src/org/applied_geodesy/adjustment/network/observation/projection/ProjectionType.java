@@ -28,6 +28,6 @@ public enum ProjectionType {
 			if(element.id == value)
 				return element;
 		}
-		return null;
+		return NONE;
 	}  
 }
