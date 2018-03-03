@@ -1,9 +1,6 @@
 Java·Applied·Geodesy·3D
 =======================
 
-Least-squares network adjustment software package
--------------------------------------------------
-
 JAG3D (Java Applied Geodesy 3D) is one of the most popular open source least-squares software package for geodetic sciences. The Java-based application is distributed under the terms of the GNU General Public License (version 3). JAG3D is designed to combine hybrid terrestrial observations like leveling, directions, distances or vertical angles in a uniform and rigorous mathematical model. Moreover, GNSS baselines that are derived by Global Navigation Satellite System (GNSS) techniques are supported. More information about the least-squares software package JAG3D can be found at <a href="https://software.applied-geodesy.org/">software.applied-geodesy.org</a>.
 
 
