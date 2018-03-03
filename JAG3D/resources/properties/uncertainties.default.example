@@ -1,0 +1,32 @@
+# !!! This is an example file and will not be used by JAG3D. Please !!!
+# !!! create a copy of this file named "uncertainties.default",     !!!
+# !!! located in the same directory. Modify the copied file w.r.t.  !!!
+# !!! the desired values.                                           !!!
+#
+# Comments are indicated by # as first character
+# Valid units are Radiant, Meter, PPM (e.g. mm/km) w.r.t. the observation type
+#
+# The followind values are the default values of JAG3D
+#
+ANGLE_ZERO_POINT_OFFSET                 = 4.71238898038469e-06
+ANGLE_SQUARE_ROOT_DISTANCE_DEPENDENT    = 0.0
+ANGLE_DISTANCE_DEPENDENT                = 0.0005
+#
+DISTANCE_ZERO_POINT_OFFSET              = 0.002
+DISTANCE_SQUARE_ROOT_DISTANCE_DEPENDENT = 0.0
+DISTANCE_DISTANCE_DEPENDENT             = 0.000002
+#
+LEVELING_ZERO_POINT_OFFSET              = 0.00015
+LEVELING_SQUARE_ROOT_DISTANCE_DEPENDENT = 0.001
+LEVELING_DISTANCE_DEPENDENT             = 0.0
+#
+GNSS_ZERO_POINT_OFFSET                  = 0.025
+GNSS_SQUARE_ROOT_DISTANCE_DEPENDENT     = 0.0
+GNSS_DISTANCE_DEPENDENT                 = 0.000050
+#
+X = 0.002
+Y = 0.002
+Z = 0.002
+#
+DEFLECTION_X = 1.5707963267949e-05
+DEFLECTION_Y = 1.5707963267949e-05

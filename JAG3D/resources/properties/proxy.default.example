@@ -1,0 +1,14 @@
+# !!! This is an example file and will not be used by JAG3D. Please !!!
+# !!! create a copy of this file named "proxy.default",             !!!
+# !!! located in the same directory. Modify the copied file w.r.t.  !!!
+# !!! the desired values.                                           !!!
+#
+# Comments are indicated by # as first character
+#
+# Security note: The password is stored in plaintext!
+
+PROTOCOL = HTTPS
+HOST     = example.org
+PORT     = 443
+USERNAME = Username
+PASSWORD = Password

@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.table;
 
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
@@ -45,8 +66,8 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		// Component type
 		CellValueType cellValueType = CellValueType.STRING;
 		int columnIndex = table.getColumns().size(); 
-		String labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.label", "Parameter type");
-		String tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.tooltip", "Type of the additional parameter");
+		String labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.label", "Component");
+		String tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.tooltip", "Type of the variance component estimation");
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		varianceComponentTypeColumn = this.<VarianceComponentType>getColumn(header, VarianceComponentRow::varianceComponentTypeProperty, getVarianceComponentTypeCallback(), ColumnType.VISIBLE, columnIndex, false); 
 		varianceComponentTypeColumn.setPrefWidth(175);
@@ -116,7 +137,8 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 			}
 		});
 		table.getColumns().add(booleanColumn);
-
+		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		
 		this.table = table;
 		this.isInitialize = true;
 	}
@@ -183,31 +205,31 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 									return i18n.getString("UIVarianceComponentTableBuilder.type.zenith_angle.distance_dependent.label", "Zenith angle \u03C3c");
 									
 								case GNSS1D_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.label", "GNSS 1D baseline");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.label", "GNSS baseline 1D");
 								case GNSS1D_ZERO_POINT_OFFSET_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.zero_point_offset.label", "GNSS 1D baseline \u03C3a");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.zero_point_offset.label", "GNSS baseline 1D \u03C3a");
 								case GNSS1D_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.square_root_distance_dependent.label", "GNSS 1D baseline \u03C3b");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.square_root_distance_dependent.label", "GNSS baseline 1D \u03C3b");
 								case GNSS1D_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.distance_dependent.label", "GNSS 1D baseline \u03C3c");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.distance_dependent.label", "GNSS baseline 1D \u03C3c");
 
 								case GNSS2D_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.label", "GNSS 2D baseline");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.label", "GNSS baseline 2D");
 								case GNSS2D_ZERO_POINT_OFFSET_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.zero_point_offset.label", "GNSS 2D baseline \u03C3a");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.zero_point_offset.label", "GNSS baseline 2D \u03C3a");
 								case GNSS2D_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.square_root_distance_dependent.label", "GNSS 2D baseline \u03C3b");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.square_root_distance_dependent.label", "GNSS baseline 2D \u03C3b");
 								case GNSS2D_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.distance_dependent.label", "GNSS 2D baseline \u03C3c");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.distance_dependent.label", "GNSS baseline 2D \u03C3c");
 									
 								case GNSS3D_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.label", "GNSS 3D baseline");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.label", "GNSS baseline 3D");
 								case GNSS3D_ZERO_POINT_OFFSET_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.zero_point_offset.label", "GNSS 3D baseline \u03C3a");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.zero_point_offset.label", "GNSS baseline 3D \u03C3a");
 								case GNSS3D_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.square_root_distance_dependent.label", "GNSS 3D baseline \u03C3b");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.square_root_distance_dependent.label", "GNSS baseline 3D \u03C3b");
 								case GNSS3D_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.distance_dependent.label", "GNSS 3D baseline \u03C3c");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.distance_dependent.label", "GNSS baseline 3D \u03C3c");
 
 								case STOCHASTIC_POINT_1D_COMPONENT:
 									return i18n.getString("UIVarianceComponentTableBuilder.type.point.1d.label", "Stochastic point 1D");
@@ -216,7 +238,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 								case STOCHASTIC_POINT_3D_COMPONENT:
 									return i18n.getString("UIVarianceComponentTableBuilder.type.point.1d.label", "Stochastic point 3D");
 								case STOCHASTIC_POINT_DEFLECTION_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.point.1d.label", "Deflection of vertical");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.deflection.label", "Deflection of vertical");
 								}
 								return null;
 							}

@@ -1,6 +1,26 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.dialog;
 
-import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,6 +43,7 @@ import org.applied_geodesy.util.unit.UnitType;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -31,6 +52,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
@@ -39,6 +61,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Window;
 import javafx.util.StringConverter;
@@ -82,7 +105,7 @@ public class FormatterOptionDialog {
 	private Map<CellValueType, ComboBox<Unit>> unitComboBoxes = new HashMap<CellValueType, ComboBox<Unit>>();
 	private Map<CellValueType, Spinner<Integer>> digitsSpinners = new HashMap<CellValueType, Spinner<Integer>>();
 	private static FormatterOptions options = FormatterOptions.getInstance();
-	private static I18N i18n = I18N.getInstance();
+	private I18N i18n = I18N.getInstance();
 	private static FormatterOptionDialog formatterOptionDialog = new FormatterOptionDialog();
 	private Dialog<Void> dialog = null;
 	private Accordion accordion = null;
@@ -107,11 +130,10 @@ public class FormatterOptionDialog {
 			return;
 		
 		this.dialog = new Dialog<Void>();
-		this.dialog.setTitle(i18n.getString("PropertiesDialog.title", "Preferences"));
-		this.dialog.setHeaderText(i18n.getString("PropertiesDialog.header", "Formatter options and unit preferences"));
+		this.dialog.setTitle(i18n.getString("FormatterOptionDialog.title", "Preferences"));
+		this.dialog.setHeaderText(i18n.getString("FormatterOptionDialog.header", "Formatter options and unit preferences"));
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CLOSE);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
-//		this.dialog.initStyle(StageStyle.UTILITY);
 		this.dialog.initOwner(window);
 
 		this.accordion = new Accordion();
@@ -124,6 +146,13 @@ public class FormatterOptionDialog {
 
 		this.dialog.getDialogPane().setContent(this.accordion);
 		this.dialog.setResizable(true);
+		
+		this.dialog.setOnCloseRequest(new EventHandler<DialogEvent>() {
+			@Override
+			public void handle(DialogEvent event) {
+				formatterOptionDialog.accordion.setExpandedPane(formatterOptionDialog.accordion.getPanes().get(0));
+			}
+		});
 		
 		Platform.runLater(new Runnable() {
 			@Override public void run() {
@@ -162,28 +191,31 @@ public class FormatterOptionDialog {
 		int row = 0;
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.length.value.label", "Length:"),
-    			i18n.getString("FormatterOptionDialog.unit.length.value.tooltip", "Set up number of fraction digits for type length"),
-    			i18n.getString("FormatterOptionDialog.unit.length.value.tooltip.unit", "Set up unit for type length value"),
+    			i18n.getString("FormatterOptionDialog.unit.length.value.tooltip", "Set number of fraction digits for type length"),
+    			i18n.getString("FormatterOptionDialog.unit.length.value.tooltip.unit", "Set unit for type length value"),
 				formatterOptions.get(CellValueType.LENGTH),
 				gridPane,
 				++row);
 		
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.angle.value.label", "Angle:"),
-    			i18n.getString("FormatterOptionDialog.unit.angle.value.tooltip.digits", "Set up number of fraction digits for type angle"),
-    			i18n.getString("FormatterOptionDialog.unit.angle.value.tooltip.unit", "Set up unit for type angle value"),
+    			i18n.getString("FormatterOptionDialog.unit.angle.value.tooltip.digits", "Set number of fraction digits for type angle"),
+    			i18n.getString("FormatterOptionDialog.unit.angle.value.tooltip.unit", "Set unit for type angle value"),
 				formatterOptions.get(CellValueType.ANGLE),
 				gridPane,
 				++row);
 		
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.scale.value.label", "Scale:"),
-    			i18n.getString("FormatterOptionDialog.unit.scale.value.tooltip.digits", "Set up number of fraction digits for type scale"),
-    			i18n.getString("FormatterOptionDialog.unit.scale.value.tooltip.unit", "Set up unit for type scale value"),
+    			i18n.getString("FormatterOptionDialog.unit.scale.value.tooltip.digits", "Set number of fraction digits for type scale"),
+    			i18n.getString("FormatterOptionDialog.unit.scale.value.tooltip.unit", "Set unit for type scale value"),
 				formatterOptions.get(CellValueType.SCALE),
 				gridPane,
 				++row);
-		
+
+		Region spacer = new Region();
+		GridPane.setVgrow(spacer, Priority.ALWAYS);
+		gridPane.add(spacer, 1, ++row, 3, 1);
 		return this.createTitledPane(title, tooltip, gridPane);
 	}
 	
@@ -196,28 +228,31 @@ public class FormatterOptionDialog {
 		int row = 0;
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.length.uncertainty.label", "Length uncertainty:"),
-    			i18n.getString("FormatterOptionDialog.unit.length.uncertainty.tooltip.digits", "Set up number of fraction digits for type length uncertainty"),
-    			i18n.getString("FormatterOptionDialog.unit.length.uncertainty.tooltip.unit", "Set up unit for type length uncertainty"),
+    			i18n.getString("FormatterOptionDialog.unit.length.uncertainty.tooltip.digits", "Set number of fraction digits for type length uncertainty"),
+    			i18n.getString("FormatterOptionDialog.unit.length.uncertainty.tooltip.unit", "Set unit for type length uncertainty"),
 				formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY),
 				gridPane,
 				++row);
 		
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.angle.uncertainty.label", "Angle uncertainty:"),
-    			i18n.getString("FormatterOptionDialog.unit.angle.uncertainty.tooltip.digits", "Set up number of fraction digits for type angle uncertainty"),
-    			i18n.getString("FormatterOptionDialog.unit.angle.uncertainty.tooltip.unit", "Set up unit for type angle uncertainty"),
+    			i18n.getString("FormatterOptionDialog.unit.angle.uncertainty.tooltip.digits", "Set number of fraction digits for type angle uncertainty"),
+    			i18n.getString("FormatterOptionDialog.unit.angle.uncertainty.tooltip.unit", "Set unit for type angle uncertainty"),
 				formatterOptions.get(CellValueType.ANGLE_UNCERTAINTY),
 				gridPane,
 				++row);
 		
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.scale.uncertainty.label", "Scale uncertainty:"),
-    			i18n.getString("FormatterOptionDialog.unit.scale.uncertainty.tooltip.digits", "Set up number of fraction digits for type scale uncertainty"),
-    			i18n.getString("FormatterOptionDialog.unit.scale.uncertainty.tooltip.unit", "Set up unit for type scale uncertainty"),
+    			i18n.getString("FormatterOptionDialog.unit.scale.uncertainty.tooltip.digits", "Set number of fraction digits for type scale uncertainty"),
+    			i18n.getString("FormatterOptionDialog.unit.scale.uncertainty.tooltip.unit", "Set unit for type scale uncertainty"),
 				formatterOptions.get(CellValueType.SCALE_UNCERTAINTY),
 				gridPane,
 				++row);
 		
+		Region spacer = new Region();
+		GridPane.setVgrow(spacer, Priority.ALWAYS);
+		gridPane.add(spacer, 1, ++row, 3, 1);
 		return this.createTitledPane(title, tooltip, gridPane);
 	}
 	
@@ -230,28 +265,31 @@ public class FormatterOptionDialog {
 		int row = 0;
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.length.residual.label", "Length residual:"),
-    			i18n.getString("FormatterOptionDialog.unit.length.residual.tooltip.digits", "Set up number of fraction digits for type length residual"),
-    			i18n.getString("FormatterOptionDialog.unit.length.residual.tooltip.unit", "Set up unit for type length residual"),
+    			i18n.getString("FormatterOptionDialog.unit.length.residual.tooltip.digits", "Set number of fraction digits for type length residual"),
+    			i18n.getString("FormatterOptionDialog.unit.length.residual.tooltip.unit", "Set unit for type length residual"),
 				formatterOptions.get(CellValueType.LENGTH_RESIDUAL),
 				gridPane,
 				++row);
 		
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.angle.residual.label", "Angle residual:"),
-    			i18n.getString("FormatterOptionDialog.unit.angle.residual.tooltip.digits", "Set up number of fraction digits for type angle residual"),
-    			i18n.getString("FormatterOptionDialog.unit.angle.residual.tooltip.unit", "Set up unit for type angle residual"),
+    			i18n.getString("FormatterOptionDialog.unit.angle.residual.tooltip.digits", "Set number of fraction digits for type angle residual"),
+    			i18n.getString("FormatterOptionDialog.unit.angle.residual.tooltip.unit", "Set unit for type angle residual"),
 				formatterOptions.get(CellValueType.ANGLE_RESIDUAL),
 				gridPane,
 				++row);
 		
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.scale.residual.label", "Scale residual:"),
-    			i18n.getString("FormatterOptionDialog.unit.scale.residual.tooltip.digits", "Set up number of fraction digits for type scale residual"),
-    			i18n.getString("FormatterOptionDialog.unit.scale.residual.tooltip.unit", "Set up unit for type scale residual"),
+    			i18n.getString("FormatterOptionDialog.unit.scale.residual.tooltip.digits", "Set number of fraction digits for type scale residual"),
+    			i18n.getString("FormatterOptionDialog.unit.scale.residual.tooltip.unit", "Set unit for type scale residual"),
 				formatterOptions.get(CellValueType.SCALE_RESIDUAL),
 				gridPane,
 				++row);
 
+		Region spacer = new Region();
+		GridPane.setVgrow(spacer, Priority.ALWAYS);
+		gridPane.add(spacer, 1, ++row, 3, 1);
 		return this.createTitledPane(title, tooltip, gridPane);
 	}
 	
@@ -264,12 +302,15 @@ public class FormatterOptionDialog {
 		int row = 0;
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.statistic.label", "Statistic (unitless):"),
-    			i18n.getString("FormatterOptionDialog.unit.statistic.tooltip.digits", "Set up number of fraction digits for type statistic"),
+    			i18n.getString("FormatterOptionDialog.unit.statistic.tooltip.digits", "Set number of fraction digits for type statistic"),
     			null,
 				formatterOptions.get(CellValueType.STATISTIC),
 				gridPane,
 				++row);
-		
+
+		Region spacer = new Region();
+		GridPane.setVgrow(spacer, Priority.ALWAYS);
+		gridPane.add(spacer, 1, ++row, 3, 1);
 		return this.createTitledPane(title, tooltip, gridPane);
 	}
 	
@@ -446,13 +487,13 @@ public class FormatterOptionDialog {
 		try {
 			SQLManager.getInstance().saveFormatterOption(option);
 		}
-		catch (SQLException e) {
+		catch (Exception e) {
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("FormatterOptionDialog.message.error.sql.title", "SQL-Error"),
-							i18n.getString("FormatterOptionDialog.message.error.sql.header", "Error, could not save changes in database table"),
-							i18n.getString("FormatterOptionDialog.message.error.sql.message", "An exception occure during saving dataset to database."),
+							i18n.getString("FormatterOptionDialog.message.error.save.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("FormatterOptionDialog.message.error.save.exception.header", "Error, could not save formatter properties to database."),
+							i18n.getString("FormatterOptionDialog.message.error.save.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}

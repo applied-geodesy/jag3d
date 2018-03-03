@@ -1,9 +1,35 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.table;
 
-import java.sql.SQLException;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
@@ -133,7 +159,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			// Value
 			columnIndex = table.getColumns().size(); 
 			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.leveling.label", "\u03B4h0");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.leveling.tooltip", "Height difference");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.leveling.tooltip", "A-priori height difference");
 			cellValueType = CellValueType.LENGTH;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
@@ -154,7 +180,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			// Value
 			columnIndex = table.getColumns().size(); 
 			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.direction.label", "t0");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.direction.tooltip", "Direction");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.direction.tooltip", "A-priori direction");
 			cellValueType = CellValueType.ANGLE;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
@@ -162,8 +188,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 			// Uncertainty
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.slopedistance.label", "\u03C3t0");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.slopedistance.tooltip", "A-priori uncertainty of direction");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.direction.label", "\u03C3t0");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.direction.tooltip", "A-priori uncertainty of direction");
 			cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
@@ -174,8 +200,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		case HORIZONTAL_DISTANCE:
 			// Value
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.horizontaldistance.label", "sh0");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.horizontaldistance.tooltip", "Horizontal distance");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.horizontal_distance.label", "sh0");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.horizontal_distance.tooltip", "A-priori horizontal distance");
 			cellValueType = CellValueType.LENGTH;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
@@ -183,8 +209,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 			// Uncertainty
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.horizontaldistance.label", "\u03C3sh0");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.horizontaldistance.tooltip", "A-priori uncertainty of horizontal distance");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.horizontal_distance.label", "\u03C3sh0");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.horizontal_distance.tooltip", "A-priori uncertainty of horizontal distance");
 			cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
@@ -195,8 +221,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		case SLOPE_DISTANCE:
 			// Value
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.slopedistance.label", "s0");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.slopedistance.tooltip", "Slope distance");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.slope_distance.label", "s0");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.slope_distance.tooltip", "A-priori slope distance");
 			cellValueType = CellValueType.LENGTH;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
@@ -204,8 +230,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 			// Uncertainty
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.slopedistance.label", "\u03C3s0");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.slopedistance.tooltip", "A-priori uncertainty of slope distance");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.slope_distance.label", "\u03C3s0");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.slope_distance.tooltip", "A-priori uncertainty of slope distance");
 			cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
@@ -216,8 +242,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		case ZENITH_ANGLE:
 			// Value
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.zenith.label", "v0");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.zenith.tooltip", "Zenith angle");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.zenith_angle.label", "v0");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value0.zenith_angle.tooltip", "A-priori zenith angle");
 			cellValueType = CellValueType.ANGLE;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
@@ -225,8 +251,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 			// Uncertainty
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.slopedistance.label", "\u03C3v0");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.slopedistance.tooltip", "A-priori uncertainty of zenith angle");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.zenith_angle.label", "\u03C3v0");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty0.zenith_angle.tooltip", "A-priori uncertainty of zenith angle");
 			cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
@@ -255,7 +281,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			// Value
 			columnIndex = table.getColumns().size(); 
 			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.leveling.label", "\u03B4h");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.leveling.tooltip", "Height difference");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.leveling.tooltip", "A-posteriori height difference");
 			cellValueType = CellValueType.LENGTH;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
@@ -276,7 +302,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			// Value
 			columnIndex = table.getColumns().size(); 
 			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.direction.label", "t");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.direction.tooltip", "Direction");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.direction.tooltip", "A-posteriori direction");
 			cellValueType = CellValueType.ANGLE;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
@@ -284,8 +310,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 			// Uncertainty
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.slopedistance.label", "\u03C3t");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.slopedistance.tooltip", "A-posteriori uncertainty of direction");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.direction.label", "\u03C3t");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.direction.tooltip", "A-posteriori uncertainty of direction");
 			cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
@@ -296,8 +322,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		case HORIZONTAL_DISTANCE:
 			// Value
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.horizontaldistance.label", "sh");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.horizontaldistance.tooltip", "Horizontal distance");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.horizontal_distance.label", "sh");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.horizontal_distance.tooltip", "A-posteriori horizontal distance");
 			cellValueType = CellValueType.LENGTH;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
@@ -305,8 +331,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 			// Uncertainty
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.horizontaldistance.label", "\u03C3sh");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.horizontaldistance.tooltip", "A-posteriori uncertainty of horizontal distance");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.horizontal_distance.label", "\u03C3sh");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.horizontal_distance.tooltip", "A-posteriori uncertainty of horizontal distance");
 			cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
@@ -317,8 +343,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		case SLOPE_DISTANCE:
 			// Value
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.slopedistance.label", "s");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.slopedistance.tooltip", "Slope distance");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.slope_distance.label", "s");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.slope_distance.tooltip", "A-posteriori slope distance");
 			cellValueType = CellValueType.LENGTH;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
@@ -326,8 +352,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 			// Uncertainty
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.slopedistance.label", "\u03C3s");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.slopedistance.tooltip", "A-posteriori uncertainty of slope distance");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.slope_distance.label", "\u03C3s");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.slope_distance.tooltip", "A-posteriori uncertainty of slope distance");
 			cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
@@ -338,8 +364,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		case ZENITH_ANGLE:
 			// Value
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.zenith.label", "v");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.zenith.tooltip", "Zenith angle");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.zenith_angle.label", "v");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.value.zenith_angle.tooltip", "A-posteriori zenith angle");
 			cellValueType = CellValueType.ANGLE;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
@@ -347,8 +373,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 			// Uncertainty
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.slopedistance.label", "\u03C3v");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.slopedistance.tooltip", "A-posteriori uncertainty of zenith angle");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.zenith_angle.label", "\u03C3v");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.uncertainty.zenith_angle.tooltip", "A-posteriori uncertainty of zenith angle");
 			cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
@@ -364,7 +390,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		// Redundance
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.redundancy.label", "r");
-		tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.redundancy.tooltip", "Part of redundancy");
+		tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.redundancy.tooltip", "Redundancy");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::redundancyProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
@@ -427,8 +453,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 		// Influence on point position
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.ep.label", "EP");
-		tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.ep.tooltip", "Influence on point position due to an undetected gross-error");
+		labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.influenceonposition.label", "EP");
+		tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.influenceonposition.tooltip", "Influence on point position due to an undetected gross-error");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::influenceOnPointPositionProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
@@ -437,8 +463,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 		// Influence on network distortion
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.efsp.label", "EF\u00B7SPmax");
-		tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.efsp.tooltip", "Maximal influence on network distortion");
+		labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.influenceonnetworkdistortion.label", "EF\u00B7SPmax");
+		tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.influenceonnetworkdistortion.tooltip", "Maximal influence on network distortion");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::influenceOnNetworkDistortionProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
@@ -487,7 +513,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 		// A-posteriori test statistic
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.teststatistic.aposteriori.label", "Tprio");
+		labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.teststatistic.aposteriori.label", "Tpost");
 		tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.teststatistic.aposteriori.tooltip", "A-posteriori test statistic");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
@@ -499,7 +525,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		columnIndex = table.getColumns().size(); 
 		final int columnIndexOutlier = columnIndex;
 		labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.testdecision.label", "Significant");
-		tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.testdecision.tooltip", "Decision of test statistic");
+		tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.testdecision.tooltip", "Checked, if null-hypothesis is rejected");
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		booleanColumn = this.<Boolean>getColumn(header, TerrestrialObservationRow::significantProperty, getBooleanCallback(), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
 		booleanColumn.setCellValueFactory(new Callback<CellDataFeatures<TerrestrialObservationRow, Boolean>, ObservableValue<Boolean>>() {
@@ -585,8 +611,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		if (valid && this.isComplete(rowData)) {
 			try {
 				SQLManager.getInstance().saveItem(this.observationItemValue.getGroupId(), rowData);
-			} catch (SQLException e) {
-				
+			} catch (Exception e) {
 				switch (columnIndex) {
 				case 1:
 					rowData.setStartPointName(oldValue == null ? null : oldValue.toString().trim());
@@ -661,7 +686,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			if (this.isComplete(clonedRow)) {
 				try {
 					SQLManager.getInstance().saveItem(this.observationItemValue.getGroupId(), clonedRow);
-				} catch (SQLException e) {
+				} catch (Exception e) {
 					raiseErrorMessage(ContextMenuType.DUPLICATE, e);
 					e.printStackTrace();
 					break;
@@ -690,7 +715,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			if (this.isComplete(row)) {
 				try {
 					SQLManager.getInstance().remove(row);
-				} catch (SQLException e) {
+				} catch (Exception e) {
 					raiseErrorMessage(ContextMenuType.REMOVE, e);
 					e.printStackTrace();
 					break;
@@ -721,7 +746,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 		try {
 			SQLManager.getInstance().saveGroup((ObservationTreeItemValue)newTreeItem.getValue());
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			raiseErrorMessage(type, e);
 			UITreeBuilder.getInstance().removeItem(newTreeItem);
 			e.printStackTrace();
@@ -734,11 +759,86 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				SQLManager.getInstance().saveItem(groupId, row);
 			}
 			
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			raiseErrorMessage(type, e);
 			e.printStackTrace();
 			return;
 		}
 		UITreeBuilder.getInstance().getTree().getSelectionModel().select(newTreeItem);
+	}
+	
+	public void export(File file, boolean aprioriValues) throws IOException {
+		List<TerrestrialObservationRow> rows = this.table.getItems();
+
+		String exportFormatString = "%10s \t";
+		String exportFormatDouble = "%+15.6f \t";
+		
+		PrintWriter writer = null;
+
+		try {
+			writer = new PrintWriter(new BufferedWriter(new FileWriter( file )));
+
+			for (TerrestrialObservationRow row : rows) {
+				if (!row.isEnable())
+					continue;
+
+				String startPointName = row.getStartPointName();
+				String endPointName   = row.getEndPointName();
+
+				if (startPointName == null || startPointName.trim().isEmpty() || 
+						endPointName == null || endPointName.trim().isEmpty())
+					continue;
+
+				Double value    = aprioriValues ? row.getValueApriori() : row.getValueAposteriori();
+				Double distance = aprioriValues ? row.getDistanceApriori() : null;
+				Double sigma    = aprioriValues ? row.getSigmaApriori() : row.getSigmaAposteriori();
+				Double ih       = row.getInstrumentHeight();
+				Double th       = row.getReflectorHeight();
+				
+				if (value == null || (!aprioriValues && sigma == null))
+					continue;
+
+				String observationValue, sigmaValue, distanceValue;
+				
+				String instrumentHeight = ih != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(ih)) : "";
+				String reflectorHeight  = th != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(th)) : "";
+				
+				if (aprioriValues) {
+					if (sigma != null && sigma <= 0)
+						sigma = null;
+					if (sigma != null && sigma > 0)
+						distance = null;
+					if (distance != null && distance <= 0)
+						distance = null;
+				}
+				
+				switch(this.type) {
+				case DIRECTION:
+				case ZENITH_ANGLE:
+					observationValue = value != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertAngleToView(value)) : "";
+					sigmaValue       = sigma != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertAngleToView(sigma)) : "";
+					distanceValue    = distance != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertAngleToView(distance)) : "";
+					break;
+
+				default:
+					observationValue = value != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(value)) : "";
+					sigmaValue       = sigma != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(sigma)) : "";
+					distanceValue    = distance != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(distance)) : "";
+					break;
+
+				}
+				
+				writer.println(
+						String.format(exportFormatString, startPointName) +
+						String.format(exportFormatString, endPointName) +
+						instrumentHeight + reflectorHeight + observationValue + sigmaValue + distanceValue
+				);
+
+			}
+		}
+		finally {
+			if (writer != null)
+				writer.close();
+		}
 	}
 }

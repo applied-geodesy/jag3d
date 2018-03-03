@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.adjustment;
 
 import org.netlib.util.intW;
@@ -27,7 +48,6 @@ public final class MathExtension {
 	public static final double SIGN (double a, double b) {
 		return b >= 0.0 ? Math.abs(a) : -Math.abs(a);
 	}
-
 
 	/**
 	 * Winkelreduktion auf ein pos. Intervall
@@ -169,7 +189,6 @@ public final class MathExtension {
 		return Q;
 	}
 
-
 	/**
 	 * Liefert eine quadratische Einheitsmatrix der Dimension <code>size</code>
 	 * @param size
@@ -290,7 +309,8 @@ public final class MathExtension {
         double abstol = 2.0 * LAPACK.getInstance().dlamch("S");
         intW m = new intW(0);
         UpperSymmBandMatrix eval = new UpperSymmBandMatrix(iu-il + 1, 0);
-        DenseMatrix evec = vectors ? new DenseMatrix(iu-il + 1, n) : new DenseMatrix(0, 0);
+        //DenseMatrix evec = vectors ? new DenseMatrix(iu-il + 1, n) : new DenseMatrix(0, 0);
+        DenseMatrix evec = vectors ? new DenseMatrix(n, iu-il + 1) : new DenseMatrix(0, 0);
         int ldz = Math.max(1,n);
         double work[] = new double[8*n];
         int iwork[] = new int[5*n];

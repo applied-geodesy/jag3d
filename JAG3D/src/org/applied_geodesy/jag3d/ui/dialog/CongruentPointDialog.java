@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.dialog;
 
 import java.util.List;
@@ -86,7 +107,7 @@ public class CongruentPointDialog {
 		}
 	}
 
-	private static I18N i18n = I18N.getInstance();
+	private I18N i18n = I18N.getInstance();
 	private static UICongruentPointTableBuilder tableBuilder = UICongruentPointTableBuilder.getInstance();
 	private static CongruentPointDialog congruentPointDialog = new CongruentPointDialog();
 	private Dialog<Void> dialog = null;
@@ -166,7 +187,7 @@ public class CongruentPointDialog {
 		gridPane.setPadding(new Insets(5, 5, 5, 5)); // oben, recht, unten, links
 		
 		String labelSnap   = i18n.getString("CongruentPointDialog.snap.label", "Snap distance:");
-		String tooltipSnap = i18n.getString("CongruentPointDialog.snap.tooltip", "Snap distance to find congruent points");
+		String tooltipSnap = i18n.getString("CongruentPointDialog.snap.tooltip", "Set snap distance to find congruent points");
 		
 		String labelDimension   = i18n.getString("CongruentPointDialog.dimension.label", "Point dimension:");
 		String label1D = i18n.getString("CongruentPointDialog.dimension.1d.label", "1D");
@@ -264,9 +285,9 @@ public class CongruentPointDialog {
 					Platform.runLater(new Runnable() {
 						@Override public void run() {
 							OptionDialog.showThrowableDialog (
-									i18n.getString("CongruentPointDialog.message.error.sql.exception.title",  "SQL-Error"),
-									i18n.getString("CongruentPointDialog.message.error.sql.exception.header", "Error, database request is failed."),
-									i18n.getString("CongruentPointDialog.message.error.sql.exception.message", "An exception occured during network adjustment."),
+									i18n.getString("CongruentPointDialog.message.error.request.exception.title",  "Unexpected SQL-Error"),
+									i18n.getString("CongruentPointDialog.message.error.request.exception.header", "Error, database request is failed."),
+									i18n.getString("CongruentPointDialog.message.error.request.exception.message", "An exception has occurred during database transaction."),
 									throwable
 									);
 						}

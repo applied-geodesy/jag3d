@@ -1,9 +1,29 @@
-package org.applied_geodesy.jag3d.ui.propertiespane;
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
 
-import java.sql.SQLException;
+package org.applied_geodesy.jag3d.ui.propertiespane;
 
 import org.applied_geodesy.adjustment.network.PointGroupUncertaintyType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.table.CellValueType;
 import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField;
 import org.applied_geodesy.jag3d.ui.textfield.UncertaintyTextField;
@@ -11,6 +31,7 @@ import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.util.i18.I18N;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
@@ -39,7 +60,7 @@ public class UIPointPropertiesPane {
 		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
 			if (!ignoreValueUpdate && this.field.getUserData() != null && this.field.getUserData() instanceof PointGroupUncertaintyType) {
 				PointGroupUncertaintyType uncertaintyType = (PointGroupUncertaintyType)this.field.getUserData();
-				saveUncertainties(uncertaintyType);
+				save(uncertaintyType);
 			}
 		}
 	}
@@ -54,13 +75,13 @@ public class UIPointPropertiesPane {
 		@Override
 		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 			if (!ignoreValueUpdate && this.button == deflectionCheckBox) {
-				saveDeflection();
+				save();
 			}
 		}
 	}
 
 
-	private static I18N i18n = I18N.getInstance();
+	private I18N i18n = I18N.getInstance();
 	private Node propertiesNode = null;
 	private final TreeItemType type;
 
@@ -198,17 +219,17 @@ public class UIPointPropertiesPane {
 			int row = 0;
 
 			if (this.type == TreeItemType.STOCHASTIC_POINT_2D_LEAF || this.type == TreeItemType.STOCHASTIC_POINT_3D_LEAF) {
-				Label uncertaintyCoordinateYLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.y.label", "\u03C3z"));
+				Label uncertaintyCoordinateYLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.y.label", "\u03C3y"));
 				this.uncertaintyCoordinateYField = new UncertaintyTextField(sigmaY, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
-				this.uncertaintyCoordinateYField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.y.tooltip", "Choose uncertainty of y-component")));
+				this.uncertaintyCoordinateYField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.y.tooltip", "Uncertainty of y-component of stochastic points")));
 				this.uncertaintyCoordinateYField.setUserData(PointGroupUncertaintyType.CONSTANT_Y);
 				this.uncertaintyCoordinateYField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateYField));
 				this.uncertaintyCoordinateYField.setMinWidth(150);
 				this.uncertaintyCoordinateYField.setMaxWidth(250);
 				
-				Label uncertaintyCoordinateXLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.x.label", "\u03C3z"));
+				Label uncertaintyCoordinateXLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.x.label", "\u03C3x"));
 				this.uncertaintyCoordinateXField = new UncertaintyTextField(sigmaX, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
-				this.uncertaintyCoordinateXField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.x.tooltip", "Choose uncertainty of x-component")));
+				this.uncertaintyCoordinateXField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.x.tooltip", "Uncertainty of x-component of stochastic points")));
 				this.uncertaintyCoordinateXField.setUserData(PointGroupUncertaintyType.CONSTANT_X);
 				this.uncertaintyCoordinateXField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateXField));
 				this.uncertaintyCoordinateXField.setMinWidth(150);
@@ -235,7 +256,7 @@ public class UIPointPropertiesPane {
 			if (this.type == TreeItemType.STOCHASTIC_POINT_1D_LEAF || this.type == TreeItemType.STOCHASTIC_POINT_3D_LEAF) {		
 				Label uncertaintyCoordinateZLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.z.label", "\u03C3z"));
 				this.uncertaintyCoordinateZField = new UncertaintyTextField(sigmaZ, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
-				this.uncertaintyCoordinateZField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.z.tooltip", "Choose uncertainty of z-component")));
+				this.uncertaintyCoordinateZField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.z.tooltip", "Uncertainty of z-component of stochastic points")));
 				this.uncertaintyCoordinateZField.setUserData(PointGroupUncertaintyType.CONSTANT_Z);
 				this.uncertaintyCoordinateZField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateZField));
 				this.uncertaintyCoordinateZField.setMinWidth(150);
@@ -250,7 +271,7 @@ public class UIPointPropertiesPane {
 				gridPane.add(this.uncertaintyCoordinateZField, 1, row++);
 			}
 
-			TitledPane uncertaintiesTitledPane = this.createTitledPane(i18n.getString("UIPointPropertiesPane.uncertainty.title", "Uncertainties"));
+			TitledPane uncertaintiesTitledPane = this.createTitledPane(i18n.getString("UIPointPropertiesPane.uncertainty.title", "Uncertainties of stochastic points"));
 			uncertaintiesTitledPane.setContent(gridPane);
 			return uncertaintiesTitledPane;
 		}
@@ -268,14 +289,14 @@ public class UIPointPropertiesPane {
 			uncertaintyDeflectionXLabel.setMinWidth(Control.USE_PREF_SIZE);
 			
 			this.uncertaintyDeflectionYField = new UncertaintyTextField(sigmaY, CellValueType.ANGLE_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
-			this.uncertaintyDeflectionYField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.deflection.y.tooltip", "Deflection uncertainty of y component")));
+			this.uncertaintyDeflectionYField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.deflection.y.tooltip", "Uncertainty of y-component of deflections of vertical")));
 			this.uncertaintyDeflectionYField.setUserData(PointGroupUncertaintyType.DEFLECTION_Y);
 			this.uncertaintyDeflectionYField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyDeflectionYField));
 			this.uncertaintyDeflectionYField.setMinWidth(150);
 			this.uncertaintyDeflectionYField.setMaxWidth(250);
 						
 			this.uncertaintyDeflectionXField = new UncertaintyTextField(sigmaX, CellValueType.ANGLE_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
-			this.uncertaintyDeflectionXField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.deflection.x.tooltip", "Deflection uncertainty of x component")));
+			this.uncertaintyDeflectionXField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.deflection.x.tooltip", "Uncertainty of x-component of deflections of vertical")));
 			this.uncertaintyDeflectionXField.setUserData(PointGroupUncertaintyType.DEFLECTION_X);
 			this.uncertaintyDeflectionXField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyDeflectionXField));
 			this.uncertaintyDeflectionXField.setMinWidth(150);
@@ -296,7 +317,7 @@ public class UIPointPropertiesPane {
 			gridPane.add(uncertaintyDeflectionXLabel,      0, 1);
 			gridPane.add(this.uncertaintyDeflectionXField, 1, 1);
 
-			TitledPane uncertaintiesTitledPane = this.createTitledPane(i18n.getString("UIPointPropertiesPane.uncertainty.deflection.title", "Uncertainties of deflection"));
+			TitledPane uncertaintiesTitledPane = this.createTitledPane(i18n.getString("UIPointPropertiesPane.uncertainty.deflection.title", "Uncertainties of deflections of vertical"));
 			uncertaintiesTitledPane.setContent(gridPane);
 			return uncertaintiesTitledPane;
 		}
@@ -329,7 +350,7 @@ public class UIPointPropertiesPane {
 		case DATUM_POINT_3D_LEAF:
 		case NEW_POINT_3D_LEAF:
 			this.deflectionCheckBox = new CheckBox(i18n.getString("UIPointPropertiesPane.deflection.label", "Consider deflections of the vertical"));
-			this.deflectionCheckBox.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.deflection.label", "If checked, deflections of the vertical are considered during adjustment")));
+			this.deflectionCheckBox.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.deflection.tooltip", "If checked, deflections of the vertical are considered during adjustment")));
 			this.deflectionCheckBox.setSelected(false);
 			this.deflectionCheckBox.setMinWidth(Control.USE_PREF_SIZE);
 			this.deflectionCheckBox.setPadding(new Insets(10, 0, 5, 0)); // oben, rechts, unten, links
@@ -363,7 +384,7 @@ public class UIPointPropertiesPane {
 		this.propertiesNode = scroller;
 	}
 
-	private void saveUncertainties(PointGroupUncertaintyType uncertaintyType) {
+	private void save(PointGroupUncertaintyType uncertaintyType) {
 		try {
 			Double value = null;
 			switch(uncertaintyType) {
@@ -391,19 +412,38 @@ public class UIPointPropertiesPane {
 				SQLManager.getInstance().saveUncertainty(uncertaintyType, value.doubleValue(), this.selectedPointItemValues);
 			}
 
-		} catch (SQLException e) {
-
+		} catch (Exception e) {
 			e.printStackTrace();
+			Platform.runLater(new Runnable() {
+				@Override public void run() {
+					OptionDialog.showThrowableDialog (
+							i18n.getString("UIPointPropertiesPane.message.error.save.uncertainty.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UIPointPropertiesPane.message.error.save.uncertainty.exception.header", "Error, could not save group uncertainties to database."),
+							i18n.getString("UIPointPropertiesPane.message.error.save.uncertainty.exception.message", "An exception has occurred during database transaction."),
+							e
+					);
+				}
+			});
 		}
 	}
 
-	private void saveDeflection() {
+	private void save() {
 		try {
 			if (this.selectedPointItemValues != null && this.selectedPointItemValues.length > 0)
 				SQLManager.getInstance().saveDeflection(this.deflectionCheckBox.isSelected(), this.selectedPointItemValues);
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			this.setDeflection(!this.deflectionCheckBox.isSelected());
 			e.printStackTrace();
+			Platform.runLater(new Runnable() {
+				@Override public void run() {
+					OptionDialog.showThrowableDialog (
+							i18n.getString("UIPointPropertiesPane.message.error.save.parameter.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UIPointPropertiesPane.message.error.save.parameter.exception.header", "Error, could not save properties of vertical deflection to database."),
+							i18n.getString("UIPointPropertiesPane.message.error.save.parameter.exception.message", "An exception has occurred during database transaction."),
+							e
+					);
+				}
+			});
 		}
 	}
 }

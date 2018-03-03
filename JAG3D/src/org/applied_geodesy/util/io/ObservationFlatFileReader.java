@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.util.io;
 
 import java.io.File;
@@ -22,8 +43,8 @@ public class ObservationFlatFileReader extends SourceFileReader {
 	private final ObservationType observationType;
 	private final TreeItemType treeItemType;
 	
-	private List<TerrestrialObservationRow> observations = new ArrayList<TerrestrialObservationRow>();
-	private List<GNSSObservationRow> gnss = new ArrayList<GNSSObservationRow>();
+	private List<TerrestrialObservationRow> observations = null;
+	private List<GNSSObservationRow> gnss = null;
 	
 	private boolean isDirectionGroupWithEqualStation = true;
 	private String directionStartPointName = null;
@@ -33,6 +54,7 @@ public class ObservationFlatFileReader extends SourceFileReader {
 		this.treeItemType = TreeItemType.getTreeItemTypeByObservationType(observationType);
 		if (this.treeItemType == null)
 			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, observation type could not be transformed to tree item type. " + observationType);
+		this.reset();
 	}
 	
 	public ObservationFlatFileReader(String fileName, ObservationType observationType) {
@@ -49,14 +71,18 @@ public class ObservationFlatFileReader extends SourceFileReader {
 		this.treeItemType = TreeItemType.getTreeItemTypeByObservationType(observationType);
 		if (this.treeItemType == null)
 			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, observation type could not be transformed to tree item type. " + observationType);
+		this.reset();
 	}
 	
 	@Override
 	public void reset() {
-		if (this.observations != null)
-			this.observations.clear();
-		if (this.gnss != null)
-			this.gnss.clear();
+		if (this.observations == null)
+			this.observations = new ArrayList<TerrestrialObservationRow>();
+		if (this.gnss == null)
+			this.gnss = new ArrayList<GNSSObservationRow>();
+		
+		this.observations.clear();
+		this.gnss.clear();
 		
 		this.isDirectionGroupWithEqualStation = true;
 		this.directionStartPointName = null;
@@ -64,6 +90,7 @@ public class ObservationFlatFileReader extends SourceFileReader {
 	
 	@Override
 	public TreeItem<TreeItemValue> readAndImport() throws IOException, SQLException {
+		this.reset();
 		this.ignoreLinesWhichStartWith("#");
 		TreeItem<TreeItemValue> newTreeItem = null;
 		if (this.observationType != ObservationType.DIRECTION)
@@ -99,6 +126,7 @@ public class ObservationFlatFileReader extends SourceFileReader {
 				throw new SQLException(e);
 			}			
 		}
+		this.reset();
 		return newTreeItem;
 	}
 
@@ -112,9 +140,15 @@ public class ObservationFlatFileReader extends SourceFileReader {
 		try {
 			switch(this.observationType) {		
 			case GNSS1D:
+				gnssObservationRow = GNSSObservationRow.scan(line, 1);
+				break;
+				
 			case GNSS2D:
+				gnssObservationRow = GNSSObservationRow.scan(line, 2);
+				break;
+				
 			case GNSS3D:
-				this.gnss.add(gnssObservationRow);
+				gnssObservationRow = GNSSObservationRow.scan(line, 3);
 				break;
 
 			case LEVELING:
@@ -122,20 +156,25 @@ public class ObservationFlatFileReader extends SourceFileReader {
 			case HORIZONTAL_DISTANCE:
 			case ZENITH_ANGLE:
 			case SLOPE_DISTANCE:
-				terrestrialObservationRow = TerrestrialObservationRow.scan(line, observationType);
-				if (terrestrialObservationRow != null) {
-					if (this.observationType == ObservationType.DIRECTION) {
-						if (this.directionStartPointName == null)
-							this.directionStartPointName = terrestrialObservationRow.getStartPointName();
-						this.isDirectionGroupWithEqualStation = this.isDirectionGroupWithEqualStation && this.directionStartPointName.equals(terrestrialObservationRow.getStartPointName());
-					}
-					else
-						this.directionStartPointName = null;
-
-					this.observations.add(terrestrialObservationRow);
-				}
+				terrestrialObservationRow = TerrestrialObservationRow.scan(line, this.observationType);
 				break;
 			}
+			
+			if (terrestrialObservationRow != null) {
+				if (this.observationType == ObservationType.DIRECTION) {
+					if (this.directionStartPointName == null)
+						this.directionStartPointName = terrestrialObservationRow.getStartPointName();
+					this.isDirectionGroupWithEqualStation = this.isDirectionGroupWithEqualStation && this.directionStartPointName.equals(terrestrialObservationRow.getStartPointName());
+				}
+				else
+					this.directionStartPointName = null;
+
+				this.observations.add(terrestrialObservationRow);
+			}
+			
+			if (gnssObservationRow != null)
+				this.gnss.add(gnssObservationRow);
+			
 		}
 		catch (Exception err) {
 			return;
@@ -143,5 +182,4 @@ public class ObservationFlatFileReader extends SourceFileReader {
 			// nichts, Beobachtung unbrauchbar...
 		}	
 	}
-
 }

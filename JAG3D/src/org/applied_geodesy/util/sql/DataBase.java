@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.util.sql;
 
 import java.sql.Connection;
@@ -15,26 +36,13 @@ public abstract class DataBase {
 		this.username = username;
 		this.password = password;
 	}
-	
-	/**
-	 * Liefert die Adresse zur DB
-	 * @return
-	 */
+
 	public abstract String getURI();
-	  
-	/**
-	 * Gibt den DB-Treiber zurueck
-	 * @return
-	 */
+
 	public final String getDBDriver() {
 		return this.dbDriver;
 	}
 
-	/**
-	 * Oeffnet eine Datenbankverbindung
-	 * @throws ClassNotFoundException
-	 * @throws SQLException
-	 */
 	public void open() throws ClassNotFoundException, SQLException {
 		if (this.conn == null || this.conn.isClosed()) {
 			this.conn = this.getConnection();
@@ -42,22 +50,16 @@ public abstract class DataBase {
 		}
 	}
 	
-	/**
-	 * Liefert true, wenn eine Verbindung zum DBS besteht
-	 * @return isOpen
-	 */
 	public boolean isOpen() {
 		try {
 			return this.conn != null && !this.conn.isClosed() && this.isOpen;
-		}catch (SQLException e ) {
+		}
+		catch (SQLException e ) {
 			e.printStackTrace();
 		}
 		return false;
 	}
-	    
-	/**
-	 * Schliesst eine Datanbankverbindung
-	 */
+
 	public void close() {
 		if (this.conn == null)
 			return;
@@ -75,68 +77,33 @@ public abstract class DataBase {
 	    }
 	}
 	
-	/**
-	 * Liefert im Erfolgsfall die beim letzten INSERT 
-	 * automatisch vergebene ID des Datensatzes 
-	 * ansonsten -1
-	 * @return id
-	 * @throws SQLException
-	 */
 	public abstract int getLastInsertId() throws SQLException;
 
-	/**
-	 * Liefert eine vorbereitete Anweisung fuer ein DB Abfrage
-	 * @param sql
-	 * @return statement
-	 * @throws SQLException
-	 */
 	public PreparedStatement getPreparedStatement(String sql) throws SQLException {
 		if (this.isOpen()) {
 			return this.conn.prepareStatement(sql);
 		}
 		return null;
 	}
-	
-	/**
-	 * Schreibt die Daten engueltig in die DB (INSERT/UPDATE)
-	 * @throws SQLException
-	 */
+
 	public void commit() throws SQLException {
 		if (this.isOpen()) {
 			this.conn.commit();
 		}
 	}
 	
-	/**
-	 * Legt fest, ob jedes Statement einzeln abgearbeitet wird oder eine Reihe von
-	 * Statements als Transaktion zusammengefasst werden.
-	 * 
-	 * @param autoCommit
-	 * @throws SQLException
-	 */
 	public void setAutoCommit(boolean autoCommit) throws SQLException {
 		if (this.isOpen()) {
 			this.conn.setAutoCommit(autoCommit);
 		}
 	}
-	
-	/**
-	 * Fuehrt einen Rollback der Transaktion aus.
-	 * 
-	 * @throws SQLException 
-	 */
+
 	public void rollback() throws SQLException {
 		if (this.isOpen()) {
 			this.conn.rollback();
 		}
 	}
 	    
-	/**
-	 * Stellt eine Verbindung zur DB her
-	 * @return conn
-	 * @throws ClassNotFoundException
-	 * @throws SQLException
-	 */
 	private Connection getConnection() throws ClassNotFoundException, SQLException {
 		Class.forName( this.getDBDriver() );
 		Connection con = DriverManager.getConnection(

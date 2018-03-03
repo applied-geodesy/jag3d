@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.table;
 
 import org.applied_geodesy.adjustment.network.ParameterType;
@@ -16,9 +37,6 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 
 public class UIAdditionalParameterTableBuilder extends UITableBuilder<AdditionalParameterRow> {
-	private enum DisplayFormatType {
-		NORMAL, UNCERTAINTY, RESIDUAL
-	}
 	private static UIAdditionalParameterTableBuilder tableBuilder = new UIAdditionalParameterTableBuilder();
 	private boolean isInitialize = false;
 	private UIAdditionalParameterTableBuilder() {
@@ -53,7 +71,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		labelText   = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.value.label", "Value");
 		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.value.tooltip", "Estimated value of additional parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, AdditionalParameterRow::valueAposterioriProperty, getDoubleValueWithUnitCallback(DisplayFormatType.NORMAL), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, AdditionalParameterRow::valueAposterioriProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.NORMAL), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 		
 		// Uncertainty
@@ -61,7 +79,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		labelText   = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.uncertainty.label", "\u03C3");
 		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.uncertainty.tooltip", "A-posteriori uncertainty of additional parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, AdditionalParameterRow::sigmaAposterioriProperty, getDoubleValueWithUnitCallback(DisplayFormatType.UNCERTAINTY), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, AdditionalParameterRow::sigmaAposterioriProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.UNCERTAINTY), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 		
 		// Confidence
@@ -69,7 +87,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		labelText   = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.semiaxis.label", "a");
 		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.semiaxis.tooltip", "Confidence interval");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, AdditionalParameterRow::confidenceProperty, getDoubleValueWithUnitCallback(DisplayFormatType.UNCERTAINTY), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, AdditionalParameterRow::confidenceProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.UNCERTAINTY), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 		
 		// Nabla
@@ -77,7 +95,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		labelText   = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.grosserror.label", "\u2207");
 		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.grosserror.tooltip", "Gross-error of additional parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, AdditionalParameterRow::grossErrorProperty, getDoubleValueWithUnitCallback(DisplayFormatType.RESIDUAL), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, AdditionalParameterRow::grossErrorProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.RESIDUAL), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 		
 		// MDB
@@ -85,7 +103,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		labelText   = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.minimaldetectablebias.label", "\u2207(\u03B1,\u03B2)");
 		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.minimaldetectablebias.tooltip", "Minimal detectable bias of additional parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, AdditionalParameterRow::minimalDetectableBiasProperty, getDoubleValueWithUnitCallback(DisplayFormatType.RESIDUAL), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, AdditionalParameterRow::minimalDetectableBiasProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.RESIDUAL), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 		
 		// A-priori log(p)
@@ -131,8 +149,8 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		// Decision of test statistic
 		columnIndex = table.getColumns().size(); 
 		final int columnIndexOutlier = columnIndex;
-		labelText   = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.significant.label", "Significant");
-		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.significant.tooltip", "Checked, if additional parameter is significant");
+		labelText   = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.testdecision.label", "Significant");
+		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.testdecision.tooltip", "Checked, if null-hypothesis is rejected");
 		cellValueType = CellValueType.BOOLEAN;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		booleanColumn = this.<Boolean>getColumn(header, AdditionalParameterRow::significantProperty, getBooleanCallback(), ColumnType.VISIBLE, columnIndex, false);
@@ -165,13 +183,13 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
             					
             					switch (type) {
             					case ZERO_POINT_OFFSET:
-            						return i18n.getString("UIAdditionalParameterTableBuilder.type.zeropointoffset", "Zero point offset");
+            						return i18n.getString("UIAdditionalParameterTableBuilder.type.zero_point_offset", "Zero point offset a");
             					case SCALE:
-            						return i18n.getString("UIAdditionalParameterTableBuilder.type.scale", "Scale");
+            						return i18n.getString("UIAdditionalParameterTableBuilder.type.scale", "Scale m");
             					case ORIENTATION:
-            						return i18n.getString("UIAdditionalParameterTableBuilder.type.orientation", "Orientation");
+            						return i18n.getString("UIAdditionalParameterTableBuilder.type.orientation", "Orientation o");
 								case REFRACTION_INDEX:
-									return i18n.getString("UIAdditionalParameterTableBuilder.type.refractionindex", "Refraction index");
+									return i18n.getString("UIAdditionalParameterTableBuilder.type.refractionindex", "Refraction index k");
 									
 								case ROTATION_X:
 								case STRAIN_ROTATION_X:
@@ -245,86 +263,12 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
             
         };
     }
-	// https://stackoverflow.com/questions/27281370/javafx-tableview-format-one-cell-based-on-the-value-of-another-in-the-row
-	private static Callback<TableColumn<AdditionalParameterRow, Double>, TableCell<AdditionalParameterRow, Double>> getDoubleValueWithUnitCallback(DisplayFormatType displayFormatType) {
+	
+	private static Callback<TableColumn<AdditionalParameterRow, Double>, TableCell<AdditionalParameterRow, Double>> getDoubleValueWithUnitCallback(DisplayCellFormatType displayFormatType) {
 		return new Callback<TableColumn<AdditionalParameterRow, Double>, TableCell<AdditionalParameterRow, Double>>() {
 			@Override
 			public TableCell<AdditionalParameterRow, Double> call(TableColumn<AdditionalParameterRow, Double> cell) {
-				TableCell<AdditionalParameterRow, Double> tableCell = new TableCell<AdditionalParameterRow, Double>() {
-						@Override
-                        protected void updateItem(Double value, boolean empty) {
-							int currentIndex = indexProperty().getValue();
-							if (!empty && value != null && currentIndex >= 0 && currentIndex < cell.getTableView().getItems().size()) {
-								AdditionalParameterRow paramRow = cell.getTableView().getItems().get(currentIndex);
-								if (paramRow != null && paramRow.getParameterType() != null) {
-									switch(paramRow.getParameterType()) {
-									case ZERO_POINT_OFFSET:
-									case STRAIN_TRANSLATION_X:
-									case STRAIN_TRANSLATION_Y:
-									case STRAIN_TRANSLATION_Z:
-										
-										if (displayFormatType == DisplayFormatType.NORMAL)
-											this.setText(options.toLengthFormat(value.doubleValue(), true));
-										else if (displayFormatType == DisplayFormatType.UNCERTAINTY)
-											this.setText(options.toLengthUncertaintyFormat(value.doubleValue(), true));
-										else if (displayFormatType == DisplayFormatType.RESIDUAL)
-											this.setText(options.toLengthResidualFormat(value.doubleValue(), true));
-										
-										break;
-									case SCALE:
-									case STRAIN_SCALE_X:
-									case STRAIN_SCALE_Y:
-									case STRAIN_SCALE_Z:
-										
-										if (displayFormatType == DisplayFormatType.NORMAL)
-											this.setText(options.toScaleFormat(value.doubleValue(), true));
-										else if (displayFormatType == DisplayFormatType.UNCERTAINTY)
-											this.setText(options.toScaleUncertaintyFormat(value.doubleValue(), true));
-										else if (displayFormatType == DisplayFormatType.RESIDUAL)
-											this.setText(options.toScaleResidualFormat(value.doubleValue(), true));
-
-										break;
-									case ORIENTATION:
-									case ROTATION_X:
-									case ROTATION_Y:
-									case ROTATION_Z:
-									case STRAIN_ROTATION_X:
-									case STRAIN_ROTATION_Y:
-									case STRAIN_ROTATION_Z:
-									case STRAIN_SHEAR_X:
-									case STRAIN_SHEAR_Y:
-									case STRAIN_SHEAR_Z:
-										
-										if (displayFormatType == DisplayFormatType.NORMAL)
-											this.setText(options.toAngleFormat(value.doubleValue(), true));
-										else if (displayFormatType == DisplayFormatType.UNCERTAINTY)
-											this.setText(options.toAngleUncertaintyFormat(value.doubleValue(), true));
-										else if (displayFormatType == DisplayFormatType.RESIDUAL)
-											this.setText(options.toAngleResidualFormat(value.doubleValue(), true));
-
-										break;
-									case REFRACTION_INDEX:
-										
-										this.setText(options.toTestStatisticFormat(value.doubleValue()));
-										break;
-										
-									default:
-										
-										System.err.println(UIAdditionalParameterTableBuilder.class.getSimpleName() + " : Error, unknown parameter type " + paramRow.getParameterType());
-										setText(null);
-										break;
-										
-									}
-								}
-								else 
-									setText(null);
-							}
-							else
-								setText(value == null ? null : value.toString());
-						}
-				};
-				tableCell.setAlignment(Pos.CENTER_RIGHT);
-				return tableCell;
+				return new AdditionalParameterDoubleCell(displayFormatType);
 			}
 		};
     }

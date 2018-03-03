@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.dialog;
 
 import java.beans.PropertyChangeEvent;
@@ -6,6 +27,7 @@ import java.util.Locale;
 
 import org.applied_geodesy.adjustment.EstimationStateType;
 import org.applied_geodesy.adjustment.network.NetworkAdjustment;
+import org.applied_geodesy.adjustment.network.sql.IllegalProjectionPropertyException;
 import org.applied_geodesy.adjustment.network.sql.SQLAdjustmentManager;
 import org.applied_geodesy.jag3d.sql.PointTypeMismatchException;
 import org.applied_geodesy.jag3d.sql.SQLManager;
@@ -47,8 +69,8 @@ public class NetworkAdjustmentDialog {
 		private AdjustmentTask(SQLAdjustmentManager dataBaseManager) {
 			this.dataBaseManager = dataBaseManager;
 
-			this.iterationTextTemplate   = i18n.getString("ProgressDialog.iteration.label",   "%d. iteration step of maximal %d \u2026");
-			this.convergenceTextTemplate = i18n.getString("ProgressDialog.convergence.label", "Convergence max|dx| = %.2e");
+			this.iterationTextTemplate   = i18n.getString("NetworkAdjustmentDialog.iteration.label",   "%d. iteration step of maximal %d \u2026");
+			this.convergenceTextTemplate = i18n.getString("NetworkAdjustmentDialog.convergence.label", "Convergence max|dx| = %.2e");
 		}
 
 		@Override
@@ -57,8 +79,8 @@ public class NetworkAdjustmentDialog {
 				preventClosing = true;
 
 				this.updateProgress(ProgressIndicator.INDETERMINATE_PROGRESS, ProgressIndicator.INDETERMINATE_PROGRESS);
-				this.updateMessage(i18n.getString("ProgressDialog.initialize.label", "Initialize process\u2026"));
-				this.updateIterationProgressMessage(i18n.getString("ProgressDialog.pleasewait.label", "Please wait\u2026"));
+				this.updateMessage(i18n.getString("NetworkAdjustmentDialog.initialize.label", "Initialize process\u2026"));
+				this.updateIterationProgressMessage(i18n.getString("NetworkAdjustmentDialog.pleasewait.label", "Please wait\u2026"));
 				this.updateConvergenceProgressMessage(null);
 
 				SQLManager.getInstance().checkNumberOfObersvationsPerUnknownParameter();
@@ -79,8 +101,8 @@ public class NetworkAdjustmentDialog {
 					return EstimationStateType.INTERRUPT;
 
 				this.updateProgress(ProgressIndicator.INDETERMINATE_PROGRESS, ProgressIndicator.INDETERMINATE_PROGRESS);
-				this.updateMessage(i18n.getString("ProgressDialog.save.label", "Save results\u2026"));
-				this.updateIterationProgressMessage(i18n.getString("ProgressDialog.pleasewait.label", "Please wait\u2026"));
+				this.updateMessage(i18n.getString("NetworkAdjustmentDialog.save.label", "Save results\u2026"));
+				this.updateIterationProgressMessage(i18n.getString("NetworkAdjustmentDialog.pleasewait.label", "Please wait\u2026"));
 				this.updateConvergenceProgressMessage(null);
 				this.dataBaseManager.saveResults();
 				this.dataBaseManager.clear();
@@ -168,7 +190,7 @@ public class NetworkAdjustmentDialog {
 						Node node = progressIndicator.lookup(".percentage");
 						if (node != null && node instanceof Text) {
 							Text text = (Text)node;
-							text.setText(i18n.getString("ProgressDialog.done.label", "Done"));
+							text.setText(i18n.getString("NetworkAdjustmentDialog.done.label", "Done"));
 							progressIndicator.setPrefWidth(text.getLayoutBounds().getWidth());
 						}
 					}
@@ -197,7 +219,7 @@ public class NetworkAdjustmentDialog {
 
 			switch(state) {
 			case BUSY:
-				this.updateMessage(i18n.getString("ProgressDialog.busy.label", "Network adjustment in process\u2026"));
+				this.updateMessage(i18n.getString("NetworkAdjustmentDialog.busy.label", "Network adjustment in process\u2026"));
 				this.updateIterationProgressMessage(null);
 				this.updateConvergenceProgressMessage(null);
 				break;
@@ -227,25 +249,25 @@ public class NetworkAdjustmentDialog {
 			case INVERT_NORMAL_EQUATION_MATRIX:
 				this.processState += this.finalStepProcesses;
 				this.updateProgress(this.processState, 1.0);
-				this.updateMessage(i18n.getString("ProgressDialog.invert_normal_equation_matrix.label", "Invert normal equation matrix\u2026"));
+				this.updateMessage(i18n.getString("NetworkAdjustmentDialog.invert_normal_equation_matrix.label", "Invert normal equation matrix\u2026"));
 				break;
 
 			case ESTIAMTE_STOCHASTIC_PARAMETERS:
 				this.processState += this.finalStepProcesses;
 				this.updateProgress(this.processState, 1.0);
-				this.updateMessage(i18n.getString("ProgressDialog.estimate_stochastic_parameters.label", "Estimate stochastic parameters\u2026"));
+				this.updateMessage(i18n.getString("NetworkAdjustmentDialog.estimate_stochastic_parameters.label", "Estimate stochastic parameters\u2026"));
 				break;
 
 			case PRINCIPAL_COMPONENT_ANALYSIS:
 				this.processState += this.finalStepProcesses;
 				this.updateProgress(this.processState, 1.0);
-				this.updateMessage(i18n.getString("ProgressDialog.principle_component_analysis.label", "Principle component analysis\u2026"));
+				this.updateMessage(i18n.getString("NetworkAdjustmentDialog.principal_component_analysis.label", "Principal component analysis\u2026"));
 				break;
 
 			case EXPORT_COVARIANCE_MATRIX:
 				this.processState += this.finalStepProcesses;
 				this.updateProgress(this.processState, 1.0);
-				this.updateMessage(i18n.getString("ProgressDialog.export_covariance_matrix.label", "Export covariance matrix\u2026"));
+				this.updateMessage(i18n.getString("NetworkAdjustmentDialog.export_covariance_matrix.label", "Export covariance matrix\u2026"));
 				if (newValue != null) {
 					this.updateIterationProgressMessage(newValue.toString());
 					this.updateConvergenceProgressMessage(null);
@@ -254,12 +276,12 @@ public class NetworkAdjustmentDialog {
 
 			case ERROR_FREE_ESTIMATION:
 				this.updateProgress(1.0, 1.0);
-				this.updateMessage(i18n.getString("ProgressDialog.error_free_estimation.label", "Network adjustment finished\u2026"));
+				this.updateMessage(i18n.getString("NetworkAdjustmentDialog.error_free_estimation.label", "Network adjustment finished\u2026"));
 				break;
 
 			case INTERRUPT:
-				this.updateMessage(i18n.getString("ProgressDialog.interrupt.label", "Terminate adjustment process\u2026"));
-				this.updateIterationProgressMessage(i18n.getString("ProgressDialog.pleasewait.label", "Please wait\u2026"));
+				this.updateMessage(i18n.getString("NetworkAdjustmentDialog.interrupt.label", "Terminate adjustment process\u2026"));
+				this.updateIterationProgressMessage(i18n.getString("NetworkAdjustmentDialog.pleasewait.label", "Please wait\u2026"));
 				this.updateConvergenceProgressMessage(null);
 				break;
 
@@ -305,8 +327,8 @@ public class NetworkAdjustmentDialog {
 
 		this.dialog = new Dialog<EstimationStateType>();
 		this.dialog.initOwner(window);
-		this.dialog.setTitle(i18n.getString("ProgressDialog.title", "Network adjustment"));
-		this.dialog.setHeaderText(i18n.getString("ProgressDialog.header", "Network adjustment is processing..."));
+		this.dialog.setTitle(i18n.getString("NetworkAdjustmentDialog.title", "Network adjustment"));
+		this.dialog.setHeaderText(i18n.getString("NetworkAdjustmentDialog.header", "Network adjustment is processing\u2026"));
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
 		//		this.dialog.initStyle(StageStyle.UTILITY);
@@ -389,31 +411,31 @@ public class NetworkAdjustmentDialog {
 					case NO_CONVERGENCE:
 					case ROBUST_ESTIMATION_FAILD:
 						OptionDialog.showErrorDialog(
-								i18n.getString("ProgressDialog.message.error.failed.noconvergence.title",  "Network adjustment failed"),
-								i18n.getString("ProgressDialog.message.error.failed.noconvergence.header", "Iteration process diverges"),
-								i18n.getString("ProgressDialog.message.error.failed.noconvergence.message", "Error, iteration limit of adjustment process reached.")
+								i18n.getString("NetworkAdjustmentDialog.message.error.failed.noconvergence.title",  "Network adjustment failed"),
+								i18n.getString("NetworkAdjustmentDialog.message.error.failed.noconvergence.header", "Iteration process diverges"),
+								i18n.getString("NetworkAdjustmentDialog.message.error.failed.noconvergence.message", "Error, iteration limit of adjustment process reached but without satisfactory convergence.")
 								);
 						break;
 						
 					case NOT_INITIALISED:
 					case SINGULAR_MATRIX:
 						OptionDialog.showErrorDialog(
-								i18n.getString("ProgressDialog.message.error.failed.singularmatrix.title",  "Network adjustment failed"),
-								i18n.getString("ProgressDialog.message.error.failed.singularmatrix.header", "Singular normal euqation matrix"),
-								i18n.getString("ProgressDialog.message.error.failed.singularmatrix.message", "Error, could not invert normal equation matrix.")
+								i18n.getString("NetworkAdjustmentDialog.message.error.failed.singularmatrix.title",  "Network adjustment failed"),
+								i18n.getString("NetworkAdjustmentDialog.message.error.failed.singularmatrix.header", "Singular normal euqation matrix"),
+								i18n.getString("NetworkAdjustmentDialog.message.error.failed.singularmatrix.message", "Error, could not invert normal equation matrix.")
 								);
 						break;
 
 					case OUT_OF_MEMORY:
 						OptionDialog.showErrorDialog(
-								i18n.getString("ProgressDialog.message.error.failed.outofmemory.title",  "Network adjustment failed"),
-								i18n.getString("ProgressDialog.message.error.failed.outofmemory.header", "Out of memory"),
-								i18n.getString("ProgressDialog.message.error.failed.outofmemory.message", "Error, not enought memory to adjust network.")
+								i18n.getString("NetworkAdjustmentDialog.message.error.failed.outofmemory.title",  "Network adjustment failed"),
+								i18n.getString("NetworkAdjustmentDialog.message.error.failed.outofmemory.header", "Out of memory"),
+								i18n.getString("NetworkAdjustmentDialog.message.error.failed.outofmemory.message", "Error, not enough memory to adjust network. Please allocate more memory.")
 								);
 						break;
 
 					default:
-						System.out.println(NetworkAdjustmentDialog.class.getSimpleName() + " Fishied " + result);
+//						System.out.println(NetworkAdjustmentDialog.class.getSimpleName() + " Fishied " + result);
 						MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
 						TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
 						selectionModel.clearSelection();
@@ -438,9 +460,9 @@ public class NetworkAdjustmentDialog {
 						Platform.runLater(new Runnable() {
 							@Override public void run() {
 								OptionDialog.showThrowableDialog (
-										i18n.getString("ProgressDialog.message.error.pointtypemismatch.exception.title",  "Initialization error"),
-										i18n.getString("ProgressDialog.message.error.pointtypemismatch.exception.header", "Error, the project contains uncombinable point typs, i.e. datum points as well as reference or stochastic points."),
-										i18n.getString("ProgressDialog.message.error.pointtypemismatch.exception.message", "An exception occured during network adjustment."),
+										i18n.getString("NetworkAdjustmentDialog.message.error.pointtypemismatch.exception.title",  "Initialization error"),
+										i18n.getString("NetworkAdjustmentDialog.message.error.pointtypemismatch.exception.header", "Error, the project contains uncombinable point typs, i.e. datum points as well as reference or stochastic points."),
+										i18n.getString("NetworkAdjustmentDialog.message.error.pointtypemismatch.exception.message", "An exception has occurred during network adjustment."),
 										throwable
 										);
 							}
@@ -451,9 +473,21 @@ public class NetworkAdjustmentDialog {
 						Platform.runLater(new Runnable() {
 							@Override public void run() {
 								OptionDialog.showThrowableDialog (
-										i18n.getString("ProgressDialog.message.error.underdeterminded.exception.title",  "Initialization error"),
-										String.format(i18n.getString("ProgressDialog.message.error.underdeterminded.exception.header", "Error, the point %s of dimension %d has only %d observations and is indeterminable."), e.getPointName(), e.getDimension(), e.getNumberOfObservations()),
-										i18n.getString("ProgressDialog.message.error.underdeterminded.exception.message", "An exception occured during network adjustment."),
+										i18n.getString("NetworkAdjustmentDialog.message.error.underdeterminded.exception.title",  "Initialization error"),
+										String.format(i18n.getString("NetworkAdjustmentDialog.message.error.underdeterminded.exception.header", "Error, the point %s of dimension %d has only %d observations and is indeterminable."), e.getPointName(), e.getDimension(), e.getNumberOfObservations()),
+										i18n.getString("NetworkAdjustmentDialog.message.error.underdeterminded.exception.message", "An exception has occurred during network adjustment."),
+										throwable
+										);
+							}
+						});
+					}
+					else if (throwable instanceof IllegalProjectionPropertyException) {
+						Platform.runLater(new Runnable() {
+							@Override public void run() {
+								OptionDialog.showThrowableDialog (
+										i18n.getString("NetworkAdjustmentDialog.message.error.projection.exception.title",  "Initialization error"),
+										i18n.getString("NetworkAdjustmentDialog.message.error.projection.exception.header", "Error, the project contains unsupported projection properties."),
+										i18n.getString("NetworkAdjustmentDialog.message.error.projection.exception.message", "An exception has occurred during network adjustment."),
 										throwable
 										);
 							}
@@ -463,9 +497,9 @@ public class NetworkAdjustmentDialog {
 						Platform.runLater(new Runnable() {
 							@Override public void run() {
 								OptionDialog.showThrowableDialog (
-										i18n.getString("ProgressDialog.message.error.failed.exception.title", "Network adjustment failed"),
-										i18n.getString("ProgressDialog.message.error.failed.exception.header", "Error, could not adjust network."),
-										i18n.getString("ProgressDialog.message.error.failed.exception.message", "An exception occured during network adjustment."),
+										i18n.getString("NetworkAdjustmentDialog.message.error.failed.exception.title", "Network adjustment failed"),
+										i18n.getString("NetworkAdjustmentDialog.message.error.failed.exception.header", "Error, could not adjust network."),
+										i18n.getString("NetworkAdjustmentDialog.message.error.failed.exception.message", "An exception has occurred during network adjustment."),
 										throwable
 										);
 							}

@@ -1,6 +1,26 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.dialog;
 
-import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.Optional;
 
@@ -8,6 +28,8 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.table.CellValueType;
+import org.applied_geodesy.util.FormatterChangedListener;
+import org.applied_geodesy.util.FormatterEvent;
 import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.util.i18.I18N;
 
@@ -34,9 +56,8 @@ import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 
-public class TestStatisticDialog {
-
-	private static I18N i18n = I18N.getInstance();
+public class TestStatisticDialog implements FormatterChangedListener {
+	private I18N i18n = I18N.getInstance();
 	private static TestStatisticDialog testStatisticDialog = new TestStatisticDialog();
 	private static FormatterOptions options = FormatterOptions.getInstance();
 	private Dialog<TestStatisticDefinition> dialog = null;
@@ -56,7 +77,6 @@ public class TestStatisticDialog {
 		testStatisticDialog.load();
 		return testStatisticDialog.dialog.showAndWait();
 	}
-
 
 	private void init() {
 		if (this.dialog != null)
@@ -93,14 +113,16 @@ public class TestStatisticDialog {
 				return null;
 			}
 		});
+		// add formatter listener
+		options.addFormatterChangedListener(this);
 	}
 
 	private Node createPane() {
 		String labelProbabilityValue   = i18n.getString("TestStatisticDialog.probability.label", "Probability value \u03B1 [\u0025]:");
-		String tooltipProbabilityValue = i18n.getString("TestStatisticDialog.probability.tooltip", "Set up probability value (type I error)");
+		String tooltipProbabilityValue = i18n.getString("TestStatisticDialog.probability.tooltip", "Set probability value (type I error)");
 
 		String labelTestPower   = i18n.getString("TestStatisticDialog.testpower.label", "Power of test \u03B2 [\u0025]:");
-		String tooltipTestPower = i18n.getString("TestStatisticDialog.testpower.tooltip", "Set up power of test (type II error)");
+		String tooltipTestPower = i18n.getString("TestStatisticDialog.testpower.tooltip", "Set power of test (type II error)");
 
 		String labelFamilywiseErrorRate   = i18n.getString("TestStatisticDialog.familywiseerror.label", "Familywise error rate");
 		String tooltipFamilywiseErrorRate = i18n.getString("TestStatisticDialog.familywiseerror.tooltip", "If checked, probability value \u03B1 defines familywise error rate");
@@ -188,7 +210,7 @@ public class TestStatisticDialog {
 				return TestStatisticType.valueOf(string);
 			}
 		});
-		typeComboBox.setTooltip(new Tooltip(i18n.getString("TestStatisticDialog.type.tooltip", "Select method for \u03B1 adaption")));
+		typeComboBox.setTooltip(new Tooltip(i18n.getString("TestStatisticDialog.type.tooltip", "Select method for type I error adaption")));
 		typeComboBox.getSelectionModel().select(TestStatisticType.NONE);
 		typeComboBox.setMinWidth(150);
 		typeComboBox.setPrefWidth(200);
@@ -254,14 +276,14 @@ public class TestStatisticDialog {
 		try {
 			SQLManager.getInstance().save(testStatistic);
 		}
-		catch (SQLException e) {
+		catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("TestStatisticDialog.message.error.sql.save.title", "SQL-Error"),
-							i18n.getString("TestStatisticDialog.message.error.sql.save.header", "Error, could not save changes in database table"),
-							i18n.getString("TestStatisticDialog.message.error.sql.save.message", "An exception occure during saving dataset to database."),
+							i18n.getString("TestStatisticDialog.message.error.save.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("TestStatisticDialog.message.error.save.exception.header", "Error, could not save test statistics to database."),
+							i18n.getString("TestStatisticDialog.message.error.save.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}
@@ -288,18 +310,24 @@ public class TestStatisticDialog {
 			testPowerSpinnerFactory.setValue(powerOfTest);
 
 		} 
-		catch (SQLException e) {
+		catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("TestStatisticDialog.message.error.sql.load.title", "SQL-Error"),
-							i18n.getString("TestStatisticDialog.message.error.sql.load.header", "Error, could not load data."),
-							i18n.getString("TestStatisticDialog.message.error.sql.load.message", "An exception occure during saving dataset to database."),
+							i18n.getString("TestStatisticDialog.message.error.load.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("TestStatisticDialog.message.error.load.exception.header", "Error, could not load test statistics from database."),
+							i18n.getString("TestStatisticDialog.message.error.load.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}
 			});
 		}
+	}
+	
+	@Override
+	public void formatterChanged(FormatterEvent evt) {
+		this.probabilityValueSpinner.getEditor().setText(options.toStatisticFormat(this.probabilityValueSpinner.getValueFactory().getValue()));
+		this.testPowerSpinner.getEditor().setText(options.toStatisticFormat(this.testPowerSpinner.getValueFactory().getValue()));
 	}
 }

@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.tabpane;
 
 import org.applied_geodesy.jag3d.ui.graphic.UIGraphicPaneBuilder;
@@ -84,11 +105,11 @@ public class UITabPaneBuilder {
 	private void init() {
 
 		this.createTab(
-				i18n.getString("UITabPaneBuilder.tab.metadata.label", "Settings"), 
-				i18n.getString("UITabPaneBuilder.tab.metadata.title", "Global project properties"), 
+				i18n.getString("UITabPaneBuilder.tab.metadata.label", "Metadata"), 
+				i18n.getString("UITabPaneBuilder.tab.metadata.title", "Project-specific metadata"), 
 				TabType.META_DATA, null
 				);
-		
+
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.graphic.label", "Graphic"), 
 				i18n.getString("UITabPaneBuilder.tab.graphic.title", "Graphical visualisation of the network"), 
@@ -103,7 +124,7 @@ public class UITabPaneBuilder {
 
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.properties.label", "Properties"), 
-				i18n.getString("UITabPaneBuilder.tab.properties.title", "Defining properties"), 
+				i18n.getString("UITabPaneBuilder.tab.properties.title", "Properties of group"), 
 				TabType.PROPERTIES, null
 				);
 
@@ -118,22 +139,22 @@ public class UITabPaneBuilder {
 				i18n.getString("UITabPaneBuilder.tab.param.title", "Table of additional parameters"), 
 				TabType.ADDITIONAL_PARAMETER, null
 				);
-		
+
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.deflection.label", "Deflections"), 
-				i18n.getString("UITabPaneBuilder.tab.deflection.title", "Table of estimated deflections"), 
+				i18n.getString("UITabPaneBuilder.tab.deflection.title", "Table of estimated deflections of the vertical"), 
 				TabType.RESULT_DEFLECTION, null
 				);
 
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.congruence.point.label", "Congruence of points"), 
-				i18n.getString("UITabPaneBuilder.tab.congruence.point.title", "Result of point congruence analysis"), 
+				i18n.getString("UITabPaneBuilder.tab.congruence.point.title", "Result of congruence analysis of point"), 
 				TabType.RESULT_CONGRUENCE_ANALYSIS_POINT, null
 				);
-		
+
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.congruence.deflection.label", "Congruence of deflections"), 
-				i18n.getString("UITabPaneBuilder.tab.congruence.deflection.title", "Result of deflection congruence analysis"), 
+				i18n.getString("UITabPaneBuilder.tab.congruence.deflection.title", "Result of congruence analysis of deflections of the vertical"), 
 				TabType.RESULT_CONGRUENCE_ANALYSIS_DEFLECTION, null
 				);
 
@@ -234,7 +255,7 @@ public class UITabPaneBuilder {
 				node = table;
 			}
 			break;
-			
+
 		case CONGRUENCE_ANALYSIS_1D_LEAF:
 		case CONGRUENCE_ANALYSIS_2D_LEAF:
 		case CONGRUENCE_ANALYSIS_3D_LEAF:
@@ -254,7 +275,7 @@ public class UITabPaneBuilder {
 				node = table;
 			}
 			break;
-			
+
 		default:
 			node = null;
 			break;
@@ -294,20 +315,20 @@ public class UITabPaneBuilder {
 					column.setVisible(tabType == TabType.RESULT_DATA);
 
 					break;
-					
+
 				case APOSTERIORI_DEFLECTION:
 					column.setVisible(tabType == TabType.RESULT_DEFLECTION);
-					
+
 					break;
-				
+
 				case APOSTERIORI_POINT_CONGRUENCE:
 					column.setVisible(tabType == TabType.RESULT_CONGRUENCE_ANALYSIS_POINT);
-				
+
 					break;
-					
+
 				case APOSTERIORI_DEFLECTION_CONGRUENCE:
 					column.setVisible(tabType == TabType.RESULT_CONGRUENCE_ANALYSIS_DEFLECTION);
-				
+
 					break;
 
 				default:
@@ -320,7 +341,7 @@ public class UITabPaneBuilder {
 	public void setTreeItemValue(TreeItemValue treeItemValue) {
 		SingleSelectionModel<Tab> selectionModel = this.tabPane.getSelectionModel();
 		try {
-			selectionModel.selectedItemProperty().removeListener(this.tabSelectionChangeListener);
+			//selectionModel.selectedItemProperty().removeListener(this.tabSelectionChangeListener);
 			this.lastSelectedTab = this.lastSelectedTab != null ? this.lastSelectedTab : selectionModel.getSelectedItem();
 			selectionModel.clearSelection();
 
@@ -365,7 +386,7 @@ public class UITabPaneBuilder {
 								break;
 							}
 						}
-						
+
 						selectedTab = validLastSelectedTabType ? this.lastSelectedTab : null;
 					}
 
@@ -374,10 +395,11 @@ public class UITabPaneBuilder {
 
 					selectionModel.select(selectedTab);
 
-					if (selectedTab != null && selectedTab.getUserData() instanceof TabType) {
-						TabType tabType = (TabType)selectedTab.getUserData();
-						selectedTab.setContent(getNode(tabType));
-					}
+					// setContent() is called by TabSelectionChangeListener
+					//					if (selectedTab != null && selectedTab.getUserData() instanceof TabType) {
+					//						TabType tabType = (TabType)selectedTab.getUserData();
+					//						selectedTab.setContent(getNode(tabType));
+					//					}
 				}
 				else {
 					tabPane.getTabs().clear();
@@ -386,7 +408,7 @@ public class UITabPaneBuilder {
 			}
 		}
 		finally {
-			selectionModel.selectedItemProperty().addListener(this.tabSelectionChangeListener);
+			//selectionModel.selectedItemProperty().addListener(this.tabSelectionChangeListener);
 		}
 	}
 }

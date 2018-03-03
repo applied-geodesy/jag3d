@@ -1,0 +1,22 @@
+# !!! This is an example file and will not be used by JAG3D. Please !!!
+# !!! create a copy of this file named "averagethresholds.default", !!!
+# !!! located in the same directory. Modify the copied file w.r.t.  !!!
+# !!! the desired values.                                           !!!
+#
+# Comments are indicated by # as first character
+# Valid units are Radiant and Meter w.r.t. the observation type
+#
+# The followind values are the default values of JAG3D and are ten-times 
+# larger than the uncertainties of the zero point offsets
+#
+LEVELING            = 0.0015
+#
+DIRECTION           = 4.71238898038469e-05
+ZENITH_ANGLE        = 4.71238898038469e-05
+#
+HORIZONTAL_DISTANCE = 0.02
+SLOPE_DISTANCE      = 0.02
+#
+GNSS1D              = 0.25
+GNSS2D              = 0.25
+GNSS3D              = 0.25

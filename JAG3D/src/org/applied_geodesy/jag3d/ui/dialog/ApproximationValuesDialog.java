@@ -1,14 +1,38 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.dialog;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import org.applied_geodesy.adjustment.EstimationStateType;
 import org.applied_geodesy.adjustment.network.approximation.sql.SQLApproximationManager;
+import org.applied_geodesy.jag3d.sql.PointTypeMismatchException;
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.sql.UnderDeterminedPointException;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.i18.I18N;
@@ -130,7 +154,7 @@ public class ApproximationValuesDialog {
 		}
 	}
 
-	private static I18N i18n = I18N.getInstance();
+	private I18N i18n = I18N.getInstance();
 	private static ApproximationValuesDialog approximationValuesDialog = new ApproximationValuesDialog();
 	private Dialog<EstimationStateType> dialog = null;
 	private Window window;
@@ -221,16 +245,16 @@ public class ApproximationValuesDialog {
 
 	private Node createSettingPane() {
 		String estimateDatumAndNewPointsRadioButtonLabel   = i18n.getString("ApproximationValuesDialog.estimate.datum_and_new.label", "Derive approximations for datum and new points");
-		String estimateDatumAndNewPointsRadioButtonTooltip = i18n.getString("ApproximationValuesDialog.estimate.datum_and_new.label", "If checked, datum and new points will be estimated.");
+		String estimateDatumAndNewPointsRadioButtonTooltip = i18n.getString("ApproximationValuesDialog.estimate.datum_and_new.title", "If checked, datum and new points will be estimated");
 
 		String estimateNewPointsRadioButtonLabel   = i18n.getString("ApproximationValuesDialog.estimate.new.label", "Derive approximations for new points");
-		String estimateNewPointsRadioButtonTooltip = i18n.getString("ApproximationValuesDialog.estimate.new.label", "If checked, new points will be estimated.");
+		String estimateNewPointsRadioButtonTooltip = i18n.getString("ApproximationValuesDialog.estimate.new.title", "If checked, new points will be estimated");
 
-		String transferDatumAndNewPointsResultsLabel   = i18n.getString("ApproximationValuesDialog.transfer.datum_and_new.label", "Transfer adjusted coordinates of datum and new points");
-		String transferDatumAndNewPointsResultsTooltip = i18n.getString("ApproximationValuesDialog.transfer.datum_and_new.label", "If checked, adjusted coordinates of datum and new points will be transferd to apprixmation values.");
+		String transferDatumAndNewPointsResultsLabel   = i18n.getString("ApproximationValuesDialog.transfer.datum_and_new.label", "Transfer adjusted coordinates of datum and new points as well as additional parameters");
+		String transferDatumAndNewPointsResultsTooltip = i18n.getString("ApproximationValuesDialog.transfer.datum_and_new.title", "If checked, adjusted coordinates of datum and new points as well as additional parameters will be transferred to apprixmation values");
 
-		String transferNewPointsResultsLabel   = i18n.getString("ApproximationValuesDialog.transfer.new.label", "Transfer adjusted coordinates of new points");
-		String transferNewPointsResultsTooltip = i18n.getString("ApproximationValuesDialog.transfer.new.label", "If checked, adjusted coordinates of new points will be transferd to apprixmation values.");
+		String transferNewPointsResultsLabel   = i18n.getString("ApproximationValuesDialog.transfer.new.label", "Transfer adjusted coordinates of new points as well as additional parameters");
+		String transferNewPointsResultsTooltip = i18n.getString("ApproximationValuesDialog.transfer.new.title", "If checked, adjusted coordinates of new points as well as additional parameters will be transferred to apprixmation values");
 
 		this.estimateDatumAndNewPointsRadioButton = this.createRadioButton(estimateDatumAndNewPointsRadioButtonLabel, estimateDatumAndNewPointsRadioButtonTooltip);
 		this.estimateNewPointsRadioButton = this.createRadioButton(estimateNewPointsRadioButtonLabel, estimateNewPointsRadioButtonTooltip);
@@ -279,6 +303,37 @@ public class ApproximationValuesDialog {
 	private void process() {
 		this.reset();
 
+		// Global check
+		try {
+			SQLManager.getInstance().checkNumberOfObersvationsPerUnknownParameter();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			OptionDialog.showThrowableDialog (
+					i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.title",  "Unexpected Error"),
+					i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.header", "Error, estimation of approximation values failed."),
+					i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.message", "An exception has occurred during estimation of approximation."),
+					e
+					);
+		} catch (PointTypeMismatchException e) {
+			e.printStackTrace();
+			OptionDialog.showThrowableDialog (
+					i18n.getString("ApproximationValuesDialog.message.error.pointtypemismatch.exception.title",  "Initialization error"),
+					i18n.getString("ApproximationValuesDialog.message.error.pointtypemismatch.exception.header", "Error, the project contains uncombinable point typs, i.e. datum points as well as reference or stochastic points."),
+					i18n.getString("ApproximationValuesDialog.message.error.pointtypemismatch.exception.message", "An exception has occurred during estimation of approximation."),
+					e
+					);
+
+		} catch (UnderDeterminedPointException e) {
+			e.printStackTrace();
+			OptionDialog.showThrowableDialog (
+					i18n.getString("ApproximationValuesDialog.message.error.underdeterminded.exception.title",  "Initialization error"),
+					String.format(i18n.getString("ApproximationValuesDialog.message.error.underdeterminded.exception.header", "Error, the point %s of dimension %d has only %d observations and is indeterminable."), e.getPointName(), e.getDimension(), e.getNumberOfObservations()),
+					i18n.getString("ApproximationValuesDialog.message.error.underdeterminded.exception.message", "An exception has occurred during estimation of approximation."),
+					e
+					);
+		}
+
+		// Try to estimate approx. values
 		SQLApproximationManager approximationManager = SQLManager.getInstance().getApproximationManager();
 		this.approximationEstimationTask = new ApproximationEstimationTask(approximationManager);
 		this.approximationEstimationTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
@@ -370,9 +425,9 @@ public class ApproximationValuesDialog {
 					Platform.runLater(new Runnable() {
 						@Override public void run() {
 							OptionDialog.showThrowableDialog (
-									i18n.getString("ApproximationValuesDialog.message.error.sql.exception.title",  "SQL-Error"),
-									i18n.getString("ApproximationValuesDialog.message.error.sql.exception.header", "Error, estimation of approximation values failed."),
-									i18n.getString("ApproximationValuesDialog.message.error.sql.exception.message", "An exception occured during averaging process."),
+									i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.title",  "Unexpected Error"),
+									i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.header", "Error, estimation of approximation values failed."),
+									i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.message", "An exception has occurred during estimation of approximation."),
 									throwable
 									);
 						}

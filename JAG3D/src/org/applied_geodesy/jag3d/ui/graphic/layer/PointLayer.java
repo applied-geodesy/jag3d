@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.graphic.layer;
 
 import java.util.List;
@@ -38,49 +59,187 @@ public class PointLayer extends Layer {
 	PointLayer(LayerType layerType, GraphicExtent currentGraphicExtent) {
 		super(layerType, currentGraphicExtent);
 		
-		Color color = Color.BLACK;
-		PointSymbolType pointSymbolType = PointSymbolType.DOT;
+		Color color;
+		PointSymbolType pointSymbolType;
+		double symbolSize = -1, lineWidth = -1;
 		
 		switch(layerType) {			
 		case REFERENCE_POINT_APRIORI:
-			color = Color.LIGHTGREEN;
-			pointSymbolType = PointSymbolType.STROKED_SQUARE;
+			try {
+				color = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_COLOR", "#90ee90"));
+			}
+			catch (Exception e) {
+				color = Color.web("#90ee90"); //Color.LIGHTGREEN;
+			}
+
+			try {
+				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_SYMBOL_TYPE", "STROKED_SQUARE"));
+			}catch (Exception e) {
+				pointSymbolType = PointSymbolType.STROKED_SQUARE;
+			}
+
+			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_SYMBOL_SIZE")); } catch (Exception e) {}
+			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
+			
+			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
+			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
+
 			break;
 			
 		case REFERENCE_POINT_APOSTERIORI:
-			color = Color.DARKGREEN;
-			pointSymbolType = PointSymbolType.STROKED_SQUARE;
+			try {
+				color = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_COLOR", "#006400"));
+			}
+			catch (Exception e) {
+				color = Color.web("#006400"); //Color.DARKGREEN;
+			}
+
+			try {
+				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_SYMBOL_TYPE", "STROKED_SQUARE"));
+			}catch (Exception e) {
+				pointSymbolType = PointSymbolType.STROKED_SQUARE;
+			}
+
+			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
+			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
+			
+			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
+			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
+
 			break;
 			
 		case STOCHASTIC_POINT_APRIORI:
-			color = Color.GOLD;
-			pointSymbolType = PointSymbolType.STROKED_UPRIGHT_TRIANGLE;
+			try {
+				color = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_COLOR", "#ffd700"));
+			}
+			catch (Exception e) {
+				color = Color.web("#ffd700"); //Color.GOLD;
+			}
+
+			try {
+				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_SYMBOL_TYPE", "STROKED_UPRIGHT_TRIANGLE"));
+			}catch (Exception e) {
+				pointSymbolType = PointSymbolType.STROKED_SQUARE;
+			}
+
+			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_SYMBOL_SIZE")); } catch (Exception e) {}
+			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
+			
+			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
+			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
+
 			break;
 			
 		case STOCHASTIC_POINT_APOSTERIORI:
-			color = Color.GOLDENROD;
-			pointSymbolType = PointSymbolType.STROKED_UPRIGHT_TRIANGLE;
+			try {
+				color = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_COLOR", "#daa520"));
+			}
+			catch (Exception e) {
+				color = Color.web("#daa520"); //Color.GOLDENROD;
+			}
+
+			try {
+				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_SYMBOL_TYPE", "STROKED_UPRIGHT_TRIANGLE"));
+			}catch (Exception e) {
+				pointSymbolType = PointSymbolType.STROKED_SQUARE;
+			}
+
+			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
+			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
+			
+			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
+			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
+
 			break;
 			
 		case DATUM_POINT_APRIORI:
-			color = Color.SKYBLUE;
-			pointSymbolType = PointSymbolType.STROKED_HEXAGON;
+			try {
+				color = Color.web(PROPERTIES.getProperty("DATUM_POINT_APRIORI_COLOR", "#87ceeb"));
+			}
+			catch (Exception e) {
+				color = Color.web("#87ceeb"); //Color.SKYBLUE;
+			}
+
+			try {
+				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("DATUM_POINT_APRIORI_SYMBOL_TYPE", "STROKED_HEXAGON"));
+			}catch (Exception e) {
+				pointSymbolType = PointSymbolType.STROKED_SQUARE;
+			}
+
+			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APRIORI_SYMBOL_SIZE")); } catch (Exception e) {}
+			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
+			
+			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
+			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
+
 			break;
 			
 		case DATUM_POINT_APOSTERIORI:
-			color = Color.DODGERBLUE;
-			pointSymbolType = PointSymbolType.STROKED_HEXAGON;
+			try {
+				color = Color.web(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_COLOR", "#1e90ff"));
+			}
+			catch (Exception e) {
+				color = Color.web("#1e90ff"); //Color.DODGERBLUE;
+			}
+
+			try {
+				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_SYMBOL_TYPE", "STROKED_HEXAGON"));
+			}catch (Exception e) {
+				pointSymbolType = PointSymbolType.STROKED_SQUARE;
+			}
+			
+			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
+			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
+			
+			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
+			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
+
 			break;
 			
 		case NEW_POINT_APRIORI:
-			color = Color.PINK;
-			pointSymbolType = PointSymbolType.STROKED_CIRCLE;
+			try {
+				color = Color.web(PROPERTIES.getProperty("NEW_POINT_APRIORI_COLOR", "#c480c4"));
+			}
+			catch (Exception e) {
+				color = Color.web("#c480c4");
+			}
+
+			try {
+				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("NEW_POINT_APRIORI_SYMBOL_TYPE", "STROKED_CIRCLE"));
+			}catch (Exception e) {
+				pointSymbolType = PointSymbolType.STROKED_SQUARE;
+			}
+			
+			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APRIORI_SYMBOL_SIZE")); } catch (Exception e) {}
+			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
+	
+			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
+			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
+
 			break;
 			
 		case NEW_POINT_APOSTERIORI:
-			color = Color.PLUM;
-			pointSymbolType = PointSymbolType.STROKED_CIRCLE;
+			try {
+				color = Color.web(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_COLOR", "#dda0dd"));
+			}
+			catch (Exception e) {
+				color = Color.web("#dda0dd"); //Color.PLUM;
+			}
+
+			try {
+				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_SYMBOL_TYPE", "STROKED_CIRCLE"));
+			}catch (Exception e) {
+				pointSymbolType = PointSymbolType.STROKED_SQUARE;
+			}
+			
+			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
+			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
+			
+			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
+			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
+
 			break;
+
 		default:
 			throw new IllegalArgumentException("Error, unsupported layer type " + layerType);		
 		}
@@ -88,6 +247,7 @@ public class PointLayer extends Layer {
 		this.setSymbolType(pointSymbolType);
 		this.setColor(color);
 		this.setLineWidth(1.5);
+		this.setSymbolSize(symbolSize);
 		
 		this.addLayerPropertyChangeListener(this.fontColorProperty());
 		this.addLayerPropertyChangeListener(this.fontFamilyProperty());
@@ -230,9 +390,9 @@ public class PointLayer extends Layer {
 		case REFERENCE_POINT_APRIORI:
 			return i18n.getString("PointAprioriLayer.type.reference.apriori", "Reference points (a-priori)");
 		case STOCHASTIC_POINT_APOSTERIORI:
-			return i18n.getString("PointAprioriLayer.type.reference.aposteriori", "Stochastic points (a-posteriori)");
+			return i18n.getString("PointAprioriLayer.type.stochastic.aposteriori", "Stochastic points (a-posteriori)");
 		case STOCHASTIC_POINT_APRIORI:
-			return i18n.getString("PointAprioriLayer.type.reference.apriori", "Stochastic points (a-priori)");
+			return i18n.getString("PointAprioriLayer.type.stochastic.apriori", "Stochastic points (a-priori)");
 		default:
 			return "";		
 		}

@@ -1,6 +1,26 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.dialog;
 
-import java.sql.SQLException;
 import java.util.Optional;
 
 import org.applied_geodesy.adjustment.network.DefectType;
@@ -61,7 +81,7 @@ public class RankDefectDialog {
 		}
 	}
 
-	private static I18N i18n = I18N.getInstance();
+	private I18N i18n = I18N.getInstance();
 	private static RankDefectDialog rankDefectDialog = new RankDefectDialog();
 	private Dialog<RankDefect> dialog = null;
 	private Window window;
@@ -159,7 +179,7 @@ public class RankDefectDialog {
 		VBox box = this.createVbox();
 
 		String labelUserDefined = i18n.getString("RankDefectDialog.userdefined.title", "User defined defect analysis");
-		String tooltipUserDefined = i18n.getString("RankDefectDialog.userdefined.tooltip", "If checked, user defined condition euqation will be applied to free network adjustment");
+		String tooltipUserDefined = i18n.getString("RankDefectDialog.userdefined.tooltip", "If checked, user defined condition equations will be applied (without examination) to free network adjustment");
 
 		this.userDefinedCheckBox = this.createCheckBox(labelUserDefined, tooltipUserDefined);
 		this.userDefinedCheckBox.selectedProperty().addListener(new ScaleSelectionChangeListener(this.userDefinedCheckBox));
@@ -185,17 +205,17 @@ public class RankDefectDialog {
 
 
 	private TitledPane createTranslationPane() {
-		String title   = i18n.getString("RankDefectDialog.scale.title", "Translations");
-		String tooltip = i18n.getString("RankDefectDialog.scale.tooltip", "Condition equation for network translations");
+		String title   = i18n.getString("RankDefectDialog.translation.title", "Translations");
+		String tooltip = i18n.getString("RankDefectDialog.translation.tooltip", "Condition equation for network translations");
 		
 		String labelY   = i18n.getString("RankDefectDialog.translation.y.label", "Translation y");
-		String tooltipY = i18n.getString("RankDefectDialog.translation.y.tooltip", "If checked, condition equation for y translation will be applied to free network adjustment");
+		String tooltipY = i18n.getString("RankDefectDialog.translation.y.tooltip", "If checked, condition equation for y-translation will be applied to free network adjustment");
 
-		String labelX   = i18n.getString("RankDefectDialog.translation.y.label", "Translation x");
-		String tooltipX = i18n.getString("RankDefectDialog.translation.y.tooltip", "If checked, condition equation for x translation will be applied to free network adjustment");
+		String labelX   = i18n.getString("RankDefectDialog.translation.x.label", "Translation x");
+		String tooltipX = i18n.getString("RankDefectDialog.translation.x.tooltip", "If checked, condition equation for x-translation will be applied to free network adjustment");
 
-		String labelZ   = i18n.getString("RankDefectDialog.translation.y.label", "Translation z");
-		String tooltipZ = i18n.getString("RankDefectDialog.translation.y.tooltip", "If checked, condition equation for z translation will be applied to free network adjustment");
+		String labelZ   = i18n.getString("RankDefectDialog.translation.z.label", "Translation z");
+		String tooltipZ = i18n.getString("RankDefectDialog.translation.z.tooltip", "If checked, condition equation for z-translation will be applied to free network adjustment");
 
 		this.translationYCheckBox = this.createCheckBox(labelY, tooltipY);
 		this.translationXCheckBox = this.createCheckBox(labelX, tooltipX);
@@ -208,17 +228,17 @@ public class RankDefectDialog {
 	}
 
 	private TitledPane createRotationPane() {
-		String title   = i18n.getString("RankDefectDialog.scale.title", "Rotations");
-		String tooltip = i18n.getString("RankDefectDialog.scale.tooltip", "Condition equation for network rotations");
+		String title   = i18n.getString("RankDefectDialog.rotation.title", "Rotations");
+		String tooltip = i18n.getString("RankDefectDialog.rotation.tooltip", "Condition equation for network rotations");
 		
 		String labelY   = i18n.getString("RankDefectDialog.rotation.y.label", "Rotation y");
-		String tooltipY = i18n.getString("RankDefectDialog.rotation.y.tooltip", "If checked, condition equation for y rotation will be applied to free network adjustment");
+		String tooltipY = i18n.getString("RankDefectDialog.rotation.y.tooltip", "If checked, condition equation for y-rotation will be applied to free network adjustment");
 
-		String labelX   = i18n.getString("RankDefectDialog.rotation.y.label", "Rotation x");
-		String tooltipX = i18n.getString("RankDefectDialog.rotation.y.tooltip", "If checked, condition equation for x rotation will be applied to free network adjustment");
+		String labelX   = i18n.getString("RankDefectDialog.rotation.x.label", "Rotation x");
+		String tooltipX = i18n.getString("RankDefectDialog.rotation.x.tooltip", "If checked, condition equation for x-rotation will be applied to free network adjustment");
 
-		String labelZ   = i18n.getString("RankDefectDialog.rotation.y.label", "Rotation z");
-		String tooltipZ = i18n.getString("RankDefectDialog.rotation.y.tooltip", "If checked, condition equation for z rotation will be applied to free network adjustment");
+		String labelZ   = i18n.getString("RankDefectDialog.rotation.z.label", "Rotation z");
+		String tooltipZ = i18n.getString("RankDefectDialog.rotation.z.tooltip", "If checked, condition equation for z-rotation will be applied to free network adjustment");
 
 		this.rotationYCheckBox = this.createCheckBox(labelY, tooltipY);
 		this.rotationXCheckBox = this.createCheckBox(labelX, tooltipX);
@@ -231,17 +251,17 @@ public class RankDefectDialog {
 	}
 
 	private TitledPane createShearPane() {
-		String title   = i18n.getString("RankDefectDialog.scale.title", "Shears");
-		String tooltip = i18n.getString("RankDefectDialog.scale.tooltip", "Condition equation for network shears (unusual conditions)");
+		String title   = i18n.getString("RankDefectDialog.shear.title", "Shears");
+		String tooltip = i18n.getString("RankDefectDialog.shear.tooltip", "Condition equation for network shears (unusual conditions)");
 		
 		String labelY   = i18n.getString("RankDefectDialog.shear.y.label", "Shear y");
-		String tooltipY = i18n.getString("RankDefectDialog.shear.y.tooltip", "If checked, condition equation for y shear will be applied to free network adjustment");
+		String tooltipY = i18n.getString("RankDefectDialog.shear.y.tooltip", "If checked, condition equation for y-shear will be applied to free network adjustment");
 
-		String labelX   = i18n.getString("RankDefectDialog.shear.y.label", "Shear x");
-		String tooltipX = i18n.getString("RankDefectDialog.shear.y.tooltip", "If checked, condition equation for x shear will be applied to free network adjustment");
+		String labelX   = i18n.getString("RankDefectDialog.shear.x.label", "Shear x");
+		String tooltipX = i18n.getString("RankDefectDialog.shear.x.tooltip", "If checked, condition equation for x-shear will be applied to free network adjustment");
 
-		String labelZ   = i18n.getString("RankDefectDialog.shear.y.label", "Shear z");
-		String tooltipZ = i18n.getString("RankDefectDialog.shear.y.tooltip", "If checked, condition equation for z shear will be applied to free network adjustment");
+		String labelZ   = i18n.getString("RankDefectDialog.shear.z.label", "Shear z");
+		String tooltipZ = i18n.getString("RankDefectDialog.shear.z.tooltip", "If checked, condition equation for z-shear will be applied to free network adjustment");
 
 		this.shearYCheckBox = this.createCheckBox(labelY, tooltipY);
 		this.shearXCheckBox = this.createCheckBox(labelX, tooltipX);
@@ -258,13 +278,13 @@ public class RankDefectDialog {
 		String tooltip = i18n.getString("RankDefectDialog.scale.tooltip", "Condition equation for network scales");
 		
 		String labelY   = i18n.getString("RankDefectDialog.scale.y.label", "Scale y");
-		String tooltipY = i18n.getString("RankDefectDialog.scale.y.tooltip", "If checked, condition equation for y scale will be applied to free network adjustment");
+		String tooltipY = i18n.getString("RankDefectDialog.scale.y.tooltip", "If checked, condition equation for y-scale will be applied to free network adjustment");
 
-		String labelX   = i18n.getString("RankDefectDialog.scale.y.label", "Scale x");
-		String tooltipX = i18n.getString("RankDefectDialog.scale.y.tooltip", "If checked, condition equation for x scale will be applied to free network adjustment");
+		String labelX   = i18n.getString("RankDefectDialog.scale.x.label", "Scale x");
+		String tooltipX = i18n.getString("RankDefectDialog.scale.x.tooltip", "If checked, condition equation for x-scale will be applied to free network adjustment");
 
-		String labelZ   = i18n.getString("RankDefectDialog.scale.y.label", "Scale z");
-		String tooltipZ = i18n.getString("RankDefectDialog.scale.y.tooltip", "If checked, condition equation for z scale will be applied to free network adjustment");
+		String labelZ   = i18n.getString("RankDefectDialog.scale.z.label", "Scale z");
+		String tooltipZ = i18n.getString("RankDefectDialog.scale.z.tooltip", "If checked, condition equation for z-scale will be applied to free network adjustment");
 
 		String labelXY   = i18n.getString("RankDefectDialog.scale.xy.label", "Scale y, x");
 		String tooltipXY = i18n.getString("RankDefectDialog.scale.xy.tooltip", "If checked, condition equation for horizontal scale will be applied to free network adjustment");
@@ -358,14 +378,14 @@ public class RankDefectDialog {
 		try {
 			SQLManager.getInstance().save(this.userDefinedCheckBox.isSelected() || rankDefect.getDefect() == 0, rankDefect);
 		}
-		catch (SQLException e) {
+		catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("FormatterOptionDialog.message.error.sql.title", "SQL-Error"),
-							i18n.getString("FormatterOptionDialog.message.error.sql.header", "Error, could not save changes in database table"),
-							i18n.getString("FormatterOptionDialog.message.error.sql.message", "An exception occure during saving dataset to database."),
+							i18n.getString("RankDefectDialog.message.error.save.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("RankDefectDialog.message.error.save.exception.header", "Error, could not save user-defined rank defect properties to database."),
+							i18n.getString("RankDefectDialog.message.error.save.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}
@@ -399,14 +419,14 @@ public class RankDefectDialog {
 				this.scaleXYZCheckBox.setSelected(rankDefect.estimateScaleXYZ());
 			}
 		}
-		catch (SQLException e) {
+		catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("ProjectionDialog.message.error.sql.load.title", "SQL-Error"),
-							i18n.getString("ProjectionDialog.message.error.sql.load.header", "Error, could not load data."),
-							i18n.getString("ProjectionDialog.message.error.sql.load.message", "An exception occure during saving dataset to database."),
+							i18n.getString("RankDefectDialog.message.error.load.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("RankDefectDialog.message.error.load.exception.header", "Error, could not load user-defined rank defect properties from database."),
+							i18n.getString("RankDefectDialog.message.error.load.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}

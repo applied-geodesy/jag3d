@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.graphic.layer.dialog;
 
 import java.util.HashMap;
@@ -8,6 +29,8 @@ import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationSymbolProperties;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationSymbolProperties.ObservationType;
 import org.applied_geodesy.util.i18.I18N;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
@@ -19,8 +42,62 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
-	private static I18N i18n = I18N.getInstance();
+public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {	
+	private class SymbolSizeChangeListener implements ChangeListener<Double> {
+		@Override
+		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setSymbolSize(newValue);
+		}
+	}
+	
+	private class LineWidthChangeListener implements ChangeListener<Double> {
+		@Override
+		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setLineWidth(newValue);
+		}
+	}
+	
+	private class ColorChangeListener implements ChangeListener<Color> {
+		@Override
+		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setColor(newValue);
+		}
+	}
+	
+	private class ObservationColorChangeListener implements ChangeListener<Color> {
+		private ObservationType observationType;
+		ObservationColorChangeListener(ObservationType observationType) {
+			this.observationType = observationType;
+		}
+		@Override
+		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+			if (currentLayer != null && newValue != null) {
+				ObservationSymbolProperties properties = currentLayer.getObservationSymbolProperties(this.observationType);
+				if (properties != null)
+					properties.setColor(newValue);
+			}
+		}
+	}
+	
+	private class ObservationEnableChangeListener implements ChangeListener<Boolean> {
+		private ObservationType observationType;
+		ObservationEnableChangeListener(ObservationType observationType) {
+			this.observationType = observationType;
+		}
+		@Override
+		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+			if (currentLayer != null && newValue != null) {
+				ObservationSymbolProperties properties = currentLayer.getObservationSymbolProperties(this.observationType);
+				if (properties != null)
+					properties.setVisible(newValue);
+			}
+		}
+	}
+	
+	private I18N i18n = I18N.getInstance();
 	private static UIObservationLayerPropertyBuilder observationLayerPropertyBuilder = new UIObservationLayerPropertyBuilder();
 
 	private ComboBox<Double> symbolSizeComboBox;
@@ -50,27 +127,11 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 	
 	public static Node getLayerPropertyPane(ObservationLayer layer) {
 		observationLayerPropertyBuilder.init();
-		observationLayerPropertyBuilder.bindProperties(layer);
+		observationLayerPropertyBuilder.set(layer);
 		return observationLayerPropertyBuilder.propertyPane;
 	}
-	
-	private void bindProperties(ObservationLayer layer) {
-		ObservationType observationTypes[] = ObservationType.values();
-		// unbind
-		if (this.currentLayer != null) {
-			this.currentLayer.symbolSizeProperty().unbind();
-			this.currentLayer.lineWidthProperty().unbind();
-			this.currentLayer.colorProperty().unbind();
 
-			for (ObservationType observationType : observationTypes) {
-				ObservationSymbolProperties properties = this.currentLayer.getObservationSymbolProperties(observationType);
-				if (properties != null) {
-					properties.colorProperty().unbind();
-					properties.enableProperty().unbind();
-				}
-			}
-		}
-		
+	private void set(ObservationLayer layer) {
 		// set new layer
 		this.currentLayer = layer;
 		
@@ -78,20 +139,15 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 		this.symbolSizeComboBox.getSelectionModel().select(this.currentLayer.getSymbolSize());
 		this.lineWidthComboBox.getSelectionModel().select(this.currentLayer.getLineWidth());
 		this.symbolColorPicker.setValue(this.currentLayer.getColor());
-		
-		this.currentLayer.symbolSizeProperty().bind(this.symbolSizeComboBox.getSelectionModel().selectedItemProperty());
-		this.currentLayer.lineWidthProperty().bind(this.lineWidthComboBox.getSelectionModel().selectedItemProperty());
-		this.currentLayer.colorProperty().bind(this.symbolColorPicker.valueProperty());
-		
+
+		ObservationType observationTypes[] = ObservationType.values();
 		for (ObservationType observationType : observationTypes) {
 			ObservationSymbolProperties properties = this.currentLayer.getObservationSymbolProperties(observationType);	
 			CheckBox checkBox       = this.observationCheckBoxMap.get(observationType);
 			ColorPicker colorPicker = this.observationColorPickerMap.get(observationType);
 			
-			checkBox.setSelected(properties.isEnable());
-			properties.enableProperty().bind(checkBox.selectedProperty());
+			checkBox.setSelected(properties.isVisible());
 			colorPicker.setValue(properties.getColor());
-			properties.colorProperty().bind(colorPicker.valueProperty());
 		}
 	}
 	
@@ -104,7 +160,7 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 			case LEVELING:
 				this.observationCheckBoxMap.put(observationType, this.createCheckBox(
 						i18n.getString("UIObservationLayerPropertyBuilder.symbol.leveling.enable.label", "Leveling:"), 
-						i18n.getString("UIObservationLayerPropertyBuilder.symbol.leveling.enable.tooltip", "If checked, leveling will be drawn."))
+						i18n.getString("UIObservationLayerPropertyBuilder.symbol.leveling.enable.tooltip", "If checked, leveling will be drawn"))
 						);
 				this.observationColorPickerMap.put(observationType, new ColorPicker(Color.DARKBLUE));
 				break;
@@ -112,7 +168,7 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 			case DIRECTION:
 				this.observationCheckBoxMap.put(observationType, this.createCheckBox(
 						i18n.getString("UIObservationLayerPropertyBuilder.symbol.direction.enable.label", "Direction:"), 
-						i18n.getString("UIObservationLayerPropertyBuilder.symbol.direction.enable.tooltip", "If checked, directions will be drawn."))
+						i18n.getString("UIObservationLayerPropertyBuilder.symbol.direction.enable.tooltip", "If checked, directions will be drawn"))
 						);
 				this.observationColorPickerMap.put(observationType, new ColorPicker(Color.DARKBLUE));
 				break;
@@ -120,14 +176,14 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 			case DISTANCE:
 				this.observationCheckBoxMap.put(observationType, this.createCheckBox(
 						i18n.getString("UIObservationLayerPropertyBuilder.symbol.distance.enable.label", "Distance:"), 
-						i18n.getString("UIObservationLayerPropertyBuilder.symbol.distance.enable.tooltip", "If checked, distance will be drawn."))
+						i18n.getString("UIObservationLayerPropertyBuilder.symbol.distance.enable.tooltip", "If checked, distances will be drawn"))
 						);
 				this.observationColorPickerMap.put(observationType, new ColorPicker(Color.DARKBLUE));
 				break;
 			case ZENITH_ANGLE:
 				this.observationCheckBoxMap.put(observationType, this.createCheckBox(
 						i18n.getString("UIObservationLayerPropertyBuilder.symbol.zenithangle.enable.label", "Zenith angle:"), 
-						i18n.getString("UIObservationLayerPropertyBuilder.symbol.zenithangle.enable.tooltip", "If checked, zenith angle will be drawn."))
+						i18n.getString("UIObservationLayerPropertyBuilder.symbol.zenithangle.enable.tooltip", "If checked, zenith angles will be drawn"))
 						);
 				this.observationColorPickerMap.put(observationType, new ColorPicker(Color.DARKBLUE));
 				break;
@@ -135,7 +191,7 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 			case GNSS:
 				this.observationCheckBoxMap.put(observationType, this.createCheckBox(
 						i18n.getString("UIObservationLayerPropertyBuilder.symbol.gnss.enable.label", "GNSS Baseline:"), 
-						i18n.getString("UIObservationLayerPropertyBuilder.symbol.gnss.enable.tooltip", "If checked, GNSS baselines will be drawn."))
+						i18n.getString("UIObservationLayerPropertyBuilder.symbol.gnss.enable.tooltip", "If checked, GNSS baselines will be drawn"))
 						);
 				this.observationColorPickerMap.put(observationType, new ColorPicker(Color.DARKBLUE));
 				break;
@@ -144,7 +200,7 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 		}
 		
 		for (CheckBox checkBox : this.observationCheckBoxMap.values()) {
-				GridPane.setHgrow(checkBox, Priority.NEVER);
+			GridPane.setHgrow(checkBox, Priority.NEVER);
 		}
 		
 		for (ColorPicker colorPicker : this.observationColorPickerMap.values()) {
@@ -154,8 +210,13 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 		
 		int row = 0;
 		for (ObservationType observationType : observationTypes) {
-			gridPane.add(this.observationCheckBoxMap.get(observationType),     0, row);
-			gridPane.add( this.observationColorPickerMap.get(observationType), 1, row++);
+			CheckBox checkBox  = this.observationCheckBoxMap.get(observationType);
+			ColorPicker picker = this.observationColorPickerMap.get(observationType);
+			checkBox.selectedProperty().addListener(new ObservationEnableChangeListener(observationType));
+			picker.valueProperty().addListener(new ObservationColorChangeListener(observationType));
+			
+			gridPane.add(checkBox, 0, row);
+			gridPane.add(picker,   1, row++);
 		}
 
 		return this.createTitledPane(i18n.getString("UIObservationLayerPropertyBuilder.observation.title", "Observation properties"), gridPane);
@@ -177,12 +238,17 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 		for (int i = 0; i < symbolSizes.length; i++)
 			symbolSizes[i] = 5 + 0.5 * i;
 		
-		this.symbolSizeComboBox = this.createSizeComboBox(i18n.getString("UIObservationLayerPropertyBuilder.symbol.size.tooltip", "Selected symbol size"), symbolSizes, 1);
-		this.lineWidthComboBox  = this.createLineWidthComboBox(i18n.getString("UIObservationLayerPropertyBuilder.symbol.linewidth.tooltip", "Selected line width"));
+		this.symbolSizeComboBox = this.createSizeComboBox(i18n.getString("UIObservationLayerPropertyBuilder.symbol.size.tooltip", "Set symbol size"), symbolSizes, 1);
+		this.lineWidthComboBox  = this.createLineWidthComboBox(i18n.getString("UIObservationLayerPropertyBuilder.symbol.linewidth.tooltip", "Set line width"));
 		this.symbolColorPicker  = new ColorPicker(Color.DARKBLUE);
 		this.symbolColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.symbolColorPicker.setMaxWidth(Double.MAX_VALUE);
 		this.symbolColorPicker.getStyleClass().add("split-button");
+		
+		// add listeners
+		this.symbolSizeComboBox.getSelectionModel().selectedItemProperty().addListener(new SymbolSizeChangeListener());
+		this.lineWidthComboBox.getSelectionModel().selectedItemProperty().addListener(new LineWidthChangeListener());
+		this.symbolColorPicker.valueProperty().addListener(new ColorChangeListener());
 		
 		symbolSizeLabel.setLabelFor(this.symbolSizeComboBox);
 		symbolColorLabel.setLabelFor(this.symbolColorPicker);
@@ -208,6 +274,4 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 
 		return this.createTitledPane(i18n.getString("UIObservationLayerPropertyBuilder.symbol.title", "Symbol properties"), gridPane);
 	}
-	
-
 }

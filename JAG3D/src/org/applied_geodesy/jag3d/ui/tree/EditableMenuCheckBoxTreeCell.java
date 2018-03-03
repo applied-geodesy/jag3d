@@ -1,10 +1,34 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.tree;
 
-import java.sql.SQLException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog;
@@ -12,6 +36,13 @@ import org.applied_geodesy.jag3d.ui.dnd.CongruenceAnalysisRowDnD;
 import org.applied_geodesy.jag3d.ui.dnd.GNSSObservationRowDnD;
 import org.applied_geodesy.jag3d.ui.dnd.PointRowDnD;
 import org.applied_geodesy.jag3d.ui.dnd.TerrestrialObservationRowDnD;
+import org.applied_geodesy.jag3d.ui.io.DefaultFileChooser;
+import org.applied_geodesy.jag3d.ui.table.UICongruenceAnalysisTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.UIGNSSObservationTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.UIPointTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.UITerrestrialObservationTableBuilder;
+import org.applied_geodesy.jag3d.ui.tabpane.TabType;
+import org.applied_geodesy.jag3d.ui.tabpane.UITabPaneBuilder;
 import org.applied_geodesy.util.i18.I18N;
 
 import javafx.beans.property.BooleanProperty;
@@ -22,9 +53,11 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
@@ -49,7 +82,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 	public static final DataFormat POINT_ROWS_DATA_FORMAT = new DataFormat(PointRowDnD.class.toString());
 	public static final DataFormat CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT = new DataFormat(CongruenceAnalysisRowDnD.class.toString());
 
-	private static I18N i18n = I18N.getInstance();
+	private I18N i18n = I18N.getInstance();
 	private BooleanProperty ignoreEvent = new SimpleBooleanProperty(Boolean.FALSE);
 	private ContextMenu contextMenu;
 	private TextField textField;
@@ -64,6 +97,26 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		CHANGE_TO_STOCHASTIC_POINT_GROUP,
 		CHANGE_TO_DATUM_POINT_GROUP,
 		CHANGE_TO_NEW_POINT_GROUP;
+	}
+	
+	private class DatabaseStateChangedListener implements ProjectDatabaseStateChangedListener {
+		@Override
+		public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt) {
+			if (contextMenu == null || contextMenu.getItems().isEmpty())
+				return;
+			
+			boolean disable = evt.getEventType() != ProjectDatabaseStateType.OPENED;
+			List<MenuItem> items = contextMenu.getItems();
+			for (MenuItem item : items)
+				this.disableItem(item, disable);
+		}
+		
+		private void disableItem(MenuItem item, boolean disable) {
+			if (item instanceof Menu)
+				this.disableItem((Menu)item, disable);
+			else 
+				item.setDisable(disable);
+		}
 	}
 
 	private class DropEventHandler implements EventHandler<DragEvent> {
@@ -121,16 +174,15 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 									CongruenceAnalysisRowDnD rowDnD = (CongruenceAnalysisRowDnD)droppedRows.get(i);
 									SQLManager.getInstance().saveItem(groupId, rowDnD.toCongruenceAnalysisRow());
 								}
-							} catch (SQLException e) {
-								OptionDialog.showThrowableDialog (
-										i18n.getString("EditableMenuCheckBoxTreeCell.message.error.drop.title", "SQL-Error"),
-										i18n.getString("EditableMenuCheckBoxTreeCell.message.error.drop.header", "Error, could not drop selected rows to new table."),
-										i18n.getString("EditableMenuCheckBoxTreeCell.message.error.drop.message", "An exception is occured during database transaction."),
-										e);
+							} catch (Exception e) {
 								e.printStackTrace();
+								OptionDialog.showThrowableDialog (
+										i18n.getString("EditableMenuCheckBoxTreeCell.message.error.save.exception.title", "Unexpected SQL-Error"),
+										i18n.getString("EditableMenuCheckBoxTreeCell.message.error.save.exception.header", "Error, could not drop selected rows to new table."),
+										i18n.getString("EditableMenuCheckBoxTreeCell.message.error.save.exception.message", "An exception has occurred during database transaction."),
+										e);
 								success = false;
 								break;
-
 							}
 						}
 					}	
@@ -288,7 +340,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 					removeSelectedGroups();
 					break;
 				case EXPORT:
-					System.out.println(this.getClass().getSimpleName() + " : " + contextMenuType);
+					exportTableData(itemValue);
 					break;
 				case SEARCH_AND_REPLACE:
 					searchAndReplace(selectedItem);
@@ -305,16 +357,18 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 	public EditableMenuCheckBoxTreeCell() {
 		DropEventHandler dropEventHandler = new DropEventHandler();
 		this.setOnDragOver(dropEventHandler);
-		this.setOnDragDropped(dropEventHandler);		
+		this.setOnDragDropped(dropEventHandler);
 	}
 
 	private void initContextMenu(TreeItemType itemType) {
+		boolean disable = !SQLManager.getInstance().hasDatabase();
+		SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
 		ContextMenuEventHandler listener = new ContextMenuEventHandler();
-
 		MenuItem addItem = new MenuItem(i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.add", "Add item"));
 		addItem.setUserData(ContextMenuType.ADD);
 		addItem.setOnAction(listener);
-
+		addItem.setDisable(disable);
+		
 		if (TreeItemType.isPointTypeDirectory(itemType) || 
 				TreeItemType.isObservationTypeDirectory(itemType) || 
 				TreeItemType.isGNSSObservationTypeDirectory(itemType) ||
@@ -377,6 +431,10 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 					newPointMenuItem
 					);
 		}
+		
+		// disable all items (until a database is selected)
+		for (MenuItem item : this.contextMenu.getItems())
+			item.setDisable(disable);
 	}
 
 	private static RadioMenuItem createRadioMenuItem(String label, boolean selected, ToggleGroup group, ContextMenuType type) {
@@ -624,6 +682,48 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 //		this.getTreeView().getSelectionModel().clearSelection();
 		SearchAndReplaceDialog.showAndWait(selectedItem.getValue(), selectedTreeItemValues);
 //		this.getTreeView().getSelectionModel().select(selectedItem);
+	}
+	
+	private void exportTableData(TreeItemValue itemValue) {
+		try {
+			TabPane tabPane = UITabPaneBuilder.getInstance().getTabPane();
+			if (tabPane != null && tabPane.getSelectionModel().getSelectedItem() != null 
+					&& tabPane.getSelectionModel().getSelectedItem().getUserData() != null
+					&& tabPane.getSelectionModel().getSelectedItem().getUserData() instanceof TabType) {
+
+				TreeItemType itemType = itemValue.getItemType();
+				TabType tabType = (TabType)tabPane.getSelectionModel().getSelectedItem().getUserData();
+
+				boolean aprioriValues = tabType == TabType.RAW_DATA;
+
+				File selectedFile = DefaultFileChooser.showSaveDialog(
+						i18n.getString("EditableMenuCheckBoxTreeCell.filechooser.save.title", "Export table data"),
+						this.getItem().getName() + (aprioriValues ? "_apriori" : "_aposteriori") +  ".txt"
+						);
+				
+				if (selectedFile != null) {
+					if (TreeItemType.isPointTypeLeaf(itemType))
+						UIPointTableBuilder.getInstance().export(selectedFile, aprioriValues);
+					
+					else if (TreeItemType.isObservationTypeLeaf(itemType))
+						UITerrestrialObservationTableBuilder.getInstance().export(selectedFile, aprioriValues);
+					
+					else if (TreeItemType.isGNSSObservationTypeLeaf(itemType))
+						UIGNSSObservationTableBuilder.getInstance().export(selectedFile, aprioriValues);
+					
+					else if (TreeItemType.isCongruenceAnalysisTypeLeaf(itemType))
+						UICongruenceAnalysisTableBuilder.getInstance().export(selectedFile, aprioriValues);
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			OptionDialog.showThrowableDialog (
+					i18n.getString("EditableMenuCheckBoxTreeCell.message.error.export.exception.title", "I/O Error"),
+					i18n.getString("EditableMenuCheckBoxTreeCell.message.error.export.exception.header", "Error, could not export selected table data."),
+					i18n.getString("EditableMenuCheckBoxTreeCell.message.error.export.exception.message", "An exception has occurred during data export."),
+					e);
+		}
 	}
 
 	final BooleanProperty ignoreEventProperty() {

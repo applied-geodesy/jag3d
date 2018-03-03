@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.adjustment;
 
 import java.io.BufferedInputStream;
@@ -5,8 +26,8 @@ import java.util.Properties;
 
 public final class DefaultUncertainty {
 	static final double ANGLE_ZERO_POINT_OFFSET                 = 0.0003 * Constant.RHO_GRAD2RAD;
-	static final double ANGLE_SQUARE_ROOT_DISTANCE_DEPENDENT    = 0.0005;
-	static final double ANGLE_DISTANCE_DEPENDENT                = 0.0;
+	static final double ANGLE_SQUARE_ROOT_DISTANCE_DEPENDENT    = 0.0;
+	static final double ANGLE_DISTANCE_DEPENDENT                = 0.0005;
 
 	static final double DISTANCE_ZERO_POINT_OFFSET              = 0.002;
 	static final double DISTANCE_SQUARE_ROOT_DISTANCE_DEPENDENT = 0.0;
@@ -24,8 +45,8 @@ public final class DefaultUncertainty {
 	static final double Y            = 0.002;
 	static final double Z            = 0.002;
 	
-	static final double DEFLECTION_X = 0.001;
-	static final double DEFLECTION_Y = 0.001;
+	static final double DEFLECTION_X = 0.001 * Constant.RHO_GRAD2RAD;
+	static final double DEFLECTION_Y = 0.001 * Constant.RHO_GRAD2RAD;
 	
 	private final static Properties PROPERTIES = new Properties();
 	

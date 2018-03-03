@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.adjustment.network.sql;
 
 import java.sql.PreparedStatement;
@@ -25,6 +46,7 @@ import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.adjustment.network.PointGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.adjustment.network.PrincipalComponent;
 import org.applied_geodesy.adjustment.network.RankDefect;
 import org.applied_geodesy.adjustment.network.VarianceComponent;
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
@@ -71,9 +93,10 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticParameters;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.util.sql.DataBase;
 import org.applied_geodesy.util.sql.HSQLDB;
+import org.applied_geodesy.version.jag3d.Version;
+import org.applied_geodesy.version.jag3d.VersionType;
 
 public class SQLAdjustmentManager {
-	public final static int DATABASE_VERSION = 20180104;
 	private final DataBase dataBase;
 
 	private Map<String, Point> completePoints    = new LinkedHashMap<String, Point>();
@@ -105,7 +128,7 @@ public class SQLAdjustmentManager {
 		this.dataBase.getPreparedStatement("SET SCHEMA \"OpenAdjustment\"").execute();
 	}
 
-	public NetworkAdjustment getNetworkAdjustment() throws SQLException, IllegalArgumentException {
+	public NetworkAdjustment getNetworkAdjustment() throws SQLException, IllegalProjectionPropertyException {
 		this.clear();
 		
 		this.setDataBaseSchema();
@@ -151,7 +174,7 @@ public class SQLAdjustmentManager {
 
 		// wenn 2D Projektionen nicht moeglich sind, werden keine Reduktionen durchgefuehrt
 		if (this.projection.getType() != ProjectionType.NONE && !this.applyableProjection) {
-			throw new IllegalArgumentException("Projection cannot applied to observations! " + this.projection.getType());
+			throw new IllegalProjectionPropertyException("Projection cannot applied to observations! " + this.projection.getType());
 		}
 
 		// Fuege Beobachtungen zu den Punkten hinzu
@@ -244,7 +267,9 @@ public class SQLAdjustmentManager {
 
 	private void addAdjustmentDefinition(NetworkAdjustment adjustment) throws SQLException {
 		String sql = "SELECT "
-				+ "\"type\", \"number_of_iterations\", \"robust_estimation_limit\", \"estimate_direction_set_orientation_approximation\", \"congruence_analysis\", \"export_covariance_matrix\" "
+				+ "\"type\", \"number_of_iterations\", \"robust_estimation_limit\", "
+				+ "\"number_of_principal_components\", \"estimate_direction_set_orientation_approximation\", "
+				+ "\"congruence_analysis\", \"export_covariance_matrix\" "
 				+ "FROM \"AdjustmentDefinition\" "
 				+ "WHERE \"id\" = 1 LIMIT 1";
 
@@ -252,15 +277,17 @@ public class SQLAdjustmentManager {
 
 		ResultSet rs = stmt.executeQuery();
 		if (rs.next()) {
-			EstimationType type            = EstimationType.getEnumByValue(rs.getInt("type"));
-			int maximalNumberOfIterations  = rs.getInt("number_of_iterations");
-			double robustEstimationLimit   = rs.getDouble("robust_estimation_limit");
+			EstimationType type             = EstimationType.getEnumByValue(rs.getInt("type"));
+			int maximalNumberOfIterations   = rs.getInt("number_of_iterations");
+			double robustEstimationLimit    = rs.getDouble("robust_estimation_limit");
+			int numberOfPrincipalComponents = rs.getInt("number_of_principal_components");
 			this.estimateOrientationApproximation = rs.getBoolean("estimate_direction_set_orientation_approximation");
-			this.congruenceAnalysis        = rs.getBoolean("congruence_analysis");
-			boolean exportCovarianceMatrix = rs.getBoolean("export_covariance_matrix");
+			this.congruenceAnalysis         = rs.getBoolean("congruence_analysis");
+			boolean exportCovarianceMatrix  = rs.getBoolean("export_covariance_matrix");
 			
 			adjustment.setMaximalNumberOfIterations(maximalNumberOfIterations);
 			adjustment.setRobustEstimationLimit(robustEstimationLimit);
+			adjustment.setNumberOfPrincipalComponents(numberOfPrincipalComponents);
 			adjustment.setEstimationType(type == null ? EstimationType.L2NORM : type);
 			adjustment.setCongruenceAnalysis(this.congruenceAnalysis);
 
@@ -867,7 +894,9 @@ public class SQLAdjustmentManager {
 	}
 
 	private void setStrainAnalysisRestrictionsToGroup(CongruenceAnalysisGroup group) throws SQLException {
-		String sql = "SELECT \"type\", \"enable\" FROM \"CongruenceAnalysisStrainParameterRestriction\" "
+		String sql = "SELECT "
+				+ "\"type\", \"enable\" "
+				+ "FROM \"CongruenceAnalysisStrainParameterRestriction\" "
 				+ "WHERE \"group_id\" = ?";
 
 		int idx = 1;
@@ -880,7 +909,7 @@ public class SQLAdjustmentManager {
 			int type = rs.getInt("type");
 			boolean enable = rs.getBoolean("enable");
 			RestrictionType restriction = RestrictionType.getEnumByValue(type);
-			if (restriction != null && enable)
+			if (restriction != null && !enable)
 				group.setStrainRestrictions(restriction);
 		}
 	}
@@ -902,16 +931,27 @@ public class SQLAdjustmentManager {
 				this.saveCongruenceAnalysisPointPair();
 				this.saveStrainParameters();
 
-				this.savePrincipalComponentAnalysis();
+				this.savePrincipalComponentAnalysis(this.networkAdjustment.getPrincipalComponents());
 				this.saveRankDefect(this.networkAdjustment.getRankDefect());
 				this.saveTestStatistic(this.networkAdjustment.getSignificanceTestStatisticParameters());
 				this.saveVarianceComponents(this.networkAdjustment.getVarianceComponents());
 				this.saveProjection();
+				
+				this.saveVersion();
 			}
 		}
 		finally {
 			this.clear();
 		}
+	}
+	
+	private void saveVersion() throws SQLException {
+		String sql = "UPDATE \"Version\" SET \"version\" = ? WHERE \"type\" = ?";
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		int idx = 1;
+		stmt.setDouble(idx++, Version.get(VersionType.ADJUSTMENT_CORE));
+		stmt.setInt(idx++, VersionType.ADJUSTMENT_CORE.getId());
+		stmt.execute();
 	}
 
 	private void clearAposterioriTables() throws SQLException {
@@ -925,9 +965,7 @@ public class SQLAdjustmentManager {
 
 		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"VarianceComponent\"").execute();
 		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"TestStatistic\"").execute();
-		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"FirstPrincipalComponent\"").execute();
-		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"RankDefect\"").execute();
-
+		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"PrincipalComponent\"").execute();
 	}
 
 	private void savePoints() throws SQLException {
@@ -1373,38 +1411,54 @@ public class SQLAdjustmentManager {
 		}
 	}
 
-	private void savePrincipalComponentAnalysis() throws SQLException {
+	private void savePrincipalComponentAnalysis(PrincipalComponent[] principalComponents) throws SQLException {
+		if (principalComponents == null || principalComponents.length == 0)
+			return;
+		
+		boolean hasBatch = false;
 
-		int index = this.networkAdjustment.getIndexOfFirstPrincipalComponent();
-		double firstPrincipalComponent = this.networkAdjustment.getFirstPrincipalComponent();
-		double traceCxx = this.networkAdjustment.getTraceOfCovarianceMatrixOfPoints();
-		double ratio = traceCxx > 0 ? firstPrincipalComponent / traceCxx : 0;
-
-		String sql = "INSERT INTO \"FirstPrincipalComponent\" ("
+		String sql = "INSERT INTO \"PrincipalComponent\" ("
 				+ "\"index\", \"value\", \"ratio\""
 				+ ") VALUES (?,?,?)";
 
-		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
-		int idx = 1;
+		try {
+			double traceCxx = this.networkAdjustment.getTraceOfCovarianceMatrixOfPoints();
+			this.dataBase.setAutoCommit(false);
+			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+			for ( PrincipalComponent principalComponent : principalComponents ) {
+				int idx = 1;
+				
+				int index = principalComponent.getIndex();
+				double value = principalComponent.getValue();
+				double ratio = traceCxx > 0 ? value / traceCxx : 0;
+						
+				stmt.setInt(idx++, index);
+				stmt.setDouble(idx++, value);
+				stmt.setDouble(idx++, ratio);
+				
+				stmt.addBatch();
+				hasBatch = true;
+			}
 
-		stmt.setInt(idx++, index);
-		stmt.setDouble(idx++, firstPrincipalComponent);
-		stmt.setDouble(idx++, ratio);
-		stmt.execute();
+			if (hasBatch)
+				stmt.executeLargeBatch();
+		}
+		finally {
+			this.dataBase.setAutoCommit(true);
+		}
 	}
 
 	private void saveRankDefect(RankDefect rankDefect) throws SQLException {
-		String sql = "INSERT INTO \"RankDefect\" ("
-				+ "\"ty\",\"tx\",\"tz\","
-				+ "\"ry\",\"rx\",\"rz\","
-				+ "\"sy\",\"sx\",\"sz\","
-				+ "\"my\",\"mx\",\"mz\","
-				+ "\"mxy\",\"mxyz\""
-				+ ") VALUES (?,?,?, ?,?,?, ?,?,?, ?,?,?, ?,?)";
+		String sql = "UPDATE \"RankDefect\" SET "
+				+ "\"ty\" = ?,\"tx\" = ?,\"tz\" = ?,"
+				+ "\"ry\" = ?,\"rx\" = ?,\"rz\" = ?,"
+				+ "\"sy\" = ?,\"sx\" = ?,\"sz\" = ?,"
+				+ "\"my\" = ?,\"mx\" = ?,\"mz\" = ?,"
+				+ "\"mxy\" = ?,\"mxyz\" = ? WHERE \"id\" = 1";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		int idx = 1;
-
+		
 		stmt.setBoolean(idx++, rankDefect.estimateTranslationY());
 		stmt.setBoolean(idx++, rankDefect.estimateTranslationX());
 		stmt.setBoolean(idx++, rankDefect.estimateTranslationZ());
@@ -1423,6 +1477,8 @@ public class SQLAdjustmentManager {
 
 		stmt.setBoolean(idx++, rankDefect.estimateScaleXY());
 		stmt.setBoolean(idx++, rankDefect.estimateScaleXYZ());
+		
+		stmt.execute();
 	}
 
 	private void saveProjection() throws SQLException {
@@ -1558,7 +1614,7 @@ public class SQLAdjustmentManager {
 					for (int i=0; i<strainAnalysisEquations.numberOfParameters(); i++) {
 						StrainParameter strainParameter = strainAnalysisEquations.get(i);
 						ParameterType type = strainParameter.getParameterType();
-						if (parameterTyps.containsKey(type) && !strainAnalysisEquations.isRestricted(parameterTyps.get(type))) {
+						if (parameterTyps.containsKey(type) && !strainAnalysisEquations.isRestricted(parameterTyps.get(type)) && strainParameter.getStd() >= 0) {
 							double value = strainParameter.getValue();
 							switch(strainParameter.getParameterType()) {
 							case STRAIN_ROTATION_X:
@@ -1607,7 +1663,7 @@ public class SQLAdjustmentManager {
 	}
 	
 	/** Average **/
-	public List<Observation> averageDetermination(boolean saveAvarageValues) throws SQLException {
+	public List<Observation> averageDetermination(boolean saveAvarageValues) throws SQLException, IllegalProjectionPropertyException {
 		// erzeuge ein Objekt zur Netzausgleichung
 		// Hierdurch werden alle Punkte, Beobachtungen und Zusatzparameter 
 		// geladen und inizialisiert.

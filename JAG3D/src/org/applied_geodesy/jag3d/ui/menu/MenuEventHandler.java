@@ -1,6 +1,29 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.menu;
 
-import org.applied_geodesy.jag3d.ui.JavaGraticule3D;
+import java.io.File;
+
+import org.applied_geodesy.jag3d.ui.JAG3D;
 import org.applied_geodesy.jag3d.ui.dialog.AboutDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ApproximationValuesDialog;
 import org.applied_geodesy.jag3d.ui.dialog.AverageDialog;
@@ -23,16 +46,20 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 
 	@Override
 	public void handle(ActionEvent event) {
-		if (event.getSource() instanceof MenuItem && ((MenuItem)event.getSource()).getUserData() instanceof MenuItemType) {
-			MenuItemType menuItemType = (MenuItemType)((MenuItem)event.getSource()).getUserData();
-			handleAction(menuItemType);
+		if (event.getSource() instanceof MenuItem) {
+			MenuItem menuItem = (MenuItem)event.getSource();
+			if (menuItem.getUserData() instanceof MenuItemType) {
+				MenuItemType menuItemType = (MenuItemType)menuItem.getUserData();
+				File file = menuItem instanceof FileMenuItem ? ((FileMenuItem)menuItem).getFile() : null;
+				handleAction(menuItemType, file);
+			}
 		}
 	}
 	
-	private void handleAction(MenuItemType menuItemType) {
+	private void handleAction(MenuItemType menuItemType, File file) {
 		switch(menuItemType) {
 		case EXIT:
-			JavaGraticule3D.close();
+			JAG3D.close();
 			break;
 		case ABOUT:
 			AboutDialog.showAndWait();
@@ -67,12 +94,15 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 		case AVERAGE:
 			AverageDialog.showAndWait();
 			break;
+		case CHECK_UPDATES:
+			this.menuBuilder.checkUpdates();
+			break;
 		case IMPORT_FLAT_DIRECTION:
 		case IMPORT_FLAT_GNSS1D:
 		case IMPORT_FLAT_GNSS2D:
 		case IMPORT_FLAT_GNSS3D:
 		case IMPORT_FLAT_HORIZONTAL_DISTANCE:
-		case IMPORT_FLAT_LEVELLING:
+		case IMPORT_FLAT_LEVELING:
 		case IMPORT_FLAT_SLOPE_DISTANCE:
 		case IMPORT_FLAT_ZENITH_ANGLE:
 		case IMPORT_BEO:
@@ -88,7 +118,38 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 		case IMPORT_JOB_XML3D:
 		case IMPORT_DL100:
 		case IMPORT_Z:
+			
+		case IMPORT_FLAT_REFERENCE_POINT_1D:
+		case IMPORT_FLAT_REFERENCE_POINT_2D:
+		case IMPORT_FLAT_REFERENCE_POINT_3D:
+		case IMPORT_FLAT_STOCHASTIC_POINT_1D:
+		case IMPORT_FLAT_STOCHASTIC_POINT_2D:
+		case IMPORT_FLAT_STOCHASTIC_POINT_3D:
+		case IMPORT_FLAT_DATUM_POINT_1D:
+		case IMPORT_FLAT_DATUM_POINT_2D:
+		case IMPORT_FLAT_DATUM_POINT_3D:
+		case IMPORT_FLAT_NEW_POINT_1D:
+		case IMPORT_FLAT_NEW_POINT_2D:
+		case IMPORT_FLAT_NEW_POINT_3D:
+			
+		case IMPORT_FLAT_CONGRUENCE_ANALYSIS_PAIR_1D:
+		case IMPORT_FLAT_CONGRUENCE_ANALYSIS_PAIR_2D:
+		case IMPORT_FLAT_CONGRUENCE_ANALYSIS_PAIR_3D:
 			this.menuBuilder.importFile(menuItemType);
+			break;
+			
+		case MODULE_COORDTRANS:
+		case MODULE_FORMFITTINGTOOLBOX:
+		case MODULE_GEOTRA:
+			this.menuBuilder.showSwingApplication(menuItemType);
+			break;
+
+		case REPORT:
+			this.menuBuilder.createReport(file);
+			break;
+			
+		case RECENTLY_USED:
+			this.menuBuilder.openProject(file);
 			break;
 		}
 	}

@@ -1,11 +1,31 @@
-package org.applied_geodesy.jag3d.ui.propertiespane;
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
 
-import java.sql.SQLException;
+package org.applied_geodesy.jag3d.ui.propertiespane;
 
 import org.applied_geodesy.adjustment.network.Epoch;
 import org.applied_geodesy.adjustment.network.ObservationGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.table.CellValueType;
 import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField;
 import org.applied_geodesy.jag3d.ui.textfield.UncertaintyTextField;
@@ -14,6 +34,7 @@ import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.util.i18.I18N;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
@@ -44,11 +65,11 @@ public class UIObservationPropertiesPane {
 			if (!ignoreValueUpdate && this.field.getUserData() != null) {
 				if (this.field.getUserData() instanceof ParameterType) {
 					ParameterType paramType = (ParameterType)this.field.getUserData();
-					saveAdditionalParameter(paramType);
+					save(paramType);
 				}
 				else if (this.field.getUserData() instanceof ObservationGroupUncertaintyType) {
 					ObservationGroupUncertaintyType uncertaintyType = (ObservationGroupUncertaintyType)this.field.getUserData();
-					saveUncertainties(uncertaintyType);
+					save(uncertaintyType);
 				}
 			}
 		}
@@ -65,18 +86,17 @@ public class UIObservationPropertiesPane {
 		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 			if (!ignoreValueUpdate && this.button.getUserData() != null) {
 				if (this.button == referenceEpochRadioButton) {
-					saveEpoch();
+					save();
 				}
 				else if (this.button.getUserData() instanceof ParameterType) {
 					ParameterType paramType = (ParameterType)this.button.getUserData();
-					saveAdditionalParameter(paramType);
+					save(paramType);
 				}
 			}
 		}
 	}
-	
-	
-	private static I18N i18n = I18N.getInstance();
+
+	private I18N i18n = I18N.getInstance();
 	private Node propertiesNode = null;
 	private final TreeItemType type;
 	
@@ -322,49 +342,49 @@ public class UIObservationPropertiesPane {
 
 			case ORIENTATION:
 				
-				box   = this.orientationOffsetCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.label", "Orientation o"), i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.label.tooltip", "Checked, if orientation is a known parameter"), false, ParameterType.ORIENTATION);
-				field = this.orientationOffsetField    = this.createDoubleTextField(orientation, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.tooltip", "Choose orientation offset"), ParameterType.ORIENTATION);				
+				box   = this.orientationOffsetCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.label", "Orientation o"), i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.label.tooltip", "Checked, if orientation is an unknown parameter"), false, ParameterType.ORIENTATION);
+				field = this.orientationOffsetField    = this.createDoubleTextField(orientation, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.tooltip", "Set orientation offset"), ParameterType.ORIENTATION);				
 
 				break;
 				
 			case REFRACTION_INDEX:
 				
-				box   = this.refractionIndexCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.label", "Refraction index k"), i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.label.tooltip", "Checked, if refraction index is a known parameter"), true, ParameterType.REFRACTION_INDEX);
-				field = this.refractionIndexField    = this.createDoubleTextField(refraction, CellValueType.STATISTIC, false, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.tooltip", "Choose refraction index offset"), ParameterType.REFRACTION_INDEX);
+				box   = this.refractionIndexCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.label", "Refraction index k"), i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.label.tooltip", "Checked, if refraction index is an unknown parameter"), true, ParameterType.REFRACTION_INDEX);
+				field = this.refractionIndexField    = this.createDoubleTextField(refraction, CellValueType.STATISTIC, false, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.tooltip", "Set refraction index offset"), ParameterType.REFRACTION_INDEX);
 
 				break;
 				
 			case ROTATION_Y:
 				
-				box   = this.rotationYCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotationy.label", "Rotation angle ry"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotationy.label.tooltip", "Checked, if rotation angle around y-axis is a known parameter"), true, ParameterType.ROTATION_Y);
-				field = this.rotationYField    = this.createDoubleTextField(rotationY, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotationy.tooltip", "Choose rotation angle around y-axis"), ParameterType.ROTATION_Y);
+				box   = this.rotationYCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.label", "Rotation angle ry"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.label.tooltip", "Checked, if rotation angle around y-axis is an unknown parameter"), true, ParameterType.ROTATION_Y);
+				field = this.rotationYField    = this.createDoubleTextField(rotationY, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.tooltip", "Set rotation angle around y-axis"), ParameterType.ROTATION_Y);
 
 				break;
 				
 			case ROTATION_X:
 				
-				box   = this.rotationXCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotationx.label", "Rotation angle rx"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotationx.label.tooltip", "Checked, if rotation angle around x-axis is a known parameter"), true, ParameterType.ROTATION_X);
-				field = this.rotationXField    = this.createDoubleTextField(rotationX, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotationx.tooltip", "Choose rotation angle around x-axis"), ParameterType.ROTATION_X);
+				box   = this.rotationXCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.label", "Rotation angle rx"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.label.tooltip", "Checked, if rotation angle around x-axis is an unknown parameter"), true, ParameterType.ROTATION_X);
+				field = this.rotationXField    = this.createDoubleTextField(rotationX, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.tooltip", "Set rotation angle around x-axis"), ParameterType.ROTATION_X);
 
 				break;
 				
 			case ROTATION_Z:
 				
-				box   = this.rotationZCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotationz.label", "Rotation angle rz"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotationz.label.tooltip", "Checked, if rotation angle around z-axis is a known parameter"), true, ParameterType.ROTATION_Z);
-				field = this.rotationZField    = this.createDoubleTextField(rotationZ, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotationz.tooltip", "Choose rotation angle around z-axis"), ParameterType.ROTATION_Z);
+				box   = this.rotationZCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.label", "Rotation angle rz"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.label.tooltip", "Checked, if rotation angle around z-axis is an unknown parameter"), true, ParameterType.ROTATION_Z);
+				field = this.rotationZField    = this.createDoubleTextField(rotationZ, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.tooltip", "Set rotation angle around z-axis"), ParameterType.ROTATION_Z);
 
 				break;
 			case SCALE:
 				
-				box   = this.scaleCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.label", "Scale s"), i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.label.tooltip", "Checked, if scale is a known parameter"), true, ParameterType.SCALE);
-				field = this.scaleField    = this.createDoubleTextField(scale, CellValueType.SCALE, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.tooltip", "Choose scale"), ParameterType.SCALE);
+				box   = this.scaleCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.label", "Scale s"), i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.label.tooltip", "Checked, if scale is an unknown parameter"), true, ParameterType.SCALE);
+				field = this.scaleField    = this.createDoubleTextField(scale, CellValueType.SCALE, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.tooltip", "Set scale"), ParameterType.SCALE);
 
 				break;
 
 			case ZERO_POINT_OFFSET:
 				
-				box   = this.zeroPointOffsetCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.zeropoint.label", "Offset a"), i18n.getString("UIObservationPropertiesPane.additionalparameter.zeropoint.label.tooltip", "Checked, if zero point offset is a known parameter"), true, ParameterType.ZERO_POINT_OFFSET);
-				field = this.zeroPointOffsetField    = this.createDoubleTextField(offset, CellValueType.LENGTH_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.zeropoint.tooltip", "Choose zero point offset"), ParameterType.ZERO_POINT_OFFSET);
+				box   = this.zeroPointOffsetCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.label", "Offset a"), i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.label.tooltip", "Checked, if zero point offset is an unknown parameter"), true, ParameterType.ZERO_POINT_OFFSET);
+				field = this.zeroPointOffsetField    = this.createDoubleTextField(offset, CellValueType.LENGTH_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.tooltip", "Set zero point offset"), ParameterType.ZERO_POINT_OFFSET);
 				
 				break;
 				
@@ -435,7 +455,7 @@ public class UIObservationPropertiesPane {
 		Label uncertaintyTypeALabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.ua.label", "\u03C3a"));
 		uncertaintyTypeALabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.zeroPointOffsetUncertaintyField = new UncertaintyTextField(sigmaZeroPointOffset, constantUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
-		this.zeroPointOffsetUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.ua.tooltip", "Choose constant part of combined uncertainty")));
+		this.zeroPointOffsetUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.ua.tooltip", "Set constant part of combined uncertainty")));
 		this.zeroPointOffsetUncertaintyField.setUserData(ObservationGroupUncertaintyType.ZERO_POINT_OFFSET);
 		this.zeroPointOffsetUncertaintyField.numberProperty().addListener(new NumberChangeListener(this.zeroPointOffsetUncertaintyField));
 		this.zeroPointOffsetUncertaintyField.setMinWidth(150);
@@ -445,7 +465,7 @@ public class UIObservationPropertiesPane {
 		uncertaintyTypeBLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		//this.squareRootDistanceDependentUncertaintyField = new LengthUnceraintySquareRootTextField(sigmaSquareRootDistance, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO, true);
 		this.squareRootDistanceDependentUncertaintyField = new UncertaintyTextField(sigmaSquareRootDistance, squareRootDistanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO);
-		this.squareRootDistanceDependentUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.ub.tooltip", "Square root distance dependent part of combined uncertainty")));
+		this.squareRootDistanceDependentUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.ub.tooltip", "Set square-root distance dependent part of combined uncertainty")));
 		this.squareRootDistanceDependentUncertaintyField.setUserData(ObservationGroupUncertaintyType.SQUARE_ROOT_DISTANCE_DEPENDENT);
 		this.squareRootDistanceDependentUncertaintyField.numberProperty().addListener(new NumberChangeListener(this.squareRootDistanceDependentUncertaintyField));
 		this.squareRootDistanceDependentUncertaintyField.setMinWidth(150);
@@ -454,7 +474,7 @@ public class UIObservationPropertiesPane {
 		Label uncertaintyTypeCLabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.uc.label", "\u03C3c(d)"));
 		uncertaintyTypeCLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.distanceDependentUncertaintyField = new UncertaintyTextField(sigmaDistanceDependent, distanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO);
-		this.distanceDependentUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.uc.tooltip", "Distance dependent part of combined uncertainty")));
+		this.distanceDependentUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.uc.tooltip", "Set distance dependent part of combined uncertainty")));
 		this.distanceDependentUncertaintyField.setUserData(ObservationGroupUncertaintyType.DISTANCE_DEPENDENT);
 		this.distanceDependentUncertaintyField.numberProperty().addListener(new NumberChangeListener(this.distanceDependentUncertaintyField));
 		this.distanceDependentUncertaintyField.setMinWidth(150);
@@ -574,7 +594,7 @@ public class UIObservationPropertiesPane {
 		return parametersTitledPane;
 	}
 	
-	private void saveUncertainties(ObservationGroupUncertaintyType uncertaintyType) {
+	private void save(ObservationGroupUncertaintyType uncertaintyType) {
 		try {
 			Double value = null;
 			switch(uncertaintyType) {
@@ -596,13 +616,22 @@ public class UIObservationPropertiesPane {
 				SQLManager.getInstance().saveUncertainty(uncertaintyType, value.doubleValue(), this.selectedObservationItemValues);
 			}
 			
-		} catch (SQLException e) {
-			
+		} catch (Exception e) {
 			e.printStackTrace();
+			Platform.runLater(new Runnable() {
+				@Override public void run() {
+					OptionDialog.showThrowableDialog (
+							i18n.getString("UIObservationPropertiesPane.message.error.save.uncertainty.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UIObservationPropertiesPane.message.error.save.uncertainty.exception.header", "Error, could not save group uncertainties to database."),
+							i18n.getString("UIObservationPropertiesPane.message.error.save.uncertainty.exception.message", "An exception has occurred during database transaction."),
+							e
+					);
+				}
+			});
 		}
 	}
 	
-	private void saveAdditionalParameter(ParameterType parameterType) {
+	private void save(ParameterType parameterType) {
 		try {
 			boolean enable = false;
 			Double value = null;
@@ -644,19 +673,38 @@ public class UIObservationPropertiesPane {
 				SQLManager.getInstance().saveAdditionalParameter(parameterType, enable, value.doubleValue(), this.selectedObservationItemValues);
 			}
 			
-		} catch (SQLException e) {
-			
+		} catch (Exception e) {
 			e.printStackTrace();
+			Platform.runLater(new Runnable() {
+				@Override public void run() {
+					OptionDialog.showThrowableDialog (
+							i18n.getString("UIObservationPropertiesPane.message.error.save.parameter.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UIObservationPropertiesPane.message.error.save.parameter.exception.header", "Error, could not save properties of additional group parameters to database."),
+							i18n.getString("UIObservationPropertiesPane.message.error.save.parameter.exception.message", "An exception has occurred during database transaction."),
+							e
+					);
+				}
+			});
 		}
 	}
 	
-	private void saveEpoch() {
+	private void save() {
 		try {
 			if (this.selectedObservationItemValues != null && this.selectedObservationItemValues.length > 0)
 				SQLManager.getInstance().saveEpoch(this.referenceEpochRadioButton.isSelected(), this.selectedObservationItemValues);
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			this.setReferenceEpoch(!this.referenceEpochRadioButton.isSelected());
 			e.printStackTrace();
+			Platform.runLater(new Runnable() {
+				@Override public void run() {
+					OptionDialog.showThrowableDialog (
+							i18n.getString("UIObservationPropertiesPane.message.error.save.epoch.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UIObservationPropertiesPane.message.error.save.epoch.exception.header", "Error, could not save observation epoch properties to database."),
+							i18n.getString("UIObservationPropertiesPane.message.error.save.epoch.exception.message", "An exception has occurred during database transaction."),
+							e
+					);
+				}
+			});
 		}
 	}
 }

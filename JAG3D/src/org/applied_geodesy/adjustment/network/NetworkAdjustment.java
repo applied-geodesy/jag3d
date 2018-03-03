@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.adjustment.network;
 
 import java.beans.PropertyChangeListener;
@@ -88,7 +109,8 @@ public class NetworkAdjustment implements Runnable {
 				numberOfFixPointRows             = 0,
 				numberOfUnknownParameters        = 0,
 	            numberOfObservations             = 0,
-	            numberOfHypotesis                = 0;
+	            numberOfHypotesis                = 0,
+	            numberOfPrincipalComponents      = 0;
 	
 	private boolean interrupt          = false,
 					freeNetwork	 	   = false,
@@ -98,7 +120,6 @@ public class NetworkAdjustment implements Runnable {
 	               degreeOfFreedom  = 0.0,
 	               omega            = 0.0,
 	               traceCxxPoints   = 0.0,
-	               firstPrincipalComponent = 0.0,
 	               finalLinearisationError = 0.0,
 	               robustEstimationLimit   = DefaultValue.getRobustEstimationLimit();
 
@@ -113,6 +134,7 @@ public class NetworkAdjustment implements Runnable {
 	private List<Point> stochasticPoints = new ArrayList<Point>();
 	private List<Point> stochasticDeflectionPoints = new ArrayList<Point>();
 	private List<Point> referencePoints = new ArrayList<Point>();
+	private PrincipalComponent principalComponents[] = new PrincipalComponent[0];
 	private List<CongruenceAnalysisGroup> congruenceAnalysisGroup = new ArrayList<CongruenceAnalysisGroup>();
 	private Map<VarianceComponentType, VarianceComponent> varianceComponents = new LinkedHashMap<VarianceComponentType, VarianceComponent>();
 	private Map<Integer,Matrix> ATQxxBP_GNSS_EP    = new LinkedHashMap<Integer,Matrix>();
@@ -2120,7 +2142,8 @@ public class NetworkAdjustment implements Runnable {
 				System.err.println("Fehler, Varianz-Kovarianz-Matrix konnte nicht exportiert werden.");
 			
 			// Fuehre Hauptkomponentenanalyse durch; Qxx wird hierbei zu NULL gesetzt
-			this.estimatePrincipalComponentAnalysis();
+			if (this.numberOfPrincipalComponents > 0)
+				this.estimatePrincipalComponentAnalysis(this.numberOfPrincipalComponents);
 		}
 		catch (OutOfMemoryError e) {
 			e.printStackTrace();
@@ -4474,59 +4497,66 @@ public class NetworkAdjustment implements Runnable {
 	}
 	
 	/**
-	 * Liefert die 1. Hauptkomponente der Hauptkomponentenanalyse (maximaler Eigenwert von Qxx)
-	 * @return fpc
+	 * Setzt die Anzahl der zubestimmenden Hauptkomponenten
+	 * @param numberOfPrincipalComponents
 	 */
-	public double getFirstPrincipalComponent() {
-		return this.firstPrincipalComponent;
+	public void setNumberOfPrincipalComponents(int numberOfPrincipalComponents) {
+		this.numberOfPrincipalComponents = numberOfPrincipalComponents < 0 ? 0 : numberOfPrincipalComponents;
 	}
 	
 	/**
-	 * Liefert den Index der 1. Hauptkomponente der Hauptkomponentenanalyse (Index des maximalen Eigenwerts von Qxx)
-	 * Der kleinste Eigenwert haette den Index Eins.
+	 * Liefert die ersten n. Hauptkomponente der Hauptkomponentenanalyse (maximale Eigenwerte von Cxx)
 	 * @return fpc
 	 */
-	public int getIndexOfFirstPrincipalComponent() {
-		return this.unknownParameters.columnsOfPoints();
+	public PrincipalComponent[] getPrincipalComponents() {
+		return this.principalComponents;
 	}
 	
 	/**
-	 * Fuehrt eine Hauptkomponentenanalyse durch und bestimmt die 1. Hauptkomponente. Hierbei wird Qxx ueberschrieben.
+	 * Fuehrt eine Hauptkomponentenanalyse durch und bestimmt die k Hauptkomponente. Hierbei wird Qxx ueberschrieben.
 	 * Um Fehler zu vermeiden, wird Qxx = null am Ende gesetzt.
+	 * @param numberOfComponents Anzahl der zu bestimmenden Komponenten
 	 */
-	private void estimatePrincipalComponentAnalysis() {
+	private void estimatePrincipalComponentAnalysis(int numberOfComponents) {
 		try {
 			this.currentEstimationStatus = EstimationStateType.PRINCIPAL_COMPONENT_ANALYSIS;
 	    	this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
 			double sigma2apost = this.getVarianceFactorAposteriori();
 			int n = this.unknownParameters.columnsOfPoints();
 
-			if (this.Qxx != null && n > 0) {
-				// Der Index ist Eins-Index-basierend, d.h., der kleinste Eigenwert hat den Index Eins!
-				Matrix evalEvec[] = MathExtension.eig(this.Qxx, n, n, n, true);
+			if (this.Qxx != null && n > 0 && numberOfComponents > 0) {				
+				// Der Index ist Eins-Index-basierend, d.h., der kleinste Eigenwert hat den Index Eins und der groesste ist am Index n!
+				Matrix evalEvec[] = MathExtension.eig(this.Qxx, n, Math.max(n - numberOfComponents + 1, 1), n, true);
 				Matrix eval = (UpperSymmBandMatrix)evalEvec[0];
 				Matrix evec = (DenseMatrix)evalEvec[1];
-
-				this.firstPrincipalComponent = Math.abs(sigma2apost * eval.get(0, 0));
-				double sqrtFPC = Math.sqrt(this.firstPrincipalComponent);
+				// Anzahl der tatsaechlich bestimmten Komponenten
+				numberOfComponents = eval.numColumns();
+				double sqrtFPC = 0.0;
+				this.principalComponents = new PrincipalComponent[numberOfComponents];
+				for (int i = 0; i < numberOfComponents; i++) {
+					PrincipalComponent principalComponent = new PrincipalComponent(n - i, Math.abs(sigma2apost * eval.get(numberOfComponents - 1 - i, numberOfComponents - 1 - i)));
+					this.principalComponents[i] = principalComponent;
+					if (i == 0)
+						sqrtFPC = Math.sqrt(principalComponent.getValue());
+				}
 
 				for (int i=0; i<this.unknownParameters.size(); i++) {
 					if (this.interrupt)
 						return;
 
 					UnknownParameter unknownParameter = this.unknownParameters.get(i);
-					int col = unknownParameter.getColInJacobiMatrix();
-
-					if (unknownParameter instanceof Point && col >= 0) {
+					int row = unknownParameter.getColInJacobiMatrix();
+					int col = numberOfComponents - 1;
+					if (unknownParameter instanceof Point && row >= 0) {
 						Point point = (Point)unknownParameter;
 						int dim = point.getDimension();
 						double principalComponents[] = new double[dim];
 						if (dim != 1) {
-							principalComponents[0] = sqrtFPC * evec.get(0, col++);
-							principalComponents[1] = sqrtFPC * evec.get(0, col++);
+							principalComponents[0] = sqrtFPC * evec.get(row++, col);
+							principalComponents[1] = sqrtFPC * evec.get(row++, col);
 						}
 						if (dim != 2) {
-							principalComponents[dim - 1] = sqrtFPC * evec.get(0, col++);
+							principalComponents[dim - 1] = sqrtFPC * evec.get(row++, col);
 						}
 						point.setFirstPrincipalComponents(principalComponents);
 					}

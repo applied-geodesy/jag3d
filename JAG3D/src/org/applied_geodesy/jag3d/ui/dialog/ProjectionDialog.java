@@ -1,6 +1,26 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.dialog;
 
-import java.sql.SQLException;
 import java.util.Optional;
 
 import org.applied_geodesy.adjustment.network.observation.projection.Projection;
@@ -33,7 +53,7 @@ import javafx.util.Callback;
 
 public class ProjectionDialog {
 
-	private static I18N i18n = I18N.getInstance();
+	private I18N i18n = I18N.getInstance();
 	private static ProjectionDialog projectionDialog = new ProjectionDialog();
 	private Dialog<Projection> dialog = null;
 	private Window window;
@@ -97,11 +117,11 @@ public class ProjectionDialog {
 		String heightLabel      = i18n.getString("ProjectionDialog.reduction.height.title", "Height reduction");
 		String heightTooltip    = i18n.getString("ProjectionDialog.reduction.height.tooltip", "If checked, height reduction of horizontal distances will be applied during network adjustment");
 
-		String gkLabel          = i18n.getString("ProjectionDialog.reduction.gk.title", "Gau\u00df-Kr\u00fcger reduction");
-		String gkTooltip        = i18n.getString("ProjectionDialog.reduction.gk.tooltip", "If checked, Gau\u00df-Kr\u00fcger reduction of horizontal distances will be applied during network adjustment");
+		String gkLabel          = i18n.getString("ProjectionDialog.reduction.gauss_krueger.title", "Gau\u00df-Kr\u00fcger reduction");
+		String gkTooltip        = i18n.getString("ProjectionDialog.reduction.gauss_krueger.tooltip", "If checked, Gau\u00df-Kr\u00fcger reduction of horizontal distances will be applied during network adjustment");
 
-		String utmLabel         = i18n.getString("ProjectionDialog.reduction.gk.title", "UTM reduction");
-		String utmTooltip       = i18n.getString("ProjectionDialog.reduction.gk.tooltip", "If checked, UTM reduction of horizontal distances will be applied during network adjustment");
+		String utmLabel         = i18n.getString("ProjectionDialog.reduction.utm.title", "UTM reduction");
+		String utmTooltip       = i18n.getString("ProjectionDialog.reduction.utm.tooltip", "If checked, UTM reduction of horizontal distances will be applied during network adjustment");
 
 		this.heightTextField = new DoubleTextField(0.0, CellValueType.LENGTH, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
 		this.heightTextField.setTooltip(new Tooltip(i18n.getString("ProjectionDialog.reduction.height.value.tooltip", "Height w.r.t. survey datum")));
@@ -245,14 +265,14 @@ public class ProjectionDialog {
 			this.gaussKruegerReductionRadioButton.setSelected(projection.isGaussKruegerReduction());
 			this.utmReductionRadioButton.setSelected(projection.isUTMReduction());
 		}
-		catch (SQLException e) {
+		catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("ProjectionDialog.message.error.sql.load.title", "SQL-Error"),
-							i18n.getString("ProjectionDialog.message.error.sql.load.header", "Error, could not load data."),
-							i18n.getString("ProjectionDialog.message.error.sql.load.message", "An exception occure during saving dataset to database."),
+							i18n.getString("ProjectionDialog.message.error.load.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("ProjectionDialog.message.error.load.exception.header", "Error, could not load projection properties from database."),
+							i18n.getString("ProjectionDialog.message.error.load.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}
@@ -264,14 +284,14 @@ public class ProjectionDialog {
 		try {
 			SQLManager.getInstance().save(projection);
 		}
-		catch (SQLException e) {
+		catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("ProjectionDialog.message.error.sql.save.title", "SQL-Error"),
-							i18n.getString("ProjectionDialog.message.error.sql.save.header", "Error, could not save changes in database table"),
-							i18n.getString("ProjectionDialog.message.error.sql.save.message", "An exception occure during saving dataset to database."),
+							i18n.getString("ProjectionDialog.message.error.save.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("ProjectionDialog.message.error.save.exception.header", "Error, could not save projection properties to database"),
+							i18n.getString("ProjectionDialog.message.error.save.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}

@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.table;
 
 import java.text.NumberFormat;
@@ -93,7 +114,7 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> i
 		case SCALE_UNCERTAINTY:
 			return options.toScaleUncertaintyFormat(value.doubleValue(), displayUnit);
 		case STATISTIC:
-			return options.toTestStatisticFormat(value.doubleValue());
+			return options.toStatisticFormat(value.doubleValue());
 		case VECTOR:
 			return options.toVectorFormat(value.doubleValue(), displayUnit);
 		case VECTOR_UNCERTAINTY:
@@ -155,6 +176,7 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> i
 			break;
 		}
 
-		this.tableCell.setText(this.tableCell == null ? null :  this.toString((Double)this.tableCell.getItem()));
+		if (this.tableCell != null)
+			this.tableCell.setText(this.toString((Double)this.tableCell.getItem()));
 	}
 }

@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.graphic.layer;
 
 import java.util.List;
@@ -27,7 +48,28 @@ public class AbsoluteConfidenceLayer extends ConfidenceLayer<PointLayer> {
 	
 	AbsoluteConfidenceLayer(LayerType layerType, GraphicExtent currentGraphicExtent) {
 		super(layerType, currentGraphicExtent);
-		this.setColor(Color.gray(0.8));
+		
+		Color fillColor, strokeColor;
+		double lineWidth = -1;
+		
+		try {
+			fillColor = Color.web(PROPERTIES.getProperty("ABSOLUTE_CONFIDENCE_FILL_COLOR", "#cccccc"));
+		} catch (Exception e) {
+			fillColor = Color.web("#999999");
+		}
+		
+		try {
+			strokeColor = Color.web(PROPERTIES.getProperty("ABSOLUTE_CONFIDENCE_STROKE_COLOR", "#000000"));
+		} catch (Exception e) {
+			strokeColor = Color.web("#e6e6e6");
+		}
+
+		try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("ABSOLUTE_CONFIDENCE_LINE_WIDTH")); } catch (Exception e) {}
+		lineWidth = lineWidth >= 0 ? lineWidth : 0.5;
+		
+		this.setStrokeColor(strokeColor);
+		this.setColor(fillColor);
+		this.setLineWidth(lineWidth);
 		this.addLayerPropertyChangeListener(this.confidenceScaleProperty());
 	}
 	

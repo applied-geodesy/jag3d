@@ -1,6 +1,26 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.tree;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,7 +55,7 @@ public class UITreeBuilder {
 		@Override
 		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 			if (!isIgnoreEvent())
-				saveGroup(this.treeItemValue);
+				save(this.treeItemValue);
 		}
 	}
 
@@ -51,7 +71,7 @@ public class UITreeBuilder {
 			if (isIgnoreEvent() || newValue == null || newValue.trim().isEmpty())
 				this.treeItemValue.setName(oldValue);
 			else if (!isIgnoreEvent())
-				saveGroup(this.treeItemValue);
+				save(this.treeItemValue);
 		}
 	}
 
@@ -78,7 +98,7 @@ public class UITreeBuilder {
 	}
 
 	private static UITreeBuilder treeBuilder = new UITreeBuilder();
-	private static I18N i18n = I18N.getInstance();
+	private I18N i18n = I18N.getInstance();
 	private UITabPaneBuilder tabPaneBuilder = UITabPaneBuilder.getInstance();
 	private ObservableMap<TreeItemType, CheckBoxTreeItem<TreeItemValue>> directoryItemMap = FXCollections.observableHashMap();
 	private TreeView<TreeItemValue> treeView;
@@ -136,12 +156,12 @@ public class UITreeBuilder {
 		TreeItem<TreeItemValue> terrestrialObservationItem = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.terrestrialobservations", "Terrestrial Observations")));
 		TreeItem<TreeItemValue> levelingObservationItem    = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.LEVELING_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.leveling", "Levelings")));
 		TreeItem<TreeItemValue> directionObservationItem   = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.DIRECTION_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.direction", "Directions")));
-		TreeItem<TreeItemValue> distance2dObservationItem  = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.HORIZONTAL_DISTANCE_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.distance2d", "Horizontal distances")));
-		TreeItem<TreeItemValue> distance3dObservationItem  = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.SLOPE_DISTANCE_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.distance3d", "Slope distances")));
-		TreeItem<TreeItemValue> zenithObservationItem      = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.ZENITH_ANGLE_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.zenith", "Zenith angles")));
+		TreeItem<TreeItemValue> distance2dObservationItem  = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.HORIZONTAL_DISTANCE_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.horizontal_distance", "Horizontal distances")));
+		TreeItem<TreeItemValue> distance3dObservationItem  = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.SLOPE_DISTANCE_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.slope_distance", "Slope distances")));
+		TreeItem<TreeItemValue> zenithObservationItem      = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.ZENITH_ANGLE_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.zenith_angle", "Zenith angles")));
 		terrestrialObservationItem.getChildren().addAll(Arrays.asList(levelingObservationItem, directionObservationItem, distance2dObservationItem, distance3dObservationItem, zenithObservationItem));
 
-		TreeItem<TreeItemValue> gnssBaselineItem   = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.gnssobservations", "GNSS Baselines")));
+		TreeItem<TreeItemValue> gnssBaselineItem   = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.gnssobservations", "GNSS baselines")));
 		CheckBoxTreeItem<TreeItemValue> gnssBaseline1DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.GNSS_1D_DIRECTORY, i18n.getString("UITreeBuiler.directory.gnssobservations.1d", "GNSS baselines 1D")));
 		CheckBoxTreeItem<TreeItemValue> gnssBaseline2DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.GNSS_2D_DIRECTORY, i18n.getString("UITreeBuiler.directory.gnssobservations.2d", "GNSS baselines 2D")));
 		CheckBoxTreeItem<TreeItemValue> gnssBaseline3DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.GNSS_3D_DIRECTORY, i18n.getString("UITreeBuiler.directory.gnssobservations.3d", "GNSS baselines 3D")));
@@ -282,7 +302,7 @@ public class UITreeBuilder {
 		if (parentType == null || !this.directoryItemMap.containsKey(parentType))
 			return;
 
-		if (this.removeGroup(itemValue)) {
+		if (this.remove(itemValue)) {
 			setIgnoreEvent(true);
 			CheckBoxTreeItem<TreeItemValue> parent = directoryItemMap.get(parentType); 
 			parent.getChildren().remove(treeItem);
@@ -304,7 +324,7 @@ public class UITreeBuilder {
 					TreeItemType oldParentType   = TreeItemType.getDirectoryByLeafType(oldItemType);
 					if (this.directoryItemMap.containsKey(oldParentType)) {
 						itemValue.setItemType(newItemType);
-						if (!this.saveGroup(itemValue)) {
+						if (!this.save(itemValue)) {
 							itemValue.setItemType(oldItemType);
 							continue;
 						}
@@ -333,7 +353,7 @@ public class UITreeBuilder {
 	public void addEmptyGroup(TreeItemType parentType) {
 		if (this.directoryItemMap.containsKey(parentType)) {
 			TreeItem<TreeItemValue> newMenuItem = this.addItem(parentType);
-			if (!this.saveGroup(newMenuItem.getValue())) {
+			if (!this.save(newMenuItem.getValue())) {
 				TreeItem<TreeItemValue> parentItem = directoryItemMap.get(parentType);
 				parentItem.getChildren().remove(newMenuItem);
 			}
@@ -429,11 +449,11 @@ public class UITreeBuilder {
 				case CONGRUENCE_ANALYSIS_3D_DIRECTORY:
 
 					this.selectChildren(currentTreeItem);
-
 					break;
 
-//				default:
-//					break;
+				default:
+					System.err.println(this.getClass().getSimpleName() + " : Error, unsupported TreeItemType (only directories) " + itemValue.getItemType());
+					break;
 				}
 			}
 			else if (currentTreeItem.isLeaf()) {
@@ -442,7 +462,7 @@ public class UITreeBuilder {
 		}
 	}
 
-	private boolean saveGroup(TreeItemValue treeItemValue) {
+	private boolean save(TreeItemValue treeItemValue) {
 		try {
 			TreeItemType type = treeItemValue.getItemType();
 			if (TreeItemType.isPointTypeLeaf(type) && treeItemValue instanceof PointTreeItemValue) 
@@ -459,37 +479,35 @@ public class UITreeBuilder {
 				return false;
 			}
 
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			OptionDialog.showThrowableDialog (
-					i18n.getString("UITreeBuiler.message.error.sql.save.title", "SQL-Error"),
-					i18n.getString("UITreeBuiler.message.error.sql.save.header", "Could not save properties of group."), 
-					i18n.getString("UITreeBuiler.message.error.sql.save.title", "An exception occured while update database."), 
-					e
-					);
+			OptionDialog.showThrowableDialog (					
+					i18n.getString("UITreeBuiler.message.error.save.exception.title", "Unexpected SQL-Error"),
+					i18n.getString("UITreeBuiler.message.error.save.exception.header", "Error, could save group properties to database."),
+					i18n.getString("UITreeBuiler.message.error.save.exception.message", "An exception has occurred during database transaction."),
+					e);
 			return false;
 		}
 		return true;
 	}
 	
-	private boolean removeGroup(TreeItemValue treeItemValue) {
+	private boolean remove(TreeItemValue treeItemValue) {
 		try {
 			TreeItemType type = treeItemValue.getItemType();
-			if (TreeItemType.isPointTypeLeaf(type) || TreeItemType.isGNSSObservationTypeLeaf(type) || TreeItemType.isObservationTypeLeaf(type)) {
+			if (TreeItemType.isPointTypeLeaf(type) || TreeItemType.isGNSSObservationTypeLeaf(type) || TreeItemType.isObservationTypeLeaf(type) || TreeItemType.isCongruenceAnalysisTypeDirectory(type)) {
 				SQLManager.getInstance().removeGroup(treeItemValue);
 			}
 			else {
-				System.err.println(this.getClass().getSimpleName() + " : Error, item has no saveable properties " + treeItemValue);
+				System.err.println(this.getClass().getSimpleName() + " : Error, item has no removeable properties " + treeItemValue);
 			}
 
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			OptionDialog.showThrowableDialog (
-					i18n.getString("UITreeBuiler.message.error.sql.remove.title", "SQL-Error"),
-					i18n.getString("UITreeBuiler.message.error.sql.remove.header", "Could not remove table."), 
-					i18n.getString("UITreeBuiler.message.error.sql.remove.title", "An exception occured while update database."), 
-					e
-					);
+			OptionDialog.showThrowableDialog (					
+					i18n.getString("UITreeBuiler.message.error.remove.exception.title", "Unexpected SQL-Error"),
+					i18n.getString("UITreeBuiler.message.error.remove.exception.header", "Error, could remove group from database."),
+					i18n.getString("UITreeBuiler.message.error.remove.exception.message", "An exception has occurred during database transaction."),
+					e);
 			return false;
 		}
 		return true;
@@ -505,14 +523,13 @@ public class UITreeBuilder {
 			}
 			SQLManager.getInstance().loadData(itemValue, itemValues);
 			this.tabPaneBuilder.setTreeItemValue(itemValue);
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			OptionDialog.showThrowableDialog (
-					i18n.getString("UITreeBuiler.message.error.sql.load.title", "SQL-Error"),
-					i18n.getString("UITreeBuiler.message.error.sql.load.header", "Could not load table."), 
-					i18n.getString("UITreeBuiler.message.error.sql.load.title", "An exception occured while update database."), 
-					e
-					);
+			OptionDialog.showThrowableDialog (					
+					i18n.getString("UITreeBuiler.message.error.load.exception.title", "Unexpected SQL-Error"),
+					i18n.getString("UITreeBuiler.message.error.load.exception.header", "Error, could load group properties from database."),
+					i18n.getString("UITreeBuiler.message.error.load.exception.message", "An exception has occurred during database transaction."),
+					e);
 		}
 	}
 
@@ -545,5 +562,4 @@ public class UITreeBuilder {
 	final void setIgnoreEvent(final boolean ignoreEvent) {
 		this.ignoreEventProperty().set(ignoreEvent);
 	}
-
 }

@@ -1,4 +1,28 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.table.row;
+
+import java.util.Locale;
+import java.util.Scanner;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -364,5 +388,36 @@ public class CongruenceAnalysisRow extends Row {
 		clone.setNameInControlEpoch(row.getNameInControlEpoch());
 
 		return clone;
+	}
+	
+	public static CongruenceAnalysisRow scan(String str) {
+		Scanner scanner = new Scanner( str.trim() );
+		try {
+			scanner.useLocale( Locale.ENGLISH );
+			String startPointName = new String(), 
+					endPointName  = new String(); 
+			
+			CongruenceAnalysisRow row = new CongruenceAnalysisRow();
+			// reference epoch
+			if (!scanner.hasNext())
+				return null;
+			startPointName = scanner.next();
+
+			// control epoch
+			if (!scanner.hasNext())
+				return null;
+			endPointName = scanner.next();	
+
+			if (startPointName.equals(endPointName))
+				return null;
+
+			row.setNameInReferenceEpoch(startPointName);
+			row.setNameInControlEpoch(endPointName);
+			
+			return row;
+		}
+		finally {
+			scanner.close();
+		}
 	}
 }

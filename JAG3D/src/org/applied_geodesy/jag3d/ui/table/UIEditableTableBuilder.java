@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.table;
 
 import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
@@ -123,16 +144,16 @@ public abstract class UIEditableTableBuilder<T> extends UITableBuilder<T> {
 				switch(type) {
 				case DUPLICATE:
 					OptionDialog.showThrowableDialog (
-							i18n.getString("UIEditableTableBuilder.message.error.sql.duplicate.title", "SQL-Error"),
-							i18n.getString("UIEditableTableBuilder.message.error.sql.duplicate.header", "Error, could not store duplicted selected items in table."),
-							i18n.getString("UIEditableTableBuilder.message.error.sql.duplicate.message", "An exception is occured during database transaction."),
+							i18n.getString("UIEditableTableBuilder.message.error.duplicate.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UIEditableTableBuilder.message.error.duplicate.exception.header", "Error, could not save copies of selected items."),
+							i18n.getString("UIEditableTableBuilder.message.error.duplicate.exception.message", "An exception has occurred during database transaction."),
 							e);
 					break;
 				case REMOVE:
 					OptionDialog.showThrowableDialog (
-							i18n.getString("UIEditableTableBuilder.message.error.sql.remove.title", "SQL-Error"),
-							i18n.getString("UIEditableTableBuilder.message.error.sql.remove.header", "Error, could not remove selected items from table."),
-							i18n.getString("UIEditableTableBuilder.message.error.sql.remove.message", "An exception is occured during database transaction."),
+							i18n.getString("UIEditableTableBuilder.message.error.remove.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UIEditableTableBuilder.message.error.remove.exception.header", "Error, could not remove selected items."),
+							i18n.getString("UIEditableTableBuilder.message.error.remove.exception.message", "An exception has occurred during database transaction."),
 							e);
 					break;
 				case MOVETO:
@@ -141,9 +162,9 @@ public abstract class UIEditableTableBuilder<T> extends UITableBuilder<T> {
 				case MOVETO_REFERENCE:
 				case MOVETO_STOCHASTIC:
 					OptionDialog.showThrowableDialog (
-							i18n.getString("UIEditableTableBuilder.message.error.moveto.title", "SQL-Error"),
-							i18n.getString("UIEditableTableBuilder.message.error.moveto.header", "Error, could not move selected items to new table."),
-							i18n.getString("UIEditableTableBuilder.message.error.moveto.message", "An exception is occured during database transaction."),
+							i18n.getString("UIEditableTableBuilder.message.error.moveto.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UIEditableTableBuilder.message.error.moveto.exception.header", "Error, could not move selected items to new table."),
+							i18n.getString("UIEditableTableBuilder.message.error.moveto.exception.message", "An exception has occurred during database transaction."),
 							e);
 					break;
 
@@ -156,9 +177,9 @@ public abstract class UIEditableTableBuilder<T> extends UITableBuilder<T> {
 		Platform.runLater(new Runnable() {
 			@Override public void run() {
 				OptionDialog.showThrowableDialog (
-						i18n.getString("UIEditableTableBuilder.message.error.sql.setvalue.title", "SQL-Error"),
-						i18n.getString("UIEditableTableBuilder.message.error.sql.setvalue.header", "Error, could not save item changes in table"),
-						i18n.getString("UIEditableTableBuilder.message.error.sql.setvalue.message", "An exception occure during saving dataset to database."),
+						i18n.getString("UIEditableTableBuilder.message.error.save.exception.title", "Unexpected SQL-Error"),
+						i18n.getString("UIEditableTableBuilder.message.error.save.exception.header", "Error, could not save value to database."),
+						i18n.getString("UIEditableTableBuilder.message.error.save.exception.message", "An exception has occurred during database transaction."),
 						e
 				);
 			}
@@ -181,5 +202,4 @@ public abstract class UIEditableTableBuilder<T> extends UITableBuilder<T> {
 	abstract void removeRows();
 	abstract void duplicateRows();
 	abstract void moveRows(ContextMenuType type);
-
 }

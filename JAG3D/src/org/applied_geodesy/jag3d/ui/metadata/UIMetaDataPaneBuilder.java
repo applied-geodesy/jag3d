@@ -1,7 +1,29 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.metadata;
 
-import java.sql.SQLException;
-
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.textfield.LimitedTextArea;
@@ -26,6 +48,16 @@ import javafx.scene.layout.Region;
 
 public class UIMetaDataPaneBuilder {
 	
+	private class DatabaseStateChangedListener implements ProjectDatabaseStateChangedListener {
+		@Override
+		public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt) {
+			if (metaDataNode != null) {
+				boolean disable = evt.getEventType() != ProjectDatabaseStateType.OPENED;
+				disableComponents(disable);
+			}
+		}
+	}
+	
 	private class MetaDataChangeListener implements ChangeListener<Boolean>, EventHandler<ActionEvent> {
 
 		@Override
@@ -40,7 +72,7 @@ public class UIMetaDataPaneBuilder {
 		}
 	}
 
-	private static I18N i18n = I18N.getInstance();
+	private I18N i18n = I18N.getInstance();
 	private static UIMetaDataPaneBuilder metaDataPane = new UIMetaDataPaneBuilder();
 	private Node metaDataNode = null;
 	private DatePicker datePicker;
@@ -65,7 +97,7 @@ public class UIMetaDataPaneBuilder {
 	private void init() {
 		if (this.metaDataNode != null)
 			return;
-		
+		SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
 		GridPane gridPane = createGridPane();
 
 		Label nameLabel = new Label(i18n.getString("UIMetaDataPane.name.label", "Project name:"));
@@ -78,7 +110,7 @@ public class UIMetaDataPaneBuilder {
 		
 		Label operatorLabel = new Label(i18n.getString("UIMetaDataPane.operator.label", "Person in charge:"));
 		this.operatorLimitedTextField = this.createLimitedTextField(
-				i18n.getString("UIMetaDataPane.operator.tooltip", "Name person in charge"), 
+				i18n.getString("UIMetaDataPane.operator.tooltip", "Name of person in charge"), 
 				i18n.getString("UIMetaDataPane.operator.prompt", "Operator")
 		);
 		operatorLabel.setLabelFor(this.operatorLimitedTextField);
@@ -168,6 +200,7 @@ public class UIMetaDataPaneBuilder {
 		this.descriptionTextArea.textProperty().bindBidirectional(this.metaData.descriptionProperty());
 		
 		this.metaDataNode = scroller;
+		this.disableComponents(true);
 	}
 	
 	private LimitedTextField createLimitedTextField(String tooltip, String promptText) {
@@ -218,17 +251,27 @@ public class UIMetaDataPaneBuilder {
 		return this.metaData;
 	}
 	
+	private void disableComponents(boolean disable) {
+		this.nameLimitedTextField.setDisable(disable);
+		this.datePicker.setDisable(disable);
+		this.operatorLimitedTextField.setDisable(disable);
+		this.customerIdLimitedTextField.setDisable(disable);
+		this.projectIdLimitedTextField.setDisable(disable);
+		this.descriptionTextArea.setDisable(disable);
+		this.descriptionTextArea.setDisable(disable);
+	}
+	
 	private void save() {
 		try {
 			SQLManager.getInstance().save(this.metaData);
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("UIMetaDataPane.message.error.sql.save.title", "SQL-Error"),
-							i18n.getString("UIMetaDataPane.message.error.sql.save.header", "Error, could not save item changes in table"),
-							i18n.getString("UIMetaDataPane.message.error.sql.save.message", "An exception occure during saving dataset to database."),
+							i18n.getString("UIMetaDataPane.message.error.save.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UIMetaDataPane.message.error.save.exception.header", "Error, could not save project meta-data to database."),
+							i18n.getString("UIMetaDataPane.message.error.save.exception.message", "An exception has occurred during database transaction."),
 							e
 					);
 				}

@@ -1,9 +1,32 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.graphic.layer.dialog;
 
 import org.applied_geodesy.jag3d.ui.graphic.layer.ArrowLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.ArrowSymbolType;
 import org.applied_geodesy.util.i18.I18N;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
@@ -19,8 +42,39 @@ import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
 public class UIArrowLayerPropertyBuilder extends UILayerPropertyBuilder {
+	private class SymbolTypeChangeListener implements ChangeListener<ArrowSymbolType> {
+		@Override
+		public void changed(ObservableValue<? extends ArrowSymbolType> observable, ArrowSymbolType oldValue, ArrowSymbolType newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setSymbolType(newValue);
+		}
+	}
 	
-	private static I18N i18n = I18N.getInstance();
+	private class SymbolSizeChangeListener implements ChangeListener<Double> {
+		@Override
+		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setSymbolSize(newValue);
+		}
+	}
+	
+	private class LineWidthChangeListener implements ChangeListener<Double> {
+		@Override
+		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setLineWidth(newValue);
+		}
+	}
+	
+	private class ColorChangeListener implements ChangeListener<Color> {
+		@Override
+		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setColor(newValue);
+		}
+	}
+	
+	private I18N i18n = I18N.getInstance();
 	private static UIArrowLayerPropertyBuilder arrowLayerPropertyBuilder = new UIArrowLayerPropertyBuilder();
 	private ComboBox<ArrowSymbolType> symbolTypeComboBox;
 	private ComboBox<Double> symbolSizeComboBox;
@@ -47,28 +101,11 @@ public class UIArrowLayerPropertyBuilder extends UILayerPropertyBuilder {
 	
 	public static Node getLayerPropertyPane(ArrowLayer layer) {
 		arrowLayerPropertyBuilder.init();
-		arrowLayerPropertyBuilder.bindProperties(layer);
+		arrowLayerPropertyBuilder.set(layer);
 		return arrowLayerPropertyBuilder.propertyPane;
 	}
-	
-	private void unbindProperties() {
-		if (this.currentLayer != null) {
-			this.currentLayer.symbolSizeProperty().unbind();
-			this.currentLayer.lineWidthProperty().unbind();
-			this.currentLayer.vectorScaleProperty().unbind();
-			this.currentLayer.colorProperty().unbind();
-			this.currentLayer.arrowSymbolTypeProperty().unbind();
-			
-//			this.currentLayer.fontFamilyProperty().unbind();
-//			this.currentLayer.fontSizeProperty().unbind();
-//			this.currentLayer.fontColorProperty().unbind();
-		}
-	}
-	
-	private void bindProperties(ArrowLayer layer) {
-		// unbind
-		this.unbindProperties();
-		
+
+	private void set(ArrowLayer layer) {
 		// set new layer
 		this.currentLayer = layer;
 		
@@ -76,23 +113,12 @@ public class UIArrowLayerPropertyBuilder extends UILayerPropertyBuilder {
 		this.symbolSizeComboBox.getSelectionModel().select(this.currentLayer.getSymbolSize());
 		this.lineWidthComboBox.getSelectionModel().select(this.currentLayer.getLineWidth());
 		this.symbolColorPicker.setValue(this.currentLayer.getColor());
-		this.symbolTypeComboBox.setValue(this.currentLayer.getArrowSymbolType());
-		
-		this.currentLayer.symbolSizeProperty().bind(this.symbolSizeComboBox.getSelectionModel().selectedItemProperty());
-		this.currentLayer.lineWidthProperty().bind(this.lineWidthComboBox.getSelectionModel().selectedItemProperty());
-		this.currentLayer.colorProperty().bind(this.symbolColorPicker.valueProperty());
-		this.currentLayer.arrowSymbolTypeProperty().bind(this.symbolTypeComboBox.valueProperty());
-		
-		//this.currentLayer.vectorScaleProperty().bind(this.vectorScaleComboBox.getSelectionModel().selectedItemProperty());
-		
+		this.symbolTypeComboBox.setValue(this.currentLayer.getSymbolType());
+
 		// Font properties
 //		this.fontFamilyComboBox.getSelectionModel().select(this.currentLayer.getFontFamily());
 //		this.fontSizeComboBox.getSelectionModel().select(this.currentLayer.getFontSize());
 //		this.fontColorPicker.setValue(this.currentLayer.getFontColor());
-//		
-//		this.currentLayer.fontFamilyProperty().bind(this.fontFamilyComboBox.getSelectionModel().selectedItemProperty());
-//		this.currentLayer.fontSizeProperty().bind(this.fontSizeComboBox.getSelectionModel().selectedItemProperty());
-//		this.currentLayer.fontColorProperty().bind(this.fontColorPicker.valueProperty());
 	}
 	
 	private Node createSymbolPane() {
@@ -114,13 +140,19 @@ public class UIArrowLayerPropertyBuilder extends UILayerPropertyBuilder {
 		for (int i = 0; i < symbolSizes.length; i++)
 			symbolSizes[i] = 5 + 0.5 * i;
 
-		this.symbolTypeComboBox  = this.createSymbolComboBox(i18n.getString("UIArrowLayerPropertyBuilder.symbol.type.tooltip", "Selected symbol"));
-		this.symbolSizeComboBox  = this.createSizeComboBox(i18n.getString("UIArrowLayerPropertyBuilder.symbol.size.tooltip", "Selected symbol size"), symbolSizes, 1);
-		this.lineWidthComboBox   = this.createLineWidthComboBox(i18n.getString("UIArrowLayerPropertyBuilder.symbol.linewidth.tooltip", "Selected line width"));
+		this.symbolTypeComboBox  = this.createSymbolComboBox(i18n.getString("UIArrowLayerPropertyBuilder.symbol.type.tooltip", "Set arrow symbol type"));
+		this.symbolSizeComboBox  = this.createSizeComboBox(i18n.getString("UIArrowLayerPropertyBuilder.symbol.size.tooltip", "Set arrow symbol size"), symbolSizes, 1);
+		this.lineWidthComboBox   = this.createLineWidthComboBox(i18n.getString("UIArrowLayerPropertyBuilder.symbol.linewidth.tooltip", "Set line width"));
 		this.symbolColorPicker   = new ColorPicker(Color.DARKBLUE);
 		this.symbolColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.symbolColorPicker.setMaxWidth(Double.MAX_VALUE);
 		this.symbolColorPicker.getStyleClass().add("split-button");
+		
+		// add listeners
+		this.symbolTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new SymbolTypeChangeListener());
+		this.symbolSizeComboBox.getSelectionModel().selectedItemProperty().addListener(new SymbolSizeChangeListener());
+		this.lineWidthComboBox.getSelectionModel().selectedItemProperty().addListener(new LineWidthChangeListener());
+		this.symbolColorPicker.valueProperty().addListener(new ColorChangeListener());		
 
 		symbolTypeLabel.setLabelFor(this.symbolTypeComboBox);
 		symbolSizeLabel.setLabelFor(this.symbolSizeComboBox);

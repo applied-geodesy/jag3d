@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Class-Path: 
+  resources/ 
+  
+  lib/arpack_combined_all-0.1.jar  
+  lib/core-1.1.2.jar 
+  lib/mtj-1.0.4.jar    
+  lib/freemarker.jar 
+  lib/hsqldb.jar 
+  lib/jdistlib-0.4.5-bin.jar 
+  lib/tablelayout.jar 
+  
+  lib/tools.jar 
+  lib/CoordTrans.jar 
+  lib/FormFittingToolbox.jar 
+  lib/GeoTra.jar  
+    
+Main-Class: org.applied_geodesy.jag3d.ui.JAG3D
+

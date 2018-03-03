@@ -1,9 +1,32 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.graphic.layer.dialog;
 
 import org.applied_geodesy.jag3d.ui.graphic.layer.PointLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.PointSymbolType;
 import org.applied_geodesy.util.i18.I18N;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
@@ -21,7 +44,85 @@ import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
 public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
-	private static I18N i18n = I18N.getInstance();
+	private class SymbolTypeChangeListener implements ChangeListener<PointSymbolType> {
+		@Override
+		public void changed(ObservableValue<? extends PointSymbolType> observable, PointSymbolType oldValue, PointSymbolType newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setSymbolType(newValue);
+		}
+	}
+	
+	private class SymbolSizeChangeListener implements ChangeListener<Double> {
+		@Override
+		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setSymbolSize(newValue);
+		}
+	}
+	
+	private class LineWidthChangeListener implements ChangeListener<Double> {
+		@Override
+		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setLineWidth(newValue);
+		}
+	}
+	
+	private class ColorChangeListener implements ChangeListener<Color> {
+		@Override
+		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setColor(newValue);
+		}
+	}
+	
+	private class FontFamilyChangeListener implements ChangeListener<String> {
+		@Override
+		public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setFontFamily(newValue);
+		}
+	}
+	
+	private class FontColorChangeListener implements ChangeListener<Color> {
+		@Override
+		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setFontColor(newValue);
+		}
+	}
+	
+	private class FontSizeChangeListener implements ChangeListener<Double> {
+		@Override
+		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setFontSize(newValue);
+		}
+	}
+	
+	private class PointVisibleChangeListener implements ChangeListener<Boolean> {
+		private int dim;
+		PointVisibleChangeListener(int dim) {
+			this.dim = dim;
+		}
+		@Override
+		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+			if (currentLayer != null && newValue != null)
+				switch(this.dim) {
+				case 1:
+					currentLayer.setPoint1DVisible(newValue);
+					break;
+				case 2:
+					currentLayer.setPoint2DVisible(newValue);
+					break;
+				case 3:
+					currentLayer.setPoint3DVisible(newValue);
+					break;
+				}
+		}
+	}
+	
+	private I18N i18n = I18N.getInstance();
 	private static UIPointLayerPropertyBuilder pointLayerPropertyBuilder = new UIPointLayerPropertyBuilder();
 	
 	private ComboBox<PointSymbolType> symbolTypeComboBox;
@@ -58,27 +159,11 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 	
 	public static Node getLayerPropertyPane(PointLayer layer) {
 		pointLayerPropertyBuilder.init();
-		pointLayerPropertyBuilder.bindProperties(layer);
+		pointLayerPropertyBuilder.set(layer);
 		return pointLayerPropertyBuilder.propertyPane;
 	}
-	
-	private void bindProperties(PointLayer layer) {
-		// unbind
-		if (this.currentLayer != null) {
-			this.currentLayer.symbolSizeProperty().unbind();
-			this.currentLayer.lineWidthProperty().unbind();
-			this.currentLayer.pointSymbolTypeProperty().unbind();
-			this.currentLayer.colorProperty().unbind();
-			
-			this.currentLayer.fontFamilyProperty().unbind();
-			this.currentLayer.fontSizeProperty().unbind();
-			this.currentLayer.fontColorProperty().unbind();
-			
-			this.currentLayer.point1DVisibleProperty().unbind();
-			this.currentLayer.point2DVisibleProperty().unbind();
-			this.currentLayer.point3DVisibleProperty().unbind();
-		}
 		
+	private void set(PointLayer layer) {	
 		// set new layer
 		this.currentLayer = layer;
 		
@@ -87,29 +172,16 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		this.symbolSizeComboBox.getSelectionModel().select(this.currentLayer.getSymbolSize());
 		this.lineWidthComboBox.getSelectionModel().select(this.currentLayer.getLineWidth());
 		this.symbolColorPicker.setValue(this.currentLayer.getColor());
-		
-		this.currentLayer.symbolSizeProperty().bind(this.symbolSizeComboBox.getSelectionModel().selectedItemProperty());
-		this.currentLayer.lineWidthProperty().bind(this.lineWidthComboBox.getSelectionModel().selectedItemProperty());
-		this.currentLayer.pointSymbolTypeProperty().bind(this.symbolTypeComboBox.getSelectionModel().selectedItemProperty());
-		this.currentLayer.colorProperty().bind(this.symbolColorPicker.valueProperty());
-		
+
 		// Font properties
 		this.fontFamilyComboBox.getSelectionModel().select(this.currentLayer.getFontFamily());
 		this.fontSizeComboBox.getSelectionModel().select(this.currentLayer.getFontSize());
 		this.fontColorPicker.setValue(this.currentLayer.getFontColor());
-		
-		this.currentLayer.fontFamilyProperty().bind(this.fontFamilyComboBox.getSelectionModel().selectedItemProperty());
-		this.currentLayer.fontSizeProperty().bind(this.fontSizeComboBox.getSelectionModel().selectedItemProperty());
-		this.currentLayer.fontColorProperty().bind(this.fontColorPicker.valueProperty());
-		
+
 		// Visibility properties w.r.t. dimension
 		this.point1DVisibleCheckBox.setSelected(this.currentLayer.isPoint1DVisible());
 		this.point2DVisibleCheckBox.setSelected(this.currentLayer.isPoint2DVisible());
 		this.point3DVisibleCheckBox.setSelected(this.currentLayer.isPoint3DVisible());
-		
-		this.currentLayer.point1DVisibleProperty().bind(this.point1DVisibleCheckBox.selectedProperty());
-		this.currentLayer.point2DVisibleProperty().bind(this.point2DVisibleCheckBox.selectedProperty());
-		this.currentLayer.point3DVisibleProperty().bind(this.point3DVisibleCheckBox.selectedProperty());
 	}
 	
 	private Node createFontPane() {
@@ -128,12 +200,16 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		for (int i = 0; i < fontSizes.length; i++)
 			fontSizes[i] = 6.0 + 2*i; //fontSizes[i] = 5 + 0.5 * i;
 		
-		this.fontFamilyComboBox = this.createFontFamliyComboBox(i18n.getString("UIPointLayerPropertyBuilder.symbol.type.tooltip", "Selected symbol"));
-		this.fontSizeComboBox   = this.createSizeComboBox(i18n.getString("UIPointLayerPropertyBuilder.font.size.tooltip", "Selected font size"), fontSizes, 1);
+		this.fontFamilyComboBox = this.createFontFamliyComboBox(i18n.getString("UIPointLayerPropertyBuilder.font.family.tooltip", "Set font familiy"));
+		this.fontSizeComboBox   = this.createSizeComboBox(i18n.getString("UIPointLayerPropertyBuilder.font.size.tooltip", "Set font size"), fontSizes, 1);
 		this.fontColorPicker    = new ColorPicker(Color.BLACK);
 		this.fontColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.fontColorPicker.setMaxWidth(Double.MAX_VALUE);
 		this.fontColorPicker.getStyleClass().add("split-button");
+		
+		this.fontFamilyComboBox.getSelectionModel().selectedItemProperty().addListener(new FontFamilyChangeListener());
+		this.fontSizeComboBox.getSelectionModel().selectedItemProperty().addListener(new FontSizeChangeListener());
+		this.fontColorPicker.valueProperty().addListener(new FontColorChangeListener());
 		
 		fontFamilyLabel.setLabelFor(this.fontFamilyComboBox);
 		fontSizeLabel.setLabelFor(this.fontSizeComboBox);
@@ -179,13 +255,19 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		for (int i = 0; i < symbolSizes.length; i++)
 			symbolSizes[i] = 5 + 0.5 * i;
 		
-		this.symbolTypeComboBox = this.createSymbolComboBox(i18n.getString("UIPointLayerPropertyBuilder.symbol.type.tooltip", "Selected symbol"));
-		this.symbolSizeComboBox = this.createSizeComboBox(i18n.getString("UIPointLayerPropertyBuilder.symbol.size.tooltip", "Selected symbol size"), symbolSizes, 1);
-		this.lineWidthComboBox  = this.createLineWidthComboBox(i18n.getString("UIPointLayerPropertyBuilder.symbol.linewidth.tooltip", "Selected line width"));
+		this.symbolTypeComboBox = this.createSymbolComboBox(i18n.getString("UIPointLayerPropertyBuilder.symbol.type.tooltip", "Set point symbol type"));
+		this.symbolSizeComboBox = this.createSizeComboBox(i18n.getString("UIPointLayerPropertyBuilder.symbol.size.tooltip", "Set point symbol size"), symbolSizes, 1);
+		this.lineWidthComboBox  = this.createLineWidthComboBox(i18n.getString("UIPointLayerPropertyBuilder.symbol.linewidth.tooltip", "Set line width"));
 		this.symbolColorPicker = new ColorPicker(Color.DARKBLUE);
 		this.symbolColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.symbolColorPicker.setMaxWidth(Double.MAX_VALUE);
 		this.symbolColorPicker.getStyleClass().add("split-button");
+		
+		// add listeners
+		this.symbolTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new SymbolTypeChangeListener());
+		this.symbolSizeComboBox.getSelectionModel().selectedItemProperty().addListener(new SymbolSizeChangeListener());
+		this.lineWidthComboBox.getSelectionModel().selectedItemProperty().addListener(new LineWidthChangeListener());
+		this.symbolColorPicker.valueProperty().addListener(new ColorChangeListener());
 		
 		symbolTypeLabel.setLabelFor(this.symbolTypeComboBox);
 		symbolSizeLabel.setLabelFor(this.symbolSizeComboBox);
@@ -223,18 +305,22 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 
 		this.point1DVisibleCheckBox = this.createCheckBox(
 				i18n.getString("UIPointLayerPropertyBuilder.dimension.1d.label", "1D points"), 
-				i18n.getString("UIPointLayerPropertyBuilder.dimension.1d.tooltip", "If checked, 1D points will be drawn.")
+				i18n.getString("UIPointLayerPropertyBuilder.dimension.1d.tooltip", "If checked, 1D points will be drawn")
 				);
 		
 		this.point2DVisibleCheckBox = this.createCheckBox(
 				i18n.getString("UIPointLayerPropertyBuilder.dimension.2d.label", "2D points"), 
-				i18n.getString("UIPointLayerPropertyBuilder.dimension.2d.tooltip", "If checked, 2D points will be drawn.")
+				i18n.getString("UIPointLayerPropertyBuilder.dimension.2d.tooltip", "If checked, 2D points will be drawn")
 				);
 		
 		this.point3DVisibleCheckBox = this.createCheckBox(
 				i18n.getString("UIPointLayerPropertyBuilder.dimension.3d.label", "3D points"), 
-				i18n.getString("UIPointLayerPropertyBuilder.dimension.3d.tooltip", "If checked, 3D points will be drawn.")
+				i18n.getString("UIPointLayerPropertyBuilder.dimension.3d.tooltip", "If checked, 3D points will be drawn")
 				);
+		
+		this.point1DVisibleCheckBox.selectedProperty().addListener(new PointVisibleChangeListener(1));
+		this.point2DVisibleCheckBox.selectedProperty().addListener(new PointVisibleChangeListener(2));
+		this.point3DVisibleCheckBox.selectedProperty().addListener(new PointVisibleChangeListener(3));
 		
 		GridPane.setHgrow(this.point1DVisibleCheckBox, Priority.NEVER);
 		GridPane.setHgrow(this.point2DVisibleCheckBox, Priority.NEVER);

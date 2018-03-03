@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.dialog;
 
 import javafx.scene.Node;
@@ -8,6 +29,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Window;
 
@@ -31,8 +53,8 @@ public class OptionDialog {
 		alert.setContentText(message);
 		alert.initModality(Modality.APPLICATION_MODAL);
 		alert.initOwner(window);
-//		alert.initStyle(StageStyle.UTILITY);
 		alert.setResizable(true);
+		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		return alert.showAndWait();
 	}
 	
@@ -59,7 +81,6 @@ public class OptionDialog {
 		alert.setContentText(message);
 		alert.initModality(Modality.APPLICATION_MODAL);
 		alert.initOwner(window);
-//		alert.initStyle(StageStyle.UTILITY);
 		
 		GridPane.setVgrow(node, Priority.ALWAYS);
 		GridPane.setHgrow(node, Priority.ALWAYS);
@@ -85,7 +106,6 @@ public class OptionDialog {
 		alert.setContentText(message);
 		alert.initModality(Modality.APPLICATION_MODAL);
 		alert.initOwner(window);
-//		alert.initStyle(StageStyle.UTILITY);
 
 		StringWriter stringWriter = new StringWriter();
 		PrintWriter printWriter = new PrintWriter(stringWriter);
@@ -110,129 +130,4 @@ public class OptionDialog {
 
 		return alert.showAndWait();
     }
-
-//    public static void showInformation(String title, String message) {
-//        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-//        alert.initStyle(StageStyle.UTILITY);
-//        alert.setTitle("Information");
-//        alert.setHeaderText(title);
-//        alert.setContentText(message);
-//
-//        alert.showAndWait();
-//    }
-//
-//    public static void showWarning(String title, String message) {
-//        Alert alert = new Alert(Alert.AlertType.WARNING);
-//        alert.initStyle(StageStyle.UTILITY);
-//        alert.setTitle("Warning");
-//        alert.setHeaderText(title);
-//        alert.setContentText(message);
-//
-//        alert.showAndWait();
-//    }
-//
-//    public static void showError(String title, String message) {
-//        Alert alert = new Alert(Alert.AlertType.ERROR);
-//        alert.initStyle(StageStyle.UTILITY);
-//        alert.setTitle("Error");
-//        alert.setHeaderText(title);
-//        alert.setContentText(message);
-//
-//        alert.showAndWait();
-//    }
-//
-//    public static void showException(String title, String message, Exception exception) {
-//        Alert alert = new Alert(Alert.AlertType.ERROR);
-//        alert.initStyle(StageStyle.UTILITY);
-//        alert.setTitle("Exception");
-//        alert.setHeaderText(title);
-//        alert.setContentText(message);
-//
-//        StringWriter sw = new StringWriter();
-//        PrintWriter pw = new PrintWriter(sw);
-//        exception.printStackTrace(pw);
-//        String exceptionText = sw.toString();
-//
-//        Label label = new Label("Details:");
-//
-//        TextArea textArea = new TextArea(exceptionText);
-//        textArea.setEditable(false);
-//        textArea.setWrapText(true);
-//
-//        textArea.setMaxWidth(Double.MAX_VALUE);
-//        textArea.setMaxHeight(Double.MAX_VALUE);
-//        GridPane.setVgrow(textArea, Priority.ALWAYS);
-//        GridPane.setHgrow(textArea, Priority.ALWAYS);
-//
-//        GridPane expContent = new GridPane();
-//        expContent.setMaxWidth(Double.MAX_VALUE);
-//        expContent.add(label, 0, 0);
-//        expContent.add(textArea, 0, 1);
-//
-//        alert.getDialogPane().setExpandableContent(expContent);
-//
-//        alert.showAndWait();
-//    }
-//
-//    public static final String YES = "Yes";
-//    public static final String NO = "No";
-//    public static final String OK = "OK";
-//    public static final String CANCEL = "Cancel";
-//
-//    public static String showConfirm(String title, String message, String... options) {
-//        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-//        alert.initStyle(StageStyle.UTILITY);
-//        alert.setTitle("Choose an option");
-//        alert.setHeaderText(title);
-//        alert.setContentText(message);
-//
-//        //To make enter key press the actual focused button, not the first one. Just like pressing "space".
-//        alert.getDialogPane().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-//            if (event.getCode().equals(KeyCode.ENTER)) {
-//                event.consume();
-//                try {
-//                    Robot r = new Robot();
-//                    r.keyPress(java.awt.event.KeyEvent.VK_SPACE);
-//                    r.keyRelease(java.awt.event.KeyEvent.VK_SPACE);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
-//
-//        if (options == null || options.length == 0) {
-//            options = new String[]{OK, CANCEL};
-//        }
-//
-//        List<ButtonType> buttons = new ArrayList<>();
-//        for (String option : options) {
-//            buttons.add(new ButtonType(option));
-//        }
-//
-//        alert.getButtonTypes().setAll(buttons);
-//
-//        Optional<ButtonType> result = alert.showAndWait();
-//        if (!result.isPresent()) {
-//            return CANCEL;
-//        } else {
-//            return result.get().getText();
-//        }
-//    }
-//
-//    public static String showTextInput(String title, String message, String defaultValue) {
-//        TextInputDialog dialog = new TextInputDialog(defaultValue);
-//        dialog.initStyle(StageStyle.UTILITY);
-//        dialog.setTitle("Input");
-//        dialog.setHeaderText(title);
-//        dialog.setContentText(message);
-//
-//        Optional<String> result = dialog.showAndWait();
-//        if (result.isPresent()) {
-//            return result.get();
-//        } else {
-//            return null;
-//        }
-//
-//    }
-
 }

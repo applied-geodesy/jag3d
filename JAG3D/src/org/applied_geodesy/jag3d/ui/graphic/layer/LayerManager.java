@@ -1,14 +1,37 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.graphic.layer;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.graphic.layer.dialog.LayerManagerDialog;
@@ -57,6 +80,15 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.StringConverter;
 
 public class LayerManager {
+	private class DatabaseStateChangedListener implements ProjectDatabaseStateChangedListener {
+		@Override
+		public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt) {
+			if (layerToolbar != null) {
+				boolean disable = evt.getEventType() != ProjectDatabaseStateType.OPENED;
+				layerToolbar.setDisable(disable);
+			}
+		}
+	}
 
 	private class ToolbarActionEventHandler implements EventHandler<ActionEvent> {
 		@Override
@@ -76,6 +108,27 @@ public class LayerManager {
 			action(type);
 		}
 	}
+	
+	private class ScaleChangeListener implements ChangeListener<Double> {
+		private Layer[] layers;
+		ScaleChangeListener(Layer... layer) {
+			this.layers = layer;
+		}
+		@Override
+		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
+			if (newValue != null && !Double.isInfinite(newValue) && !Double.isNaN(newValue)) {
+				for (Layer layer : layers) {
+					if (layer.getLayerType() == LayerType.POINT_SHIFT || 
+							layer.getLayerType() == LayerType.PRINCIPAL_COMPONENT_HORIZONTAL || 
+							layer.getLayerType() == LayerType.PRINCIPAL_COMPONENT_VERTICAL)
+						((ArrowLayer)layer).setVectorScale(newValue);
+					else if (layer.getLayerType() == LayerType.ABSOLUTE_CONFIDENCE)
+						((AbsoluteConfidenceLayer)layer).setConfidenceScale(newValue);
+				}
+				saveEllipseScale(newValue);
+			}			
+		}
+	}
 
 	private class ColorChangeListener implements ChangeListener<Color> {
 		@Override
@@ -83,6 +136,13 @@ public class LayerManager {
 			BackgroundFill fill = new BackgroundFill(getColor(), CornerRadii.EMPTY, Insets.EMPTY);
 			Background background = new Background(fill);
 			stackPane.setBackground(background);
+		}
+	}
+	
+	private class GraphicExtentChangeListener implements ChangeListener<Number> {
+		@Override
+		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+			save(currentGraphicExtent);
 		}
 	}
 	
@@ -110,12 +170,19 @@ public class LayerManager {
 				getLayer(LayerType.OBSERVATION_APOSTERIORI).draw(getCurrentGraphicExtent());
 				getLayer(LayerType.ABSOLUTE_CONFIDENCE).draw(getCurrentGraphicExtent());
 				getLayer(LayerType.RELATIVE_CONFIDENCE).draw(getCurrentGraphicExtent());
-				getLayer(LayerType.ARROW).draw(getCurrentGraphicExtent());
+				getLayer(LayerType.POINT_SHIFT).draw(getCurrentGraphicExtent());
+				getLayer(LayerType.PRINCIPAL_COMPONENT_HORIZONTAL).draw(getCurrentGraphicExtent());
+				getLayer(LayerType.PRINCIPAL_COMPONENT_VERTICAL).draw(getCurrentGraphicExtent());
 				break;
 				
-			case ARROW:
+			case POINT_SHIFT:
 				this.layer.draw(getCurrentGraphicExtent());
 				getLayer(LayerType.RELATIVE_CONFIDENCE).draw(getCurrentGraphicExtent());
+				break;
+				
+			case PRINCIPAL_COMPONENT_HORIZONTAL:
+			case PRINCIPAL_COMPONENT_VERTICAL:
+				this.layer.draw(getCurrentGraphicExtent());
 				break;
 			
 			default:
@@ -126,7 +193,7 @@ public class LayerManager {
 	}
 
 	private Label coordinatePanel = new Label();
-	private static I18N i18n = I18N.getInstance();
+	private I18N i18n = I18N.getInstance();
 	private ToolBar layerToolbar = new ToolBar();
 	private StackPane stackPane = new StackPane();
 	private final GraphicExtent currentGraphicExtent = new GraphicExtent();
@@ -147,6 +214,14 @@ public class LayerManager {
 		this.color.addListener(new ColorChangeListener());
 		this.currentGraphicExtent.drawingBoardWidthProperty().bind(this.stackPane.widthProperty());
 		this.currentGraphicExtent.drawingBoardHeightProperty().bind(this.stackPane.heightProperty());
+
+		GraphicExtentChangeListener graphicExtentChangeListener = new GraphicExtentChangeListener();
+		this.currentGraphicExtent.minXProperty().addListener(graphicExtentChangeListener);
+		this.currentGraphicExtent.maxXProperty().addListener(graphicExtentChangeListener);
+		this.currentGraphicExtent.minYProperty().addListener(graphicExtentChangeListener);
+		this.currentGraphicExtent.maxYProperty().addListener(graphicExtentChangeListener);
+		
+		SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
 	}
 	
 	private void initLayers() {
@@ -182,10 +257,18 @@ public class LayerManager {
 				layer = new ObservationLayer(layerType, this.getCurrentGraphicExtent());
 				break;
 
-			case ARROW:
-				ArrowLayer arrowLayer = new ArrowLayer(layerType, this.getCurrentGraphicExtent());
-				arrowLayer.vectorScaleProperty().addListener(new DrawDependentLayerChangeListener(arrowLayer));
-				layer = arrowLayer;
+			case PRINCIPAL_COMPONENT_HORIZONTAL:
+			case PRINCIPAL_COMPONENT_VERTICAL:
+				PrincipalComponentArrowLayer principalComponentArrowLayer = new PrincipalComponentArrowLayer(layerType, this.getCurrentGraphicExtent());
+				principalComponentArrowLayer.vectorScaleProperty().addListener(new DrawDependentLayerChangeListener(principalComponentArrowLayer));
+				layer = principalComponentArrowLayer;
+				break;
+				
+			case POINT_SHIFT:
+				PointShiftArrowLayer pointShiftArrowLayer = new PointShiftArrowLayer(layerType, this.getCurrentGraphicExtent());
+				pointShiftArrowLayer.vectorScaleProperty().addListener(new DrawDependentLayerChangeListener(pointShiftArrowLayer));
+				pointShiftArrowLayer.visibleProperty().addListener(new DrawDependentLayerChangeListener(pointShiftArrowLayer));
+				layer = pointShiftArrowLayer;
 				break;
 				
 			case ABSOLUTE_CONFIDENCE:
@@ -209,13 +292,30 @@ public class LayerManager {
 				(PointLayer)this.getLayer(LayerType.NEW_POINT_APOSTERIORI)
 				);
 		
-		ArrowLayer arrowLayer = (ArrowLayer)this.getLayer(LayerType.ARROW);
-		RelativeConfidenceLayer relativeConfidenceLayer = (RelativeConfidenceLayer)this.getLayer(LayerType.RELATIVE_CONFIDENCE);
-		relativeConfidenceLayer.add(arrowLayer);
+		PrincipalComponentArrowLayer principalComponentHorizontalArrowLayer = (PrincipalComponentArrowLayer)this.getLayer(LayerType.PRINCIPAL_COMPONENT_HORIZONTAL);
+		principalComponentHorizontalArrowLayer.addAll(
+				(PointLayer)this.getLayer(LayerType.STOCHASTIC_POINT_APOSTERIORI),
+				(PointLayer)this.getLayer(LayerType.DATUM_POINT_APOSTERIORI),
+				(PointLayer)this.getLayer(LayerType.NEW_POINT_APOSTERIORI)
+				);
 		
-		// binding scale property
-		arrowLayer.vectorScaleProperty().bind(this.scaleSpinner.valueProperty());
-		absoluteConfidenceLayer.confidenceScaleProperty().bind(this.scaleSpinner.valueProperty());
+		PrincipalComponentArrowLayer principalComponentVerticalArrowLayer = (PrincipalComponentArrowLayer)this.getLayer(LayerType.PRINCIPAL_COMPONENT_VERTICAL);
+		principalComponentVerticalArrowLayer.addAll(
+				(PointLayer)this.getLayer(LayerType.STOCHASTIC_POINT_APOSTERIORI),
+				(PointLayer)this.getLayer(LayerType.DATUM_POINT_APOSTERIORI),
+				(PointLayer)this.getLayer(LayerType.NEW_POINT_APOSTERIORI)
+				);
+		
+		PointShiftArrowLayer pointShiftArrowLayer = (PointShiftArrowLayer)this.getLayer(LayerType.POINT_SHIFT);
+		RelativeConfidenceLayer relativeConfidenceLayer = (RelativeConfidenceLayer)this.getLayer(LayerType.RELATIVE_CONFIDENCE);
+		relativeConfidenceLayer.add(pointShiftArrowLayer);
+		
+		// add scale change listener
+		pointShiftArrowLayer.setVectorScale(this.scaleSpinner.getValueFactory().getValue());
+		principalComponentHorizontalArrowLayer.setVectorScale(this.scaleSpinner.getValueFactory().getValue());
+		principalComponentVerticalArrowLayer.setVectorScale(this.scaleSpinner.getValueFactory().getValue());
+		absoluteConfidenceLayer.setConfidenceScale(this.scaleSpinner.getValueFactory().getValue());
+		this.scaleSpinner.valueProperty().addListener(new ScaleChangeListener(pointShiftArrowLayer, principalComponentHorizontalArrowLayer, principalComponentVerticalArrowLayer, absoluteConfidenceLayer));
 		
 		// Bind apriori symbol size of point to observation layer
 		((ObservationLayer)this.getLayer(LayerType.OBSERVATION_APRIORI)).pointSymbolSizeProperty().bind(
@@ -294,7 +394,7 @@ public class LayerManager {
 		
 		Button redrawButton  = this.createButton(
 				"graphic_refresh_32x32.png", 
-				i18n.getString("LayerManager.toolbar.button.refresh.tooltip", "Refresh graphic"),
+				i18n.getString("LayerManager.toolbar.button.refresh.tooltip", "Refresh graphic from database"),
 				ToolbarType.REDRAW,
 				toolbarActionEventHandler
 				);
@@ -313,7 +413,7 @@ public class LayerManager {
 				toolbarActionEventHandler
 				);
 				
-		this.scaleSpinner = this.createDoubleSpinner(1, Double.MAX_VALUE, 5000, 250, i18n.getString("LayerManager.toolbar.scale.tooltip", "Selected arrow and confidence scale"), 0);
+		this.scaleSpinner = this.createDoubleSpinner(1, Double.MAX_VALUE, 5000, 250, i18n.getString("LayerManager.toolbar.scale.tooltip", "Scale of arrows and confidences"), 0);
 		this.scaleSpinner.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		Label scaleLabel = new Label(" : 1");
 		scaleLabel.setGraphic(this.scaleSpinner);
@@ -340,6 +440,13 @@ public class LayerManager {
 				new Separator(),
 				scaleLabel
 				);
+		
+		boolean disable = !SQLManager.getInstance().hasDatabase();
+		this.layerToolbar.setDisable(disable);
+	}
+	
+	public void setEllipseScale(double scale) {
+		this.scaleSpinner.getValueFactory().setValue(scale);
 	}
 	
 	public void clearAllLayers() {
@@ -439,22 +546,25 @@ public class LayerManager {
 			return;
 
 		try {
-			sqlGraphicManager.load(this); 
-		} catch (SQLException e) {
+			sqlGraphicManager.load(this);
+			sqlGraphicManager.loadEllipseScale(this);
+			if (!sqlGraphicManager.load(this.getCurrentGraphicExtent()))
+				this.expand();
+			
+		} catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("LayerManager.message.error.sql.load.title", "SQL-Error"),
-							i18n.getString("LayerManager.message.error.sql.load.header", "Error, could not load data."),
-							i18n.getString("LayerManager.message.error.sql.load.message", "An exception occure during saving dataset to database."),
+							i18n.getString("LayerManager.message.error.load.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("LayerManager.message.error.load.exception.header", "Error, could not create plot from database."),
+							i18n.getString("LayerManager.message.error.load.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}
 			});
 		} finally {
-			// TODO get Extent from DB
-			this.expand();
+			//this.expand();
 			this.draw();
 		}
 	}
@@ -472,8 +582,17 @@ public class LayerManager {
 					maxGraphicExtent.merge(layer.getMaximumGraphicExtent());
 			}
 		}
-		this.currentGraphicExtent.set(maxGraphicExtent);
-		this.draw();
+		
+		if (maxGraphicExtent.getMinX() == Double.MAX_VALUE && 
+				maxGraphicExtent.getMinY() == Double.MAX_VALUE && 
+				maxGraphicExtent.getMaxX() == Double.MIN_VALUE && 
+				maxGraphicExtent.getMaxY() == Double.MIN_VALUE) {
+			//this.redraw(); 
+		}
+		else {
+			this.currentGraphicExtent.set(maxGraphicExtent);
+			this.draw();
+		}
 	}
 	
 	public void zoomIn() {
@@ -512,8 +631,17 @@ public class LayerManager {
 					BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
 					ImageIO.write(bufferedImage, "PNG", outputFile);
 				} catch (Exception e) {
-					// TODO
 					e.printStackTrace();
+					Platform.runLater(new Runnable() {
+						@Override public void run() {
+							OptionDialog.showThrowableDialog (
+									i18n.getString("LayerManager.message.error.save.image.exception.title", "Unexpected Error"),
+									i18n.getString("LayerManager.message.error.save.image.exception.header", "Error, could not save plot as image."),
+									i18n.getString("LayerManager.message.error.save.image.exception.message", "An exception has occurred during image export."),
+									e
+									);
+						}
+					});
 				}
 			}
 		}
@@ -623,5 +751,53 @@ public class LayerManager {
 			}
 		});
 		return doubleSpinner;
+	}
+	
+	private void saveEllipseScale(double newScale) {
+		SQLGraphicManager sqlGraphicManager = SQLManager.getInstance().getSQLGraphicManager();
+		if (sqlGraphicManager == null || Double.isNaN(newScale) || Double.isInfinite(newScale))
+			return;
+		
+		try {
+			sqlGraphicManager.saveEllipseScale(newScale);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Platform.runLater(new Runnable() {
+				@Override public void run() {
+					OptionDialog.showThrowableDialog (
+							i18n.getString("LayerManager.message.error.save.scale.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("LayerManager.message.error.save.scale.exception.header", "Error, could not save scale parameter to database."),
+							i18n.getString("LayerManager.message.error.save.scale.exception.message", "An exception has occurred during database transaction."),
+							e
+							);
+				}
+			});
+		}
+	}
+	
+	private void save(GraphicExtent currentGraphicExtent) {
+		SQLGraphicManager sqlGraphicManager = SQLManager.getInstance().getSQLGraphicManager();
+		if (Double.isNaN(currentGraphicExtent.getMinX()) || Double.isInfinite(currentGraphicExtent.getMinX()) ||
+				Double.isNaN(currentGraphicExtent.getMinY()) || Double.isInfinite(currentGraphicExtent.getMinY()) ||
+				Double.isNaN(currentGraphicExtent.getMaxX()) || Double.isInfinite(currentGraphicExtent.getMaxX()) ||
+				Double.isNaN(currentGraphicExtent.getMaxY()) || Double.isInfinite(currentGraphicExtent.getMaxY()) ||
+				sqlGraphicManager == null) 
+			return;
+
+		try {
+			sqlGraphicManager.save(currentGraphicExtent);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Platform.runLater(new Runnable() {
+				@Override public void run() {
+					OptionDialog.showThrowableDialog (
+							i18n.getString("LayerManager.message.error.save.extent.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("LayerManager.message.error.save.extent.exception.header", "Error, could not save graphic extent to database."),
+							i18n.getString("LayerManager.message.error.save.extent.exception.message", "An exception has occurred during database transaction."),
+							e
+							);
+				}
+			});
+		}
 	}
 }

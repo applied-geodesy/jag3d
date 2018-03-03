@@ -1,6 +1,26 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.dialog;
 
-import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Optional;
@@ -43,6 +63,7 @@ public class LeastSquaresSettingDialog {
 
 	public class LeastSquaresSettings {
 		private ObjectProperty<Integer> iteration             = new SimpleObjectProperty<Integer>(50);
+		private ObjectProperty<Integer> principalComponents   = new SimpleObjectProperty<Integer>(1);
 		private ObjectProperty<Double> robustEstimationLimit  = new SimpleObjectProperty<Double>(DefaultValue.getRobustEstimationLimit());
 		private BooleanProperty orientation                   = new SimpleBooleanProperty(Boolean.TRUE);
 		private BooleanProperty congruenceAnalysis            = new SimpleBooleanProperty(Boolean.FALSE);
@@ -59,6 +80,18 @@ public class LeastSquaresSettingDialog {
 		
 		public void setIteration(final int iteration) {
 			this.iterationProperty().set(iteration);
+		}
+		
+		public ObjectProperty<Integer> principalComponentsProperty() {
+			return this.principalComponents;
+		}
+		
+		public int getPrincipalComponents() {
+			return this.principalComponentsProperty().get();
+		}
+		
+		public void setPrincipalComponents(final int principalComponents) {
+			this.principalComponentsProperty().set(principalComponents);
 		}
 		
 		public ObjectProperty<Double> robustEstimationLimitProperty() {
@@ -117,7 +150,6 @@ public class LeastSquaresSettingDialog {
 			return this.exportCovarianceMatrixProperty().get();
 		}
 		
-
 		public void setExportCovarianceMatrix(final boolean exportCovarianceMatrix) {
 			this.exportCovarianceMatrixProperty().set(exportCovarianceMatrix);
 		}
@@ -130,7 +162,7 @@ public class LeastSquaresSettingDialog {
 		}
 	}
 
-	private static I18N i18n = I18N.getInstance();
+	private I18N i18n = I18N.getInstance();
 	private static LeastSquaresSettingDialog leastSquaresSettingDialog = new LeastSquaresSettingDialog();
 	private static FormatterOptions options = FormatterOptions.getInstance();
 	private Dialog<LeastSquaresSettings> dialog = null;
@@ -138,6 +170,7 @@ public class LeastSquaresSettingDialog {
 	private ComboBox<EstimationType> estimationTypeComboBox;
 	private LeastSquaresSettings settings = new LeastSquaresSettings();
 	private Spinner<Integer> iterationSpinner;
+	private Spinner<Integer> principalComponentSpinner;
 	private Spinner<Double> robustSpinner;
 	private CheckBox orientationApproximationCheckBox, congruenceAnalysisCheckBox, exportCovarianceMatrixCheckBox;
 	private LeastSquaresSettingDialog() {}
@@ -158,8 +191,8 @@ public class LeastSquaresSettingDialog {
 			return;
 
 		this.dialog = new Dialog<LeastSquaresSettings>();
-		this.dialog.setTitle(i18n.getString("TestStatisticDialog.title", "Test statistic"));
-		this.dialog.setHeaderText(i18n.getString("TestStatisticDialog.header", "Test statistic properties"));
+		this.dialog.setTitle(i18n.getString("LeastSquaresSettingDialog.title", "Least-squares"));
+		this.dialog.setHeaderText(i18n.getString("LeastSquaresSettingDialog.header", "Least-squares properties"));
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
 		//		this.dialog.initStyle(StageStyle.UTILITY);
@@ -178,27 +211,32 @@ public class LeastSquaresSettingDialog {
 	}
 	
 	private Node createPane() {
-		this.estimationTypeComboBox = this.createEstimationTypeComboBox(EstimationType.L2NORM, i18n.getString("LeastSquaresSettingDialog.estimationtype.tooltip", "Select estimation method")); 
+		this.estimationTypeComboBox = this.createEstimationTypeComboBox(EstimationType.L2NORM, i18n.getString("LeastSquaresSettingDialog.estimationtype.tooltip", "Set estimation method")); 
 		
 		Label iterationLabel = new Label(i18n.getString("LeastSquaresSettingDialog.iterations.label", "Maximum number of iterations:"));
-		this.iterationSpinner = this.createIntegerSpinner(0, DefaultValue.getMaximalNumberOfIterations(), 10, i18n.getString("LeastSquaresSettingDialog.iterations.tooltip", "Select number of iterations"));
+		this.iterationSpinner = this.createIntegerSpinner(0, DefaultValue.getMaximalNumberOfIterations(), 10, i18n.getString("LeastSquaresSettingDialog.iterations.tooltip", "Set maximum permissible iteration value"));
 		iterationLabel.setLabelFor(this.iterationSpinner);
 		iterationLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
+		Label principalComponentLabel = new Label(i18n.getString("LeastSquaresSettingDialog.principal_components.label", "Number of principal components:"));
+		this.principalComponentSpinner = this.createIntegerSpinner(0, Integer.MAX_VALUE, 1, i18n.getString("LeastSquaresSettingDialog.principal_components.tooltip", "Set number of principal components to be estimated"));
+		principalComponentLabel.setLabelFor(this.principalComponentSpinner);
+		principalComponentLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+
 		Label robustLabel = new Label(i18n.getString("LeastSquaresSettingDialog.robust.label", "Robust estimation limit:"));
-		this.robustSpinner = this.createDoubleSpinner(1.5, Math.max(DefaultValue.getRobustEstimationLimit(), 6.0), 0.5, i18n.getString("LeastSquaresSettingDialog.robust.tooltip", "Select robust estimation limit"));
+		this.robustSpinner = this.createDoubleSpinner(1.5, Math.max(DefaultValue.getRobustEstimationLimit(), 6.0), 0.5, i18n.getString("LeastSquaresSettingDialog.robust.tooltip", "Set robust estimation limit of BIBER estimator"));
 		robustLabel.setLabelFor(this.robustSpinner);
 		robustLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
 		this.orientationApproximationCheckBox = this.createCheckBox(
 			i18n.getString("LeastSquaresSettingDialog.orientation.label", "Orientation approximation"),
-			i18n.getString("LeastSquaresSettingDialog.orientation.tooltip", "If checked, orientation approximations of direction sets will be estimated")
+			i18n.getString("LeastSquaresSettingDialog.orientation.tooltip", "If checked, orientation approximations of direction sets will be estimated before network adjustment starts")
 		);
 		
 		
 		this.congruenceAnalysisCheckBox = this.createCheckBox(
 				i18n.getString("LeastSquaresSettingDialog.congruenceanalysis.label", "Congruence analysis"),
-				i18n.getString("LeastSquaresSettingDialog.congruenceanalysis.tooltip", "If checked, in case of a free network adjustment, a congruence analysis will be carry out")
+				i18n.getString("LeastSquaresSettingDialog.congruenceanalysis.tooltip", "If checked, a congruence analysis will be carry out in case of a free network adjustment")
 		);
 		
 		this.exportCovarianceMatrixCheckBox = this.createCheckBox(
@@ -210,6 +248,7 @@ public class LeastSquaresSettingDialog {
 		this.orientationApproximationCheckBox.selectedProperty().bindBidirectional(this.settings.orientationProperty());
 		this.congruenceAnalysisCheckBox.selectedProperty().bindBidirectional(this.settings.congruenceAnalysisProperty());
 		this.iterationSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.iterationProperty());
+		this.principalComponentSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.principalComponentsProperty());
 		this.robustSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.robustEstimationLimitProperty());
 		
 		this.estimationTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new EstimationTypeChangeListener());
@@ -224,6 +263,7 @@ public class LeastSquaresSettingDialog {
 		//gridPane.setGridLinesVisible(true);
 		
 		GridPane.setHgrow(iterationLabel, Priority.NEVER);
+		GridPane.setHgrow(principalComponentLabel, Priority.NEVER);
 		GridPane.setHgrow(robustLabel, Priority.NEVER);
 		
 		GridPane.setHgrow(this.orientationApproximationCheckBox, Priority.ALWAYS);
@@ -231,6 +271,7 @@ public class LeastSquaresSettingDialog {
 		GridPane.setHgrow(this.exportCovarianceMatrixCheckBox, Priority.ALWAYS);
 		
 		GridPane.setHgrow(this.robustSpinner, Priority.ALWAYS);
+		GridPane.setHgrow(this.principalComponentSpinner, Priority.ALWAYS);
 		GridPane.setHgrow(this.iterationSpinner, Priority.ALWAYS);
 		
 		int row = 0;
@@ -243,6 +284,9 @@ public class LeastSquaresSettingDialog {
 
 		gridPane.add(robustLabel,        0, ++row);
 		gridPane.add(this.robustSpinner, 1,   row);
+		
+		gridPane.add(principalComponentLabel,        0, ++row);
+		gridPane.add(this.principalComponentSpinner, 1,   row);
 
 		gridPane.add(this.congruenceAnalysisCheckBox,       0, ++row, 2, 1);
 		gridPane.add(this.exportCovarianceMatrixCheckBox,   0, ++row, 2, 1);
@@ -412,14 +456,14 @@ public class LeastSquaresSettingDialog {
 	private void save() {
 		try {
 			SQLManager.getInstance().save(this.settings);
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("FormatterOptionDialog.message.error.sql.title", "SQL-Error"),
-							i18n.getString("FormatterOptionDialog.message.error.sql.header", "Error, could not save changes in database table"),
-							i18n.getString("FormatterOptionDialog.message.error.sql.message", "An exception occure during saving dataset to database."),
+							i18n.getString("FormatterOptionDialog.message.error.save.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("FormatterOptionDialog.message.error.save.exception.header", "Error, could not save least-squares settings to database."),
+							i18n.getString("FormatterOptionDialog.message.error.save.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}
@@ -430,14 +474,14 @@ public class LeastSquaresSettingDialog {
 	private void load() {
 		try {
 			SQLManager.getInstance().load(this.settings);
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("ProjectionDialog.message.error.sql.load.title", "SQL-Error"),
-							i18n.getString("ProjectionDialog.message.error.sql.load.header", "Error, could not load data."),
-							i18n.getString("ProjectionDialog.message.error.sql.load.message", "An exception occure during saving dataset to database."),
+							i18n.getString("ProjectionDialog.message.error.load.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("ProjectionDialog.message.error.load.exception.header", "Error, could not load least-squares settings from database."),
+							i18n.getString("ProjectionDialog.message.error.load.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}

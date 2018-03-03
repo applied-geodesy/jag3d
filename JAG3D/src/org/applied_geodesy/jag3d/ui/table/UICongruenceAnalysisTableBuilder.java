@@ -1,9 +1,35 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.table;
 
-import java.sql.SQLException;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.applied_geodesy.jag3d.sql.SQLManager;
@@ -87,6 +113,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		cellValueType = CellValueType.STRING;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(header, CongruenceAnalysisRow::nameInReferenceEpochProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
+		stringColumn.setPrefWidth(175);
 		table.getColumns().add(stringColumn);
 
 		// Target-ID
@@ -96,6 +123,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		cellValueType = CellValueType.STRING;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(header, CongruenceAnalysisRow::nameInControlEpochProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true);
+		stringColumn.setPrefWidth(175);
 		table.getColumns().add(stringColumn);
 
 		///////////////// A-POSTERIORI VALUES /////////////////////////////
@@ -222,7 +250,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.y.label", "\u2207y");
-		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.y.tooltip", "Gross-error of y-component");
+		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.y.tooltip", "Gross-error in y");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::grossErrorYProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
@@ -232,7 +260,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.x.label", "\u2207x");
-		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.x.tooltip", "Gross-error of x-component");
+		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.x.tooltip", "Gross-error in x");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::grossErrorXProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
@@ -242,7 +270,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.z.label", "\u2207z");
-		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.z.tooltip", "Gross-error of z-component");
+		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.z.tooltip", "Gross-error in z");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::grossErrorZProperty, getDoubleCallback(cellValueType), this.dimension != 2 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
@@ -254,7 +282,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.y.label", "\u2207y(\u03B1,\u03B2)");
-		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.y.tooltip", "Minimal detectable bias of y-component");
+		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.y.tooltip", "Minimal detectable bias in y");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::minimalDetectableBiasYProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
@@ -264,7 +292,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.x.label", "\u2207x(\u03B1,\u03B2)");
-		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.x.tooltip", "Minimal detectable bias of x-component");
+		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.x.tooltip", "Minimal detectable bias in x");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::minimalDetectableBiasXProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
@@ -274,7 +302,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.z.label", "\u2207z(\u03B1,\u03B2)");
-		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.z.tooltip", "Minimal detectable bias of z-component");
+		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.z.tooltip", "Minimal detectable bias in z");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::minimalDetectableBiasZProperty, getDoubleCallback(cellValueType), this.dimension != 2 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
@@ -326,7 +354,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		columnIndex = table.getColumns().size(); 
 		final int columnIndexOutlier = columnIndex;
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.testdecision.label", "Significant");
-		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.testdecision.tooltip", "Decision of test statistic");
+		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.testdecision.tooltip", "Checked, if null-hypothesis is rejected");
 		cellValueType = CellValueType.BOOLEAN;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		booleanColumn = this.<Boolean>getColumn(header, CongruenceAnalysisRow::significantProperty, getBooleanCallback(), ColumnType.APOSTERIORI_POINT_CONGRUENCE, columnIndex, false);
@@ -387,8 +415,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		if (valid && this.isComplete(rowData)) {
 			try {
 				SQLManager.getInstance().saveItem(this.congruenceAnalysisItemValue.getGroupId(), rowData);
-			} catch (SQLException e) {
-				
+			} catch (Exception e) {
 				switch (columnIndex) {
 				case 1:
 					rowData.setNameInReferenceEpoch(oldValue == null ? null : oldValue.toString().trim());
@@ -461,7 +488,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 					clonedRow.setNameInControlEpoch(names[1]);
 					SQLManager.getInstance().saveItem(this.congruenceAnalysisItemValue.getGroupId(), clonedRow);
 				} 
-				catch (SQLException e) {
+				catch (Exception e) {
 					raiseErrorMessage(ContextMenuType.DUPLICATE, e);
 					e.printStackTrace();
 					break;
@@ -491,7 +518,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 				try {
 					SQLManager.getInstance().remove(row);
 				} 
-				catch (SQLException e) {
+				catch (Exception e) {
 					raiseErrorMessage(ContextMenuType.REMOVE, e);
 					e.printStackTrace();
 					break;
@@ -522,7 +549,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		try {
 			SQLManager.getInstance().saveGroup((CongruenceAnalysisTreeItemValue)newTreeItem.getValue());
 		} 
-		catch (SQLException e) {
+		catch (Exception e) {
 			raiseErrorMessage(type, e);
 			UITreeBuilder.getInstance().removeItem(newTreeItem);
 			e.printStackTrace();
@@ -535,12 +562,72 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 				SQLManager.getInstance().saveItem(groupId, row);
 			
 		} 
-		catch (SQLException e) {
+		catch (Exception e) {
 			raiseErrorMessage(type, e);
 			e.printStackTrace();
 			return;
 		}
 		
 		UITreeBuilder.getInstance().getTree().getSelectionModel().select(newTreeItem);
+	}
+	
+	public void export(File file, boolean aprioriValues) throws IOException {
+		List<CongruenceAnalysisRow> rows = this.table.getItems();
+		
+		String exportFormatString = "%10s \t";
+		String exportFormatDouble = "%+15.6f \t";
+		
+		PrintWriter writer = null;
+
+		try {
+			writer = new PrintWriter(new BufferedWriter(new FileWriter( file )));
+
+			for (CongruenceAnalysisRow row : rows) {
+				if (!row.isEnable())
+					continue;
+
+				String nameInReferenceEpoch = row.getNameInReferenceEpoch();
+				String nameInControlEpoch   = row.getNameInControlEpoch();
+
+				if (nameInReferenceEpoch == null || nameInReferenceEpoch.trim().isEmpty() || 
+						nameInControlEpoch == null || nameInControlEpoch.trim().isEmpty())
+					continue;
+
+				Double y = aprioriValues ? null : row.getYAposteriori();
+				Double x = aprioriValues ? null : row.getXAposteriori();
+				Double z = aprioriValues ? null : row.getZAposteriori();
+
+				if (!aprioriValues && this.dimension != 2 && z == null)
+					continue;
+				
+				if (!aprioriValues && this.dimension != 1 && (y == null || x == null))
+					continue;
+
+				Double sigmaY = aprioriValues ? null : row.getSigmaYaposteriori();
+				Double sigmaX = aprioriValues ? null : row.getSigmaXaposteriori();
+				Double sigmaZ = aprioriValues ? null : row.getSigmaZaposteriori();
+
+				if (!aprioriValues && (sigmaY == null || sigmaX == null || sigmaZ == null))
+					continue;
+				
+				String yValue = this.dimension != 1 && y != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(y)) : "";
+				String xValue = this.dimension != 1 && x != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(x)) : "";
+				String zValue = this.dimension != 2 && z != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(z)) : "";
+
+				String sigmaYvalue = this.dimension != 1 && sigmaY != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(sigmaY)) : "";
+				String sigmaXvalue = this.dimension != 1 && sigmaX != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(sigmaX)) : "";
+				String sigmaZvalue = this.dimension != 2 && sigmaZ != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(sigmaZ)) : "";
+
+				writer.println(
+						String.format(exportFormatString, nameInReferenceEpoch) +
+						String.format(exportFormatString, nameInControlEpoch) +
+						yValue + xValue + zValue + sigmaYvalue + sigmaXvalue + sigmaZvalue
+						);
+			}
+		}
+		finally {
+			if (writer != null)
+				writer.close();
+		}
 	}
 }

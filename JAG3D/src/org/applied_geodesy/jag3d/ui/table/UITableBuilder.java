@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.table;
 
 import java.util.function.Function;
@@ -24,7 +45,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.text.Text;
 import javafx.util.Callback;
 
 public abstract class UITableBuilder<T>  {
@@ -71,46 +91,11 @@ public abstract class UITableBuilder<T>  {
 		this.table = new TableView<T>();
 		ObservableList<T> tableModel = FXCollections.observableArrayList();
 		this.table.setItems(tableModel);
-		this.table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		this.table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
 		this.table.setTableMenuButtonVisible(false);
-		this.table.setPlaceholder(new Text(i18n.getString("UITableBuilder.emptytable", "No content in table.")));
+//		this.table.setPlaceholder(new Text(i18n.getString("UITableBuilder.emptytable", "No content in table.")));
 		this.table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-		tableModel.add(this.getEmptyRow());
-		
-//		tableModel.addListener(new ListChangeListener<T>() {
-//
-//			@Override
-//			public void onChanged(Change<? extends T> change) {
-//				// TODO Auto-generated method stub
-//				change.next();
-//				System.out.println(tableModel.size());
-//			}
-//			
-//		});
-//		table.getColumns().addListener(
-//                new ListChangeListener<TableColumn>() {
-//
-//					@Override
-//					public void onChanged(Change<? extends TableColumn> change) {
-//
-//	                       change.next();
-//
-////	                        System.out.println("old list");
-////	                        System.out.println(change.getRemoved());
-//
-//	                       System.out.println (change.wasPermutated()+"   "+change.wasUpdated()+"   "+change.wasReplaced()) ;
-//	                        System.out.println(change.wasReplaced());
-//	                        
-//	                        System.out.println("new list");
-//	                        System.out.println(change.getList());
-////	                       }
-//						
-//					}
-//
-//
-//
-//                });
-		
+		tableModel.add(this.getEmptyRow());		
 		return table;
 	}
 	
@@ -130,6 +115,17 @@ public abstract class UITableBuilder<T>  {
 			@Override
 			public TableCell<T, Double> call(TableColumn<T, Double> cell) {
 				TableCell<T, Double> tableCell = new EditableCell<T, Double>(new EditableDoubleCellConverter(cellValueType));
+				tableCell.setAlignment(Pos.CENTER_RIGHT);
+				return tableCell;
+			}
+	    };
+	}
+	
+	static <T> Callback<TableColumn<T,Double>, TableCell<T,Double>> getDoubleCallback(CellValueType cellValueType, boolean displayUnit) {
+		return new Callback<TableColumn<T, Double>, TableCell<T, Double>>() {
+			@Override
+			public TableCell<T, Double> call(TableColumn<T, Double> cell) {
+				TableCell<T, Double> tableCell = new EditableCell<T, Double>(new EditableDoubleCellConverter(cellValueType, displayUnit));
 				tableCell.setAlignment(Pos.CENTER_RIGHT);
 				return tableCell;
 			}
@@ -202,7 +198,7 @@ public abstract class UITableBuilder<T>  {
 	    column.setUserData(type);
 	    column.setEditable(editable);
 	    column.setGraphic(columnLabel);
-	    column.setMinWidth(75);
+	    column.setMinWidth(25);
 	    column.setPrefWidth(125);
 		column.setCellValueFactory(new Callback<CellDataFeatures<T, S>, ObservableValue<S>>() {
 			@Override
@@ -222,5 +218,9 @@ public abstract class UITableBuilder<T>  {
 
 	public TableView<T> getTable() {
 		return this.table;
+	}
+	
+	public static Object getValueAt(TableView<?> table, int columnIndex, int rowIndex) {
+	    return table.getColumns().get(columnIndex).getCellObservableValue(rowIndex).getValue();
 	}
 }

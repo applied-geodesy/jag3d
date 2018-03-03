@@ -1,8 +1,30 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.dialog;
 
 import java.util.Optional;
 
-import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.version.jag3d.Version;
+import org.applied_geodesy.version.jag3d.VersionType;
 
 import javafx.application.HostServices;
 import javafx.event.ActionEvent;
@@ -28,7 +50,6 @@ import javafx.stage.Modality;
 import javafx.stage.Window;
 
 public class AboutDialog {
-	private static I18N i18n = I18N.getInstance();
 	private static AboutDialog aboutDialog = new AboutDialog();
 	private Dialog<Void> dialog = null;
 	private Window window;
@@ -54,11 +75,10 @@ public class AboutDialog {
 			return;
 
 		this.dialog = new Dialog<Void>();
-		this.dialog.setTitle(i18n.getString("AboutDialog.title", "About JAG3D"));
-		this.dialog.setHeaderText(i18n.getString("AboutDialog.header", "Java\u00B7Applied\u00B7Geodesy\u00B73D"));
+		this.dialog.setTitle("JAG3D");
+		this.dialog.setHeaderText("JAG3D \u2014 Java\u00B7Applied\u00B7Geodesy\u00B73D");
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CLOSE);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
-		//		this.dialog.initStyle(StageStyle.UTILITY);
 		this.dialog.initOwner(window);
 		this.dialog.getDialogPane().setContent(this.createPane());
 		this.dialog.setResizable(true);
@@ -78,17 +98,21 @@ public class AboutDialog {
 		applicationText.setTextAlignment(TextAlignment.CENTER);
 		
 		// left-hand labels
-		Label authorLabel     = this.createLabel("Author:");	
-		Label licenceLabel    = this.createLabel("Licence:");
-		Label versionLabel    = this.createLabel("Version:");	
-		Label homePageLabel   = this.createLabel("Homepage:");
-		Label thirdPartyLabel = this.createLabel("3rd Party Libraries:");
-		Label iconLabel       = this.createLabel("Icon set:");
+		Label authorLabel      = this.createLabel("Author:");	
+		Label licenceLabel     = this.createLabel("Licence:");
+		Label uiVersionLabel   = this.createLabel("UI version:");
+		Label dbVersionLabel   = this.createLabel("DB version:");
+		Label coreVersionLabel = this.createLabel("AC version:");
+		Label homePageLabel    = this.createLabel("Homepage:");
+		Label thirdPartyLabel  = this.createLabel("3rd Party Libraries:");
+		Label iconLabel        = this.createLabel("Icon set:");
 
 		// right-hand labels
-		Label author = this.createLabel("Michael L\u00F6sler\r\n\r\nBahnhofsplatz 3\r\nDE-61118 Bad Vilbel");
-		Label licence = this.createLabel("GNU General Public License v3.0");
-		Label version = this.createLabel("2018xxxx");
+		Label author      = this.createLabel("Michael L\u00F6sler\r\n\r\nBahnhofsplatz 3\r\nDE-61118 Bad Vilbel");
+		Label licence     = this.createLabel("GNU General Public License v3.0");
+		Label uiVersion   = this.createLabel("v" + Version.get(VersionType.USER_INTERFACE));
+		Label dbVersion   = this.createLabel("v" + Version.get(VersionType.DATABASE));
+		Label coreVersion = this.createLabel("v" + Version.get(VersionType.ADJUSTMENT_CORE));
 		
 		Hyperlink homePageLink = new Hyperlink("software.applied-geodesy.org");
 		homePageLink.setTooltip(new Tooltip("Go to software.applied-geodesy.org"));
@@ -118,7 +142,9 @@ public class AboutDialog {
 
 		authorLabel.setLabelFor(author);
 		licenceLabel.setLabelFor(licence);
-		versionLabel.setLabelFor(version);
+		uiVersionLabel.setLabelFor(uiVersion);
+		dbVersionLabel.setLabelFor(dbVersion);
+		coreVersionLabel.setLabelFor(coreVersion);
 		homePageLabel.setLabelFor(homePageLink);
 		thirdPartyLabel.setLabelFor(thirdParty);
 		iconLabel.setLabelFor(icon);
@@ -133,8 +159,14 @@ public class AboutDialog {
 		gridPane.add(licenceLabel, 0, row);
 		gridPane.add(licence, 1, row++);
 		
-		gridPane.add(versionLabel, 0, row);
-		gridPane.add(version, 1, row++);
+		gridPane.add(uiVersionLabel, 0, row);
+		gridPane.add(uiVersion, 1, row++);
+		
+		gridPane.add(dbVersionLabel, 0, row);
+		gridPane.add(dbVersion, 1, row++);
+		
+		gridPane.add(coreVersionLabel, 0, row);
+		gridPane.add(coreVersion, 1, row++);
 		
 		gridPane.add(homePageLabel, 0, row);
 		gridPane.add(homePageLink, 1, row++);

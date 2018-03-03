@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch4jConfig>
+  <dontWrapJar>true</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>jag3d.jar</jar>
+  <outfile>jag3d.exe</outfile>
+  <errTitle>Error</errTitle>
+  <cmdLine></cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl>http://applied-geodesy.org/</supportUrl>
+  <stayAlive>false</stayAlive>
+  <restartOnCrash>false</restartOnCrash>
+  <manifest></manifest>
+  <icon>JAG3D.ico</icon>
+  <jre>
+    <path></path>
+    <bundledJre64Bit>false</bundledJre64Bit>
+    <bundledJreAsFallback>false</bundledJreAsFallback>
+    <minVersion>9.0.0</minVersion>
+    <maxVersion></maxVersion>
+    <jdkPreference>preferJre</jdkPreference>
+    <runtimeBits>64/32</runtimeBits>
+  </jre>
+  <splash>
+    <file>JAG3D_splash.bmp</file>
+    <waitForWindow>true</waitForWindow>
+    <timeout>60</timeout>
+    <timeoutErr>true</timeoutErr>
+  </splash>
+  <versionInfo>
+    <fileVersion>20.18.02.27</fileVersion>
+    <txtFileVersion>20180227</txtFileVersion>
+    <fileDescription>Java Applied Geodesy 3D (JAG3D) - Least-Squares Adjustment Software for Geodetic Sciences</fileDescription>
+    <copyright>Michael Loesler</copyright>
+    <productVersion>20.18.02.27</productVersion>
+    <txtProductVersion>20180227</txtProductVersion>
+    <productName>Java Applied Geodesy 3D (JAG3D) - Least-Squares Adjustment Software for Geodetic Sciences</productName>
+    <companyName>Applied Geodesy - http://applied-geodesy.org</companyName>
+    <internalName>JAG3D</internalName>
+    <originalFilename>JAG3D.exe</originalFilename>
+    <trademarks></trademarks>
+    <language>ENGLISH_UK</language>
+  </versionInfo>
+</launch4jConfig>

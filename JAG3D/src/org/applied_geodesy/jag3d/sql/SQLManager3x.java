@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.sql;
 
 import java.sql.PreparedStatement;
@@ -13,20 +34,21 @@ import org.applied_geodesy.adjustment.network.PointGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
 import org.applied_geodesy.util.sql.DataBase;
+import org.applied_geodesy.version.jag3d.VersionType;
 
 public class SQLManager3x {
 	public final static double DATABASE_VERSION_3x = 1.29;
-	public final static double DATABASE_VERSION_FX = 20171216;
+	public final static double DATABASE_VERSION_FX = 20180107; 
 	
 	private SQLManager3x() {}
 	
 	private static void prepareOADBForDataTransfer(DataBase projectDataBase) throws SQLException {
 		PreparedStatement stmt = null;
-		final String sqlSelectVersion = "SELECT \"version\" FROM \"Version\" WHERE \"name\" = ?";
-		final String sqlUpdateVersion = "UPDATE \"Version\" SET \"version\" = ? WHERE \"name\" = ?";
+		final String sqlSelectVersion = "SELECT \"version\" FROM \"Version\" WHERE \"type\" = ?";
+		final String sqlUpdateVersion = "UPDATE \"Version\" SET \"version\" = ? WHERE \"type\" = ?";
 
 		stmt = projectDataBase.getPreparedStatement(sqlSelectVersion);
-		stmt.setString(1, "database");
+		stmt.setInt(1, VersionType.DATABASE.getId());
 		ResultSet rs = stmt.executeQuery();
 
 		double databaseVersion = -1;
@@ -49,12 +71,11 @@ public class SQLManager3x {
 					// Speichere die Version des DB-Updates
 					stmt = projectDataBase.getPreparedStatement(sqlUpdateVersion);
 					stmt.setDouble(1, subDBVersion);
-					stmt.setString(2, "database");
+					stmt.setInt(2, VersionType.DATABASE.getId());
 					stmt.execute();
 				}
 			}
 		}
-		
 	}
 	
 	static void transferOADB3xToFX(DataBase projectDataBase) throws SQLException {
@@ -229,21 +250,23 @@ public class SQLManager3x {
 				/** stochastic parameters and adjustment settings **/
 				// adjustment settings
 				"MERGE INTO \"AdjustmentDefinition\" USING ( "
-				+ "SELECT \"id\", \"adjustment_type\", \"iteration\", \"bounded_influence\", TRUE AS \"estimate_direction_set_orientation_approximation\", \"deformation_analysis\", \"export_covar\" FROM \"PUBLIC\".\"LeastSquareSetting\" JOIN \"PUBLIC\".\"GeneralSetting\" ON \"PUBLIC\".\"LeastSquareSetting\".\"id\" = \"PUBLIC\".\"GeneralSetting\".\"id\" WHERE \"PUBLIC\".\"LeastSquareSetting\".\"id\" = 1 LIMIT 1 "
-				+ ") AS \"vals\" (\"id\", \"type\", \"number_of_iterations\", \"robust_estimation_limit\", \"estimate_direction_set_orientation_approximation\", \"congruence_analysis\", \"export_covariance_matrix\") "
+				+ "SELECT \"id\", \"adjustment_type\", \"iteration\", \"bounded_influence\", 1 AS \"number_of_principal_components\", TRUE AS \"estimate_direction_set_orientation_approximation\", \"deformation_analysis\", \"export_covar\" FROM \"PUBLIC\".\"LeastSquareSetting\" JOIN \"PUBLIC\".\"GeneralSetting\" ON \"PUBLIC\".\"LeastSquareSetting\".\"id\" = \"PUBLIC\".\"GeneralSetting\".\"id\" WHERE \"PUBLIC\".\"LeastSquareSetting\".\"id\" = 1 LIMIT 1 "
+				+ ") AS \"vals\" (\"id\", \"type\", \"number_of_iterations\", \"robust_estimation_limit\", \"number_of_principal_components\", \"estimate_direction_set_orientation_approximation\", \"congruence_analysis\", \"export_covariance_matrix\") "
 				+ "ON \"AdjustmentDefinition\".\"id\" = \"vals\".\"id\" "
 				+ "WHEN MATCHED THEN UPDATE SET "
-				+ "\"AdjustmentDefinition\".\"type\"                     = \"vals\".\"type\", "
-				+ "\"AdjustmentDefinition\".\"number_of_iterations\"     = \"vals\".\"number_of_iterations\", "
-				+ "\"AdjustmentDefinition\".\"robust_estimation_limit\"  = \"vals\".\"robust_estimation_limit\", "
+				+ "\"AdjustmentDefinition\".\"type\"                           = \"vals\".\"type\", "
+				+ "\"AdjustmentDefinition\".\"number_of_iterations\"           = \"vals\".\"number_of_iterations\", "
+				+ "\"AdjustmentDefinition\".\"robust_estimation_limit\"        = \"vals\".\"robust_estimation_limit\", "
+				+ "\"AdjustmentDefinition\".\"number_of_principal_components\" = \"vals\".\"number_of_principal_components\", "
 				+ "\"AdjustmentDefinition\".\"estimate_direction_set_orientation_approximation\" = \"vals\".\"estimate_direction_set_orientation_approximation\", "
-				+ "\"AdjustmentDefinition\".\"congruence_analysis\"      = \"vals\".\"congruence_analysis\", "
-				+ "\"AdjustmentDefinition\".\"export_covariance_matrix\" = \"vals\".\"export_covariance_matrix\" "
+				+ "\"AdjustmentDefinition\".\"congruence_analysis\"            = \"vals\".\"congruence_analysis\", "
+				+ "\"AdjustmentDefinition\".\"export_covariance_matrix\"       = \"vals\".\"export_covariance_matrix\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"type\", "
 				+ "\"vals\".\"number_of_iterations\", "
 				+ "\"vals\".\"robust_estimation_limit\", "
+				+ "\"vals\".\"number_of_principal_components\", "
 				+ "\"vals\".\"estimate_direction_set_orientation_approximation\", "
 				+ "\"vals\".\"congruence_analysis\","
 				+ "\"vals\".\"export_covariance_matrix\" ",
@@ -370,7 +393,7 @@ public class SQLManager3x {
 				+ "\"redundancy\",\"omega\",\"sigma2apost\",\"number_of_observations\" FROM \"PUBLIC\".\"VarianceEstimation\" ",
 				
 				// Principle component analysis
-				"INSERT INTO \"FirstPrincipalComponent\" (\"index\",\"value\",\"ratio\") "
+				"INSERT INTO \"PrincipalComponent\" (\"index\",\"value\",\"ratio\") "
 				+ "SELECT \"index\",\"value\",\"ratio\" FROM \"PUBLIC\".\"PrincipalComponentAnalysis\" ",
 				
 				// rank defect of NES

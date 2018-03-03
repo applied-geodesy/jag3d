@@ -1,4 +1,30 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.table.row;
+
+import java.util.Locale;
+import java.util.Scanner;
+
+import org.applied_geodesy.util.FormatterOptions;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -343,4 +369,218 @@ public class GNSSObservationRow extends ObservationRow {
 
 		return clone;
 	}
+
+	public static GNSSObservationRow scan(String str, int dim) {
+		if (dim == 1)
+			return GNSSObservationRow.scan1D(str);
+		else if (dim == 2)
+			return GNSSObservationRow.scan2D(str);
+		else if (dim == 3)
+			return GNSSObservationRow.scan3D(str);
+		return null;
+	}
+
+	private static GNSSObservationRow scan1D(String str) {
+		FormatterOptions options = FormatterOptions.getInstance();
+		Scanner scanner = new Scanner( str.trim() );
+		try {
+			scanner.useLocale( Locale.ENGLISH );
+			String startPointName = new String(), 
+					endPointName  = new String(); 
+			double z = 0, sigmaZ = 0;
+			GNSSObservationRow row = new GNSSObservationRow();
+			
+			// station
+			if (!scanner.hasNext())
+				return null;
+			startPointName = scanner.next();
+
+			// target
+			if (!scanner.hasNext())
+				return null;
+			endPointName = scanner.next();	
+
+			if (startPointName.equals(endPointName))
+				return null;
+			
+			row.setStartPointName(startPointName);
+			row.setEndPointName(endPointName);
+
+			// Z 		
+			if (!scanner.hasNextDouble())
+				return null;
+			z = options.convertLengthToModel(scanner.nextDouble());
+
+			// sigma Z
+			if (!scanner.hasNextDouble()) {
+				row.setZApriori(z);
+				return row;
+			}
+			sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+
+			row.setZApriori(z);
+			row.setSigmaZapriori(sigmaZ);
+			
+			return row;
+		}
+		finally {
+			scanner.close();
+		}
+	}
+
+	private static GNSSObservationRow scan2D(String str) {
+		FormatterOptions options = FormatterOptions.getInstance();
+		Scanner scanner = new Scanner( str.trim() );
+		try {
+			scanner.useLocale( Locale.ENGLISH );
+			String startPointName = new String(), 
+					endPointName  = new String(); 
+			double x = 0, y = 0, sigmaX = 0, sigmaY = 0;
+			GNSSObservationRow row = new GNSSObservationRow();
+			
+			// station
+			if (!scanner.hasNext())
+				return null;
+			startPointName = scanner.next();
+
+			// target
+			if (!scanner.hasNext())
+				return null;
+			endPointName = scanner.next();	
+
+			if (startPointName.equals(endPointName))
+				return null;
+			
+			row.setStartPointName(startPointName);
+			row.setEndPointName(endPointName);
+
+			// Y 		
+			if (!scanner.hasNextDouble())
+				return null;
+			y = options.convertLengthToModel(scanner.nextDouble());
+
+			// X
+			if (!scanner.hasNextDouble())
+				return null;
+			x = options.convertLengthToModel(scanner.nextDouble());
+
+			// sigma Y (and X)
+			if (!scanner.hasNextDouble()) {
+				row.setXApriori(x);
+				row.setYApriori(y);
+				return row;
+			}
+			sigmaX = sigmaY = options.convertLengthToModel(scanner.nextDouble());
+
+			// sigma Y
+			if (!scanner.hasNextDouble()) {
+				row.setXApriori(x);
+				row.setYApriori(y);
+				row.setSigmaXapriori(sigmaX);
+				row.setSigmaYapriori(sigmaY);
+				return row;
+
+			}
+			sigmaX = options.convertLengthToModel(scanner.nextDouble());
+
+			row.setXApriori(x);
+			row.setYApriori(y);
+			row.setSigmaXapriori(sigmaX);
+			row.setSigmaYapriori(sigmaY);
+			return row;
+		}
+		finally {
+			scanner.close();
+		}
+	}
+
+	private static GNSSObservationRow scan3D(String str) {
+		FormatterOptions options = FormatterOptions.getInstance();
+		Scanner scanner = new Scanner( str.trim() );
+		try {
+			scanner.useLocale( Locale.ENGLISH );
+			String startPointName = new String(), 
+					endPointName  = new String(); 
+			double x = 0, y = 0, z = 0, sigmaX = 0, sigmaY = 0, sigmaZ = 0;
+			GNSSObservationRow row = new GNSSObservationRow();
+			
+			// station
+			if (!scanner.hasNext())
+				return null;
+			startPointName = scanner.next();
+
+			// target
+			if (!scanner.hasNext())
+				return null;
+			endPointName = scanner.next();	
+
+			if (startPointName.equals(endPointName))
+				return null;
+			
+			row.setStartPointName(startPointName);
+			row.setEndPointName(endPointName);
+
+			// Y 		
+			if (!scanner.hasNextDouble())
+				return null;
+			y = options.convertLengthToModel(scanner.nextDouble());
+
+			// X
+			if (!scanner.hasNextDouble())
+				return null;
+			x = options.convertLengthToModel(scanner.nextDouble());
+
+			// Z
+			if (!scanner.hasNextDouble())
+				return null;
+			z = options.convertLengthToModel(scanner.nextDouble());
+
+			// sigma Y (and X,Z)
+			if (!scanner.hasNextDouble()) {
+				row.setXApriori(x);
+				row.setYApriori(y);
+				row.setZApriori(z);
+				return row;
+			}
+			sigmaY = sigmaX = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+
+			// sigma X (or Z)
+			if (!scanner.hasNextDouble()) {
+				row.setXApriori(x);
+				row.setYApriori(y);
+				row.setZApriori(z);
+				row.setSigmaXapriori(sigmaX);
+				row.setSigmaYapriori(sigmaY);
+				row.setSigmaZapriori(sigmaZ);
+				return row;
+			}
+
+			sigmaX = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+
+			// sigma Y (or Z)
+			if (!scanner.hasNextDouble()) {
+				row.setXApriori(x);
+				row.setYApriori(y);
+				row.setZApriori(z);
+				row.setSigmaXapriori(sigmaY);
+				row.setSigmaYapriori(sigmaY);
+				row.setSigmaZapriori(sigmaZ);
+				return row;
+			}
+
+			sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+
+			row.setXApriori(x);
+			row.setYApriori(y);
+			row.setZApriori(z);
+			row.setSigmaXapriori(sigmaX);
+			row.setSigmaYapriori(sigmaY);
+			row.setSigmaZapriori(sigmaZ);
+			return row;
+		}
+		finally {
+			scanner.close();
+		}
+	}
+
 }

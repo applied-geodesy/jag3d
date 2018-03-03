@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.util;
 
 import java.text.NumberFormat;
@@ -87,12 +108,12 @@ public class FormatterOptions {
 		LengthUnit LENGTH_RESIDUAL_UNIT = LengthUnit.MILLIMETER;
 		AngleUnit  ANGLE_RESIDUAL_UNIT  = AngleUnit.MILLIGRADIAN;
 		ScaleUnit  SCALE_RESIDUAL_UNIT  = ScaleUnit.PARTS_PER_MILLION_WRT_ZERO;
-		
+
 		final NumberFormat lengthFormatter = NumberFormat.getInstance(Locale.ENGLISH);
 		final NumberFormat angleFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
 		final NumberFormat scaleFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
 		final NumberFormat vectorFormatter = NumberFormat.getInstance(Locale.ENGLISH);
-		
+
 		final NumberFormat lengthUncertaintyFormatter = NumberFormat.getInstance(Locale.ENGLISH);
 		final NumberFormat angleUncertaintyFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
 		final NumberFormat scaleUncertaintyFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
@@ -108,14 +129,13 @@ public class FormatterOptions {
 		angleFormatter.setGroupingUsed(false);
 		scaleFormatter.setGroupingUsed(false);
 		vectorFormatter.setGroupingUsed(false);
+		statisticFormatter.setGroupingUsed(false);
 		
 		lengthUncertaintyFormatter.setGroupingUsed(false);
 		angleUncertaintyFormatter.setGroupingUsed(false);
 		scaleUncertaintyFormatter.setGroupingUsed(false);
 		vectorUncertaintyFormatter.setGroupingUsed(false);
-		
-		statisticFormatter.setGroupingUsed(false);
-		
+
 		lengthResidualFormatter.setGroupingUsed(false);
 		angleResidualFormatter.setGroupingUsed(false);
 		scaleResidualFormatter.setGroupingUsed(false);
@@ -124,14 +144,13 @@ public class FormatterOptions {
 		this.setFractionDigits(angleFormatter,  5);
 		this.setFractionDigits(scaleFormatter,  2);
 		this.setFractionDigits(vectorFormatter, 7);
+		this.setFractionDigits(statisticFormatter, 2);
 		
 		this.setFractionDigits(lengthUncertaintyFormatter, 1);
 		this.setFractionDigits(angleUncertaintyFormatter,  2);
 		this.setFractionDigits(scaleUncertaintyFormatter,  1);
 		this.setFractionDigits(vectorUncertaintyFormatter, 1);
-		
-		this.setFractionDigits(statisticFormatter, 2);
-		
+				
 		this.setFractionDigits(lengthResidualFormatter, 1);
 		this.setFractionDigits(angleResidualFormatter, 2);
 		this.setFractionDigits(scaleResidualFormatter, 2);
@@ -281,7 +300,7 @@ public class FormatterOptions {
 				displayUnit ? this.formatterOptions.get(CellValueType.VECTOR).getUnit().getAbbreviation():"").trim();
 	}
 	
-	public String toTestStatisticFormat(double d) {
+	public String toStatisticFormat(double d) {
 		return this.formatterOptions.get(CellValueType.STATISTIC).getFormatter().format(d).trim();
 	}
 	
@@ -366,5 +385,4 @@ public class FormatterOptions {
 	public void removeFormatterChangedListener(FormatterChangedListener l) {
 		this.listenerList.remove(l);
 	}
-	
 }

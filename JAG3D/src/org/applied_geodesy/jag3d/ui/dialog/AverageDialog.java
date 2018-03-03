@@ -1,6 +1,26 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.dialog;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +30,7 @@ import java.util.Optional;
 import org.applied_geodesy.adjustment.DefaultAverageThreshold;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.observation.Observation;
+import org.applied_geodesy.adjustment.network.sql.IllegalProjectionPropertyException;
 import org.applied_geodesy.adjustment.network.sql.SQLAdjustmentManager;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.table.CellValueType;
@@ -66,7 +87,7 @@ public class AverageDialog {
 				save(this.observationType, newValue);
 		}
 	}
-	
+
 	private class AverageEvent implements EventHandler<ActionEvent> {
 		@Override
 		public void handle(ActionEvent event) {
@@ -75,7 +96,7 @@ public class AverageDialog {
 			event.consume();
 		}
 	}
-	
+
 	private class AverageTask extends Task<List<Observation>> {
 		private SQLAdjustmentManager dataBaseManager;
 		private AverageTask(SQLAdjustmentManager dataBaseManager) {
@@ -104,7 +125,7 @@ public class AverageDialog {
 		}
 	}
 
-	private static I18N i18n = I18N.getInstance();
+	private I18N i18n = I18N.getInstance();
 	private static AverageDialog averageDialog = new AverageDialog();
 	private Dialog<Void> dialog = null;
 	private Window window;
@@ -115,11 +136,11 @@ public class AverageDialog {
 	private Button okButton;
 	private Map<ObservationType, DoubleTextField> thresholdFieldMap = new HashMap<ObservationType, DoubleTextField>(10);
 	private UIAverageObservationTableBuilder tableBuilder = UIAverageObservationTableBuilder.getInstance();
-	
+
 	private Node thresholdPane, progressIndicatorPane;
-	
+
 	private AverageDialog() {}
-	
+
 	public static void setOwner(Window owner) {
 		averageDialog.window = owner;
 	}
@@ -130,7 +151,7 @@ public class AverageDialog {
 		averageDialog.reset();
 		return averageDialog.dialog.showAndWait();
 	}
-	
+
 	private void reset() {
 		this.preventClosing = false;
 		this.thresholdPane.setDisable(false);
@@ -143,8 +164,8 @@ public class AverageDialog {
 			return;
 
 		this.dialog = new Dialog<Void>();
-		this.dialog.setTitle(i18n.getString("CongruentPointDialog.title", "Averaging"));
-		this.dialog.setHeaderText(i18n.getString("CongruentPointDialog.header", "Averaging repeated observations"));
+		this.dialog.setTitle(i18n.getString("AverageDialog.title", "Averaging"));
+		this.dialog.setHeaderText(i18n.getString("AverageDialog.header", "Averaging repeated observations"));
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
 		this.okButton = (Button)this.dialog.getDialogPane().lookupButton(ButtonType.OK);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
@@ -166,7 +187,7 @@ public class AverageDialog {
 					event.consume();
 			}
 		});
-		
+
 		this.thresholdPane = this.createThresholdPane();
 		this.progressIndicatorPane = this.createProgressIndicatorPane();
 		this.progressIndicatorPane.setVisible(false);
@@ -185,7 +206,7 @@ public class AverageDialog {
 		box.getChildren().setAll(this.progressIndicator);
 		return box;
 	}
-	
+
 	private VBox createThresholdPane() {
 		GridPane gridPane = new GridPane();
 		gridPane.setMaxWidth(Double.MAX_VALUE);
@@ -193,7 +214,7 @@ public class AverageDialog {
 		gridPane.setVgap(5);
 		gridPane.setPadding(new Insets(5, 5, 5, 5)); // oben, recht, unten, links
 		gridPane.setAlignment(Pos.TOP_CENTER);
-		
+
 		int row = 0;
 		this.addRow(gridPane, ++row, ObservationType.LEVELING);
 		this.addRow(gridPane, ++row, ObservationType.DIRECTION);
@@ -205,7 +226,7 @@ public class AverageDialog {
 		this.addRow(gridPane, ++row, ObservationType.GNSS2D);
 		this.addRow(gridPane, ++row, ObservationType.GNSS3D);
 
-		Label warningLabel = new Label(i18n.getString("AverageDialog.warning.label", "Please note: Averaging repeated measurements will reduce\r\nthe number of observations and is an irreversible process."));
+		Label warningLabel = new Label(i18n.getString("AverageDialog.warning.label", "Please note: Averaging repeated measurements will reduce\r\nthe number of observations and is an irreversible process"));
 		warningLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		warningLabel.setWrapText(true);
 
@@ -215,18 +236,11 @@ public class AverageDialog {
 		box.setSpacing(10);
 		box.getChildren().addAll(
 				warningLabel,
-				this.createTitledPane(i18n.getString("AverageDialog.threshold.title", "Threshold"), gridPane)
+				this.createTitledPane(i18n.getString("AverageDialog.threshold.title", "Threshold w.r.t median"), gridPane)
 				);
-		
-//		Platform.runLater(new Runnable() {
-//			@Override public void run() {
-//				thresholdFieldMap.get(ObservationType.LEVELING).requestFocus();
-//			}
-//		});
-
 		return box;
 	}
-	
+
 	private void addRow(GridPane parent, int row, ObservationType observationType) {
 		CellValueType valueType = null;
 		String labelText = null;
@@ -243,32 +257,32 @@ public class AverageDialog {
 			break;
 
 		case ZENITH_ANGLE:
-			labelText = i18n.getString("AverageDialog.zenithangle.label", "Zenith angle:");
+			labelText = i18n.getString("AverageDialog.zenith_angle.label", "Zenith angle:");
 			valueType = CellValueType.ANGLE_RESIDUAL;
 			break;
 
 		case HORIZONTAL_DISTANCE:
-			labelText = i18n.getString("AverageDialog.horizontaldistance.label", "Horizontal distance:");
+			labelText = i18n.getString("AverageDialog.horizontal_distance.label", "Horizontal distance:");
 			valueType = CellValueType.LENGTH_RESIDUAL;
 			break;
 
 		case SLOPE_DISTANCE:
-			labelText = i18n.getString("AverageDialog.slopedistance.label", "Slope distance:");
+			labelText = i18n.getString("AverageDialog.slope_distance.label", "Slope distance:");
 			valueType = CellValueType.LENGTH_RESIDUAL;
 			break;
 
 		case GNSS1D:
-			labelText = i18n.getString("AverageDialog.gnss1d.label", "GNSS baseline 1D:");
+			labelText = i18n.getString("AverageDialog.gnss.1d.label", "GNSS baseline 1D:");
 			valueType = CellValueType.LENGTH_RESIDUAL;
 			break;
 
 		case GNSS2D:
-			labelText = i18n.getString("AverageDialog.gnss2d.label", "GNSS baseline 2D:");
+			labelText = i18n.getString("AverageDialog.gnss.2d.label", "GNSS baseline 2D:");
 			valueType = CellValueType.LENGTH_RESIDUAL;
 			break;
 
 		case GNSS3D:
-			labelText = i18n.getString("AverageDialog.gnss3d.label", "GNSS baseline 3D:");
+			labelText = i18n.getString("AverageDialog.gnss.3d.label", "GNSS baseline 3D:");
 			valueType = CellValueType.LENGTH_RESIDUAL;
 			break;
 		}
@@ -284,7 +298,7 @@ public class AverageDialog {
 
 			GridPane.setHgrow(label, Priority.SOMETIMES);
 			GridPane.setHgrow(thresholdField, Priority.ALWAYS);
-			
+
 			parent.add(label,          0, row);
 			parent.add(thresholdField, 1, row);
 		}
@@ -313,14 +327,14 @@ public class AverageDialog {
 				field.setValue(value);
 			}
 		} 
-		catch (SQLException e) {
+		catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("AverageDialog.message.error.sql.exception.title",  "SQL-Error"),
-							i18n.getString("AverageDialog.message.error.sql.exception.header", "Error, could not save item to database."),
-							i18n.getString("AverageDialog.message.error.sql.exception.message", "An exception occured during network adjustment."),
+							i18n.getString("AverageDialog.message.error.load.exception.title",  "Unexpected SQL-Error"),
+							i18n.getString("AverageDialog.message.error.load.exception.header", "Error, could not load averaging properties from database."),
+							i18n.getString("AverageDialog.message.error.load.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}
@@ -334,14 +348,14 @@ public class AverageDialog {
 	private void save(ObservationType observationType, double value) {
 		try {
 			SQLManager.getInstance().save(observationType, value);
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("AverageDialog.message.error.sql.load.title", "SQL-Error"),
-							i18n.getString("AverageDialog.message.error.sql.load.header", "Error, could not load data."),
-							i18n.getString("AverageDialog.message.error.sql.load.message", "An exception occure during saving dataset to database."),
+							i18n.getString("AverageDialog.message.error.save.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("AverageDialog.message.error.save.exception.header", "Error, could not save averaging properties to database."),
+							i18n.getString("AverageDialog.message.error.save.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}
@@ -360,12 +374,12 @@ public class AverageDialog {
 					List<AveragedObservationRow> averagedObservationRows = new ArrayList<AveragedObservationRow>(observations.size());
 					for (Observation observation : observations)
 						averagedObservationRows.add(new AveragedObservationRow(observation));
-					
+
 					tableBuilder.getTable().getItems().setAll(averagedObservationRows);
 					tableBuilder.getTable().setPrefHeight(200);
 					tableBuilder.getTable().setPrefWidth(250);
 					String title   = i18n.getString("AverageDialog.message.error.threshold.title", "Exceeding thresholds");
-					String header  = i18n.getString("AverageDialog.message.error.threshold.header", "Error, averaging could not be finished due to exceeded threshold values.\r\nPlease correct the listed observations or increase the threshold value.");
+					String header  = i18n.getString("AverageDialog.message.error.threshold.header", "Error, averaging could not be finished due to exceeded threshold values.\r\nPlease correct the listed observations or increase the threshold value");
 					String message = i18n.getString("AverageDialog.message.error.threshold.message","List of exceeded observations");
 
 					Platform.runLater(new Runnable() {
@@ -385,9 +399,9 @@ public class AverageDialog {
 					dialog.hide();
 				}
 			}
-			
+
 		});
-		
+
 		this.averageTask.setOnFailed(new EventHandler<WorkerStateEvent>() {
 			@Override
 			public void handle(WorkerStateEvent event) {
@@ -395,24 +409,38 @@ public class AverageDialog {
 				dialog.hide();
 				Throwable throwable = averageTask.getException(); 
 				if (throwable != null) {
-					Platform.runLater(new Runnable() {
-						@Override public void run() {
-							OptionDialog.showThrowableDialog (
-									i18n.getString("AverageDialog.message.error.sql.exception.title",  "SQL-Error"),
-									i18n.getString("AverageDialog.message.error.sql.exception.header", "Error, averaging failed."),
-									i18n.getString("AverageDialog.message.error.sql.exception.message", "An exception occured during averaging process."),
-									throwable
-									);
-						}
-					});
+					if (throwable instanceof IllegalProjectionPropertyException) {
+						Platform.runLater(new Runnable() {
+							@Override public void run() {
+								OptionDialog.showThrowableDialog (
+										i18n.getString("AverageDialog.message.error.projection.exception.title",  "Initialization error"),
+										i18n.getString("AverageDialog.message.error.projection.exception.header", "Error, the project contains unsupported projection properties."),
+										i18n.getString("AverageDialog.message.error.projection.exception.message", "An exception has occurred during estimation of approximation."),
+										throwable
+										);
+							}
+						});
+					}
+					else {
+						Platform.runLater(new Runnable() {
+							@Override public void run() {
+								OptionDialog.showThrowableDialog (
+										i18n.getString("AverageDialog.message.error.averaging.exception.title",  "Unexpected Error"),
+										i18n.getString("AverageDialog.message.error.averaging.exception.header", "Error, averaging failed. An unexpected exception occurred."),
+										i18n.getString("AverageDialog.message.error.averaging.exception.message", "An exception has occurred during averaging process."),
+										throwable
+										);
+							}
+						});
+					}
 					throwable.printStackTrace();
 				}
 				UITreeBuilder.getInstance().getTree().getSelectionModel().select(0);
 			}
 		});
-		
-		
-		
+
+
+
 		Thread th = new Thread(this.averageTask);
 		th.setDaemon(true);
 		th.start();

@@ -1,8 +1,31 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.graphic.layer.dialog;
 
 import org.applied_geodesy.jag3d.ui.graphic.layer.ConfidenceLayer;
 import org.applied_geodesy.util.i18.I18N;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
@@ -15,7 +38,31 @@ import javafx.scene.paint.Color;
 
 public class UIConfidenceLayerPropertyBuilder extends UILayerPropertyBuilder {
 
-	private static I18N i18n = I18N.getInstance();
+	private class LineWidthChangeListener implements ChangeListener<Double> {
+		@Override
+		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setLineWidth(newValue);
+		}
+	}
+	
+	private class StrokeColorChangeListener implements ChangeListener<Color> {
+		@Override
+		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setStrokeColor(newValue);
+		}
+	}
+	
+	private class FillColorChangeListener implements ChangeListener<Color> {
+		@Override
+		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setColor(newValue);
+		}
+	}
+	
+	private I18N i18n = I18N.getInstance();
 	private static UIConfidenceLayerPropertyBuilder confidenceLayerPropertyBuilder = new UIConfidenceLayerPropertyBuilder();
 
 	private ComboBox<Double> lineWidthComboBox;
@@ -39,22 +86,11 @@ public class UIConfidenceLayerPropertyBuilder extends UILayerPropertyBuilder {
 	
 	public static Node getLayerPropertyPane(ConfidenceLayer<?> layer) {
 		confidenceLayerPropertyBuilder.init();
-		confidenceLayerPropertyBuilder.bindProperties(layer);
+		confidenceLayerPropertyBuilder.set(layer);
 		return confidenceLayerPropertyBuilder.propertyPane;
 	}
-	
-	private void unbindProperties() {
-		if (this.currentLayer != null) {
-			this.currentLayer.symbolSizeProperty().unbind();
-			this.currentLayer.lineWidthProperty().unbind();
-			this.currentLayer.colorProperty().unbind();
-		}
-	}
-	
-	private void bindProperties(ConfidenceLayer<?> layer) {
-		// unbind
-		this.unbindProperties();
 		
+	private void set(ConfidenceLayer<?> layer) {		
 		// set new layer
 		this.currentLayer = layer;
 
@@ -62,11 +98,6 @@ public class UIConfidenceLayerPropertyBuilder extends UILayerPropertyBuilder {
 		this.lineWidthComboBox.getSelectionModel().select(this.currentLayer.getLineWidth());
 		this.symbolStrokeColorPicker.setValue(this.currentLayer.getStrokeColor());
 		this.symbolFillColorPicker.setValue(this.currentLayer.getColor());
-		
-		//this.currentLayer.confidenceScaleProperty().bind(this.scaleComboBox.getSelectionModel().selectedItemProperty());
-		this.currentLayer.lineWidthProperty().bind(this.lineWidthComboBox.getSelectionModel().selectedItemProperty());
-		this.currentLayer.colorProperty().bind(this.symbolFillColorPicker.valueProperty());
-		this.currentLayer.strokeColorProperty().bind(this.symbolStrokeColorPicker.valueProperty());	
 	}
 	
 	private Node createSymbolPane() {
@@ -81,8 +112,8 @@ public class UIConfidenceLayerPropertyBuilder extends UILayerPropertyBuilder {
 		Label symbolLineWidthLabel = new Label(i18n.getString("UIConfidenceLayerPropertyBuilder.symbol.linewidth.label", "Line width:"));
 		symbolLineWidthLabel.setMinWidth(Control.USE_PREF_SIZE);
 
-		this.lineWidthComboBox  = this.createLineWidthComboBox(i18n.getString("UIConfidenceLayerPropertyBuilder.symbol.linewidth.tooltip", "Selected line width"));
-		this.symbolStrokeColorPicker  = new ColorPicker(Color.BLACK);
+		this.lineWidthComboBox  = this.createLineWidthComboBox(i18n.getString("UIConfidenceLayerPropertyBuilder.symbol.linewidth.tooltip", "Set line width"));
+		this.symbolStrokeColorPicker = new ColorPicker(Color.BLACK);
 		this.symbolStrokeColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.symbolStrokeColorPicker.setMaxWidth(Double.MAX_VALUE);
 		this.symbolStrokeColorPicker.getStyleClass().add("split-button");
@@ -91,6 +122,11 @@ public class UIConfidenceLayerPropertyBuilder extends UILayerPropertyBuilder {
 		this.symbolFillColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.symbolFillColorPicker.setMaxWidth(Double.MAX_VALUE);
 		this.symbolFillColorPicker.getStyleClass().add("split-button");
+		
+		// add listeners
+		this.lineWidthComboBox.getSelectionModel().selectedItemProperty().addListener(new LineWidthChangeListener());
+		this.symbolFillColorPicker.valueProperty().addListener(new FillColorChangeListener());
+		this.symbolStrokeColorPicker.valueProperty().addListener(new StrokeColorChangeListener());
 		
 		symbolStrokeColorLabel.setLabelFor(this.symbolStrokeColorPicker);
 		symbolFillColorLabel.setLabelFor(this.symbolFillColorPicker);

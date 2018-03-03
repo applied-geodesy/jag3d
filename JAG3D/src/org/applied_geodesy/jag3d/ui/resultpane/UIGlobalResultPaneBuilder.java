@@ -1,9 +1,30 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.resultpane;
 
-import org.applied_geodesy.jag3d.ui.graphic.layer.dialog.ArrowSymbolTypeListCell;
-import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.ArrowSymbolType;
+import org.applied_geodesy.jag3d.ui.table.UIPrincipalComponentTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITestStatisticTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIVarianceComponentTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.row.PrincipalComponentRow;
 import org.applied_geodesy.jag3d.ui.table.row.TestStatisticRow;
 import org.applied_geodesy.jag3d.ui.table.row.VarianceComponentRow;
 import org.applied_geodesy.util.i18.I18N;
@@ -11,32 +32,22 @@ import org.applied_geodesy.util.i18.I18N;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Control;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 public class UIGlobalResultPaneBuilder {
 	private static UIGlobalResultPaneBuilder resultPaneBuilder = new UIGlobalResultPaneBuilder();
-	private static I18N i18n = I18N.getInstance();
-	
-	
+
 	private Node resultDataNode = null;
 
 	private UIGlobalResultPaneBuilder() {}
@@ -55,9 +66,7 @@ public class UIGlobalResultPaneBuilder {
 		if (this.resultDataNode != null)
 			return;
 
-
-		//Label testStatisticLabel = new Label(i18n.getString("UIGlobalResultPaneBuilder.teststatistic.label", "Derived teststatistics"));
-		// Label varianceComponentLabel = new Label(i18n.getString("UIGlobalResultPaneBuilder.variance_component.label", "Variance components estimation"));
+		I18N i18n = I18N.getInstance();
 		
 		TableView<TestStatisticRow> testStatisticTable = UITestStatisticTableBuilder.getInstance().getTable();
 		testStatisticTable.setUserData(GlobalResultType.TEST_STATISTIC);
@@ -67,10 +76,15 @@ public class UIGlobalResultPaneBuilder {
 		varianceComponentTable.setUserData(GlobalResultType.VARIANCE_COMPONENT);
 		varianceComponentTable.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		
+		TableView<PrincipalComponentRow> principalComponentTable = UIPrincipalComponentTableBuilder.getInstance().getTable();
+		principalComponentTable.setUserData(GlobalResultType.PRINCIPAL_COMPONENT);
+		principalComponentTable.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
 		StackPane contenPane = new StackPane();
-		contenPane.setPadding(new Insets(10, 50, 20, 50)); // oben, rechts, unten, links
-		contenPane.getChildren().addAll(testStatisticTable, varianceComponentTable);
+		contenPane.setPadding(new Insets(10, 30, 10, 30)); // oben, rechts, unten, links
+		contenPane.getChildren().addAll(testStatisticTable, varianceComponentTable, principalComponentTable);
 		varianceComponentTable.setVisible(false);
+		principalComponentTable.setVisible(false);
 
 		ComboBox<Node> paneSwitcherComboBox = new ComboBox<Node>();
 		paneSwitcherComboBox.setCellFactory(new Callback<ListView<Node>, ListCell<Node>>() {
@@ -80,7 +94,7 @@ public class UIGlobalResultPaneBuilder {
             }
 		});
 		paneSwitcherComboBox.setButtonCell(new GlobalResultTypeListCell());
-		paneSwitcherComboBox.getItems().addAll(testStatisticTable, varianceComponentTable);
+		paneSwitcherComboBox.getItems().addAll(testStatisticTable, varianceComponentTable, principalComponentTable);
 		paneSwitcherComboBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Node>() {
 
 			@Override
@@ -93,10 +107,10 @@ public class UIGlobalResultPaneBuilder {
 			
 		});
 		paneSwitcherComboBox.getSelectionModel().select(varianceComponentTable);
-		
+		paneSwitcherComboBox.setTooltip(new Tooltip(i18n.getString("UIGlobalResultPaneBuilder.global_result_switcher.tooltip", "Global network adjustment results")));
 		Region spacer = new Region();
 		HBox hbox = new HBox(10);
-		hbox.setPadding(new Insets(15, 50, 5, 0));
+		hbox.setPadding(new Insets(15, 30, 5, 0));
 		HBox.setHgrow(spacer, Priority.ALWAYS);
 		hbox.getChildren().addAll(spacer, paneSwitcherComboBox);
 
@@ -106,6 +120,4 @@ public class UIGlobalResultPaneBuilder {
 		
 		this.resultDataNode = borderPane;
 	}
-	
-
 }
