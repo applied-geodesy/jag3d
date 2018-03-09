@@ -770,8 +770,9 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 	public void export(File file, boolean aprioriValues) throws IOException {
 		List<TerrestrialObservationRow> rows = this.table.getItems();
 
-		String exportFormatString = "%10s \t";
-		String exportFormatDouble = "%+15.6f \t";
+		String exportFormatString = "%15s \t";
+		//String exportFormatDouble = "%+15.6f \t";
+		String exportFormatDouble = "%20s \t";
 		
 		PrintWriter writer = null;
 
@@ -800,8 +801,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 				String observationValue, sigmaValue, distanceValue;
 				
-				String instrumentHeight = ih != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(ih)) : "";
-				String reflectorHeight  = th != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(th)) : "";
+				String instrumentHeight = ih != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(ih, false)) : "";
+				String reflectorHeight  = th != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(th, false)) : "";
 				
 				if (aprioriValues) {
 					if (sigma != null && sigma <= 0)
@@ -815,18 +816,17 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				switch(this.type) {
 				case DIRECTION:
 				case ZENITH_ANGLE:
-					observationValue = value != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertAngleToView(value)) : "";
-					sigmaValue       = sigma != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertAngleToView(sigma)) : "";
-					distanceValue    = distance != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertAngleToView(distance)) : "";
+					observationValue = value != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toAngleFormat(value, false)) : "";
+					sigmaValue       = sigma != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toAngleFormat(sigma, false)) : "";
 					break;
 
 				default:
-					observationValue = value != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(value)) : "";
-					sigmaValue       = sigma != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(sigma)) : "";
-					distanceValue    = distance != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(distance)) : "";
+					observationValue = value != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(value, false)) : "";
+					sigmaValue       = sigma != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(sigma, false)) : "";
 					break;
 
 				}
+				distanceValue = distance != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(distance, false)) : "";
 				
 				writer.println(
 						String.format(exportFormatString, startPointName) +

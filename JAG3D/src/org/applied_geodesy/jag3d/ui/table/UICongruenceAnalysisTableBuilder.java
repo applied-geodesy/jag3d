@@ -574,8 +574,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 	public void export(File file, boolean aprioriValues) throws IOException {
 		List<CongruenceAnalysisRow> rows = this.table.getItems();
 		
-		String exportFormatString = "%10s \t";
-		String exportFormatDouble = "%+15.6f \t";
+		String exportFormatString = "%15s \t";
+		//String exportFormatDouble = "%+15.6f \t";
+		String exportFormatDouble = "%20s \t";
 		
 		PrintWriter writer = null;
 
@@ -610,13 +611,13 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 				if (!aprioriValues && (sigmaY == null || sigmaX == null || sigmaZ == null))
 					continue;
 				
-				String yValue = this.dimension != 1 && y != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(y)) : "";
-				String xValue = this.dimension != 1 && x != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(x)) : "";
-				String zValue = this.dimension != 2 && z != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(z)) : "";
+				String yValue = this.dimension != 1 && y != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(y, false)) : "";
+				String xValue = this.dimension != 1 && x != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(x, false)) : "";
+				String zValue = this.dimension != 2 && z != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(z, false)) : "";
 
-				String sigmaYvalue = this.dimension != 1 && sigmaY != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(sigmaY)) : "";
-				String sigmaXvalue = this.dimension != 1 && sigmaX != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(sigmaX)) : "";
-				String sigmaZvalue = this.dimension != 2 && sigmaZ != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(sigmaZ)) : "";
+				String sigmaYvalue = this.dimension != 1 && sigmaY != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(sigmaY, false)) : "";
+				String sigmaXvalue = this.dimension != 1 && sigmaX != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(sigmaX, false)) : "";
+				String sigmaZvalue = this.dimension != 2 && sigmaZ != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(sigmaZ, false)) : "";
 
 				writer.println(
 						String.format(exportFormatString, nameInReferenceEpoch) +

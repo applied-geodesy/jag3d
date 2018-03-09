@@ -694,8 +694,9 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 	public void export(File file, boolean aprioriValues) throws IOException {
 		List<GNSSObservationRow> rows = this.table.getItems();
 		
-		String exportFormatString = "%10s \t";
-		String exportFormatDouble = "%+15.6f \t";
+		String exportFormatString = "%15s \t";
+		//String exportFormatDouble = "%+15.6f \t";
+		String exportFormatDouble = "%20s \t";
 		
 		PrintWriter writer = null;
 
@@ -739,13 +740,13 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 						sigmaZ = null;
 				}
 				
-				String yValue = this.type != ObservationType.GNSS1D && y != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(y)) : "";
-				String xValue = this.type != ObservationType.GNSS1D && x != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(x)) : "";
-				String zValue = this.type != ObservationType.GNSS2D && z != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(z)) : "";
+				String yValue = this.type != ObservationType.GNSS1D && y != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(y, false)) : "";
+				String xValue = this.type != ObservationType.GNSS1D && x != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(x, false)) : "";
+				String zValue = this.type != ObservationType.GNSS2D && z != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(z, false)) : "";
 
-				String sigmaYvalue = this.type != ObservationType.GNSS1D && sigmaY != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(sigmaY)) : "";
-				String sigmaXvalue = this.type != ObservationType.GNSS1D && sigmaX != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(sigmaX)) : "";
-				String sigmaZvalue = this.type != ObservationType.GNSS2D && sigmaZ != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.convertLengthToView(sigmaZ)) : "";
+				String sigmaYvalue = this.type != ObservationType.GNSS1D && sigmaY != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(sigmaY, false)) : "";
+				String sigmaXvalue = this.type != ObservationType.GNSS1D && sigmaX != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(sigmaX, false)) : "";
+				String sigmaZvalue = this.type != ObservationType.GNSS2D && sigmaZ != null ? String.format(Locale.ENGLISH, exportFormatDouble, options.toLengthFormat(sigmaZ, false)) : "";
 
 				writer.println(
 						String.format(exportFormatString, startPointName) +
