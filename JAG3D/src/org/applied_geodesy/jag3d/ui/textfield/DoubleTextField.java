@@ -181,7 +181,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 			return editorNumberFormat.format(options.convertAngleToView(value.doubleValue()));
 			
 		case ANGLE_RESIDUAL:
-			return editorNumberFormat.format(options.convertAngleToView(value.doubleValue()));
+			return editorNumberFormat.format(options.convertAngleResidualToView(value.doubleValue()));
 
 		case ANGLE_UNCERTAINTY:
 			return editorNumberFormat.format(options.convertAngleUncertaintyToView(value.doubleValue()));
@@ -194,9 +194,12 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 
 		case LENGTH_UNCERTAINTY:
 			return editorNumberFormat.format(options.convertLengthUncertaintyToView(value.doubleValue()));
-
+	
 		case SCALE:
 			return editorNumberFormat.format(options.convertScaleToView(value.doubleValue()));
+			
+		case SCALE_RESIDUAL:
+			return editorNumberFormat.format(options.convertScaleResidualToView(value.doubleValue()));
 
 		case SCALE_UNCERTAINTY:
 			return editorNumberFormat.format(options.convertScaleUncertaintyToView(value.doubleValue()));
@@ -243,6 +246,9 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 
 		case SCALE:
 			return options.toScaleFormat(value.doubleValue(), this.displayUnit);
+			
+		case SCALE_RESIDUAL:
+			return options.toScaleResidualFormat(value.doubleValue(), this.displayUnit);
 
 		case SCALE_UNCERTAINTY:
 			return options.toScaleUncertaintyFormat(value.doubleValue(), this.displayUnit);
@@ -277,7 +283,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 						newValue = options.convertAngleToModel(newValue.doubleValue());
 						break;
 					case ANGLE_RESIDUAL:
-						newValue = options.convertAngleToModel(newValue.doubleValue());
+						newValue = options.convertAngleResidualToModel(newValue.doubleValue());
 						break;
 					case ANGLE_UNCERTAINTY:
 						newValue = options.convertAngleUncertaintyToModel(newValue.doubleValue());
@@ -293,6 +299,9 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 						break;
 					case SCALE:
 						newValue = options.convertScaleToModel(newValue.doubleValue());
+						break;
+					case SCALE_RESIDUAL:
+						newValue = options.convertScaleResidualToModel(newValue.doubleValue());
 						break;
 					case SCALE_UNCERTAINTY:
 						newValue = options.convertScaleUncertaintyToModel(newValue.doubleValue());
