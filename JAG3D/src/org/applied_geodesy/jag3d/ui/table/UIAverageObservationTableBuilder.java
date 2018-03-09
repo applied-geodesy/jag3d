@@ -57,44 +57,46 @@ public class UIAverageObservationTableBuilder extends UITableBuilder<AveragedObs
 
 		// Observation type
 		int columnIndex = table.getColumns().size(); 
-		String labelText   = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.type.label", "Observation");
-		String tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.type.tooltip", "Type of the observation");
+		String labelText   = i18n.getString("UIAverageObservationTableBuilder.tableheader.type.label", "Observation");
+		String tooltipText = i18n.getString("UIAverageObservationTableBuilder.tableheader.type.tooltip", "Type of the observation");
 		ColumnTooltipHeader header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		observationTypeColumn = this.<ObservationType>getColumn(header, AveragedObservationRow::observationTypeProperty, getObservationTypeCallback(), ColumnType.VISIBLE, columnIndex, false); 
 		table.getColumns().add(observationTypeColumn);
 
 		// Station-ID
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.station.name.label", "Station-Id");
-		tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.station.name.tooltip", "Id of station");
+		labelText   = i18n.getString("UIAverageObservationTableBuilder.tableheader.station.name.label", "Station-Id");
+		tooltipText = i18n.getString("UIAverageObservationTableBuilder.tableheader.station.name.tooltip", "Id of station");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(header, AveragedObservationRow::startPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
 		table.getColumns().add(stringColumn);
 
 		// Target-ID
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.target.name.label", "Target-Id");
-		tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.target.name.tooltip", "Id of target point");
+		labelText   = i18n.getString("UIAverageObservationTableBuilder.tableheader.target.name.label", "Target-Id");
+		tooltipText = i18n.getString("UIAverageObservationTableBuilder.tableheader.target.name.tooltip", "Id of target point");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(header, AveragedObservationRow::endPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true);
 		table.getColumns().add(stringColumn);
 
 		// Parameter value
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.value.label", "Value");
-		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.value.tooltip", "Estimated value of additional parameter");
+		labelText   = i18n.getString("UIAverageObservationTableBuilder.tableheader.value.label", "Value");
+		tooltipText = i18n.getString("UIAverageObservationTableBuilder.tableheader.value.tooltip", "A-priori observation");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, AveragedObservationRow::valueProperty, getDoubleValueWithUnitCallback(DisplayFormatType.NORMAL), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
 		// Nabla
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.grosserror.label", "\u2207");
-		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.grosserror.tooltip", "Gross-error of additional parameter");
+		labelText   = i18n.getString("UIAverageObservationTableBuilder.tableheader.grosserror.label", "\u2207");
+		tooltipText = i18n.getString("UIAverageObservationTableBuilder.tableheader.grosserror.tooltip", "Deviation w.r.t. median");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, AveragedObservationRow::grossErrorProperty, getDoubleValueWithUnitCallback(DisplayFormatType.RESIDUAL), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
+		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		
 		this.table = table;
 		this.isInitialize = true;
 	}
@@ -134,13 +136,13 @@ public class UIAverageObservationTableBuilder extends UITableBuilder<AveragedObs
 									this.setText(i18n.getString("UIAverageObservationTableBuilder.direction.label", "Direction"));
 									break;
 								case HORIZONTAL_DISTANCE:
-									this.setText(i18n.getString("UIAverageObservationTableBuilder.horizontaldistance.label", "Horizontal distance"));
+									this.setText(i18n.getString("UIAverageObservationTableBuilder.horizontal_distance.label", "Horizontal distance"));
 									break;
 								case SLOPE_DISTANCE:
-									this.setText(i18n.getString("UIAverageObservationTableBuilder.slopedistance.label", "Slope distance"));
+									this.setText(i18n.getString("UIAverageObservationTableBuilder.slope_distance.label", "Slope distance"));
 									break;
 								case ZENITH_ANGLE:
-									this.setText(i18n.getString("UIAverageObservationTableBuilder.zenithangle.label", "Zenith angle"));
+									this.setText(i18n.getString("UIAverageObservationTableBuilder.zenith_angle.label", "Zenith angle"));
 									break;
 								case GNSS1D:
 									this.setText(i18n.getString("UIAverageObservationTableBuilder.gnss.1d.label", "GNSS baseline 1D") + (component != null ? " " + component : ""));
