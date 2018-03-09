@@ -182,8 +182,8 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 				break;
 			case ZENITH_ANGLE:
 				this.observationCheckBoxMap.put(observationType, this.createCheckBox(
-						i18n.getString("UIObservationLayerPropertyBuilder.symbol.zenithangle.enable.label", "Zenith angle:"), 
-						i18n.getString("UIObservationLayerPropertyBuilder.symbol.zenithangle.enable.tooltip", "If checked, zenith angles will be drawn"))
+						i18n.getString("UIObservationLayerPropertyBuilder.symbol.zenith_angle.enable.label", "Zenith angle:"), 
+						i18n.getString("UIObservationLayerPropertyBuilder.symbol.zenith_angle.enable.tooltip", "If checked, zenith angles will be drawn"))
 						);
 				this.observationColorPickerMap.put(observationType, new ColorPicker(Color.DARKBLUE));
 				break;
