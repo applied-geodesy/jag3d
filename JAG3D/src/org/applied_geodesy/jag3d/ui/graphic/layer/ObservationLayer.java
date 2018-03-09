@@ -248,7 +248,7 @@ public class ObservationLayer extends Layer {
 			distance = distance > 0 ? distance : 1;
 			double dx = (xe-xs)/distance;
 			double dy = (ye-ys)/distance;
-
+			
 			graphicsContext.setStroke(this.getColor());
 			graphicsContext.setLineWidth(this.getLineWidth());
 			graphicsContext.setLineDashes(null);
@@ -300,6 +300,9 @@ public class ObservationLayer extends Layer {
 
 			// check, if drawable
 			if (distance > 3.0*symbolSize) {
+				if (observableLink.isSignificant())
+					graphicsContext.setStroke(Color.RED);
+				
 				double scale = distance > 4.0*pointSymbolSize + symbolSize ? 1.5*pointSymbolSize + 0.5*symbolSize : 0.5 * (distance - symbolSize);
 				if (!observableLink.getStartPointObservationType().isEmpty()) {
 					PixelCoordinate coordinate = new PixelCoordinate(xs - 0.5*symbolSize + scale * dx, ys - 0.5*symbolSize + scale * dy);

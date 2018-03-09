@@ -363,6 +363,8 @@ public class PointLayer extends Layer {
 				// set layer color
 				graphicsContext.setStroke(this.getColor());
 				graphicsContext.setFill(this.getColor());
+				if (point.isSignificant())
+					graphicsContext.setStroke(Color.RED);
 				SymbolBuilder.drawSymbol(graphicsContext, pixelCoordinate, symbolType, symbolSize);
 				
 				// set text color
