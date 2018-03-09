@@ -43,7 +43,7 @@ public class RelativeConfidenceLayer extends ConfidenceLayer<PointShiftArrowLaye
 		try {
 			fillColor = Color.web(PROPERTIES.getProperty("RELATIVE_CONFIDENCE_FILL_COLOR", "#ffffe0"));
 		} catch (Exception e) {
-			fillColor = Color.web("#ffffe0"); //Color.LIGHTYELLOW;
+			fillColor = Color.web("#ffffe0");
 		}
 		
 		try {

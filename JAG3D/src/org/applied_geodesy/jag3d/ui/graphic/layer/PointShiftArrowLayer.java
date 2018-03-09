@@ -41,6 +41,8 @@ public class PointShiftArrowLayer extends ArrowLayer {
 		super(layerType, currentGraphicExtent);
 		
 		Color color;
+		double symbolSize = -1, lineWidth = -1;
+		
 		try {
 			color = Color.web(PROPERTIES.getProperty("POINT_SHIFT_ARROW_COLOR", "#ff8c00"));
 		} catch (Exception e) {
@@ -50,18 +52,16 @@ public class PointShiftArrowLayer extends ArrowLayer {
 		ArrowSymbolType arrowSymbolType;
 		try {
 			arrowSymbolType = ArrowSymbolType.valueOf(PROPERTIES.getProperty("POINT_SHIFT_ARROW_SYMBOL_TYPE", "FILLED_TETRAGON_ARROW"));
-		}catch (Exception e) {
+		} catch (Exception e) {
 			arrowSymbolType = ArrowSymbolType.FILLED_TETRAGON_ARROW;
 		}
-		
-		double symbolSize = -1;
-		try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_ARROW_SYMBOL_SIZE")); } catch (Exception e) {}
-		symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
-		
-		double lineWidth = -1;
-		try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_ARROW_LINE_WIDTH")); } catch (Exception e) {}
-		lineWidth = lineWidth >= 0 ? lineWidth : 1.0;
 
+		try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_ARROW_SYMBOL_SIZE")); } catch (Exception e) {}
+		try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_ARROW_LINE_WIDTH")); } catch (Exception e) {}
+
+		symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
+		lineWidth = lineWidth >= 0 ? lineWidth : 1.0;
+		
 		this.setSymbolType(arrowSymbolType);
 		this.setColor(color);
 		this.setSymbolSize(symbolSize);

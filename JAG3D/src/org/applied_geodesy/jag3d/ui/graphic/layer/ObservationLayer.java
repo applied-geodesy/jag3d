@@ -56,40 +56,33 @@ public class ObservationLayer extends Layer {
 		case OBSERVATION_APRIORI:
 			try {
 				color = Color.web(PROPERTIES.getProperty("OBSERVATION_APRIORI_COLOR", "#b0c4de"));
-			}
-			catch (Exception e) {
-				color = Color.web("#b0c4de"); //Color.LIGHTSTEELBLUE;
+			} catch (Exception e) {
+				color = Color.web("#b0c4de");
 			}
 
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APRIORI_SYMBOL_SIZE")); } catch (Exception e) {}
-			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
-
-
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
-			lineWidth = lineWidth >= 0 ? lineWidth : 1.0;
 
 			break;
 
 		case OBSERVATION_APOSTERIORI:
 			try {
 				color = Color.web(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_COLOR", "#778899"));
-			}
-			catch (Exception e) {
-				color = Color.web("#778899"); //color = Color.LIGHTSLATEGRAY;
+			} catch (Exception e) {
+				color = Color.web("#778899");
 			}
 
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
-			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
-
-
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
-			lineWidth = lineWidth >= 0 ? lineWidth : 1.0;
 
 			break;
 		default:
 			throw new IllegalArgumentException("Error, unsupported layer type " + layerType);
 		}
 
+		symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
+		lineWidth = lineWidth >= 0 ? lineWidth : 1.0;
+		
 		this.setLineWidth(lineWidth);
 		this.setSymbolSize(symbolSize);
 		this.setColor(color);

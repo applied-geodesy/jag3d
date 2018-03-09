@@ -65,7 +65,7 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 
 			try {
 				arrowSymbolType = ArrowSymbolType.valueOf(PROPERTIES.getProperty("PRINCIPAL_COMPONENT_HORIZONTAL_ARROW_SYMBOL_TYPE", "FILLED_TRIANGLE_ARROW"));
-			}catch (Exception e) {
+			} catch (Exception e) {
 				arrowSymbolType = ArrowSymbolType.FILLED_TRIANGLE_ARROW;
 			}
 			
@@ -83,7 +83,7 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 
 			try {
 				arrowSymbolType = ArrowSymbolType.valueOf(PROPERTIES.getProperty("PRINCIPAL_COMPONENT_VERTICAL_ARROW_SYMBOL_TYPE", "FILLED_TRIANGLE_ARROW"));
-			}catch (Exception e) {
+			} catch (Exception e) {
 				arrowSymbolType = ArrowSymbolType.FILLED_TRIANGLE_ARROW;
 			}
 			

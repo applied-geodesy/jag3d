@@ -59,184 +59,225 @@ public class PointLayer extends Layer {
 	PointLayer(LayerType layerType, GraphicExtent currentGraphicExtent) {
 		super(layerType, currentGraphicExtent);
 		
-		Color color;
+		Color symbolColor, fontColor;
 		PointSymbolType pointSymbolType;
-		double symbolSize = -1, lineWidth = -1;
+		String fontFamily = null;
+		double symbolSize = -1, lineWidth = -1, fontSize = -1;
 		
 		switch(layerType) {			
 		case REFERENCE_POINT_APRIORI:
+			fontFamily = PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_FONT_FAMILY", "System");
+						
 			try {
-				color = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_COLOR", "#90ee90"));
+				fontColor = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_FONT_COLOR", "#696969"));
+			} catch (Exception e) {
+				fontColor = Color.web("#696969");
 			}
-			catch (Exception e) {
-				color = Color.web("#90ee90"); //Color.LIGHTGREEN;
+			
+			try {
+				symbolColor = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_COLOR", "#90ee90"));
+			} catch (Exception e) {
+				symbolColor = Color.web("#90ee90");
 			}
 
 			try {
 				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_SYMBOL_TYPE", "STROKED_SQUARE"));
-			}catch (Exception e) {
+			} catch (Exception e) {
 				pointSymbolType = PointSymbolType.STROKED_SQUARE;
 			}
 
+			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_FONT_SIZE")); } catch (Exception e) {}
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_SYMBOL_SIZE")); } catch (Exception e) {}
-			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
-			
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
-			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
 
 			break;
 			
 		case REFERENCE_POINT_APOSTERIORI:
+			fontFamily = PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_FONT_FAMILY", "System");
+			
 			try {
-				color = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_COLOR", "#006400"));
+				fontColor = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_FONT_COLOR", "#696969"));
+			} catch (Exception e) {
+				fontColor = Color.web("#696969");
 			}
-			catch (Exception e) {
-				color = Color.web("#006400"); //Color.DARKGREEN;
+			
+			try {
+				symbolColor = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_COLOR", "#006400"));
+			} catch (Exception e) {
+				symbolColor = Color.web("#006400");
 			}
 
 			try {
 				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_SYMBOL_TYPE", "STROKED_SQUARE"));
-			}catch (Exception e) {
+			} catch (Exception e) {
 				pointSymbolType = PointSymbolType.STROKED_SQUARE;
 			}
 
+			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_FONT_SIZE")); } catch (Exception e) {}
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
-			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
-			
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
-			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
 
 			break;
 			
 		case STOCHASTIC_POINT_APRIORI:
+			fontFamily = PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_FONT_FAMILY", "System");
+			
 			try {
-				color = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_COLOR", "#ffd700"));
+				fontColor = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_FONT_COLOR", "#696969"));
+			} catch (Exception e) {
+				fontColor = Color.web("#696969");
 			}
-			catch (Exception e) {
-				color = Color.web("#ffd700"); //Color.GOLD;
+			
+			try {
+				symbolColor = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_COLOR", "#ffd700"));
+			} catch (Exception e) {
+				symbolColor = Color.web("#ffd700");
 			}
 
 			try {
 				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_SYMBOL_TYPE", "STROKED_UPRIGHT_TRIANGLE"));
-			}catch (Exception e) {
+			} catch (Exception e) {
 				pointSymbolType = PointSymbolType.STROKED_SQUARE;
 			}
 
+			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_FONT_SIZE")); } catch (Exception e) {}
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_SYMBOL_SIZE")); } catch (Exception e) {}
-			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
-			
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
-			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
 
 			break;
 			
 		case STOCHASTIC_POINT_APOSTERIORI:
+			fontFamily = PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_FONT_FAMILY", "System");
+			
 			try {
-				color = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_COLOR", "#daa520"));
+				fontColor = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_FONT_COLOR", "#696969"));
+			} catch (Exception e) {
+				fontColor = Color.web("#696969");
 			}
-			catch (Exception e) {
-				color = Color.web("#daa520"); //Color.GOLDENROD;
+			
+			try {
+				symbolColor = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_COLOR", "#daa520"));
+			} catch (Exception e) {
+				symbolColor = Color.web("#daa520");
 			}
 
 			try {
 				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_SYMBOL_TYPE", "STROKED_UPRIGHT_TRIANGLE"));
-			}catch (Exception e) {
+			} catch (Exception e) {
 				pointSymbolType = PointSymbolType.STROKED_SQUARE;
 			}
 
+			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_FONT_SIZE")); } catch (Exception e) {}
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
-			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
-			
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
-			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
 
 			break;
 			
 		case DATUM_POINT_APRIORI:
+			fontFamily = PROPERTIES.getProperty("DATUM_POINT_APRIORI_FONT_FAMILY", "System");
+			
 			try {
-				color = Color.web(PROPERTIES.getProperty("DATUM_POINT_APRIORI_COLOR", "#87ceeb"));
+				fontColor = Color.web(PROPERTIES.getProperty("DATUM_POINT_APRIORI_FONT_COLOR", "#696969"));
+			} catch (Exception e) {
+				fontColor = Color.web("#696969");
 			}
-			catch (Exception e) {
-				color = Color.web("#87ceeb"); //Color.SKYBLUE;
+			
+			try {
+				symbolColor = Color.web(PROPERTIES.getProperty("DATUM_POINT_APRIORI_COLOR", "#87ceeb"));
+			} catch (Exception e) {
+				symbolColor = Color.web("#87ceeb");
 			}
 
 			try {
 				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("DATUM_POINT_APRIORI_SYMBOL_TYPE", "STROKED_HEXAGON"));
-			}catch (Exception e) {
+			} catch (Exception e) {
 				pointSymbolType = PointSymbolType.STROKED_SQUARE;
 			}
 
+			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APRIORI_FONT_SIZE")); } catch (Exception e) {}
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APRIORI_SYMBOL_SIZE")); } catch (Exception e) {}
-			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
-			
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
-			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
 
 			break;
 			
 		case DATUM_POINT_APOSTERIORI:
+			fontFamily = PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_FONT_FAMILY", "System");
+			
 			try {
-				color = Color.web(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_COLOR", "#1e90ff"));
+				fontColor = Color.web(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_FONT_COLOR", "#696969"));
+			} catch (Exception e) {
+				fontColor = Color.web("#696969");
 			}
-			catch (Exception e) {
-				color = Color.web("#1e90ff"); //Color.DODGERBLUE;
+			
+			try {
+				symbolColor = Color.web(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_COLOR", "#1e90ff"));
+			} catch (Exception e) {
+				symbolColor = Color.web("#1e90ff");
 			}
 
 			try {
 				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_SYMBOL_TYPE", "STROKED_HEXAGON"));
-			}catch (Exception e) {
+			} catch (Exception e) {
 				pointSymbolType = PointSymbolType.STROKED_SQUARE;
 			}
 			
-			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
-			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
-			
+			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_FONT_SIZE")); } catch (Exception e) {}
+			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}			
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
-			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
 
 			break;
 			
 		case NEW_POINT_APRIORI:
+			fontFamily = PROPERTIES.getProperty("NEW_POINT_APRIORI_FONT_FAMILY", "System");
+			
 			try {
-				color = Color.web(PROPERTIES.getProperty("NEW_POINT_APRIORI_COLOR", "#c480c4"));
+				fontColor = Color.web(PROPERTIES.getProperty("NEW_POINT_APRIORI_FONT_COLOR", "#696969"));
+			} catch (Exception e) {
+				fontColor = Color.web("#696969");
 			}
-			catch (Exception e) {
-				color = Color.web("#c480c4");
+			
+			try {
+				symbolColor = Color.web(PROPERTIES.getProperty("NEW_POINT_APRIORI_COLOR", "#c480c4"));
+			} catch (Exception e) {
+				symbolColor = Color.web("#c480c4");
 			}
 
 			try {
 				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("NEW_POINT_APRIORI_SYMBOL_TYPE", "STROKED_CIRCLE"));
-			}catch (Exception e) {
+			} catch (Exception e) {
 				pointSymbolType = PointSymbolType.STROKED_SQUARE;
 			}
 			
-			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APRIORI_SYMBOL_SIZE")); } catch (Exception e) {}
-			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
-	
+			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APRIORI_FONT_SIZE")); } catch (Exception e) {}
+			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APRIORI_SYMBOL_SIZE")); } catch (Exception e) {}	
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
-			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
 
 			break;
 			
 		case NEW_POINT_APOSTERIORI:
+			fontFamily = PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_FONT_FAMILY", "System");
+			
 			try {
-				color = Color.web(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_COLOR", "#dda0dd"));
+				fontColor = Color.web(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_FONT_COLOR", "#696969"));
+			} catch (Exception e) {
+				fontColor = Color.web("#696969");
 			}
-			catch (Exception e) {
-				color = Color.web("#dda0dd"); //Color.PLUM;
+			
+			try {
+				symbolColor = Color.web(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_COLOR", "#dda0dd"));
+			} catch (Exception e) {
+				symbolColor = Color.web("#dda0dd");
 			}
 
 			try {
 				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_SYMBOL_TYPE", "STROKED_CIRCLE"));
-			}catch (Exception e) {
+			} catch (Exception e) {
 				pointSymbolType = PointSymbolType.STROKED_SQUARE;
 			}
 			
-			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
-			symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
-			
+			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_FONT_SIZE")); } catch (Exception e) {}
+			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}			
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
-			lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
 
 			break;
 
@@ -244,10 +285,19 @@ public class PointLayer extends Layer {
 			throw new IllegalArgumentException("Error, unsupported layer type " + layerType);		
 		}
 		
+		symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
+		lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
+		fontSize = fontSize >= 0 ? fontSize : 10.0;
+		fontFamily = fontFamily != null ? fontFamily : "System";
+		
 		this.setSymbolType(pointSymbolType);
-		this.setColor(color);
-		this.setLineWidth(1.5);
+		this.setColor(symbolColor);
+		this.setLineWidth(lineWidth);
 		this.setSymbolSize(symbolSize);
+		
+		this.setFontSize(fontSize);
+		this.setFontFamily(fontFamily);
+		this.setFontColor(fontColor);
 		
 		this.addLayerPropertyChangeListener(this.fontColorProperty());
 		this.addLayerPropertyChangeListener(this.fontFamilyProperty());
