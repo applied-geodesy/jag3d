@@ -120,6 +120,7 @@ public class LayerManagerDialog {
 						scroller.setPadding(new Insets(10, 10, 10, 10)); // oben, links, unten, rechts
 						scroller.setFitToHeight(true);
 						scroller.setFitToWidth(true);
+						scroller.setCache(false);
 						layerPropertyBorderPane.setCenter(scroller);
 					}
 				}

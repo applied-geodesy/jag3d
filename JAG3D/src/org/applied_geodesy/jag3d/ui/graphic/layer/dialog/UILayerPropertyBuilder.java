@@ -61,6 +61,7 @@ public abstract class UILayerPropertyBuilder {
 		lineWidthComboBox.setButtonCell(new LineWidthListCell());
 		lineWidthComboBox.setTooltip(new Tooltip(tooltip));
 		lineWidthComboBox.setMaxWidth(Double.MAX_VALUE);
+		lineWidthComboBox.setCache(false);
 		return lineWidthComboBox;
 	}
 	
@@ -106,6 +107,7 @@ public abstract class UILayerPropertyBuilder {
 		symbolSizeComboBox.setMaxWidth(Double.MAX_VALUE);
 		symbolSizeComboBox.setMinWidth(65);
 		symbolSizeComboBox.setPrefWidth(75);
+		symbolSizeComboBox.setCache(false);
 		return symbolSizeComboBox;
 	}
 		
@@ -116,6 +118,7 @@ public abstract class UILayerPropertyBuilder {
 		gridPane.setVgap(10);
 		gridPane.setAlignment(Pos.CENTER);
 		gridPane.setPadding(new Insets(5,15,5,15)); // oben, recht, unten, links
+		gridPane.setCache(false);
 		//gridPane.setGridLinesVisible(true);
 		return gridPane;
 	}
@@ -127,6 +130,7 @@ public abstract class UILayerPropertyBuilder {
 		titledPane.setContent(content);
 		titledPane.setPadding(new Insets(0, 10, 5, 10)); // oben, links, unten, rechts
 		titledPane.setText(title);
+		titledPane.setCache(false);
 		return titledPane;
 	}
 	
@@ -136,6 +140,7 @@ public abstract class UILayerPropertyBuilder {
 		checkBox.setTooltip(new Tooltip(tooltip));
 		checkBox.setMinSize(Control.USE_PREF_SIZE,Control.USE_PREF_SIZE);
 		checkBox.setMaxWidth(Double.MAX_VALUE);
+		checkBox.setCache(false);
 		return checkBox;
 	}
 	
@@ -145,6 +150,7 @@ public abstract class UILayerPropertyBuilder {
 		typeComboBox.getSelectionModel().select(Font.getDefault().getFamily());
 		typeComboBox.setTooltip(new Tooltip(tooltip));
 		typeComboBox.setMaxWidth(Double.MAX_VALUE);
+		typeComboBox.setCache(false);
 		return typeComboBox;
 	}
 }

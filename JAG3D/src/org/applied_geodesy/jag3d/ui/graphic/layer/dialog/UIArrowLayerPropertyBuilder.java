@@ -198,6 +198,7 @@ public class UIArrowLayerPropertyBuilder extends UILayerPropertyBuilder {
 		typeComboBox.setButtonCell(new ArrowSymbolTypeListCell());
 		typeComboBox.setTooltip(new Tooltip(tooltip));
 		typeComboBox.setMaxWidth(Double.MAX_VALUE);
+		typeComboBox.setCache(false);
 		return typeComboBox;
 	}
 }

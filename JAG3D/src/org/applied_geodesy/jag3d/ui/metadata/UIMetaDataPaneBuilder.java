@@ -98,7 +98,7 @@ public class UIMetaDataPaneBuilder {
 		if (this.metaDataNode != null)
 			return;
 		SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
-		GridPane gridPane = createGridPane();
+		GridPane gridPane = this.createGridPane();
 
 		Label nameLabel = new Label(i18n.getString("UIMetaDataPane.name.label", "Project name:"));
 		this.nameLimitedTextField = this.createLimitedTextField(
@@ -191,6 +191,7 @@ public class UIMetaDataPaneBuilder {
 		scroller.setPadding(new Insets(20, 30, 20, 30)); // oben, links, unten, rechts
 		scroller.setFitToHeight(true);
 		scroller.setFitToWidth(true);
+		scroller.setCache(false);
 		
 		this.nameLimitedTextField.textProperty().bindBidirectional(this.metaData.nameProperty());
 		this.datePicker.valueProperty().bindBidirectional(this.metaData.dateProperty());
@@ -235,6 +236,7 @@ public class UIMetaDataPaneBuilder {
 		textArea.setPromptText(promptText);
 		textArea.setTooltip(new Tooltip(tooltip));
 		textArea.focusedProperty().addListener(listener);
+		textArea.setCache(false);
 		return textArea;
 	}
 	
@@ -244,6 +246,7 @@ public class UIMetaDataPaneBuilder {
 		gridPane.setHgap(20);
 		gridPane.setVgap(10);
 		gridPane.setPadding(new Insets(10, 10, 10, 10)); // oben, links, unten, rechts
+		gridPane.setCache(false);
 		return gridPane;
 	}
 	
@@ -257,7 +260,6 @@ public class UIMetaDataPaneBuilder {
 		this.operatorLimitedTextField.setDisable(disable);
 		this.customerIdLimitedTextField.setDisable(disable);
 		this.projectIdLimitedTextField.setDisable(disable);
-		this.descriptionTextArea.setDisable(disable);
 		this.descriptionTextArea.setDisable(disable);
 	}
 	

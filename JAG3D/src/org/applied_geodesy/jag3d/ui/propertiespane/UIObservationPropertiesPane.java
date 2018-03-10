@@ -535,12 +535,14 @@ public class UIObservationPropertiesPane {
 				);
 		
 		this.reset();
+		
+		content.setCache(false);
 
 		ScrollPane scroller = new ScrollPane(content);
 		scroller.setPadding(new Insets(20, 50, 20, 50)); // oben, links, unten, rechts
 		scroller.setFitToHeight(true);
 		scroller.setFitToWidth(true);
-		
+		scroller.setCache(false);
 		this.propertiesNode = scroller;
 	}
 	
@@ -561,6 +563,7 @@ public class UIObservationPropertiesPane {
 		checkBox.setSelected(selected);
 		checkBox.setUserData(userData);
 		checkBox.selectedProperty().addListener(new BooleanChangeListener(checkBox));
+		checkBox.setCache(false);
 		return checkBox;
 	}
 	
@@ -572,6 +575,7 @@ public class UIObservationPropertiesPane {
 		radioButton.setSelected(selected);
 		radioButton.setUserData(userData);
 		radioButton.selectedProperty().addListener(new BooleanChangeListener(radioButton));
+		radioButton.setCache(false);
 		return radioButton;
 	}
 	
@@ -581,6 +585,7 @@ public class UIObservationPropertiesPane {
 		gridPane.setHgap(10);
 		gridPane.setVgap(10);
 		gridPane.setPadding(new Insets(20, 10, 20, 10)); // oben, links, unten, rechts
+		gridPane.setCache(false);
 		return gridPane;
 	}
 	
@@ -591,6 +596,7 @@ public class UIObservationPropertiesPane {
 		parametersTitledPane.setAnimated(false);
 		parametersTitledPane.setText(title);
 		parametersTitledPane.setPadding(new Insets(5, 0, 5, 0)); // oben, links, unten, rechts
+		parametersTitledPane.setCache(false);
 		return parametersTitledPane;
 	}
 	

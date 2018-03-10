@@ -159,6 +159,7 @@ public class UITabPaneBuilder {
 				);
 
 		this.tabPane = new TabPane();
+		this.tabPane.setCache(false);
 		this.tabPane.setSide(Side.BOTTOM);
 
 		this.tabPane.getSelectionModel().selectedItemProperty().addListener(this.tabSelectionChangeListener);

@@ -442,6 +442,8 @@ public class LayerManager {
 				);
 		
 		boolean disable = !SQLManager.getInstance().hasDatabase();
+		moveButton.setSelected(true);
+		action(ToolbarType.MOVE);
 		this.layerToolbar.setDisable(disable);
 	}
 	
