@@ -416,7 +416,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 					);
 
 			RadioMenuItem newPointMenuItem = createRadioMenuItem(
-					i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.pointgroup.reference", "New point group"),
+					i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.pointgroup.new", "New point group"),
 					itemType == TreeItemType.NEW_POINT_1D_LEAF || itemType == TreeItemType.NEW_POINT_2D_LEAF || itemType == TreeItemType.NEW_POINT_3D_LEAF,
 					pointTypeToogleGroup,
 					ContextMenuType.CHANGE_TO_NEW_POINT_GROUP
