@@ -650,12 +650,16 @@ public class SQLGraphicManager {
 		this.saveLayerOrder(pointLayer.getLayerType(), order);
 		this.saveFont(pointLayer);
 		this.saveSymbolAndPointVisibleProperies(pointLayer); 
+		
+		//TODO save HighlightLayerProperty
 	}
 	
 	public void save(ObservationLayer observationLayer, int order) throws SQLException {
 		this.saveLayer(observationLayer);
 		this.saveLayerOrder(observationLayer.getLayerType(), order);
 		this.saveObservationLayerColors(observationLayer);
+		
+		//TODO save HighlightLayerProperty
 	}
 	
 	public void save(ArrowLayer arrowLayer, int order) throws SQLException {

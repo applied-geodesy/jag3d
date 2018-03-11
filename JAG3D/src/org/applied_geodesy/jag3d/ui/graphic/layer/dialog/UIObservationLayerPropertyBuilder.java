@@ -67,6 +67,14 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 		}
 	}
 	
+	private class HighlightColorChangeListener implements ChangeListener<Color> {
+		@Override
+		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setHighlightColor(newValue);
+		}
+	}
+	
 	private class ObservationColorChangeListener implements ChangeListener<Color> {
 		private ObservationType observationType;
 		ObservationColorChangeListener(ObservationType observationType) {
@@ -103,6 +111,7 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 	private ComboBox<Double> symbolSizeComboBox;
 	private ComboBox<Double> lineWidthComboBox;
 	private ColorPicker symbolColorPicker;
+	private ColorPicker highlightColorPicker;
 	
 	private Map<ObservationType, ColorPicker> observationColorPickerMap = new HashMap<ObservationType, ColorPicker>();
 	private Map<ObservationType, CheckBox> observationCheckBoxMap = new HashMap<ObservationType, CheckBox>();
@@ -139,6 +148,16 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 		this.symbolSizeComboBox.getSelectionModel().select(this.currentLayer.getSymbolSize());
 		this.lineWidthComboBox.getSelectionModel().select(this.currentLayer.getLineWidth());
 		this.symbolColorPicker.setValue(this.currentLayer.getColor());
+		
+		switch(this.currentLayer.getLayerType()) {
+		case OBSERVATION_APOSTERIORI:
+			this.highlightColorPicker.setValue(this.currentLayer.getHighlightColor());
+			this.highlightColorPicker.setDisable(false);
+			break;
+		default:
+			this.highlightColorPicker.setDisable(true);
+			break;
+		}
 
 		ObservationType observationTypes[] = ObservationType.values();
 		for (ObservationType observationType : observationTypes) {
@@ -199,24 +218,23 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 			}
 		}
 		
-		for (CheckBox checkBox : this.observationCheckBoxMap.values()) {
-			GridPane.setHgrow(checkBox, Priority.NEVER);
-		}
-		
-		for (ColorPicker colorPicker : this.observationColorPickerMap.values()) {
-			colorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-			GridPane.setHgrow(colorPicker, Priority.ALWAYS);
-		}
-		
 		int row = 0;
 		for (ObservationType observationType : observationTypes) {
 			CheckBox checkBox  = this.observationCheckBoxMap.get(observationType);
-			ColorPicker picker = this.observationColorPickerMap.get(observationType);
-			checkBox.selectedProperty().addListener(new ObservationEnableChangeListener(observationType));
-			picker.valueProperty().addListener(new ObservationColorChangeListener(observationType));
+			ColorPicker colorPicker = this.observationColorPickerMap.get(observationType);
 			
-			gridPane.add(checkBox, 0, row);
-			gridPane.add(picker,   1, row++);
+			colorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+			colorPicker.setMaxWidth(Double.MAX_VALUE);
+			colorPicker.getStyleClass().add("split-button");
+			
+			checkBox.selectedProperty().addListener(new ObservationEnableChangeListener(observationType));
+			colorPicker.valueProperty().addListener(new ObservationColorChangeListener(observationType));
+			
+			GridPane.setHgrow(checkBox, Priority.NEVER);
+			GridPane.setHgrow(colorPicker, Priority.ALWAYS);
+
+			gridPane.add(checkBox,    0, row);
+			gridPane.add(colorPicker, 1, row++);
 		}
 
 		return this.createTitledPane(i18n.getString("UIObservationLayerPropertyBuilder.observation.title", "Observation properties"), gridPane);
@@ -226,13 +244,16 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 		GridPane gridPane = this.createGridPane();
 		
 		Label symbolSizeLabel = new Label(i18n.getString("UIObservationLayerPropertyBuilder.symbol.size.label", "Symbol size:"));
-		symbolSizeLabel.setMinWidth(Control.USE_PREF_SIZE);
+		symbolSizeLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
 		Label symbolColorLabel = new Label(i18n.getString("UIObservationLayerPropertyBuilder.symbol.color.label", "Symbol color:"));
-		symbolColorLabel.setMinWidth(Control.USE_PREF_SIZE);
+		symbolColorLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
 		Label symbolLineWidthLabel = new Label(i18n.getString("UIObservationLayerPropertyBuilder.symbol.linewidth.label", "Line width:"));
-		symbolLineWidthLabel.setMinWidth(Control.USE_PREF_SIZE);
+		symbolLineWidthLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		
+		Label highlightColorLabel = new Label(i18n.getString("UIObservationLayerPropertyBuilder.highlight.color.label", "Highlight color:"));
+		highlightColorLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
 		Double symbolSizes[] = new Double[21];
 		for (int i = 0; i < symbolSizes.length; i++)
@@ -240,37 +261,50 @@ public class UIObservationLayerPropertyBuilder extends UILayerPropertyBuilder {
 		
 		this.symbolSizeComboBox = this.createSizeComboBox(i18n.getString("UIObservationLayerPropertyBuilder.symbol.size.tooltip", "Set symbol size"), symbolSizes, 1);
 		this.lineWidthComboBox  = this.createLineWidthComboBox(i18n.getString("UIObservationLayerPropertyBuilder.symbol.linewidth.tooltip", "Set line width"));
+		
 		this.symbolColorPicker  = new ColorPicker(Color.DARKBLUE);
 		this.symbolColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.symbolColorPicker.setMaxWidth(Double.MAX_VALUE);
 		this.symbolColorPicker.getStyleClass().add("split-button");
 		
+		this.highlightColorPicker  = new ColorPicker(Color.DARKBLUE);
+		this.highlightColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		this.highlightColorPicker.setMaxWidth(Double.MAX_VALUE);
+		this.highlightColorPicker.getStyleClass().add("split-button");
+		
 		// add listeners
 		this.symbolSizeComboBox.getSelectionModel().selectedItemProperty().addListener(new SymbolSizeChangeListener());
 		this.lineWidthComboBox.getSelectionModel().selectedItemProperty().addListener(new LineWidthChangeListener());
 		this.symbolColorPicker.valueProperty().addListener(new ColorChangeListener());
+		this.highlightColorPicker.valueProperty().addListener(new HighlightColorChangeListener());
 		
 		symbolSizeLabel.setLabelFor(this.symbolSizeComboBox);
 		symbolColorLabel.setLabelFor(this.symbolColorPicker);
 		symbolLineWidthLabel.setLabelFor(this.lineWidthComboBox);
+		highlightColorLabel.setLabelFor(this.highlightColorPicker);
 		
 		GridPane.setHgrow(symbolSizeLabel,      Priority.NEVER);
 		GridPane.setHgrow(symbolColorLabel,     Priority.NEVER);
 		GridPane.setHgrow(symbolLineWidthLabel, Priority.NEVER);
+		GridPane.setHgrow(highlightColorLabel,  Priority.NEVER);
 		
-		GridPane.setHgrow(this.symbolSizeComboBox, Priority.ALWAYS);
-		GridPane.setHgrow(this.symbolColorPicker,  Priority.ALWAYS);
-		GridPane.setHgrow(this.lineWidthComboBox,  Priority.ALWAYS);
+		GridPane.setHgrow(this.symbolSizeComboBox,   Priority.ALWAYS);
+		GridPane.setHgrow(this.symbolColorPicker,    Priority.ALWAYS);
+		GridPane.setHgrow(this.lineWidthComboBox,    Priority.ALWAYS);
+		GridPane.setHgrow(this.highlightColorPicker, Priority.ALWAYS);
 
 		int row = 0;		
-		gridPane.add(symbolSizeLabel,    0, row);
+		gridPane.add(symbolSizeLabel,         0, row);
 		gridPane.add(this.symbolSizeComboBox, 1, row++);
 		
-		gridPane.add(symbolColorLabel,  0, row);
+		gridPane.add(symbolColorLabel,       0, row);
 		gridPane.add(this.symbolColorPicker, 1, row++);
 		
-		gridPane.add(symbolLineWidthLabel, 0, row);
-		gridPane.add(this.lineWidthComboBox,    1, row++);
+		gridPane.add(symbolLineWidthLabel,   0, row);
+		gridPane.add(this.lineWidthComboBox, 1, row++);
+		
+		gridPane.add(highlightColorLabel,       0, row);
+		gridPane.add(this.highlightColorPicker, 1, row++);
 
 		return this.createTitledPane(i18n.getString("UIObservationLayerPropertyBuilder.symbol.title", "Symbol properties"), gridPane);
 	}

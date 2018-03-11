@@ -33,7 +33,9 @@ import org.applied_geodesy.jag3d.ui.graphic.sql.ObservableMeasurement;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -45,12 +47,13 @@ public class ObservationLayer extends Layer {
 	private List<ObservableMeasurement> observableMeasurements = FXCollections.observableArrayList();
 	private Map<ObservationType, ObservationSymbolProperties> symbolPropertiesMap = new HashMap<ObservationType, ObservationSymbolProperties>(ObservationType.values().length);
 
+	private ObjectProperty<Color> highlightColor = new SimpleObjectProperty<Color>(Color.ORANGERED); //#FF4500
+	
 	ObservationLayer(LayerType layerType, GraphicExtent currentGraphicExtent) {
 		super(layerType, currentGraphicExtent);
 
-		Color color;
-		double symbolSize = -1;
-		double lineWidth = -1;
+		Color color, highlightColor;
+		double symbolSize = -1, lineWidth = -1;
 
 		switch(layerType) {
 		case OBSERVATION_APRIORI:
@@ -67,6 +70,12 @@ public class ObservationLayer extends Layer {
 
 		case OBSERVATION_APOSTERIORI:
 			try {
+				highlightColor = Color.web(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_HIGHLIGHT_COLOR", "#FF4500"));
+			} catch (Exception e) {
+				highlightColor = Color.web("#FF4500");
+			}
+			
+			try {
 				color = Color.web(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_COLOR", "#778899"));
 			} catch (Exception e) {
 				color = Color.web("#778899");
@@ -75,6 +84,8 @@ public class ObservationLayer extends Layer {
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
 
+			this.setHighlightColor(highlightColor);
+
 			break;
 		default:
 			throw new IllegalArgumentException("Error, unsupported layer type " + layerType);
@@ -82,10 +93,13 @@ public class ObservationLayer extends Layer {
 
 		symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
 		lineWidth = lineWidth >= 0 ? lineWidth : 1.0;
-		
+				
 		this.setLineWidth(lineWidth);
 		this.setSymbolSize(symbolSize);
 		this.setColor(color);
+		
+		this.addLayerPropertyChangeListener(this.highlightColorProperty());
+		
 		this.initSymbolProperties();
 	}
 
@@ -249,7 +263,9 @@ public class ObservationLayer extends Layer {
 			double dx = (xe-xs)/distance;
 			double dy = (ye-ys)/distance;
 			
-			graphicsContext.setStroke(this.getColor());
+			Color color = observableLink.isSignificant() ? this.getHighlightColor() : this.getColor();
+			
+			graphicsContext.setStroke(color);
 			graphicsContext.setLineWidth(this.getLineWidth());
 			graphicsContext.setLineDashes(null);
 
@@ -299,10 +315,7 @@ public class ObservationLayer extends Layer {
 					);
 
 			// check, if drawable
-			if (distance > 3.0*symbolSize) {
-				if (observableLink.isSignificant())
-					graphicsContext.setStroke(Color.RED);
-				
+			if (distance > 3.0*symbolSize) {			
 				double scale = distance > 4.0*pointSymbolSize + symbolSize ? 1.5*pointSymbolSize + 0.5*symbolSize : 0.5 * (distance - symbolSize);
 				if (!observableLink.getStartPointObservationType().isEmpty()) {
 					PixelCoordinate coordinate = new PixelCoordinate(xs - 0.5*symbolSize + scale * dx, ys - 0.5*symbolSize + scale * dy);
@@ -383,5 +396,17 @@ public class ObservationLayer extends Layer {
 			}
 		}
 		return graphicExtent;
+	}
+
+	public final ObjectProperty<Color> highlightColorProperty() {
+		return this.highlightColor;
+	}
+	
+	public final Color getHighlightColor() {
+		return this.highlightColorProperty().get();
+	}
+	
+	public final void setHighlightColor(final Color highlightColor) {
+		this.highlightColorProperty().set(highlightColor);
 	}
 }

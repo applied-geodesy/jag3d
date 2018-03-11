@@ -52,6 +52,8 @@ public class PointLayer extends Layer {
 	private ObjectProperty<PointSymbolType> pointSymbolType = new SimpleObjectProperty<PointSymbolType>(PointSymbolType.STROKED_CIRCLE);
 	private List<GraphicPoint> points = FXCollections.observableArrayList();
 	
+	private ObjectProperty<Color> highlightColor = new SimpleObjectProperty<Color>(Color.ORANGERED); //#FF4500
+	
 	private BooleanProperty point1DVisible = new SimpleBooleanProperty(Boolean.FALSE);
 	private BooleanProperty point2DVisible = new SimpleBooleanProperty(Boolean.TRUE);
 	private BooleanProperty point3DVisible = new SimpleBooleanProperty(Boolean.TRUE);
@@ -59,7 +61,7 @@ public class PointLayer extends Layer {
 	PointLayer(LayerType layerType, GraphicExtent currentGraphicExtent) {
 		super(layerType, currentGraphicExtent);
 		
-		Color symbolColor, fontColor;
+		Color symbolColor, fontColor, highlightColor;
 		PointSymbolType pointSymbolType;
 		String fontFamily = null;
 		double symbolSize = -1, lineWidth = -1, fontSize = -1;
@@ -106,6 +108,12 @@ public class PointLayer extends Layer {
 			} catch (Exception e) {
 				symbolColor = Color.web("#006400");
 			}
+			
+			try {
+				highlightColor = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_HIGHLIGHT_COLOR", "#FF4500"));
+			} catch (Exception e) {
+				highlightColor = Color.web("#FF4500");
+			}
 
 			try {
 				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_SYMBOL_TYPE", "STROKED_SQUARE"));
@@ -117,6 +125,8 @@ public class PointLayer extends Layer {
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
 
+			this.setHighlightColor(highlightColor);
+			
 			break;
 			
 		case STOCHASTIC_POINT_APRIORI:
@@ -160,6 +170,12 @@ public class PointLayer extends Layer {
 			} catch (Exception e) {
 				symbolColor = Color.web("#daa520");
 			}
+			
+			try {
+				highlightColor = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_HIGHLIGHT_COLOR", "#FF4500"));
+			} catch (Exception e) {
+				highlightColor = Color.web("#FF4500");
+			}
 
 			try {
 				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_SYMBOL_TYPE", "STROKED_UPRIGHT_TRIANGLE"));
@@ -171,6 +187,8 @@ public class PointLayer extends Layer {
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
 
+			this.setHighlightColor(highlightColor);
+			
 			break;
 			
 		case DATUM_POINT_APRIORI:
@@ -214,6 +232,12 @@ public class PointLayer extends Layer {
 			} catch (Exception e) {
 				symbolColor = Color.web("#1e90ff");
 			}
+			
+			try {
+				highlightColor = Color.web(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_HIGHLIGHT_COLOR", "#FF4500"));
+			} catch (Exception e) {
+				highlightColor = Color.web("#FF4500");
+			}
 
 			try {
 				pointSymbolType = PointSymbolType.valueOf(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_SYMBOL_TYPE", "STROKED_HEXAGON"));
@@ -224,6 +248,8 @@ public class PointLayer extends Layer {
 			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_FONT_SIZE")); } catch (Exception e) {}
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}			
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
+
+			this.setHighlightColor(highlightColor);
 
 			break;
 			
@@ -304,6 +330,7 @@ public class PointLayer extends Layer {
 		this.addLayerPropertyChangeListener(this.fontSizeProperty());
 		this.addLayerPropertyChangeListener(this.pointSymbolTypeProperty());
 
+		this.addLayerPropertyChangeListener(this.highlightColorProperty());
 	}
 	
 	public void setPoints(List<GraphicPoint> points) {
@@ -348,10 +375,10 @@ public class PointLayer extends Layer {
 		PointSymbolType symbolType = this.getPointSymbolType();
 		double symbolSize = this.getSymbolSize();
 		double fontSize   = this.getFontSize();
-		double lineWidth  = this.getLineWidth();
+		double lineWidth = this.getLineWidth();
 		String fontFamily = this.getFontFamily();
-		graphicsContext.setLineWidth(lineWidth);
 		
+		graphicsContext.setLineWidth(lineWidth);
 		// draw points
 		for (GraphicPoint point : this.points) {
 			if (!point.isVisible())
@@ -360,11 +387,17 @@ public class PointLayer extends Layer {
 			PixelCoordinate pixelCoordinate = GraphicExtent.toPixelCoordinate(point.getCoordinate(), graphicExtent);
 
 			if (this.contains(pixelCoordinate)) {
-				// set layer color
-				graphicsContext.setStroke(this.getColor());
-				graphicsContext.setFill(this.getColor());
+				Color color;
+				// set layer color 
 				if (point.isSignificant())
-					graphicsContext.setStroke(Color.RED);
+					color = this.getHighlightColor();
+				else { 
+					color = this.getColor();
+				}
+
+				graphicsContext.setStroke(color);
+				graphicsContext.setFill(color);
+				
 				SymbolBuilder.drawSymbol(graphicsContext, pixelCoordinate, symbolType, symbolSize);
 				
 				// set text color
@@ -502,5 +535,17 @@ public class PointLayer extends Layer {
 					graphicExtent.merge(point.getCoordinate());
 		}
 		return graphicExtent;
+	}
+
+	public final ObjectProperty<Color> highlightColorProperty() {
+		return this.highlightColor;
+	}
+	
+	public final Color getHighlightColor() {
+		return this.highlightColorProperty().get();
+	}
+	
+	public final void setHighlightColor(final Color highlightColor) {
+		this.highlightColorProperty().set(highlightColor);
 	}
 }
