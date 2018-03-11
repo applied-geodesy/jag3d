@@ -330,7 +330,6 @@ public class UIPointPropertiesPane {
 		gridPane.setHgap(10);
 		gridPane.setVgap(10);
 		gridPane.setPadding(new Insets(20, 10, 20, 10)); // oben, links, unten, rechts
-		gridPane.setCache(false);
 		return gridPane;
 	}
 	
@@ -341,7 +340,6 @@ public class UIPointPropertiesPane {
 		parametersTitledPane.setAnimated(false);
 		parametersTitledPane.setText(title);
 		parametersTitledPane.setPadding(new Insets(5, 0, 5, 0)); // oben, links, unten, rechts
-		parametersTitledPane.setCache(false);
 		return parametersTitledPane;
 	}
 
@@ -377,14 +375,11 @@ public class UIPointPropertiesPane {
 			content.getChildren().add(deflectionUncertainties);
 		
 		this.reset();
-
-		content.setCache(false);
 		
 		ScrollPane scroller = new ScrollPane(content);
 		scroller.setPadding(new Insets(20, 50, 20, 50)); // oben, links, unten, rechts
 		scroller.setFitToHeight(true);
 		scroller.setFitToWidth(true);
-		scroller.setCache(false);
 		this.propertiesNode = scroller;
 	}
 

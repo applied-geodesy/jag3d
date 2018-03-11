@@ -351,7 +351,6 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		typeComboBox.setButtonCell(new PointSymbolTypeListCell());
 		typeComboBox.setTooltip(new Tooltip(tooltip));
 		typeComboBox.setMaxWidth(Double.MAX_VALUE);
-		typeComboBox.setCache(false);
 		return typeComboBox;
 	}
 }

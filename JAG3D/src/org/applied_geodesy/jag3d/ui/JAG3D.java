@@ -123,14 +123,12 @@ public class JAG3D extends Application {
 		splitPane.setOrientation(Orientation.HORIZONTAL);
 		splitPane.getItems().addAll(tree, tabPane);
 		splitPane.setDividerPositions(0.30);
-		splitPane.setCache(false);
 		SplitPane.setResizableWithParent(tree, false);
 		
 		BorderPane border = new BorderPane();
 		border.setPrefSize(900, 650);
 		border.setTop(menuBuilder.getMenuBar());
 		border.setCenter(splitPane);
-		border.setCache(false);
 		
 		UITreeBuilder.getInstance().getTree().getSelectionModel().clearSelection();
 		UITreeBuilder.getInstance().getTree().getSelectionModel().selectFirst();
