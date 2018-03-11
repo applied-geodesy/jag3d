@@ -8,8 +8,8 @@
   <cmdLine></cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
-  <downloadUrl>http://java.com/download</downloadUrl>
-  <supportUrl>http://applied-geodesy.org/</supportUrl>
+  <downloadUrl>http://java.oracle.com</downloadUrl>
+  <supportUrl>http://software.applied-geodesy.org/forum</supportUrl>
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>
@@ -23,19 +23,13 @@
     <jdkPreference>preferJre</jdkPreference>
     <runtimeBits>64/32</runtimeBits>
   </jre>
-  <splash>
-    <file>JAG3D_splash.bmp</file>
-    <waitForWindow>true</waitForWindow>
-    <timeout>60</timeout>
-    <timeoutErr>true</timeoutErr>
-  </splash>
   <versionInfo>
-    <fileVersion>20.18.02.27</fileVersion>
-    <txtFileVersion>20180227</txtFileVersion>
+    <fileVersion>20.18.03.10</fileVersion>
+    <txtFileVersion>20180310</txtFileVersion>
     <fileDescription>Java Applied Geodesy 3D (JAG3D) - Least-Squares Adjustment Software for Geodetic Sciences</fileDescription>
     <copyright>Michael Loesler</copyright>
-    <productVersion>20.18.02.27</productVersion>
-    <txtProductVersion>20180227</txtProductVersion>
+    <productVersion>20.18.03.10</productVersion>
+    <txtProductVersion>20180310</txtProductVersion>
     <productName>Java Applied Geodesy 3D (JAG3D) - Least-Squares Adjustment Software for Geodetic Sciences</productName>
     <companyName>Applied Geodesy - http://applied-geodesy.org</companyName>
     <internalName>JAG3D</internalName>
