@@ -105,9 +105,14 @@ public class MouseLayer extends Layer {
 
 			if (toolbarType == null || toolbarType == ToolbarType.NONE)
 				return;
+			
+			// expand plot
+			if(mouseButton == MouseButton.PRIMARY && event.getClickCount() >= 2) {
+				layerManager.expand();
+	        }
 
 			// zoom by window
-			if (toolbarType == ToolbarType.WINDOW_ZOOM && event.getEventType() == MouseEvent.MOUSE_DRAGGED && mouseButton == MouseButton.PRIMARY && event.isPrimaryButtonDown() && this.xStart >= 0 && this.yStart >= 0) {
+			else if (toolbarType == ToolbarType.WINDOW_ZOOM && event.getEventType() == MouseEvent.MOUSE_DRAGGED && mouseButton == MouseButton.PRIMARY && event.isPrimaryButtonDown() && this.xStart >= 0 && this.yStart >= 0) {
 				drawRect(
 						Math.min(this.xStart,this.xEnd), 
 						Math.min(this.yStart,this.yEnd), 
