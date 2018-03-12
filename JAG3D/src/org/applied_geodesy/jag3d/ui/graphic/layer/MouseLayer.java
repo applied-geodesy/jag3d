@@ -32,6 +32,7 @@ import org.applied_geodesy.util.FormatterOptions;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
@@ -97,6 +98,7 @@ public class MouseLayer extends Layer {
 		private double xStart = -1, yStart = -1, xEnd = 0, yEnd = 0;
 		@Override
 		public void handle(MouseEvent event) {
+			MouseButton mouseButton = event.getButton();
 			this.xEnd = event.getX();
 			this.yEnd = event.getY();
 			setCurrentCoordinate(new PixelCoordinate(this.xEnd, this.yEnd));
@@ -104,9 +106,8 @@ public class MouseLayer extends Layer {
 			if (toolbarType == null || toolbarType == ToolbarType.NONE)
 				return;
 
-
 			// zoom by window
-			if (toolbarType == ToolbarType.WINDOW_ZOOM && event.getEventType() == MouseEvent.MOUSE_DRAGGED && event.isPrimaryButtonDown() && this.xStart >= 0 && this.yStart >= 0) {
+			if (toolbarType == ToolbarType.WINDOW_ZOOM && event.getEventType() == MouseEvent.MOUSE_DRAGGED && mouseButton == MouseButton.PRIMARY && event.isPrimaryButtonDown() && this.xStart >= 0 && this.yStart >= 0) {
 				drawRect(
 						Math.min(this.xStart,this.xEnd), 
 						Math.min(this.yStart,this.yEnd), 
@@ -116,7 +117,7 @@ public class MouseLayer extends Layer {
 			}
 
 			// move map
-			else if (toolbarType == ToolbarType.MOVE && event.getEventType() == MouseEvent.MOUSE_DRAGGED && event.isPrimaryButtonDown() && this.xStart >= 0 && this.yStart >= 0) {
+			else if ((mouseButton == MouseButton.SECONDARY || toolbarType == ToolbarType.MOVE) && event.getEventType() == MouseEvent.MOUSE_DRAGGED && this.xStart >= 0 && this.yStart >= 0) {
 
 				GraphicExtent currentExtent = getCurrentGraphicExtent();
 
@@ -154,11 +155,10 @@ public class MouseLayer extends Layer {
 				this.yStart = event.getY();
 			}
 
-			else if (event.getEventType() == MouseEvent.MOUSE_RELEASED && this.xStart >= 0 && this.yStart >= 0) {
-				if (this.xStart != this.xEnd && this.yStart != this.yEnd) {
+			else if (mouseButton == MouseButton.PRIMARY && event.getEventType() == MouseEvent.MOUSE_RELEASED && this.xStart >= 0 && this.yStart >= 0) {
+				if (toolbarType == ToolbarType.WINDOW_ZOOM && this.xStart != this.xEnd && this.yStart != this.yEnd) {
 					WorldCoordinate startWorldCoord = GraphicExtent.toWorldCoordinate(new PixelCoordinate(this.xStart, this.yStart), getCurrentGraphicExtent());
 					WorldCoordinate endWorldCoord   = GraphicExtent.toWorldCoordinate(new PixelCoordinate(this.xEnd, this.yEnd), getCurrentGraphicExtent());
-
 					getCurrentGraphicExtent().set(startWorldCoord, endWorldCoord);
 				}
 				clearDrawingBoard();
