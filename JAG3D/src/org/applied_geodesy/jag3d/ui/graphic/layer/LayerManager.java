@@ -442,8 +442,8 @@ public class LayerManager {
 				);
 		
 		boolean disable = !SQLManager.getInstance().hasDatabase();
-		moveButton.setSelected(true);
-		action(ToolbarType.MOVE);
+		windowZoomButton.setSelected(true); // pre-selection
+		action(ToolbarType.WINDOW_ZOOM);
 		this.layerToolbar.setDisable(disable);
 	}
 	
