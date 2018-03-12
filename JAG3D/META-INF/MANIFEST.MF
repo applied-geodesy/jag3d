@@ -16,4 +16,5 @@ Class-Path:
   lib/GeoTra.jar  
     
 Main-Class: org.applied_geodesy.jag3d.ui.JAG3D
+SplashScreen-Image: org/applied_geodesy/jag3d/ui/gfx/JAG3D_255x255_splash.gif
 

@@ -109,76 +109,85 @@ public class JAG3D extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		final java.awt.SplashScreen splashScreen = java.awt.SplashScreen.getSplashScreen();
 		JAG3D.primaryStage = primaryStage;
-		I18N i18n = I18N.getInstance(Locale.getDefault(), "i18n/jag3d");
 		
-		UIMenuBuilder menuBuilder = UIMenuBuilder.getInstance();
-		UITabPaneBuilder tabPaneBuilder = UITabPaneBuilder.getInstance();
-		UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
-		
-		TabPane tabPane = tabPaneBuilder.getTabPane();
-		TreeView<TreeItemValue> tree = treeBuilder.getTree();
-		
-		SplitPane splitPane = new SplitPane();
-		splitPane.setOrientation(Orientation.HORIZONTAL);
-		splitPane.getItems().addAll(tree, tabPane);
-		splitPane.setDividerPositions(0.30);
-		SplitPane.setResizableWithParent(tree, false);
-		
-		BorderPane border = new BorderPane();
-		border.setPrefSize(900, 650);
-		border.setTop(menuBuilder.getMenuBar());
-		border.setCenter(splitPane);
-		
-		UITreeBuilder.getInstance().getTree().getSelectionModel().clearSelection();
-		UITreeBuilder.getInstance().getTree().getSelectionModel().selectFirst();
-		
-		Button adjusmentButton = new Button(i18n.getString("JavaGraticule3D.button.adjust.label", "Adjust network"));
-		adjusmentButton.setTooltip(new Tooltip(i18n.getString("JavaGraticule3D.button.adjust.tooltip", "Start network adjustment process")));
-		adjusmentButton.setOnAction(new EventHandler<ActionEvent>() { 
-		    @Override
-		    public void handle(ActionEvent event) {	    	
-		    	NetworkAdjustmentDialog.show();
-		    }
-		});
-		
-		DropShadow ds = new DropShadow();
-		ds.setOffsetY(0.5f);
-		ds.setColor(Color.gray(0.8));
-		 
-		Text applicationName = new Text();
-		applicationName.setEffect(ds);
-		applicationName.setCache(true);
-		applicationName.setFill(Color.GREY);
-		applicationName.setText("Java\u00B7Applied\u00B7Geodesy\u00B73D");
-		applicationName.setFont(Font.font("SansSerif", FontWeight.NORMAL, 17));
-
-		Region spacer = new Region();
-		HBox hbox = new HBox(10);
-		hbox.setPadding(new Insets(5, 10, 5, 15));
-		HBox.setHgrow(spacer, Priority.ALWAYS);
-		hbox.getChildren().addAll(applicationName, spacer, adjusmentButton);
-		border.setBottom(hbox);
-
-		Scene scene = new Scene(border);
-
 		try {
-			primaryStage.getIcons().addAll(
-					ImageUtils.getImage("JAG3D_16x16.png"),
-					ImageUtils.getImage("JAG3D_32x32.png"),
-					ImageUtils.getImage("JAG3D_64x64.png")
-			);
-		} 
-		catch(Exception e) {}
-		primaryStage.setScene(scene);
-		//this.setStageToDialogs(primaryStage);
-		setTitle(null);
+			I18N i18n = I18N.getInstance(Locale.getDefault(), "i18n/jag3d");
 
-		primaryStage.show();
-		primaryStage.toFront();
-		
-		this.setStageToDialogs(primaryStage);
-		this.setHostServices();
+			UIMenuBuilder menuBuilder = UIMenuBuilder.getInstance();
+			UITabPaneBuilder tabPaneBuilder = UITabPaneBuilder.getInstance();
+			UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
+
+			TabPane tabPane = tabPaneBuilder.getTabPane();
+			TreeView<TreeItemValue> tree = treeBuilder.getTree();
+
+			SplitPane splitPane = new SplitPane();
+			splitPane.setOrientation(Orientation.HORIZONTAL);
+			splitPane.getItems().addAll(tree, tabPane);
+			splitPane.setDividerPositions(0.30);
+			SplitPane.setResizableWithParent(tree, false);
+
+			BorderPane border = new BorderPane();
+			border.setPrefSize(900, 650);
+			border.setTop(menuBuilder.getMenuBar());
+			border.setCenter(splitPane);
+
+			UITreeBuilder.getInstance().getTree().getSelectionModel().clearSelection();
+			UITreeBuilder.getInstance().getTree().getSelectionModel().selectFirst();
+
+			Button adjusmentButton = new Button(i18n.getString("JavaGraticule3D.button.adjust.label", "Adjust network"));
+			adjusmentButton.setTooltip(new Tooltip(i18n.getString("JavaGraticule3D.button.adjust.tooltip", "Start network adjustment process")));
+			adjusmentButton.setOnAction(new EventHandler<ActionEvent>() { 
+				@Override
+				public void handle(ActionEvent event) {	    	
+					NetworkAdjustmentDialog.show();
+				}
+			});
+
+			DropShadow ds = new DropShadow();
+			ds.setOffsetY(0.5f);
+			ds.setColor(Color.gray(0.8));
+
+			Text applicationName = new Text();
+			applicationName.setEffect(ds);
+			applicationName.setCache(true);
+			applicationName.setFill(Color.GREY);
+			applicationName.setText("Java\u00B7Applied\u00B7Geodesy\u00B73D");
+			applicationName.setFont(Font.font("SansSerif", FontWeight.NORMAL, 17));
+
+			Region spacer = new Region();
+			HBox hbox = new HBox(10);
+			hbox.setPadding(new Insets(5, 10, 5, 15));
+			HBox.setHgrow(spacer, Priority.ALWAYS);
+			hbox.getChildren().addAll(applicationName, spacer, adjusmentButton);
+			border.setBottom(hbox);
+
+			Scene scene = new Scene(border);
+
+			try {
+				primaryStage.getIcons().addAll(
+						ImageUtils.getImage("JAG3D_16x16.png"),
+						ImageUtils.getImage("JAG3D_32x32.png"),
+						ImageUtils.getImage("JAG3D_64x64.png")
+						);
+			} 
+			catch(Exception e) {}
+			primaryStage.setScene(scene);
+			//this.setStageToDialogs(primaryStage);
+			setTitle(null);
+
+			primaryStage.show();
+			primaryStage.toFront();
+
+			this.setStageToDialogs(primaryStage);
+			this.setHostServices();
+
+		}
+		finally {
+			if (splashScreen != null)
+				splashScreen.close();
+		}
 	}
 	
 	public void stop() throws Exception {
@@ -188,7 +197,6 @@ public class JAG3D extends Application {
 
 	public static void main(String[] args) {
 		//Locale.setDefault(Locale.GERMAN);
-		System.setProperty("javafx.preloader", "org.applied_geodesy.jag3d.ui.splash.SplashScreenLoader");
 		Application.launch(JAG3D.class, args);
     }
 }
