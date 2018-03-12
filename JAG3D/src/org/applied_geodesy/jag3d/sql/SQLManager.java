@@ -413,7 +413,7 @@ public class SQLManager {
 		sqls.put(20180219.0607, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ArrowLayerProperty\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"type\" SMALLINT NOT NULL, CONSTRAINT \"ArrowLayerPropertyOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
 		sqls.put(20180219.0608, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ConfidenceLayerProperty\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"red\" DOUBLE DEFAULT 0.5 NOT NULL, \"green\" DOUBLE DEFAULT 0.5 NOT NULL, \"blue\" DOUBLE DEFAULT 0.5 NOT NULL, CONSTRAINT \"ConfidenceLayerPropertyOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
 		
-		sqls.put(20180311.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"HighlightLayerProperty\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"red\" DOUBLE DEFAULT 0.5 NOT NULL, \"green\" DOUBLE DEFAULT 0.5 NOT NULL, \"blue\" DOUBLE DEFAULT 0.5 NOT NULL, CONSTRAINT \"HighlightLayerPropertyOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
+		sqls.put(20180311.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"HighlightLayerProperty\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"red\" DOUBLE DEFAULT 0.5 NOT NULL, \"green\" DOUBLE DEFAULT 0.5 NOT NULL, \"blue\" DOUBLE DEFAULT 0.5 NOT NULL, \"line_width\" DOUBLE DEFAULT 2.5 NOT NULL, CONSTRAINT \"HighlightLayerPropertyOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
 		
 
 		return sqls;

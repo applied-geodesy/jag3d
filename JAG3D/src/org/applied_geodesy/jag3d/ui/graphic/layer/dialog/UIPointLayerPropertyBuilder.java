@@ -67,7 +67,7 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 				currentLayer.setLineWidth(newValue);
 		}
 	}
-	
+		
 	private class ColorChangeListener implements ChangeListener<Color> {
 		@Override
 		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
@@ -108,6 +108,14 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		}
 	}
 	
+	private class HighlightLineWidthChangeListener implements ChangeListener<Double> {
+		@Override
+		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
+			if (currentLayer != null && newValue != null)
+				currentLayer.setHighlightLineWidth(newValue);
+		}
+	}
+	
 	private class PointVisibleChangeListener implements ChangeListener<Boolean> {
 		private int dim;
 		PointVisibleChangeListener(int dim) {
@@ -142,6 +150,8 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 	private ComboBox<Double> fontSizeComboBox;
 	private ColorPicker fontColorPicker;
 	
+	private Node highlightPane = null;
+	private ComboBox<Double> highlightLineWidthComboBox;
 	private ColorPicker highlightColorPicker;
 	
 	private CheckBox point1DVisibleCheckBox;
@@ -158,12 +168,14 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		if (this.propertyPane != null)
 			return;
 		
+		this.highlightPane = this.createHighlightPane();
 		this.propertyPane = new VBox(20);
 		this.propertyPane.setMaxWidth(Double.MAX_VALUE);
 		this.propertyPane.getChildren().addAll(
 				this.createSymbolPane(),
 				this.createFontPane(),
-				this.createPointDimensionVisibilityPane()
+				this.createPointDimensionVisibilityPane(),
+				this.highlightPane
 				);
 	}
 	
@@ -188,10 +200,12 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		case REFERENCE_POINT_APOSTERIORI:
 		case STOCHASTIC_POINT_APOSTERIORI:
 			this.highlightColorPicker.setValue(this.currentLayer.getHighlightColor());
-			this.highlightColorPicker.setDisable(false);
+			this.highlightLineWidthComboBox.getSelectionModel().select(this.currentLayer.getHighlightLineWidth());
+			this.highlightPane.setVisible(true);
 			break;
+			
 		default:
-			this.highlightColorPicker.setDisable(true);
+			this.highlightPane.setVisible(false);
 			break;
 		}
 		
@@ -273,9 +287,6 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		Label symbolLineWidthLabel = new Label(i18n.getString("UIPointLayerPropertyBuilder.symbol.linewidth.label", "Line width:"));
 		symbolLineWidthLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
-		Label highlightColorLabel = new Label(i18n.getString("UIPointLayerPropertyBuilder.highlight.color.label", "Highlight color:"));
-		highlightColorLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		
 		Double symbolSizes[] = new Double[21];
 		for (int i = 0; i < symbolSizes.length; i++)
 			symbolSizes[i] = 5 + 0.5 * i;
@@ -289,35 +300,29 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		this.symbolColorPicker.setMaxWidth(Double.MAX_VALUE);
 		this.symbolColorPicker.getStyleClass().add("split-button");
 		
-		this.highlightColorPicker  = new ColorPicker(Color.DARKBLUE);
-		this.highlightColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.highlightColorPicker.setMaxWidth(Double.MAX_VALUE);
-		this.highlightColorPicker.getStyleClass().add("split-button");
-		
 		// add listeners
 		this.symbolTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new SymbolTypeChangeListener());
 		this.symbolSizeComboBox.getSelectionModel().selectedItemProperty().addListener(new SymbolSizeChangeListener());
 		this.lineWidthComboBox.getSelectionModel().selectedItemProperty().addListener(new LineWidthChangeListener());
 		this.symbolColorPicker.valueProperty().addListener(new ColorChangeListener());
-		this.highlightColorPicker.valueProperty().addListener(new HighlightColorChangeListener());
 		
 		symbolTypeLabel.setLabelFor(this.symbolTypeComboBox);
 		symbolSizeLabel.setLabelFor(this.symbolSizeComboBox);
 		symbolColorLabel.setLabelFor(this.symbolColorPicker);
 		symbolLineWidthLabel.setLabelFor(this.lineWidthComboBox);
-		highlightColorLabel.setLabelFor(this.highlightColorPicker);
+		
 		
 		GridPane.setHgrow(symbolTypeLabel,      Priority.NEVER);
 		GridPane.setHgrow(symbolSizeLabel,      Priority.NEVER);
 		GridPane.setHgrow(symbolColorLabel,     Priority.NEVER);
 		GridPane.setHgrow(symbolLineWidthLabel, Priority.NEVER);
-		GridPane.setHgrow(highlightColorLabel,  Priority.NEVER);
 		
-		GridPane.setHgrow(this.symbolTypeComboBox,   Priority.ALWAYS);
-		GridPane.setHgrow(this.symbolSizeComboBox,   Priority.ALWAYS);
-		GridPane.setHgrow(this.symbolColorPicker,    Priority.ALWAYS);
-		GridPane.setHgrow(this.lineWidthComboBox,    Priority.ALWAYS);
-		GridPane.setHgrow(this.highlightColorPicker, Priority.ALWAYS);
+		
+		GridPane.setHgrow(this.symbolTypeComboBox, Priority.ALWAYS);
+		GridPane.setHgrow(this.symbolSizeComboBox, Priority.ALWAYS);
+		GridPane.setHgrow(this.symbolColorPicker,  Priority.ALWAYS);
+		GridPane.setHgrow(this.lineWidthComboBox,  Priority.ALWAYS);
+		
 
 		int row = 0;
 		gridPane.add(symbolTypeLabel,         0, row);
@@ -331,11 +336,47 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		
 		gridPane.add(symbolLineWidthLabel,   0, row);
 		gridPane.add(this.lineWidthComboBox, 1, row++);
-		
-		gridPane.add(highlightColorLabel,       0, row);
-		gridPane.add(this.highlightColorPicker, 1, row++);
 
 		return this.createTitledPane(i18n.getString("UIPointLayerPropertyBuilder.symbol.title", "Symbol properties"), gridPane);
+	}
+	
+	private Node createHighlightPane() {
+		GridPane gridPane = this.createGridPane();
+		
+		Label highlightColorLabel = new Label(i18n.getString("UIPointLayerPropertyBuilder.highlight.color.label", "Highlight color:"));
+		highlightColorLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		
+		Label highlightLineWidthLabel = new Label(i18n.getString("UIPointLayerPropertyBuilder.highlight.linewidth.label", "Line width:"));
+		highlightLineWidthLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		
+		this.highlightLineWidthComboBox = this.createLineWidthComboBox(i18n.getString("UIPointLayerPropertyBuilder.highlight.linewidth.tooltip", "Set line width for highlighting"));
+				
+		this.highlightColorPicker  = new ColorPicker(Color.DARKBLUE);
+		this.highlightColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		this.highlightColorPicker.setMaxWidth(Double.MAX_VALUE);
+		this.highlightColorPicker.getStyleClass().add("split-button");
+		
+		// add listener
+		this.highlightColorPicker.valueProperty().addListener(new HighlightColorChangeListener());
+		this.highlightLineWidthComboBox.getSelectionModel().selectedItemProperty().addListener(new HighlightLineWidthChangeListener());
+		
+		highlightColorLabel.setLabelFor(this.highlightColorPicker);
+		highlightLineWidthLabel.setLabelFor(this.highlightLineWidthComboBox);
+		
+		GridPane.setHgrow(highlightColorLabel,     Priority.NEVER);
+		GridPane.setHgrow(highlightLineWidthLabel, Priority.NEVER);
+		
+		GridPane.setHgrow(this.highlightColorPicker,       Priority.ALWAYS);
+		GridPane.setHgrow(this.highlightLineWidthComboBox, Priority.ALWAYS);
+		
+		int row = 0;
+		gridPane.add(highlightColorLabel,       0, row);
+		gridPane.add(this.highlightColorPicker, 1, row++);
+		
+		gridPane.add(highlightLineWidthLabel,         0, row);
+		gridPane.add(this.highlightLineWidthComboBox, 1, row++);
+
+		return this.createTitledPane(i18n.getString("UIPointLayerPropertyBuilder.highlight.title", "Highlight properties"), gridPane);
 	}
 	
 	private Node createPointDimensionVisibilityPane() {

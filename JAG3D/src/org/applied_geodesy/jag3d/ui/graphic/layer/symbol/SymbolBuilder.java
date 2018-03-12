@@ -65,7 +65,7 @@ public class SymbolBuilder {
 			double angle = 360.0 / n;
 			int cnt = 0;
 			graphicsContext.setLineDashes(null);
-			graphicsContext.setLineWidth(1);
+			//graphicsContext.setLineWidth(1); // take value from observation properties
 			for (ObservationType type : observationTypes) {
 				if (!symbolPropertiesMap.get(type).isVisible())
 					continue;

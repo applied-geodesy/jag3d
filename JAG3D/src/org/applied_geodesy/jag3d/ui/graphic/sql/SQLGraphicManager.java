@@ -33,6 +33,7 @@ import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ArrowLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ConfidenceLayer;
+import org.applied_geodesy.jag3d.ui.graphic.layer.HighlightableLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.Layer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerManager;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerType;
@@ -133,7 +134,6 @@ public class SQLGraphicManager {
 		for (LayerType layerType : layerOrder) {
 			reorderedLayerList.add(layerManager.getLayer(layerType));
 		}
-
 		layerManager.reorderLayer(reorderedLayerList);
 	}
 	
@@ -651,7 +651,16 @@ public class SQLGraphicManager {
 		this.saveFont(pointLayer);
 		this.saveSymbolAndPointVisibleProperies(pointLayer); 
 		
-		//TODO save HighlightLayerProperty
+		switch(pointLayer.getLayerType()) {
+		case DATUM_POINT_APOSTERIORI:
+		case REFERENCE_POINT_APOSTERIORI:
+		case REFERENCE_POINT_APRIORI:
+		case STOCHASTIC_POINT_APOSTERIORI:
+			this.save(pointLayer);
+			break;
+		default:
+			break;
+		}
 	}
 	
 	public void save(ObservationLayer observationLayer, int order) throws SQLException {
@@ -659,7 +668,8 @@ public class SQLGraphicManager {
 		this.saveLayerOrder(observationLayer.getLayerType(), order);
 		this.saveObservationLayerColors(observationLayer);
 		
-		//TODO save HighlightLayerProperty
+		if (observationLayer.getLayerType() == LayerType.OBSERVATION_APOSTERIORI)
+			this.save(observationLayer);
 	}
 	
 	public void save(ArrowLayer arrowLayer, int order) throws SQLException {
@@ -672,6 +682,32 @@ public class SQLGraphicManager {
 		this.saveLayer(confidenceLayer);
 		this.saveLayerOrder(confidenceLayer.getLayerType(), order);
 		this.saveStrokeColor(confidenceLayer);
+	}
+	
+	private void save(HighlightableLayer layer) throws SQLException {
+		String sql = "MERGE INTO \"HighlightLayerProperty\" USING (VALUES "
+				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"layer\", \"red\", \"green\", \"blue\", \"line_width\") ON \"HighlightLayerProperty\".\"layer\" = \"vals\".\"layer\" "
+				+ "WHEN MATCHED THEN UPDATE SET "
+				+ "\"HighlightLayerProperty\".\"red\"       = \"vals\".\"red\", "
+				+ "\"HighlightLayerProperty\".\"green\"      = \"vals\".\"green\", "
+				+ "\"HighlightLayerProperty\".\"blue\"       = \"vals\".\"blue\", "
+				+ "\"HighlightLayerProperty\".\"line_width\" = \"vals\".\"line_width\" "
+				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "\"vals\".\"layer\", "
+				+ "\"vals\".\"red\", "
+				+ "\"vals\".\"green\", "
+				+ "\"vals\".\"blue\","
+				+ "\"vals\".\"line_width\" ";
+		
+		int idx = 1;
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(idx++,     layer.getLayerType().getId());
+		stmt.setDouble(idx++,  layer.getHighlightColor().getRed());
+		stmt.setDouble(idx++,  layer.getHighlightColor().getGreen());
+		stmt.setDouble(idx++,  layer.getHighlightColor().getBlue());
+		stmt.setDouble(idx++,  layer.getHighlightLineWidth());
+		stmt.execute();
 	}
 	
 	private void saveLayerOrder(LayerType type, int order) throws SQLException {
@@ -861,14 +897,58 @@ public class SQLGraphicManager {
 	private void load(ObservationLayer observationLayer) throws SQLException {
 		this.loadLayer(observationLayer);
 		this.loadObservationColors(observationLayer);
+		
+		if (observationLayer.getLayerType() == LayerType.OBSERVATION_APOSTERIORI)
+			this.loadHighlightProperties(observationLayer);
 	}
 
 	private void load(PointLayer pointLayer) throws SQLException {
 		this.loadLayer(pointLayer);
 		this.loadFont(pointLayer);
 		this.loadSymbolAndPointVisibleProperties(pointLayer);
+		
+		switch(pointLayer.getLayerType()) {
+		case DATUM_POINT_APOSTERIORI:
+		case REFERENCE_POINT_APOSTERIORI:
+		case REFERENCE_POINT_APRIORI:
+		case STOCHASTIC_POINT_APOSTERIORI:
+			this.loadHighlightProperties(pointLayer);
+			break;
+		default:
+			break;
+		}
 	}
 	
+	private void loadHighlightProperties(HighlightableLayer layer) throws SQLException {
+		String sql = "SELECT "
+				+ "\"red\", \"green\", \"blue\", \"line_width\" "
+				+ "FROM \"HighlightLayerProperty\" "
+				+ "WHERE \"layer\" = ? LIMIT 1";
+
+		int idx = 1;
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(idx++, layer.getLayerType().getId());
+		ResultSet rs = stmt.executeQuery();
+
+		if (rs.next()) {
+			double opacity = 1.0;
+
+			double red = rs.getDouble("red");
+			red = Math.min(Math.max(0, red), 1);
+
+			double green = rs.getDouble("green");
+			green = Math.min(Math.max(0, green), 1);
+
+			double blue = rs.getDouble("blue");
+			blue = Math.min(Math.max(0, blue), 1);
+
+			double lineWidth = rs.getDouble("line_width");
+			
+			layer.setHighlightColor(new Color(red, green, blue, opacity));
+			layer.setHighlightLineWidth(lineWidth >= 0 ? lineWidth : 0);
+		}
+	}
+
 	private void load(ArrowLayer arrowLayer) throws SQLException {
 		this.loadLayer(arrowLayer);
 		this.loadSymbol(arrowLayer);

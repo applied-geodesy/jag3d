@@ -45,7 +45,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 
-public class PointLayer extends Layer {
+public class PointLayer extends Layer implements HighlightableLayer {
 	private DoubleProperty fontSize   = new SimpleDoubleProperty(10);
 	private StringProperty fontFamily = new SimpleStringProperty(Font.getDefault().getFamily());
 	private ObjectProperty<Color> fontColor = new SimpleObjectProperty<Color>(Color.DIMGREY);
@@ -53,6 +53,7 @@ public class PointLayer extends Layer {
 	private List<GraphicPoint> points = FXCollections.observableArrayList();
 	
 	private ObjectProperty<Color> highlightColor = new SimpleObjectProperty<Color>(Color.ORANGERED); //#FF4500
+	private DoubleProperty highlightLineWidth    = new SimpleDoubleProperty(2.5);
 	
 	private BooleanProperty point1DVisible = new SimpleBooleanProperty(Boolean.FALSE);
 	private BooleanProperty point2DVisible = new SimpleBooleanProperty(Boolean.TRUE);
@@ -64,7 +65,7 @@ public class PointLayer extends Layer {
 		Color symbolColor, fontColor, highlightColor;
 		PointSymbolType pointSymbolType;
 		String fontFamily = null;
-		double symbolSize = -1, lineWidth = -1, fontSize = -1;
+		double symbolSize = -1, lineWidth = -1, fontSize = -1, highlightLineWidth = -1;
 		
 		switch(layerType) {			
 		case REFERENCE_POINT_APRIORI:
@@ -124,7 +125,8 @@ public class PointLayer extends Layer {
 			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_FONT_SIZE")); } catch (Exception e) {}
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
-
+			try { highlightLineWidth = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_HIGHLIGHT_LINE_WIDTH")); } catch (Exception e) {}
+			this.setHighlightLineWidth(highlightLineWidth >= 0 ? highlightLineWidth : 2.5);
 			this.setHighlightColor(highlightColor);
 			
 			break;
@@ -186,7 +188,8 @@ public class PointLayer extends Layer {
 			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_FONT_SIZE")); } catch (Exception e) {}
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
-
+			try { highlightLineWidth = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_HIGHLIGHT_LINE_WIDTH")); } catch (Exception e) {}
+			this.setHighlightLineWidth(highlightLineWidth >= 0 ? highlightLineWidth : 2.5);
 			this.setHighlightColor(highlightColor);
 			
 			break;
@@ -248,7 +251,8 @@ public class PointLayer extends Layer {
 			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_FONT_SIZE")); } catch (Exception e) {}
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}			
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
-
+			try { highlightLineWidth = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_HIGHLIGHT_LINE_WIDTH")); } catch (Exception e) {}
+			this.setHighlightLineWidth(highlightLineWidth >= 0 ? highlightLineWidth : 2.5);
 			this.setHighlightColor(highlightColor);
 
 			break;
@@ -330,6 +334,7 @@ public class PointLayer extends Layer {
 		this.addLayerPropertyChangeListener(this.fontSizeProperty());
 		this.addLayerPropertyChangeListener(this.pointSymbolTypeProperty());
 
+		this.addLayerPropertyChangeListener(this.highlightLineWidthProperty());
 		this.addLayerPropertyChangeListener(this.highlightColorProperty());
 	}
 	
@@ -375,10 +380,8 @@ public class PointLayer extends Layer {
 		PointSymbolType symbolType = this.getPointSymbolType();
 		double symbolSize = this.getSymbolSize();
 		double fontSize   = this.getFontSize();
-		double lineWidth = this.getLineWidth();
 		String fontFamily = this.getFontFamily();
 		
-		graphicsContext.setLineWidth(lineWidth);
 		// draw points
 		for (GraphicPoint point : this.points) {
 			if (!point.isVisible())
@@ -387,22 +390,30 @@ public class PointLayer extends Layer {
 			PixelCoordinate pixelCoordinate = GraphicExtent.toPixelCoordinate(point.getCoordinate(), graphicExtent);
 
 			if (this.contains(pixelCoordinate)) {
-				Color color;
-				// set layer color 
-				if (point.isSignificant())
-					color = this.getHighlightColor();
+				Color symbolColor, fontColor;
+				double lineWidth;
+				// set layer color and line width properties
+				if (point.isSignificant()) {
+					symbolColor = this.getHighlightColor();
+					fontColor   = this.getHighlightColor();
+					lineWidth   = this.getHighlightLineWidth();
+				}
 				else { 
-					color = this.getColor();
+					symbolColor = this.getColor();
+					fontColor   = this.getFontColor();
+					lineWidth   = this.getLineWidth();
 				}
 
-				graphicsContext.setStroke(color);
-				graphicsContext.setFill(color);
+				graphicsContext.setLineWidth(lineWidth);
+				
+				graphicsContext.setStroke(symbolColor);
+				graphicsContext.setFill(symbolColor);
 				
 				SymbolBuilder.drawSymbol(graphicsContext, pixelCoordinate, symbolType, symbolSize);
 				
 				// set text color
-				graphicsContext.setStroke(this.getFontColor());
-				graphicsContext.setFill(this.getFontColor());
+				graphicsContext.setStroke(fontColor);
+				graphicsContext.setFill(fontColor);
 				graphicsContext.setFont(Font.font(fontFamily, FontWeight.NORMAL, FontPosture.REGULAR, fontSize));		
 				graphicsContext.fillText(point.getName().trim(), 
 						pixelCoordinate.getX() + 0.5 * (symbolSize + lineWidth + 1), 
@@ -547,5 +558,17 @@ public class PointLayer extends Layer {
 	
 	public final void setHighlightColor(final Color highlightColor) {
 		this.highlightColorProperty().set(highlightColor);
+	}
+
+	public final DoubleProperty highlightLineWidthProperty() {
+		return this.highlightLineWidth;
+	}
+
+	public final double getHighlightLineWidth() {
+		return this.highlightLineWidthProperty().get();
+	}
+
+	public final void setHighlightLineWidth(final double highlightLineWidth) {
+		this.highlightLineWidthProperty().set(highlightLineWidth);
 	}
 }

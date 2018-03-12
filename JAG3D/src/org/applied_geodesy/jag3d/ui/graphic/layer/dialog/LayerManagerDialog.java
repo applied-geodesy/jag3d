@@ -246,6 +246,18 @@ public class LayerManagerDialog {
 
 		try {
 			sqlGraphicManager.initLayer(this.layerManager);
+			
+			ListView<Layer> listView = new ListView<Layer>();
+			int length = this.layerManager.getPane().getChildren().size();
+			for (int i = length - 1; i >= 0; i--) {
+				Node node = this.layerManager.getPane().getChildren().get(i);
+				if (node != null && node instanceof Layer && ((Layer)node).getLayerType() != LayerType.MOUSE) {
+					listView.getItems().add((Layer)node);
+				}
+			}
+			this.layerList.getSelectionModel().clearSelection();
+			this.layerList.getItems().setAll(listView.getItems());
+			this.layerList.getSelectionModel().select(0);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
