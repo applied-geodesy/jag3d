@@ -70,6 +70,9 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 		case OPEN:
 			this.menuBuilder.openProject();
 			break;
+		case COPY:
+			this.menuBuilder.copyProject();
+			break;
 		case PREFERENCES:
 			FormatterOptionDialog.showAndWait();
 			break;

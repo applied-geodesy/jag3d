@@ -1,23 +1,23 @@
 /***********************************************************************
-* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
-*                                                                      *
-* This program is free software; you can redistribute it and/or modify *
-* it under the terms of the GNU General Public License as published by *
-* the Free Software Foundation; either version 3 of the License, or    *
-* at your option any later version.                                    *
-*                                                                      *
-* This program is distributed in the hope that it will be useful,      *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
-* GNU General Public License for more details.                         *
-*                                                                      *
-* You should have received a copy of the GNU General Public License    *
-* along with this program; if not, see <http://www.gnu.org/licenses/>  *
-* or write to the                                                      *
-* Free Software Foundation, Inc.,                                      *
-* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
-*                                                                      *
-***********************************************************************/
+ * Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+ *                                                                      *
+ * This program is free software; you can redistribute it and/or modify *
+ * it under the terms of the GNU General Public License as published by *
+ * the Free Software Foundation; either version 3 of the License, or    *
+ * at your option any later version.                                    *
+ *                                                                      *
+ * This program is distributed in the hope that it will be useful,      *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ * GNU General Public License for more details.                         *
+ *                                                                      *
+ * You should have received a copy of the GNU General Public License    *
+ * along with this program; if not, see <http://www.gnu.org/licenses/>  *
+ * or write to the                                                      *
+ * Free Software Foundation, Inc.,                                      *
+ * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+ *                                                                      *
+ ***********************************************************************/
 
 package org.applied_geodesy.jag3d.ui.menu;
 
@@ -29,6 +29,8 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -139,7 +141,7 @@ public class UIMenuBuilder {
 	public static UIMenuBuilder getInstance() {
 		return menuBuilder;
 	}
-	
+
 	public static void setHostServices(HostServices hostServices) {
 		menuBuilder.hostServices = hostServices;
 	}
@@ -261,12 +263,14 @@ public class UIMenuBuilder {
 	private void createProjectMenu(Menu parentMenu) {
 		MenuItem newItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.new.label", "_New"), true, MenuItemType.NEW, new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN), this.menuEventHandler, false);
 		MenuItem openItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.open.label", "_Open"), true, MenuItemType.OPEN, new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN), this.menuEventHandler, false);
+		MenuItem copyItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.copy.label", "_Copy"), true, MenuItemType.COPY, new KeyCodeCombination(KeyCode.Y, KeyCombination.CONTROL_DOWN), this.menuEventHandler, true);
 		MenuItem exitItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.exit.label", "_Exit"), true, MenuItemType.EXIT, new KeyCodeCombination(KeyCode.E, KeyCombination.CONTROL_DOWN), this.menuEventHandler, false);
 		Menu historyMenu = this.createHistoryMenu();
 
 		parentMenu.getItems().addAll(
 				newItem, 
 				openItem,
+				copyItem,
 				new SeparatorMenuItem(),
 				historyMenu,
 				new SeparatorMenuItem(),
@@ -318,7 +322,7 @@ public class UIMenuBuilder {
 			String parent   = file.getParent();
 			if (parent.length() > 60)
 				itemName = parent.substring(0, 50) + "\u2026" + File.separator + file.getName();
-			
+
 			MenuItem newFileItem = createMenuItem(itemName, false, MenuItemType.RECENTLY_USED, file, null, this.menuEventHandler, false);
 			items.add(newFileItem);
 
@@ -355,7 +359,7 @@ public class UIMenuBuilder {
 							String parent   = file.getParent();
 							if (parent.length() > 60)
 								itemName = parent.substring(0, 50) + "\u2026" + File.separator + file.getName();
-							
+
 							MenuItem fileItem = createMenuItem(itemName, false, MenuItemType.RECENTLY_USED, file, null, this.menuEventHandler, false);
 							newItems.add(fileItem);
 						}
@@ -575,6 +579,64 @@ public class UIMenuBuilder {
 					e
 					);
 			SQLManager.getInstance().closeDataBase();
+		}
+	}
+
+	void copyProject() {
+		try {
+			// check for loaded db
+			if (!SQLManager.getInstance().hasDatabase())
+				return;
+
+			String dataBaseFileExtensions[] = new String[] { "data", "properties", "script", "backup" };
+			String currentDataBaseName = SQLManager.getInstance().getDataBase() != null && SQLManager.getInstance().getDataBase() instanceof HSQLDB ? ((HSQLDB)SQLManager.getInstance().getDataBase()).getDataBaseFileName() : null;
+
+			// check for HSQLDB type database
+			if (currentDataBaseName == null)
+				return;
+
+			File selectedFile = DefaultFileChooser.showSaveDialog(
+					i18n.getString("UIMenuBuilder.filechooser.copy.title", "Create deep copy of current project"),
+					null,
+					new ExtensionFilter("HSQLDB (*.script)", "*.script")
+					);
+
+			if (selectedFile == null)
+				return;
+
+			String regex = "(.+?)(\\.)(backup$|data$|properties$|script$)";
+			String copyDataBaseName = selectedFile.getAbsolutePath().replaceAll(regex, "$1");
+
+			// check if selected file equals to loaded file
+			if (currentDataBaseName.equals(copyDataBaseName))
+				return;
+			
+			// close current database
+			SQLManager.getInstance().closeDataBase();
+
+			// copy files
+			for (int i=0; i<dataBaseFileExtensions.length; i++) {
+				Path src = Paths.get(currentDataBaseName + "." + dataBaseFileExtensions[i]);
+				if (!Files.exists(src, LinkOption.NOFOLLOW_LINKS))
+					continue;
+				
+				Path trg = Paths.get(copyDataBaseName + "." + dataBaseFileExtensions[i]);
+				Files.copy(src, trg, StandardCopyOption.REPLACE_EXISTING);
+			}
+			
+			// open copied database
+			if (Files.exists(selectedFile.toPath(), LinkOption.NOFOLLOW_LINKS) && Files.isRegularFile(selectedFile.toPath(), LinkOption.NOFOLLOW_LINKS))
+				this.openProject(selectedFile);
+			
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+			OptionDialog.showThrowableDialog (
+					i18n.getString("UIMenuBuilder.message.error.copy.exception.title", "I/O Error"),
+					i18n.getString("UIMenuBuilder.message.error.copy.exception.header", "Error, could not create a deep copy of the current database."),
+					i18n.getString("UIMenuBuilder.message.error.copy.exception.message", "An exception has occurred during project copying."),
+					e
+					);
 		}
 	}
 
@@ -810,7 +872,7 @@ public class UIMenuBuilder {
 					);
 		}
 	}
-	
+
 	public void checkUpdates() {
 		final String address = "https://software.applied-geodesy.org/update.php"; //"https://software.applied-geodesy.org/update.php";
 		URLParameter param = new URLParameter("checkupdate", "jag3d");
@@ -828,11 +890,11 @@ public class UIMenuBuilder {
 								String.format(Locale.ENGLISH, i18n.getString("UIMenuBuilder.message.confirmation.outdated_version.header", "A new version v%d of JAG3D is available.\r\nDo you want to download the latest release?"), propVersion),
 								i18n.getString("UIMenuBuilder.message.confirmation.outdated_version.message", "The currently used application is outdated. A new version of JAG3D is available at <software.applied-geodesy.org>.")
 								);
-						
-						
+
+
 						if (result.get() == ButtonType.OK && this.hostServices != null) 
 							this.hostServices.showDocument(properties.getProperty("DOWNLOAD", "http://software.applied-geodesy.org"));
-						
+
 					} 
 					else {
 						OptionDialog.showInformationDialog(
@@ -878,5 +940,5 @@ public class UIMenuBuilder {
 		});
 	}
 
-	
+
 }

@@ -24,6 +24,7 @@ package org.applied_geodesy.jag3d.ui.menu;
 enum MenuItemType {
 	NEW, 
 	OPEN,
+	COPY,
 	PREFERENCES,
 	TEST_STATISTIC,
 	HORIZONTAL_PROJECTION,
