@@ -74,6 +74,10 @@ public class UITabPaneBuilder {
 			if (newTab != null && newTab.getUserData() instanceof TabType) {
 				TabType tabType = (TabType)newTab.getUserData();
 				newTab.setContent(getNode(tabType));
+				
+				if (tabType == TabType.GRAPHIC) {
+					UIGraphicPaneBuilder.getInstance().getLayerManager().redraw();
+				}
 			}
 		}
 	}
