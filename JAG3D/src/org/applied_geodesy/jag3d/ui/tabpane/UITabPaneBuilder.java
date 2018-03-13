@@ -75,9 +75,9 @@ public class UITabPaneBuilder {
 				TabType tabType = (TabType)newTab.getUserData();
 				newTab.setContent(getNode(tabType));
 				
-				if (tabType == TabType.GRAPHIC) {
+				// TODD ROOT
+				if (tabType == TabType.GRAPHIC)
 					UIGraphicPaneBuilder.getInstance().getLayerManager().redraw();
-				}
 			}
 		}
 	}
