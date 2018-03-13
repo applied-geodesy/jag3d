@@ -202,10 +202,12 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 			this.highlightColorPicker.setValue(this.currentLayer.getHighlightColor());
 			this.highlightLineWidthComboBox.getSelectionModel().select(this.currentLayer.getHighlightLineWidth());
 			this.highlightPane.setVisible(true);
+			this.highlightPane.setManaged(true);
 			break;
 			
 		default:
 			this.highlightPane.setVisible(false);
+			this.highlightPane.setManaged(false);
 			break;
 		}
 		
