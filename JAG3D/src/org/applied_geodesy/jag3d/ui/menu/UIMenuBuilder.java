@@ -313,7 +313,13 @@ public class UIMenuBuilder {
 			if (removeIndex >= 0)
 				items.remove(removeIndex);
 
-			MenuItem newFileItem = createMenuItem(file.getName(), false, MenuItemType.RECENTLY_USED, file, null, this.menuEventHandler, false);
+
+			String itemName = file.toString();
+			String parent   = file.getParent();
+			if (parent.length() > 60)
+				itemName = parent.substring(0, 50) + "\u2026" + File.separator + file.getName();
+			
+			MenuItem newFileItem = createMenuItem(itemName, false, MenuItemType.RECENTLY_USED, file, null, this.menuEventHandler, false);
 			items.add(newFileItem);
 
 			while (items.size() >= 10)
