@@ -593,7 +593,8 @@ public class LayerManager {
 		}
 		else {
 			this.currentGraphicExtent.set(maxGraphicExtent);
-			this.draw();
+			//this.draw();
+			this.zoomOut();
 		}
 	}
 	
