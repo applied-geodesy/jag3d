@@ -75,9 +75,9 @@ public class UITabPaneBuilder {
 				TabType tabType = (TabType)newTab.getUserData();
 				newTab.setContent(getNode(tabType));
 				
-				// re-draw network plot
-				if (lastTreeItemValue != null && tabType != null && lastTreeItemValue.getItemType() == TreeItemType.ROOT && tabType == TabType.GRAPHIC)
-					UIGraphicPaneBuilder.getInstance().getLayerManager().redraw();
+//				// re-draw network plot
+//				if (lastTreeItemValue != null && tabType != null && lastTreeItemValue.getItemType() == TreeItemType.ROOT && tabType == TabType.GRAPHIC)
+//					UIGraphicPaneBuilder.getInstance().getLayerManager().redraw();
 			}
 		}
 	}
@@ -191,6 +191,8 @@ public class UITabPaneBuilder {
 				node = UIGlobalResultPaneBuilder.getInstance().getNode();
 			else if (tabType == TabType.GRAPHIC)
 				node = UIGraphicPaneBuilder.getInstance().getPane();
+				// re-draw network plot
+				UIGraphicPaneBuilder.getInstance().getLayerManager().redraw();
 			break;
 
 		case REFERENCE_POINT_1D_LEAF:
