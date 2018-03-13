@@ -75,8 +75,8 @@ public class UITabPaneBuilder {
 				TabType tabType = (TabType)newTab.getUserData();
 				newTab.setContent(getNode(tabType));
 				
-				// TODD ROOT
-				if (tabType == TabType.GRAPHIC)
+				// re-draw network plot
+				if (lastTreeItemValue != null && tabType != null && lastTreeItemValue.getItemType() == TreeItemType.ROOT && tabType == TabType.GRAPHIC)
 					UIGraphicPaneBuilder.getInstance().getLayerManager().redraw();
 			}
 		}
