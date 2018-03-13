@@ -345,7 +345,12 @@ public class UIMenuBuilder {
 						String string = scanner.nextLine().trim();
 						File file = new File(string);
 						if (!string.isEmpty() && string.matches(regex) && Files.exists(file.toPath()) && Files.isRegularFile(file.toPath())) {
-							MenuItem fileItem = createMenuItem(file.getName(), false, MenuItemType.RECENTLY_USED, file, null, this.menuEventHandler, false);
+							String itemName = file.toString();
+							String parent   = file.getParent();
+							if (parent.length() > 60)
+								itemName = parent.substring(0, 50) + "\u2026" + File.separator + file.getName();
+							
+							MenuItem fileItem = createMenuItem(itemName, false, MenuItemType.RECENTLY_USED, file, null, this.menuEventHandler, false);
 							newItems.add(fileItem);
 						}
 						if (newItems.size() == 10)
