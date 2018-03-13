@@ -3571,6 +3571,10 @@ public class SQLManager {
 		return names;
 	}
 	
+	public DataBase getDataBase() {
+		return this.dataBase;
+	}
+	
 	private void fireDatabaseStateChanged(ProjectDatabaseStateType stateType) {
 		ProjectDatabaseStateEvent evt = new ProjectDatabaseStateEvent(this, stateType);
 		Object listeners[] = this.listenerList.toArray();
