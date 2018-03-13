@@ -2450,7 +2450,7 @@ public class SQLManager {
 	public void removeGroup(TreeItemValue treeItemValue) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
-		
+
 		String sql = null;
 		int id = -1;
 		if (treeItemValue instanceof PointTreeItemValue) {
@@ -2458,12 +2458,12 @@ public class SQLManager {
 			id = ((PointTreeItemValue)treeItemValue).getGroupId();
 		}
 		else if (treeItemValue instanceof ObservationTreeItemValue) {
-			sql = "DELETE FROM \"PointGroup\" WHERE \"id\" = ? LIMIT 1";
+			sql = "DELETE FROM \"ObservationGroup\" WHERE \"id\" = ? LIMIT 1";
 			id = ((ObservationTreeItemValue)treeItemValue).getGroupId();
 		}
 		else if (treeItemValue instanceof CongruenceAnalysisTreeItemValue) {
 			sql = "DELETE FROM \"CongruenceAnalysisGroup\" WHERE \"id\" = ? LIMIT 1";
-			id = ((ObservationTreeItemValue)treeItemValue).getGroupId();
+			id = ((CongruenceAnalysisTreeItemValue)treeItemValue).getGroupId();
 		}
 		else {
 			System.err.println(this.getClass().getSimpleName() + " : Error, cannot remove item, because type is unknwon " + treeItemValue.getItemType());

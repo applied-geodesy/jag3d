@@ -276,7 +276,6 @@ public class UITreeBuilder {
 			TreeItemType parentItemType = null;
 			for (TreeItem<TreeItemValue> item : items) {
 				this.removeItem(item);
-
 				if (parentItemType == null && item.getValue() != null) {
 					parentItemType = TreeItemType.getDirectoryByLeafType(item.getValue().getItemType());
 				}
@@ -296,7 +295,7 @@ public class UITreeBuilder {
 				!TreeItemType.isGNSSObservationTypeLeaf(itemType) &&
 				!TreeItemType.isCongruenceAnalysisTypeLeaf(itemType))
 			return;
-		
+
 		TreeItemType parentType = TreeItemType.getDirectoryByLeafType(itemType);
 		
 		if (parentType == null || !this.directoryItemMap.containsKey(parentType))
@@ -494,8 +493,9 @@ public class UITreeBuilder {
 	private boolean remove(TreeItemValue treeItemValue) {
 		try {
 			TreeItemType type = treeItemValue.getItemType();
-			if (TreeItemType.isPointTypeLeaf(type) || TreeItemType.isGNSSObservationTypeLeaf(type) || TreeItemType.isObservationTypeLeaf(type) || TreeItemType.isCongruenceAnalysisTypeDirectory(type)) {
+			if (TreeItemType.isPointTypeLeaf(type) || TreeItemType.isGNSSObservationTypeLeaf(type) || TreeItemType.isObservationTypeLeaf(type) || TreeItemType.isCongruenceAnalysisTypeLeaf(type)) {
 				SQLManager.getInstance().removeGroup(treeItemValue);
+				return true;
 			}
 			else {
 				System.err.println(this.getClass().getSimpleName() + " : Error, item has no removeable properties " + treeItemValue);
@@ -508,9 +508,9 @@ public class UITreeBuilder {
 					i18n.getString("UITreeBuiler.message.error.remove.exception.header", "Error, could remove group from database."),
 					i18n.getString("UITreeBuiler.message.error.remove.exception.message", "An exception has occurred during database transaction."),
 					e);
-			return false;
+			
 		}
-		return true;
+		return false;
 	}
 
 	private void load(TreeItemValue itemValue, ObservableList<TreeItem<TreeItemValue>> treeItems) {
