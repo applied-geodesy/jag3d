@@ -28,6 +28,8 @@ import javafx.scene.image.Image;
 public class ImageUtils {
 	private final static String IMGAGE_PATH = "/org/applied_geodesy/jag3d/ui/gfx/";
 
+	private ImageUtils() {}
+	
 	public static Image getImage(String icon) {
 		InputStream input = null;
 		try {
