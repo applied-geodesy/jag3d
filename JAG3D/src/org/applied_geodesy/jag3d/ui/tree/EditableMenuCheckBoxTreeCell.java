@@ -45,6 +45,7 @@ import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 import org.applied_geodesy.jag3d.ui.tabpane.UITabPaneBuilder;
 import org.applied_geodesy.util.i18.I18N;
 
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -498,7 +499,12 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 				this.setText(null);
 				this.setGraphic(this.textField);
 				this.textField.setText(this.getString());
-				this.textField.selectAll();
+				Platform.runLater(new Runnable() {
+		            @Override public void run() {
+		            	textField.selectAll();
+		            	textField.requestFocus();
+		            }
+		        });
 				break;
 			default:
 				break;
@@ -587,7 +593,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 			setText(null);
 		else {
 			if (isEditing()) {
-				// Editierbare Nodes sind Root und alle Leafs, vgl. startEditing    		      		        		
+				// Editierbare Nodes sind alle Leafs, vgl. startEditing    		      		        		
 				if (this.textField != null) 
 					this.textField.setText(getString());
 				this.setText(null);
