@@ -109,10 +109,16 @@ public class JAG3D extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		final java.awt.SplashScreen splashScreen = java.awt.SplashScreen.getSplashScreen();
+		java.awt.SplashScreen splashScreen = null;
 		JAG3D.primaryStage = primaryStage;
 		
 		try {
+			try {
+				splashScreen = java.awt.SplashScreen.getSplashScreen();
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
 			I18N i18n = I18N.getInstance(Locale.getDefault(), "i18n/jag3d");
 
 			UIMenuBuilder menuBuilder = UIMenuBuilder.getInstance();
@@ -172,7 +178,9 @@ public class JAG3D extends Application {
 						ImageUtils.getImage("JAG3D_64x64.png")
 						);
 			} 
-			catch(Exception e) {}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
 			primaryStage.setScene(scene);
 
 			setTitle(null);
