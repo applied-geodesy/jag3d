@@ -10,5 +10,5 @@
 PROTOCOL = HTTPS
 HOST     = example.org
 PORT     = 443
-USERNAME = Username
-PASSWORD = Password
+#USERNAME = Username
+#PASSWORD = Password
