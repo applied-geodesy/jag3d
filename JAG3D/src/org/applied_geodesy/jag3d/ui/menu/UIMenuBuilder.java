@@ -87,6 +87,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -716,8 +717,11 @@ public class UIMenuBuilder {
 		}
 
 		if (lastItem != null) {
-			UITreeBuilder.getInstance().getTree().getSelectionModel().clearSelection();
-			UITreeBuilder.getInstance().getTree().getSelectionModel().select(lastItem);
+			TreeView<TreeItemValue> treeView = UITreeBuilder.getInstance().getTree();
+			treeView.getSelectionModel().clearSelection();
+			treeView.getSelectionModel().select(lastItem);
+			int index = treeView.getRow(lastItem);
+			treeView.scrollTo(index);
 		}
 	}
 
