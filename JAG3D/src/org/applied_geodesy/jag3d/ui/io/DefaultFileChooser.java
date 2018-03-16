@@ -43,7 +43,7 @@ public class DefaultFileChooser {
 		BufferedInputStream bis = null;
 		final String path = "/properties/paths.default";
 		try {
-			if (DefaultUncertainty.class.getResource(path) != null) {
+			if (DefaultFileChooser.class.getResource(path) != null) {
 				Properties PROPERTIES = new Properties();
 				bis = new BufferedInputStream(DefaultUncertainty.class.getResourceAsStream(path));
 				PROPERTIES.load(bis);
