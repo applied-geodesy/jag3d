@@ -41,7 +41,7 @@ public class DefaultFileChooser {
 	
 	static {
 		BufferedInputStream bis = null;
-		final String path = "/properties/workspace.default";
+		final String path = "/properties/paths.default";
 		try {
 			if (DefaultUncertainty.class.getResource(path) != null) {
 				Properties PROPERTIES = new Properties();
