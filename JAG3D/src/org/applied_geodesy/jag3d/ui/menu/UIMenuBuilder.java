@@ -21,6 +21,7 @@
 
 package org.applied_geodesy.jag3d.ui.menu;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -45,6 +46,7 @@ import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
+import org.applied_geodesy.adjustment.DefaultUncertainty;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.jag3d.sql.DatabaseVersionMismatchException;
@@ -155,6 +157,8 @@ public class UIMenuBuilder {
 
 	private void init() {
 		SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
+
+		this.initHistoryPathFromProperties();
 
 		this.menuBar = new MenuBar();
 
@@ -279,6 +283,9 @@ public class UIMenuBuilder {
 	}
 
 	private void writeProjectHistory() {
+		if (this.historyFile == null)
+			return;
+		
 		List<MenuItem> items = this.historyMenu.getItems();
 		if (items.isEmpty())
 			return;
@@ -345,6 +352,11 @@ public class UIMenuBuilder {
 			this.historyMenu = createMenu(i18n.getString("UIMenuBuilder.menu.project.history.label", "_Recently used projects"), true);
 			List<MenuItem> newItems = this.historyMenu.getItems();
 			newItems.clear();
+			
+			if (this.historyFile == null) {
+				this.historyMenu.setDisable(newItems.isEmpty());
+				return this.historyMenu;
+			}
 
 			String regex = "(?i)(.+?)(\\.)(backup$|data$|properties$|script$)";
 			Scanner scanner = null;
@@ -944,5 +956,32 @@ public class UIMenuBuilder {
 		});
 	}
 
+	private void initHistoryPathFromProperties() {
+		BufferedInputStream bis = null;
+		final String path = "/properties/paths.default";
+		try {
+			if (this.getClass().getResource(path) != null) {
+				Properties PROPERTIES = new Properties();
+				bis = new BufferedInputStream(DefaultUncertainty.class.getResourceAsStream(path));
+				PROPERTIES.load(bis);
+				String defaultHistoryPath = PROPERTIES.getProperty("HISTORY", System.getProperty("user.home", null));
 
+				if (defaultHistoryPath != null && Files.exists(Paths.get(defaultHistoryPath)) && Files.isDirectory(Paths.get(defaultHistoryPath), LinkOption.NOFOLLOW_LINKS))
+					this.historyFile = new File(defaultHistoryPath + File.separator + ".jag3d_history");
+				else 
+					this.historyFile = new File(System.getProperty("user.home") + File.separator + ".jag3d_history");
+			}  
+		} catch (Exception e) {
+			e.printStackTrace();
+			this.historyFile = new File(System.getProperty("user.home") + File.separator + ".jag3d_history");
+		}
+		finally {
+			try {
+				if (bis != null)
+					bis.close();  
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
 }
