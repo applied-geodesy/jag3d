@@ -436,15 +436,17 @@ public class NetworkAdjustmentDialog {
 
 					default:
 //						System.out.println(NetworkAdjustmentDialog.class.getSimpleName() + " Fishied " + result);
-						MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
-						TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
-						selectionModel.clearSelection();
-						if (treeItem != null)
-							selectionModel.select(treeItem);
-						else
-							selectionModel.select(0);
 						break;
 					}
+					
+					MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
+					TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
+					selectionModel.clearSelection();
+					if (treeItem != null)
+						selectionModel.select(treeItem);
+					else
+						selectionModel.select(0);
+					
 				}
 			}
 		});
