@@ -27,8 +27,6 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Properties;
 
-import org.applied_geodesy.adjustment.DefaultUncertainty;
-
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
@@ -45,7 +43,7 @@ public class DefaultFileChooser {
 		try {
 			if (DefaultFileChooser.class.getResource(path) != null) {
 				Properties PROPERTIES = new Properties();
-				bis = new BufferedInputStream(DefaultUncertainty.class.getResourceAsStream(path));
+				bis = new BufferedInputStream(DefaultFileChooser.class.getResourceAsStream(path));
 				PROPERTIES.load(bis);
 				String defaultWorkspace = PROPERTIES.getProperty("WORKSPACE", System.getProperty("user.home", null));
 				if (defaultWorkspace != null && Files.exists(new File(defaultWorkspace).toPath())) {

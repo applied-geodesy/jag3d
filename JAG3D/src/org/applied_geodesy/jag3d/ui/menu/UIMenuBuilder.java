@@ -46,7 +46,6 @@ import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
-import org.applied_geodesy.adjustment.DefaultUncertainty;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.jag3d.sql.DatabaseVersionMismatchException;
@@ -962,7 +961,7 @@ public class UIMenuBuilder {
 		try {
 			if (this.getClass().getResource(path) != null) {
 				Properties PROPERTIES = new Properties();
-				bis = new BufferedInputStream(DefaultUncertainty.class.getResourceAsStream(path));
+				bis = new BufferedInputStream(this.getClass().getResourceAsStream(path));
 				PROPERTIES.load(bis);
 				String defaultHistoryPath = PROPERTIES.getProperty("HISTORY", System.getProperty("user.home", null));
 
