@@ -82,19 +82,20 @@ public class EditableCell<T, S> extends TableCell<T, S> {
 					textField.setText(converter.toEditorString(getItem()));
 					cancelEdit();
 					event.consume();
-				} else if (event.getCode() == KeyCode.RIGHT) {
-					getTableView().getSelectionModel().selectRightCell();
-					event.consume();
-				} else if (event.getCode() == KeyCode.LEFT) {
-					getTableView().getSelectionModel().selectLeftCell();
-					event.consume();
-				} else if (event.getCode() == KeyCode.UP) {
-					getTableView().getSelectionModel().selectAboveCell();
-					event.consume();
-				} else if (event.getCode() == KeyCode.DOWN) {
-					getTableView().getSelectionModel().selectBelowCell();
-					event.consume();
-				}
+				} 
+//				else if (event.getCode() == KeyCode.RIGHT) {
+//					getTableView().getSelectionModel().selectRightCell();
+//					event.consume();
+//				} else if (event.getCode() == KeyCode.LEFT) {
+//					getTableView().getSelectionModel().selectLeftCell();
+//					event.consume();
+//				} else if (event.getCode() == KeyCode.UP) {
+//					getTableView().getSelectionModel().selectAboveCell();
+//					event.consume();
+//				} else if (event.getCode() == KeyCode.DOWN) {
+//					getTableView().getSelectionModel().selectBelowCell();
+//					event.consume();
+//				}
 			}
 		});
 	}
