@@ -24,7 +24,6 @@ package org.applied_geodesy.jag3d.ui.graphic.layer;
 import java.io.BufferedInputStream;
 import java.util.Properties;
 
-import org.applied_geodesy.adjustment.DefaultUncertainty;
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
@@ -50,8 +49,8 @@ public abstract class Layer extends Canvas {
 		BufferedInputStream bis = null;
 		final String path = "/properties/layers.default";
 		try {
-			if (DefaultUncertainty.class.getResource(path) != null) {
-				bis = new BufferedInputStream(DefaultUncertainty.class.getResourceAsStream(path));
+			if (Layer.class.getResource(path) != null) {
+				bis = new BufferedInputStream(Layer.class.getResourceAsStream(path));
 				PROPERTIES.load(bis);
 			}  
 		} catch (Exception e) {
