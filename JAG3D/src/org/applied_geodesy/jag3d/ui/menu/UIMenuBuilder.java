@@ -199,8 +199,8 @@ public class UIMenuBuilder {
 	}
 
 	private void createPreprocessingMenu(Menu parentMenu) {
-		MenuItem approximationValuesItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.preprocessing.approximation.label", "Aproximation _values"), true, MenuItemType.APROXIMATE_VALUES, new KeyCodeCombination(KeyCode.M, KeyCombination.CONTROL_DOWN), this.menuEventHandler, true);
-		MenuItem averageItem             = createMenuItem(i18n.getString("UIMenuBuilder.menu.preprocessing.average.label", "Avera_ge observations"), true, MenuItemType.AVERAGE, new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN), this.menuEventHandler, true);
+		MenuItem approximationValuesItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.preprocessing.approximation.label", "Aproximation _values"), true, MenuItemType.APROXIMATE_VALUES, new KeyCodeCombination(KeyCode.M, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem averageItem             = createMenuItem(i18n.getString("UIMenuBuilder.menu.preprocessing.average.label", "Avera_ge observations"), true, MenuItemType.AVERAGE, new KeyCodeCombination(KeyCode.G, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 
 		parentMenu.getItems().addAll(
 				approximationValuesItem,
@@ -232,8 +232,8 @@ public class UIMenuBuilder {
 	}
 
 	private void createHelpMenu(Menu parentMenu) {
-		MenuItem aboutItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.help.about.label", "_About JAG3D"), true, MenuItemType.ABOUT, new KeyCodeCombination(KeyCode.W, KeyCombination.CONTROL_DOWN), this.menuEventHandler, false);
-		MenuItem updateItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.help.check_update.label", "Check for _updates\u2026"), true, MenuItemType.CHECK_UPDATES, new KeyCodeCombination(KeyCode.U, KeyCombination.CONTROL_DOWN), this.menuEventHandler, false);
+		MenuItem aboutItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.help.about.label", "_About JAG3D"), true, MenuItemType.ABOUT, new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
+		MenuItem updateItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.help.check_update.label", "Check for _updates\u2026"), true, MenuItemType.CHECK_UPDATES, new KeyCodeCombination(KeyCode.U, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 		parentMenu.getItems().addAll(
 				aboutItem,
 				updateItem
@@ -241,7 +241,7 @@ public class UIMenuBuilder {
 	}
 
 	private void createAnalysisMenu(Menu parentMenu) {
-		MenuItem congruentPointItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.congruentpoint.label", "Congr_uent point"), true, MenuItemType.CONGRUENT_POINT, new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN), this.menuEventHandler, true);
+		MenuItem congruentPointItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.congruentpoint.label", "Congr_uent point"), true, MenuItemType.CONGRUENT_POINT, new KeyCodeCombination(KeyCode.P, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 
 		parentMenu.getItems().addAll(
 				congruentPointItem
@@ -250,10 +250,10 @@ public class UIMenuBuilder {
 
 	private void createPropertyMenu(Menu parentMenu) {
 		MenuItem preferencesItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.preferences.label", "Preferences"), true, MenuItemType.PREFERENCES, new KeyCodeCombination(KeyCode.ENTER, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
-		MenuItem leastSquaresItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.leastsquares.label", "Least-squares"), true, MenuItemType.LEAST_SQUARES, new KeyCodeCombination(KeyCode.Q, KeyCombination.CONTROL_DOWN), this.menuEventHandler, true);
-		MenuItem teststatisticItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.teststatistic.label", "Test statistic"), true, MenuItemType.TEST_STATISTIC, new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN), this.menuEventHandler, true);
-		MenuItem projectionItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.projection.label", "Horizontal projection"), true, MenuItemType.HORIZONTAL_PROJECTION, new KeyCodeCombination(KeyCode.I, KeyCombination.CONTROL_DOWN), this.menuEventHandler, true);
-		MenuItem rankDefectItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.rankdefect.label", "Rank defect"), true, MenuItemType.RANK_DEFECT, new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN), this.menuEventHandler, true);
+		MenuItem leastSquaresItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.leastsquares.label", "Least-squares"), true, MenuItemType.LEAST_SQUARES, new KeyCodeCombination(KeyCode.Q, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem teststatisticItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.teststatistic.label", "Test statistic"), true, MenuItemType.TEST_STATISTIC, new KeyCodeCombination(KeyCode.T, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem projectionItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.projection.label", "Horizontal projection"), true, MenuItemType.HORIZONTAL_PROJECTION, new KeyCodeCombination(KeyCode.I, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem rankDefectItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.rankdefect.label", "Rank defect"), true, MenuItemType.RANK_DEFECT, new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 
 		parentMenu.getItems().addAll(
 				leastSquaresItem,
@@ -265,12 +265,12 @@ public class UIMenuBuilder {
 	}
 
 	private void createProjectMenu(Menu parentMenu) {
-		MenuItem newItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.new.label", "_New"), true, MenuItemType.NEW, new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN), this.menuEventHandler, false);
-		MenuItem openItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.open.label", "_Open"), true, MenuItemType.OPEN, new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN), this.menuEventHandler, false);
-		MenuItem copyItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.copy.label", "_Copy"), true, MenuItemType.COPY, new KeyCodeCombination(KeyCode.Y, KeyCombination.CONTROL_DOWN), this.menuEventHandler, true);
-		MenuItem exitItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.exit.label", "_Exit"), true, MenuItemType.EXIT, new KeyCodeCombination(KeyCode.E, KeyCombination.CONTROL_DOWN), this.menuEventHandler, false);
+		MenuItem newItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.new.label", "Create _new project"), true, MenuItemType.NEW, new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
+		MenuItem openItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.open.label", "_Open existing project"), true, MenuItemType.OPEN, new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
+		MenuItem copyItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.copy.label", "_Copy and open current project"), true, MenuItemType.COPY, new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
+		MenuItem exitItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.exit.label", "_Exit"), true, MenuItemType.EXIT, new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 		Menu historyMenu = this.createHistoryMenu();
-
+		
 		parentMenu.getItems().addAll(
 				newItem, 
 				openItem,
