@@ -626,7 +626,10 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				e.printStackTrace();
 			}
 		}
-		table.refresh();
+		this.table.refresh();
+		this.table.requestFocus();
+		this.table.getSelectionModel().clearSelection();
+		this.table.getSelectionModel().select(rowData);
 	}
 	
 	private boolean isComplete(TerrestrialObservationRow row) {

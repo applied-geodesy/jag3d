@@ -547,12 +547,15 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 				default:
 					break;
 				}
-				//table.refresh();
+				
 				raiseErrorMessageSaveValue(e);
 				e.printStackTrace();
 			}
 		}
-		table.refresh();
+		this.table.refresh();
+		this.table.requestFocus();
+		this.table.getSelectionModel().clearSelection();
+		this.table.getSelectionModel().select(rowData);
 	}
 
 	@Override

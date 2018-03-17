@@ -95,6 +95,4 @@ public class UIPrincipalComponentTableBuilder extends UITableBuilder<PrincipalCo
 	public PrincipalComponentRow getEmptyRow() {
 		return new PrincipalComponentRow();
 	}
-
-
 }

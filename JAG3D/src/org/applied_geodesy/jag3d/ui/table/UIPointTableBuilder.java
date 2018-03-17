@@ -905,7 +905,10 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 				e.printStackTrace();
 			}
 		}
-		table.refresh();
+		this.table.refresh();
+		this.table.requestFocus();
+		this.table.getSelectionModel().clearSelection();
+		this.table.getSelectionModel().select(rowData);
 	}
 	
 	private boolean isComplete(PointRow row) {

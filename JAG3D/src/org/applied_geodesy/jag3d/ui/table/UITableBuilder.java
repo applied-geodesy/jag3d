@@ -119,7 +119,7 @@ public abstract class UITableBuilder<T> {
 		//		this.table.setPlaceholder(new Text(i18n.getString("UITableBuilder.emptytable", "No content in table.")));
 		this.table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		this.table.setOnKeyPressed(new TableKeyEventHandler());
-		tableModel.add(this.getEmptyRow());		
+		tableModel.add(this.getEmptyRow());
 		return table;
 	}
 
@@ -170,7 +170,7 @@ public abstract class UITableBuilder<T> {
 	static <T> Callback<TableColumn<T,Boolean>, TableCell<T,Boolean>> getBooleanCallback() {
 		return new Callback<TableColumn<T, Boolean>, TableCell<T, Boolean>>() {
 			@Override
-			public TableCell<T, Boolean> call(TableColumn<T, Boolean> column) {
+			public TableCell<T, Boolean> call(TableColumn<T, Boolean> cell) {
 				TableCell<T, Boolean> tableCell = new CheckBoxTableCell<T, Boolean>();
 				tableCell.setAlignment(Pos.CENTER);
 				return tableCell;
