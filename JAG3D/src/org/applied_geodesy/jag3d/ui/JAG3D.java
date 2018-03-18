@@ -69,7 +69,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class JAG3D extends Application {
-	private final static String TITLE_TEMPLATE = "%s%sJAG3D (RC4) \u00B7 Least-Squares Adjustment \u0026 Deformation Analysis \u00B7";
+	private final static String TITLE_TEMPLATE = "%s%sJAG3D (RC5) \u00B7 Least-Squares Adjustment \u0026 Deformation Analysis \u00B7";
 	private static Stage primaryStage;
 	
 	public static void setTitle(String title) {
