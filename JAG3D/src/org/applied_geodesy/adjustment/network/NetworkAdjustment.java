@@ -2419,6 +2419,7 @@ public class NetworkAdjustment implements Runnable {
 					double qB = observationB.getStdApriori()*observationB.getStdApriori();
 					double vB = this.estimationType == EstimationType.SIMULATION ? 0.0 : -observationB.getCorrection();
 					double b  = 0.0;
+					vB = Math.abs(vB) < SQRT_EPS ? 0.0 : vB;
 
 					for (int c=0; c<dim; c++) {
 						if (observationB.getStartPoint().equals(point)) {
@@ -2451,7 +2452,7 @@ public class NetworkAdjustment implements Runnable {
 							// (I - P*Q_ll)*P
 							// (P - P*Q_ll*P)
 							
-							// Nummerische Null wird auf Hauptdiagonale zu Null gesetzt, um Summation von "Fragmenten" zu unterbinden
+							// Numerische Null wird auf Hauptdiagonale zu Null gesetzt, um Summation von "Fragmenten" zu unterbinden
 							double pqvvp = k==j ? Math.max(1.0/qBT - qll/qBT/qB, 0.0) : -qll/qBT/qB; 
 							
 							for (int r=0; r<dim; r++) {
@@ -2551,6 +2552,7 @@ public class NetworkAdjustment implements Runnable {
 						double qB = observationB.getStdApriori()*observationB.getStdApriori();
 						double vB = this.estimationType == EstimationType.SIMULATION ? 0.0 : -observationB.getCorrection();
 						double b  = 0.0;
+						vB = Math.abs(vB) < SQRT_EPS ? 0.0 : vB;
 
 						for (int c=0; c<dim; c++) {
 							if (observationB.getStartPoint().equals(point)) {
@@ -2579,7 +2581,7 @@ public class NetworkAdjustment implements Runnable {
 								// (I - P*Q_ll)*P
 								// (P - P*Q_ll*P)
 								
-								// Nummerische Null wird auf Hauptdiagonale zu Null gesetzt, um Summation von "Fragmenten" zu unterbinden
+								// Numerische Null wird auf Hauptdiagonale zu Null gesetzt, um Summation von "Fragmenten" zu unterbinden
 								double pqvvp = k==j ? Math.max(1.0/qBT - qll/qBT/qB, 0.0) : -qll/qBT/qB; 
 								
 								for (int r=0; r<dim; r++) {
@@ -3134,7 +3136,8 @@ public class NetworkAdjustment implements Runnable {
 								double qB = observationB.getStdApriori()*observationB.getStdApriori();
 								double vB = this.estimationType == EstimationType.SIMULATION ? 0.0 : -observationB.getCorrection();
 								double b  = 0.0;
-
+								vB = Math.abs(vB) < SQRT_EPS ? 0.0 : vB;
+								
 								for (int c=0; c<dim; c++) {
 									if (observationB.getStartPoint().equals(point)) {
 										if (c==0 && dim !=1)
@@ -3166,7 +3169,7 @@ public class NetworkAdjustment implements Runnable {
 										// (I - P*Q_ll)*P
 										// (P - P*Q_ll*P)
 										
-										// Nummerische Null wird auf Hauptdiagonale zu Null gesetzt, um Summation von "Fragmenten" zu unterbinden
+										// Numerische Null wird auf Hauptdiagonale zu Null gesetzt, um Summation von "Fragmenten" zu unterbinden
 										double pqvvp = k==j ? Math.max(1.0/qBT - qll/qBT/qB, 0.0) : -qll/qBT/qB; 
 										
 										for (int r=0; r<dim; r++) {
