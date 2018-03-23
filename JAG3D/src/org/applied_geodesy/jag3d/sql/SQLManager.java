@@ -873,6 +873,7 @@ public class SQLManager {
 			table.getItems().setAll(tableModel);
 		else
 			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
 	}
 	
 	private void loadPrincipalComponents() throws SQLException {
@@ -911,6 +912,7 @@ public class SQLManager {
 			table.getItems().setAll(tableModel);
 		else
 			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
 	}
 	
 	private void loadTestStatistics() throws SQLException {
@@ -961,6 +963,7 @@ public class SQLManager {
 			table.getItems().setAll(tableModel);
 		else
 			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
 	}
 	
 	private void loadAdditionalParameters(ObservationTreeItemValue observationItemValue, ObservationTreeItemValue... selectedObservationItemValues) throws SQLException {
@@ -1066,6 +1069,7 @@ public class SQLManager {
 			table.getItems().setAll(tableModel);
 		else
 			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
 	}
 
 	private void loadStrainParameterRestrictions(CongruenceAnalysisTreeItemValue congruenceAnalysisItemValue) throws SQLException {
@@ -1198,6 +1202,7 @@ public class SQLManager {
 			table.getItems().setAll(tableModel);
 		else
 			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
 	}
 
 	private void loadEpoch(ObservationTreeItemValue observationItemValue, ObservationTreeItemValue... selectedObservationItemValues) throws SQLException {
@@ -1358,6 +1363,7 @@ public class SQLManager {
 			table.getItems().setAll(tableModel);
 		else
 			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
 	}
 
 	private void loadGNSSObservations(ObservationTreeItemValue observationGNSSItemValue, ObservationTreeItemValue... selectedGNSSObservationItemValues) throws SQLException {
@@ -1510,6 +1516,7 @@ public class SQLManager {
 			table.getItems().setAll(tableModel);
 		else
 			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
 	}
 
 	private void loadUncertainties(PointTreeItemValue pointItemValue, PointTreeItemValue... selectedPointItemValues) throws SQLException {
@@ -1830,6 +1837,7 @@ public class SQLManager {
 			table.getItems().setAll(tableModel);
 		else
 			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
 	}
 
 	private void loadCongruenceAnalysisPointPair(CongruenceAnalysisTreeItemValue congruenceAnalysisItemValue, CongruenceAnalysisTreeItemValue... selectedCongruenceAnalysisItemValues) throws SQLException {
@@ -1959,6 +1967,7 @@ public class SQLManager {
 			table.getItems().setAll(tableModel);
 		else
 			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
 	}
 
 	public void remove(Row rowData) throws SQLException {
