@@ -392,32 +392,32 @@ public class UIMenuBuilder {
 	}
 
 	private void createImportMenu(Menu parentMenu) {
-		Menu importReferencePointFlatMenu        = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.point.reference.label", "Reference point"), true);
-		MenuItem importReferencePoint1DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.reference.1d.label", "Reference point 1D"), true, MenuItemType.IMPORT_FLAT_REFERENCE_POINT_1D, null, this.menuEventHandler, true);
-		MenuItem importReferencePoint2DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.reference.2d.label", "Reference point 2D"), true, MenuItemType.IMPORT_FLAT_REFERENCE_POINT_2D, null, this.menuEventHandler, true);
-		MenuItem importReferencePoint3DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.reference.3d.label", "Reference point 3D"), true, MenuItemType.IMPORT_FLAT_REFERENCE_POINT_3D, null, this.menuEventHandler, true);
+		Menu importReferencePointFlatMenu        = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.point.reference.label", "Reference points"), true);
+		MenuItem importReferencePoint1DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.reference.1d.label", "Reference points 1D"), true, MenuItemType.IMPORT_FLAT_REFERENCE_POINT_1D, null, this.menuEventHandler, true);
+		MenuItem importReferencePoint2DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.reference.2d.label", "Reference points 2D"), true, MenuItemType.IMPORT_FLAT_REFERENCE_POINT_2D, null, this.menuEventHandler, true);
+		MenuItem importReferencePoint3DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.reference.3d.label", "Reference points 3D"), true, MenuItemType.IMPORT_FLAT_REFERENCE_POINT_3D, null, this.menuEventHandler, true);
 
-		Menu importStochasticPointFlatMenu        = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.point.stochastic.label", "Stochastic point"), true);
-		MenuItem importStochasticPoint1DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.stochastic.1d.label", "Stochastic point 1D"), true, MenuItemType.IMPORT_FLAT_STOCHASTIC_POINT_1D, null, this.menuEventHandler, true);
-		MenuItem importStochasticPoint2DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.stochastic.2d.label", "Stochastic point 2D"), true, MenuItemType.IMPORT_FLAT_STOCHASTIC_POINT_2D, null, this.menuEventHandler, true);
-		MenuItem importStochasticPoint3DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.stochastic.3d.label", "Stochastic point 3D"), true, MenuItemType.IMPORT_FLAT_STOCHASTIC_POINT_3D, null, this.menuEventHandler, true);
+		Menu importStochasticPointFlatMenu        = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.point.stochastic.label", "Stochastic points"), true);
+		MenuItem importStochasticPoint1DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.stochastic.1d.label", "Stochastic points 1D"), true, MenuItemType.IMPORT_FLAT_STOCHASTIC_POINT_1D, null, this.menuEventHandler, true);
+		MenuItem importStochasticPoint2DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.stochastic.2d.label", "Stochastic points 2D"), true, MenuItemType.IMPORT_FLAT_STOCHASTIC_POINT_2D, null, this.menuEventHandler, true);
+		MenuItem importStochasticPoint3DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.stochastic.3d.label", "Stochastic points 3D"), true, MenuItemType.IMPORT_FLAT_STOCHASTIC_POINT_3D, null, this.menuEventHandler, true);
 
-		Menu importDatumPointFlatMenu        = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.point.datum.label", "Datum point"), true);
-		MenuItem importDatumPoint1DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.datum.1d.label", "Datum point 1D"), true, MenuItemType.IMPORT_FLAT_DATUM_POINT_1D, null, this.menuEventHandler, true);
-		MenuItem importDatumPoint2DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.datum.2d.label", "Datum point 2D"), true, MenuItemType.IMPORT_FLAT_DATUM_POINT_2D, null, this.menuEventHandler, true);
-		MenuItem importDatumPoint3DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.datum.3d.label", "Datum point 3D"), true, MenuItemType.IMPORT_FLAT_DATUM_POINT_3D, null, this.menuEventHandler, true);
+		Menu importDatumPointFlatMenu        = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.point.datum.label", "Datum points"), true);
+		MenuItem importDatumPoint1DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.datum.1d.label", "Datum points 1D"), true, MenuItemType.IMPORT_FLAT_DATUM_POINT_1D, null, this.menuEventHandler, true);
+		MenuItem importDatumPoint2DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.datum.2d.label", "Datum points 2D"), true, MenuItemType.IMPORT_FLAT_DATUM_POINT_2D, null, this.menuEventHandler, true);
+		MenuItem importDatumPoint3DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.datum.3d.label", "Datum points 3D"), true, MenuItemType.IMPORT_FLAT_DATUM_POINT_3D, null, this.menuEventHandler, true);
 
-		Menu importNewPointFlatMenu        = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.point.new.label", "New point"), true);
-		MenuItem importNewPoint1DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.new.1d.label", "New point 1D"), true, MenuItemType.IMPORT_FLAT_NEW_POINT_1D, null, this.menuEventHandler, true);
-		MenuItem importNewPoint2DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.new.2d.label", "New point 2D"), true, MenuItemType.IMPORT_FLAT_NEW_POINT_2D, null, this.menuEventHandler, true);
-		MenuItem importNewPoint3DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.new.3d.label", "New point 3D"), true, MenuItemType.IMPORT_FLAT_NEW_POINT_3D, null, this.menuEventHandler, true);
+		Menu importNewPointFlatMenu        = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.point.new.label", "New points"), true);
+		MenuItem importNewPoint1DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.new.1d.label", "New points 1D"), true, MenuItemType.IMPORT_FLAT_NEW_POINT_1D, null, this.menuEventHandler, true);
+		MenuItem importNewPoint2DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.new.2d.label", "New points 2D"), true, MenuItemType.IMPORT_FLAT_NEW_POINT_2D, null, this.menuEventHandler, true);
+		MenuItem importNewPoint3DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.new.3d.label", "New points 3D"), true, MenuItemType.IMPORT_FLAT_NEW_POINT_3D, null, this.menuEventHandler, true);
 
-		Menu importTerrestrialFlatMenu            = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.label", "Terrestrial observation"), true);
-		MenuItem importLevelingFlatItem           = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.leveling.label", "Leveling"), true, MenuItemType.IMPORT_FLAT_LEVELING, null, this.menuEventHandler, true);
-		MenuItem importDirectionFlatItem          = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.direction.label", "Direction"), true, MenuItemType.IMPORT_FLAT_DIRECTION, null, this.menuEventHandler, true);
-		MenuItem importHorizontalDistanceFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.horizontal_distance.label", "Horizontal distance"), true, MenuItemType.IMPORT_FLAT_HORIZONTAL_DISTANCE, null, this.menuEventHandler, true);
-		MenuItem importSlopeDistanceFlatItem      = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.slope_distance.label", "Slope distance"), true, MenuItemType.IMPORT_FLAT_SLOPE_DISTANCE, null, this.menuEventHandler, true);
-		MenuItem importZenithAngleFlatItem        = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.zenith_angle.label", "Zenith angle"), true, MenuItemType.IMPORT_FLAT_ZENITH_ANGLE, null, this.menuEventHandler, true);
+		Menu importTerrestrialFlatMenu            = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.label", "Terrestrial observations"), true);
+		MenuItem importLevelingFlatItem           = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.leveling.label", "Leveling data"), true, MenuItemType.IMPORT_FLAT_LEVELING, null, this.menuEventHandler, true);
+		MenuItem importDirectionFlatItem          = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.direction.label", "Direction sets"), true, MenuItemType.IMPORT_FLAT_DIRECTION, null, this.menuEventHandler, true);
+		MenuItem importHorizontalDistanceFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.horizontal_distance.label", "Horizontal distances"), true, MenuItemType.IMPORT_FLAT_HORIZONTAL_DISTANCE, null, this.menuEventHandler, true);
+		MenuItem importSlopeDistanceFlatItem      = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.slope_distance.label", "Slope distances"), true, MenuItemType.IMPORT_FLAT_SLOPE_DISTANCE, null, this.menuEventHandler, true);
+		MenuItem importZenithAngleFlatItem        = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.zenith_angle.label", "Zenith angles"), true, MenuItemType.IMPORT_FLAT_ZENITH_ANGLE, null, this.menuEventHandler, true);
 
 		Menu importCongruenceAnalysisPairFlatMenu       = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.congruence_analysis.label", "Congruence Analysis"), true);
 		MenuItem importCongruenceAnalysisPair1DFlatMenu = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.congruence_analysis.1d.label", "Point nexus 1D"), true, MenuItemType.IMPORT_FLAT_CONGRUENCE_ANALYSIS_PAIR_1D, null, this.menuEventHandler, true);
@@ -782,7 +782,7 @@ public class UIMenuBuilder {
 			this.importFile(new ObservationFlatFileReader(ObservationType.LEVELING), ObservationFlatFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.flat.leveling.title", "Import leveling data from flat files"));
 			break;
 		case IMPORT_FLAT_DIRECTION:
-			this.importFile(new ObservationFlatFileReader(ObservationType.DIRECTION), ObservationFlatFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.flat.direction.title", "Import directions from flat files"));
+			this.importFile(new ObservationFlatFileReader(ObservationType.DIRECTION), ObservationFlatFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.flat.direction.title", "Import direction sets from flat files"));
 			break;
 		case IMPORT_FLAT_HORIZONTAL_DISTANCE:
 			this.importFile(new ObservationFlatFileReader(ObservationType.HORIZONTAL_DISTANCE), ObservationFlatFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.flat.horizontal_distances.title", "Import horizontal distances from flat files"));

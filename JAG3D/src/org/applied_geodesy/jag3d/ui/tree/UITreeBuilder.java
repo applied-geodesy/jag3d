@@ -155,7 +155,7 @@ public class UITreeBuilder {
 
 		TreeItem<TreeItemValue> terrestrialObservationItem = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.terrestrialobservations", "Terrestrial Observations")));
 		TreeItem<TreeItemValue> levelingObservationItem    = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.LEVELING_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.leveling", "Levelings")));
-		TreeItem<TreeItemValue> directionObservationItem   = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.DIRECTION_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.direction", "Directions")));
+		TreeItem<TreeItemValue> directionObservationItem   = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.DIRECTION_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.direction", "Direction sets")));
 		TreeItem<TreeItemValue> distance2dObservationItem  = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.HORIZONTAL_DISTANCE_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.horizontal_distance", "Horizontal distances")));
 		TreeItem<TreeItemValue> distance3dObservationItem  = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.SLOPE_DISTANCE_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.slope_distance", "Slope distances")));
 		TreeItem<TreeItemValue> zenithObservationItem      = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.ZENITH_ANGLE_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.zenith_angle", "Zenith angles")));
