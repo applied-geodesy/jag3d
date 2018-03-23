@@ -33,7 +33,7 @@ public final class DefaultUncertainty {
 	static final double DISTANCE_SQUARE_ROOT_DISTANCE_DEPENDENT = 0.0;
 	static final double DISTANCE_DISTANCE_DEPENDENT             = 0.000002;
 	
-	static final double LEVELING_ZERO_POINT_OFFSET              = 0.00015;
+	static final double LEVELING_ZERO_POINT_OFFSET              = 0.0001;
 	static final double LEVELING_SQUARE_ROOT_DISTANCE_DEPENDENT = 0.001;
 	static final double LEVELING_DISTANCE_DEPENDENT             = 0.0;
 	
