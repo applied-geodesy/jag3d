@@ -503,10 +503,10 @@ public class UIMenuBuilder {
 				importCongruenceAnalysisPair3DFlatMenu
 				);
 
-		Menu importGNSSFlatMenu       = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.gnss.label", "GNSS baseline"), true);
-		MenuItem importGNSS1DFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.genss.1d.label", "GNSS baseline 1D"), true, MenuItemType.IMPORT_FLAT_GNSS1D, null, this.menuEventHandler, true);
-		MenuItem importGNSS2DFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.genss.2d.label", "GNSS baseline 2D"), true, MenuItemType.IMPORT_FLAT_GNSS2D, null, this.menuEventHandler, true);
-		MenuItem importGNSS3DFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.genss.3d.label", "GNSS baseline 3D"), true, MenuItemType.IMPORT_FLAT_GNSS3D, null, this.menuEventHandler, true);
+		Menu importGNSSFlatMenu       = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.gnss.label", "GNSS baselines"), true);
+		MenuItem importGNSS1DFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.gnss.1d.label", "GNSS baselines 1D"), true, MenuItemType.IMPORT_FLAT_GNSS1D, null, this.menuEventHandler, true);
+		MenuItem importGNSS2DFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.gnss.2d.label", "GNSS baselines 2D"), true, MenuItemType.IMPORT_FLAT_GNSS2D, null, this.menuEventHandler, true);
+		MenuItem importGNSS3DFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.gnss.3d.label", "GNSS baselines 3D"), true, MenuItemType.IMPORT_FLAT_GNSS3D, null, this.menuEventHandler, true);
 
 		importGNSSFlatMenu.getItems().addAll(
 				importGNSS1DFlatItem,
