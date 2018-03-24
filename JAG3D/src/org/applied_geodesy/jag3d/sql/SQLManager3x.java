@@ -336,12 +336,64 @@ public class SQLManager3x {
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"type\", "
 				+ "\"vals\".\"reference_height\" ",
+				
+				// Principle component analysis
+				"INSERT INTO \"PrincipalComponent\" (\"index\",\"value\",\"ratio\") "
+				+ "SELECT \"index\",\"value\",\"ratio\" FROM \"PUBLIC\".\"PrincipalComponentAnalysis\" ",
+				
+				// rank defect of NES
+				"MERGE INTO \"RankDefect\" USING ( "
+				+ "SELECT \"id\",\"user_defined\",\"ty\",\"tx\",\"tz\",\"ry\",\"rx\",\"rz\",\"sy\",\"sx\",\"sz\",\"my\",\"mx\",\"mz\",\"mxy\",\"mxyz\" FROM \"PUBLIC\".\"RankDefect\" WHERE \"id\" = 1 LIMIT 1 "
+				+ ") AS \"vals\" (\"id\",\"user_defined\",\"ty\",\"tx\",\"tz\",\"ry\",\"rx\",\"rz\",\"sy\",\"sx\",\"sz\",\"my\",\"mx\",\"mz\",\"mxy\",\"mxyz\") "
+				+ "ON \"RankDefect\".\"id\" = \"vals\".\"id\" "
+				+ "WHEN MATCHED THEN UPDATE SET "
+				+ "\"RankDefect\".\"user_defined\" = \"vals\".\"user_defined\", "
+				+ "\"RankDefect\".\"ty\"           = \"vals\".\"ty\", "
+				+ "\"RankDefect\".\"tx\"           = \"vals\".\"tx\", "
+				+ "\"RankDefect\".\"tz\"           = \"vals\".\"tz\", "
+				+ "\"RankDefect\".\"ry\"           = \"vals\".\"ry\", "
+				+ "\"RankDefect\".\"rx\"           = \"vals\".\"rx\", "
+				+ "\"RankDefect\".\"rz\"           = \"vals\".\"rz\", "
+				+ "\"RankDefect\".\"sy\"           = \"vals\".\"sy\", "
+				+ "\"RankDefect\".\"sx\"           = \"vals\".\"sx\", "
+				+ "\"RankDefect\".\"sz\"           = \"vals\".\"sz\", "
+				+ "\"RankDefect\".\"my\"           = \"vals\".\"my\", "
+				+ "\"RankDefect\".\"mx\"           = \"vals\".\"mx\", "
+				+ "\"RankDefect\".\"mz\"           = \"vals\".\"mz\", "
+				+ "\"RankDefect\".\"mxy\"          = \"vals\".\"mxy\", "
+				+ "\"RankDefect\".\"mxyz\"         = \"vals\".\"mxyz\" "
+				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "\"vals\".\"id\", "
+				+ "\"vals\".\"user_defined\", "
+				+ "\"vals\".\"ty\", "
+				+ "\"vals\".\"tx\", "
+				+ "\"vals\".\"tz\", "
+				+ "\"vals\".\"ry\", "
+				+ "\"vals\".\"rx\", "
+				+ "\"vals\".\"rz\", "
+				+ "\"vals\".\"sy\", "
+				+ "\"vals\".\"sx\", "
+				+ "\"vals\".\"sz\", "
+				+ "\"vals\".\"my\", "
+				+ "\"vals\".\"mx\", "
+				+ "\"vals\".\"mz\", "
+				+ "\"vals\".\"mxy\", "
+				+ "\"vals\".\"mxyz\" ",
 
 				// store varicance components 
 				"INSERT INTO \"VarianceComponent\"(\"type\",\"redundancy\",\"omega\",\"sigma2apost\",\"number_of_observations\") "
 				+ "SELECT "
 				+ "(CASE \"id\" "
 				+ "WHEN   -1 THEN " + VarianceComponentType.GLOBAL.getId() + " "
+
+				+ "WHEN    1 THEN " + VarianceComponentType.LEVELING_COMPONENT.getId() + " "
+				+ "WHEN    2 THEN " + VarianceComponentType.DIRECTION_COMPONENT.getId() + " "
+				+ "WHEN    3 THEN " + VarianceComponentType.HORIZONTAL_DISTANCE_COMPONENT.getId() + " "
+				+ "WHEN    4 THEN " + VarianceComponentType.SLOPE_DISTANCE_COMPONENT.getId() + " "
+				+ "WHEN    5 THEN " + VarianceComponentType.ZENITH_ANGLE_COMPONENT.getId() + " "
+				+ "WHEN   50 THEN " + VarianceComponentType.GNSS1D_COMPONENT.getId() + " "
+				+ "WHEN   60 THEN " + VarianceComponentType.GNSS2D_COMPONENT.getId() + " "
+				+ "WHEN   70 THEN " + VarianceComponentType.GNSS3D_COMPONENT.getId() + " "
 
 				+ "WHEN  100 THEN " + VarianceComponentType.LEVELING_COMPONENT.getId() + " "
 				+ "WHEN  101 THEN " + VarianceComponentType.LEVELING_ZERO_POINT_OFFSET_COMPONENT.getId() + " "
@@ -388,53 +440,9 @@ public class SQLManager3x {
 				+ "WHEN 100003 THEN " + VarianceComponentType.STOCHASTIC_POINT_3D_COMPONENT.getId() + " "
 				+ "WHEN 101112 THEN " + VarianceComponentType.STOCHASTIC_POINT_DEFLECTION_COMPONENT.getId() + " "
 				
-				+ "ELSE -99 " // Unknown/unsupported component id
+				+ "ELSE -999999 - \"id\" " // Unknown/unsupported component id; create dummy id
 				+ "END CASE) AS \"id\", "
 				+ "\"redundancy\",\"omega\",\"sigma2apost\",\"number_of_observations\" FROM \"PUBLIC\".\"VarianceEstimation\" ",
-				
-				// Principle component analysis
-				"INSERT INTO \"PrincipalComponent\" (\"index\",\"value\",\"ratio\") "
-				+ "SELECT \"index\",\"value\",\"ratio\" FROM \"PUBLIC\".\"PrincipalComponentAnalysis\" ",
-				
-				// rank defect of NES
-				"MERGE INTO \"RankDefect\" USING ( "
-				+ "SELECT \"id\",\"user_defined\",\"ty\",\"tx\",\"tz\",\"ry\",\"rx\",\"rz\",\"sy\",\"sx\",\"sz\",\"my\",\"mx\",\"mz\",\"mxy\",\"mxyz\" FROM \"PUBLIC\".\"RankDefect\" WHERE \"id\" = 1 LIMIT 1 "
-				+ ") AS \"vals\" (\"id\",\"user_defined\",\"ty\",\"tx\",\"tz\",\"ry\",\"rx\",\"rz\",\"sy\",\"sx\",\"sz\",\"my\",\"mx\",\"mz\",\"mxy\",\"mxyz\") "
-				+ "ON \"RankDefect\".\"id\" = \"vals\".\"id\" "
-				+ "WHEN MATCHED THEN UPDATE SET "
-				+ "\"RankDefect\".\"user_defined\" = \"vals\".\"user_defined\", "
-				+ "\"RankDefect\".\"ty\"           = \"vals\".\"ty\", "
-				+ "\"RankDefect\".\"tx\"           = \"vals\".\"tx\", "
-				+ "\"RankDefect\".\"tz\"           = \"vals\".\"tz\", "
-				+ "\"RankDefect\".\"ry\"           = \"vals\".\"ry\", "
-				+ "\"RankDefect\".\"rx\"           = \"vals\".\"rx\", "
-				+ "\"RankDefect\".\"rz\"           = \"vals\".\"rz\", "
-				+ "\"RankDefect\".\"sy\"           = \"vals\".\"sy\", "
-				+ "\"RankDefect\".\"sx\"           = \"vals\".\"sx\", "
-				+ "\"RankDefect\".\"sz\"           = \"vals\".\"sz\", "
-				+ "\"RankDefect\".\"my\"           = \"vals\".\"my\", "
-				+ "\"RankDefect\".\"mx\"           = \"vals\".\"mx\", "
-				+ "\"RankDefect\".\"mz\"           = \"vals\".\"mz\", "
-				+ "\"RankDefect\".\"mxy\"          = \"vals\".\"mxy\", "
-				+ "\"RankDefect\".\"mxyz\"         = \"vals\".\"mxyz\" "
-				+ "WHEN NOT MATCHED THEN INSERT VALUES "
-				+ "\"vals\".\"id\", "
-				+ "\"vals\".\"user_defined\", "
-				+ "\"vals\".\"ty\", "
-				+ "\"vals\".\"tx\", "
-				+ "\"vals\".\"tz\", "
-				+ "\"vals\".\"ry\", "
-				+ "\"vals\".\"rx\", "
-				+ "\"vals\".\"rz\", "
-				+ "\"vals\".\"sy\", "
-				+ "\"vals\".\"sx\", "
-				+ "\"vals\".\"sz\", "
-				+ "\"vals\".\"my\", "
-				+ "\"vals\".\"mx\", "
-				+ "\"vals\".\"mz\", "
-				+ "\"vals\".\"mxy\", "
-				+ "\"vals\".\"mxyz\" ",
-				
 		};
 		
 		for (String sql : querys) {
