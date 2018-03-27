@@ -890,8 +890,12 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		}
 		
 		if (valid && this.isComplete(rowData)) {
+			// Set observation group id, if not exists
+			if (rowData.getGroupId() < 0)
+				rowData.setGroupId(this.pointItemValue.getGroupId());
+						
 			try {
-				SQLManager.getInstance().saveItem(this.pointItemValue.getGroupId(), rowData);
+				SQLManager.getInstance().saveItem(rowData);
 			} catch (Exception e) {
 				switch (columnIndex) {
 				case 1:
@@ -965,7 +969,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 				try {
 					// Generate next unique point name
 					clonedRow.setName(SQLManager.getInstance().getNextValidPointName(row.getName()));
-					SQLManager.getInstance().saveItem(this.pointItemValue.getGroupId(), clonedRow);
+					SQLManager.getInstance().saveItem(clonedRow);
 				} 
 				catch (Exception e) {
 					raiseErrorMessage(ContextMenuType.DUPLICATE, e);
@@ -1072,8 +1076,10 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		
 		try {
 			int groupId = ((PointTreeItemValue)newTreeItem.getValue()).getGroupId();
-			for (PointRow row : selectedRows)
-				SQLManager.getInstance().saveItem(groupId, row);
+			for (PointRow row : selectedRows) {
+				row.setGroupId(groupId);
+				SQLManager.getInstance().saveItem(row);
+			}
 		} 
 		catch (Exception e) {
 			raiseErrorMessage(type, e);

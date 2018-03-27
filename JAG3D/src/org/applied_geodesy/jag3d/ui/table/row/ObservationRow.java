@@ -26,7 +26,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class ObservationRow extends Row {
+public class ObservationRow extends GroupRow {
 	private ObjectProperty<String> startPointName = new SimpleObjectProperty<String>(); 
 	private ObjectProperty<String> endPointName   = new SimpleObjectProperty<String>();
 	

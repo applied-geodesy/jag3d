@@ -361,8 +361,11 @@ public class BeoFileReader extends SourceFileReader {
 
 		try {
 			int groupId = ((ObservationTreeItemValue)newTreeItem.getValue()).getGroupId();
-			for (TerrestrialObservationRow row : observations)
-				SQLManager.getInstance().saveItem(groupId, row);
+			for (TerrestrialObservationRow row : observations) {
+				//SQLManager.getInstance().saveItem(groupId, row);
+				row.setGroupId(groupId);
+				SQLManager.getInstance().saveItem(row);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new SQLException(e);

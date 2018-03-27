@@ -45,6 +45,7 @@ public class TerrestrialObservationRowDnD extends ObservationRowDnD {
 		TerrestrialObservationRowDnD rowDnD = new TerrestrialObservationRowDnD();
 		
 		rowDnD.setId(row.getId());
+		rowDnD.setGroupId(row.getGroupId());
 		rowDnD.setEnable(row.isEnable());
 		
 		rowDnD.setStartPointName(row.getStartPointName());
@@ -64,6 +65,7 @@ public class TerrestrialObservationRowDnD extends ObservationRowDnD {
 		TerrestrialObservationRow row = new TerrestrialObservationRow();
 		
 		row.setId(this.getId());
+		row.setGroupId(this.getGroupId());
 		row.setEnable(this.isEnable());
 		
 		row.setStartPointName(this.getStartPointName());

@@ -29,7 +29,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class CongruenceAnalysisRow extends Row {
+public class CongruenceAnalysisRow extends GroupRow {
 	private ObjectProperty<String> nameInReferenceEpoch = new SimpleObjectProperty<String>(); 
 	private ObjectProperty<String> nameInControlEpoch   = new SimpleObjectProperty<String>();
 
@@ -382,6 +382,7 @@ public class CongruenceAnalysisRow extends Row {
 		CongruenceAnalysisRow clone = new CongruenceAnalysisRow();
 		
 		clone.setId(-1);
+		clone.setGroupId(row.getGroupId());
 		clone.setEnable(row.isEnable());
 		
 		clone.setNameInReferenceEpoch(row.getNameInReferenceEpoch());

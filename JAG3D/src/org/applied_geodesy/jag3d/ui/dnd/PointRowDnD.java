@@ -44,6 +44,7 @@ public class PointRowDnD extends RowDnD{
 		PointRowDnD rowDnD = new PointRowDnD();
 		
 		rowDnD.setId(row.getId());
+		rowDnD.setGroupId(row.getGroupId());
 		rowDnD.setEnable(row.isEnable());
 		
 		rowDnD.name = row.getName();
@@ -64,6 +65,7 @@ public class PointRowDnD extends RowDnD{
 		PointRow row = new PointRow();
 		
 		row.setId(this.getId());
+		row.setGroupId(this.getGroupId());
 		row.setEnable(this.isEnable());
 		
 		row.setName(this.name);

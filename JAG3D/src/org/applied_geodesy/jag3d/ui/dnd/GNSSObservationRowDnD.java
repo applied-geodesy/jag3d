@@ -43,6 +43,7 @@ public class GNSSObservationRowDnD extends ObservationRowDnD {
 		GNSSObservationRowDnD rowDnD = new GNSSObservationRowDnD();
 		
 		rowDnD.setId(row.getId());
+		rowDnD.setGroupId(row.getGroupId());
 		rowDnD.setEnable(row.isEnable());
 		
 		rowDnD.setStartPointName(row.getStartPointName());
@@ -63,6 +64,7 @@ public class GNSSObservationRowDnD extends ObservationRowDnD {
 		GNSSObservationRow row = new GNSSObservationRow();
 		
 		row.setId(this.getId());
+		row.setGroupId(this.getGroupId());
 		row.setEnable(this.isEnable());
 		
 		row.setStartPointName(this.getStartPointName());

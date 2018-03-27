@@ -182,6 +182,7 @@ public class TerrestrialObservationRow extends ObservationRow {
 		TerrestrialObservationRow clone = new TerrestrialObservationRow();
 
 		clone.setId(-1);
+		clone.setGroupId(row.getGroupId());
 		clone.setEnable(row.isEnable());
 
 		clone.setStartPointName(row.getStartPointName());

@@ -433,8 +433,11 @@ public class DL100FileReader extends SourceFileReader {
 
 		try {
 			int groupId = ((ObservationTreeItemValue)newTreeItem.getValue()).getGroupId();
-			for (TerrestrialObservationRow row : observations)
-				SQLManager.getInstance().saveItem(groupId, row);
+			for (TerrestrialObservationRow row : observations) {
+				//SQLManager.getInstance().saveItem(groupId, row);
+				row.setGroupId(groupId);
+				SQLManager.getInstance().saveItem(row);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new SQLException(e);
@@ -459,8 +462,10 @@ public class DL100FileReader extends SourceFileReader {
 
 		try {
 			int groupId = ((PointTreeItemValue)newTreeItem.getValue()).getGroupId();
-			for (PointRow row : points)
-				SQLManager.getInstance().saveItem(groupId, row);
+			for (PointRow row : points) {
+				row.setGroupId(groupId);
+				SQLManager.getInstance().saveItem(row);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new SQLException(e);

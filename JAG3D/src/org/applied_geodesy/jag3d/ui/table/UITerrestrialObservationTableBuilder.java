@@ -609,8 +609,12 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		}
 
 		if (valid && this.isComplete(rowData)) {
+			// Set observation group id, if not exists
+			if (rowData.getGroupId() < 0)
+				rowData.setGroupId(this.observationItemValue.getGroupId());
+			
 			try {
-				SQLManager.getInstance().saveItem(this.observationItemValue.getGroupId(), rowData);
+				SQLManager.getInstance().saveItem(rowData);
 			} catch (Exception e) {
 				switch (columnIndex) {
 				case 1:
@@ -688,7 +692,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			TerrestrialObservationRow clonedRow = TerrestrialObservationRow.cloneRowApriori(row);
 			if (this.isComplete(clonedRow)) {
 				try {
-					SQLManager.getInstance().saveItem(this.observationItemValue.getGroupId(), clonedRow);
+					SQLManager.getInstance().saveItem(clonedRow);
 				} catch (Exception e) {
 					raiseErrorMessage(ContextMenuType.DUPLICATE, e);
 					e.printStackTrace();
@@ -759,7 +763,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		try {
 			int groupId = ((ObservationTreeItemValue)newTreeItem.getValue()).getGroupId();
 			for (TerrestrialObservationRow row : selectedRows) {
-				SQLManager.getInstance().saveItem(groupId, row);
+				row.setGroupId(groupId);
+				SQLManager.getInstance().saveItem(row);
 			}
 			
 		} catch (Exception e) {

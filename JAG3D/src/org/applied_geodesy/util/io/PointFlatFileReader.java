@@ -108,7 +108,8 @@ public class PointFlatFileReader extends SourceFileReader {
 				int groupId = ((PointTreeItemValue)newTreeItem.getValue()).getGroupId();
 				if (!this.points.isEmpty()) {
 					for (PointRow row : this.points) {
-						SQLManager.getInstance().saveItem(groupId, row);
+						row.setGroupId(groupId);
+						SQLManager.getInstance().saveItem(row);
 					}
 				}
 			} catch (SQLException e) {

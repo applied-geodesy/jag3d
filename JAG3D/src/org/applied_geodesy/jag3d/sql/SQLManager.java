@@ -1261,7 +1261,7 @@ public class SQLManager {
 		TableView<TerrestrialObservationRow> table = tableBuilder.getTable(observationItemValue);
 		List<TerrestrialObservationRow> tableModel = FXCollections.observableArrayList();
 		String sql = "SELECT " + 
-				"\"ObservationApriori\".\"id\", \"start_point_name\", \"end_point_name\", \"instrument_height\", \"reflector_height\", \"value_0\", \"distance_0\", \"ObservationApriori\".\"sigma_0\" AS \"sigma_0\", \"enable\", " + 
+				"\"ObservationApriori\".\"id\", \"group_id\", \"start_point_name\", \"end_point_name\", \"instrument_height\", \"reflector_height\", \"value_0\", \"distance_0\", \"ObservationApriori\".\"sigma_0\" AS \"sigma_0\", \"enable\", " + 
 				"\"ObservationAposteriori\".\"value\", \"sigma\", \"redundancy\", \"gross_error\", \"influence_on_position\", \"influence_on_network_distortion\", \"minimal_detectable_bias\", \"omega\", \"t_prio\", \"t_post\", \"p_prio\", \"p_post\", \"significant\" " + 
 				"FROM \"ObservationApriori\" " + 
 				"INNER JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" " + 
@@ -1282,6 +1282,7 @@ public class SQLManager {
 
 			// Apriori-Values
 			row.setId(rs.getInt("id"));
+			row.setGroupId(rs.getInt("group_id"));
 			row.setStartPointName(rs.getString("start_point_name"));
 			row.setEndPointName(rs.getString("end_point_name"));
 			row.setEnable(rs.getBoolean("enable"));
@@ -1378,7 +1379,7 @@ public class SQLManager {
 		TableView<GNSSObservationRow> table = tableBuilder.getTable(observationGNSSItemValue);
 		List<GNSSObservationRow> tableModel = FXCollections.observableArrayList();
 		String sql = "SELECT " + 
-				"\"GNSSObservationApriori\".\"id\", \"start_point_name\", \"end_point_name\", \"y0\", \"x0\", \"z0\", \"GNSSObservationApriori\".\"sigma_y0\" AS \"sigma_y0\", \"GNSSObservationApriori\".\"sigma_x0\" AS \"sigma_x0\", \"GNSSObservationApriori\".\"sigma_z0\" AS \"sigma_z0\", \"enable\", " + 
+				"\"GNSSObservationApriori\".\"id\", \"group_id\", \"start_point_name\", \"end_point_name\", \"y0\", \"x0\", \"z0\", \"GNSSObservationApriori\".\"sigma_y0\" AS \"sigma_y0\", \"GNSSObservationApriori\".\"sigma_x0\" AS \"sigma_x0\", \"GNSSObservationApriori\".\"sigma_z0\" AS \"sigma_z0\", \"enable\", " + 
 				"\"y\", \"x\", \"z\",  \"sigma_y\", \"sigma_x\", \"sigma_z\", " + 
 
 				"\"redundancy_y\", \"redundancy_x\", \"redundancy_z\", " +
@@ -1405,6 +1406,7 @@ public class SQLManager {
 			GNSSObservationRow row = new GNSSObservationRow();
 			// Apriori-Values
 			row.setId(rs.getInt("id"));
+			row.setGroupId(rs.getInt("group_id"));
 			row.setStartPointName(rs.getString("start_point_name"));
 			row.setEndPointName(rs.getString("end_point_name"));
 			row.setEnable(rs.getBoolean("enable"));
@@ -1620,6 +1622,7 @@ public class SQLManager {
 
 			// Apriori-Values
 			row.setId(rs.getInt("id"));
+			row.setGroupId(rs.getInt("group_id"));
 			row.setName(rs.getString("name"));
 			row.setCode(rs.getString("code"));
 			row.setEnable(rs.getBoolean("enable"));
@@ -1881,6 +1884,7 @@ public class SQLManager {
 
 			// Apriori-Values
 			row.setId(rs.getInt("id"));
+			row.setGroupId(rs.getInt("group_id"));
 			row.setNameInReferenceEpoch(rs.getString("start_point_name"));
 			row.setNameInControlEpoch(rs.getString("end_point_name"));
 			row.setEnable(rs.getBoolean("enable"));
@@ -2030,7 +2034,8 @@ public class SQLManager {
 	}	
 
 	// http://hsqldb.org/doc/2.0/guide/dataaccess-chapt.html#dac_merge_statement
-	public void saveItem(int groupId, TerrestrialObservationRow rowData) throws SQLException {
+	//public void saveItem(int groupId, TerrestrialObservationRow rowData, int k) throws SQLException {
+	public void saveItem(TerrestrialObservationRow rowData) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen() || rowData == null || 
 				rowData.getStartPointName() == null || rowData.getEndPointName() == null || 
 				rowData.getStartPointName().equals(rowData.getEndPointName()))
@@ -2070,7 +2075,7 @@ public class SQLManager {
 		else
 			stmt.setInt(idx++, rowData.getId());
 
-		stmt.setInt(idx++,     groupId);
+		stmt.setInt(idx++,     rowData.getGroupId());
 		stmt.setString(idx++,  rowData.getStartPointName());
 		stmt.setString(idx++,  rowData.getEndPointName());
 
@@ -2093,7 +2098,8 @@ public class SQLManager {
 	}
 
 	// http://hsqldb.org/doc/2.0/guide/dataaccess-chapt.html#dac_merge_statement
-	public void saveItem(int groupId, GNSSObservationRow rowData) throws SQLException {
+	//public void saveItem(int groupId, GNSSObservationRow rowData) throws SQLException {
+	public void saveItem(GNSSObservationRow rowData) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
@@ -2133,7 +2139,7 @@ public class SQLManager {
 		else
 			stmt.setInt(idx++, rowData.getId());
 
-		stmt.setInt(idx++,     groupId);
+		stmt.setInt(idx++,     rowData.getGroupId());
 		stmt.setString(idx++,  rowData.getStartPointName());
 		stmt.setString(idx++,  rowData.getEndPointName());
 
@@ -2156,7 +2162,8 @@ public class SQLManager {
 	}
 
 	// http://hsqldb.org/doc/2.0/guide/dataaccess-chapt.html#dac_merge_statement 
-	public void saveItem(int groupId, PointRow rowData) throws SQLException {
+	//public void saveItem(int groupId, PointRow rowData) throws SQLException {
+	public void saveItem(PointRow rowData) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
@@ -2203,7 +2210,7 @@ public class SQLManager {
 		// Update existing item
 		else
 			stmt.setInt(idx++, rowData.getId());
-		stmt.setInt(idx++,     groupId);
+		stmt.setInt(idx++,     rowData.getGroupId());
 
 		stmt.setString(idx++,  rowData.getName());
 		stmt.setString(idx++,  rowData.getCode() == null || rowData.getCode().trim().isEmpty() ? "" : rowData.getCode());
@@ -2233,7 +2240,8 @@ public class SQLManager {
 	}
 
 	// http://hsqldb.org/doc/2.0/guide/dataaccess-chapt.html#dac_merge_statement
-	public void saveItem(int groupId, CongruenceAnalysisRow rowData) throws SQLException {
+	//public void saveItem(int groupId, CongruenceAnalysisRow rowData) throws SQLException {
+	public void saveItem(CongruenceAnalysisRow rowData) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
@@ -2260,7 +2268,7 @@ public class SQLManager {
 		// Update existing item
 		else
 			stmt.setInt(idx++, rowData.getId());
-		stmt.setInt(idx++,     groupId);
+		stmt.setInt(idx++,     rowData.getGroupId());
 
 		stmt.setString(idx++,  rowData.getNameInReferenceEpoch());
 		stmt.setString(idx++,  rowData.getNameInControlEpoch());

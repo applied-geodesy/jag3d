@@ -113,12 +113,16 @@ public class ObservationFlatFileReader extends SourceFileReader {
 			try {
 				int groupId = ((ObservationTreeItemValue)newTreeItem.getValue()).getGroupId();
 				if (!this.observations.isEmpty()) {
-					for (TerrestrialObservationRow row : this.observations)
-						SQLManager.getInstance().saveItem(groupId, row);
+					for (TerrestrialObservationRow row : this.observations) {
+						row.setGroupId(groupId);
+						SQLManager.getInstance().saveItem(row);
+					}
 				}
 				else if (!this.gnss.isEmpty()) {
-					for (GNSSObservationRow row : this.gnss)
-						SQLManager.getInstance().saveItem(groupId, row);
+					for (GNSSObservationRow row : this.gnss) {
+						row.setGroupId(groupId);
+						SQLManager.getInstance().saveItem(row);
+					}
 				}
 
 			} catch (SQLException e) {

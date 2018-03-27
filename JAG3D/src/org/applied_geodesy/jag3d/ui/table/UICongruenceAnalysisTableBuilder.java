@@ -413,8 +413,12 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		}
 		
 		if (valid && this.isComplete(rowData)) {
+			// Set observation group id, if not exists
+			if (rowData.getGroupId() < 0)
+				rowData.setGroupId(this.congruenceAnalysisItemValue.getGroupId());
+
 			try {
-				SQLManager.getInstance().saveItem(this.congruenceAnalysisItemValue.getGroupId(), rowData);
+				SQLManager.getInstance().saveItem(rowData);
 			} catch (Exception e) {
 				switch (columnIndex) {
 				case 1:
@@ -489,7 +493,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 					String[] names = SQLManager.getInstance().getNextValidPointNexusNames(this.congruenceAnalysisItemValue.getGroupId(), row.getNameInReferenceEpoch(), row.getNameInControlEpoch());
 					clonedRow.setNameInReferenceEpoch(names[0]);
 					clonedRow.setNameInControlEpoch(names[1]);
-					SQLManager.getInstance().saveItem(this.congruenceAnalysisItemValue.getGroupId(), clonedRow);
+					SQLManager.getInstance().saveItem(clonedRow);
 				} 
 				catch (Exception e) {
 					raiseErrorMessage(ContextMenuType.DUPLICATE, e);
@@ -561,9 +565,10 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		
 		try {
 			int groupId = ((CongruenceAnalysisTreeItemValue)newTreeItem.getValue()).getGroupId();
-			for (CongruenceAnalysisRow row : selectedRows)
-				SQLManager.getInstance().saveItem(groupId, row);
-			
+			for (CongruenceAnalysisRow row : selectedRows) {
+				row.setGroupId(groupId);
+				SQLManager.getInstance().saveItem(row);
+			}
 		} 
 		catch (Exception e) {
 			raiseErrorMessage(type, e);

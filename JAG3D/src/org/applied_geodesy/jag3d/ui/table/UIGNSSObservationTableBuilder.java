@@ -534,8 +534,12 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		}
 		
 		if (valid && this.isComplete(rowData)) {
+			// Set observation group id, if not exists
+			if (rowData.getGroupId() < 0)
+				rowData.setGroupId(this.observationItemValue.getGroupId());
+			
 			try {
-				SQLManager.getInstance().saveItem(this.observationItemValue.getGroupId(), rowData);
+				SQLManager.getInstance().saveItem(rowData);
 			} catch (Exception e) {
 				switch (columnIndex) {
 				case 1:
@@ -614,7 +618,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 			GNSSObservationRow clonedRow = GNSSObservationRow.cloneRowApriori(row);
 			if (this.isComplete(clonedRow)) {
 				try {
-					SQLManager.getInstance().saveItem(this.observationItemValue.getGroupId(), clonedRow);
+					SQLManager.getInstance().saveItem(clonedRow);
 				} catch (Exception e) {
 					raiseErrorMessage(ContextMenuType.DUPLICATE, e);
 					e.printStackTrace();
@@ -682,8 +686,10 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		
 		try {
 			int groupId = ((ObservationTreeItemValue)newTreeItem.getValue()).getGroupId();
-			for (GNSSObservationRow row : selectedRows)
-				SQLManager.getInstance().saveItem(groupId, row);
+			for (GNSSObservationRow row : selectedRows) {
+				row.setGroupId(groupId);
+				SQLManager.getInstance().saveItem(row);
+			}
 			
 		} catch (Exception e) {
 			raiseErrorMessage(type, e);

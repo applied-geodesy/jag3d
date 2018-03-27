@@ -19,43 +19,24 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.dnd;
+package org.applied_geodesy.jag3d.ui.table.row;
 
-import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 
-public class CongruenceAnalysisRowDnD extends RowDnD{
-	private static final long serialVersionUID = 6317004442775639322L;
-	private String nameInReferenceEpoch = null;
-	private String nameInControlEpoch = null;
+public class GroupRow extends Row {
 
-	public static CongruenceAnalysisRowDnD fromCongruenceAnalysisRow(CongruenceAnalysisRow row) {
-		if (row.getNameInReferenceEpoch() == null || row.getNameInControlEpoch() == null ||
-				row.getNameInReferenceEpoch().trim().isEmpty() || row.getNameInControlEpoch().trim().isEmpty() || 
-				row.getNameInReferenceEpoch().equals(row.getNameInControlEpoch()))
-			return null;
-		
-		CongruenceAnalysisRowDnD rowDnD = new CongruenceAnalysisRowDnD();
-		
-		rowDnD.setId(row.getId());
-		rowDnD.setGroupId(row.getGroupId());
-		rowDnD.setEnable(row.isEnable());
-		
-		rowDnD.nameInReferenceEpoch = row.getNameInReferenceEpoch();
-		rowDnD.nameInControlEpoch   = row.getNameInControlEpoch();
+private IntegerProperty groupId = new SimpleIntegerProperty(-1);
+	
+	public int getGroupId() {
+		return this.groupIdProperty().get();
+	}
 
-		return rowDnD;
+	public void setGroupId(int id) {
+		this.groupIdProperty().set(id);
 	}
 	
-	public CongruenceAnalysisRow toCongruenceAnalysisRow() {
-		CongruenceAnalysisRow row = new CongruenceAnalysisRow();
-		
-		row.setId(this.getId());
-		row.setGroupId(this.getGroupId());
-		row.setEnable(this.isEnable());
-		
-		row.setNameInReferenceEpoch(this.nameInReferenceEpoch);
-		row.setNameInControlEpoch(this.nameInControlEpoch);
-		
-		return row;
+	public IntegerProperty groupIdProperty() {
+		return this.groupId;
 	}
 }

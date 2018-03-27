@@ -41,6 +41,10 @@ import org.applied_geodesy.jag3d.ui.table.UICongruenceAnalysisTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIGNSSObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIPointTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITerrestrialObservationTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
+import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
+import org.applied_geodesy.jag3d.ui.table.row.PointRow;
+import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 import org.applied_geodesy.jag3d.ui.tabpane.UITabPaneBuilder;
 import org.applied_geodesy.util.i18.I18N;
@@ -161,19 +165,27 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 							try {
 								if (droppedRows.get(i) instanceof TerrestrialObservationRowDnD) {
 									TerrestrialObservationRowDnD rowDnD = (TerrestrialObservationRowDnD)droppedRows.get(i);
-									SQLManager.getInstance().saveItem(groupId, rowDnD.toTerrestrialObservationRow());
+									TerrestrialObservationRow row = rowDnD.toTerrestrialObservationRow();
+									row.setGroupId(groupId);
+									SQLManager.getInstance().saveItem(row);
 								}
 								else if (droppedRows.get(i) instanceof GNSSObservationRowDnD) {
 									GNSSObservationRowDnD rowDnD = (GNSSObservationRowDnD)droppedRows.get(i);
-									SQLManager.getInstance().saveItem(groupId, rowDnD.toGNSSObservationRow());
+									GNSSObservationRow row = rowDnD.toGNSSObservationRow();
+									row.setGroupId(groupId);
+									SQLManager.getInstance().saveItem(row);
 								}
 								else if (droppedRows.get(i) instanceof PointRowDnD) {
 									PointRowDnD rowDnD = (PointRowDnD)droppedRows.get(i);
-									SQLManager.getInstance().saveItem(groupId, rowDnD.toPointRow());
+									PointRow row = rowDnD.toPointRow();
+									row.setGroupId(groupId);
+									SQLManager.getInstance().saveItem(row);
 								}
 								else if (droppedRows.get(i) instanceof CongruenceAnalysisRowDnD) {
 									CongruenceAnalysisRowDnD rowDnD = (CongruenceAnalysisRowDnD)droppedRows.get(i);
-									SQLManager.getInstance().saveItem(groupId, rowDnD.toCongruenceAnalysisRow());
+									CongruenceAnalysisRow row = rowDnD.toCongruenceAnalysisRow();
+									row.setGroupId(groupId);
+									SQLManager.getInstance().saveItem(row);
 								}
 							} catch (Exception e) {
 								e.printStackTrace();

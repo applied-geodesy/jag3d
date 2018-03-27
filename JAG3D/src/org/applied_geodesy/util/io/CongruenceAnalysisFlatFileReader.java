@@ -153,7 +153,8 @@ public class CongruenceAnalysisFlatFileReader extends SourceFileReader {
 				int groupId = ((CongruenceAnalysisTreeItemValue)newTreeItem.getValue()).getGroupId();
 				if (!this.congruenceAnalysisPairs.isEmpty()) {
 					for (CongruenceAnalysisRow row : this.congruenceAnalysisPairs) {
-						SQLManager.getInstance().saveItem(groupId, row);
+						row.setGroupId(groupId);
+						SQLManager.getInstance().saveItem(row);
 					}
 				}
 			} catch (SQLException e) {

@@ -31,7 +31,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class PointRow extends Row {
+public class PointRow extends GroupRow {
 	private ObjectProperty<String> name = new SimpleObjectProperty<String>();
 	private ObjectProperty<String> code = new SimpleObjectProperty<String>("0"); 
 	
@@ -911,6 +911,7 @@ public class PointRow extends Row {
 		PointRow clone = new PointRow();
 		
 		clone.setId(-1);
+		clone.setGroupId(row.getGroupId());
 		clone.setEnable(row.isEnable());
 		
 		clone.setName(row.getName());
