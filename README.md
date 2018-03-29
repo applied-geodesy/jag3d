@@ -12,4 +12,4 @@ JAG3D is written in the platform-independent programming language Java and, ther
 
 Installation
 ------------
-JAG3D is portable - no need to install or uninstall. Just download, unpack and run.
+JAG3D is a portable least-squares software package - no need to install or uninstall. Just <a href="https://github.com/loesler/applied-geodesy/releases">download</a>, unpack and run.
