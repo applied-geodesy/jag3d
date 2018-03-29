@@ -2034,7 +2034,6 @@ public class SQLManager {
 	}	
 
 	// http://hsqldb.org/doc/2.0/guide/dataaccess-chapt.html#dac_merge_statement
-	//public void saveItem(int groupId, TerrestrialObservationRow rowData, int k) throws SQLException {
 	public void saveItem(TerrestrialObservationRow rowData) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen() || rowData == null || 
 				rowData.getStartPointName() == null || rowData.getEndPointName() == null || 
@@ -2098,7 +2097,6 @@ public class SQLManager {
 	}
 
 	// http://hsqldb.org/doc/2.0/guide/dataaccess-chapt.html#dac_merge_statement
-	//public void saveItem(int groupId, GNSSObservationRow rowData) throws SQLException {
 	public void saveItem(GNSSObservationRow rowData) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
@@ -2162,7 +2160,6 @@ public class SQLManager {
 	}
 
 	// http://hsqldb.org/doc/2.0/guide/dataaccess-chapt.html#dac_merge_statement 
-	//public void saveItem(int groupId, PointRow rowData) throws SQLException {
 	public void saveItem(PointRow rowData) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
@@ -2240,7 +2237,6 @@ public class SQLManager {
 	}
 
 	// http://hsqldb.org/doc/2.0/guide/dataaccess-chapt.html#dac_merge_statement
-	//public void saveItem(int groupId, CongruenceAnalysisRow rowData) throws SQLException {
 	public void saveItem(CongruenceAnalysisRow rowData) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
