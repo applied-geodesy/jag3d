@@ -473,8 +473,8 @@ public class GSIFileReader extends SourceFileReader {
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
 					obs.setEndPointName(this.endPointName);				
-					obs.setInstrumentHeight(0.0);
-					obs.setReflectorHeight(0.0);
+					obs.setInstrumentHeight(this.ih);
+					obs.setReflectorHeight(this.th);
 					obs.setValueApriori(dist2d);
 					obs.setDistanceApriori(dist2d);
 					this.horizontalDistances.add(obs);
