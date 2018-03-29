@@ -132,7 +132,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		// Y-Comp.
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.y.label", "y");
-		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.y.tooltip", "A-posteriori y-component of the displacement vector");
+		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.y.tooltip", "A-posteriori y-component of displacement vector");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::yAposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
@@ -141,7 +141,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		// X-Comp.
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.x.label", "x");
-		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.x.tooltip", "A-posteriori x-component of the displacement vector");
+		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.x.tooltip", "A-posteriori x-component of displacement vector");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::xAposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
@@ -150,7 +150,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		// Z-Comp.
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.z.label", "z");
-		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.z.tooltip", "A-posteriori z-component of the displacement vector");
+		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.z.tooltip", "A-posteriori z-component of displacement vector");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::zAposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 2 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
@@ -160,8 +160,8 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		// A-posteriori Uncertainties
 		// Y-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigmay.label", "\u03C3y");
-		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigmay.tooltip", "A-posteriori uncertainty of y-component");
+		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigma.y.label", "\u03C3y");
+		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigma.y.tooltip", "A-posteriori uncertainty of y-component of displacement vector");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::sigmaYaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
@@ -170,8 +170,8 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 
 		// X-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigmax.label", "\u03C3x");
-		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigmax.tooltip", "A-posteriori uncertainty of x-component");
+		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigma.x.label", "\u03C3x");
+		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigma.x.tooltip", "A-posteriori uncertainty of x-component of displacement vector");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::sigmaXaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
@@ -180,8 +180,8 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 
 		// Z-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigmaz.label", "\u03C3z");
-		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigmaz.tooltip", "A-posteriori uncertainty of z-component");
+		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigma.z.label", "\u03C3z");
+		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigma.z.tooltip", "A-posteriori uncertainty of z-component of displacement vector");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::sigmaZaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 2 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
