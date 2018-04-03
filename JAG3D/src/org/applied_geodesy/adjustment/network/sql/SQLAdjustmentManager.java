@@ -1540,7 +1540,7 @@ public class SQLAdjustmentManager {
 
 						stmt.setDouble(idx++, dimension != 1 ? pointPair.getGrossErrorY() : 0.0);
 						stmt.setDouble(idx++, dimension != 1 ? pointPair.getGrossErrorX() : 0.0);
-						stmt.setDouble(idx++, dimension != 2 ? pointPair.getGrossErrorY() : 0.0);
+						stmt.setDouble(idx++, dimension != 2 ? pointPair.getGrossErrorZ() : 0.0);
 
 						stmt.setDouble(idx++, dimension != 1 ? pointPair.getMinimalDetectableBiasY() : 0.0);
 						stmt.setDouble(idx++, dimension != 1 ? pointPair.getMinimalDetectableBiasX() : 0.0);
