@@ -73,7 +73,7 @@ public class HSQLDB extends DataBase{
 	public int getLastInsertId() throws SQLException {
 		PreparedStatement statementId = this.getPreparedStatement(HSQLDB.SQL_LAST_ID);
 		ResultSet lastId = statementId.executeQuery();
-		if (!lastId.wasNull() && lastId.next())
+		if (lastId.next() && !lastId.wasNull())
 			return lastId.getInt(1);
 		return -1;
 	}
