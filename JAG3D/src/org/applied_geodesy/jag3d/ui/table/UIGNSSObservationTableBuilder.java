@@ -42,6 +42,7 @@ import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -556,10 +557,19 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 				e.printStackTrace();
 			}
 		}
-		this.table.refresh();
-		this.table.requestFocus();
-		this.table.getSelectionModel().clearSelection();
-		this.table.getSelectionModel().select(rowData);
+//		this.table.refresh();
+//		this.table.requestFocus();
+//		this.table.getSelectionModel().clearSelection();
+//		this.table.getSelectionModel().select(rowData);
+		Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+            	table.refresh();
+            	table.requestFocus();
+        		table.getSelectionModel().clearSelection();
+        		table.getSelectionModel().select(rowData);
+            }
+	    });
 	}
 
 	@Override
