@@ -112,7 +112,7 @@ import javafx.scene.control.TableView;
 
 public class SQLManager {
 	private I18N i18n = I18N.getInstance();
-	private final static String TABLE_STORAGE_TYPE = ""; //"CACHED"; 
+	private final static String TABLE_STORAGE_TYPE = "CACHED"; //"CACHED"; 
 	private DataBase dataBase;
 	private HostServices hostServices;
 	private List<EventListener> listenerList = new ArrayList<EventListener>();
