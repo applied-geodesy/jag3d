@@ -2455,7 +2455,16 @@ public class SQLManager {
 
 			RestrictionType restrictions[] = CongruenceAnalysisTreeItemValue.getRestrictionTypes(congruenceAnalysisTreeItemValue.getItemType());
 			for (RestrictionType restrictionType : restrictions) {
-				this.saveStrainParameter(restrictionType, false, congruenceAnalysisTreeItemValue);
+				switch(restrictionType) {
+				case IDENT_SCALES_XY:
+				case IDENT_SCALES_XZ:
+				case IDENT_SCALES_YZ:
+					this.saveStrainParameter(restrictionType, true, congruenceAnalysisTreeItemValue);
+					break;
+				default:
+					this.saveStrainParameter(restrictionType, false, congruenceAnalysisTreeItemValue);
+					break;
+				}
 			}
 		}
 	}
