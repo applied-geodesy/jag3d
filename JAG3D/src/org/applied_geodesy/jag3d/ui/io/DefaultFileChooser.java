@@ -34,6 +34,7 @@ import javafx.stage.Window;
 public class DefaultFileChooser {
 	private static Window window;
 	private static File lastSelectedDirectory = null;
+	private static ExtensionFilter lastSelectedExtensionFilter = null;
 	private static String lastSelectedFileName = "";
 	private static final FileChooser fileChooser = new FileChooser();
 	
@@ -75,25 +76,55 @@ public class DefaultFileChooser {
 		fileChooser.setInitialDirectory(lastSelectedDirectory != null && Files.exists(lastSelectedDirectory.toPath()) ? lastSelectedDirectory : null);  
 		fileChooser.setInitialFileName(initialFileName == null ? lastSelectedFileName : initialFileName);
 		fileChooser.setTitle(title);
-		if (extensionFilters != null && extensionFilters.length > 0)
+
+		if (extensionFilters != null && extensionFilters.length > 0) {
+			
+			boolean containsFilter = false;
+			for (ExtensionFilter filter : extensionFilters) {
+				if (equalExtensionFilters(lastSelectedExtensionFilter, filter)) {
+					setLastSelectedExtensionFilter(filter);
+					containsFilter = true;
+					break;
+				}
+			}
+			
 			fileChooser.getExtensionFilters().setAll(extensionFilters);
+			
+			if (!containsFilter || lastSelectedExtensionFilter == null)
+				lastSelectedExtensionFilter = extensionFilters[0];
+			fileChooser.setSelectedExtensionFilter(lastSelectedExtensionFilter);
+		}
 		else
 			fileChooser.getExtensionFilters().clear();
+	}
+	
+	private static boolean equalExtensionFilters(ExtensionFilter filter1, ExtensionFilter filter2) {
+		if (filter1 == null || filter2 == null || filter1.getExtensions().size() != filter2.getExtensions().size() || !filter1.getDescription().equals(filter2.getDescription()))
+			return false;
+		
+		List<String> extensions = filter1.getExtensions();
+		for (String extension : extensions) 
+			if (!filter2.getExtensions().contains(extension))
+				return false;
+		
+		return true;
 	}
 	
 	public static File showOpenDialog(String title, String initialFileName, ExtensionFilter... extensionFilters) {
 		prepareFileChooser(title, initialFileName, extensionFilters);
 		File file = fileChooser.showOpenDialog(window);
 		setLastSelectedDirectory(file);
-		
+		setLastSelectedExtensionFilter(fileChooser.getSelectedExtensionFilter());
 		return file;
 	}
 	
 	public static List<File> showOpenMultipleDialog(String title, String initialFileName, ExtensionFilter... extensionFilters) {
 		prepareFileChooser(title, initialFileName, extensionFilters);
 		List<File> files = fileChooser.showOpenMultipleDialog(window);
-		if (files != null && !files.isEmpty() && files.get(0) != null)
+		if (files != null && !files.isEmpty() && files.get(0) != null) {
 			setLastSelectedDirectory(files.get(0));
+			setLastSelectedExtensionFilter(fileChooser.getSelectedExtensionFilter());
+		}
 
 		return files;
 	}
@@ -102,10 +133,13 @@ public class DefaultFileChooser {
 		prepareFileChooser(title, initialFileName, extensionFilters);
 
 		File file = fileChooser.showSaveDialog(window);
-		if (file != null && file.getParentFile() != null)
-			setLastSelectedDirectory(file.getParentFile());
-		
 		ExtensionFilter extensionFilter = fileChooser.getSelectedExtensionFilter();
+
+		if (file != null && file.getParentFile() != null) {
+			setLastSelectedDirectory(file.getParentFile());
+			setLastSelectedExtensionFilter(extensionFilter);	
+		}
+		
 		if (file != null && extensionFilter != null) {
 			boolean hasExtension = false;
 			List<String> extensions = extensionFilter.getExtensions();
@@ -124,6 +158,16 @@ public class DefaultFileChooser {
 		}
 
 		return file;
+	}
+	
+	public static ExtensionFilter getSelectedExtensionFilter() {
+		return fileChooser.getSelectedExtensionFilter();
+	}
+	
+	public static void setLastSelectedExtensionFilter(ExtensionFilter extensionFilter) {
+		if (extensionFilter == null)
+			return;
+		lastSelectedExtensionFilter = extensionFilter;
 	}
 	
 	public static void setLastSelectedDirectory(File file) {
