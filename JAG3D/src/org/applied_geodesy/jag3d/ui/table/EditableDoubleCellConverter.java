@@ -25,11 +25,9 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
-import org.applied_geodesy.util.FormatterChangedListener;
-import org.applied_geodesy.util.FormatterEvent;
 import org.applied_geodesy.util.FormatterOptions;
 
-public class EditableDoubleCellConverter extends EditableCellConverter<Double> implements FormatterChangedListener {
+public class EditableDoubleCellConverter extends EditableCellConverter<Double> {
 	private final CellValueType cellValueType;
 	private final FormatterOptions options = FormatterOptions.getInstance();
 	private final NumberFormat editorNumberFormat = NumberFormat.getInstance(Locale.ENGLISH);
@@ -42,7 +40,6 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> i
 	
 	EditableDoubleCellConverter(CellValueType cellValueType, boolean displayUnit) {
 		this.cellValueType = cellValueType;
-		this.options.addFormatterChangedListener(this);
 		this.displayUnit = displayUnit;
 		
 		int fracDigits = options.getFormatterOptions().get(this.cellValueType).getFractionDigits();
@@ -56,6 +53,12 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> i
 		try {
 			if (value == null)
 				return "";
+			
+			int fracDigits = options.getFormatterOptions().get(this.cellValueType).getFractionDigits();
+			if (this.editorNumberFormat.getMinimumFractionDigits() != fracDigits) {
+				this.editorNumberFormat.setMaximumFractionDigits(fracDigits + EXTRA_DIGITS_ON_EDIT);
+				this.editorNumberFormat.setMinimumFractionDigits(fracDigits);
+			}
 
 			switch(this.cellValueType) {
 			case ANGLE:
@@ -165,18 +168,18 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> i
 		return null;
 	}
 
-	@Override
-	public void formatterChanged(FormatterEvent evt) {
-		switch(evt.getEventType()) {
-		case RESOLUTION_CHANGED:
-			this.editorNumberFormat.setMinimumFractionDigits(evt.getNewResultion());
-			this.editorNumberFormat.setMaximumFractionDigits(evt.getNewResultion() + EXTRA_DIGITS_ON_EDIT);
-			break;
-		case UNIT_CHANGED:
-			break;
-		}
-
-		if (this.tableCell != null)
-			this.tableCell.setText(this.toString((Double)this.tableCell.getItem()));
-	}
+//	@Override
+//	public void formatterChanged(FormatterEvent evt) {
+//		switch(evt.getEventType()) {
+//		case RESOLUTION_CHANGED:
+//			this.editorNumberFormat.setMinimumFractionDigits(evt.getNewResultion());
+//			this.editorNumberFormat.setMaximumFractionDigits(evt.getNewResultion() + EXTRA_DIGITS_ON_EDIT);
+//			break;
+//		case UNIT_CHANGED:
+//			break;
+//		}
+//
+//		if (this.tableCell != null)
+//			this.tableCell.setText(this.toString((Double)this.tableCell.getItem()));
+//	}
 }
