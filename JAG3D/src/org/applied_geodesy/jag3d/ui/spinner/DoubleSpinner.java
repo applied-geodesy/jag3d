@@ -37,7 +37,7 @@ import javafx.scene.control.TextFormatter;
 import javafx.util.StringConverter;
 
 public class DoubleSpinner extends Spinner<Double> implements FormatterChangedListener {
-	private static FormatterOptions options = FormatterOptions.getInstance();
+	private FormatterOptions options = FormatterOptions.getInstance();
 	private final CellValueType cellValueType;
 	private final double min, max, amountToStepBy;
 	private Double number; 

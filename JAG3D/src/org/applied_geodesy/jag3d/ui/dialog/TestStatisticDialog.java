@@ -59,7 +59,7 @@ import javafx.util.StringConverter;
 public class TestStatisticDialog implements FormatterChangedListener {
 	private I18N i18n = I18N.getInstance();
 	private static TestStatisticDialog testStatisticDialog = new TestStatisticDialog();
-	private static FormatterOptions options = FormatterOptions.getInstance();
+	private FormatterOptions options = FormatterOptions.getInstance();
 	private Dialog<TestStatisticDefinition> dialog = null;
 	private Spinner<Double> probabilityValueSpinner, testPowerSpinner;
 	private ComboBox<TestStatisticType> testStatisticTypeComboBox;

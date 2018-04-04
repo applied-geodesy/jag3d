@@ -104,7 +104,7 @@ public class FormatterOptionDialog {
 	
 	private Map<CellValueType, ComboBox<Unit>> unitComboBoxes = new HashMap<CellValueType, ComboBox<Unit>>();
 	private Map<CellValueType, Spinner<Integer>> digitsSpinners = new HashMap<CellValueType, Spinner<Integer>>();
-	private static FormatterOptions options = FormatterOptions.getInstance();
+	private FormatterOptions options = FormatterOptions.getInstance();
 	private I18N i18n = I18N.getInstance();
 	private static FormatterOptionDialog formatterOptionDialog = new FormatterOptionDialog();
 	private Dialog<Void> dialog = null;

@@ -176,7 +176,7 @@ public class MouseLayer extends Layer {
 		}
 	}
 
-	private static FormatterOptions options = FormatterOptions.getInstance();
+	private FormatterOptions options = FormatterOptions.getInstance();
 	private ToolbarType toolbarType = null;
 	private Label coordinatePanel;
 	private RubberbandingAndPanEventHandler rubberbandingAndPanEventHandler = new RubberbandingAndPanEventHandler();

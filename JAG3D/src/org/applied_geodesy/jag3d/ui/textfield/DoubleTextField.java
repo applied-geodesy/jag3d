@@ -50,7 +50,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 		NON_NULL_VALUE_SUPPORT;
 	}
 	
-	static FormatterOptions options = FormatterOptions.getInstance();
+	FormatterOptions options = FormatterOptions.getInstance();
 	private final static int EDITOR_ADDITIONAL_DIGITS = 10;
 	private NumberFormat editorNumberFormat;
 	private final CellValueType type;

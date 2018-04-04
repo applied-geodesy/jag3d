@@ -31,7 +31,7 @@ import javafx.scene.control.TableCell;
 
 class AdditionalParameterDoubleCell extends TableCell<AdditionalParameterRow, Double> implements FormatterChangedListener {
 	private DisplayCellFormatType displayFormatType;
-	private final FormatterOptions options = FormatterOptions.getInstance();
+	private FormatterOptions options = FormatterOptions.getInstance();
 	Double item;
 	AdditionalParameterDoubleCell(DisplayCellFormatType displayFormatType) {
 		this.displayFormatType = displayFormatType;

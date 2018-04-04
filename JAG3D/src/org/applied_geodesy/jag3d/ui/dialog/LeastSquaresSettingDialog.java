@@ -164,7 +164,7 @@ public class LeastSquaresSettingDialog {
 
 	private I18N i18n = I18N.getInstance();
 	private static LeastSquaresSettingDialog leastSquaresSettingDialog = new LeastSquaresSettingDialog();
-	private static FormatterOptions options = FormatterOptions.getInstance();
+	private FormatterOptions options = FormatterOptions.getInstance();
 	private Dialog<LeastSquaresSettings> dialog = null;
 	private Window window;
 	private ComboBox<EstimationType> estimationTypeComboBox;

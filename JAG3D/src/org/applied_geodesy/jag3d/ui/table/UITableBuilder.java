@@ -23,6 +23,8 @@ package org.applied_geodesy.jag3d.ui.table;
 
 import java.util.function.Function;
 
+import org.applied_geodesy.util.FormatterChangedListener;
+import org.applied_geodesy.util.FormatterEvent;
 import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.util.i18.I18N;
 
@@ -55,9 +57,17 @@ import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 
 public abstract class UITableBuilder<T> {
+	
+	class NumberAndUnitFormatterChangedListener implements FormatterChangedListener {
+
+		@Override
+		public void formatterChanged(FormatterEvent evt) {
+			if (table != null)
+				table.refresh();
+		}
+	}
 
 	class TableKeyEventHandler implements EventHandler<KeyEvent> {
-
 		KeyCodeCombination copyKeyCodeCompination = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_ANY);
 		public void handle(final KeyEvent keyEvent) {
 
@@ -69,7 +79,6 @@ public abstract class UITableBuilder<T> {
 			}
 		}
 	}
-
 
 	class TableCellChangeListener<S> implements ChangeListener<S> {
 		private final int columnIndex;
@@ -104,11 +113,14 @@ public abstract class UITableBuilder<T> {
 		}
 	}
 
+	final NumberAndUnitFormatterChangedListener numberAndUnitFormatterChangedListener = new NumberAndUnitFormatterChangedListener();
 	static FormatterOptions options = FormatterOptions.getInstance();
 	static I18N i18n = I18N.getInstance();
 	TableView<T> table = this.createTable();
 
-	UITableBuilder() {}
+	UITableBuilder() {
+		options.addFormatterChangedListener(this.numberAndUnitFormatterChangedListener);
+	}
 
 	TableView<T> createTable() {
 		this.table = new TableView<T>();
