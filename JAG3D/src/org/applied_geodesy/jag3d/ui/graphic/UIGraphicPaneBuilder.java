@@ -25,11 +25,15 @@ import org.applied_geodesy.jag3d.ui.graphic.layer.LayerManager;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
 public class UIGraphicPaneBuilder {
@@ -52,11 +56,22 @@ public class UIGraphicPaneBuilder {
 		if (this.borderPane != null)
 			return;
 	
+		BackgroundFill fill = new BackgroundFill(Color.rgb(255, 255, 255, 1.0), CornerRadii.EMPTY, Insets.EMPTY); //0-255
+		Background background = new Background(fill);
+
+		BorderPane plotBackgroundPane = new BorderPane();
+		plotBackgroundPane.setMinSize(0, 0);
+		plotBackgroundPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		plotBackgroundPane.setBackground(background);
+		plotBackgroundPane.setCenter(this.layerManager.getPane());
+		
 		this.borderPane = new BorderPane();
+		
+		this.borderPane.setMinSize(0, 0);
 		this.borderPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		
 		this.borderPane.setTop(this.layerManager.getToolBar());
-		this.borderPane.setCenter(this.layerManager.getPane());
+		this.borderPane.setCenter(plotBackgroundPane); // this.layerManager.getPane()
 		
 		Label coordinateLabel = this.layerManager.getCoordinateLabel();
 		coordinateLabel.setFont(new Font(10));

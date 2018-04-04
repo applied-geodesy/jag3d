@@ -43,8 +43,6 @@ import org.applied_geodesy.util.i18.I18N;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
@@ -130,14 +128,14 @@ public class LayerManager {
 		}
 	}
 
-	private class ColorChangeListener implements ChangeListener<Color> {
-		@Override
-		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
-			BackgroundFill fill = new BackgroundFill(getColor(), CornerRadii.EMPTY, Insets.EMPTY);
-			Background background = new Background(fill);
-			stackPane.setBackground(background);
-		}
-	}
+//	private class ColorChangeListener implements ChangeListener<Color> {
+//		@Override
+//		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+//			BackgroundFill fill = new BackgroundFill(getColor(), CornerRadii.EMPTY, Insets.EMPTY);
+//			Background background = new Background(fill);
+//			stackPane.setBackground(background);
+//		}
+//	}
 	
 	private class GraphicExtentChangeListener implements ChangeListener<Number> {
 		@Override
@@ -197,7 +195,7 @@ public class LayerManager {
 	private ToolBar layerToolbar = new ToolBar();
 	private StackPane stackPane = new StackPane();
 	private final GraphicExtent currentGraphicExtent = new GraphicExtent();
-	private ObjectProperty<Color> color = new SimpleObjectProperty<Color>(Color.rgb(255, 255, 255, 1.0)); //0-255
+//	private ObjectProperty<Color> color = new SimpleObjectProperty<Color>(Color.rgb(255, 255, 255, 1.0)); //0-255
 	private final MouseLayer mouseLayer = new MouseLayer(this);
 	private Spinner<Double> scaleSpinner;
 	public LayerManager() {
@@ -211,7 +209,7 @@ public class LayerManager {
 		
 		this.initLayers();
 
-		this.color.addListener(new ColorChangeListener());
+//		this.color.addListener(new ColorChangeListener());
 		this.currentGraphicExtent.drawingBoardWidthProperty().bind(this.stackPane.widthProperty());
 		this.currentGraphicExtent.drawingBoardHeightProperty().bind(this.stackPane.heightProperty());
 
@@ -341,9 +339,10 @@ public class LayerManager {
 	}
 
 	private void initPane() {
-		BackgroundFill fill = new BackgroundFill(this.getColor(), CornerRadii.EMPTY, Insets.EMPTY);
+		//BackgroundFill fill = new BackgroundFill(this.getColor(), CornerRadii.EMPTY, Insets.EMPTY);
+		BackgroundFill fill = new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY);
 		Background background = new Background(fill);
-
+		
 		this.stackPane.setBackground(background);
 		this.stackPane.setMinSize(0, 0);
 		this.stackPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -616,21 +615,24 @@ public class LayerManager {
 		double height = this.stackPane.getHeight();
 
 		if (height > 0 && width > 0) {
-
-			SnapshotParameters snapshotParameters = new SnapshotParameters();
-			snapshotParameters.setFill(Color.TRANSPARENT);
-			snapshotParameters.setTransform(Transform.scale(pixelScale, pixelScale));
-			WritableImage writableImage = new WritableImage((int)Math.rint(pixelScale*width), (int)Math.rint(pixelScale*height));
-			this.stackPane.snapshot(snapshotParameters, writableImage);
-			
-			ExtensionFilter extensionFilter = new ExtensionFilter(i18n.getString("LayerManager.export.png", "PNG-Image"), "*.png");
+			ExtensionFilter extensionFilters[] = new ExtensionFilter[] {
+					new ExtensionFilter(i18n.getString("LayerManager.extension.filled.png",      "Portable Network Graphics (PNG)"), "*.png"),
+					new ExtensionFilter(i18n.getString("LayerManager.extension.transparent.png", "Transparent Portable Network Graphics (PNG)"), "*.png")
+			};
 			File outputFile = DefaultFileChooser.showSaveDialog(
 					i18n.getString("LayerManager.export.title", "Save current graphic"), 
 					null, 
-					extensionFilter);
-
+					extensionFilters);
+			
 			if (outputFile != null) {				
 				try {
+					boolean transparentImage = DefaultFileChooser.getSelectedExtensionFilter() == extensionFilters[1];
+					SnapshotParameters snapshotParameters = new SnapshotParameters();
+					snapshotParameters.setFill(transparentImage ? Color.TRANSPARENT : null);
+					snapshotParameters.setTransform(Transform.scale(pixelScale, pixelScale));
+					WritableImage writableImage = new WritableImage((int)Math.rint(pixelScale*width), (int)Math.rint(pixelScale*height));
+					this.stackPane.snapshot(snapshotParameters, writableImage);
+					
 					BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
 					ImageIO.write(bufferedImage, "PNG", outputFile);
 				} catch (Exception e) {
@@ -678,17 +680,17 @@ public class LayerManager {
 		return button;
 	}
 
-	public ObjectProperty<Color> colorProperty() {
-		return this.color;
-	}
-
-	public Color getColor() {
-		return this.colorProperty().get();
-	}
-
-	public void setColor(final Color color) {
-		this.colorProperty().set(color);
-	}
+//	public ObjectProperty<Color> colorProperty() {
+//		return this.color;
+//	}
+//
+//	public Color getColor() {
+//		return this.colorProperty().get();
+//	}
+//
+//	public void setColor(final Color color) {
+//		this.colorProperty().set(color);
+//	}
 	
 	public Layer getLayer(LayerType layerType) {
 		List<Node> nodes = this.stackPane.getChildren();
