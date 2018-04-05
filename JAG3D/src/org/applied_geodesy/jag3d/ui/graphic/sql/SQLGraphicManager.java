@@ -563,7 +563,25 @@ public class SQLGraphicManager {
 				+ "WHERE "
 				+ "\"CongruenceAnalysisPointPairApriori\".\"enable\" = TRUE AND \"CongruenceAnalysisGroup\".\"enable\" = TRUE "
 				+ "AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE "
-				+ "AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE";
+				+ "AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE "
+				+ "UNION ALL "
+				+ "SELECT "
+				+ "\"name\" AS \"start_point_name\", \"name\" AS \"end_point_name\", "
+				+ "\"dimension\", "
+				+ "\"x\" - 0.5 * \"gross_error_x\" AS \"xs\", "
+				+ "\"y\" - 0.5 * \"gross_error_y\" AS \"ys\", "
+				+ "\"x\" + 0.5 * \"gross_error_x\" AS \"xe\", "
+				+ "\"y\" + 0.5 * \"gross_error_y\" AS \"ye\", "
+				+ "0 AS \"confidence_major_axis_2d\", "
+				+ "0 AS \"confidence_minor_axis_2d\", "
+				+ "0 AS \"confidence_alpha_2d\", "
+				+ "\"significant\" "
+				+ "FROM \"PointApriori\" "
+				+ "JOIN \"PointAposteriori\" ON \"PointApriori\".\"id\" =  \"PointAposteriori\".\"id\" "
+				+ "JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" "
+				+ "WHERE "
+				+ "\"PointApriori\".\"enable\" = TRUE AND \"PointGroup\".\"enable\" = TRUE "
+				+ "AND \"PointAposteriori\".\"significant\" = TRUE";
 		
 		
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -573,7 +591,7 @@ public class SQLGraphicManager {
 
 			String startPointName = rs.getString("start_point_name");
 			String endPointName   = rs.getString("end_point_name");
-			// int dimension         = rs.getInt("dimension");
+			int dimension         = rs.getInt("dimension");
 			
 			double majorAxis      = rs.getDouble("confidence_major_axis_2d");
 			double minorAxis      = rs.getDouble("confidence_minor_axis_2d");
@@ -594,9 +612,21 @@ public class SQLGraphicManager {
 			GraphicPoint startPoint = completePointMap.get(startPointName);
 			GraphicPoint endPoint   = completePointMap.get(endPointName);
 			
-			RelativeConfidence relativeConfidence = new RelativeConfidence(startPoint, endPoint, majorAxis, minorAxis, angle, significant);
-			relativeConfidence.setSignificant(significant);
+			// shift values of reference points
+			if (startPointName.equals(endPointName)) {
+				double xs = rs.getDouble("xs");
+				double ys = rs.getDouble("ys");
+				double xe = rs.getDouble("xe");
+				double ye = rs.getDouble("ye");
+				
+				startPoint = new GraphicPoint(startPointName, dimension, ys, xs);
+				endPoint   = new GraphicPoint(endPointName,   dimension, ye, xe);
+				
+				startPoint.visibleProperty().bind(completePointMap.get(startPointName).visibleProperty());
+				endPoint.visibleProperty().bind(completePointMap.get(endPointName).visibleProperty());
+			}
 			
+			RelativeConfidence relativeConfidence = new RelativeConfidence(startPoint, endPoint, majorAxis, minorAxis, angle, significant);
 			relativeConfidences.put(key, relativeConfidence);
 		}
 		
