@@ -304,8 +304,10 @@ public class ApproximationValuesDialog {
 		this.reset();
 
 		// Global check
+		boolean validNumberOfObservations = false;
 		try {
 			SQLManager.getInstance().checkNumberOfObersvationsPerUnknownParameter();
+			validNumberOfObservations = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			OptionDialog.showThrowableDialog (
@@ -332,6 +334,9 @@ public class ApproximationValuesDialog {
 					e
 					);
 		}
+		
+		if (!validNumberOfObservations)
+			return;
 
 		// Try to estimate approx. values
 		SQLApproximationManager approximationManager = SQLManager.getInstance().getApproximationManager();
