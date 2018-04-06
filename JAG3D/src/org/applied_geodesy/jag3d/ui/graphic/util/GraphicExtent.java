@@ -24,7 +24,9 @@ package org.applied_geodesy.jag3d.ui.graphic.util;
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.WorldCoordinate;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
 public class GraphicExtent {
@@ -32,6 +34,8 @@ public class GraphicExtent {
 	private DoubleProperty minY = new SimpleDoubleProperty(0.0);
 	private DoubleProperty maxX = new SimpleDoubleProperty(0.0);
 	private DoubleProperty maxY = new SimpleDoubleProperty(0.0);
+	
+	private BooleanProperty extended = new SimpleBooleanProperty(Boolean.FALSE);
 
 	private DoubleProperty drawingBoardWidth  = new SimpleDoubleProperty(0.0);
 	private DoubleProperty drawingBoardHeight = new SimpleDoubleProperty(0.0);
@@ -41,28 +45,59 @@ public class GraphicExtent {
 	}
 
 	public GraphicExtent merge(GraphicExtent graphicExtent) {
+		boolean isExtended = false;
 		
-		if (this.getMinX() > graphicExtent.getMinX())
+		if (this.getMinX() > graphicExtent.getMinX()) {
 			this.setMinX(graphicExtent.getMinX());
+			isExtended = true;	
+		}
 		
-		if (this.getMinY() > graphicExtent.getMinY())
+		if (this.getMinY() > graphicExtent.getMinY()) {
 			this.setMinY(graphicExtent.getMinY());
+			isExtended = true;
+		}
 		
-		if (this.getMaxX() < graphicExtent.getMaxX())
+		if (this.getMaxX() < graphicExtent.getMaxX()) {
 			this.setMaxX(graphicExtent.getMaxX());
+			isExtended = true;
+		}
 		
-		if (this.getMaxY() < graphicExtent.getMaxY())
+		if (this.getMaxY() < graphicExtent.getMaxY()) {
 			this.setMaxY(graphicExtent.getMaxY());
+			isExtended = true;
+		}
 
+		if (isExtended)
+			this.extended();
+		
 		return this;
 	}
 	
 	public void reset() {
-		this.setMinX(Double.MAX_VALUE);
-		this.setMinY(Double.MAX_VALUE);
+		boolean isExtended = false;
 
-		this.setMaxX(Double.MIN_VALUE);
-		this.setMaxY(Double.MIN_VALUE);
+		if (this.getMinX() != Double.MAX_VALUE) {
+			this.setMinX(Double.MAX_VALUE);
+			isExtended = true;
+		}
+
+		if (this.getMinY() != Double.MAX_VALUE) {
+			this.setMinY(Double.MAX_VALUE);
+			isExtended = true;
+		}
+
+		if (this.getMaxX() != Double.MIN_VALUE) {
+			this.setMaxX(Double.MIN_VALUE);
+			isExtended = true;
+		}
+
+		if (this.getMaxY() != Double.MIN_VALUE) {
+			this.setMaxY(Double.MIN_VALUE);
+			isExtended = true;
+		}
+
+		if (isExtended)
+			this.extended();
 	}
 	
 	public double getCentreX() {
@@ -78,17 +113,30 @@ public class GraphicExtent {
 	}
 
 	public GraphicExtent merge(double x, double y) {
-		if (this.getMinX() > x) 
+		boolean isExtended = false;
+		
+		if (this.getMinX() > x) {
 			this.setMinX(x);
+			isExtended = true;
+		}
 
-		if (this.getMaxX() < x) 
+		if (this.getMaxX() < x) {
 			this.setMaxX(x);
+			isExtended = true;
+		}
 
-		if (this.getMinY() > y) 
+		if (this.getMinY() > y) {
 			this.setMinY(y);
+			isExtended = true;
+		}
 
-		if (this.getMaxY() < y) 
+		if (this.getMaxY() < y) {
 			this.setMaxY(y);
+			isExtended = true;
+		}
+		
+		if (isExtended)
+			this.extended();
 
 		return this;
 	}
@@ -110,23 +158,33 @@ public class GraphicExtent {
 	}
 
 	public void set(double xmin, double ymin, double xmax, double ymax) {
+		boolean isExtended = false;
+		
 		if (xmin > xmax) {
+			isExtended = this.getMinX() != xmax || this.getMaxX() != xmin;
 			this.setMinX(xmax);
 			this.setMaxX(xmin);
+			
 		} 
 		else {
+			isExtended = this.getMinX() != xmin || this.getMaxX() != xmax;
 			this.setMinX(xmin);
 			this.setMaxX(xmax);
 		}
 
 		if (ymin > ymax) {
+			isExtended = this.getMinY() != ymax || this.getMaxY() != ymin;
 			this.setMinY(ymax);
 			this.setMaxY(ymin);
 		} 
 		else {
+			isExtended = this.getMinY() != ymin || this.getMaxY() != ymax;
 			this.setMinY(ymin);
 			this.setMaxY(ymax);
 		}
+		
+		if (isExtended)
+			this.extended();
 	}
 	
 	public double getScale() {
@@ -270,5 +328,21 @@ public class GraphicExtent {
 		double scaleHeight = drawingBoardHeight > 0 ? extentHeight / drawingBoardHeight : -1;
 	    double scaleWidth  = drawingBoardWidth  > 0 ? extentWidth  / drawingBoardWidth  : -1;
 	    return Math.max(scaleHeight, scaleWidth);
+	}
+
+	public final BooleanProperty extendedProperty() {
+		return this.extended;
+	}
+
+	private final boolean isExtended() {
+		return this.extendedProperty().get();
+	}
+
+	private final void setExtended(final boolean extended) {
+		this.extendedProperty().set(extended);
+	}
+	
+	private void extended() {
+		this.setExtended(!this.isExtended());
 	}
 }

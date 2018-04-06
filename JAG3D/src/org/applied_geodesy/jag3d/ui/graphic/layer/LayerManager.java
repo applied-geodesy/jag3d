@@ -137,9 +137,9 @@ public class LayerManager {
 //		}
 //	}
 	
-	private class GraphicExtentChangeListener implements ChangeListener<Number> {
+	private class GraphicExtentChangeListener implements ChangeListener<Boolean> {
 		@Override
-		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 			save(currentGraphicExtent);
 		}
 	}
@@ -214,10 +214,11 @@ public class LayerManager {
 		this.currentGraphicExtent.drawingBoardHeightProperty().bind(this.stackPane.heightProperty());
 
 		GraphicExtentChangeListener graphicExtentChangeListener = new GraphicExtentChangeListener();
-		this.currentGraphicExtent.minXProperty().addListener(graphicExtentChangeListener);
-		this.currentGraphicExtent.maxXProperty().addListener(graphicExtentChangeListener);
-		this.currentGraphicExtent.minYProperty().addListener(graphicExtentChangeListener);
-		this.currentGraphicExtent.maxYProperty().addListener(graphicExtentChangeListener);
+//		this.currentGraphicExtent.minXProperty().addListener(graphicExtentChangeListener);
+//		this.currentGraphicExtent.maxXProperty().addListener(graphicExtentChangeListener);
+//		this.currentGraphicExtent.minYProperty().addListener(graphicExtentChangeListener);
+//		this.currentGraphicExtent.maxYProperty().addListener(graphicExtentChangeListener);
+		this.currentGraphicExtent.extendedProperty().addListener(graphicExtentChangeListener);
 		
 		SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
 	}
