@@ -276,6 +276,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 			Double newValue = null;
 			String input = this.getText();
 			if (input != null && !input.trim().isEmpty()) {
+				input = input.replaceAll(",", ".");
 				newValue = options.getFormatterOptions().get(this.type).parse(input).doubleValue();
 				if (newValue != null) {
 					switch(this.type) {

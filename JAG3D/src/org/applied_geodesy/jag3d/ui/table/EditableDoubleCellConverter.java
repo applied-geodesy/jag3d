@@ -132,6 +132,7 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> {
 	public Double fromString(String string) {
 		if (string != null && !string.trim().isEmpty()) {
 			try {
+				string = string.replaceAll(",", ".");
 				double value = options.getFormatterOptions().get(this.cellValueType).parse(string.trim()).doubleValue();
 				switch(this.cellValueType) {
 				case ANGLE:
