@@ -431,6 +431,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 				default:
 					break;
 				}
+				valid = false;
 				raiseErrorMessageSaveValue(e);
 				e.printStackTrace();
 			}
@@ -439,15 +440,18 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 //		this.table.requestFocus();
 //		this.table.getSelectionModel().clearSelection();
 //		this.table.getSelectionModel().select(rowData);
-		Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-            	table.refresh();
-            	table.requestFocus();
-        		table.getSelectionModel().clearSelection();
-        		table.getSelectionModel().select(rowData);
-            }
-	    });
+		
+		if (!valid) {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					table.refresh();
+					table.requestFocus();
+					table.getSelectionModel().clearSelection();
+					table.getSelectionModel().select(rowData);
+				}
+			});
+		}
 	}
 	
 	private boolean isComplete(CongruenceAnalysisRow row) {

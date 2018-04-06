@@ -552,7 +552,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 				default:
 					break;
 				}
-				
+				valid = false;
 				raiseErrorMessageSaveValue(e);
 				e.printStackTrace();
 			}
@@ -561,15 +561,18 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 //		this.table.requestFocus();
 //		this.table.getSelectionModel().clearSelection();
 //		this.table.getSelectionModel().select(rowData);
-		Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-            	table.refresh();
-            	table.requestFocus();
-        		table.getSelectionModel().clearSelection();
-        		table.getSelectionModel().select(rowData);
-            }
-	    });
+		
+		if (!valid) {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					table.refresh();
+					table.requestFocus();
+					table.getSelectionModel().clearSelection();
+					table.getSelectionModel().select(rowData);
+				}
+			});
+		}
 	}
 
 	@Override

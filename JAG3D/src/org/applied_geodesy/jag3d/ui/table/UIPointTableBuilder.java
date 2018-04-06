@@ -905,7 +905,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 				default:
 					break;
 				}
-
+				valid = false;
 				raiseErrorMessageSaveValue(e);
 				e.printStackTrace();
 			}
@@ -914,15 +914,18 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 //		this.table.requestFocus();
 //		this.table.getSelectionModel().clearSelection();
 //		this.table.getSelectionModel().select(rowData);
-		Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-            	table.refresh();
-            	table.requestFocus();
-        		table.getSelectionModel().clearSelection();
-        		table.getSelectionModel().select(rowData);
-            }
-	    });
+		
+		if (!valid) {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					table.refresh();
+					table.requestFocus();
+					table.getSelectionModel().clearSelection();
+					table.getSelectionModel().select(rowData);
+				}
+			});
+		}
 	}
 	
 	private boolean isComplete(PointRow row) {
