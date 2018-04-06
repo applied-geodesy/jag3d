@@ -21,6 +21,9 @@
 
 package org.applied_geodesy.jag3d.ui.table;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -83,19 +86,18 @@ public class EditableCell<T, S> extends TableCell<T, S> {
 					cancelEdit();
 					event.consume();
 				} 
-//				else if (event.getCode() == KeyCode.RIGHT) {
-//					getTableView().getSelectionModel().selectRightCell();
-//					event.consume();
-//				} else if (event.getCode() == KeyCode.LEFT) {
-//					getTableView().getSelectionModel().selectLeftCell();
-//					event.consume();
-//				} else if (event.getCode() == KeyCode.UP) {
-//					getTableView().getSelectionModel().selectAboveCell();
-//					event.consume();
-//				} else if (event.getCode() == KeyCode.DOWN) {
-//					getTableView().getSelectionModel().selectBelowCell();
-//					event.consume();
-//				}
+				
+				else if (event.getCode() == KeyCode.TAB) {
+					commitEdit(converter.fromString(textField.getText()));
+					TableColumn<T, ?> nextColumn = getNextColumn(!event.isShiftDown());
+					TableView<T> table = getTableView();
+					if (table != null && nextColumn != null) {
+						table.requestFocus();
+						table.getSelectionModel().select(getTableRow().getIndex(), nextColumn);
+						table.edit(getTableRow().getIndex(), nextColumn);
+					}
+					event.consume();
+				}
 			}
 		});
 	}
@@ -127,5 +129,45 @@ public class EditableCell<T, S> extends TableCell<T, S> {
 		}
 		super.commitEdit(item);
 		this.setContentDisplay(ContentDisplay.TEXT_ONLY);
+	}
+	
+	private TableColumn<T, ?> getNextColumn(boolean forward) {
+		List<TableColumn<T, ?>> columns = new ArrayList<>();
+		TableView<T> table = getTableView();
+		for (TableColumn<T, ?> column : table.getColumns())
+			columns.addAll(getLeaves(column));
+		
+		if (columns.size() < 2) 
+			return null;
+
+		int currentIndex = columns.indexOf(getTableColumn());
+		int nextIndex = currentIndex;
+		
+		if (forward) {
+			nextIndex++;
+			if (nextIndex > columns.size() - 1)
+				nextIndex = 0;
+		} 
+		else {
+			nextIndex--;
+			if (nextIndex < 0) 
+				nextIndex = columns.size() - 1;
+		}
+
+		return columns.get(nextIndex);
+	}
+
+	private List<TableColumn<T, ?>> getLeaves(TableColumn<T, ?> root) {
+		List<TableColumn<T, ?>> columns = new ArrayList<>();
+		if (root.getColumns().isEmpty()) {
+			if (root.isEditable() && root.isVisible() && !(root.getCellObservableValue(0).getValue() instanceof Boolean)) 
+				columns.add(root);
+			return columns;
+		} 
+		else {
+			for (TableColumn<T, ?> column : root.getColumns()) 
+				columns.addAll(getLeaves(column));
+			return columns;
+		}
 	}
 }
