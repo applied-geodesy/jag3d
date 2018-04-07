@@ -806,7 +806,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 
 	@Override
 	void setValue(PointRow rowData, int columnIndex, int rowIndex, Object oldValue, Object newValue) {
-		boolean valid = false;
+		boolean valid = (oldValue == null || oldValue.toString().trim().isEmpty()) && (newValue == null || newValue.toString().trim().isEmpty());
 		switch (columnIndex) {
 		case 0:
 			rowData.setEnable(newValue != null && newValue instanceof Boolean && (Boolean)newValue);
