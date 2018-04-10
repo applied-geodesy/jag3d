@@ -534,7 +534,10 @@ public class SQLManager {
 			return;
 		
 		UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
-		String sql = "SELECT \"id\", \"name\", \"enable\" FROM \"ObservationGroup\" WHERE \"type\" = ? ORDER BY \"id\" ASC";
+		String sql = "SELECT \"id\", \"name\", \"enable\" "
+				+ "FROM \"ObservationGroup\" "
+				+ "WHERE \"type\" = ? "
+				+ "ORDER BY \"id\" ASC";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		TreeItemType[] types = new TreeItemType[] {						
@@ -567,7 +570,10 @@ public class SQLManager {
 			return;
 		
 		UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
-		String sql = "SELECT \"id\", \"name\", \"enable\" FROM \"PointGroup\" WHERE \"type\" = ? AND \"dimension\" = ? ORDER BY \"id\" ASC";
+		String sql = "SELECT \"id\", \"name\", \"enable\" "
+				+ "FROM \"PointGroup\" "
+				+ "WHERE \"type\" = ? AND \"dimension\" = ? "
+				+ "ORDER BY \"id\" ASC";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		TreeItemType[] types = new TreeItemType[] {
@@ -640,7 +646,10 @@ public class SQLManager {
 		
 		UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
 
-		String sql = "SELECT \"id\", \"name\", \"enable\" FROM \"CongruenceAnalysisGroup\" WHERE \"dimension\" = ? ORDER BY \"id\" ASC";
+		String sql = "SELECT \"id\", \"name\", \"enable\" "
+				+ "FROM \"CongruenceAnalysisGroup\" "
+				+ "WHERE \"dimension\" = ? "
+				+ "ORDER BY \"id\" ASC";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		TreeItemType[] types = new TreeItemType[] {
@@ -1214,7 +1223,9 @@ public class SQLManager {
 		propertiesPane.setTreeItemValue(selectedObservationItemValues);
 
 		boolean referenceEpoch = true;
-		String sql = "SELECT \"reference_epoch\" FROM \"ObservationGroup\" WHERE \"id\" = ?";
+		String sql = "SELECT \"reference_epoch\" "
+				+ "FROM \"ObservationGroup\" "
+				+ "WHERE \"id\" = ?";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		stmt.setInt(1, observationItemValue.getGroupId());
@@ -1234,7 +1245,9 @@ public class SQLManager {
 		UIObservationPropertiesPane propertiesPane = propertiesPaneBuilder.getObservationPropertiesPane(observationItemValue.getItemType());
 		propertiesPane.setTreeItemValue(selectedObservationItemValues);
 
-		String sql = "SELECT \"type\", \"value\" FROM \"ObservationGroupUncertainty\" WHERE \"group_id\" = ?";
+		String sql = "SELECT \"type\", \"value\" "
+				+ "FROM \"ObservationGroupUncertainty\" "
+				+ "WHERE \"group_id\" = ?";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		stmt.setInt(1, observationItemValue.getGroupId());
@@ -1268,7 +1281,7 @@ public class SQLManager {
 				"LEFT JOIN \"ObservationAposteriori\" ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" " + 
 				"WHERE \"ObservationGroup\".\"type\" = ? " +
 				"AND \"ObservationGroup\".\"id\" IN (" + inArrayValues + ") " + 
-				"ORDER BY \"ObservationApriori\".\"id\" ASC";
+				"ORDER BY \"ObservationGroup\".\"id\" ASC, \"ObservationApriori\".\"id\" ASC";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
@@ -1393,7 +1406,7 @@ public class SQLManager {
 				"LEFT JOIN \"GNSSObservationAposteriori\" ON \"GNSSObservationApriori\".\"id\" = \"GNSSObservationAposteriori\".\"id\" " + 
 				"WHERE \"ObservationGroup\".\"type\" = ? " +
 				"AND \"ObservationGroup\".\"id\" IN (" + inArrayValues + ") " + 
-				"ORDER BY \"GNSSObservationApriori\".\"id\" ASC";
+				"ORDER BY \"ObservationGroup\".\"id\" ASC, \"GNSSObservationApriori\".\"id\" ASC";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
@@ -1529,7 +1542,9 @@ public class SQLManager {
 		UIPointPropertiesPane propertiesPane = propertiesPaneBuilder.getPointPropertiesPane(pointItemValue.getItemType());
 		propertiesPane.setTreeItemValue(selectedPointItemValues);
 
-		String sql = "SELECT \"type\", \"value\" FROM \"PointGroupUncertainty\" WHERE \"group_id\" = ?";
+		String sql = "SELECT \"type\", \"value\" "
+				+ "FROM \"PointGroupUncertainty\" "
+				+ "WHERE \"group_id\" = ?";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		stmt.setInt(1, pointItemValue.getGroupId());
@@ -1552,7 +1567,9 @@ public class SQLManager {
 		UIPointPropertiesPane propertiesPane = propertiesPaneBuilder.getPointPropertiesPane(pointItemValue.getItemType());
 		propertiesPane.setTreeItemValue(selectedPointItemValues);
 
-		String sql = "SELECT \"consider_deflection\" FROM \"PointGroup\" WHERE \"id\" = ?";
+		String sql = "SELECT \"consider_deflection\" "
+				+ "FROM \"PointGroup\" "
+				+ "WHERE \"id\" = ?";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		stmt.setInt(1, pointItemValue.getGroupId());
