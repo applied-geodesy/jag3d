@@ -368,6 +368,7 @@ public class PointLayer extends Layer implements HighlightableLayer {
 		return this.points;
 	}
 	
+	@Override
 	public void draw(GraphicExtent graphicExtent) {
 		this.clearDrawingBoard();
 		
