@@ -3409,7 +3409,8 @@ public class SQLManager {
 			while(rs.next()) {
 				String oldName = rs.getString("name");
 				String newName = oldName.replaceFirst(searchRegex, replaceRegex);
-
+				newName = newName.substring(0, Math.min(newName.length(), 255));
+				
 				if (this.isNameCollisions(pointTreeItemValue, newName))
 					continue;
 				
@@ -3438,7 +3439,8 @@ public class SQLManager {
 			while(rs.next()) {
 				String oldName = rs.getString("name");
 				String newName = oldName.replaceFirst(searchRegex, replaceRegex);
-
+				newName = newName.substring(0, Math.min(newName.length(), 255));
+				
 				if (this.isNameCollisions(observationTreeItemValue, oldName, newName))
 					continue;
 				
@@ -3466,6 +3468,7 @@ public class SQLManager {
 			while(rs.next()) {
 				String oldName = rs.getString("name");
 				String newName = oldName.replaceFirst(searchRegex, replaceRegex);
+				newName = newName.substring(0, Math.min(newName.length(), 255));
 
 				if (this.isNameCollisions(congruenceAnalysisTreeItemValue, oldName, newName))
 					continue;
