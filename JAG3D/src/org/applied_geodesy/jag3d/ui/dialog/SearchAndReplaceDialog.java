@@ -24,8 +24,8 @@ package org.applied_geodesy.jag3d.ui.dialog;
 import java.util.Optional;
 
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.textfield.LimitedTextField;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
+import org.applied_geodesy.util.ObservableLimitedList;
 import org.applied_geodesy.util.i18.I18N;
 
 import javafx.application.Platform;
@@ -33,6 +33,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -53,8 +54,8 @@ public class SearchAndReplaceDialog {
 	private static SearchAndReplaceDialog searchAndReplaceDialog = new SearchAndReplaceDialog();
 	private Dialog<Pair<String, String>> dialog = null;
 	private Window window;
-	private LimitedTextField searchTextField;
-	private LimitedTextField replaceTextField;
+	private ComboBox<String> searchComboBox  = new ComboBox<String>();
+	private ComboBox<String> replaceComboBox = new ComboBox<String>();
 	private RadioButton normalModeRadioButton;
 	private RadioButton regularExpressionRadioButton;
 	private TreeItemValue itemValue;
@@ -100,15 +101,13 @@ public class SearchAndReplaceDialog {
 
 	private Node createPane() {
 
-		this.searchTextField = this.createLimitedTextField(
-				255,
+		this.searchComboBox = createComboBox(
 				i18n.getString("SearchAndReplaceDialog.search.promt", "Old point name"),
 				i18n.getString("SearchAndReplaceDialog.search.tooltip", "Enter old point name"));
 		
-		this.replaceTextField = this.createLimitedTextField(
-				255,
-				i18n.getString("SearchAndReplaceDialog.replace.promt", "New point name"),
-				i18n.getString("SearchAndReplaceDialog.replace.tooltip", "Enter new point name"));
+		this.replaceComboBox = createComboBox(
+				i18n.getString("SearchAndReplaceDialog.replace.promt", "Old point name"),
+				i18n.getString("SearchAndReplaceDialog.replace.tooltip", "Enter old point name"));
 		
 		this.normalModeRadioButton = this.createRadioButton(
 				i18n.getString("SearchAndReplaceDialog.mode.normal.label", "Normal"), 
@@ -117,15 +116,15 @@ public class SearchAndReplaceDialog {
 		this.regularExpressionRadioButton = this.createRadioButton(
 				i18n.getString("SearchAndReplaceDialog.mode.regex.label", "Regular expression"), 
 				i18n.getString("SearchAndReplaceDialog.mode.regex.tooltip", "If selected, regular expression mode will be applied"));
-		
+
 		Label searchLabel  = new Label(i18n.getString("SearchAndReplaceDialog.search.label", "Find what:"));
 		Label replaceLabel = new Label(i18n.getString("SearchAndReplaceDialog.replace.label", "Replace with:"));
 		Label modeLabel    = new Label(i18n.getString("SearchAndReplaceDialog.mode.label", "Mode:"));
 		
 		searchLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		replaceLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		searchLabel.setLabelFor(this.searchTextField);
-		replaceLabel.setLabelFor(this.replaceTextField);
+		searchLabel.setLabelFor(this.searchComboBox);
+		replaceLabel.setLabelFor(this.replaceComboBox);
 		
 		ToggleGroup group = new ToggleGroup();
 		group.getToggles().addAll(this.normalModeRadioButton, this.regularExpressionRadioButton);
@@ -145,35 +144,36 @@ public class SearchAndReplaceDialog {
 		GridPane.setHgrow(searchLabel,  Priority.NEVER);
 		GridPane.setHgrow(replaceLabel, Priority.NEVER);
 		
-		GridPane.setHgrow(this.searchTextField,  Priority.ALWAYS);
-		GridPane.setHgrow(this.replaceTextField, Priority.ALWAYS);
+		GridPane.setHgrow(this.searchComboBox,  Priority.ALWAYS);
+		GridPane.setHgrow(this.replaceComboBox, Priority.ALWAYS);
 				
 		int row = 1;
 		gridPane.add(searchLabel,           0, row);
-		gridPane.add(this.searchTextField,  1, row++);
+		gridPane.add(this.searchComboBox,  1, row++);
 
 		gridPane.add(replaceLabel,          0, row);
-		gridPane.add(this.replaceTextField, 1, row++);
+		gridPane.add(this.replaceComboBox, 1, row++);
 		
 		gridPane.add(modeLabel,             0, row);
 		gridPane.add(hbox,                  1, row++);
 		
 		Platform.runLater(new Runnable() {
 			@Override public void run() {
-				searchTextField.requestFocus();
+				searchComboBox.requestFocus();
 			}
 		});
 		
 		return gridPane;
 	}
 	
-	private LimitedTextField createLimitedTextField(int size, String promtText, String tooltip) {
-		LimitedTextField textField = new LimitedTextField(size);
-		textField.setPromptText(promtText);
-		textField.setTooltip(new Tooltip(tooltip));
-		textField.setMinWidth(250);
-		textField.setMaxWidth(Double.MAX_VALUE);
-		return textField;
+	private ComboBox<String> createComboBox(String promtText, String tooltip) {
+		ComboBox<String> comboBox = new ComboBox<String>(new ObservableLimitedList<String>(150));
+		comboBox.setEditable(true);
+		comboBox.setPromptText(promtText);
+		comboBox.setTooltip(new Tooltip(tooltip));
+		comboBox.setMinSize(250, Control.USE_PREF_SIZE);
+		comboBox.setMaxWidth(Double.MAX_VALUE);
+		return comboBox;
 	}
 	
 	private RadioButton createRadioButton(String text, String tooltip) {
@@ -189,8 +189,21 @@ public class SearchAndReplaceDialog {
 
 	private void save() {
 		try {
-			String search  = this.searchTextField.getText();
-			String replace = this.replaceTextField.getText();
+			String search  = this.searchComboBox.getValue();
+			String replace = this.replaceComboBox.getValue();
+
+			search  = search == null  ? "" : search;
+			replace = replace == null ? "" : replace;
+
+			// add new items to combo boxes
+			if (!search.isEmpty() && !this.searchComboBox.getItems().contains(search))
+				this.searchComboBox.getItems().add(search);
+			this.searchComboBox.setValue(search);
+			
+			if (!replace.isEmpty() && !this.replaceComboBox.getItems().contains(replace))
+				this.replaceComboBox.getItems().add(replace);
+			this.replaceComboBox.setValue(replace);
+			
 			boolean regExp = this.regularExpressionRadioButton.isSelected();
 			
 			// masking values
