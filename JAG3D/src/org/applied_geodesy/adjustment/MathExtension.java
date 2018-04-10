@@ -308,7 +308,7 @@ public final class MathExtension {
         double vu = 0;
         double abstol = 2.0 * LAPACK.getInstance().dlamch("S");
         intW m = new intW(0);
-        UpperSymmBandMatrix eval = new UpperSymmBandMatrix(iu-il + 1, 0);
+        double evalArray[] = new double[n]; // n because of multiple roots
         //DenseMatrix evec = vectors ? new DenseMatrix(iu-il + 1, n) : new DenseMatrix(0, 0);
         DenseMatrix evec = vectors ? new DenseMatrix(n, iu-il + 1) : new DenseMatrix(0, 0);
         int ldz = Math.max(1,n);
@@ -321,12 +321,20 @@ public final class MathExtension {
         	throw new IllegalArgumentException();
 
 		// http://www.netlib.org/lapack/double/dspevx.f
-		LAPACK.getInstance().dspevx(jobz, range, uplo, n, ap, vl, vu, il, iu, abstol, m, eval.getData(), evec.getData(), ldz, work, iwork, ifail, info);
+		//LAPACK.getInstance().dspevx(jobz, range, uplo, n, ap, vl, vu, il, iu, abstol, m, eval.getData(), evec.getData(), ldz, work, iwork, ifail, info);
+        LAPACK.getInstance().dspevx(jobz, range, uplo, n, ap, vl, vu, il, iu, abstol, m, evalArray, evec.getData(), ldz, work, iwork, ifail, info);
 		
 		if (info.val > 0)
             throw new NotConvergedException(NotConvergedException.Reason.Breakdown);
         else if (info.val < 0)
             throw new IllegalArgumentException("Fehler, Eingangsargumente fehlerhaft!");
+		
+		work  = null;
+		iwork = null;
+		ifail = null;
+		
+		UpperSymmBandMatrix eval = new UpperSymmBandMatrix(iu-il + 1, 0);
+		System.arraycopy(evalArray, 0, eval.getData(), 0, iu-il + 1);
 		
 		return new Matrix[] {
 				eval, evec
