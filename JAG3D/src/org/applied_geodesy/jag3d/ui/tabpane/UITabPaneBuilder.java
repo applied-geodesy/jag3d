@@ -46,6 +46,7 @@ import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.util.i18.I18N;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -189,10 +190,17 @@ public class UITabPaneBuilder {
 				node = UIMetaDataPaneBuilder.getInstance().getNode();
 			else if (tabType == TabType.RESULT_DATA)
 				node = UIGlobalResultPaneBuilder.getInstance().getNode();
-			else if (tabType == TabType.GRAPHIC)
-				node = UIGraphicPaneBuilder.getInstance().getPane();
+			else if (tabType == TabType.GRAPHIC) {
+				UIGraphicPaneBuilder graphicPaneBuilder = UIGraphicPaneBuilder.getInstance();
+				node = graphicPaneBuilder.getPane();
 				// re-draw network plot
-				UIGraphicPaneBuilder.getInstance().getLayerManager().redraw();
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						graphicPaneBuilder.getLayerManager().redraw();
+					}
+				});
+			}
 			break;
 
 		case REFERENCE_POINT_1D_LEAF:
