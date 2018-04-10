@@ -21,6 +21,8 @@
 
 package org.applied_geodesy.jag3d.ui.table;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 import org.applied_geodesy.util.FormatterChangedListener;
@@ -90,8 +92,22 @@ public abstract class UITableBuilder<T> {
 
 		@Override
 		public void changed(ObservableValue<? extends S> observable, S oldValue, S newValue) {
-			if (rowData != null) {
-				setValue(rowData, columnIndex, -1, oldValue, newValue);
+			if (this.rowData != null) {
+				List<T> selectedItems = table.getSelectionModel().getSelectedItems();
+				if (selectedItems == null || selectedItems.isEmpty() || !selectedItems.contains(this.rowData)) {
+					selectedItems = new ArrayList<T>(1);
+					selectedItems.add(this.rowData);
+					table.getSelectionModel().clearSelection();
+					table.getSelectionModel().select(this.rowData);
+				}
+				
+				for (T item : selectedItems)
+					setValue(item, columnIndex, oldValue, newValue);
+				
+				if (selectedItems.size() > 1)
+					table.refresh();
+				
+//				setValue(rowData, columnIndex, oldValue, newValue);
 			}
 		}
 	}
@@ -105,10 +121,7 @@ public abstract class UITableBuilder<T> {
 		@Override
 		public void handle(CellEditEvent<T, S> event) {
 			if (event.getTableColumn().isEditable()) {
-				//				event.getTablePosition().getRow()
-				//int column = event.getTablePosition().getColumn();
-				//setValue(event.getRowValue(), column, event.getNewValue());
-				setValue(event.getRowValue(), this.columnIndex, event.getTablePosition().getRow(), event.getOldValue(), event.getNewValue());
+				setValue(event.getRowValue(), this.columnIndex, event.getOldValue(), event.getNewValue());
 			}
 		}
 	}
@@ -250,7 +263,7 @@ public abstract class UITableBuilder<T> {
 
 	public abstract T getEmptyRow();
 
-	abstract void setValue(T row, int columnIndex, int rowIndex, Object oldValue, Object newValue);
+	abstract void setValue(T row, int columnIndex, Object oldValue, Object newValue);
 
 	public TableView<T> getTable() {
 		return this.table;
