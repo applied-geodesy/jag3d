@@ -255,7 +255,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 	}
 
 	@Override
-	void setValue(VarianceComponentRow row, int columnIndex, int rowIndex, Object oldValue, Object newValue) {}
+	void setValue(VarianceComponentRow row, int columnIndex, Object oldValue, Object newValue) {}
 
 	@Override
 	public VarianceComponentRow getEmptyRow() {

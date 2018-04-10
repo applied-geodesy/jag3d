@@ -279,5 +279,5 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 	}
 	
 	@Override
-	void setValue(AdditionalParameterRow row, int columnIndex, int rowIndex, Object oldValue, Object newValue) {}
+	void setValue(AdditionalParameterRow row, int columnIndex, Object oldValue, Object newValue) {}
 }

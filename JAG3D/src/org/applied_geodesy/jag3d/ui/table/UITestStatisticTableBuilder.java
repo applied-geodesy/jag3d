@@ -127,7 +127,7 @@ public class UITestStatisticTableBuilder extends UITableBuilder<TestStatisticRow
 	}
 
 	@Override
-	void setValue(TestStatisticRow row, int columnIndex, int rowIndex, Object oldValue, Object newValue) {}
+	void setValue(TestStatisticRow row, int columnIndex, Object oldValue, Object newValue) {}
 	
 	@Override
 	public TestStatisticRow getEmptyRow() {

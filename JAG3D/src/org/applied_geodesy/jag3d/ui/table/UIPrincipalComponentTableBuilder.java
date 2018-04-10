@@ -89,7 +89,7 @@ public class UIPrincipalComponentTableBuilder extends UITableBuilder<PrincipalCo
 	}
 
 	@Override
-	void setValue(PrincipalComponentRow row, int columnIndex, int rowIndex, Object oldValue, Object newValue) {}
+	void setValue(PrincipalComponentRow row, int columnIndex, Object oldValue, Object newValue) {}
 	
 	@Override
 	public PrincipalComponentRow getEmptyRow() {

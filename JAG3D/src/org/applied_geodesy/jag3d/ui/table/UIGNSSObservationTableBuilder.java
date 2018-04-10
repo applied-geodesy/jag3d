@@ -468,7 +468,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 	}
 	
 	@Override
-	void setValue(GNSSObservationRow rowData, int columnIndex, int rowIndex, Object oldValue, Object newValue) {
+	void setValue(GNSSObservationRow rowData, int columnIndex, Object oldValue, Object newValue) {
 		boolean valid = (oldValue == null || oldValue.toString().trim().isEmpty()) && (newValue == null || newValue.toString().trim().isEmpty());
 		switch (columnIndex) {
 

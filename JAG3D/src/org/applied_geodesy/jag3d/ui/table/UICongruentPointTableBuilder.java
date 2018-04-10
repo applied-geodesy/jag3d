@@ -86,6 +86,6 @@ public class UICongruentPointTableBuilder extends UITableBuilder<TerrestrialObse
 	}
 
 	@Override
-	void setValue(TerrestrialObservationRow row, int columnIndex, int rowIndex, Object oldValue, Object newValue) {}
+	void setValue(TerrestrialObservationRow row, int columnIndex, Object oldValue, Object newValue) {}
 	
 }

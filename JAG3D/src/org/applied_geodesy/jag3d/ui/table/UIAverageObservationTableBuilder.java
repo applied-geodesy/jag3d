@@ -215,5 +215,5 @@ public class UIAverageObservationTableBuilder extends UITableBuilder<AveragedObs
 	}
 
 	@Override
-	void setValue(AveragedObservationRow row, int columnIndex, int rowIndex, Object oldValue, Object newValue) {}
+	void setValue(AveragedObservationRow row, int columnIndex, Object oldValue, Object newValue) {}
 }
