@@ -39,7 +39,8 @@ public abstract class LockFileReader {
 	private Path sourceFilePath = null;
 	private String ignoreStartString = new String();
 	public static final String UTF8_BOM = "\uFEFF";
-
+	private boolean interrupt = false;
+	
 	LockFileReader() {}
 	
 	LockFileReader(String fileName) {
@@ -80,7 +81,8 @@ public abstract class LockFileReader {
 				!Files.isRegularFile(this.sourceFilePath) ||
 				!Files.isReadable(this.sourceFilePath))
 			return;
-
+		
+		this.interrupt = false;
 		BufferedReader reader = null;
 		boolean isFirstLine = true;
 		try{
@@ -89,7 +91,7 @@ public abstract class LockFileReader {
 			reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
 
 			String currentLine = null;
-			while ((currentLine = reader.readLine()) != null) {
+			while (!this.interrupt && (currentLine = reader.readLine()) != null) {
 				if (isFirstLine && currentLine.startsWith(UTF8_BOM)) {
 					currentLine = currentLine.substring(1); 
 					isFirstLine = false;
@@ -107,5 +109,13 @@ public abstract class LockFileReader {
 				e.printStackTrace();
 			}
 		}
-	} 
+	}
+	
+	public void interrupt() {
+		this.interrupt = true;
+	}
+	
+	public boolean isInterrupted() {
+		return this.interrupt;
+	}
 } 
