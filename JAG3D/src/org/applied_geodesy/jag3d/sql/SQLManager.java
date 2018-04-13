@@ -2103,7 +2103,9 @@ public class SQLManager {
 	public void saveItem(TerrestrialObservationRow rowData) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen() || rowData == null || 
 				rowData.getStartPointName() == null || rowData.getEndPointName() == null || 
-				rowData.getStartPointName().equals(rowData.getEndPointName()))
+				rowData.getStartPointName().equals(rowData.getEndPointName()) ||
+				rowData.getValueApriori() == null ||
+				rowData.getStartPointName().trim().isEmpty() || rowData.getEndPointName().trim().isEmpty())
 			return;
 		
 		String sql = "MERGE INTO \"ObservationApriori\" USING (VALUES "
@@ -2164,7 +2166,11 @@ public class SQLManager {
 
 	// http://hsqldb.org/doc/2.0/guide/dataaccess-chapt.html#dac_merge_statement
 	public void saveItem(GNSSObservationRow rowData) throws SQLException {
-		if (!this.hasDatabase() || !this.dataBase.isOpen())
+		if (!this.hasDatabase() || !this.dataBase.isOpen() || rowData == null || 
+				rowData.getStartPointName() == null || rowData.getEndPointName() == null || 
+				rowData.getStartPointName().equals(rowData.getEndPointName()) ||
+				(rowData.getYApriori() == null && rowData.getXApriori() == null && rowData.getZApriori() == null) ||
+				rowData.getStartPointName().trim().isEmpty() || rowData.getEndPointName().trim().isEmpty())
 			return;
 		
 		String sql = "MERGE INTO \"GNSSObservationApriori\" USING (VALUES "
@@ -2207,9 +2213,9 @@ public class SQLManager {
 		stmt.setString(idx++,  rowData.getStartPointName());
 		stmt.setString(idx++,  rowData.getEndPointName());
 
-		stmt.setDouble(idx++,  rowData.getYApriori());
-		stmt.setDouble(idx++,  rowData.getXApriori());
-		stmt.setDouble(idx++,  rowData.getZApriori());
+		stmt.setDouble(idx++,  rowData.getYApriori() == null ? 0.0 : rowData.getYApriori());
+		stmt.setDouble(idx++,  rowData.getXApriori() == null ? 0.0 : rowData.getXApriori());
+		stmt.setDouble(idx++,  rowData.getZApriori() == null ? 0.0 : rowData.getZApriori());
 
 		stmt.setDouble(idx++,  rowData.getSigmaYapriori() == null || rowData.getSigmaYapriori() < 0 ? 0 : rowData.getSigmaYapriori());
 		stmt.setDouble(idx++,  rowData.getSigmaXapriori() == null || rowData.getSigmaXapriori() < 0 ? 0 : rowData.getSigmaXapriori());
@@ -2227,7 +2233,9 @@ public class SQLManager {
 
 	// http://hsqldb.org/doc/2.0/guide/dataaccess-chapt.html#dac_merge_statement 
 	public void saveItem(PointRow rowData) throws SQLException {
-		if (!this.hasDatabase() || !this.dataBase.isOpen())
+		if (!this.hasDatabase() || !this.dataBase.isOpen() ||
+				rowData.getName() == null || rowData.getName().trim().isEmpty() ||
+				(rowData.getYApriori() == null && rowData.getXApriori() == null && rowData.getZApriori() == null))
 			return;
 		
 		String sql = "MERGE INTO \"PointApriori\" USING (VALUES "
@@ -2304,7 +2312,9 @@ public class SQLManager {
 
 	// http://hsqldb.org/doc/2.0/guide/dataaccess-chapt.html#dac_merge_statement
 	public void saveItem(CongruenceAnalysisRow rowData) throws SQLException {
-		if (!this.hasDatabase() || !this.dataBase.isOpen())
+		if (!this.hasDatabase() || !this.dataBase.isOpen() ||
+				rowData.getNameInControlEpoch() == null || rowData.getNameInReferenceEpoch() == null ||
+				rowData.getNameInControlEpoch().trim().isEmpty() || rowData.getNameInReferenceEpoch().trim().isEmpty())
 			return;
 		
 		String sql = "MERGE INTO \"CongruenceAnalysisPointPairApriori\" USING (VALUES "
