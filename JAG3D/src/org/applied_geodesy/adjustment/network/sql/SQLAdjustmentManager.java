@@ -978,6 +978,7 @@ public class SQLAdjustmentManager {
 				"\"confidence_major_axis\",\"confidence_middle_axis\",\"confidence_minor_axis\"," +
 				"\"confidence_alpha\",\"confidence_beta\",\"confidence_gamma\"," +
 				"\"helmert_major_axis\",\"helmert_minor_axis\",\"helmert_alpha\"," +
+				"\"residual_y\",\"residual_x\",\"residual_z\"," +
 				"\"redundancy_y\",\"redundancy_x\",\"redundancy_z\"," +
 				"\"gross_error_y\",\"gross_error_x\",\"gross_error_z\"," +
 				"\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\",\"minimal_detectable_bias_z\"," +
@@ -986,7 +987,7 @@ public class SQLAdjustmentManager {
 				"\"first_principal_component_y\",\"first_principal_component_x\",\"first_principal_component_z\"," +
 				"\"omega\",\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\",\"covar_index\") VALUES (" +
 				"(SELECT \"id\" FROM \"PointApriori\" WHERE \"name\" = ?), " +
-				"?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				"?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		try {
 			this.dataBase.setAutoCommit(false);
@@ -1020,6 +1021,10 @@ public class SQLAdjustmentManager {
 				stmt.setDouble(idx++, point.getConfidenceAxis2D(0));
 				stmt.setDouble(idx++, dimension != 1 ? point.getConfidenceAxis2D(1) : 0.0);
 				stmt.setDouble(idx++, dimension != 1 ? point.getConfidenceAngle2D() : 0.0);
+				
+				stmt.setDouble(idx++, dimension != 1 ? point.getY0() - point.getY() : 0.0);
+				stmt.setDouble(idx++, dimension != 1 ? point.getX0() - point.getX() : 0.0);
+				stmt.setDouble(idx++, dimension != 2 ? point.getZ0() - point.getZ() : 0.0);
 
 				stmt.setDouble(idx++, dimension != 1 ? point.getRedundancyY() : 0.0);
 				stmt.setDouble(idx++, dimension != 1 ? point.getRedundancyX() : 0.0);
@@ -1073,12 +1078,13 @@ public class SQLAdjustmentManager {
 				"\"sigma_dy0\",\"sigma_dx0\"," +
 				"\"sigma_dy\",\"sigma_dx\"," +
 				"\"confidence_major_axis\",\"confidence_minor_axis\"," +
+				"\"residual_dy\",\"residual_dx\"," +
 				"\"redundancy_dy\",\"redundancy_dx\"," +
 				"\"gross_error_dy\",\"gross_error_dx\"," +
 				"\"minimal_detectable_bias_dy\",\"minimal_detectable_bias_dx\"," +
 				"\"omega\",\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\",\"covar_index\") VALUES (" +
 				"(SELECT \"id\" FROM \"PointApriori\" WHERE \"name\" = ?), " +
-				"?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				"?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		try {
 			this.dataBase.setAutoCommit(false);
@@ -1102,6 +1108,9 @@ public class SQLAdjustmentManager {
 					stmt.setDouble(idx++, Math.max(point.getDeflectionX().getConfidence(), point.getDeflectionY().getConfidence()));
 					stmt.setDouble(idx++, Math.min(point.getDeflectionX().getConfidence(), point.getDeflectionY().getConfidence()));
 
+					stmt.setDouble(idx++, point.getDeflectionY().getValue0() - point.getDeflectionY().getValue());
+					stmt.setDouble(idx++, point.getDeflectionX().getValue0() - point.getDeflectionX().getValue());
+					
 					stmt.setDouble(idx++, point.getDeflectionY().getRedundancy());
 					stmt.setDouble(idx++, point.getDeflectionX().getRedundancy());
 
@@ -1143,25 +1152,27 @@ public class SQLAdjustmentManager {
 		String sqlTerObs = "INSERT INTO \"ObservationAposteriori\" ("
 				+ "\"id\", \"value\", "
 				+ "\"sigma_0\", \"sigma\", "
+				+ "\"residual\", "
 				+ "\"redundancy\", "
 				+ "\"gross_error\", \"minimal_detectable_bias\", "
 				+ "\"influence_on_position\", \"influence_on_network_distortion\", "
 				+ "\"omega\", "
 				+ "\"p_prio\", \"p_post\", "
 				+ "\"t_prio\", \"t_post\", "
-				+ "\"significant\") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "\"significant\") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		String sqlGNSSObs = "INSERT INTO \"GNSSObservationAposteriori\" (" +
 				"\"id\", \"y\", \"x\", \"z\", " +
 				"\"sigma_y0\", \"sigma_x0\", \"sigma_z0\", " +
 				"\"sigma_y\", \"sigma_x\", \"sigma_z\", " +
+				"\"residual_y\", \"residual_x\", \"residual_z\", " +
 				"\"redundancy_y\", \"redundancy_x\", \"redundancy_z\", " +
 				"\"gross_error_y\", \"gross_error_x\", \"gross_error_z\", " +
 				"\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\",\"minimal_detectable_bias_z\", " +
 				"\"influence_on_position_y\", \"influence_on_position_x\", \"influence_on_position_z\", " +
 				"\"influence_on_network_distortion\", " +
 				"\"omega\", \"p_prio\", \"p_post\", \"t_prio\", \"t_post\", \"significant\") " +
-				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,?, ?, ?, ?)"; 
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,?, ?, ?, ?, ?, ?, ?)"; 
 
 		try {
 			this.dataBase.setAutoCommit(false);
@@ -1209,6 +1220,10 @@ public class SQLAdjustmentManager {
 						stmt.setDouble(idx++, gnssY == null ? 0.0 : gnssY.getStd());
 						stmt.setDouble(idx++, gnssX == null ? 0.0 : gnssX.getStd());
 						stmt.setDouble(idx++, gnssZ == null ? 0.0 : gnssZ.getStd());
+						
+						stmt.setDouble(idx++, gnssY == null ? 0.0 : gnssY.getCorrection());
+						stmt.setDouble(idx++, gnssX == null ? 0.0 : gnssX.getCorrection());
+						stmt.setDouble(idx++, gnssZ == null ? 0.0 : gnssZ.getCorrection());
 
 						stmt.setDouble(idx++, gnssY == null ? 0.0 : gnssY.getRedundancy());
 						stmt.setDouble(idx++, gnssX == null ? 0.0 : gnssX.getRedundancy());
@@ -1258,6 +1273,7 @@ public class SQLAdjustmentManager {
 						stmt.setDouble(idx++, observation.getStdApriori());
 						stmt.setDouble(idx++, observation.getStd());
 
+						stmt.setDouble(idx++, observation.getCorrection());
 						stmt.setDouble(idx++, observation.getRedundancy());
 
 						stmt.setDouble(idx++, observation.getGrossError());

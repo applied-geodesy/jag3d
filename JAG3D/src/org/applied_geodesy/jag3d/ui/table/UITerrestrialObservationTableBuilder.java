@@ -403,6 +403,16 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		case LEVELING:
 		case HORIZONTAL_DISTANCE:
 		case SLOPE_DISTANCE:
+			// Residual
+			columnIndex = table.getColumns().size(); 
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.residual.label", "\u03B5");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.residual.tooltip", "Residual");
+			cellValueType = CellValueType.LENGTH_RESIDUAL;
+			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::residualProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn.setComparator(new AbsoluteValueComparator());
+			table.getColumns().add(doubleColumn);
+						
 			// Gross error
 			columnIndex = table.getColumns().size(); 
 			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.grosserror.label", "\u2207");
@@ -426,6 +436,16 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			break;
 		case DIRECTION:
 		case ZENITH_ANGLE:
+			// Residual
+			columnIndex = table.getColumns().size(); 
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.residual.label", "\u03B5");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.residual.tooltip", "Residual");
+			cellValueType = CellValueType.ANGLE_RESIDUAL;
+			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+			doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::residualProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn.setComparator(new AbsoluteValueComparator());
+			table.getColumns().add(doubleColumn);
+						
 			// Gross error
 			columnIndex = table.getColumns().size(); 
 			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.grosserror.label", "\u2207");

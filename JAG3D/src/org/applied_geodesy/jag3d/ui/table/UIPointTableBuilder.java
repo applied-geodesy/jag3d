@@ -410,7 +410,38 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.z.tooltip", "Redundancy of z-component");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, PointRow::redundancyZProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT && this.dimension != 2 ?ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, PointRow::redundancyZProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT && this.dimension != 2 ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn.setComparator(new AbsoluteValueComparator());
+		table.getColumns().add(doubleColumn);
+		
+		// Residual
+		// y-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.y.label", "\u03B5y");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component");
+		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(header, PointRow::residualYProperty, getDoubleCallback(cellValueType), this.dimension != 1 && this.type == PointType.STOCHASTIC_POINT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn.setComparator(new AbsoluteValueComparator());
+		table.getColumns().add(doubleColumn);
+
+		// x-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.x.label", "\u03B5x");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component");
+		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(header, PointRow::residualXProperty, getDoubleCallback(cellValueType), this.dimension != 1 && this.type == PointType.STOCHASTIC_POINT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn.setComparator(new AbsoluteValueComparator());
+		table.getColumns().add(doubleColumn);
+
+		// z-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.z.label", "\u03B5z");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component");
+		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(header, PointRow::residualZProperty, getDoubleCallback(cellValueType), this.dimension != 2 && this.type == PointType.STOCHASTIC_POINT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -444,7 +475,6 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		doubleColumn = this.<Double>getColumn(header, PointRow::grossErrorZProperty, getDoubleCallback(cellValueType), this.dimension != 2 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 2 && this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
-
 
 		// MDB
 		// y-Comp
@@ -623,7 +653,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.deflection.y.label", "\u03B6y");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.deflection.y.tooltip", "Y-component of deflection of the vertical");
-		cellValueType = CellValueType.ANGLE;
+		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, PointRow::yAposterioriDeflectionProperty, getDoubleCallback(cellValueType), this.dimension == 3 ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
 		table.getColumns().add(doubleColumn);
@@ -632,11 +662,12 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.deflection.x.label", "\u03B6x");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.deflection.x.tooltip", "X-component of deflection of the vertical");
-		cellValueType = CellValueType.ANGLE;
+		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, PointRow::xAposterioriDeflectionProperty, getDoubleCallback(cellValueType), this.dimension == 3 ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
+		// Uncertainty
 		// y-comp.
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.deflection.sigma.y.label", "\u03c3\u03B6y");
@@ -655,6 +686,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		doubleColumn = this.<Double>getColumn(header, PointRow::sigmaXaposterioriDeflectionProperty, getDoubleCallback(cellValueType), this.dimension == 3 && this.type != PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
+		// Confidence
 		// A
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.deflection.semiaxis.major.label", "a");
@@ -673,6 +705,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		doubleColumn = this.<Double>getColumn(header, PointRow::confidenceBDeflectionProperty, getDoubleCallback(cellValueType), this.dimension == 3 && this.type != PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
+		// Redundancy
 		// ry
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.deflection.redundancy.y.label", "r\u03B6y");
@@ -691,6 +724,26 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		doubleColumn = this.<Double>getColumn(header, PointRow::redundancyXDeflectionProperty, getDoubleCallback(cellValueType), this.dimension == 3 && this.type == PointType.STOCHASTIC_POINT ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
+		// Residual
+		// y-epsilon
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.deflection.residual.y.label", "\u03B5\u03B6y");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.deflection.residual.y.tooltip", "Residual of y-component of deflection of the vertical");
+		cellValueType = CellValueType.ANGLE_RESIDUAL;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(header, PointRow::residualYDeflectionProperty, getDoubleCallback(cellValueType), this.dimension == 3 && this.type == PointType.STOCHASTIC_POINT ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		table.getColumns().add(doubleColumn);
+
+		// x-epsilon
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.deflection.residual.x.label", "\u03B5\u03B6x");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.deflection.residual.x.tooltip", "Residual of x-component of deflection of the vertical");
+		cellValueType = CellValueType.ANGLE_RESIDUAL;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(header, PointRow::residualXDeflectionProperty, getDoubleCallback(cellValueType), this.dimension == 3 && this.type == PointType.STOCHASTIC_POINT ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		table.getColumns().add(doubleColumn);
+		
+		// Gross-error
 		// y-Nabla
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.deflection.grosserror.y.label", "\u2207\u03B6y");
@@ -709,6 +762,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		doubleColumn = this.<Double>getColumn(header, PointRow::grossErrorXDeflectionProperty, getDoubleCallback(cellValueType), this.dimension == 3 && this.type == PointType.STOCHASTIC_POINT ? ColumnType.APOSTERIORI_DEFLECTION : this.dimension == 3 && this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_DEFLECTION_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
+		// MDB
 		// y-MDB
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.deflection.minimaldetectablebias.y.label", "\u2207\u03B6x(\u03B1,\u03B2)");

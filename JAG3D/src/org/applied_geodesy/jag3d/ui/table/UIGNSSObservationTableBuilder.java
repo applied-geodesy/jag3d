@@ -286,6 +286,37 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		doubleColumn = this.<Double>getColumn(header, GNSSObservationRow::redundancyZProperty, getDoubleCallback(cellValueType), this.type != ObservationType.GNSS2D ?ColumnType.APOSTERIORI_GNSS_OBSERVATION : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
+		
+		// Residual
+		// y-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.y.label", "\u03B5y");
+		tooltipText = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component");
+		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(header, GNSSObservationRow::residualYProperty, getDoubleCallback(cellValueType), this.type != ObservationType.GNSS1D ? ColumnType.APOSTERIORI_GNSS_OBSERVATION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn.setComparator(new AbsoluteValueComparator());
+		table.getColumns().add(doubleColumn);
+
+		// x-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.x.label", "\u03B5x");
+		tooltipText = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component");
+		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(header, GNSSObservationRow::residualXProperty, getDoubleCallback(cellValueType), this.type != ObservationType.GNSS1D ? ColumnType.APOSTERIORI_GNSS_OBSERVATION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn.setComparator(new AbsoluteValueComparator());
+		table.getColumns().add(doubleColumn);
+
+		// z-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.z.label", "\u03B5z");
+		tooltipText = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component");
+		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(header, GNSSObservationRow::residualZProperty, getDoubleCallback(cellValueType), this.type != ObservationType.GNSS2D ? ColumnType.APOSTERIORI_GNSS_OBSERVATION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn.setComparator(new AbsoluteValueComparator());
+		table.getColumns().add(doubleColumn);
 
 		// Gross-Error
 		// y-Comp
@@ -317,7 +348,6 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		doubleColumn = this.<Double>getColumn(header, GNSSObservationRow::grossErrorZProperty, getDoubleCallback(cellValueType), this.type != ObservationType.GNSS2D ? ColumnType.APOSTERIORI_GNSS_OBSERVATION : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
-
 
 		// MDB
 		// y-Comp

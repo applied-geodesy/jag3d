@@ -415,7 +415,20 @@ public class SQLManager {
 		
 		sqls.put(20180311.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"HighlightLayerProperty\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"red\" DOUBLE DEFAULT 0.5 NOT NULL, \"green\" DOUBLE DEFAULT 0.5 NOT NULL, \"blue\" DOUBLE DEFAULT 0.5 NOT NULL, \"line_width\" DOUBLE DEFAULT 2.5 NOT NULL, CONSTRAINT \"HighlightLayerPropertyOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
 		
-
+		// add residual columns to aposteriori tables
+		sqls.put(20180410.0001, "ALTER TABLE \"ObservationAposteriori\" ADD \"residual\" DOUBLE DEFAULT 0 NOT NULL\r\n");
+		
+		sqls.put(20180410.0011, "ALTER TABLE \"GNSSObservationAposteriori\" ADD \"residual_x\" DOUBLE DEFAULT 0 NOT NULL\r\n");
+		sqls.put(20180410.0012, "ALTER TABLE \"GNSSObservationAposteriori\" ADD \"residual_y\" DOUBLE DEFAULT 0 NOT NULL\r\n");
+		sqls.put(20180410.0013, "ALTER TABLE \"GNSSObservationAposteriori\" ADD \"residual_z\" DOUBLE DEFAULT 0 NOT NULL\r\n");
+		
+		sqls.put(20180410.0021, "ALTER TABLE \"PointAposteriori\" ADD \"residual_x\" DOUBLE DEFAULT 0 NOT NULL\r\n");
+		sqls.put(20180410.0022, "ALTER TABLE \"PointAposteriori\" ADD \"residual_y\" DOUBLE DEFAULT 0 NOT NULL\r\n");
+		sqls.put(20180410.0023, "ALTER TABLE \"PointAposteriori\" ADD \"residual_z\" DOUBLE DEFAULT 0 NOT NULL\r\n");
+		
+		sqls.put(20180410.0031, "ALTER TABLE \"DeflectionAposteriori\" ADD \"residual_dx\" DOUBLE DEFAULT 0 NOT NULL\r\n");
+		sqls.put(20180410.0032, "ALTER TABLE \"DeflectionAposteriori\" ADD \"residual_dy\" DOUBLE DEFAULT 0 NOT NULL\r\n");
+		
 		return sqls;
 	}
 
@@ -1275,7 +1288,7 @@ public class SQLManager {
 		List<TerrestrialObservationRow> tableModel = FXCollections.observableArrayList();
 		String sql = "SELECT " + 
 				"\"ObservationApriori\".\"id\", \"group_id\", \"start_point_name\", \"end_point_name\", \"instrument_height\", \"reflector_height\", \"value_0\", \"distance_0\", \"ObservationApriori\".\"sigma_0\" AS \"sigma_0\", \"enable\", " + 
-				"\"ObservationAposteriori\".\"value\", \"sigma\", \"redundancy\", \"gross_error\", \"influence_on_position\", \"influence_on_network_distortion\", \"minimal_detectable_bias\", \"omega\", \"t_prio\", \"t_post\", \"p_prio\", \"p_post\", \"significant\" " + 
+				"\"ObservationAposteriori\".\"value\", \"sigma\", \"residual\", \"redundancy\", \"gross_error\", \"influence_on_position\", \"influence_on_network_distortion\", \"minimal_detectable_bias\", \"omega\", \"t_prio\", \"t_post\", \"p_prio\", \"p_post\", \"significant\" " + 
 				"FROM \"ObservationApriori\" " + 
 				"INNER JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" " + 
 				"LEFT JOIN \"ObservationAposteriori\" ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" " + 
@@ -1325,10 +1338,14 @@ public class SQLManager {
 			value = rs.getDouble("sigma");
 			if (!rs.wasNull())
 				row.setSigmaAposteriori(value);
+			
+			value = rs.getDouble("residual");
+			if (!rs.wasNull())
+				row.setResidual(value);
 
 			value = rs.getDouble("redundancy");
 			if (!rs.wasNull())
-				row.setRedundancy(value);
+				row.setRedundancy(Math.abs(value));
 
 			value = rs.getDouble("gross_error");
 			if (!rs.wasNull())
@@ -1395,6 +1412,7 @@ public class SQLManager {
 				"\"GNSSObservationApriori\".\"id\", \"group_id\", \"start_point_name\", \"end_point_name\", \"y0\", \"x0\", \"z0\", \"GNSSObservationApriori\".\"sigma_y0\" AS \"sigma_y0\", \"GNSSObservationApriori\".\"sigma_x0\" AS \"sigma_x0\", \"GNSSObservationApriori\".\"sigma_z0\" AS \"sigma_z0\", \"enable\", " + 
 				"\"y\", \"x\", \"z\",  \"sigma_y\", \"sigma_x\", \"sigma_z\", " + 
 
+				"\"residual_y\", \"residual_x\", \"residual_z\", " +
 				"\"redundancy_y\", \"redundancy_x\", \"redundancy_z\", " +
 				"\"gross_error_y\", \"gross_error_x\", \"gross_error_z\", " +
 				"\"minimal_detectable_bias_y\", \"minimal_detectable_bias_x\", \"minimal_detectable_bias_z\", " +
@@ -1461,6 +1479,16 @@ public class SQLManager {
 
 			value = rs.getDouble("sigma_z");
 			row.setSigmaZaposteriori(rs.wasNull() ? null : Math.abs(value));
+			
+			// Residuals
+			value = rs.getDouble("residual_x");
+			row.setResidualX(rs.wasNull() ? null : value);
+
+			value = rs.getDouble("residual_y");
+			row.setResidualY(rs.wasNull() ? null : value);
+
+			value = rs.getDouble("residual_z");
+			row.setResidualZ(rs.wasNull() ? null : value);
 
 			// Redundancy
 			value = rs.getDouble("redundancy_x");
@@ -1601,7 +1629,9 @@ public class SQLManager {
 				"\"PointApriori\".\"sigma_dy0\", \"PointApriori\".\"sigma_dx0\", " + 
 				"\"y\", \"x\", \"z\",  \"sigma_y\", \"sigma_x\", \"sigma_z\", " + 
 				"\"PointAposteriori\".\"confidence_major_axis\" AS \"confidence_major_axis_point\", \"PointAposteriori\".\"confidence_middle_axis\" AS \"confidence_middle_axis_point\", \"PointAposteriori\".\"confidence_minor_axis\" AS \"confidence_minor_axis_point\", \"confidence_alpha\", \"confidence_beta\", \"confidence_gamma\", " + 
-				"\"redundancy_y\", \"redundancy_x\", \"redundancy_z\", \"gross_error_y\", \"gross_error_x\", \"gross_error_z\", \"influence_on_position_y\", \"influence_on_position_x\", \"influence_on_position_z\", " + 
+				"\"residual_y\", \"residual_x\", \"residual_z\", " + 
+				"\"redundancy_y\", \"redundancy_x\", \"redundancy_z\", " + 
+				"\"gross_error_y\", \"gross_error_x\", \"gross_error_z\", \"influence_on_position_y\", \"influence_on_position_x\", \"influence_on_position_z\", " + 
 				"\"influence_on_network_distortion\", \"minimal_detectable_bias_y\", \"minimal_detectable_bias_x\", \"minimal_detectable_bias_z\", \"first_principal_component_y\", \"first_principal_component_x\", \"first_principal_component_z\", " + 
 				"\"PointAposteriori\".\"omega\" AS \"omega_point\", \"PointAposteriori\".\"significant\" AS \"significant_point\", " + 
 				"\"PointAposteriori\".\"t_prio\" AS \"t_prio_point\", \"PointAposteriori\".\"t_post\" AS \"t_post_point\", \"PointAposteriori\".\"p_prio\" AS \"p_prio_point\", \"PointAposteriori\".\"p_post\" AS \"p_post_point\", " + 
@@ -1610,7 +1640,9 @@ public class SQLManager {
 				// Part: deflection
 				"\"dy\", \"dx\", \"sigma_dy\", \"sigma_dx\", " + 
 				"\"DeflectionAposteriori\".\"confidence_major_axis\" AS \"confidence_major_axis_deflection\", \"DeflectionAposteriori\".\"confidence_minor_axis\" AS \"confidence_minor_axis_deflection\", " + 
-				"\"redundancy_dy\", \"redundancy_dx\", \"gross_error_dy\", \"gross_error_dx\", \"minimal_detectable_bias_dy\", \"minimal_detectable_bias_dx\", " + 
+				"\"residual_dy\", \"residual_dx\", " +
+				"\"redundancy_dy\", \"redundancy_dx\", " +
+				"\"gross_error_dy\", \"gross_error_dx\", \"minimal_detectable_bias_dy\", \"minimal_detectable_bias_dx\", " + 
 				"\"DeflectionAposteriori\".\"omega\" AS \"omega_deflection\", \"DeflectionAposteriori\".\"significant\" AS \"significant_deflection\", " + 
 				"\"DeflectionAposteriori\".\"t_prio\" AS \"t_prio_deflection\", \"DeflectionAposteriori\".\"t_post\" AS \"t_post_deflection\", \"DeflectionAposteriori\".\"p_prio\" AS \"p_prio_deflection\", \"DeflectionAposteriori\".\"p_post\" AS \"p_post_deflection\" " + 
 				"FROM \"PointApriori\" " + 
@@ -1701,6 +1733,16 @@ public class SQLManager {
 
 			value = rs.getDouble("confidence_gamma");
 			row.setConfidenceGamma(rs.wasNull() ? null : value);
+			
+			// Residual
+			value = rs.getDouble("residual_x");
+			row.setResidualX(rs.wasNull() ? null : value);
+
+			value = rs.getDouble("residual_y");
+			row.setResidualY(rs.wasNull() ? null : value);
+
+			value = rs.getDouble("residual_z");
+			row.setResidualZ(rs.wasNull() ? null : value);
 
 			// Redundancy
 			value = rs.getDouble("redundancy_x");
@@ -1808,6 +1850,13 @@ public class SQLManager {
 
 			value = rs.getDouble("confidence_minor_axis_deflection");
 			row.setConfidenceBDeflection(rs.wasNull() ? null : Math.abs(value));
+			
+			// Residual
+			value = rs.getDouble("residual_dx");
+			row.setResidualXDeflection(rs.wasNull() ? null : value);
+
+			value = rs.getDouble("residual_dy");
+			row.setResidualYDeflection(rs.wasNull() ? null : value);
 
 			// Redundancy
 			value = rs.getDouble("redundancy_dx");

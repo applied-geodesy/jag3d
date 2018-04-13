@@ -41,6 +41,7 @@ public class TerrestrialObservationRow extends ObservationRow {
 	private ObjectProperty<Double> sigmaApriori     = new SimpleObjectProperty<Double>(this, "sigmaApriori");
 	private ObjectProperty<Double> sigmaAposteriori = new SimpleObjectProperty<Double>(this, "sigmaAposteriori");
 
+	private ObjectProperty<Double> residual                     = new SimpleObjectProperty<Double>(this, "residual");
 	private ObjectProperty<Double> redundancy                   = new SimpleObjectProperty<Double>(this, "redundancy");
 	private ObjectProperty<Double> grossError                   = new SimpleObjectProperty<Double>(this, "grossError");
 	private ObjectProperty<Double> influenceOnPointPosition     = new SimpleObjectProperty<Double>(this, "influenceOnPointPosition"); 
@@ -128,6 +129,18 @@ public class TerrestrialObservationRow extends ObservationRow {
 
 	public void setSigmaAposteriori(final Double sigmaAposteriori) {
 		this.sigmaAposterioriProperty().set(sigmaAposteriori);
+	}
+	
+	public final ObjectProperty<Double> residualProperty() {
+		return this.residual;
+	}
+
+	public final Double getResidual() {
+		return this.residualProperty().get();
+	}
+
+	public final void setResidual(final Double residual) {
+		this.residualProperty().set(residual);
 	}
 
 	public ObjectProperty<Double> redundancyProperty() {

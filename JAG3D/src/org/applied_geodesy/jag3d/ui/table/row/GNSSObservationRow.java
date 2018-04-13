@@ -30,37 +30,41 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public class GNSSObservationRow extends ObservationRow {
-	private ObjectProperty<Double> xApriori = new SimpleObjectProperty<Double>(0.0);
-	private ObjectProperty<Double> yApriori = new SimpleObjectProperty<Double>(0.0);
-	private ObjectProperty<Double> zApriori = new SimpleObjectProperty<Double>(0.0);
+	private ObjectProperty<Double> xApriori = new SimpleObjectProperty<Double>(this, "xApriori", 0.0);
+	private ObjectProperty<Double> yApriori = new SimpleObjectProperty<Double>(this, "yApriori",0.0);
+	private ObjectProperty<Double> zApriori = new SimpleObjectProperty<Double>(this, "zApriori",0.0);
 	
-	private ObjectProperty<Double> sigmaXapriori = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> sigmaYapriori = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> sigmaZapriori = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> sigmaXapriori = new SimpleObjectProperty<Double>(this, "sigmaXapriori");
+	private ObjectProperty<Double> sigmaYapriori = new SimpleObjectProperty<Double>(this, "sigmaYapriori");
+	private ObjectProperty<Double> sigmaZapriori = new SimpleObjectProperty<Double>(this, "sigmaZapriori");
 	
-	private ObjectProperty<Double> xAposteriori = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> yAposteriori = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> zAposteriori = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> xAposteriori = new SimpleObjectProperty<Double>(this, "xAposteriori");
+	private ObjectProperty<Double> yAposteriori = new SimpleObjectProperty<Double>(this, "yAposteriori");
+	private ObjectProperty<Double> zAposteriori = new SimpleObjectProperty<Double>(this, "zAposteriori");
 	
-	private ObjectProperty<Double> sigmaXaposteriori = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> sigmaYaposteriori = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> sigmaZaposteriori = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> sigmaXaposteriori = new SimpleObjectProperty<Double>(this, "sigmaXaposteriori");
+	private ObjectProperty<Double> sigmaYaposteriori = new SimpleObjectProperty<Double>(this, "sigmaYaposteriori");
+	private ObjectProperty<Double> sigmaZaposteriori = new SimpleObjectProperty<Double>(this, "sigmaZaposteriori");
 
-	private ObjectProperty<Double> minimalDetectableBiasX = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> minimalDetectableBiasY = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> minimalDetectableBiasZ = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> minimalDetectableBiasX = new SimpleObjectProperty<Double>(this, "minimalDetectableBiasX");
+	private ObjectProperty<Double> minimalDetectableBiasY = new SimpleObjectProperty<Double>(this, "minimalDetectableBiasY");
+	private ObjectProperty<Double> minimalDetectableBiasZ = new SimpleObjectProperty<Double>(this, "minimalDetectableBiasZ");
 	
-	private ObjectProperty<Double> redundancyX = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> redundancyY = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> redundancyZ = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> residualX = new SimpleObjectProperty<Double>(this, "residualX");
+	private ObjectProperty<Double> residualY = new SimpleObjectProperty<Double>(this, "residualY");
+	private ObjectProperty<Double> residualZ = new SimpleObjectProperty<Double>(this, "residualZ");
 	
-	private ObjectProperty<Double> grossErrorX = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> grossErrorY = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> grossErrorZ = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> redundancyX = new SimpleObjectProperty<Double>(this, "redundancyX");
+	private ObjectProperty<Double> redundancyY = new SimpleObjectProperty<Double>(this, "redundancyY");
+	private ObjectProperty<Double> redundancyZ = new SimpleObjectProperty<Double>(this, "redundancyZ");
 	
-	private ObjectProperty<Double> influenceOnPointPositionX = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> influenceOnPointPositionY = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> influenceOnPointPositionZ = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> grossErrorX = new SimpleObjectProperty<Double>(this, "grossErrorX");
+	private ObjectProperty<Double> grossErrorY = new SimpleObjectProperty<Double>(this, "grossErrorY");
+	private ObjectProperty<Double> grossErrorZ = new SimpleObjectProperty<Double>(this, "grossErrorZ");
+	
+	private ObjectProperty<Double> influenceOnPointPositionX = new SimpleObjectProperty<Double>(this, "influenceOnPointPositionX");
+	private ObjectProperty<Double> influenceOnPointPositionY = new SimpleObjectProperty<Double>(this, "influenceOnPointPositionY");
+	private ObjectProperty<Double> influenceOnPointPositionZ = new SimpleObjectProperty<Double>(this, "influenceOnPointPositionZ");
 
 	public ObjectProperty<Double> xAprioriProperty() {
 		return this.xApriori;
@@ -240,6 +244,42 @@ public class GNSSObservationRow extends ObservationRow {
 	
 	public void setMinimalDetectableBiasZ(final Double minimalDetectableBiasZ) {
 		this.minimalDetectableBiasZProperty().set(minimalDetectableBiasZ);
+	}
+	
+	public final ObjectProperty<Double> residualXProperty() {
+		return this.residualX;
+	}
+
+	public final Double getResidualX() {
+		return this.residualXProperty().get();
+	}
+
+	public final void setResidualX(final Double residualX) {
+		this.residualXProperty().set(residualX);
+	}
+
+	public final ObjectProperty<Double> residualYProperty() {
+		return this.residualY;
+	}
+
+	public final Double getResidualY() {
+		return this.residualYProperty().get();
+	}
+
+	public final void setResidualY(final Double residualY) {
+		this.residualYProperty().set(residualY);
+	}
+
+	public final ObjectProperty<Double> residualZProperty() {
+		return this.residualZ;
+	}
+
+	public final Double getResidualZ() {
+		return this.residualZProperty().get();
+	}
+
+	public final void setResidualZ(final Double residualZ) {
+		this.residualZProperty().set(residualZ);
 	}
 	
 	public ObjectProperty<Double> redundancyXProperty() {
@@ -583,5 +623,4 @@ public class GNSSObservationRow extends ObservationRow {
 			scanner.close();
 		}
 	}
-
 }

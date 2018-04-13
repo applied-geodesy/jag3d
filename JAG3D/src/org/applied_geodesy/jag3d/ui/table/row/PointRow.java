@@ -55,6 +55,10 @@ public class PointRow extends GroupRow {
 	private ObjectProperty<Double> minimalDetectableBiasY = new SimpleObjectProperty<Double>();
 	private ObjectProperty<Double> minimalDetectableBiasZ = new SimpleObjectProperty<Double>();
 	
+	private ObjectProperty<Double> residualX = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> residualY = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> residualZ = new SimpleObjectProperty<Double>();
+	
 	private ObjectProperty<Double> redundancyX = new SimpleObjectProperty<Double>();
 	private ObjectProperty<Double> redundancyY = new SimpleObjectProperty<Double>();
 	private ObjectProperty<Double> redundancyZ = new SimpleObjectProperty<Double>();
@@ -107,6 +111,9 @@ public class PointRow extends GroupRow {
 
 	private ObjectProperty<Double> minimalDetectableBiasXDeflection = new SimpleObjectProperty<Double>();
 	private ObjectProperty<Double> minimalDetectableBiasYDeflection = new SimpleObjectProperty<Double>();
+	
+	private ObjectProperty<Double> residualXDeflection = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> residualYDeflection = new SimpleObjectProperty<Double>();
 	
 	private ObjectProperty<Double> redundancyXDeflection = new SimpleObjectProperty<Double>();
 	private ObjectProperty<Double> redundancyYDeflection = new SimpleObjectProperty<Double>();
@@ -340,6 +347,42 @@ public class PointRow extends GroupRow {
 	
 	public void setMinimalDetectableBiasZ(final Double minimalDetectableBiasZ) {
 		this.minimalDetectableBiasZProperty().set(minimalDetectableBiasZ);
+	}
+	
+	public final ObjectProperty<Double> residualXProperty() {
+		return this.residualX;
+	}
+	
+	public final Double getResidualX() {
+		return this.residualXProperty().get();
+	}
+	
+	public final void setResidualX(final Double residualX) {
+		this.residualXProperty().set(residualX);
+	}
+	
+	public final ObjectProperty<Double> residualYProperty() {
+		return this.residualY;
+	}
+	
+	public final Double getResidualY() {
+		return this.residualYProperty().get();
+	}
+	
+	public final void setResidualY(final Double residualY) {
+		this.residualYProperty().set(residualY);
+	}
+	
+	public final ObjectProperty<Double> residualZProperty() {
+		return this.residualZ;
+	}
+	
+	public final Double getResidualZ() {
+		return this.residualZProperty().get();
+	}
+	
+	public final void setResidualZ(final Double residualZ) {
+		this.residualZProperty().set(residualZ);
 	}
 	
 	public ObjectProperty<Double> redundancyXProperty() {
@@ -761,6 +804,30 @@ public class PointRow extends GroupRow {
 	
 	public final void setMinimalDetectableBiasYDeflection(final Double minimalDetectableBiasYDeflection) {
 		this.minimalDetectableBiasYDeflectionProperty().set(minimalDetectableBiasYDeflection);
+	}
+	
+	public final ObjectProperty<Double> residualXDeflectionProperty() {
+		return this.residualXDeflection;
+	}
+
+	public final Double getResidualXDeflection() {
+		return this.residualXDeflectionProperty().get();
+	}
+
+	public final void setResidualXDeflection(final Double residualXDeflection) {
+		this.residualXDeflectionProperty().set(residualXDeflection);
+	}
+
+	public final ObjectProperty<Double> residualYDeflectionProperty() {
+		return this.residualYDeflection;
+	}
+	
+	public final Double getResidualYDeflection() {
+		return this.residualYDeflectionProperty().get();
+	}
+
+	public final void setResidualYDeflection(final Double residualYDeflection) {
+		this.residualYDeflectionProperty().set(residualYDeflection);
 	}
 	
 	public final ObjectProperty<Double> redundancyXDeflectionProperty() {
