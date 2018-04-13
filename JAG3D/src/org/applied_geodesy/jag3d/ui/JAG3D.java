@@ -27,6 +27,7 @@ import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dialog.AboutDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ApproximationValuesDialog;
 import org.applied_geodesy.jag3d.ui.dialog.AverageDialog;
+import org.applied_geodesy.jag3d.ui.dialog.ColumnImportDialog;
 import org.applied_geodesy.jag3d.ui.dialog.CongruentPointDialog;
 import org.applied_geodesy.jag3d.ui.dialog.FormatterOptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.LeastSquaresSettingDialog;
@@ -105,6 +106,7 @@ public class JAG3D extends Application {
 		LayerManagerDialog.setOwner(primaryStage);
 		SearchAndReplaceDialog.setOwner(primaryStage);
 		AboutDialog.setOwner(primaryStage);
+		ColumnImportDialog.setOwner(primaryStage);
 	}
 
 	@Override

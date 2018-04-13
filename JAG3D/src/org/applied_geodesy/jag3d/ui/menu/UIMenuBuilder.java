@@ -445,6 +445,9 @@ public class UIMenuBuilder {
 		MenuItem zFileItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.z.label", "Z-File (Caplan)"), true, MenuItemType.IMPORT_Z, null, this.menuEventHandler, true);
 		MenuItem beoFileItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.beo.label", "Beo-File (Neptan)"), true, MenuItemType.IMPORT_BEO, null, this.menuEventHandler, true);
 
+		MenuItem columnBasedFileItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.column_based.label", "Column based file import"), true, MenuItemType.IMPORT_COLUMN_BASED_FILES, null, this.menuEventHandler, true);
+
+		
 		importHexagonFlatMenu.getItems().addAll(
 				gsi1DFileItem,
 				gsi2DFileItem,
@@ -530,7 +533,9 @@ public class UIMenuBuilder {
 				dl100FileItem,
 				new SeparatorMenuItem(),
 				beoFileItem,
-				zFileItem
+				zFileItem,
+				new SeparatorMenuItem(),
+				columnBasedFileItem
 				);
 	}
 
