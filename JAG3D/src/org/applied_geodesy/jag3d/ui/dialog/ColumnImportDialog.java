@@ -35,7 +35,6 @@ import java.util.regex.Pattern;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
-import org.applied_geodesy.jag3d.ui.io.DefaultFileChooser;
 import org.applied_geodesy.jag3d.ui.textfield.LimitedTextField;
 import org.applied_geodesy.util.i18.I18N;
 import org.applied_geodesy.util.io.CSVObservationFileReader;
@@ -43,12 +42,14 @@ import org.applied_geodesy.util.io.CSVPointFileReader;
 import org.applied_geodesy.util.io.ColumnDefinedObservationFileReader;
 import org.applied_geodesy.util.io.ColumnDefinedPointFileReader;
 import org.applied_geodesy.util.io.PreviewFileReader;
+import org.applied_geodesy.util.io.SourceFileReader;
 import org.applied_geodesy.util.io.csv.CSVColumnType;
 import org.applied_geodesy.util.io.csv.CSVOptionType;
 import org.applied_geodesy.util.io.csv.CSVParser;
 import org.applied_geodesy.util.io.csv.ColumnRange;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -115,7 +116,7 @@ public class ColumnImportDialog {
 				case ESCAPE:
 					escape = c;
 					break;
-				case SEPERATOR:
+				case SEPARATOR:
 					separator = c;
 					break;				
 				}
@@ -156,7 +157,7 @@ public class ColumnImportDialog {
 					case ESCAPE:
 						escape = c;
 						break;
-					case SEPERATOR:
+					case SEPARATOR:
 						separator = c;
 						break;				
 					}
@@ -243,7 +244,7 @@ public class ColumnImportDialog {
 	
 	private I18N i18n = I18N.getInstance();
 	private static ColumnImportDialog columnImportDialog = new ColumnImportDialog();
-	private Dialog<Void> dialog = null;
+	private Dialog<SourceFileReader> dialog = null;
 	private Window window;
 
 	private int maxCharactersPerColumn[] = null;
@@ -256,6 +257,7 @@ public class ColumnImportDialog {
 	private Node csvOptionPane;
 	private Node pointColumnPickerPane;
 	private Node terrestrialObservationColumnPickerPane;
+	private Node gnssObservationColumnPickerPane;
 	
 	private CheckBox importCSVFileCheckBox;
 	private int startColumn = -1;
@@ -265,7 +267,6 @@ public class ColumnImportDialog {
 	private char quotechar = CSVParser.DEFAULT_QUOTE_CHARACTER;
 	private char escape    = CSVParser.DEFAULT_ESCAPE_CHARACTER; 
 	private Locale fileLocale = Locale.ENGLISH;
-	private File selectedFile = null;
 	
 	private ColumnImportDialog() {}
 
@@ -273,32 +274,26 @@ public class ColumnImportDialog {
 		columnImportDialog.window = owner;
 	}
 	
-	public static Optional<Void> showAndWait() {
-		columnImportDialog.init();
-		
-		File selectedFile = DefaultFileChooser.showOpenDialog("Import column based file", null);
+	public static Optional<SourceFileReader> showAndWait(File selectedFile) {
 		if (selectedFile == null)
 			return null;
-		
+
+		columnImportDialog.init();
+	
 		try {
 			columnImportDialog.readPreview(selectedFile);
-			columnImportDialog.selectedFile = selectedFile;
 		} catch (IOException | SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		
 		return columnImportDialog.dialog.showAndWait();
 	}
-
-
 
 	private void init() {
 		if (this.dialog != null)
 			return;
 		
-		this.dialog = new Dialog<Void>();
+		this.dialog = new Dialog<SourceFileReader>();
 		this.dialog.setTitle(i18n.getString("ColumnImportDialog.title", "Column based file import"));
 		this.dialog.setHeaderText(i18n.getString("ColumnImportDialog.header", "User-defined import of column based files"));
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
@@ -307,39 +302,48 @@ public class ColumnImportDialog {
 		this.dialog.setResizable(true);
 		
 		this.dialog.getDialogPane().setContent(this.createMainPane());
-		
-		this.dialog.setResultConverter(new Callback<ButtonType, Void>() {
+
+		this.dialog.setResultConverter(new Callback<ButtonType, SourceFileReader>() {
 			@Override
-			public Void call(ButtonType buttonType) {
+			public SourceFileReader call(ButtonType buttonType) {
 				if (buttonType == ButtonType.OK) {
-					save();					
+					return getSourceFileReader();					
 				}
 				return null;
 			}
 		});
 	}
-	
-	
+
 	private Node createMainPane() {
 		VBox vBox = new VBox();
-		vBox.setSpacing(10);
+		vBox.setSpacing(15);
 		vBox.setPadding(new Insets(5,5,5,5));
 		
 		Node editorPane            = this.initEditor();
 		this.importCSVFileCheckBox = this.createCSVCheckbox();
 		this.pointColumnPickerPane = this.createPointColumnPickerPane();
 		this.terrestrialObservationColumnPickerPane = this.createTerrestrialObservationColumnPickerPane();
+		this.gnssObservationColumnPickerPane        = this.createGNSSObservationColumnPickerPane();
 		this.importTypes           = this.createImportTypeComboBox();
 		this.csvOptionPane         = this.createCSVOptionPane();
 		Node globalImportOptions   = createImportOptionPane();
 
-		((TitledPane)editorPane).prefWidthProperty().bind(((TitledPane)pointColumnPickerPane).widthProperty());
+		((TitledPane)editorPane).prefWidthProperty().bind(
+				Bindings.max(
+						((TitledPane)this.gnssObservationColumnPickerPane).widthProperty(), 
+						Bindings.max(
+								((TitledPane)this.pointColumnPickerPane).widthProperty(), 
+								((TitledPane)this.terrestrialObservationColumnPickerPane).widthProperty()
+								)
+						)
+				);
 		
 		vBox.getChildren().addAll(
 				globalImportOptions,
 				this.csvOptionPane,
 				this.pointColumnPickerPane,
 				this.terrestrialObservationColumnPickerPane,
+				this.gnssObservationColumnPickerPane,
 				editorPane
 				);
 		
@@ -347,6 +351,12 @@ public class ColumnImportDialog {
 		scrollPane.setFitToHeight(true);
 		scrollPane.setFitToWidth(true);
 		
+		Platform.runLater(new Runnable() {
+            @Override public void run() {
+            	importTypes.requestFocus();
+            }
+		});
+
 		return scrollPane;
 	}
 	
@@ -355,8 +365,15 @@ public class ColumnImportDialog {
 
 		ToggleGroup localeGroup = new ToggleGroup();
 		LocaleOptionChangeListener localeChangeListener = new LocaleOptionChangeListener(localeGroup);
-		RadioButton englishLocaleRadioButton = this.createRadioButton("Point", "If selected, decimal seperator is a point", true, Locale.ENGLISH, localeGroup, localeChangeListener);
-		RadioButton germanLocaleRadioButton  = this.createRadioButton("Comma", "If selected, decimal seperator is a comma", false, Locale.GERMAN, localeGroup, localeChangeListener);
+		RadioButton englishLocaleRadioButton = this.createRadioButton(
+				i18n.getString("ColumnImportDialog.decimal.separator.point.label", "Point"), 
+				i18n.getString("ColumnImportDialog.decimal.separator.point.tooltip", "If selected, decimal separator is set to point"), 
+				true, Locale.ENGLISH, localeGroup, localeChangeListener);
+		RadioButton germanLocaleRadioButton  = this.createRadioButton(
+				i18n.getString("ColumnImportDialog.decimal.separator.comma.label", "Comma"), 
+				i18n.getString("ColumnImportDialog.decimal.separator.comma.tooltip", "If selected, decimal separator is set to comma"), 
+				false, Locale.GERMAN, localeGroup, localeChangeListener);
+		
 		
 		
 		int columnIndex = 0;
@@ -368,13 +385,13 @@ public class ColumnImportDialog {
 		columnIndex = 0;
 		rowIndex++;
 
-		gridPane.add(new Label("Decimal seperator:"), columnIndex++, rowIndex);
+		gridPane.add(new Label(i18n.getString("ColumnImportDialog.decimal.separator.label", "Decimal separator:")), columnIndex++, rowIndex);
 		gridPane.add(englishLocaleRadioButton, columnIndex++, rowIndex);
 		gridPane.add(germanLocaleRadioButton,  columnIndex++, rowIndex);
 		
 		TitledPane titledPane = this.createTitledPane(
-				"Import options", 
-				"Set global import options", 
+				i18n.getString("ColumnImportDialog.import.label", "Import options"),
+				i18n.getString("ColumnImportDialog.import.tooltip", "Specify global import options"),
 				gridPane);
 
 		return titledPane;
@@ -384,46 +401,68 @@ public class ColumnImportDialog {
 	private Node createCSVOptionPane() {
 		GridPane gridPane = this.createGridPane();
 		
-		char seperator = CSVParser.DEFAULT_SEPARATOR;
+		char separator = CSVParser.DEFAULT_SEPARATOR;
 		char quotechar = CSVParser.DEFAULT_QUOTE_CHARACTER;
 		char escape    = CSVParser.DEFAULT_ESCAPE_CHARACTER; 
 		
-		ToggleGroup seperatorGroup = new ToggleGroup();
-		seperatorGroup.setUserData(CSVOptionType.SEPERATOR);
-		LimitedTextField seperatorTextField = new LimitedTextField(1,"|");
-		seperatorTextField.setPrefColumnCount(1);
-		seperatorTextField.setUserData(CSVOptionType.SEPERATOR);
-		seperatorTextField.setMaxWidth(Control.USE_PREF_SIZE);
-		seperatorTextField.setDisable(true);
-		seperatorTextField.textProperty().addListener(new CSVUserDefinedOptionChangeListener(seperatorTextField));
+		ToggleGroup separatorGroup = new ToggleGroup();
+		separatorGroup.setUserData(CSVOptionType.SEPARATOR);
+		LimitedTextField separatorTextField = new LimitedTextField(1,"|");
+		separatorTextField.setPrefColumnCount(1);
+		separatorTextField.setUserData(CSVOptionType.SEPARATOR);
+		separatorTextField.setMaxWidth(Control.USE_PREF_SIZE);
+		separatorTextField.setDisable(true);
+		separatorTextField.textProperty().addListener(new CSVUserDefinedOptionChangeListener(separatorTextField));
 		
-		CSVOptionChangeListener seperatorChangeListener = new CSVOptionChangeListener(seperatorGroup);
-		RadioButton commaSeperatorRadioButton       = this.createRadioButton("Comma", "If selected, column seperator is set to comma",         seperator == ',',  ',', seperatorGroup, seperatorChangeListener);
-		RadioButton semicolonSeperatorRadioButton   = this.createRadioButton("Semicolon", "If selected, column seperator is set to semicolon", seperator == ';',  ';', seperatorGroup, seperatorChangeListener);
-		RadioButton spaceSeperatorRadioButton       = this.createRadioButton("Space", "If selected, column seperator is set to space",         seperator == ' ',  ' ', seperatorGroup, seperatorChangeListener);
-		RadioButton tabulatorSeperatorRadioButton   = this.createRadioButton("Tabulator", "If selected, column seperator is set to tabulator", seperator == '\t', '\t', seperatorGroup, seperatorChangeListener);
-		RadioButton userdefinedSeperatorRadioButton = this.createRadioButton("User-defined", "If selected, column seperator is user-defined",  seperator == seperatorTextField.getText().charAt(0), seperatorTextField, seperatorGroup, seperatorChangeListener);
-		HBox seperatorBox = new HBox();
-		seperatorBox.setSpacing(3);
-		seperatorBox.setAlignment(Pos.CENTER_LEFT);
-		seperatorBox.getChildren().addAll(userdefinedSeperatorRadioButton, seperatorTextField);
-		userdefinedSeperatorRadioButton.selectedProperty().addListener(new ChangeListener<Boolean>() {
+		CSVOptionChangeListener separatorChangeListener = new CSVOptionChangeListener(separatorGroup);
+		RadioButton commaSeparatorRadioButton       = this.createRadioButton(
+				i18n.getString("ColumnImportDialog.csv.separator.comma.label", "Comma"),
+				i18n.getString("ColumnImportDialog.csv.separator.comma.tooltip", "If selected, column separator is set to comma"),
+				separator == ',',  ',', separatorGroup, separatorChangeListener);
+		RadioButton semicolonSeparatorRadioButton   = this.createRadioButton(
+				i18n.getString("ColumnImportDialog.csv.separator.semicolon.label", "Semicolon"),
+				i18n.getString("ColumnImportDialog.csv.separator.semicolon.tooltip", "If selected, column separator is set to semicolon"),
+				separator == ';',  ';', separatorGroup, separatorChangeListener);
+		RadioButton blankSeparatorRadioButton       = this.createRadioButton(
+				i18n.getString("ColumnImportDialog.csv.separator.blank.label", "Blank"),
+				i18n.getString("ColumnImportDialog.csv.separator.blank.tooltip", "If selected, column separator is set to blank"),
+				separator == ' ',  ' ', separatorGroup, separatorChangeListener);
+		RadioButton tabulatorSeparatorRadioButton   = this.createRadioButton(
+				i18n.getString("ColumnImportDialog.csv.separator.tabulator.label", "Tabulator"),
+				i18n.getString("ColumnImportDialog.csv.separator.tabulator.tooltip", "If selected, column separator is set to tabulator"),
+				separator == '\t', '\t', separatorGroup, separatorChangeListener);
+		RadioButton userdefinedSeparatorRadioButton = this.createRadioButton(
+				i18n.getString("ColumnImportDialog.csv.separator.user.label", "User-defined"),
+				i18n.getString("ColumnImportDialog.csv.separator.user.tooltip", "If selected, column separator is user-defined"),
+				separatorTextField.getText().length() > 0 && separator == separatorTextField.getText().charAt(0), separatorTextField, separatorGroup, separatorChangeListener);
+		HBox separatorBox = new HBox();
+		separatorBox.setSpacing(3);
+		separatorBox.setAlignment(Pos.CENTER_LEFT);
+		separatorBox.getChildren().addAll(userdefinedSeparatorRadioButton, separatorTextField);
+		userdefinedSeparatorRadioButton.selectedProperty().addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-				seperatorTextField.setDisable(!newValue);
+				separatorTextField.setDisable(!newValue);
 			}
 		});
-		
 		
 		ToggleGroup quoteGroup = new ToggleGroup();
 		quoteGroup.setUserData(CSVOptionType.QUOTE);
 		
 		CSVOptionChangeListener quoteChangeListener = new CSVOptionChangeListener(quoteGroup);
-		RadioButton noneQuoteCharRadioButton   = this.createRadioButton("None", "If selected, quote character is undefined", quotechar == CSVParser.NULL_CHARACTER, CSVParser.NULL_CHARACTER, quoteGroup, quoteChangeListener);
-		RadioButton singleQuoteCharRadioButton = this.createRadioButton("Single quote", "If selected, single quote character will used", quotechar == '\'', '\'', quoteGroup, quoteChangeListener);
-		RadioButton doubleQuoteCharRadioButton = this.createRadioButton("Double quote", "If selected, double quote character will used", quotechar == '"',  '"',  quoteGroup, quoteChangeListener);
+		RadioButton noneQuoteCharRadioButton   = this.createRadioButton(
+				i18n.getString("ColumnImportDialog.csv.quote.none.label", "None"),
+				i18n.getString("ColumnImportDialog.csv.quote.none.tooltip", "If selected, quote character is undefined"),
+				quotechar == CSVParser.NULL_CHARACTER, CSVParser.NULL_CHARACTER, quoteGroup, quoteChangeListener);
+		RadioButton singleQuoteCharRadioButton = this.createRadioButton(
+				i18n.getString("ColumnImportDialog.csv.quote.single.label", "Single quote"),
+				i18n.getString("ColumnImportDialog.csv.quote.single.tooltip", "If selected, single quote character will used"),
+				quotechar == '\'', '\'', quoteGroup, quoteChangeListener);
+		RadioButton doubleQuoteCharRadioButton = this.createRadioButton(
+				i18n.getString("ColumnImportDialog.csv.quote.double.label", "Double quote"),
+				i18n.getString("ColumnImportDialog.csv.quote.double.tooltip", "If selected, double quote character will used"),
+				quotechar == '"',  '"',  quoteGroup, quoteChangeListener);
 
-		
 		ToggleGroup escapeGroup = new ToggleGroup();
 		escapeGroup.setUserData(CSVOptionType.ESCAPE);
 		LimitedTextField escapeTextField = new LimitedTextField(1,String.valueOf(escape));
@@ -433,8 +472,14 @@ public class ColumnImportDialog {
 		escapeTextField.textProperty().addListener(new CSVUserDefinedOptionChangeListener(escapeTextField));
 		
 		CSVOptionChangeListener escapeChangeListener = new CSVOptionChangeListener(escapeGroup);
-		RadioButton noneEscapeCharRadioButton    = this.createRadioButton("None", "If selected, escape character is undefined", escape == CSVParser.NULL_CHARACTER, CSVParser.NULL_CHARACTER, escapeGroup, escapeChangeListener);
-		RadioButton userdefinedEscapeRadioButton = this.createRadioButton("User-defined", "If selected, column seperator is user-defined", escape == escapeTextField.getText().charAt(0), escapeTextField, escapeGroup, escapeChangeListener);
+		RadioButton noneEscapeCharRadioButton    = this.createRadioButton(
+				i18n.getString("ColumnImportDialog.csv.escape.none.label", "Note"),
+				i18n.getString("ColumnImportDialog.csv.escape.none.tooltip", "If selected, escape character is undefined"),
+				escape == CSVParser.NULL_CHARACTER, CSVParser.NULL_CHARACTER, escapeGroup, escapeChangeListener);
+		RadioButton userdefinedEscapeRadioButton = this.createRadioButton(
+				i18n.getString("ColumnImportDialog.csv.escape.user.label", "User-defined"),
+				i18n.getString("ColumnImportDialog.csv.escape.user.tooltip", "If selected, column separator is user-defined"),
+				escapeTextField.getText().length() > 0 && escape == escapeTextField.getText().charAt(0), escapeTextField, escapeGroup, escapeChangeListener);
 		
 		HBox escapeBox = new HBox();
 		escapeBox.setSpacing(3);
@@ -449,29 +494,29 @@ public class ColumnImportDialog {
 		
 		int columnIndex = 0;
 		int rowIndex = 0;
-		gridPane.add(new Label("Column seperator:"),  columnIndex++, rowIndex);
-		gridPane.add(commaSeperatorRadioButton,       columnIndex++, rowIndex);
-		gridPane.add(semicolonSeperatorRadioButton,   columnIndex++, rowIndex); 
-		gridPane.add(spaceSeperatorRadioButton,       columnIndex++, rowIndex); 
-		gridPane.add(tabulatorSeperatorRadioButton,   columnIndex++, rowIndex); 
-		gridPane.add(seperatorBox,                    columnIndex++, rowIndex); 
+		gridPane.add(new Label(i18n.getString("ColumnImportDialog.csv.separator.label", "Column separator:")),  columnIndex++, rowIndex);
+		gridPane.add(commaSeparatorRadioButton,       columnIndex++, rowIndex);
+		gridPane.add(semicolonSeparatorRadioButton,   columnIndex++, rowIndex); 
+		gridPane.add(blankSeparatorRadioButton,       columnIndex++, rowIndex); 
+		gridPane.add(tabulatorSeparatorRadioButton,   columnIndex++, rowIndex); 
+		gridPane.add(separatorBox,                    columnIndex++, rowIndex); 
 		
 		columnIndex = 0;
 		rowIndex++;
-		gridPane.add(new Label("Quote character:"), columnIndex++, rowIndex);
+		gridPane.add(new Label(i18n.getString("ColumnImportDialog.csv.quote.label", "Quote character:")), columnIndex++, rowIndex);
 		gridPane.add(noneQuoteCharRadioButton,      columnIndex++, rowIndex);
 		gridPane.add(singleQuoteCharRadioButton,    columnIndex++, rowIndex); 
 		gridPane.add(doubleQuoteCharRadioButton,    columnIndex++, rowIndex);
 		
 		columnIndex = 0;
 		rowIndex++;
-		gridPane.add(new Label("Escape character:"), columnIndex++, rowIndex);
+		gridPane.add(new Label(i18n.getString("ColumnImportDialog.csv.escape.label", "Escape character:")), columnIndex++, rowIndex);
 		gridPane.add(noneEscapeCharRadioButton,      columnIndex++, rowIndex);
 		gridPane.add(escapeBox,    columnIndex++, rowIndex); 
 		
 		TitledPane titledPane = this.createTitledPane(
-				"CSV options", 
-				"Set CSV import options", 
+				i18n.getString("ColumnImportDialog.csv.label", "CSV options"),
+				i18n.getString("ColumnImportDialog.csv.tooltip", "Specify character-separated-values (CSV) import options"),
 				gridPane);
 
 		titledPane.setDisable(!this.importCSVFileCheckBox.isSelected());
@@ -486,60 +531,126 @@ public class ColumnImportDialog {
 		int columnIndex = 0;
 		int rowIndex    = 0;
 		
-		String buttonLabel      = "Point-id \u25B6";
-		String buttonTooltip    = "Add selected range for point-id";
-		String textFieldTooltip = "Range for point-id column";
+		String buttonLabel      = i18n.getString("ColumnImportDialog.column.point.name.label",        "Point-id \u25B6");
+		String buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.name.tooltip",      "Add selected range for point-id");
+		String textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.name.text.tooltip", "Range for point-id column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.POINT_ID, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		// a-priori y-com,ponent
-		buttonLabel      = "y0 \u25B6";
-		buttonTooltip    = "Add selected range for a-priori y-component";
-		textFieldTooltip = "Range for a-priori y-component column";
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.point.y0.label",        "y0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.y0.tooltip",      "Add selected range for a-priori y-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.y0.text.tooltip", "Range for a-priori y-component column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.Y, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		// a-priori x-component
-		buttonLabel      = "x0 \u25B6";
-		buttonTooltip    = "Add selected range for a-priori x-component";
-		textFieldTooltip = "Range for a-priori x-component column";
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.point.x0.label",        "x0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.x0.tooltip",      "Add selected range for a-priori x-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.x0.text.tooltip", "Range for a-priori x-component column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.X, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		// a-priori z-component
-		buttonLabel      = "z0 \u25B6";
-		buttonTooltip    = "Add selected range for a-priori z-component";
-		textFieldTooltip = "Range for a-priori z-component column";
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.point.z0.label",        "z0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.z0.tooltip",      "Add selected range for a-priori z-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.z0.text.tooltip", "Range for a-priori z-component column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.Z, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		rowIndex++;
 		columnIndex = 0;
 		
 		// Point code
-		buttonLabel      = "Code \u25B6";
-		buttonTooltip    = "Add selected range for code";
-		textFieldTooltip = "Range for code column";
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.point.code.label",        "Code \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.code.tooltip",      "Add selected range for code");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.code.text.tooltip", "Range for code column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.POINT_CODE, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		// Uncertainty in y
-		buttonLabel      = "\u03C3y0 \u25B6";
-		buttonTooltip    = "Add selected range for a-priori uncertainty of y-component";
-		textFieldTooltip = "Range for a-priori uncertainty of y-component column";
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.point.sigma.y0.label",        "\u03C3y0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.sigma.y0.tooltip",      "Add selected range for a-priori uncertainty of y-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.sigma.y0.text.tooltip", "Range for a-priori uncertainty of y-component column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.UNCERTAINTY_Y, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		// Uncertainty in x
-		buttonLabel      = "\u03C3x0 \u25B6";
-		buttonTooltip    = "Add selected range for a-priori uncertainty of x-component";
-		textFieldTooltip = "Range for a-priori uncertainty of x-component column";
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.point.sigma.x0.label",        "\u03C3x0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.sigma.x0.tooltip",      "Add selected range for a-priori uncertainty of x-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.sigma.x0.text.tooltip", "Range for a-priori uncertainty of x-component column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.UNCERTAINTY_X, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		// Uncertainty in z
-		buttonLabel      = "\u03C3z0 \u25B6";
-		buttonTooltip    = "Add selected range for a-priori uncertainty of z-component";
-		textFieldTooltip = "Range for a-priori uncertainty of z-component column";
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.point.sigma.z0.label",        "\u03C3z0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.sigma.z0.tooltip",      "Add selected range for a-priori uncertainty of z-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.sigma.z0.text.tooltip", "Range for a-priori uncertainty of z-component column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.UNCERTAINTY_Z, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		
 		TitledPane titledPane = this.createTitledPane(
-				"Column defintions", 
-				"Specify column range of file for point import", 
+				i18n.getString("ColumnImportDialog.column.point.label",   "Column defintions for points"),
+				i18n.getString("ColumnImportDialog.column.point.tooltip", "Specify column range of file for points import"),
+				gridPane);
+		
+		
+		return titledPane;
+	}
+	
+	private Node createGNSSObservationColumnPickerPane() {
+		GridPane gridPane = this.createGridPane();
+
+		int columnIndex = 0;
+		int rowIndex    = 0;
+		
+		String buttonLabel      = i18n.getString("ColumnImportDialog.column.gnss.station.label",        "Station \u25B6");
+		String buttonTooltip    = i18n.getString("ColumnImportDialog.column.gnss.station.tooltip",      "Add selected range for station");
+		String textFieldTooltip = i18n.getString("ColumnImportDialog.column.gnss.station.text.tooltip", "Range for station column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.STATION, buttonLabel, buttonTooltip, textFieldTooltip);
+
+		// a-priori y-com,ponent
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.gnss.y0.label",        "y0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.gnss.y0.tooltip",      "Add selected range for a-priori y-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.gnss.y0.text.tooltip", "Range for a-priori y-component column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.Y, buttonLabel, buttonTooltip, textFieldTooltip);
+
+		// a-priori x-component
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.gnss.x0.label",        "x0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.gnss.x0.tooltip",      "Add selected range for a-priori x-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.gnss.x0.text.tooltip", "Range for a-priori x-component column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.X, buttonLabel, buttonTooltip, textFieldTooltip);
+
+		// a-priori z-component
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.gnss.z0.label",        "z0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.gnss.z0.tooltip",      "Add selected range for a-priori z-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.gnss.z0.text.tooltip", "Range for a-priori z-component column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.Z, buttonLabel, buttonTooltip, textFieldTooltip);
+
+		rowIndex++;
+		columnIndex = 0;
+		
+		// Target point
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.gnss.target.label",        "Target \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.gnss.target.tooltip",      "Add selected range for target point");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.gnss.target.text.tooltip", "Range for target point column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.TARGET, buttonLabel, buttonTooltip, textFieldTooltip);
+
+		// Uncertainty in y
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.gnss.sigma.y0.label",        "\u03C3y0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.gnss.sigma.y0.tooltip",      "Add selected range for a-priori uncertainty of y-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.gnss.sigma.y0.text.tooltip", "Range for a-priori uncertainty of y-component column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.UNCERTAINTY_Y, buttonLabel, buttonTooltip, textFieldTooltip);
+
+		// Uncertainty in x
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.gnss.sigma.x0.label",        "\u03C3x0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.gnss.sigma.x0.tooltip",      "Add selected range for a-priori uncertainty of x-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.gnss.sigma.x0.text.tooltip", "Range for a-priori uncertainty of x-component column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.UNCERTAINTY_X, buttonLabel, buttonTooltip, textFieldTooltip);
+
+		// Uncertainty in z
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.gnss.sigma.z0.label",        "\u03C3z0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.gnss.sigma.z0.tooltip",      "Add selected range for a-priori uncertainty of z-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.gnss.sigma.z0.text.tooltip", "Range for a-priori uncertainty of z-component column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.UNCERTAINTY_Z, buttonLabel, buttonTooltip, textFieldTooltip);
+
+		
+		TitledPane titledPane = this.createTitledPane(
+				i18n.getString("ColumnImportDialog.column.gnss.label",   "Column defintions for GNSS observations"),
+				i18n.getString("ColumnImportDialog.column.gnss.tooltip", "Specify column range of file for GNSS observations import"),
 				gridPane);
 		
 		
@@ -552,21 +663,21 @@ public class ColumnImportDialog {
 		int columnIndex = 0;
 		int rowIndex    = 0;
 		
-		String buttonLabel      = "Station \u25B6";
-		String buttonTooltip    = "Add selected range for station";
-		String textFieldTooltip = "Range for station column";
+		String buttonLabel      = i18n.getString("ColumnImportDialog.column.terrestrial.station.label",        "Station \u25B6");
+		String buttonTooltip    = i18n.getString("ColumnImportDialog.column.terrestrial.station.tooltip",      "Add selected range for station");
+		String textFieldTooltip = i18n.getString("ColumnImportDialog.column.terrestrial.station.text.tooltip", "Range for station column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.STATION, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		// Instrumenten height
-		buttonLabel      = "ih \u25B6";
-		buttonTooltip    = "Add selected range for instrument height";
-		textFieldTooltip = "Range for instrument height column";
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.terrestrial.station.height.label",        "ih \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.terrestrial.station.height.tooltip",      "Add selected range for instrument height");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.terrestrial.station.height.text.tooltip", "Range for instrument height column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.INSTRUMENT_HEIGHT, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		// a-priori observation value
-		buttonLabel      = "Value0 \u25B6";
-		buttonTooltip    = "Add selected range for a-priori observation value";
-		textFieldTooltip = "Range for observation value column";
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.terrestrial.value.label",        "Value0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.terrestrial.value.tooltip",      "Add selected range for a-priori observation value");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.terrestrial.value.text.tooltip", "Range for observation value column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.VALUE, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		// Next column
@@ -574,41 +685,41 @@ public class ColumnImportDialog {
 		rowIndex++;
 		
 		// Target point
-		buttonLabel      = "Target \u25B6";
-		buttonTooltip    = "Add selected range for target point";
-		textFieldTooltip = "Range for target point column";
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.terrestrial.target.label",        "Target \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.terrestrial.target.tooltip",      "Add selected range for target point");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.terrestrial.target.text.tooltip", "Range for target point column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.TARGET, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		// target height
-		buttonLabel      = "th \u25B6";
-		buttonTooltip    = "Add selected range for target height";
-		textFieldTooltip = "Range for target height column";
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.terrestrial.target.height.label",        "th \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.terrestrial.target.height.tooltip",      "Add selected range for target height");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.terrestrial.target.height.text.tooltip", "Range for target height column");
 
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.TARGET_HEIGHT, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		// Uncertainty
-		buttonLabel      = "\u03C30 \u25B6";
-		buttonTooltip    = "Add selected range for a-priori uncertainty";
-		textFieldTooltip = "Range for uncertainty column";
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.terrestrial.sigma0.label",        "\u03C30 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.terrestrial.sigma0.tooltip",      "Add selected range for a-priori uncertainty");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.terrestrial.sigma0.text.tooltip", "Range for uncertainty column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.UNCERTAINTY, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		// Distance for uncertainty
-		buttonLabel      = "d0 \u25B6";
-		buttonTooltip    = "Add selected range for length approximation for distance dependent uncertainty";
-		textFieldTooltip = "Range for length approximation for distance dependent uncertainty calculation column";
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.terrestrial.distance.label",        "d0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.terrestrial.distance.tooltip",      "Add selected range for length approximation for distance dependent uncertainty");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.terrestrial.distance.text.tooltip", "Range for length approximation for distance dependent uncertainty calculation column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.DISTANCE_FOR_UNCERTAINTY, buttonLabel, buttonTooltip, textFieldTooltip);
 
 		
 		TitledPane titledPane = this.createTitledPane(
-				"Column defintions", 
-				"Specify column range of file for terrestrial observation import", 
+				i18n.getString("ColumnImportDialog.column.terrestrial.label",   "Column defintions for terrestrial observations"),
+				i18n.getString("ColumnImportDialog.column.terrestrial.tooltip", "Specify column range of file for terrestrial observations import"),
 				gridPane);
 		
 		return titledPane;
 	}
 
 	private int addPickerElement(GridPane gridPane, int rowIndex, int columnIndex, CSVColumnType type, String buttonLabel, String buttonTooltip, String textFieldTooltip) {
-		String promptText = "from - to";
+		String promptText = i18n.getString("ColumnImportDialog.column.range.prompt", "from - to");
 		TextField textField = new TextField();
 		textField.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		textField.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -691,8 +802,8 @@ public class ColumnImportDialog {
 		editorScrollPane.setFitToWidth(true);
 		
 		TitledPane titledPane = this.createTitledPane(
-				"File preview", 
-				"Preview of selected file", 
+				i18n.getString("ColumnImportDialog.file.preview.label", "File preview"),
+				i18n.getString("ColumnImportDialog.file.preview.tooltip", "Preview of selected file"),
 				editorScrollPane);
 		
 		return titledPane;
@@ -743,7 +854,7 @@ public class ColumnImportDialog {
 
 		for (int j=0; j<columns; j++) {
 			Text text = new Text(String.valueOf(headerLine.charAt(j)));
-			text.setFont(Font.font("MonoSpace", FontWeight.BOLD, 15));
+			text.setFont(Font.font("MonoSpace", FontWeight.BOLD, 12));
 			text.setFill(Color.DARKBLUE);
 			text.setTextAlignment(TextAlignment.CENTER);
 
@@ -771,7 +882,7 @@ public class ColumnImportDialog {
 	}
 	
 	private void readPreview(File f) throws IOException, SQLException {
-		PreviewFileReader reader = new PreviewFileReader(f, 15);
+		PreviewFileReader reader = new PreviewFileReader(f, 10);
 		reader.ignoreLinesWhichStartWith("#");
 		
 		reader.read();
@@ -891,7 +1002,7 @@ public class ColumnImportDialog {
 			String line = String.format(Locale.ENGLISH, "%-" + contentColumns + "s", formattedLines.get(i));
 			for (int j = 0; j < contentColumns; j++) {
 				Text character = new Text(String.valueOf(line.charAt(j)));
-				character.setFont(Font.font("MonoSpace", FontWeight.NORMAL, 15));
+				character.setFont(Font.font("MonoSpace", FontWeight.NORMAL, 12));
 				character.setFill(Color.BLACK);
 				character.setTextAlignment(TextAlignment.CENTER);
 
@@ -907,10 +1018,8 @@ public class ColumnImportDialog {
 		for (PointType type : PointType.values())
 			model.add(type);
 		
-		for (ObservationType type : ObservationType.values()) {
-			if (type != ObservationType.GNSS1D && type != ObservationType.GNSS2D  && type != ObservationType.GNSS3D)
-				model.add(type);
-		}
+		for (ObservationType type : ObservationType.values())
+			model.add(type);
 
 		typeComboBox.setConverter(new StringConverter<Enum<?>>() {
 
@@ -926,16 +1035,16 @@ public class ColumnImportDialog {
 					PointType type = (PointType)item;
 					switch(type) {
 					case DATUM_POINT:
-						return "Datum points";
+						return i18n.getString("UITreeBuiler.directory.datumpoints", "Datum points");
 						
 					case NEW_POINT:
-						return "New points";
+						return i18n.getString("UITreeBuiler.directory.newpoints", "New points");
 						
 					case REFERENCE_POINT:
-						return "Reference points";
+						return i18n.getString("UITreeBuiler.directory.referencepoints", "Reference points");
 						
 					case STOCHASTIC_POINT:
-						return "Stochastic points";				
+						return i18n.getString("UITreeBuiler.directory.stochasticpoints", "Stochastic points");
 					}
 				}
 				
@@ -943,40 +1052,36 @@ public class ColumnImportDialog {
 					ObservationType type = (ObservationType)item;
 					switch(type) {
 					case LEVELING:
-						return "Leveling data";
+						return i18n.getString("UITreeBuiler.directory.terrestrialobservations.leveling", "Leveling data");
 						
 					case DIRECTION:
-						return "Horizontal directions";
+						return i18n.getString("UITreeBuiler.directory.terrestrialobservations.direction", "Direction sets");
 						
 					case HORIZONTAL_DISTANCE:
-						return "Horizontal distances";
+						return i18n.getString("UITreeBuiler.directory.terrestrialobservations.horizontal_distance", "Horizontal distances");
 					
 					case SLOPE_DISTANCE:
-						return "Slope distances";
+						return i18n.getString("UITreeBuiler.directory.terrestrialobservations.slope_distance", "Slope distances");
 						
 					case ZENITH_ANGLE:
-						return "Zenith angles";
+						return i18n.getString("UITreeBuiler.directory.terrestrialobservations.zenith_angle", "Zenith angles");
 						
-//					case GNSS1D:
-//						break;
-//					case GNSS2D:
-//						break;
-//					case GNSS3D:
-//						break;
+					case GNSS1D:
+						return i18n.getString("UITreeBuiler.directory.gnssobservations.1d", "GNSS baselines 1D");
 						
-					default:
-						break;
-					
+					case GNSS2D:
+						return i18n.getString("UITreeBuiler.directory.gnssobservations.1d", "GNSS baselines 2D");
+						
+					case GNSS3D:
+						return i18n.getString("UITreeBuiler.directory.gnssobservations.1d", "GNSS baselines 3D");
 					}
 				}
 				
 				return null;
 			}
-
-
 		});
 
-		typeComboBox.setTooltip(new Tooltip("Select type to import"));
+		typeComboBox.setTooltip(new Tooltip(i18n.getString("ColumnImportDialog.import.type.tooltip", "Select import type")));
 		
 		typeComboBox.setMinWidth(150);
 		typeComboBox.setPrefWidth(200);
@@ -988,14 +1093,29 @@ public class ColumnImportDialog {
 					terrestrialObservationColumnPickerPane.setVisible(false);
 					terrestrialObservationColumnPickerPane.setManaged(false);
 					
+					gnssObservationColumnPickerPane.setVisible(false);
+					gnssObservationColumnPickerPane.setManaged(false);
+					
 					pointColumnPickerPane.setVisible(true);
 					pointColumnPickerPane.setManaged(true);
 				}
 
 				
 				else if (newValue instanceof ObservationType) {
-					terrestrialObservationColumnPickerPane.setVisible(true);
-					terrestrialObservationColumnPickerPane.setManaged(true);
+					if (isGNSS((ObservationType)newValue)) {
+						gnssObservationColumnPickerPane.setVisible(true);
+						gnssObservationColumnPickerPane.setManaged(true);
+						
+						terrestrialObservationColumnPickerPane.setVisible(false);
+						terrestrialObservationColumnPickerPane.setManaged(false);
+					}
+					else {
+						terrestrialObservationColumnPickerPane.setVisible(true);
+						terrestrialObservationColumnPickerPane.setManaged(true);
+						
+						gnssObservationColumnPickerPane.setVisible(false);
+						gnssObservationColumnPickerPane.setManaged(false);
+					}
 					
 					pointColumnPickerPane.setVisible(false);
 					pointColumnPickerPane.setManaged(false);
@@ -1003,18 +1123,19 @@ public class ColumnImportDialog {
 				
 			}
 		});
-		
-		
 		typeComboBox.getSelectionModel().select(PointType.REFERENCE_POINT);
-		
 		return typeComboBox;
 	}
 	
 	private CheckBox createCSVCheckbox() {
-		String label = "CSV-Import";
-		String tooltip = "If selected, file is parsed as character-separated values (CSV)";
+		String title   = i18n.getString("ColumnImportDialog.type.csv.label", "CSV file");
+		String tooltip = i18n.getString("ColumnImportDialog.type.csv.tooltip", "If selected, file is parsed as character-separated-values (CSV) file");
+		Label label = new Label(title);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setPadding(new Insets(0,0,0,3));
 		CheckBox checkBox = new CheckBox();
-		checkBox.setGraphic(new Label(label));
+		checkBox.setGraphic(label);
 		checkBox.setTooltip(new Tooltip(tooltip));
 		checkBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		checkBox.setMaxWidth(Double.MAX_VALUE);
@@ -1033,6 +1154,9 @@ public class ColumnImportDialog {
 	
 	private RadioButton createRadioButton(String title, String tooltip, boolean selected, Object userData, ToggleGroup group, ChangeListener<Boolean> listener) {
 		Label label = new Label(title);
+		label.setPadding(new Insets(0,0,0,3));
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		label.setPadding(new Insets(0,0,0,3));
 		RadioButton radioButton = new RadioButton();
 		radioButton.setGraphic(label);
@@ -1077,7 +1201,7 @@ public class ColumnImportDialog {
 			this.csvOptionPane.setDisable(!isCSVMode);
 		}
 		
-		String promptText = isCSVMode ? "Column" : "from - to";
+		String promptText = isCSVMode ? i18n.getString("ColumnImportDialog.column.index.prompt", "Index") : i18n.getString("ColumnImportDialog.column.range.prompt", "from - to");
 		for (TextField textfield : this.textFieldList) {
 			textfield.setPromptText(promptText);
 			textfield.setText("");
@@ -1112,70 +1236,65 @@ public class ColumnImportDialog {
 	    return null;
 	}
     
-    private void save() {
-		try {
-			if (this.selectedFile == null)
-				return;
-			
-			List<ColumnRange> columnRanges = new ArrayList<ColumnRange>(this.textFieldList.size());
-			for (TextField textField : this.textFieldList) {
-				ColumnRange columnRange = this.getColumnRange(textField);
-				if (columnRange != null)
-					columnRanges.add(columnRange);
-			}
-			
-			if (this.importCSVFileCheckBox.isSelected()) {
-				boolean strictQuotes = CSVParser.DEFAULT_STRICT_QUOTES;
-				boolean ignoreLeadingWhiteSpace = CSVParser.DEFAULT_IGNORE_LEADING_WHITESPACE;
-				boolean ignoreQuotations = CSVParser.DEFAULT_IGNORE_QUOTATIONS;
-				CSVParser csvParser = new CSVParser(this.separator, this.quotechar, this.escape, strictQuotes, ignoreLeadingWhiteSpace, ignoreQuotations);
-				
-				if (this.importTypes.getValue() instanceof ObservationType) {
-					ObservationType observationType = (ObservationType)this.importTypes.getValue();
-					CSVObservationFileReader reader = new CSVObservationFileReader(this.selectedFile, observationType, csvParser);
-					reader.setColumnRanges(columnRanges);
-					reader.setFileLocale(this.fileLocale);
-					reader.readAndImport();
-				}
-				else if (this.importTypes.getValue() instanceof PointType) {
-					PointType pointType = (PointType)this.importTypes.getValue();
-					CSVPointFileReader reader = new CSVPointFileReader(this.selectedFile, pointType, csvParser);
-					reader.setColumnRanges(columnRanges);
-					reader.setFileLocale(this.fileLocale);
-					reader.readAndImport();
-				}
-				
-			}
-			else {
-				if (this.importTypes.getValue() instanceof ObservationType) {
-					ObservationType observationType = (ObservationType)this.importTypes.getValue();
-					ColumnDefinedObservationFileReader reader = new ColumnDefinedObservationFileReader(this.selectedFile, observationType, TABULATOR);
-					reader.setColumnRanges(columnRanges);
-					reader.setFileLocale(this.fileLocale);
-					reader.readAndImport();
-				}
-				else if (this.importTypes.getValue() instanceof PointType) {
-					PointType pointType = (PointType)this.importTypes.getValue();
-					ColumnDefinedPointFileReader reader = new ColumnDefinedPointFileReader(this.selectedFile, pointType, TABULATOR);
-					reader.setColumnRanges(columnRanges);
-					reader.setFileLocale(this.fileLocale);
-					reader.readAndImport();
-				}				
-			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			Platform.runLater(new Runnable() {
-				@Override public void run() {
-					OptionDialog.showThrowableDialog (
-							i18n.getString("FormatterOptionDialog.message.error.save.exception.title", "Unexpected SQL-Error"),
-							i18n.getString("FormatterOptionDialog.message.error.save.exception.header", "Error, could not save least-squares settings to database."),
-							i18n.getString("FormatterOptionDialog.message.error.save.exception.message", "An exception has occurred during database transaction."),
-							e
-							);
-				}
-			});
-		}
-	}
+    private SourceFileReader getSourceFileReader() {
+    	List<ColumnRange> columnRanges = new ArrayList<ColumnRange>(this.textFieldList.size());
+    	for (TextField textField : this.textFieldList) {
+    		ColumnRange columnRange = this.getColumnRange(textField);
+    		if (columnRange != null)
+    			columnRanges.add(columnRange);
+    	}
 
+    	if (columnRanges.isEmpty())
+    		return null;
+    	
+    	if (this.importCSVFileCheckBox.isSelected()) {
+    		boolean strictQuotes = CSVParser.DEFAULT_STRICT_QUOTES;
+    		boolean ignoreLeadingWhiteSpace = CSVParser.DEFAULT_IGNORE_LEADING_WHITESPACE;
+    		boolean ignoreQuotations = CSVParser.DEFAULT_IGNORE_QUOTATIONS;
+    		CSVParser csvParser = new CSVParser(this.separator, this.quotechar, this.escape, strictQuotes, ignoreLeadingWhiteSpace, ignoreQuotations);
+
+    		if (this.importTypes.getValue() instanceof ObservationType) {
+    			ObservationType observationType = (ObservationType)this.importTypes.getValue();
+    			CSVObservationFileReader reader = new CSVObservationFileReader(observationType, csvParser);
+    			reader.setColumnRanges(columnRanges);
+    			reader.setFileLocale(this.fileLocale);
+    			return reader;
+    		}
+    		else if (this.importTypes.getValue() instanceof PointType) {
+    			PointType pointType = (PointType)this.importTypes.getValue();
+    			CSVPointFileReader reader = new CSVPointFileReader(pointType, csvParser);
+    			reader.setColumnRanges(columnRanges);
+    			reader.setFileLocale(this.fileLocale);
+    			return reader;
+    		}
+    	}
+    	else {
+    		if (this.importTypes.getValue() instanceof ObservationType) {
+    			ObservationType observationType = (ObservationType)this.importTypes.getValue();
+    			ColumnDefinedObservationFileReader reader = new ColumnDefinedObservationFileReader(observationType, TABULATOR);
+    			reader.setColumnRanges(columnRanges);
+    			reader.setFileLocale(this.fileLocale);
+    			return reader;
+    		}
+    		else if (this.importTypes.getValue() instanceof PointType) {
+    			PointType pointType = (PointType)this.importTypes.getValue();
+    			ColumnDefinedPointFileReader reader = new ColumnDefinedPointFileReader(pointType, TABULATOR);
+    			reader.setColumnRanges(columnRanges);
+    			reader.setFileLocale(this.fileLocale);
+    			return reader;
+    		}				
+    	}
+    	return null;	
+	}
+    
+    private boolean isGNSS(ObservationType type) {
+    	switch(type) {
+		case GNSS1D:
+		case GNSS2D:
+		case GNSS3D:
+			return true;
+		default:
+			return false;
+    	}
+    }
 }

@@ -183,7 +183,11 @@ public class ColumnDefinedPointFileReader extends SourceFileReader {
 				double value;
 				switch(type) {
 				case POINT_ID:
-					row.setName(line.substring(startPos, endPos).trim());
+					String name = line.substring(startPos, endPos).trim();
+					if (name != null && !name.isEmpty())
+						row.setName(name);
+					else
+						continue;
 					break;
 				case POINT_CODE:
 					row.setCode(line.substring(startPos, endPos).trim());
@@ -225,7 +229,7 @@ public class ColumnDefinedPointFileReader extends SourceFileReader {
 			}
 		}
 
-		if (row.getName() != null && !row.getName().isEmpty() && !this.reservedNames.contains(row.getName())) {
+		if (row.getName() != null && !row.getName().isEmpty() && !this.reservedNames.contains(row.getName()) && (row.getZApriori() != null || row.getXApriori() != null && row.getYApriori() != null)) {
 			this.points.add(row);
 			this.reservedNames.add(row.getName());
 		}

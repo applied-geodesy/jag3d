@@ -183,12 +183,10 @@ public class CSVPointFileReader extends SourceFileReader {
 				this.parsePoint(this.parsedLine);
 				this.parsedLine.clear();
 			}
-			
-			
-		} catch (IOException e) {
+		} 
+		catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 
 	private void parsePoint(List<String> parsedLine) {
@@ -204,7 +202,11 @@ public class CSVPointFileReader extends SourceFileReader {
 				double value;
 				switch(type) {
 				case POINT_ID:
-					row.setName(parsedLine.get(pos).trim());
+					String name = parsedLine.get(pos).trim();
+					if (name != null && !name.isEmpty())
+						row.setName(name);
+					else
+						continue;
 					break;
 				case POINT_CODE:
 					row.setCode(parsedLine.get(pos).trim());
@@ -246,7 +248,7 @@ public class CSVPointFileReader extends SourceFileReader {
 			}
 		}
 
-		if (row.getName() != null && !row.getName().isEmpty() && !this.reservedNames.contains(row.getName())) {
+		if (row.getName() != null && !row.getName().isEmpty() && !this.reservedNames.contains(row.getName()) && (row.getZApriori() != null || row.getXApriori() != null && row.getYApriori() != null)) {
 			this.points.add(row);
 			this.reservedNames.add(row.getName());
 		}

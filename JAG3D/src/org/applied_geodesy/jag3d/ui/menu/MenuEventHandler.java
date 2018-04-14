@@ -27,7 +27,6 @@ import org.applied_geodesy.jag3d.ui.JAG3D;
 import org.applied_geodesy.jag3d.ui.dialog.AboutDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ApproximationValuesDialog;
 import org.applied_geodesy.jag3d.ui.dialog.AverageDialog;
-import org.applied_geodesy.jag3d.ui.dialog.ColumnImportDialog;
 import org.applied_geodesy.jag3d.ui.dialog.CongruentPointDialog;
 import org.applied_geodesy.jag3d.ui.dialog.FormatterOptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.LeastSquaresSettingDialog;
@@ -139,11 +138,9 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 		case IMPORT_FLAT_CONGRUENCE_ANALYSIS_PAIR_1D:
 		case IMPORT_FLAT_CONGRUENCE_ANALYSIS_PAIR_2D:
 		case IMPORT_FLAT_CONGRUENCE_ANALYSIS_PAIR_3D:
-			this.menuBuilder.importFile(menuItemType);
-			break;
 			
-		case IMPORT_COLUMN_BASED_FILES: //TODO
-			ColumnImportDialog.showAndWait();
+		case IMPORT_COLUMN_BASED_FILES:
+			this.menuBuilder.importFile(menuItemType);
 			break;
 			
 		case MODULE_COORDTRANS:

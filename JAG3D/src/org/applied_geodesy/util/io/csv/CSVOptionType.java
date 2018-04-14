@@ -22,7 +22,7 @@
 package org.applied_geodesy.util.io.csv;
 
 public enum CSVOptionType {
-	SEPERATOR,
+	SEPARATOR,
 	QUOTE,
 	ESCAPE
 }

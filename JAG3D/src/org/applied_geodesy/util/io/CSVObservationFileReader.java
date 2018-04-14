@@ -104,8 +104,8 @@ public class CSVObservationFileReader extends SourceFileReader {
 	public TreeItem<TreeItemValue> readAndImport() throws IOException, SQLException {
 		this.reset();
 		this.ignoreLinesWhichStartWith("#");
-
 		TreeItem<TreeItemValue> newTreeItem = null;
+		
 		if (this.observationType != ObservationType.DIRECTION)
 			this.isDirectionGroupWithEqualStation = false;
 
@@ -173,17 +173,16 @@ public class CSVObservationFileReader extends SourceFileReader {
 			}
 
 			if (!this.parser.isPending()) {
-				if (!this.isGNSS())
+				if (this.isGNSS())
+					this.parseGNSSObservation(this.parsedLine);
+				else
 					this.parseTerrestrialObservation(this.parsedLine);
 				this.parsedLine.clear();
 			}
-			
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 
 	private void parseTerrestrialObservation(List<String> parsedLine) {
@@ -263,6 +262,76 @@ public class CSVObservationFileReader extends SourceFileReader {
 		
 		if (row.getStartPointName() != null && row.getEndPointName() != null && row.getValueApriori() != null && !row.getStartPointName().isEmpty() && !row.getEndPointName().isEmpty() && !row.getStartPointName().equals(row.getEndPointName()))
 			this.observations.add(row);
+	}
+	
+	private void parseGNSSObservation(List<String> parsedLine) {
+		GNSSObservationRow row = new GNSSObservationRow();
+		
+		for (ColumnRange range : this.columnRanges) {
+			try {
+				CSVColumnType type = range.getType();
+				int pos = range.getColumnStart() - 1;
+				if (pos < 0 || pos >= parsedLine.size())
+					continue;
+
+				double value;
+				switch(type) {
+				case STATION:
+					String station = parsedLine.get(pos).trim();
+					if (station != null && !station.isEmpty())
+						row.setStartPointName(station);
+					else
+						continue;
+					break;
+				case TARGET:
+					String target = parsedLine.get(pos).trim();
+					if (target != null && !target.isEmpty())
+						row.setEndPointName(target);
+					else
+						continue;
+					break;
+					
+				case X:
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setXApriori(options.convertLengthToModel(value));
+					break;
+				case Y:
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setYApriori(options.convertLengthToModel(value));
+					break;
+				case Z:
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setZApriori(options.convertLengthToModel(value));
+					break;
+					
+				case UNCERTAINTY_X:
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setSigmaXapriori(options.convertLengthToModel(value));
+					break;
+				case UNCERTAINTY_Y:
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setSigmaYapriori(options.convertLengthToModel(value));
+					break;
+				case UNCERTAINTY_Z:
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setSigmaZapriori(options.convertLengthToModel(value));
+					break;
+				default:
+					System.err.println(this.getClass().getSimpleName() + " Error, unsupported column type! " + type);
+					break;
+				}
+
+			} catch(Exception e) {
+				e.printStackTrace();
+				return;
+			}
+		}
+
+		if (row.getStartPointName() != null && row.getEndPointName() != null && !row.getStartPointName().isEmpty() && !row.getEndPointName().isEmpty() && !row.getStartPointName().equals(row.getEndPointName()) && 
+				((this.observationType == ObservationType.GNSS3D && row.getZApriori() != null && row.getXApriori() != null && row.getYApriori() != null) ||
+						(this.observationType == ObservationType.GNSS2D && row.getXApriori() != null && row.getYApriori() != null) ||
+						(this.observationType == ObservationType.GNSS1D && row.getZApriori() != null)))
+			this.gnss.add(row);
 	}
 	
 	private boolean isGNSS() {

@@ -54,6 +54,7 @@ import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.JAG3D;
+import org.applied_geodesy.jag3d.ui.dialog.ColumnImportDialog;
 import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.io.DefaultFileChooser;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
@@ -64,6 +65,7 @@ import org.applied_geodesy.util.io.CongruenceAnalysisFlatFileReader;
 import org.applied_geodesy.util.io.DL100FileReader;
 import org.applied_geodesy.util.io.DimensionType;
 import org.applied_geodesy.util.io.GSIFileReader;
+import org.applied_geodesy.util.io.LockFileReader;
 import org.applied_geodesy.util.io.M5FileReader;
 import org.applied_geodesy.util.io.ObservationFlatFileReader;
 import org.applied_geodesy.util.io.PointFlatFileReader;
@@ -445,7 +447,7 @@ public class UIMenuBuilder {
 		MenuItem zFileItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.z.label", "Z-File (Caplan)"), true, MenuItemType.IMPORT_Z, null, this.menuEventHandler, true);
 		MenuItem beoFileItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.beo.label", "Beo-File (Neptan)"), true, MenuItemType.IMPORT_BEO, null, this.menuEventHandler, true);
 
-		MenuItem columnBasedFileItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.column_based.label", "Column based file import"), true, MenuItemType.IMPORT_COLUMN_BASED_FILES, null, this.menuEventHandler, true);
+		MenuItem columnBasedFileItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.column_based.label", "Column-based data"), true, MenuItemType.IMPORT_COLUMN_BASED_FILES, null, this.menuEventHandler, true);
 
 		
 		importHexagonFlatMenu.getItems().addAll(
@@ -716,6 +718,13 @@ public class UIMenuBuilder {
 		if (selectedFiles == null || selectedFiles.isEmpty())
 			return;
 
+		this.importFile(fileReader, selectedFiles);
+	}
+	
+	private void importFile(SourceFileReader fileReader, List<File> selectedFiles) {
+		if (selectedFiles == null || selectedFiles.isEmpty())
+			return;
+
 		TreeItem<TreeItemValue> lastItem = null;
 		for (File file : selectedFiles) {
 			fileReader.setPath(file.toPath());
@@ -861,6 +870,23 @@ public class UIMenuBuilder {
 			break;
 		case IMPORT_Z:
 			this.importFile(new ZFileReader(), ZFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.z.title", "Import data from Z files"));
+			break;
+			
+		case IMPORT_COLUMN_BASED_FILES:
+			List<File> selectedFiles = DefaultFileChooser.showOpenMultipleDialog(
+					i18n.getString("UIMenuBuilder.filechooser.import.column_based.title", "Import user-defined column-based flat files"),
+					null,
+					LockFileReader.getExtensionFilters()
+					);
+
+			if (selectedFiles == null || selectedFiles.isEmpty())
+				return;
+			
+			Optional<SourceFileReader> optional = ColumnImportDialog.showAndWait(selectedFiles.get(0));
+			if (optional.isPresent() && optional.get() != null) {
+				SourceFileReader fileReader = optional.get();
+				this.importFile(fileReader, selectedFiles);
+			}	
 			break;
 
 		default:
