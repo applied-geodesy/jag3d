@@ -131,10 +131,12 @@ public class AboutDialog {
 
 		Label thirdParty = this.createLabel(""
 				+ "\u2219 MTJ: GNU Lesser General Public License v3.0\r\n"
-				+ "\u2219 FreeMarker: Apache License v2.0\r\n\u2219 netlib-java: BSD License\r\n"
+				+ "\u2219 FreeMarker: Apache License v2.0\r\n"
+				+ "\u2219 netlib-java: BSD License\r\n"
 				+ "\u2219 JLAPACK: BSD License\r\n"
 				+ "\u2219 HSQLDB: BSD License\r\n"
 				+ "\u2219 JDistlib: GNU General Public License v2.0\r\n"
+				+ "\u2219 OpenCSV: Apache License v2.0\r\n"
 				+ "\u2219 Launch4J: BSD/MIT License");
 		
 
