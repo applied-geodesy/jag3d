@@ -82,6 +82,7 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -295,7 +296,7 @@ public class ColumnImportDialog {
 		
 		this.dialog = new Dialog<SourceFileReader>();
 		this.dialog.setTitle(i18n.getString("ColumnImportDialog.title", "Column based file import"));
-		this.dialog.setHeaderText(i18n.getString("ColumnImportDialog.header", "User-defined import of column based files"));
+		this.dialog.setHeaderText(i18n.getString("ColumnImportDialog.header", "User-defined import of column-based files"));
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
 		this.dialog.initOwner(window);
@@ -409,6 +410,7 @@ public class ColumnImportDialog {
 		separatorGroup.setUserData(CSVOptionType.SEPARATOR);
 		LimitedTextField separatorTextField = new LimitedTextField(1,"|");
 		separatorTextField.setPrefColumnCount(1);
+		separatorTextField.setTooltip(new Tooltip(i18n.getString("ColumnImportDialog.csv.separator.user.field.tooltip", "User-defined column separator")));
 		separatorTextField.setUserData(CSVOptionType.SEPARATOR);
 		separatorTextField.setMaxWidth(Control.USE_PREF_SIZE);
 		separatorTextField.setDisable(true);
@@ -467,6 +469,7 @@ public class ColumnImportDialog {
 		escapeGroup.setUserData(CSVOptionType.ESCAPE);
 		LimitedTextField escapeTextField = new LimitedTextField(1,String.valueOf(escape));
 		escapeTextField.setPrefColumnCount(1);
+		escapeTextField.setTooltip(new Tooltip(i18n.getString("ColumnImportDialog.csv.escape.user.field.tooltip", "User-defined escape character")));
 		escapeTextField.setMaxWidth(Control.USE_PREF_SIZE);
 		escapeTextField.setUserData(CSVOptionType.ESCAPE);
 		escapeTextField.textProperty().addListener(new CSVUserDefinedOptionChangeListener(escapeTextField));
@@ -709,7 +712,6 @@ public class ColumnImportDialog {
 		textFieldTooltip = i18n.getString("ColumnImportDialog.column.terrestrial.distance.text.tooltip", "Range for length approximation for distance dependent uncertainty calculation column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.DISTANCE_FOR_UNCERTAINTY, buttonLabel, buttonTooltip, textFieldTooltip);
 
-		
 		TitledPane titledPane = this.createTitledPane(
 				i18n.getString("ColumnImportDialog.column.terrestrial.label",   "Column defintions for terrestrial observations"),
 				i18n.getString("ColumnImportDialog.column.terrestrial.tooltip", "Specify column range of file for terrestrial observations import"),
@@ -755,7 +757,6 @@ public class ColumnImportDialog {
 		button.setTooltip(new Tooltip(buttonTooltip));
 		button.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		button.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-//		GridPane.setHgrow(startPointNameTextField, Priority.ALWAYS);
 		button.setUserData(textField);
 
 		button.setOnAction(new EventHandler<ActionEvent>() {
@@ -776,6 +777,9 @@ public class ColumnImportDialog {
 		// child, columnIndex, rowIndex
 		gridPane.add(button,    columnIndex++, rowIndex);
 		gridPane.add(textField, columnIndex++, rowIndex);
+		
+		GridPane.setHgrow(button, Priority.NEVER);
+		GridPane.setHgrow(textField, Priority.ALWAYS);
 
 		this.textFieldList.add(textField);
 		return columnIndex;
@@ -1139,7 +1143,6 @@ public class ColumnImportDialog {
 		checkBox.setTooltip(new Tooltip(tooltip));
 		checkBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		checkBox.setMaxWidth(Double.MAX_VALUE);
-		
 		checkBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
 			@Override
@@ -1174,7 +1177,7 @@ public class ColumnImportDialog {
 		Label label = new Label(title);
 		label.setTooltip(new Tooltip(tooltip));
 		TitledPane titledPane = new TitledPane();
-		titledPane.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+//		titledPane.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		titledPane.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
 		titledPane.setGraphic(label);
 		titledPane.setCollapsible(false);
