@@ -129,32 +129,11 @@ public class ProjectionDialog {
 		this.heightTextField.setPrefWidth(150);
 		this.heightTextField.setMaxWidth(Double.MAX_VALUE);
 		
-		this.directionReductionCheckBox = new CheckBox();
-		this.directionReductionCheckBox.setGraphic(new Label(directionLabel));
-		this.directionReductionCheckBox.setTooltip(new Tooltip(directionTooltip));
-		this.directionReductionCheckBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.directionReductionCheckBox.setMaxWidth(Double.MAX_VALUE);
-		
+		this.directionReductionCheckBox = this.createCheckBox(directionLabel, directionTooltip);
+		this.heightReductionCheckBox    = this.createCheckBox(heightLabel, heightTooltip);
 
-		this.heightReductionCheckBox = new CheckBox();
-		this.heightReductionCheckBox.setGraphic(new Label(heightLabel));
-		this.heightReductionCheckBox.setTooltip(new Tooltip(heightTooltip));
-		this.heightReductionCheckBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.heightReductionCheckBox.setMaxWidth(Double.MAX_VALUE);
-		
-
-		this.gaussKruegerReductionRadioButton = new RadioButton();
-		this.gaussKruegerReductionRadioButton.setGraphic(new Label(gkLabel));
-		this.gaussKruegerReductionRadioButton.setTooltip(new Tooltip(gkTooltip));
-		this.gaussKruegerReductionRadioButton.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.gaussKruegerReductionRadioButton.setMaxWidth(Double.MAX_VALUE);
-
-		
-		this.utmReductionRadioButton = new RadioButton();
-		this.utmReductionRadioButton.setGraphic(new Label(utmLabel));
-		this.utmReductionRadioButton.setTooltip(new Tooltip(utmTooltip));
-		this.utmReductionRadioButton.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.utmReductionRadioButton.setMaxWidth(Double.MAX_VALUE);
+		this.gaussKruegerReductionRadioButton = this.createRadioButton(gkLabel, gkTooltip);
+		this.utmReductionRadioButton = this.createRadioButton(utmLabel, utmTooltip);
 
 		this.gaussKruegerReductionRadioButton.selectedProperty().addListener(new ChangeListener<Boolean>() {
 			@Override
@@ -297,5 +276,31 @@ public class ProjectionDialog {
 				}
 			});
 		}
+	}
+	
+	private CheckBox createCheckBox(String title, String tooltip) {
+		Label label = new Label(title);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setPadding(new Insets(0,0,0,3));
+		CheckBox checkBox = new CheckBox();
+		checkBox.setGraphic(label);
+		checkBox.setTooltip(new Tooltip(tooltip));
+		checkBox.setMinHeight(Control.USE_PREF_SIZE);
+		checkBox.setMaxHeight(Double.MAX_VALUE);
+		return checkBox;
+	}
+	
+	private RadioButton createRadioButton(String title, String tooltip) {
+		Label label = new Label(title);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setPadding(new Insets(0,0,0,3));
+		RadioButton radioButton = new RadioButton();
+		radioButton.setGraphic(label);
+		radioButton.setTooltip(new Tooltip(tooltip));
+		radioButton.setMinHeight(Control.USE_PREF_SIZE);
+		radioButton.setMaxHeight(Double.MAX_VALUE);
+		return radioButton;
 	}
 }

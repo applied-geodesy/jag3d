@@ -130,9 +130,13 @@ public abstract class UILayerPropertyBuilder {
 		return titledPane;
 	}
 	
-	CheckBox createCheckBox(String label, String tooltip) {
+	CheckBox createCheckBox(String title, String tooltip) {
+		Label label = new Label(title);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setPadding(new Insets(0,0,0,3));
 		CheckBox checkBox = new CheckBox();
-		checkBox.setGraphic(new Label(label));
+		checkBox.setGraphic(label);
 		checkBox.setTooltip(new Tooltip(tooltip));
 		checkBox.setMinSize(Control.USE_PREF_SIZE,Control.USE_PREF_SIZE);
 		checkBox.setMaxWidth(Double.MAX_VALUE);

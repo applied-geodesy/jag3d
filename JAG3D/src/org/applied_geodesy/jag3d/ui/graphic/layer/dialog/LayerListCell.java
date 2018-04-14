@@ -25,8 +25,10 @@ import org.applied_geodesy.jag3d.ui.graphic.layer.Layer;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Insets;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListCell;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -35,9 +37,11 @@ public class LayerListCell extends ListCell<Layer> {
 	private Rectangle rect = new Rectangle(25, 15);
 
 	public LayerListCell() {
+		HBox box = new HBox(this.rect);
+		box.setPadding(new Insets(0,0,0,3));
 		this.rect.setStroke(Color.BLACK);
 		this.visibleCheckBox.setText(null);
-		this.visibleCheckBox.setGraphic(this.rect);
+		this.visibleCheckBox.setGraphic(box); // this.rect
 
 		// bind/unbind properties
 		this.itemProperty().addListener(new ChangeListener<Layer>() {

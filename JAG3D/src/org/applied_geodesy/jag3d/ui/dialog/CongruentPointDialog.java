@@ -203,26 +203,14 @@ public class CongruentPointDialog {
 		this.snapDistanceTextField.setMinWidth(100);
 		this.snapDistanceTextField.setMaxWidth(500);
 
-		this.dimensionOneCheckBox   = new CheckBox(); 
-		this.dimensionTwoCheckBox   = new CheckBox(); 
-		this.dimensionThreeCheckBox = new CheckBox();
-		
-		this.dimensionOneCheckBox.setGraphic(new Label(label1D));
-		this.dimensionTwoCheckBox.setGraphic(new Label(label2D));
-		this.dimensionThreeCheckBox.setGraphic(new Label(label3D));
-		
-		this.dimensionOneCheckBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.dimensionTwoCheckBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.dimensionThreeCheckBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		this.dimensionOneCheckBox   = this.createCheckBox(label1D, tooltip1D); 
+		this.dimensionTwoCheckBox   = this.createCheckBox(label2D, tooltip2D); 
+		this.dimensionThreeCheckBox = this.createCheckBox(label3D, tooltip3D); 
 
 		DimensionChangeListener dimensionChangeListener = new DimensionChangeListener();
 		this.dimensionOneCheckBox.selectedProperty().addListener(dimensionChangeListener);
 		this.dimensionTwoCheckBox.selectedProperty().addListener(dimensionChangeListener);
 		this.dimensionThreeCheckBox.selectedProperty().addListener(dimensionChangeListener);
-		
-		this.dimensionOneCheckBox.setTooltip(new Tooltip(tooltip1D));
-		this.dimensionTwoCheckBox.setTooltip(new Tooltip(tooltip2D));
-		this.dimensionThreeCheckBox.setTooltip(new Tooltip(tooltip3D));
 		
 		this.dimensionTwoCheckBox.setSelected(true);
 		this.dimensionThreeCheckBox.setSelected(true);
@@ -301,5 +289,18 @@ public class CongruentPointDialog {
 		Thread th = new Thread(this.processSQLTask);
 		th.setDaemon(true);
 		th.start();
+	}
+	
+	private CheckBox createCheckBox(String title, String tooltip) {
+		Label label = new Label(title);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setPadding(new Insets(0,0,0,3));
+		CheckBox checkBox = new CheckBox();
+		checkBox.setGraphic(label);
+		checkBox.setTooltip(new Tooltip(tooltip));
+		checkBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		checkBox.setMaxWidth(Double.MAX_VALUE);
+		return checkBox;
 	}
 }

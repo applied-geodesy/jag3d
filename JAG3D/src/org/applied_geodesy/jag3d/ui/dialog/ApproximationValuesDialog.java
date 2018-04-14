@@ -42,6 +42,7 @@ import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -292,8 +293,12 @@ public class ApproximationValuesDialog {
 	}
 
 	private RadioButton createRadioButton(String title, String tooltip) {
+		Label label = new Label(title);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setPadding(new Insets(0,0,0,3));
 		RadioButton radioButton = new RadioButton();
-		radioButton.setGraphic(new Label(title));
+		radioButton.setGraphic(label);
 		radioButton.setTooltip(new Tooltip(tooltip));
 		radioButton.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		radioButton.setMaxWidth(Double.MAX_VALUE);

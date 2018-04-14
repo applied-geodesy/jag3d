@@ -130,12 +130,8 @@ public class TestStatisticDialog implements FormatterChangedListener {
 		Label probabilityValueLabel = new Label(labelProbabilityValue);
 		Label testPowerLabel        = new Label(labelTestPower);
 		
-		this.familywiseErrorRateCheckBox = new CheckBox();
-		this.familywiseErrorRateCheckBox.setGraphic(new Label(labelFamilywiseErrorRate));
-		this.familywiseErrorRateCheckBox.setTooltip(new Tooltip(tooltipFamilywiseErrorRate));
-		this.familywiseErrorRateCheckBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.familywiseErrorRateCheckBox.setMaxWidth(Double.MAX_VALUE);
-
+		this.familywiseErrorRateCheckBox = this.createCheckBox(labelFamilywiseErrorRate, tooltipFamilywiseErrorRate);
+		
 		this.probabilityValueSpinner = this.createDoubleSpinner(0.05, 30.00, 0.05, tooltipProbabilityValue);
 		this.testPowerSpinner        = this.createDoubleSpinner(50.0, 99.95, 0.05, tooltipTestPower);
 
@@ -329,5 +325,18 @@ public class TestStatisticDialog implements FormatterChangedListener {
 	public void formatterChanged(FormatterEvent evt) {
 		this.probabilityValueSpinner.getEditor().setText(options.toStatisticFormat(this.probabilityValueSpinner.getValueFactory().getValue()));
 		this.testPowerSpinner.getEditor().setText(options.toStatisticFormat(this.testPowerSpinner.getValueFactory().getValue()));
+	}
+	
+	private CheckBox createCheckBox(String title, String tooltip) {
+		Label label = new Label(title);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setPadding(new Insets(0,0,0,3));
+		CheckBox checkBox = new CheckBox();
+		checkBox.setGraphic(label);
+		checkBox.setTooltip(new Tooltip(tooltip));
+		checkBox.setMinHeight(Control.USE_PREF_SIZE);
+		checkBox.setMaxHeight(Double.MAX_VALUE);
+		return checkBox;
 	}
 }
