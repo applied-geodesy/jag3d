@@ -538,7 +538,7 @@ public class LayerManager {
 		case MOVE:
 		case WINDOW_ZOOM:
 			this.mouseLayer.setToolbarType(type);
-		
+			break;
 		}
 	}
 	
