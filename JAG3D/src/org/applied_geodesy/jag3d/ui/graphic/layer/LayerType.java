@@ -21,9 +21,7 @@
 
 package org.applied_geodesy.jag3d.ui.graphic.layer;
 
-public enum LayerType {
-	MOUSE(-1),
-	
+public enum LayerType {	
 	ABSOLUTE_CONFIDENCE(41),
 	RELATIVE_CONFIDENCE(42),
 	

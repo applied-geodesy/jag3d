@@ -1,24 +1,3 @@
-/***********************************************************************
-* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
-*                                                                      *
-* This program is free software; you can redistribute it and/or modify *
-* it under the terms of the GNU General Public License as published by *
-* the Free Software Foundation; either version 3 of the License, or    *
-* at your option any later version.                                    *
-*                                                                      *
-* This program is distributed in the hope that it will be useful,      *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
-* GNU General Public License for more details.                         *
-*                                                                      *
-* You should have received a copy of the GNU General Public License    *
-* along with this program; if not, see <http://www.gnu.org/licenses/>  *
-* or write to the                                                      *
-* Free Software Foundation, Inc.,                                      *
-* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
-*                                                                      *
-***********************************************************************/
-
 package org.applied_geodesy.jag3d.ui.graphic.layer;
 
 import java.awt.image.BufferedImage;
@@ -34,9 +13,13 @@ import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
+import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationLayer;
+import org.applied_geodesy.jag3d.ui.graphic.layer.Layer;
+import org.applied_geodesy.jag3d.ui.graphic.layer.LayerType;
+import org.applied_geodesy.jag3d.ui.graphic.layer.ToolbarType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.dialog.LayerManagerDialog;
-import org.applied_geodesy.jag3d.ui.graphic.sql.SQLGraphicManager;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
+import org.applied_geodesy.jag3d.ui.graphic.sql.SQLGraphicManager;
 import org.applied_geodesy.jag3d.ui.io.DefaultFileChooser;
 import org.applied_geodesy.util.ImageUtils;
 import org.applied_geodesy.util.i18.I18N;
@@ -45,12 +28,12 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
@@ -120,11 +103,20 @@ public class LayerManager {
 							layer.getLayerType() == LayerType.PRINCIPAL_COMPONENT_HORIZONTAL || 
 							layer.getLayerType() == LayerType.PRINCIPAL_COMPONENT_VERTICAL)
 						((ArrowLayer)layer).setVectorScale(newValue);
-					else if (layer.getLayerType() == LayerType.ABSOLUTE_CONFIDENCE)
-						((AbsoluteConfidenceLayer)layer).setConfidenceScale(newValue);
+					else 
+						if (layer.getLayerType() == LayerType.ABSOLUTE_CONFIDENCE)
+							((AbsoluteConfidenceLayer)layer).setConfidenceScale(newValue);
 				}
-				saveEllipseScale(newValue);
+				save(newValue);
 			}			
+		}
+	}
+	
+	private class VisiblePropertyChangeListener implements ChangeListener<Boolean> {
+		@Override
+		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+			if (!ignoreVisibleChangeEvent)
+				draw();			
 		}
 	}
 
@@ -144,64 +136,23 @@ public class LayerManager {
 		}
 	}
 	
-	private class DrawDependentLayerChangeListener implements ChangeListener<Object> {
-		private Layer layer;
-		private DrawDependentLayerChangeListener(Layer layer) {
-			this.layer = layer;
-		}
-		@Override
-		public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-			switch(this.layer.getLayerType()) {
-			case DATUM_POINT_APRIORI:
-			case NEW_POINT_APRIORI:
-			case REFERENCE_POINT_APRIORI:
-			case STOCHASTIC_POINT_APRIORI:
-				this.layer.draw(getCurrentGraphicExtent());
-				getLayer(LayerType.OBSERVATION_APRIORI).draw(getCurrentGraphicExtent());
-				break;
-
-			case DATUM_POINT_APOSTERIORI:
-			case NEW_POINT_APOSTERIORI:
-			case REFERENCE_POINT_APOSTERIORI:
-			case STOCHASTIC_POINT_APOSTERIORI:
-				this.layer.draw(getCurrentGraphicExtent());
-				getLayer(LayerType.OBSERVATION_APOSTERIORI).draw(getCurrentGraphicExtent());
-				getLayer(LayerType.ABSOLUTE_CONFIDENCE).draw(getCurrentGraphicExtent());
-				getLayer(LayerType.RELATIVE_CONFIDENCE).draw(getCurrentGraphicExtent());
-				getLayer(LayerType.POINT_SHIFT).draw(getCurrentGraphicExtent());
-				getLayer(LayerType.PRINCIPAL_COMPONENT_HORIZONTAL).draw(getCurrentGraphicExtent());
-				getLayer(LayerType.PRINCIPAL_COMPONENT_VERTICAL).draw(getCurrentGraphicExtent());
-				break;
-				
-			case POINT_SHIFT:
-				this.layer.draw(getCurrentGraphicExtent());
-				getLayer(LayerType.RELATIVE_CONFIDENCE).draw(getCurrentGraphicExtent());
-				break;
-				
-			case PRINCIPAL_COMPONENT_HORIZONTAL:
-			case PRINCIPAL_COMPONENT_VERTICAL:
-				this.layer.draw(getCurrentGraphicExtent());
-				break;
-			
-			default:
-				draw();
-				break;
-			}
-		}
-	}
-
 	private Label coordinatePanel = new Label();
 	private I18N i18n = I18N.getInstance();
 	private ToolBar layerToolbar = new ToolBar();
-	private StackPane stackPane = new StackPane();
 	private final GraphicExtent currentGraphicExtent = new GraphicExtent();
+	private final ResizableCanvas resizableGraphicCanvas = new ResizableCanvas(this.currentGraphicExtent);
+	private ObservableList<Layer> layers = this.resizableGraphicCanvas.getLayers();
+	private StackPane stackPane = new StackPane(); // Mouse- and Plotlayers
+	private final MouseNavigationCanvas mouseNavigationCanvas = new MouseNavigationCanvas(this);
 //	private ObjectProperty<Color> color = new SimpleObjectProperty<Color>(Color.rgb(255, 255, 255, 1.0)); //0-255
-	private final MouseLayer mouseLayer = new MouseLayer(this);
+	private VisiblePropertyChangeListener visibleChangeListener = new VisiblePropertyChangeListener();
+	private boolean ignoreVisibleChangeEvent = false;
+	
 	private Spinner<Double> scaleSpinner;
 	public LayerManager() {
 		this.init();
 	}
-
+	
 	private void init() {
 		this.initPane();
 		this.initToolBar();
@@ -231,10 +182,6 @@ public class LayerManager {
 
 			// create/add layer
 			switch(layerType) {
-			case MOUSE:
-				layer = this.mouseLayer;
-				break;
-				
 			case REFERENCE_POINT_APRIORI:
 			case REFERENCE_POINT_APOSTERIORI:				
 			case STOCHASTIC_POINT_APRIORI:
@@ -243,43 +190,33 @@ public class LayerManager {
 			case DATUM_POINT_APOSTERIORI:
 			case NEW_POINT_APRIORI:
 			case NEW_POINT_APOSTERIORI:
-				PointLayer pointLayer = new PointLayer(layerType, this.getCurrentGraphicExtent());
-				pointLayer.point1DVisibleProperty().addListener(new DrawDependentLayerChangeListener(pointLayer));
-				pointLayer.point2DVisibleProperty().addListener(new DrawDependentLayerChangeListener(pointLayer));
-				pointLayer.point3DVisibleProperty().addListener(new DrawDependentLayerChangeListener(pointLayer));
-				pointLayer.visibleProperty().addListener(new DrawDependentLayerChangeListener(pointLayer));
-				layer = pointLayer;
+				layer = new PointLayer(layerType);
 				break;
-			
+
 			case OBSERVATION_APRIORI:			
 			case OBSERVATION_APOSTERIORI:
-				layer = new ObservationLayer(layerType, this.getCurrentGraphicExtent());
+				layer = new ObservationLayer(layerType);
 				break;
 
 			case PRINCIPAL_COMPONENT_HORIZONTAL:
 			case PRINCIPAL_COMPONENT_VERTICAL:
-				PrincipalComponentArrowLayer principalComponentArrowLayer = new PrincipalComponentArrowLayer(layerType, this.getCurrentGraphicExtent());
-				principalComponentArrowLayer.vectorScaleProperty().addListener(new DrawDependentLayerChangeListener(principalComponentArrowLayer));
-				layer = principalComponentArrowLayer;
+				layer = new PrincipalComponentArrowLayer(layerType);;
 				break;
-				
-			case POINT_SHIFT:
-				PointShiftArrowLayer pointShiftArrowLayer = new PointShiftArrowLayer(layerType, this.getCurrentGraphicExtent());
-				pointShiftArrowLayer.vectorScaleProperty().addListener(new DrawDependentLayerChangeListener(pointShiftArrowLayer));
-				pointShiftArrowLayer.visibleProperty().addListener(new DrawDependentLayerChangeListener(pointShiftArrowLayer));
-				layer = pointShiftArrowLayer;
-				break;
-				
-			case ABSOLUTE_CONFIDENCE:
-				layer = new AbsoluteConfidenceLayer(layerType, this.getCurrentGraphicExtent());
-				break;
-				
-			case RELATIVE_CONFIDENCE:
-				layer = new RelativeConfidenceLayer(layerType, this.getCurrentGraphicExtent());
-				break;
-				
-			}
 
+			case POINT_SHIFT:
+				layer = new PointShiftArrowLayer(layerType);;
+				break;
+
+			case ABSOLUTE_CONFIDENCE:
+				layer = new AbsoluteConfidenceLayer(layerType);
+				break;
+
+			case RELATIVE_CONFIDENCE:
+				layer = new RelativeConfidenceLayer(layerType);
+				break;
+
+			}
+			
 			if (layer != null)
 				this.add(layer);
 		}
@@ -290,6 +227,7 @@ public class LayerManager {
 				(PointLayer)this.getLayer(LayerType.DATUM_POINT_APOSTERIORI),
 				(PointLayer)this.getLayer(LayerType.NEW_POINT_APOSTERIORI)
 				);
+		
 		
 		PrincipalComponentArrowLayer principalComponentHorizontalArrowLayer = (PrincipalComponentArrowLayer)this.getLayer(LayerType.PRINCIPAL_COMPONENT_HORIZONTAL);
 		principalComponentHorizontalArrowLayer.addAll(
@@ -338,7 +276,63 @@ public class LayerManager {
 						this.getLayer(LayerType.NEW_POINT_APOSTERIORI).symbolSizeProperty())
 				);
 	}
+	
+	private void add(Layer layer) {
+		this.currentGraphicExtent.merge(layer.getMaximumGraphicExtent());
+		layer.visibleProperty().addListener(this.visibleChangeListener);
+		// add to List
+		this.layers.add(layer);
+	}
+	
+	public GraphicExtent getCurrentGraphicExtent() {
+		return this.currentGraphicExtent;
+	}
+	
+	public void clearAllLayers() {
+		for (Layer layer : this.layers) {
+			layer.clearLayer();
+		}
+	}
+	
+	public Layer getLayer(LayerType layerType) {
+		for (Layer layer : this.layers) {
+			if (layer.getLayerType() == layerType)
+				return layer;
+		}
+		return null;
+	}
+	
+	public void draw() {
+		System.out.println("DRAW");
+		this.resizableGraphicCanvas.draw();
+		this.mouseNavigationCanvas.draw();
+	}
+	
+	public void reorderLayer(List<Layer> layers) {
+		this.layers.clear();
+		
+		for (Layer layer : layers) {
+			if (layer != null && layer.getLayerType() != null)
+				this.layers.add(layer);
+		}
+	}
+	
+	public Pane getPane() {
+		return this.stackPane;
+	}
 
+	public ToolBar getToolBar() {
+		return this.layerToolbar;
+	}
+	
+	public Label getCoordinateLabel() {
+		return this.coordinatePanel;
+	}
+	
+	public void setEllipseScale(double scale) {
+		this.scaleSpinner.getValueFactory().setValue(scale);
+	}
+	
 	private void initPane() {
 		//BackgroundFill fill = new BackgroundFill(this.getColor(), CornerRadii.EMPTY, Insets.EMPTY);
 		BackgroundFill fill = new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY);
@@ -347,6 +341,8 @@ public class LayerManager {
 		this.stackPane.setBackground(background);
 		this.stackPane.setMinSize(0, 0);
 		this.stackPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		
+		this.stackPane.getChildren().addAll(this.resizableGraphicCanvas, this.mouseNavigationCanvas);
 	}
 
 	private void initCoordinateLabel() {
@@ -447,67 +443,6 @@ public class LayerManager {
 		this.layerToolbar.setDisable(disable);
 	}
 	
-	public void setEllipseScale(double scale) {
-		this.scaleSpinner.getValueFactory().setValue(scale);
-	}
-	
-	public void clearAllLayers() {
-		for (Node node : this.stackPane.getChildren()) {
-			if (node instanceof Layer) {
-				Layer layer = (Layer)node;
-				layer.clearLayer();
-			}
-		}
-	}
-
-	public void draw() {
-		for (Node node : this.stackPane.getChildren()) {
-			if (node instanceof Layer) {
-				Layer layer = (Layer)node;
-				if (layer.isVisible()) 
-					layer.draw(this.currentGraphicExtent);
-			}
-		}
-	}
-	
-	public void reorderLayer(List<Layer> layers) {
-		this.stackPane.getChildren().setAll(layers);
-		this.stackPane.getChildren().add(this.mouseLayer);
-		this.mouseToFront();
-	}
-	
-	private void mouseToFront() {
-		int mouseLayerIndex = this.stackPane.getChildren().indexOf(this.mouseLayer);
-		if (mouseLayerIndex != -1 && mouseLayerIndex != this.stackPane.getChildren().size()-1)
-			this.stackPane.getChildren().get(mouseLayerIndex).toFront();
-	}
-
-	private void add(Layer layer) {
-		this.currentGraphicExtent.merge(layer.getMaximumGraphicExtent());
-
-		layer.widthProperty().bind(this.stackPane.widthProperty());
-		layer.heightProperty().bind(this.stackPane.heightProperty());
-
-		this.stackPane.getChildren().add(layer);
-		this.mouseToFront();
-	}
-
-	public GraphicExtent getCurrentGraphicExtent() {
-		return this.currentGraphicExtent;
-	}
-
-	public Pane getPane() {
-		return this.stackPane;
-	}
-
-	public ToolBar getToolBar() {
-		return this.layerToolbar;
-	}
-	
-	public Label getCoordinateLabel() {
-		return this.coordinatePanel;
-	}
-
 	private void action(ToolbarType type) {	
 		switch(type) {
 		case EXPAND:
@@ -537,8 +472,9 @@ public class LayerManager {
 		case NONE:
 		case MOVE:
 		case WINDOW_ZOOM:
-			this.mouseLayer.setToolbarType(type);
+			this.mouseNavigationCanvas.setToolbarType(type);
 			break;
+			
 		}
 	}
 	
@@ -548,11 +484,11 @@ public class LayerManager {
 			return;
 
 		try {
+			this.ignoreVisibleChangeEvent = true;
 			sqlGraphicManager.load(this);
 			sqlGraphicManager.loadEllipseScale(this);
 			if (!sqlGraphicManager.load(this.getCurrentGraphicExtent()))
-				this.expand();
-			
+				this.expand(); // TODO double call of draw() function, cf. finally
 		} catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
@@ -566,23 +502,21 @@ public class LayerManager {
 				}
 			});
 		} finally {
+			this.ignoreVisibleChangeEvent = false;
 			//this.expand();
 			this.draw();
 		}
 	}
 	
 	public void layerProperties() {
-		LayerManagerDialog.showAndWait(this);
+		LayerManagerDialog.showAndWait(this, this.layers);
 	}
 	
 	public void expand() {
 		GraphicExtent maxGraphicExtent = new GraphicExtent();
-		for (Node node : this.stackPane.getChildren()) {
-			if (node instanceof Layer) {
-				Layer layer = (Layer)node;
-				if (layer.isVisible())
-					maxGraphicExtent.merge(layer.getMaximumGraphicExtent());
-			}
+		for (Layer layer : this.layers) {
+			if (layer.isVisible())
+				maxGraphicExtent.merge(layer.getMaximumGraphicExtent());
 		}
 		
 		if (maxGraphicExtent.getMinX() == Double.MAX_VALUE && 
@@ -680,28 +614,6 @@ public class LayerManager {
 		button.setOnAction(toolbarActionEventHandler);
 		return button;
 	}
-
-//	public ObjectProperty<Color> colorProperty() {
-//		return this.color;
-//	}
-//
-//	public Color getColor() {
-//		return this.colorProperty().get();
-//	}
-//
-//	public void setColor(final Color color) {
-//		this.colorProperty().set(color);
-//	}
-	
-	public Layer getLayer(LayerType layerType) {
-		List<Node> nodes = this.stackPane.getChildren();
-		for (Node node : nodes) {
-			if (node instanceof Layer && ((Layer)node).getLayerType() == layerType)
-				return (Layer)node;
-		}
-		return null;
-	}
-
 	private Spinner<Double> createDoubleSpinner(double min, double max, double initValue, double amountToStepBy, String tooltip, int digits) {
 		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
 		numberFormat.setMaximumFractionDigits(digits);
@@ -733,7 +645,6 @@ public class LayerManager {
 		Spinner<Double> doubleSpinner = new Spinner<Double>();
 		doubleSpinner.setEditable(true);
 		doubleSpinner.setValueFactory(doubleFactory);
-		//doubleSpinner.getStyleClass().add(Spinner.STYLE_CLASS_ARROWS_ON_RIGHT_HORIZONTAL);
 
 		doubleFactory.setConverter(converter);
 		doubleFactory.setAmountToStepBy(amountToStepBy);
@@ -759,7 +670,7 @@ public class LayerManager {
 		return doubleSpinner;
 	}
 	
-	private void saveEllipseScale(double newScale) {
+	private void save(double newScale) {
 		SQLGraphicManager sqlGraphicManager = SQLManager.getInstance().getSQLGraphicManager();
 		if (sqlGraphicManager == null || Double.isNaN(newScale) || Double.isInfinite(newScale))
 			return;

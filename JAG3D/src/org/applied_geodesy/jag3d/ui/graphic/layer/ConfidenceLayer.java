@@ -35,11 +35,10 @@ public abstract class ConfidenceLayer<T extends Layer> extends Layer {
 	private ObjectProperty<Color> strokeColor = new SimpleObjectProperty<Color>(Color.BLACK);
 	private List<T> referenceLayers = FXCollections.observableArrayList();
 
-	ConfidenceLayer(LayerType layerType, GraphicExtent currentGraphicExtent) {
-		super(layerType, currentGraphicExtent);
+	ConfidenceLayer(LayerType layerType) {
+		super(layerType);
 		this.setSymbolSize(0);
 		this.setLineWidth(0.5);
-		this.addLayerPropertyChangeListener(this.strokeColorProperty());
 	}
 	
 	public void add(T layer) {
@@ -68,9 +67,7 @@ public abstract class ConfidenceLayer<T extends Layer> extends Layer {
 	}
 
 	@Override
-	public void clearLayer() {
-		this.clearDrawingBoard();
-	}
+	public void clearLayer() {} // no clearing --> use data from reference layer
 
 	@Override
 	public GraphicExtent getMaximumGraphicExtent() {
@@ -79,4 +76,3 @@ public abstract class ConfidenceLayer<T extends Layer> extends Layer {
 		return extent;
 	}
 }
-

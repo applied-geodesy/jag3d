@@ -30,24 +30,14 @@ import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 public class AbsoluteConfidenceLayer extends ConfidenceLayer<PointLayer> {
-	private class VisiblePropertyChangeListener implements ChangeListener<Boolean> {
-		@Override
-		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-			draw(getCurrentGraphicExtent());
-		}
-	}
-	
-	private VisiblePropertyChangeListener visiblePropertyChangeListener = new VisiblePropertyChangeListener();
 	private DoubleProperty confidenceScale = null;
 	
-	AbsoluteConfidenceLayer(LayerType layerType, GraphicExtent currentGraphicExtent) {
-		super(layerType, currentGraphicExtent);
+	AbsoluteConfidenceLayer(LayerType layerType) {
+		super(layerType);
 		
 		Color fillColor, strokeColor;
 		double lineWidth = -1;
@@ -70,12 +60,10 @@ public class AbsoluteConfidenceLayer extends ConfidenceLayer<PointLayer> {
 		this.setStrokeColor(strokeColor);
 		this.setColor(fillColor);
 		this.setLineWidth(lineWidth);
-		this.addLayerPropertyChangeListener(this.confidenceScaleProperty());
 	}
 	
 	@Override
 	public void add(PointLayer layer) {
-		layer.visibleProperty().addListener(this.visiblePropertyChangeListener);
 		super.add(layer);
 	}
 
@@ -85,20 +73,19 @@ public class AbsoluteConfidenceLayer extends ConfidenceLayer<PointLayer> {
 	}
 
 	@Override
-	public void draw(GraphicExtent graphicExtent) {
-		this.clearDrawingBoard();
-		
-		if (!this.isVisible())
+	public void draw(GraphicsContext graphicsContext, GraphicExtent graphicExtent) {
+		if (!this.isVisible() || graphicExtent.getScale() <= 0)
 			return;
 
-		GraphicsContext graphicsContext = this.getGraphicsContext2D();	
 		List<PointLayer> referenceLayers = this.getReferenceLayers();
-		double scale = this.getCurrentGraphicExtent().getScale();
+		double scale = graphicExtent.getScale();
 		double ellipseScale = this.getConfidenceScale()/scale;
 		double lineWidth  = this.getLineWidth();
 		graphicsContext.setLineWidth(lineWidth);
 		graphicsContext.setStroke(this.getStrokeColor());
 		graphicsContext.setFill(this.getColor());
+		graphicsContext.setLineDashes(null);
+		
 		for (PointLayer layer : referenceLayers) {
 			if (layer.isVisible()) {
 				// draw points
@@ -107,7 +94,7 @@ public class AbsoluteConfidenceLayer extends ConfidenceLayer<PointLayer> {
 						continue;
 					
 					PixelCoordinate pixelCoordinate = GraphicExtent.toPixelCoordinate(point.getCoordinate(), graphicExtent);
-					if (this.contains(pixelCoordinate) && point.getMajorAxis() > 0) {
+					if (this.contains(graphicExtent, pixelCoordinate) && point.getMajorAxis() > 0) {
 						double majorAxis = ellipseScale*point.getMajorAxis();
 						double minorAxis = ellipseScale*point.getMinorAxis();
 						double angle     = point.getAngle();

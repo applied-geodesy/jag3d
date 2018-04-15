@@ -41,6 +41,7 @@ import org.applied_geodesy.util.i18.I18N;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -93,25 +94,24 @@ public class LayerManagerDialog {
 					case REFERENCE_POINT_APRIORI:
 					case STOCHASTIC_POINT_APOSTERIORI:
 					case STOCHASTIC_POINT_APRIORI:
-						propertiesNode = UIPointLayerPropertyBuilder.getLayerPropertyPane((PointLayer)selectedLayer);
+						//propertiesNode = UIPointLayerPropertyBuilder.getLayerPropertyPane((PointLayer)selectedLayer);
 						break;
 
 					case OBSERVATION_APOSTERIORI:
 					case OBSERVATION_APRIORI:
-						propertiesNode = UIObservationLayerPropertyBuilder.getLayerPropertyPane((ObservationLayer)selectedLayer);
+//						propertiesNode = UIObservationLayerPropertyBuilder.getLayerPropertyPane((ObservationLayer)selectedLayer);
 						break;
 
 					case ABSOLUTE_CONFIDENCE:
 					case RELATIVE_CONFIDENCE:
-						propertiesNode = UIConfidenceLayerPropertyBuilder.getLayerPropertyPane((ConfidenceLayer<?>)selectedLayer);
+//						propertiesNode = UIConfidenceLayerPropertyBuilder.getLayerPropertyPane((ConfidenceLayer<?>)selectedLayer);
 						break;
 
 					case POINT_SHIFT:
 					case PRINCIPAL_COMPONENT_HORIZONTAL:
 					case PRINCIPAL_COMPONENT_VERTICAL:
-						propertiesNode = UIArrowLayerPropertyBuilder.getLayerPropertyPane((ArrowLayer)selectedLayer);
+//						propertiesNode = UIArrowLayerPropertyBuilder.getLayerPropertyPane((ArrowLayer)selectedLayer);
 
-					case MOUSE: // invisible
 						break;
 					}
 
@@ -130,17 +130,19 @@ public class LayerManagerDialog {
 	private class UpDownEventHandler implements EventHandler<ActionEvent> {
 		@Override
 		public void handle(ActionEvent event) {
-			Layer selectedLayer = layerList.getSelectionModel().getSelectedItem();
+			Layer selectedLayer = layerListView.getSelectionModel().getSelectedItem();
 			boolean moveUp = event.getSource() == upButton;
 			int selectedIndex = -1;
-			if (selectedLayer != null && (selectedIndex = layerList.getItems().indexOf(selectedLayer)) >= 0) {
-				Collections.swap(layerList.getItems(), selectedIndex + (moveUp ? -1 : 1), selectedIndex);
-				List<Layer> reorderedList = new ArrayList<Layer>(layerList.getItems());
+			if (selectedLayer != null && (selectedIndex = layerListView.getItems().indexOf(selectedLayer)) >= 0) {
+				Collections.swap(layerListView.getItems(), selectedIndex + (moveUp ? -1 : 1), selectedIndex);
+				List<Layer> reorderedList = new ArrayList<Layer>(layerListView.getItems());
 				Collections.reverse(reorderedList);
 				layerManager.reorderLayer(reorderedList);
 
-				//layerList.getSelectionModel().clearSelection();
-				layerList.getSelectionModel().select(selectedLayer);
+				//layerListView.getSelectionModel().clearSelection();
+				layerListView.getSelectionModel().select(selectedLayer);
+				
+				layerManager.draw();
 			}
 		}
 	}
@@ -152,7 +154,8 @@ public class LayerManagerDialog {
 	private LayerManager layerManager;
 	private BorderPane layerPropertyBorderPane = new BorderPane();
 	private Button upButton, downButton;
-	private ListView<Layer> layerList;
+	private ListView<Layer> layerListView;
+	private ObservableList<Layer> layers;
 	private LayerManagerDialog() {}
 
 
@@ -160,8 +163,9 @@ public class LayerManagerDialog {
 		window = owner;
 	}
 
-	public static Optional<Void> showAndWait(LayerManager layerManager) {
+	public static Optional<Void> showAndWait(LayerManager layerManager, ObservableList<Layer> layers) {
 		layerManagerDialog.layerManager = layerManager;
+		layerManagerDialog.layers = layers;
 		layerManagerDialog.init();
 		layerManagerDialog.load();
 		return layerManagerDialog.dialog.showAndWait();
@@ -195,8 +199,8 @@ public class LayerManagerDialog {
 		this.layerPropertyBorderPane.setTop(this.createLayerOrderToolBar());
 
 		BorderPane rootNode = new BorderPane();
-		this.layerList = this.createLayerListPane();
-		rootNode.setLeft(this.layerList);
+		this.layerListView = this.createLayerListPane();
+		rootNode.setLeft(this.layerListView);
 		rootNode.setCenter(this.layerPropertyBorderPane);
 		return rootNode;
 	}
@@ -219,13 +223,11 @@ public class LayerManagerDialog {
 
 	private ListView<Layer> createLayerListPane() {
 		ListView<Layer> listView = new ListView<Layer>();
-		int length = this.layerManager.getPane().getChildren().size();
-		for (int i = length - 1; i >= 0; i--) {
-			Node node = this.layerManager.getPane().getChildren().get(i);
-			if (node != null && node instanceof Layer && ((Layer)node).getLayerType() != LayerType.MOUSE) {
-				listView.getItems().add((Layer)node);
-			}
-		}
+		
+		int length = this.layers.size();
+		for (int i = length - 1; i >= 0; i--)
+			listView.getItems().add(this.layers.get(i));
+
 		listView.setCellFactory(new Callback<ListView<Layer>, ListCell<Layer>>() {
 			@Override 
 			public ListCell<Layer> call(ListView<Layer> list) {
@@ -248,16 +250,13 @@ public class LayerManagerDialog {
 			sqlGraphicManager.initLayer(this.layerManager);
 			
 			ListView<Layer> listView = new ListView<Layer>();
-			int length = this.layerManager.getPane().getChildren().size();
+			int length = this.layers.size();
 			for (int i = length - 1; i >= 0; i--) {
-				Node node = this.layerManager.getPane().getChildren().get(i);
-				if (node != null && node instanceof Layer && ((Layer)node).getLayerType() != LayerType.MOUSE) {
-					listView.getItems().add((Layer)node);
-				}
+				listView.getItems().add(this.layers.get(i));
 			}
-			this.layerList.getSelectionModel().clearSelection();
-			this.layerList.getItems().setAll(listView.getItems());
-			this.layerList.getSelectionModel().select(0);
+			this.layerListView.getSelectionModel().clearSelection();
+			this.layerListView.getItems().setAll(listView.getItems());
+			this.layerListView.getSelectionModel().select(0);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -281,11 +280,7 @@ public class LayerManagerDialog {
 
 		try {
 			int order = 0;
-			for (Node node : this.layerManager.getPane().getChildren()) {
-				if (!(node instanceof Layer))
-					continue;
-
-				Layer layer = (Layer)node;
+			for (Layer layer : this.layers) {
 				LayerType layerType = layer.getLayerType();
 
 				switch(layerType) {
@@ -314,10 +309,6 @@ public class LayerManagerDialog {
 				case PRINCIPAL_COMPONENT_HORIZONTAL:
 				case PRINCIPAL_COMPONENT_VERTICAL:
 					sqlGraphicManager.save((ArrowLayer)layer, order);
-					break;
-					
-				case MOUSE:
-					// nothing to save
 					break;
 				}
 				order++;

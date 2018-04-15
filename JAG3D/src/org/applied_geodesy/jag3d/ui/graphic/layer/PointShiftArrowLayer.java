@@ -37,8 +37,8 @@ import javafx.scene.paint.Color;
 public class PointShiftArrowLayer extends ArrowLayer {
 	private List<RelativeConfidence> relativeConfidences = FXCollections.observableArrayList();
 
-	PointShiftArrowLayer(LayerType layerType, GraphicExtent currentGraphicExtent) {
-		super(layerType, currentGraphicExtent);
+	PointShiftArrowLayer(LayerType layerType) {
+		super(layerType);
 		
 		Color color;
 		double symbolSize = -1, lineWidth = -1;
@@ -69,17 +69,22 @@ public class PointShiftArrowLayer extends ArrowLayer {
 	}
 	
 	@Override
-	public void draw(GraphicExtent graphicExtent) {
-		this.clearDrawingBoard();
-
+	public void draw(GraphicsContext graphicsContext, GraphicExtent graphicExtent) {
 		if (!this.isVisible() || this.relativeConfidences == null || this.relativeConfidences.isEmpty())
 			return;
 
-		GraphicsContext graphicsContext = this.getGraphicsContext2D();
 		ArrowSymbolType arrowSymbolType = this.getSymbolType();
 		double scale      = this.getVectorScale();
 		double symbolSize = this.getSymbolSize();
 		double lineWidth  = this.getLineWidth();
+		
+		double width  = graphicExtent.getDrawingBoardWidth();
+		double height = graphicExtent.getDrawingBoardHeight();
+		
+		graphicsContext.setStroke(this.getColor());
+		graphicsContext.setFill(this.getColor());
+		graphicsContext.setLineWidth(lineWidth);
+		graphicsContext.setLineDashes(null);
 
 		for (RelativeConfidence relativeConfidence : relativeConfidences) {
 			GraphicPoint startPoint = relativeConfidence.getStartPoint();
@@ -91,7 +96,7 @@ public class PointShiftArrowLayer extends ArrowLayer {
 			PixelCoordinate pixelCoordinateStartPoint = GraphicExtent.toPixelCoordinate(startPoint.getCoordinate(), graphicExtent);
 			PixelCoordinate pixelCoordinateEndPoint   = GraphicExtent.toPixelCoordinate(endPoint.getCoordinate(), graphicExtent);
 			
-			if (!this.contains(pixelCoordinateStartPoint) && !this.contains(pixelCoordinateEndPoint))
+			if (!this.contains(graphicExtent, pixelCoordinateStartPoint) && !this.contains(graphicExtent, pixelCoordinateEndPoint))
 				continue;
 
 			double xs = pixelCoordinateStartPoint.getX();
@@ -117,23 +122,23 @@ public class PointShiftArrowLayer extends ArrowLayer {
 
 			PixelCoordinate vectorStartCoordinate = new PixelCoordinate(avgX, avgY);
 			
-			if (!this.contains(vectorStartCoordinate))
+			if (!this.contains(graphicExtent, vectorStartCoordinate))
 				continue;
 			
 			distance = distance * scale;
 			
 			// clipping line, if one of the points is outside
-			double layerDiagoal = Math.hypot(this.getWidth(), this.getHeight());
+			double layerDiagoal = Math.hypot(width, height);
 			if (distance > 1.05 * layerDiagoal) {
 				distance = 1.05 * layerDiagoal;
 			}
 			
 			PixelCoordinate vectorEndCoordinate = new PixelCoordinate(avgX + distance * dx, avgY + distance * dy);
 
-			graphicsContext.setStroke(this.getColor());
-			graphicsContext.setFill(this.getColor());
-			graphicsContext.setLineWidth(lineWidth);
-			graphicsContext.setLineDashes(null);
+//			graphicsContext.setStroke(this.getColor());
+//			graphicsContext.setFill(this.getColor());
+//			graphicsContext.setLineWidth(lineWidth);
+//			graphicsContext.setLineDashes(null);
 			
 			graphicsContext.strokeLine(
 					avgX,
@@ -173,7 +178,6 @@ public class PointShiftArrowLayer extends ArrowLayer {
 
 	@Override
 	public void clearLayer() {
-		super.clearLayer();
 		this.relativeConfidences.clear();
 	}
 

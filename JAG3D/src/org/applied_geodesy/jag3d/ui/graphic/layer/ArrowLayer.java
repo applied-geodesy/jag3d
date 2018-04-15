@@ -22,7 +22,6 @@
 package org.applied_geodesy.jag3d.ui.graphic.layer;
 
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.ArrowSymbolType;
-import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -34,11 +33,10 @@ public abstract class ArrowLayer extends Layer {
 	private DoubleProperty vectorScale = new SimpleDoubleProperty(1.0);
 	private ObjectProperty<ArrowSymbolType> symbolType = new SimpleObjectProperty<ArrowSymbolType>(ArrowSymbolType.FILLED_TETRAGON_ARROW);
 
-	ArrowLayer(LayerType layerType, GraphicExtent currentGraphicExtent) {
-		super(layerType, currentGraphicExtent);
+	ArrowLayer(LayerType layerType) {
+		super(layerType);
 		this.setSymbolType(ArrowSymbolType.FILLED_TETRAGON_ARROW);
 		this.setColor(Color.DARKORANGE);
-		this.addLayerPropertyChangeListener(this.symbolTypeProperty());
 	}
 
 	public DoubleProperty vectorScaleProperty() {
@@ -63,10 +61,5 @@ public abstract class ArrowLayer extends Layer {
 
 	public void setSymbolType(final ArrowSymbolType arrowSymbolType) {
 		this.symbolTypeProperty().set(arrowSymbolType);
-	}
-
-	@Override
-	public void clearLayer() {
-		this.clearDrawingBoard();
 	}
 }

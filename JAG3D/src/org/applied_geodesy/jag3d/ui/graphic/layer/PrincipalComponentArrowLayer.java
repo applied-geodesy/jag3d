@@ -30,27 +30,15 @@ import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.sql.GraphicPoint;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 public class PrincipalComponentArrowLayer extends ArrowLayer {
-	
-	private class VisiblePropertyChangeListener implements ChangeListener<Boolean> {
-		@Override
-		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-			draw(getCurrentGraphicExtent());
-		}
-	}
-	
-	private VisiblePropertyChangeListener visiblePropertyChangeListener = new VisiblePropertyChangeListener();
 	private List<PointLayer> referenceLayers = FXCollections.observableArrayList();
 
-	
-	PrincipalComponentArrowLayer(LayerType layerType, GraphicExtent currentGraphicExtent) {
-		super(layerType, currentGraphicExtent);
+	PrincipalComponentArrowLayer(LayerType layerType) {
+		super(layerType);
 		
 		Color color;
 		ArrowSymbolType arrowSymbolType;
@@ -107,7 +95,6 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 	}
 	
 	public void add(PointLayer layer) {
-		layer.visibleProperty().addListener(this.visiblePropertyChangeListener);
 		this.referenceLayers.add(layer);
 	}
 
@@ -121,19 +108,24 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 	}
 	
 	@Override
-	public void draw(GraphicExtent graphicExtent) {
-		this.clearDrawingBoard();
-	
+	public void draw(GraphicsContext graphicsContext, GraphicExtent graphicExtent) {
 		if (!this.isVisible() || this.referenceLayers == null || this.referenceLayers.isEmpty())
 			return;
 		
 		LayerType layerType = this.getLayerType();
-		GraphicsContext graphicsContext = this.getGraphicsContext2D();	
 		ArrowSymbolType arrowSymbolType = this.getSymbolType();
 		double scale      = this.getVectorScale();
 		double symbolSize = this.getSymbolSize();
 		double lineWidth  = this.getLineWidth();
 		
+		double width  = graphicExtent.getDrawingBoardWidth();
+		double height = graphicExtent.getDrawingBoardHeight();
+		
+		graphicsContext.setStroke(this.getColor());
+		graphicsContext.setFill(this.getColor());
+		graphicsContext.setLineWidth(lineWidth);
+		graphicsContext.setLineDashes(null);
+
 		for (PointLayer layer : this.referenceLayers) {
 			if (layer.isVisible()) {
 				// draw points
@@ -162,7 +154,7 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 					PixelCoordinate pixelCoordinateStartPoint = GraphicExtent.toPixelCoordinate(startPoint.getCoordinate(), graphicExtent);
 					PixelCoordinate pixelCoordinateEndPoint   = GraphicExtent.toPixelCoordinate(endPoint, graphicExtent);
 	
-					if (!this.contains(pixelCoordinateStartPoint) && !this.contains(pixelCoordinateEndPoint))
+					if (!this.contains(graphicExtent, pixelCoordinateStartPoint) && !this.contains(graphicExtent, pixelCoordinateEndPoint))
 						continue;
 
 					double xs = pixelCoordinateStartPoint.getX();
@@ -183,23 +175,23 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 					
 					double angle = Math.atan2(dy, dx);
 
-					if (!this.contains(pixelCoordinateStartPoint))
+					if (!this.contains(graphicExtent, pixelCoordinateStartPoint))
 						continue;
 					
 					distance = distance * scale;
 					
 					// clipping line, if one of the points is outside
-					double layerDiagoal = Math.hypot(this.getWidth(), this.getHeight());
+					double layerDiagoal = Math.hypot(width, height);
 					if (distance > 1.05 * layerDiagoal) {
 						distance = 1.05 * layerDiagoal;
 					}
 					
 					PixelCoordinate vectorEndCoordinate = new PixelCoordinate(xs + distance * dx, ys + distance * dy);
 
-					graphicsContext.setStroke(this.getColor());
-					graphicsContext.setFill(this.getColor());
-					graphicsContext.setLineWidth(lineWidth);
-					graphicsContext.setLineDashes(null);
+//					graphicsContext.setStroke(this.getColor());
+//					graphicsContext.setFill(this.getColor());
+//					graphicsContext.setLineWidth(lineWidth);
+//					graphicsContext.setLineDashes(null);
 					
 					graphicsContext.strokeLine(
 							xs,
@@ -209,9 +201,6 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 							);
 
 					SymbolBuilder.drawSymbol(graphicsContext, vectorEndCoordinate, arrowSymbolType, symbolSize, angle);
-					
-					
-					
 				}
 			}
 		}
@@ -235,4 +224,7 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 		extent.reset();
 		return extent;
 	}
+
+	@Override
+	public void clearLayer() {} // no clearing --> use data from reference layer
 }

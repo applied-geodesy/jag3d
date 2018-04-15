@@ -50,8 +50,8 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 	private ObjectProperty<Color> highlightColor = new SimpleObjectProperty<Color>(Color.ORANGERED); //#FF4500
 	private DoubleProperty highlightLineWidth    = new SimpleDoubleProperty(2.5);
 	
-	ObservationLayer(LayerType layerType, GraphicExtent currentGraphicExtent) {
-		super(layerType, currentGraphicExtent);
+	ObservationLayer(LayerType layerType) {
+		super(layerType);
 
 		Color color, highlightColor;
 		double symbolSize = -1, lineWidth = -1, highlightLineWidth = -1;
@@ -99,9 +99,6 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 		this.setLineWidth(lineWidth);
 		this.setSymbolSize(symbolSize);
 		this.setColor(color);
-		
-		this.addLayerPropertyChangeListener(this.highlightColorProperty());
-		this.addLayerPropertyChangeListener(this.highlightLineWidthProperty());
 		
 		this.initSymbolProperties();
 	}
@@ -219,21 +216,16 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 			}
 
 			properties.setColor(color);
-			this.addLayerPropertyChangeListener(properties.visibleProperty());
-			this.addLayerPropertyChangeListener(properties.colorProperty());
 
 			this.symbolPropertiesMap.put(observationType, properties);
 		}
 	}
 
 	@Override
-	public void draw(GraphicExtent graphicExtent) {
-		this.clearDrawingBoard();
-
+	public void draw(GraphicsContext graphicsContext, GraphicExtent graphicExtent) {
 		if (!this.isVisible() || this.observableMeasurements.isEmpty())
 			return;
 
-		GraphicsContext graphicsContext = this.getGraphicsContext2D();
 		graphicsContext.setLineCap(StrokeLineCap.BUTT);
 
 		double symbolSize = this.getSymbolSize();
@@ -241,6 +233,9 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 
 		final double maxLength = 125;
 		double pointSymbolSize = this.getPointSymbolSize();
+		
+		double width  = graphicExtent.getDrawingBoardWidth();
+		double height = graphicExtent.getDrawingBoardHeight();
 
 		for (ObservableMeasurement observableLink : this.observableMeasurements) {
 			GraphicPoint startPoint = observableLink.getStartPoint();
@@ -252,7 +247,7 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 			PixelCoordinate pixelCoordinateStartPoint = GraphicExtent.toPixelCoordinate(startPoint.getCoordinate(), graphicExtent);
 			PixelCoordinate pixelCoordinateEndPoint   = GraphicExtent.toPixelCoordinate(endPoint.getCoordinate(), graphicExtent);
 
-			if (!this.contains(pixelCoordinateStartPoint) && !this.contains(pixelCoordinateEndPoint))
+			if (!this.contains(graphicExtent, pixelCoordinateStartPoint) && !this.contains(graphicExtent, pixelCoordinateEndPoint))
 				continue;
 
 			double xs = pixelCoordinateStartPoint.getX();
@@ -274,23 +269,23 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 			graphicsContext.setLineDashes(null);
 
 			// clipping line, if one of the points is outside
-			double layerDiagoal = Math.hypot(this.getWidth(), this.getHeight());
+			double layerDiagoal = Math.hypot(width, height);
 			if (distance > 1.005 * layerDiagoal) {
 				distance = 1.005 * layerDiagoal;
 
-				if (!this.contains(pixelCoordinateStartPoint)) {
+				if (!this.contains(graphicExtent, pixelCoordinateStartPoint)) {
 					xs = xe - distance * dx;
 					ys = ye - distance * dy;
 				}
 
-				else if (!this.contains(pixelCoordinateEndPoint)) {
+				else if (!this.contains(graphicExtent, pixelCoordinateEndPoint)) {
 					xe = xs + distance * dx;
 					ye = ys + distance * dy;
 				}
 			}
 
 			double si = 0.0, ei = 0.0;
-			if (this.contains(pixelCoordinateStartPoint) && !observableLink.getStartPointObservationType().isEmpty()) {
+			if (this.contains(graphicExtent, pixelCoordinateStartPoint) && !observableLink.getStartPointObservationType().isEmpty()) {
 				si = 1.0;
 				graphicsContext.strokeLine(
 						xs,
@@ -300,7 +295,7 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 						);
 			}
 
-			if (this.contains(pixelCoordinateEndPoint) && !observableLink.getEndPointObservationType().isEmpty()) {
+			if (this.contains(graphicExtent, pixelCoordinateEndPoint) && !observableLink.getEndPointObservationType().isEmpty()) {
 				ei = 1.0;
 				graphicsContext.strokeLine(
 						xe,
@@ -380,7 +375,6 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 
 	@Override
 	public void clearLayer() {
-		this.clearDrawingBoard();
 		this.observableMeasurements.clear();
 	}
 

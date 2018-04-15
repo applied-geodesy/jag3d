@@ -1,33 +1,13 @@
-/***********************************************************************
-* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
-*                                                                      *
-* This program is free software; you can redistribute it and/or modify *
-* it under the terms of the GNU General Public License as published by *
-* the Free Software Foundation; either version 3 of the License, or    *
-* at your option any later version.                                    *
-*                                                                      *
-* This program is distributed in the hope that it will be useful,      *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
-* GNU General Public License for more details.                         *
-*                                                                      *
-* You should have received a copy of the GNU General Public License    *
-* along with this program; if not, see <http://www.gnu.org/licenses/>  *
-* or write to the                                                      *
-* Free Software Foundation, Inc.,                                      *
-* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
-*                                                                      *
-***********************************************************************/
-
 package org.applied_geodesy.jag3d.ui.graphic.layer;
 
 import java.util.List;
 
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
+import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
+import org.applied_geodesy.jag3d.ui.graphic.layer.HighlightableLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.PointSymbolType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.sql.GraphicPoint;
-import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -51,16 +31,17 @@ public class PointLayer extends Layer implements HighlightableLayer {
 	private ObjectProperty<Color> fontColor = new SimpleObjectProperty<Color>(Color.DIMGREY);
 	private ObjectProperty<PointSymbolType> pointSymbolType = new SimpleObjectProperty<PointSymbolType>(PointSymbolType.STROKED_CIRCLE);
 	private List<GraphicPoint> points = FXCollections.observableArrayList();
-	
+
 	private ObjectProperty<Color> highlightColor = new SimpleObjectProperty<Color>(Color.ORANGERED); //#FF4500
 	private DoubleProperty highlightLineWidth    = new SimpleDoubleProperty(2.5);
-	
+
+	// TODO
 	private BooleanProperty point1DVisible = new SimpleBooleanProperty(Boolean.FALSE);
 	private BooleanProperty point2DVisible = new SimpleBooleanProperty(Boolean.TRUE);
 	private BooleanProperty point3DVisible = new SimpleBooleanProperty(Boolean.TRUE);
-	
-	PointLayer(LayerType layerType, GraphicExtent currentGraphicExtent) {
-		super(layerType, currentGraphicExtent);
+
+	PointLayer(LayerType layerType) {
+		super(layerType);
 		
 		Color symbolColor, fontColor, highlightColor;
 		PointSymbolType pointSymbolType;
@@ -328,69 +309,29 @@ public class PointLayer extends Layer implements HighlightableLayer {
 		this.setFontSize(fontSize);
 		this.setFontFamily(fontFamily);
 		this.setFontColor(fontColor);
-		
-		this.addLayerPropertyChangeListener(this.fontColorProperty());
-		this.addLayerPropertyChangeListener(this.fontFamilyProperty());
-		this.addLayerPropertyChangeListener(this.fontSizeProperty());
-		this.addLayerPropertyChangeListener(this.pointSymbolTypeProperty());
+	}
 
-		this.addLayerPropertyChangeListener(this.highlightLineWidthProperty());
-		this.addLayerPropertyChangeListener(this.highlightColorProperty());
-	}
-	
-	public void setPoints(List<GraphicPoint> points) {
-		// clear and unbind
-		for (GraphicPoint point : this.points)
-			point.visibleProperty().unbind();
-		this.points.clear();
-		
-		if (points != null) {
-			for (GraphicPoint point : points) {
-				switch(point.getDimension()) {
-				case 1:
-					point.visibleProperty().bind(this.point1DVisibleProperty().and(this.visibleProperty()));
-					break;
-				case 2:
-					point.visibleProperty().bind(this.point2DVisibleProperty().and(this.visibleProperty()));
-					break;
-				case 3:
-					point.visibleProperty().bind(this.point3DVisibleProperty().and(this.visibleProperty()));
-					break;
-				default:
-					continue; // wrong dimension
-				}
-			}
-			this.points.addAll(points);
-		}
-	}
-	
-	List<GraphicPoint> getPoints() {
-		return this.points;
-	}
-	
 	@Override
-	public void draw(GraphicExtent graphicExtent) {
-		this.clearDrawingBoard();
-		
+	public void draw(GraphicsContext graphicsContext, GraphicExtent graphicExtent) {
 		if (!this.isVisible() || this.points.isEmpty())
 			return;
 
-		GraphicsContext graphicsContext = this.getGraphicsContext2D();
 		graphicsContext.setLineCap(StrokeLineCap.BUTT);
+		graphicsContext.setLineDashes(null);
 
 		PointSymbolType symbolType = this.getPointSymbolType();
 		double symbolSize = this.getSymbolSize();
 		double fontSize   = this.getFontSize();
 		String fontFamily = this.getFontFamily();
-		
+
 		// draw points
 		for (GraphicPoint point : this.points) {
 			if (!point.isVisible())
 				continue;
-			
+
 			PixelCoordinate pixelCoordinate = GraphicExtent.toPixelCoordinate(point.getCoordinate(), graphicExtent);
 
-			if (this.contains(pixelCoordinate)) {
+			if (this.contains(graphicExtent, pixelCoordinate)) {
 				Color symbolColor, fontColor;
 				double lineWidth;
 				// set layer color and line width properties
@@ -406,12 +347,12 @@ public class PointLayer extends Layer implements HighlightableLayer {
 				}
 
 				graphicsContext.setLineWidth(lineWidth);
-				
+
 				graphicsContext.setStroke(symbolColor);
 				graphicsContext.setFill(symbolColor);
-				
+
 				SymbolBuilder.drawSymbol(graphicsContext, pixelCoordinate, symbolType, symbolSize);
-				
+
 				// set text color
 				graphicsContext.setStroke(fontColor);
 				graphicsContext.setFill(fontColor);
@@ -422,7 +363,42 @@ public class PointLayer extends Layer implements HighlightableLayer {
 			}
 		}
 	}
+
+	@Override
+	public void clearLayer() {
+		this.points.clear();
+	}
+
+	@Override
+	public GraphicExtent getMaximumGraphicExtent() {
+		GraphicExtent graphicExtent = new GraphicExtent();
+		graphicExtent.reset();
+		if (this.points != null) {
+			for (GraphicPoint point : this.points) 
+				if (point.isVisible())
+					graphicExtent.merge(point.getCoordinate());
+		}
+		return graphicExtent;
+	}
+
+	public void setPoints(List<GraphicPoint> points) {
+		this.points.clear();
+		if (points != null) 
+			this.points.addAll(points);
+	}
+
+	List<GraphicPoint> getPoints() {
+		return this.points;
+	}
 	
+	public void setPointVisible(int dimension, boolean visible) {
+		for (GraphicPoint point : this.points) {
+			if (point.getDimension() == dimension)
+				point.setVisible(visible);
+		}
+	}
+
+
 	public ObjectProperty<PointSymbolType> pointSymbolTypeProperty() {
 		return this.pointSymbolType;
 	}
@@ -458,7 +434,7 @@ public class PointLayer extends Layer implements HighlightableLayer {
 	public final void setFontSize(final double fontSize) {
 		this.fontSizeProperty().set(fontSize);
 	}
-	
+
 	public StringProperty fontFamilyProperty() {
 		return this.fontFamily;
 	}
@@ -470,7 +446,7 @@ public class PointLayer extends Layer implements HighlightableLayer {
 	public void setFontFamily(final String fontFamily) {
 		this.fontFamilyProperty().set(fontFamily);
 	}
-	
+
 	@Override
 	public String toString() {
 		switch(this.getLayerType()) {
@@ -531,32 +507,14 @@ public class PointLayer extends Layer implements HighlightableLayer {
 		this.point3DVisibleProperty().set(point3DVisible);
 	}
 
-	@Override
-	public void clearLayer() {
-		this.clearDrawingBoard();
-		this.points.clear();
-	}
-
-	@Override
-	public GraphicExtent getMaximumGraphicExtent() {
-		GraphicExtent graphicExtent = new GraphicExtent();
-		graphicExtent.reset();
-		if (this.points != null) {
-			for (GraphicPoint point : this.points) 
-				if (point.isVisible())
-					graphicExtent.merge(point.getCoordinate());
-		}
-		return graphicExtent;
-	}
-
 	public final ObjectProperty<Color> highlightColorProperty() {
 		return this.highlightColor;
 	}
-	
+
 	public final Color getHighlightColor() {
 		return this.highlightColorProperty().get();
 	}
-	
+
 	public final void setHighlightColor(final Color highlightColor) {
 		this.highlightColorProperty().set(highlightColor);
 	}

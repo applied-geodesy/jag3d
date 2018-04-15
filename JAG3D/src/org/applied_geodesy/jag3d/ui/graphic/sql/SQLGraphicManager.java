@@ -31,6 +31,7 @@ import java.util.Map;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ArrowLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ConfidenceLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.HighlightableLayer;
@@ -43,7 +44,6 @@ import org.applied_geodesy.jag3d.ui.graphic.layer.PointLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.PointShiftArrowLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.ArrowSymbolType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.PointSymbolType;
-import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 import org.applied_geodesy.util.sql.DataBase;
 
 import javafx.collections.FXCollections;
@@ -65,7 +65,7 @@ public class SQLGraphicManager {
 		int order = 0;
 		for (LayerType layerType : layerTyps) {
 			Layer layer = layerManager.getLayer(layerType);
-			if (layer == null || layerType == LayerType.MOUSE)
+			if (layer == null)
 				continue;
 			
 			int idx = 1;
@@ -112,10 +112,6 @@ public class SQLGraphicManager {
 				else
 					this.save((ConfidenceLayer<?>)layer, order++);
 				break;
-				
-			case MOUSE:
-				// nothing to load/save
-				break;
 			}
 		}
 		
@@ -126,7 +122,7 @@ public class SQLGraphicManager {
 
 		while (rs.next()) {
 			LayerType type = LayerType.getEnumByValue(rs.getInt("type"));
-			if (type != null && type != LayerType.MOUSE)
+			if (type != null)
 				layerOrder.add(type);
 		}
 		
@@ -199,7 +195,6 @@ public class SQLGraphicManager {
 				completeAprioriPointMap.putAll(this.loadPoints(pointAprioriLayer));
 				break;
 
-			case MOUSE:
 			case POINT_SHIFT:
 			case PRINCIPAL_COMPONENT_HORIZONTAL:
 			case PRINCIPAL_COMPONENT_VERTICAL:
@@ -234,7 +229,6 @@ public class SQLGraphicManager {
 				this.loadObservations(observationAprioriLayer, completeAprioriPointMap);
 				break;
 				
-			case MOUSE:
 			case ABSOLUTE_CONFIDENCE:
 			case RELATIVE_CONFIDENCE:
 			case DATUM_POINT_APOSTERIORI:
@@ -1038,7 +1032,7 @@ public class SQLGraphicManager {
 			confidenceLayer.setStrokeColor(new Color(red, green, blue, opacity));
 		}
 	}
-	
+
 	private void loadSymbol(ArrowLayer arrowLayer) throws SQLException {
 		String sql = "SELECT "
 				+ "\"type\" "

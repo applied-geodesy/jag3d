@@ -34,8 +34,8 @@ import javafx.scene.paint.Color;
 
 public class RelativeConfidenceLayer extends ConfidenceLayer<PointShiftArrowLayer> {
 
-	RelativeConfidenceLayer(LayerType layerType, GraphicExtent currentGraphicExtent) {
-		super(layerType, currentGraphicExtent);
+	RelativeConfidenceLayer(LayerType layerType) {
+		super(layerType);
 		
 		Color fillColor, strokeColor;
 		double lineWidth = -1;
@@ -61,20 +61,17 @@ public class RelativeConfidenceLayer extends ConfidenceLayer<PointShiftArrowLaye
 	}
 
 	@Override
-	public void draw(GraphicExtent graphicExtent) {
-		this.clearDrawingBoard();
-
-		if (!this.isVisible() || this.getCurrentGraphicExtent().getScale() <= 0)
+	public void draw(GraphicsContext graphicsContext, GraphicExtent graphicExtent) {
+		if (!this.isVisible() || graphicExtent.getScale() <= 0)
 			return;
 
-		GraphicsContext graphicsContext = this.getGraphicsContext2D();	
 		List<PointShiftArrowLayer> referenceLayers = this.getReferenceLayers();
-		double scale = this.getCurrentGraphicExtent().getScale();
-		// double ellipseScale = this.getConfidenceScale()/scale;
+		double scale = graphicExtent.getScale();
 		double lineWidth  = this.getLineWidth();
 		graphicsContext.setLineWidth(lineWidth);
 		graphicsContext.setStroke(this.getStrokeColor());
 		graphicsContext.setFill(this.getColor());
+		graphicsContext.setLineDashes(null);
 
 		for (PointShiftArrowLayer layer : referenceLayers) {
 			if (layer.isVisible()) {
@@ -89,7 +86,7 @@ public class RelativeConfidenceLayer extends ConfidenceLayer<PointShiftArrowLaye
 					PixelCoordinate pixelCoordinateStartPoint = GraphicExtent.toPixelCoordinate(startPoint.getCoordinate(), graphicExtent);
 					PixelCoordinate pixelCoordinateEndPoint   = GraphicExtent.toPixelCoordinate(endPoint.getCoordinate(), graphicExtent);
 					
-					if (!this.contains(pixelCoordinateStartPoint) && !this.contains(pixelCoordinateEndPoint))
+					if (!this.contains(graphicExtent, pixelCoordinateStartPoint) && !this.contains(graphicExtent, pixelCoordinateEndPoint))
 						continue;
 
 					double xs = pixelCoordinateStartPoint.getX();
@@ -103,7 +100,7 @@ public class RelativeConfidenceLayer extends ConfidenceLayer<PointShiftArrowLaye
 
 					PixelCoordinate vectorStartCoordinate = new PixelCoordinate(avgX, avgY);
 					
-					if (this.contains(vectorStartCoordinate) && relativeConfidence.getMajorAxis() > 0) {
+					if (this.contains(graphicExtent, vectorStartCoordinate) && relativeConfidence.getMajorAxis() > 0) {
 						double majorAxis = ellipseScale*relativeConfidence.getMajorAxis();
 						double minorAxis = ellipseScale*relativeConfidence.getMinorAxis();
 						double angle     = relativeConfidence.getAngle();
