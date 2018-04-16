@@ -81,7 +81,7 @@ public class LayerManagerDialog {
 				downButton.setDisable(newValue.intValue() == this.listView.getItems().size() - 1);
 
 				Layer selectedLayer = this.listView.getItems().get(newValue.intValue());
-				if (selectedLayer != null && selectedLayer.getLayerType() != null) {
+				if (selectedLayer != null && selectedLayer.getLayerType() != null && layerManager != null) {
 					LayerType type = selectedLayer.getLayerType();
 
 					Node propertiesNode = null;
@@ -94,23 +94,23 @@ public class LayerManagerDialog {
 					case REFERENCE_POINT_APRIORI:
 					case STOCHASTIC_POINT_APOSTERIORI:
 					case STOCHASTIC_POINT_APRIORI:
-						//propertiesNode = UIPointLayerPropertyBuilder.getLayerPropertyPane((PointLayer)selectedLayer);
+						propertiesNode = UIPointLayerPropertyBuilder.getLayerPropertyPane(layerManager, (PointLayer)selectedLayer);
 						break;
 
 					case OBSERVATION_APOSTERIORI:
 					case OBSERVATION_APRIORI:
-//						propertiesNode = UIObservationLayerPropertyBuilder.getLayerPropertyPane((ObservationLayer)selectedLayer);
+						propertiesNode = UIObservationLayerPropertyBuilder.getLayerPropertyPane(layerManager, (ObservationLayer)selectedLayer);
 						break;
 
 					case ABSOLUTE_CONFIDENCE:
 					case RELATIVE_CONFIDENCE:
-//						propertiesNode = UIConfidenceLayerPropertyBuilder.getLayerPropertyPane((ConfidenceLayer<?>)selectedLayer);
+						propertiesNode = UIConfidenceLayerPropertyBuilder.getLayerPropertyPane(layerManager, (ConfidenceLayer<?>)selectedLayer);
 						break;
 
 					case POINT_SHIFT:
 					case PRINCIPAL_COMPONENT_HORIZONTAL:
 					case PRINCIPAL_COMPONENT_VERTICAL:
-//						propertiesNode = UIArrowLayerPropertyBuilder.getLayerPropertyPane((ArrowLayer)selectedLayer);
+						propertiesNode = UIArrowLayerPropertyBuilder.getLayerPropertyPane(layerManager, (ArrowLayer)selectedLayer);
 
 						break;
 					}

@@ -35,29 +35,28 @@ public class PointLayer extends Layer implements HighlightableLayer {
 	private ObjectProperty<Color> highlightColor = new SimpleObjectProperty<Color>(Color.ORANGERED); //#FF4500
 	private DoubleProperty highlightLineWidth    = new SimpleDoubleProperty(2.5);
 
-	// TODO
 	private BooleanProperty point1DVisible = new SimpleBooleanProperty(Boolean.FALSE);
 	private BooleanProperty point2DVisible = new SimpleBooleanProperty(Boolean.TRUE);
 	private BooleanProperty point3DVisible = new SimpleBooleanProperty(Boolean.TRUE);
 
 	PointLayer(LayerType layerType) {
 		super(layerType);
-		
+
 		Color symbolColor, fontColor, highlightColor;
 		PointSymbolType pointSymbolType;
 		String fontFamily = null;
 		double symbolSize = -1, lineWidth = -1, fontSize = -1, highlightLineWidth = -1;
-		
+
 		switch(layerType) {			
 		case REFERENCE_POINT_APRIORI:
 			fontFamily = PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_FONT_FAMILY", "System");
-						
+
 			try {
 				fontColor = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_FONT_COLOR", "#696969"));
 			} catch (Exception e) {
 				fontColor = Color.web("#696969");
 			}
-			
+
 			try {
 				symbolColor = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_COLOR", "#90ee90"));
 			} catch (Exception e) {
@@ -75,22 +74,22 @@ public class PointLayer extends Layer implements HighlightableLayer {
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
 
 			break;
-			
+
 		case REFERENCE_POINT_APOSTERIORI:
 			fontFamily = PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_FONT_FAMILY", "System");
-			
+
 			try {
 				fontColor = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_FONT_COLOR", "#696969"));
 			} catch (Exception e) {
 				fontColor = Color.web("#696969");
 			}
-			
+
 			try {
 				symbolColor = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_COLOR", "#006400"));
 			} catch (Exception e) {
 				symbolColor = Color.web("#006400");
 			}
-			
+
 			try {
 				highlightColor = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_HIGHLIGHT_COLOR", "#FF4500"));
 			} catch (Exception e) {
@@ -109,18 +108,18 @@ public class PointLayer extends Layer implements HighlightableLayer {
 			try { highlightLineWidth = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_HIGHLIGHT_LINE_WIDTH")); } catch (Exception e) {}
 			this.setHighlightLineWidth(highlightLineWidth >= 0 ? highlightLineWidth : 2.5);
 			this.setHighlightColor(highlightColor);
-			
+
 			break;
-			
+
 		case STOCHASTIC_POINT_APRIORI:
 			fontFamily = PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_FONT_FAMILY", "System");
-			
+
 			try {
 				fontColor = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_FONT_COLOR", "#696969"));
 			} catch (Exception e) {
 				fontColor = Color.web("#696969");
 			}
-			
+
 			try {
 				symbolColor = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_COLOR", "#ffd700"));
 			} catch (Exception e) {
@@ -138,22 +137,22 @@ public class PointLayer extends Layer implements HighlightableLayer {
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
 
 			break;
-			
+
 		case STOCHASTIC_POINT_APOSTERIORI:
 			fontFamily = PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_FONT_FAMILY", "System");
-			
+
 			try {
 				fontColor = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_FONT_COLOR", "#696969"));
 			} catch (Exception e) {
 				fontColor = Color.web("#696969");
 			}
-			
+
 			try {
 				symbolColor = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_COLOR", "#daa520"));
 			} catch (Exception e) {
 				symbolColor = Color.web("#daa520");
 			}
-			
+
 			try {
 				highlightColor = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_HIGHLIGHT_COLOR", "#FF4500"));
 			} catch (Exception e) {
@@ -172,18 +171,18 @@ public class PointLayer extends Layer implements HighlightableLayer {
 			try { highlightLineWidth = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_HIGHLIGHT_LINE_WIDTH")); } catch (Exception e) {}
 			this.setHighlightLineWidth(highlightLineWidth >= 0 ? highlightLineWidth : 2.5);
 			this.setHighlightColor(highlightColor);
-			
+
 			break;
-			
+
 		case DATUM_POINT_APRIORI:
 			fontFamily = PROPERTIES.getProperty("DATUM_POINT_APRIORI_FONT_FAMILY", "System");
-			
+
 			try {
 				fontColor = Color.web(PROPERTIES.getProperty("DATUM_POINT_APRIORI_FONT_COLOR", "#696969"));
 			} catch (Exception e) {
 				fontColor = Color.web("#696969");
 			}
-			
+
 			try {
 				symbolColor = Color.web(PROPERTIES.getProperty("DATUM_POINT_APRIORI_COLOR", "#87ceeb"));
 			} catch (Exception e) {
@@ -201,22 +200,22 @@ public class PointLayer extends Layer implements HighlightableLayer {
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
 
 			break;
-			
+
 		case DATUM_POINT_APOSTERIORI:
 			fontFamily = PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_FONT_FAMILY", "System");
-			
+
 			try {
 				fontColor = Color.web(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_FONT_COLOR", "#696969"));
 			} catch (Exception e) {
 				fontColor = Color.web("#696969");
 			}
-			
+
 			try {
 				symbolColor = Color.web(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_COLOR", "#1e90ff"));
 			} catch (Exception e) {
 				symbolColor = Color.web("#1e90ff");
 			}
-			
+
 			try {
 				highlightColor = Color.web(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_HIGHLIGHT_COLOR", "#FF4500"));
 			} catch (Exception e) {
@@ -228,7 +227,7 @@ public class PointLayer extends Layer implements HighlightableLayer {
 			} catch (Exception e) {
 				pointSymbolType = PointSymbolType.STROKED_SQUARE;
 			}
-			
+
 			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_FONT_SIZE")); } catch (Exception e) {}
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}			
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
@@ -237,16 +236,16 @@ public class PointLayer extends Layer implements HighlightableLayer {
 			this.setHighlightColor(highlightColor);
 
 			break;
-			
+
 		case NEW_POINT_APRIORI:
 			fontFamily = PROPERTIES.getProperty("NEW_POINT_APRIORI_FONT_FAMILY", "System");
-			
+
 			try {
 				fontColor = Color.web(PROPERTIES.getProperty("NEW_POINT_APRIORI_FONT_COLOR", "#696969"));
 			} catch (Exception e) {
 				fontColor = Color.web("#696969");
 			}
-			
+
 			try {
 				symbolColor = Color.web(PROPERTIES.getProperty("NEW_POINT_APRIORI_COLOR", "#c480c4"));
 			} catch (Exception e) {
@@ -258,22 +257,22 @@ public class PointLayer extends Layer implements HighlightableLayer {
 			} catch (Exception e) {
 				pointSymbolType = PointSymbolType.STROKED_SQUARE;
 			}
-			
+
 			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APRIORI_FONT_SIZE")); } catch (Exception e) {}
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APRIORI_SYMBOL_SIZE")); } catch (Exception e) {}	
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
 
 			break;
-			
+
 		case NEW_POINT_APOSTERIORI:
 			fontFamily = PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_FONT_FAMILY", "System");
-			
+
 			try {
 				fontColor = Color.web(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_FONT_COLOR", "#696969"));
 			} catch (Exception e) {
 				fontColor = Color.web("#696969");
 			}
-			
+
 			try {
 				symbolColor = Color.web(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_COLOR", "#dda0dd"));
 			} catch (Exception e) {
@@ -285,7 +284,7 @@ public class PointLayer extends Layer implements HighlightableLayer {
 			} catch (Exception e) {
 				pointSymbolType = PointSymbolType.STROKED_SQUARE;
 			}
-			
+
 			try { fontSize = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_FONT_SIZE")); } catch (Exception e) {}
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}			
 			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("NEW_POINT_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
@@ -295,17 +294,17 @@ public class PointLayer extends Layer implements HighlightableLayer {
 		default:
 			throw new IllegalArgumentException("Error, unsupported layer type " + layerType);		
 		}
-		
+
 		symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
 		lineWidth = lineWidth >= 0 ? lineWidth : 1.5;
 		fontSize = fontSize >= 0 ? fontSize : 10.0;
 		fontFamily = fontFamily != null ? fontFamily : "System";
-		
+
 		this.setSymbolType(pointSymbolType);
 		this.setColor(symbolColor);
 		this.setLineWidth(lineWidth);
 		this.setSymbolSize(symbolSize);
-		
+
 		this.setFontSize(fontSize);
 		this.setFontFamily(fontFamily);
 		this.setFontColor(fontColor);
@@ -383,15 +382,32 @@ public class PointLayer extends Layer implements HighlightableLayer {
 
 	public void setPoints(List<GraphicPoint> points) {
 		this.points.clear();
-		if (points != null) 
-			this.points.addAll(points);
+		if (points != null) {
+			for (GraphicPoint point : points) {
+				int dimension = point.getDimension();
+				switch(dimension) {
+				case 1:
+					point.setVisible(this.isPoint1DVisible());
+					break;
+				case 2:
+					point.setVisible(this.isPoint2DVisible());
+					break;
+				case 3:
+					point.setVisible(this.isPoint3DVisible());
+					break;
+				default:
+					continue;
+				}
+				this.points.add(point);
+			}
+		}
 	}
 
 	List<GraphicPoint> getPoints() {
 		return this.points;
 	}
-	
-	public void setPointVisible(int dimension, boolean visible) {
+
+	private void setPointVisible(int dimension, boolean visible) {
 		for (GraphicPoint point : this.points) {
 			if (point.getDimension() == dimension)
 				point.setVisible(visible);
@@ -480,6 +496,7 @@ public class PointLayer extends Layer implements HighlightableLayer {
 	}
 
 	public void setPoint1DVisible(final boolean point1DVisible) {
+		this.setPointVisible(1, point1DVisible);
 		this.point1DVisibleProperty().set(point1DVisible);
 	}
 
@@ -492,6 +509,7 @@ public class PointLayer extends Layer implements HighlightableLayer {
 	}
 
 	public void setPoint2DVisible(final boolean point2DVisible) {
+		this.setPointVisible(2, point2DVisible);
 		this.point2DVisibleProperty().set(point2DVisible);
 	}
 
@@ -504,6 +522,7 @@ public class PointLayer extends Layer implements HighlightableLayer {
 	}
 
 	public void setPoint3DVisible(final boolean point3DVisible) {
+		this.setPointVisible(3, point3DVisible);
 		this.point3DVisibleProperty().set(point3DVisible);
 	}
 

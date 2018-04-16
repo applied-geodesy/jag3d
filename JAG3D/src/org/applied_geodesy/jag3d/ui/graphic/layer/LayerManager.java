@@ -108,6 +108,8 @@ public class LayerManager {
 							((AbsoluteConfidenceLayer)layer).setConfidenceScale(newValue);
 				}
 				save(newValue);
+				if (!ignoreChangeEvent)
+					draw();
 			}			
 		}
 	}
@@ -115,8 +117,8 @@ public class LayerManager {
 	private class VisiblePropertyChangeListener implements ChangeListener<Boolean> {
 		@Override
 		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-			if (!ignoreVisibleChangeEvent)
-				draw();			
+			if (!ignoreChangeEvent)
+				draw();
 		}
 	}
 
@@ -146,7 +148,7 @@ public class LayerManager {
 	private final MouseNavigationCanvas mouseNavigationCanvas = new MouseNavigationCanvas(this);
 //	private ObjectProperty<Color> color = new SimpleObjectProperty<Color>(Color.rgb(255, 255, 255, 1.0)); //0-255
 	private VisiblePropertyChangeListener visibleChangeListener = new VisiblePropertyChangeListener();
-	private boolean ignoreVisibleChangeEvent = false;
+	private boolean ignoreChangeEvent = false;
 	
 	private Spinner<Double> scaleSpinner;
 	public LayerManager() {
@@ -303,7 +305,6 @@ public class LayerManager {
 	}
 	
 	public void draw() {
-		System.out.println("DRAW");
 		this.resizableGraphicCanvas.draw();
 		this.mouseNavigationCanvas.draw();
 	}
@@ -484,11 +485,11 @@ public class LayerManager {
 			return;
 
 		try {
-			this.ignoreVisibleChangeEvent = true;
+			this.ignoreChangeEvent = true;
 			sqlGraphicManager.load(this);
 			sqlGraphicManager.loadEllipseScale(this);
 			if (!sqlGraphicManager.load(this.getCurrentGraphicExtent()))
-				this.expand(); // TODO double call of draw() function, cf. finally
+				this.expand();
 		} catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
@@ -502,7 +503,7 @@ public class LayerManager {
 				}
 			});
 		} finally {
-			this.ignoreVisibleChangeEvent = false;
+			this.ignoreChangeEvent = false;
 			//this.expand();
 			this.draw();
 		}
