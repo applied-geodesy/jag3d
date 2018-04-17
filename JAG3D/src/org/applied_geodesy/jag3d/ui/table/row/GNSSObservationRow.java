@@ -31,8 +31,8 @@ import javafx.beans.property.SimpleObjectProperty;
 
 public class GNSSObservationRow extends ObservationRow {
 	private ObjectProperty<Double> xApriori = new SimpleObjectProperty<Double>(this, "xApriori", 0.0);
-	private ObjectProperty<Double> yApriori = new SimpleObjectProperty<Double>(this, "yApriori",0.0);
-	private ObjectProperty<Double> zApriori = new SimpleObjectProperty<Double>(this, "zApriori",0.0);
+	private ObjectProperty<Double> yApriori = new SimpleObjectProperty<Double>(this, "yApriori", 0.0);
+	private ObjectProperty<Double> zApriori = new SimpleObjectProperty<Double>(this, "zApriori", 0.0);
 	
 	private ObjectProperty<Double> sigmaXapriori = new SimpleObjectProperty<Double>(this, "sigmaXapriori");
 	private ObjectProperty<Double> sigmaYapriori = new SimpleObjectProperty<Double>(this, "sigmaYapriori");
