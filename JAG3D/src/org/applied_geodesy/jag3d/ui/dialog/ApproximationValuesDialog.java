@@ -95,6 +95,9 @@ public class ApproximationValuesDialog {
 				progressIndicatorPane.setVisible(true);
 				settingPane.setDisable(true);
 
+				// Global check - an exception occurs, if check fails
+				SQLManager.getInstance().checkNumberOfObersvationsPerUnknownParameter();
+				
 				if (transferDatumAndNewPointsResultsRadioButton.isSelected() || transferNewPointsResultsRadioButton.isSelected())
 					approximationManager.transferAposteriori2AprioriValues(transferDatumAndNewPointsResultsRadioButton.isSelected());
 				else if (estimateDatumAndNewPointsRadioButton.isSelected() || estimateNewPointsRadioButton.isSelected()) {
@@ -307,42 +310,6 @@ public class ApproximationValuesDialog {
 
 	private void process() {
 		this.reset();
-
-		// Global check
-		boolean validNumberOfObservations = false;
-		try {
-			SQLManager.getInstance().checkNumberOfObersvationsPerUnknownParameter();
-			validNumberOfObservations = true;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			OptionDialog.showThrowableDialog (
-					i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.title",  "Unexpected Error"),
-					i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.header", "Error, estimation of approximation values failed."),
-					i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.message", "An exception has occurred during estimation of approximation."),
-					e
-					);
-		} catch (PointTypeMismatchException e) {
-			e.printStackTrace();
-			OptionDialog.showThrowableDialog (
-					i18n.getString("ApproximationValuesDialog.message.error.pointtypemismatch.exception.title",  "Initialization error"),
-					i18n.getString("ApproximationValuesDialog.message.error.pointtypemismatch.exception.header", "Error, the project contains uncombinable point typs, i.e. datum points as well as reference or stochastic points."),
-					i18n.getString("ApproximationValuesDialog.message.error.pointtypemismatch.exception.message", "An exception has occurred during estimation of approximation."),
-					e
-					);
-
-		} catch (UnderDeterminedPointException e) {
-			e.printStackTrace();
-			OptionDialog.showThrowableDialog (
-					i18n.getString("ApproximationValuesDialog.message.error.underdeterminded.exception.title",  "Initialization error"),
-					String.format(i18n.getString("ApproximationValuesDialog.message.error.underdeterminded.exception.header", "Error, the point %s of dimension %d has only %d observations and is indeterminable."), e.getPointName(), e.getDimension(), e.getNumberOfObservations()),
-					i18n.getString("ApproximationValuesDialog.message.error.underdeterminded.exception.message", "An exception has occurred during estimation of approximation."),
-					e
-					);
-		}
-		
-		if (!validNumberOfObservations)
-			return;
-
 		// Try to estimate approx. values
 		SQLApproximationManager approximationManager = SQLManager.getInstance().getApproximationManager();
 		this.approximationEstimationTask = new ApproximationEstimationTask(approximationManager);
@@ -432,16 +399,55 @@ public class ApproximationValuesDialog {
 				dialog.hide();
 				Throwable throwable = approximationEstimationTask.getException(); 
 				if (throwable != null) {
-					Platform.runLater(new Runnable() {
-						@Override public void run() {
-							OptionDialog.showThrowableDialog (
-									i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.title",  "Unexpected Error"),
-									i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.header", "Error, estimation of approximation values failed."),
-									i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.message", "An exception has occurred during estimation of approximation."),
-									throwable
-									);
-						}
-					});
+					if (throwable instanceof SQLException) {
+						Platform.runLater(new Runnable() {
+							@Override public void run() {
+								OptionDialog.showThrowableDialog (
+										i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.title",  "Unexpected Error"),
+										i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.header", "Error, estimation of approximation values failed."),
+										i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.message", "An exception has occurred during estimation of approximation."),
+										throwable
+										);
+							}
+						});
+					}
+					else if (throwable instanceof PointTypeMismatchException) {
+						Platform.runLater(new Runnable() {
+							@Override public void run() {
+								OptionDialog.showThrowableDialog (
+										i18n.getString("ApproximationValuesDialog.message.error.pointtypemismatch.exception.title",  "Initialization error"),
+										i18n.getString("ApproximationValuesDialog.message.error.pointtypemismatch.exception.header", "Error, the project contains uncombinable point typs, i.e. datum points as well as reference or stochastic points."),
+										i18n.getString("ApproximationValuesDialog.message.error.pointtypemismatch.exception.message", "An exception has occurred during estimation of approximation."),
+										throwable
+										);
+							}
+						});
+					}
+					else if (throwable instanceof UnderDeterminedPointException) {
+						Platform.runLater(new Runnable() {
+							@Override public void run() {
+								UnderDeterminedPointException e = (UnderDeterminedPointException)throwable;
+								OptionDialog.showThrowableDialog (
+										i18n.getString("ApproximationValuesDialog.message.error.underdeterminded.exception.title",  "Initialization error"),
+										String.format(i18n.getString("ApproximationValuesDialog.message.error.underdeterminded.exception.header", "Error, the point %s of dimension %d has only %d observations and is indeterminable."), e.getPointName(), e.getDimension(), e.getNumberOfObservations()),
+										i18n.getString("ApproximationValuesDialog.message.error.underdeterminded.exception.message", "An exception has occurred during estimation of approximation."),
+										throwable
+										);
+							}
+						});
+					}
+					else {
+						Platform.runLater(new Runnable() {
+							@Override public void run() {
+								OptionDialog.showThrowableDialog (
+										i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.title",  "Unexpected Error"),
+										i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.header", "Error, estimation of approximation values failed."),
+										i18n.getString("ApproximationValuesDialog.message.error.approximation_value.exception.message", "An exception has occurred during estimation of approximation."),
+										throwable
+										);
+							}
+						});
+					}
 					throwable.printStackTrace();
 				}
 				UITreeBuilder.getInstance().getTree().getSelectionModel().select(0);
