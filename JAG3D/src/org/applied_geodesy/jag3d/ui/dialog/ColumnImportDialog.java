@@ -1074,10 +1074,10 @@ public class ColumnImportDialog {
 						return i18n.getString("UITreeBuiler.directory.gnssobservations.1d", "GNSS baselines 1D");
 						
 					case GNSS2D:
-						return i18n.getString("UITreeBuiler.directory.gnssobservations.1d", "GNSS baselines 2D");
+						return i18n.getString("UITreeBuiler.directory.gnssobservations.2d", "GNSS baselines 2D");
 						
 					case GNSS3D:
-						return i18n.getString("UITreeBuiler.directory.gnssobservations.1d", "GNSS baselines 3D");
+						return i18n.getString("UITreeBuiler.directory.gnssobservations.3d", "GNSS baselines 3D");
 					}
 				}
 				
