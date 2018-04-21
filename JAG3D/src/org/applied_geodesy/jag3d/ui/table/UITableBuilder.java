@@ -56,6 +56,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
 public abstract class UITableBuilder<T> {
@@ -129,6 +130,7 @@ public abstract class UITableBuilder<T> {
 	final NumberAndUnitFormatterChangedListener numberAndUnitFormatterChangedListener = new NumberAndUnitFormatterChangedListener();
 	static FormatterOptions options = FormatterOptions.getInstance();
 	static I18N i18n = I18N.getInstance();
+	private TableRowHighlightType tableRowHighlightType = TableRowHighlightType.NONE;
 	TableView<T> table = this.createTable();
 
 	UITableBuilder() {
@@ -207,11 +209,20 @@ public abstract class UITableBuilder<T> {
 		table.setRowFactory(new Callback<TableView<T>, TableRow<T>>() {  
 			@Override  
 			public TableRow<T> call(TableView<T> tableView) {  
-				final TableRow<T> row = new TableRow<T>();  
+				final TableRow<T> row = new TableRow<T>() {
+					@Override
+					public void updateItem(T item, boolean empty) {
+						super.updateItem(item, empty);
+						// highlight current row
+						highlightTableRow(this, tableRowHighlightType);
+					}
+				};
 				// Set context menu on row, but use a binding to make it only show for non-empty rows:  
-				row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu)null).otherwise(contextMenu));  
+				row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu)null).otherwise(contextMenu)); 
 				return row;  
-			}  
+			} 
+			
+			
 		}); 
 	}
 
@@ -260,7 +271,42 @@ public abstract class UITableBuilder<T> {
 		column.setOnEditCommit(tableCellEvent);
 		return column;
 	}
+	
+	public void setTableRowHighlightType(TableRowHighlightType tableRowHighlightType) {
+		this.tableRowHighlightType = tableRowHighlightType;
+		if (this.table != null)
+			this.table.refresh();
+	}
 
+	void highlightTableRow(TableRow<T> row, TableRowHighlightType tableRowHighlightType) {}
+	
+	void setTableRowHighlight(TableRow<T> row, TableRowHighlightRangeType type) {
+		Color color = null;
+		switch (type) {
+		case ACCEPTED:
+			// default green colors
+			color = row.getIndex() % 2 == 0 ? Color.rgb(188,238,104) : Color.rgb(162,205, 90);
+			break;
+			
+		case MODERATE:
+			// default yellow colors
+			color = row.getIndex() % 2 == 0 ? Color.rgb(255,236,139) : Color.rgb(238,220,130);
+			break;
+			
+		case UNACCEPTED:
+			// default red colors
+			color = row.getIndex() % 2 == 0 ? Color.rgb(255, 48, 48) : Color.rgb(238, 44, 44);
+			break;
+			
+		case NONE:
+			color = null;
+			break;
+		}
+
+		row.setStyle(color != null ? String.format("-fx-background-color: #%s;", Integer.toHexString(color.hashCode())) : "");
+
+	}
+	
 	public abstract T getEmptyRow();
 
 	abstract void setValue(T row, int columnIndex, Object oldValue, Object newValue);

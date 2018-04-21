@@ -48,6 +48,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -881,6 +882,42 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		finally {
 			if (writer != null)
 				writer.close();
+		}
+	}
+	
+	@Override
+	void highlightTableRow(TableRow<TerrestrialObservationRow> row, TableRowHighlightType tableRowHighlightType) {
+		if (row == null)
+			return;
+
+		TerrestrialObservationRow item = row.getItem();
+
+		if (!row.isSelected() && item != null) {
+			switch(tableRowHighlightType) {
+			case SIGNIFICANCE:
+				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.UNACCEPTED : TableRowHighlightRangeType.ACCEPTED);
+				break;
+				
+			case REDUNDANCY:
+				Double redundancy = item.getRedundancy();
+				if (redundancy == null) 
+					redundancy = 1.0;
+				
+				this.setTableRowHighlight(row, redundancy < 0.3 ? TableRowHighlightRangeType.UNACCEPTED : 
+					redundancy >= 0.3 && redundancy <= 0.7 ? TableRowHighlightRangeType.MODERATE :
+					TableRowHighlightRangeType.ACCEPTED);
+				
+				break;
+				
+			case NONE:
+				setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				
+				break;
+			}
+
+		} 
+		else {
+			setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 		}
 	}
 }

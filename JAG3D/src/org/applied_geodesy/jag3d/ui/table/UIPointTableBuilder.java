@@ -48,6 +48,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TableColumn.CellDataFeatures;
@@ -1221,6 +1222,81 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		finally {
 			if (writer != null)
 				writer.close();
+		}
+	}
+	
+	@Override
+	void highlightTableRow(TableRow<PointRow> row, TableRowHighlightType tableRowHighlightType) {
+		if (row == null)
+			return;
+
+		PointRow item = row.getItem();
+
+		if (!row.isSelected() && item != null) {
+			switch(tableRowHighlightType) {
+			case SIGNIFICANCE:
+				if (this.type != PointType.NEW_POINT)
+					this.setTableRowHighlight(row, item.isSignificant() || item.isSignificantDeflection() ? TableRowHighlightRangeType.UNACCEPTED : TableRowHighlightRangeType.ACCEPTED);
+				break;
+				
+			case REDUNDANCY:
+				if (this.type == PointType.STOCHASTIC_POINT) {
+					Double redundancyX = item.getRedundancyX();
+					Double redundancyY = item.getRedundancyY();
+					Double redundancyZ = item.getRedundancyZ();
+
+					if (this.dimension != 2 && redundancyZ == null)
+						redundancyZ = 1.0;
+
+					if (this.dimension != 1 && redundancyY == null)
+						redundancyY = 1.0;
+
+					if (this.dimension != 1 && redundancyX == null)
+						redundancyX = 1.0;
+
+					boolean unaccapted = false, moderate = false;
+					switch (this.dimension) {
+					case 3:
+						unaccapted = redundancyX < 0.3 && redundancyY < 0.3 && redundancyZ < 0.3;
+						moderate   = !unaccapted && redundancyX <= 0.7 && redundancyY <= 0.7 && redundancyZ <= 0.7;
+
+						// check deflections
+						if (item.getRedundancyXDeflection() != null && item.getRedundancyYDeflection() != null) {
+							unaccapted = unaccapted && item.getRedundancyXDeflection() < 0.3 && item.getRedundancyYDeflection() < 0.3;
+							moderate   = !unaccapted && item.getRedundancyXDeflection() <= 0.7 && item.getRedundancyYDeflection() <= 0.7;
+						}
+
+						break;
+
+					case 2:
+						unaccapted = redundancyX < 0.3 && redundancyY < 0.3;
+						moderate   = !unaccapted && redundancyX <= 0.7 && redundancyY <= 0.7;
+
+						break;
+
+					default: // 1
+						unaccapted = redundancyZ < 0.3;
+						moderate   = !unaccapted && redundancyZ <= 0.7;
+
+						break;
+					}
+
+					this.setTableRowHighlight(row, unaccapted ? TableRowHighlightRangeType.UNACCEPTED : 
+						moderate ? TableRowHighlightRangeType.MODERATE :
+							TableRowHighlightRangeType.ACCEPTED);
+				}
+				
+				break;
+				
+			case NONE:
+				setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				
+				break;
+			}
+
+		} 
+		else {
+			setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 		}
 	}
 }

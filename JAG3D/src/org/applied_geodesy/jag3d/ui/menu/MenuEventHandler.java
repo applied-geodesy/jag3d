@@ -143,6 +143,12 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 			this.menuBuilder.importFile(menuItemType);
 			break;
 			
+		case HIGHLIGHT_NONE:
+		case HIGHLIGHT_SIGNIFICANCE:
+		case HIGHLIGHT_REDUNDANCY:
+			this.menuBuilder.highlightTableRows(menuItemType);
+			break;
+			
 		case MODULE_COORDTRANS:
 		case MODULE_FORMFITTINGTOOLBOX:
 		case MODULE_GEOTRA:

@@ -48,6 +48,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TableColumn.CellDataFeatures;
@@ -810,6 +811,71 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		finally {
 			if (writer != null)
 				writer.close();
+		}
+	}
+	
+	@Override
+	void highlightTableRow(TableRow<GNSSObservationRow> row, TableRowHighlightType tableRowHighlightType) {
+		if (row == null)
+			return;
+
+		GNSSObservationRow item = row.getItem();
+
+		if (!row.isSelected() && item != null) {
+			switch(tableRowHighlightType) {
+			case SIGNIFICANCE:
+				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.UNACCEPTED : TableRowHighlightRangeType.ACCEPTED);
+				break;
+				
+			case REDUNDANCY:
+				Double redundancyX = item.getRedundancyX();
+				Double redundancyY = item.getRedundancyY();
+				Double redundancyZ = item.getRedundancyZ();
+				if (this.type != ObservationType.GNSS2D && redundancyZ == null)
+					redundancyZ = 1.0;
+				
+				if (this.type != ObservationType.GNSS1D && redundancyY == null)
+					redundancyY = 1.0;
+				
+				if (this.type != ObservationType.GNSS1D && redundancyX == null)
+					redundancyX = 1.0;
+				
+				boolean unaccapted = false, moderate = false;
+				switch (this.type) {
+				case GNSS3D:
+					unaccapted = redundancyX < 0.3 && redundancyY < 0.3 && redundancyZ < 0.3;
+					moderate   = !unaccapted && redundancyX <= 0.7 && redundancyY <= 0.7 && redundancyZ <= 0.7;
+					
+					break;
+					
+				case GNSS2D:
+					unaccapted = redundancyX < 0.3 && redundancyY < 0.3;
+					moderate   = !unaccapted && redundancyX <= 0.7 && redundancyY <= 0.7;
+					
+					break;
+				
+				default: // GNSS1D
+					unaccapted = redundancyZ < 0.3;
+					moderate   = !unaccapted && redundancyZ <= 0.7;
+					
+					break;
+				}
+				
+				this.setTableRowHighlight(row, unaccapted ? TableRowHighlightRangeType.UNACCEPTED : 
+					moderate ? TableRowHighlightRangeType.MODERATE :
+					TableRowHighlightRangeType.ACCEPTED);
+				
+				break;
+				
+			case NONE:
+				setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				
+				break;
+			}
+
+		} 
+		else {
+			setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 		}
 	}
 }

@@ -47,6 +47,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TableColumn.CellDataFeatures;
@@ -651,6 +652,30 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		finally {
 			if (writer != null)
 				writer.close();
+		}
+	}
+	
+	@Override
+	void highlightTableRow(TableRow<CongruenceAnalysisRow> row, TableRowHighlightType tableRowHighlightType) {
+		if (row == null)
+			return;
+
+		CongruenceAnalysisRow item = row.getItem();
+
+		if (!row.isSelected() && item != null) {
+			switch(tableRowHighlightType) {
+			case SIGNIFICANCE:
+				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.UNACCEPTED : TableRowHighlightRangeType.ACCEPTED);
+				break;
+				
+			default:
+				setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				
+				break;
+			}
+		} 
+		else {
+			setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 		}
 	}
 }
