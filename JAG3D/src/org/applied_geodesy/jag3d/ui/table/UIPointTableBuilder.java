@@ -1236,7 +1236,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 			switch(tableRowHighlightType) {
 			case SIGNIFICANCE:
 				if (this.type != PointType.NEW_POINT)
-					this.setTableRowHighlight(row, item.isSignificant() || item.isSignificantDeflection() ? TableRowHighlightRangeType.UNACCEPTED : TableRowHighlightRangeType.ACCEPTED);
+					this.setTableRowHighlight(row, item.isSignificant() || item.isSignificantDeflection() ? TableRowHighlightRangeType.INADEQUATE : TableRowHighlightRangeType.EXCELLENT);
 				break;
 				
 			case REDUNDANCY:
@@ -1254,36 +1254,41 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 					if (this.dimension != 1 && redundancyX == null)
 						redundancyX = 1.0;
 
-					boolean unaccapted = false, moderate = false;
+					boolean inadequate = false, adequate = false, satisfactory = false;
 					switch (this.dimension) {
 					case 3:
-						unaccapted = redundancyX < 0.3 && redundancyY < 0.3 && redundancyZ < 0.3;
-						moderate   = !unaccapted && redundancyX <= 0.7 && redundancyY <= 0.7 && redundancyZ <= 0.7;
+						inadequate   = redundancyX < 0.1 && redundancyY < 0.1 && redundancyZ < 0.1;
+						adequate     = !inadequate && redundancyX < 0.3 && redundancyY < 0.3 && redundancyZ < 0.3;
+						satisfactory = !inadequate && !adequate && redundancyX < 0.7 && redundancyY < 0.7 && redundancyZ < 0.7;
 
 						// check deflections
 						if (item.getRedundancyXDeflection() != null && item.getRedundancyYDeflection() != null) {
-							unaccapted = unaccapted && item.getRedundancyXDeflection() < 0.3 && item.getRedundancyYDeflection() < 0.3;
-							moderate   = !unaccapted && item.getRedundancyXDeflection() <= 0.7 && item.getRedundancyYDeflection() <= 0.7;
+							inadequate   = redundancyX < 0.1 && redundancyY < 0.1 && redundancyZ < 0.1 && item.getRedundancyXDeflection() < 0.1 && item.getRedundancyYDeflection() < 0.1;
+							adequate     = !inadequate && redundancyX < 0.3 && redundancyY < 0.3 && redundancyZ < 0.3 && item.getRedundancyXDeflection() < 0.3 && item.getRedundancyYDeflection() < 0.3;
+							satisfactory = !inadequate && !adequate && redundancyX < 0.7 && redundancyY < 0.7 && redundancyZ < 0.7 && item.getRedundancyXDeflection() < 0.7 && item.getRedundancyYDeflection() < 0.7;
 						}
 
 						break;
 
 					case 2:
-						unaccapted = redundancyX < 0.3 && redundancyY < 0.3;
-						moderate   = !unaccapted && redundancyX <= 0.7 && redundancyY <= 0.7;
+						inadequate   = redundancyX < 0.1 && redundancyY < 0.1;
+						adequate     = !inadequate && redundancyX < 0.3 && redundancyY < 0.3;
+						satisfactory = !inadequate && !adequate && redundancyX < 0.7 && redundancyY < 0.7;
 
 						break;
 
 					default: // 1
-						unaccapted = redundancyZ < 0.3;
-						moderate   = !unaccapted && redundancyZ <= 0.7;
+						inadequate   = redundancyZ < 0.1;
+						adequate     = !inadequate && redundancyZ < 0.3;
+						satisfactory = !inadequate && !adequate && redundancyZ < 0.7;
 
 						break;
 					}
 
-					this.setTableRowHighlight(row, unaccapted ? TableRowHighlightRangeType.UNACCEPTED : 
-						moderate ? TableRowHighlightRangeType.MODERATE :
-							TableRowHighlightRangeType.ACCEPTED);
+					this.setTableRowHighlight(row, inadequate ? TableRowHighlightRangeType.INADEQUATE : 
+						adequate ? TableRowHighlightRangeType.ADEQUATE :
+						satisfactory ? TableRowHighlightRangeType.SATISFACTORY :
+						TableRowHighlightRangeType.EXCELLENT);
 				}
 				
 				break;

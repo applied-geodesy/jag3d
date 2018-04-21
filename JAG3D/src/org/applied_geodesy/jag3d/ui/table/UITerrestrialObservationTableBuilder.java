@@ -895,7 +895,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		if (!row.isSelected() && item != null) {
 			switch(tableRowHighlightType) {
 			case SIGNIFICANCE:
-				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.UNACCEPTED : TableRowHighlightRangeType.ACCEPTED);
+				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.INADEQUATE : TableRowHighlightRangeType.EXCELLENT);
 				break;
 				
 			case REDUNDANCY:
@@ -903,9 +903,10 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				if (redundancy == null) 
 					redundancy = 1.0;
 				
-				this.setTableRowHighlight(row, redundancy < 0.3 ? TableRowHighlightRangeType.UNACCEPTED : 
-					redundancy >= 0.3 && redundancy <= 0.7 ? TableRowHighlightRangeType.MODERATE :
-					TableRowHighlightRangeType.ACCEPTED);
+				this.setTableRowHighlight(row, redundancy < 0.1 ? TableRowHighlightRangeType.INADEQUATE : 
+					redundancy < 0.3 ? TableRowHighlightRangeType.ADEQUATE :
+					redundancy < 0.7 ? TableRowHighlightRangeType.SATISFACTORY :
+					TableRowHighlightRangeType.EXCELLENT);
 				
 				break;
 				

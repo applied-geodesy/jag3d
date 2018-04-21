@@ -22,5 +22,5 @@
 package org.applied_geodesy.jag3d.ui.table;
 
 enum TableRowHighlightRangeType {
-	NONE, UNACCEPTED, MODERATE, ACCEPTED
+	NONE, INADEQUATE, ADEQUATE, SATISFACTORY, EXCELLENT
 }

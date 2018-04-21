@@ -283,17 +283,22 @@ public abstract class UITableBuilder<T> {
 	void setTableRowHighlight(TableRow<T> row, TableRowHighlightRangeType type) {
 		Color color = null;
 		switch (type) {
-		case ACCEPTED:
+		case EXCELLENT:
 			// default green colors
 			color = row.getIndex() % 2 == 0 ? Color.rgb(188,238,104) : Color.rgb(162,205, 90);
 			break;
 			
-		case MODERATE:
+		case SATISFACTORY:
 			// default yellow colors
 			color = row.getIndex() % 2 == 0 ? Color.rgb(255,236,139) : Color.rgb(238,220,130);
 			break;
 			
-		case UNACCEPTED:
+		case ADEQUATE:
+			// default orange colors
+			color = row.getIndex() % 2 == 0 ? Color.rgb(243, 140, 0) : Color.rgb(255, 174, 65);
+			break;
+			
+		case INADEQUATE:
 			// default red colors
 			color = row.getIndex() % 2 == 0 ? Color.rgb(255, 48, 48) : Color.rgb(238, 44, 44);
 			break;

@@ -824,7 +824,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		if (!row.isSelected() && item != null) {
 			switch(tableRowHighlightType) {
 			case SIGNIFICANCE:
-				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.UNACCEPTED : TableRowHighlightRangeType.ACCEPTED);
+				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.INADEQUATE : TableRowHighlightRangeType.EXCELLENT);
 				break;
 				
 			case REDUNDANCY:
@@ -840,30 +840,34 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 				if (this.type != ObservationType.GNSS1D && redundancyX == null)
 					redundancyX = 1.0;
 				
-				boolean unaccapted = false, moderate = false;
+				boolean inadequate = false, adequate = false, satisfactory = false;
 				switch (this.type) {
 				case GNSS3D:
-					unaccapted = redundancyX < 0.3 && redundancyY < 0.3 && redundancyZ < 0.3;
-					moderate   = !unaccapted && redundancyX <= 0.7 && redundancyY <= 0.7 && redundancyZ <= 0.7;
+					inadequate   = redundancyX < 0.1 && redundancyY < 0.1 && redundancyZ < 0.1;
+					adequate     = !inadequate && redundancyX < 0.3 && redundancyY < 0.3 && redundancyZ < 0.3;
+					satisfactory = !inadequate && !adequate && redundancyX < 0.7 && redundancyY < 0.7 && redundancyZ < 0.7;
 					
 					break;
 					
 				case GNSS2D:
-					unaccapted = redundancyX < 0.3 && redundancyY < 0.3;
-					moderate   = !unaccapted && redundancyX <= 0.7 && redundancyY <= 0.7;
+					inadequate   = redundancyX < 0.1 && redundancyY < 0.1;
+					adequate     = !inadequate && redundancyX < 0.3 && redundancyY < 0.3;
+					satisfactory = !inadequate && !adequate && redundancyX < 0.7 && redundancyY < 0.7;
 					
 					break;
 				
 				default: // GNSS1D
-					unaccapted = redundancyZ < 0.3;
-					moderate   = !unaccapted && redundancyZ <= 0.7;
+					inadequate   = redundancyZ < 0.1;
+					adequate     = !inadequate && redundancyZ < 0.3;
+					satisfactory = !inadequate && !adequate && redundancyZ < 0.7;
 					
 					break;
 				}
 				
-				this.setTableRowHighlight(row, unaccapted ? TableRowHighlightRangeType.UNACCEPTED : 
-					moderate ? TableRowHighlightRangeType.MODERATE :
-					TableRowHighlightRangeType.ACCEPTED);
+				this.setTableRowHighlight(row, inadequate ? TableRowHighlightRangeType.INADEQUATE : 
+					adequate ? TableRowHighlightRangeType.ADEQUATE :
+					satisfactory ? TableRowHighlightRangeType.SATISFACTORY :
+					TableRowHighlightRangeType.EXCELLENT);
 				
 				break;
 				

@@ -665,7 +665,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		if (!row.isSelected() && item != null) {
 			switch(tableRowHighlightType) {
 			case SIGNIFICANCE:
-				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.UNACCEPTED : TableRowHighlightRangeType.ACCEPTED);
+				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.INADEQUATE : TableRowHighlightRangeType.EXCELLENT);
 				break;
 				
 			default:
