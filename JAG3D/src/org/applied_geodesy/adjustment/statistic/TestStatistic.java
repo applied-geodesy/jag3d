@@ -363,7 +363,7 @@ public abstract class TestStatistic {
 	}
 	
 	/**
-	 * Liefert die Teststärke &beta; [%] zurueck.
+	 * Liefert die Teststaerke &beta; [%] zurueck.
 	 * 
 	 * Die Dimension des Nenners ist &infin;
 	 * @param x   kritischen Wert (Quantil)
@@ -378,7 +378,7 @@ public abstract class TestStatistic {
 	}
 	
 	/**
-	 * Liefert die Teststärke &beta; [%] zurueck.
+	 * Liefert die Teststaerke &beta; [%] zurueck.
 	 * 
 	 * @param x   kritischen Wert (Quantil)
 	 * @param n1  Dimension des Zaehlers
@@ -424,7 +424,7 @@ public abstract class TestStatistic {
 	}
 	
 	/**
-	 * Liefert die Teststärke log(&beta;) zurueck.
+	 * Liefert die Teststaerke log(&beta;) zurueck.
 	 * 
 	 * Die Dimension des Nenners ist &infin;
 	 * @param x   kritischen Wert (Quantil)
@@ -439,7 +439,7 @@ public abstract class TestStatistic {
 	}
 	
 	/**
-	 * Liefert die Teststärke log(&beta;) zurueck.
+	 * Liefert die Teststaerke log(&beta;) zurueck.
 	 * 
 	 * @param x   kritischen Wert (Quantil)
 	 * @param n1  Dimension des Zaehlers
