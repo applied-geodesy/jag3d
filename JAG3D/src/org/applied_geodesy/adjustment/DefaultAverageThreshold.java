@@ -45,8 +45,8 @@ public class DefaultAverageThreshold {
 		BufferedInputStream bis = null;
 		final String path = "/properties/averagethresholds.default";
 		try {
-			if (DefaultUncertainty.class.getResource(path) != null) {
-				bis = new BufferedInputStream(DefaultUncertainty.class.getResourceAsStream(path));
+			if (DefaultAverageThreshold.class.getResource(path) != null) {
+				bis = new BufferedInputStream(DefaultAverageThreshold.class.getResourceAsStream(path));
 				PROPERTIES.load(bis);
 			}  
 		} catch (Exception e) {
