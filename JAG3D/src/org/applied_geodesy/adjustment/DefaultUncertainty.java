@@ -25,28 +25,28 @@ import java.io.BufferedInputStream;
 import java.util.Properties;
 
 public final class DefaultUncertainty {
-	static final double ANGLE_ZERO_POINT_OFFSET                 = 0.0003 * Constant.RHO_GRAD2RAD;
-	static final double ANGLE_SQUARE_ROOT_DISTANCE_DEPENDENT    = 0.0;
-	static final double ANGLE_DISTANCE_DEPENDENT                = 0.0005;
+	private static final double ANGLE_ZERO_POINT_OFFSET                 = 0.0003 * Constant.RHO_GRAD2RAD;
+	private static final double ANGLE_SQUARE_ROOT_DISTANCE_DEPENDENT    = 0.0;
+	private static final double ANGLE_DISTANCE_DEPENDENT                = 0.0005;
 
-	static final double DISTANCE_ZERO_POINT_OFFSET              = 0.002;
-	static final double DISTANCE_SQUARE_ROOT_DISTANCE_DEPENDENT = 0.0;
-	static final double DISTANCE_DISTANCE_DEPENDENT             = 0.000002;
+	private static final double DISTANCE_ZERO_POINT_OFFSET              = 0.002;
+	private static final double DISTANCE_SQUARE_ROOT_DISTANCE_DEPENDENT = 0.0;
+	private static final double DISTANCE_DISTANCE_DEPENDENT             = 0.000002;
 	
-	static final double LEVELING_ZERO_POINT_OFFSET              = 0.0001;
-	static final double LEVELING_SQUARE_ROOT_DISTANCE_DEPENDENT = 0.001;
-	static final double LEVELING_DISTANCE_DEPENDENT             = 0.0;
+	private static final double LEVELING_ZERO_POINT_OFFSET              = 0.0001;
+	private static final double LEVELING_SQUARE_ROOT_DISTANCE_DEPENDENT = 0.001;
+	private static final double LEVELING_DISTANCE_DEPENDENT             = 0.0;
 	
-	static final double GNSS_ZERO_POINT_OFFSET                  = 0.025;
-	static final double GNSS_SQUARE_ROOT_DISTANCE_DEPENDENT     = 0.0;
-	static final double GNSS_DISTANCE_DEPENDENT                 = 0.000050;
+	private static final double GNSS_ZERO_POINT_OFFSET                  = 0.025;
+	private static final double GNSS_SQUARE_ROOT_DISTANCE_DEPENDENT     = 0.0;
+	private static final double GNSS_DISTANCE_DEPENDENT                 = 0.000050;
 	
-	static final double X            = 0.002;
-	static final double Y            = 0.002;
-	static final double Z            = 0.002;
+	private static final double X            = 0.002;
+	private static final double Y            = 0.002;
+	private static final double Z            = 0.002;
 	
-	static final double DEFLECTION_X = 0.001 * Constant.RHO_GRAD2RAD;
-	static final double DEFLECTION_Y = 0.001 * Constant.RHO_GRAD2RAD;
+	private static final double DEFLECTION_X = 0.001 * Constant.RHO_GRAD2RAD;
+	private static final double DEFLECTION_Y = 0.001 * Constant.RHO_GRAD2RAD;
 	
 	private final static Properties PROPERTIES = new Properties();
 	

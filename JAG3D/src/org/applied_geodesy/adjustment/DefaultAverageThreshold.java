@@ -27,17 +27,17 @@ import java.util.Properties;
 import org.applied_geodesy.adjustment.network.ObservationType;
 
 public class DefaultAverageThreshold {
-	static final double LEVELING            = DefaultUncertainty.LEVELING_ZERO_POINT_OFFSET * 10.0;
+	private static final double LEVELING            = DefaultUncertainty.getUncertaintyLevelingZeroPointOffset() * 10.0;
 	
-	static final double DIRECTION           = DefaultUncertainty.ANGLE_ZERO_POINT_OFFSET * 10.0;
-	static final double ZENITH_ANGLE        = DefaultUncertainty.ANGLE_ZERO_POINT_OFFSET * 10.0;
+	private static final double DIRECTION           = DefaultUncertainty.getUncertaintyAngleZeroPointOffset() * 10.0;
+	private static final double ZENITH_ANGLE        = DefaultUncertainty.getUncertaintyAngleZeroPointOffset() * 10.0;
 	
-	static final double HORIZONTAL_DISTANCE = DefaultUncertainty.DISTANCE_ZERO_POINT_OFFSET * 10.0;
-	static final double SLOPE_DISTANCE      = DefaultUncertainty.DISTANCE_ZERO_POINT_OFFSET * 10.0;
+	private static final double HORIZONTAL_DISTANCE = DefaultUncertainty.getUncertaintyDistanceZeroPointOffset() * 10.0;
+	private static final double SLOPE_DISTANCE      = DefaultUncertainty.getUncertaintyDistanceZeroPointOffset() * 10.0;
 
-	static final double GNSS1D              = DefaultUncertainty.GNSS_ZERO_POINT_OFFSET * 10.0;
-	static final double GNSS2D              = DefaultUncertainty.GNSS_ZERO_POINT_OFFSET * 10.0;
-	static final double GNSS3D              = DefaultUncertainty.GNSS_ZERO_POINT_OFFSET * 10.0;
+	private static final double GNSS1D              = DefaultUncertainty.getUncertaintyGNSSZeroPointOffset() * 10.0;
+	private static final double GNSS2D              = DefaultUncertainty.getUncertaintyGNSSZeroPointOffset() * 10.0;
+	private static final double GNSS3D              = DefaultUncertainty.getUncertaintyGNSSZeroPointOffset() * 10.0;
 	
 	private final static Properties PROPERTIES = new Properties();
 	
