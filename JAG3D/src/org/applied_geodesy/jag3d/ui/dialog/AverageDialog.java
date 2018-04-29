@@ -216,15 +216,15 @@ public class AverageDialog {
 		gridPane.setAlignment(Pos.TOP_CENTER);
 
 		int row = 0;
-		this.addRow(gridPane, ++row, ObservationType.LEVELING);
-		this.addRow(gridPane, ++row, ObservationType.DIRECTION);
-		this.addRow(gridPane, ++row, ObservationType.HORIZONTAL_DISTANCE);
-		this.addRow(gridPane, ++row, ObservationType.SLOPE_DISTANCE);
-		this.addRow(gridPane, ++row, ObservationType.ZENITH_ANGLE);
+		this.addRow(gridPane, row++, ObservationType.LEVELING);
+		this.addRow(gridPane, row++, ObservationType.DIRECTION);
+		this.addRow(gridPane, row++, ObservationType.HORIZONTAL_DISTANCE);
+		this.addRow(gridPane, row++, ObservationType.SLOPE_DISTANCE);
+		this.addRow(gridPane, row++, ObservationType.ZENITH_ANGLE);
 
-		this.addRow(gridPane, ++row, ObservationType.GNSS1D);
-		this.addRow(gridPane, ++row, ObservationType.GNSS2D);
-		this.addRow(gridPane, ++row, ObservationType.GNSS3D);
+		this.addRow(gridPane, row++, ObservationType.GNSS1D);
+		this.addRow(gridPane, row++, ObservationType.GNSS2D);
+		this.addRow(gridPane, row++, ObservationType.GNSS3D);
 
 		Label warningLabel = new Label(i18n.getString("AverageDialog.warning.label", "Please note: Averaging repeated measurements will reduce\r\nthe number of observations and is an irreversible process"));
 		warningLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
