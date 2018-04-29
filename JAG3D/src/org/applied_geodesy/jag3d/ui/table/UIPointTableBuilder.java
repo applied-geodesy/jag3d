@@ -1234,7 +1234,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 
 		if (!row.isSelected() && item != null) {
 			switch(tableRowHighlightType) {
-			case SIGNIFICANCE:
+			case TEST_STATISTIC:
 				if (this.type != PointType.NEW_POINT)
 					this.setTableRowHighlight(row, item.isSignificant() || item.isSignificantDeflection() ? TableRowHighlightRangeType.INADEQUATE : TableRowHighlightRangeType.EXCELLENT);
 				break;
@@ -1294,14 +1294,14 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 				break;
 				
 			case NONE:
-				setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 				
 				break;
 			}
 
 		} 
 		else {
-			setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+			this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 		}
 	}
 }

@@ -894,7 +894,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 		if (!row.isSelected() && item != null) {
 			switch(tableRowHighlightType) {
-			case SIGNIFICANCE:
+			case TEST_STATISTIC:
 				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.INADEQUATE : TableRowHighlightRangeType.EXCELLENT);
 				break;
 				
@@ -911,14 +911,14 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				break;
 				
 			case NONE:
-				setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 				
 				break;
 			}
 
 		} 
 		else {
-			setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+			this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 		}
 	}
 }
