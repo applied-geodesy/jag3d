@@ -21,7 +21,7 @@
 		"direction" :            "Richtungen",
 		"horizontal_distance" :  "Horizontalstrecken",
 		"slope_distance" :       "Raumstrecken",
-		"zenithangle" :          "Zenitwinkel",
+		"zenith_angle" :         "Zenitwinkel",
 		"gnss1d" :               "GNSS Basislinien 1D",
 		"gnss2d" :               "GNSS Basislinien 2D",
 		"gnss3d" :               "GNSS Basislinien 3D"

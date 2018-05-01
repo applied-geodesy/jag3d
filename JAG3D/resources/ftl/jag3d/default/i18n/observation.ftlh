@@ -21,7 +21,7 @@
 		"direction" :            "Directions",
 		"horizontal_distance" :  "Horizontal Distances",
 		"slope_distance" :       "Slope Distances",
-		"zenithangle" :          "Zenith Angles",
+		"zenith_angle" :         "Zenith Angles",
 		"gnss1d" :               "GNSS Baseline 1D",
 		"gnss2d" :               "GNSS Baseline 2D",
 		"gnss3d" :               "GNSS Baseline 3D"

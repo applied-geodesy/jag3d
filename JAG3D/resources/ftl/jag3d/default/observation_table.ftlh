@@ -17,7 +17,7 @@
 				<#elseif group.type == "SLOPE_DISTANCE">
 					<#outputformat "plainText">${observation_type_map['slope_distance']}</#outputformat>:
 				<#elseif group.type == "ZENITH_ANGLE">
-					<#outputformat "plainText">${observation_type_map['zenithangle']}</#outputformat>:
+					<#outputformat "plainText">${observation_type_map['zenith_angle']}</#outputformat>:
 				<#elseif group.type == "GNSS1D">
 					<#outputformat "plainText">${observation_type_map['gnss1d']}</#outputformat>:
 				<#elseif group.type == "GNSS2D">

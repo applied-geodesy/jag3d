@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.applied_geodesy.adjustment.network.observation.projection.Projection;
@@ -50,6 +51,7 @@ import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.ui.table.CellValueType;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.util.FormatterOptions.FormatterOption;
 import org.applied_geodesy.util.sql.DataBase;
@@ -134,6 +136,8 @@ public class FTLReport {
 		this.addPointGroups();
 		this.addObservations();
 		this.addCongruenceAnalysis();
+		
+		this.addChartAndStatisticValues();
 	}
 
 	public String getSuggestedFileName() {
@@ -470,6 +474,236 @@ public class FTLReport {
 		groups.addAll(this.getCongruenceAnalysisPointPairGroups(3));
 
 		this.setParam("congruence_analysis_groups", groups);
+	}
+	
+	private void addChartAndStatisticValues() throws SQLException {
+		ObservationType[] terrestrialObservationTypes = new ObservationType[] {
+				ObservationType.LEVELING,
+				ObservationType.DIRECTION,
+				ObservationType.HORIZONTAL_DISTANCE,
+				ObservationType.SLOPE_DISTANCE,
+				ObservationType.ZENITH_ANGLE
+		};
+		
+		HashMap<String, ArrayList<HashMap<String, Object>>> chartValues = new HashMap<String, ArrayList<HashMap<String, Object>>>();
+		HashMap<String, ArrayList<HashMap<String, Object>>> reliabilitySummary = new HashMap<String, ArrayList<HashMap<String, Object>>>();
+		
+		chartValues.put("redundancy",            new ArrayList<HashMap<String, Object>>(10));
+		chartValues.put("p_prio",                new ArrayList<HashMap<String, Object>>(10));
+		chartValues.put("influence_on_position", new ArrayList<HashMap<String, Object>>(10));
+		
+		reliabilitySummary.put("redundancy",            new ArrayList<HashMap<String, Object>>(10));
+		reliabilitySummary.put("p_prio",                new ArrayList<HashMap<String, Object>>(10));
+		reliabilitySummary.put("influence_on_position", new ArrayList<HashMap<String, Object>>(10));
+		
+		for (ObservationType observationType : terrestrialObservationTypes) {
+			chartValues.get("redundancy").add(this.getRelativeAndAbsoluteFrequency(observationType, TableRowHighlightType.REDUNDANCY));
+			chartValues.get("p_prio").add(this.getRelativeAndAbsoluteFrequency(observationType, TableRowHighlightType.P_PRIO_VALUE));
+			chartValues.get("influence_on_position").add(this.getRelativeAndAbsoluteFrequency(observationType, TableRowHighlightType.INFLUENCE_ON_POSITION));
+			
+			reliabilitySummary.get("redundancy").addAll(this.getReliabilitySummary(observationType, TableRowHighlightType.REDUNDANCY));
+			reliabilitySummary.get("p_prio").addAll(this.getReliabilitySummary(observationType, TableRowHighlightType.P_PRIO_VALUE));
+			reliabilitySummary.get("influence_on_position").addAll(this.getReliabilitySummary(observationType, TableRowHighlightType.INFLUENCE_ON_POSITION));
+		}
+		
+		this.setParam("chart_values", chartValues);
+		this.setParam("reliability_summary", reliabilitySummary);
+	}
+	
+	private List<HashMap<String, Object>> getReliabilitySummary(ObservationType observationType, TableRowHighlightType tableRowHighlightType) throws SQLException {
+		List<HashMap<String, Object>> summary = new ArrayList<HashMap<String, Object>>();
+		
+		Map<TableRowHighlightType, String[]> subQueryParts = Map.of(
+				TableRowHighlightType.REDUNDANCY, new String[] {
+						"\"redundancy\"",
+						"\"redundancy\"",
+						"MIN(\"redundancy\")",
+						"AVG(\"redundancy\")",
+						"\"redundancy\" > 0"
+				}, 
+				
+				TableRowHighlightType.P_PRIO_VALUE, new String[] {
+						"\"p_prio\"",
+						"\"p_prio\"",
+						"MIN(\"p_prio\")",
+						"AVG(\"p_prio\")",
+						""
+				}, 
+				TableRowHighlightType.INFLUENCE_ON_POSITION, new String[] {
+						"\"influence_on_position\"",
+						"ABS(\"influence_on_position\")",
+						"MAX(ABS(\"influence_on_position\"))",
+						"AVG(ABS(\"influence_on_position\"))",
+						""
+				}
+		);
+		
+		if (!subQueryParts.containsKey(tableRowHighlightType))
+			return summary;
+		
+		String type       = subQueryParts.get(tableRowHighlightType)[0];
+		String selectType = subQueryParts.get(tableRowHighlightType)[1];
+		String minMaxType = subQueryParts.get(tableRowHighlightType)[2];
+		String avgType    = subQueryParts.get(tableRowHighlightType)[3];
+		String constraint = subQueryParts.get(tableRowHighlightType)[4];
+		
+		if (constraint == null || constraint.isEmpty())
+			constraint = "";
+		else
+			constraint = " AND " + constraint + " ";
+		
+		String template = "SELECT "
+				+ "\"start_point_name\", "
+				+ "\"end_point_name\", "
+				+ "%s AS \"value\", "
+				+ "\"name\" AS \"group_name\", "
+				+ "(SELECT %s FROM \"ObservationApriori\" "
+				+ "JOIN \"ObservationAposteriori\" ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
+				+ "JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				+ "WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"type\" = ? %s) AS \"average\" "
+				+ "FROM \"ObservationApriori\" "
+				+ "JOIN \"ObservationAposteriori\" ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
+				+ "JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				+ "WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"type\" = ? %s AND "
+				+ "%s = (SELECT %s FROM \"ObservationApriori\" "
+				+ "JOIN \"ObservationAposteriori\" ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
+				+ "JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				+ "WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"type\" = ? %s)";
+
+		String sql = String.format(Locale.ENGLISH, template, 
+				type,
+				avgType,
+				constraint,
+				constraint,
+				selectType,
+				minMaxType,
+				constraint
+		);
+		
+		int idx = 1;
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(idx++, observationType.getId());
+		stmt.setInt(idx++, observationType.getId());
+		stmt.setInt(idx++, observationType.getId());
+		
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			HashMap<String, Object> statistics = new HashMap<String, Object>();
+			statistics.put("start_point_name", rs.getString("start_point_name"));
+			statistics.put("end_point_name",   rs.getString("end_point_name"));
+			statistics.put("group_name",       rs.getString("group_name"));
+			statistics.put("type",             observationType.name());
+			
+			switch(observationType) {
+			case DIRECTION:
+			case ZENITH_ANGLE:
+				statistics.put("value",   options.convertAngleToView(rs.getDouble("value")));
+				statistics.put("average", options.convertAngleToView(rs.getDouble("average")));
+				break;
+				
+			default:
+				statistics.put("value",   options.convertLengthToView(rs.getDouble("value")));
+				statistics.put("average", options.convertLengthToView(rs.getDouble("average")));
+				break;
+			}
+			
+			summary.add(statistics);
+		}
+		
+		return summary;
+	}
+	
+	private double[] getTableRowHighlightRange(TableRowHighlightType tableRowHighlightType) throws SQLException {
+		String sql = "SELECT "
+				+ "\"left_boundary\", \"right_boundary\" "
+				+ "FROM \"TableRowHighlightRange\" "
+				+ "WHERE \"type\" = ? LIMIT 1";
+
+		int idx = 1;
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(idx++, tableRowHighlightType.getId());
+
+		ResultSet rs = stmt.executeQuery();
+		if (rs.next()) {
+			double leftBoundary  = rs.getDouble("left_boundary");
+			double rightBoundary = rs.getDouble("right_boundary");
+			return new double[] {leftBoundary, rightBoundary};
+		}
+		return null;
+	}
+	
+	private HashMap<String, Object> getRelativeAndAbsoluteFrequency(ObservationType observationType, TableRowHighlightType tableRowHighlightType) throws SQLException {
+		HashMap<String, Object> part = new HashMap<String, Object>();
+		
+		Map<TableRowHighlightType, String> columnNames = Map.of(
+				TableRowHighlightType.REDUNDANCY,            "\"redundancy\"", 
+				TableRowHighlightType.P_PRIO_VALUE,          "\"p_prio\"", 
+				TableRowHighlightType.INFLUENCE_ON_POSITION, "ABS(\"influence_on_position\")"
+		);
+		double range[] = this.getTableRowHighlightRange(tableRowHighlightType);
+		if (range == null || range.length < 2 || !columnNames.containsKey(tableRowHighlightType))
+			return part;
+		
+		part.put("type", observationType.name());
+		part.put("left_boundary",  tableRowHighlightType == TableRowHighlightType.INFLUENCE_ON_POSITION ? options.convertLengthResidualToView(range[0]) : range[0]);
+		part.put("right_boundary", tableRowHighlightType == TableRowHighlightType.INFLUENCE_ON_POSITION ? options.convertLengthResidualToView(range[1]) : range[1]);
+		
+		if (tableRowHighlightType == TableRowHighlightType.P_PRIO_VALUE) {
+			range[0] = Math.log(range[0] / 100.0);
+			range[1] = Math.log(range[1] / 100.0);
+		}
+
+		String sql = "SELECT COUNT(*) AS \"value\" FROM \"ObservationApriori\" "
+				+ "JOIN \"ObservationAposteriori\" ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
+				+ "JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				+ "WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"type\" = ? "
+				+ "UNION ALL "
+				+ "SELECT COUNT(*) FROM \"ObservationApriori\" "
+				+ "JOIN \"ObservationAposteriori\" ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
+				+ "JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				+ "WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"type\" = ? AND " + columnNames.get(tableRowHighlightType) + " < ? "
+				+ "UNION ALL "
+				+ "SELECT COUNT(*) FROM \"ObservationApriori\" "
+				+ "JOIN \"ObservationAposteriori\" ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
+				+ "JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				+ "WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"type\" = ? AND " + columnNames.get(tableRowHighlightType) + " BETWEEN ? AND ? "
+				+ "UNION ALL "
+				+ "SELECT COUNT(*) FROM \"ObservationApriori\" "
+				+ "JOIN \"ObservationAposteriori\" ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
+				+ "JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				+ "WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"type\" = ? AND " + columnNames.get(tableRowHighlightType) + " > ? ";
+		
+		int idx = 1;
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(idx++, observationType.getId()); // number of values
+		
+		stmt.setInt(idx++, observationType.getId()); // inadequate values
+		stmt.setDouble(idx++, range[0]);
+
+		stmt.setInt(idx++, observationType.getId()); // satisfactory values
+		stmt.setDouble(idx++, range[0]);
+		stmt.setDouble(idx++, range[1]);
+		
+		stmt.setInt(idx++, observationType.getId()); // excellent values
+		stmt.setDouble(idx++, range[1]);
+		
+		ResultSet rs = stmt.executeQuery();
+		
+		int absoluteFrequency[] = new int[4];
+		int i=0;
+		while (rs.next() && i<absoluteFrequency.length) {
+			absoluteFrequency[i++] = rs.getInt("value");
+		}
+		
+		int numberOfValues = absoluteFrequency[0];
+		part.put("number_of_observations", numberOfValues);
+		
+		for (int j=1; numberOfValues > 0 && j<absoluteFrequency.length; j++) {
+			part.put("absolute_frequency_part_"+j, absoluteFrequency[j]);
+			part.put("relative_frequency_part_"+j, numberOfValues > 0 ? (100.0*absoluteFrequency[j])/(double)numberOfValues : 0 );
+		}
+
+		return part;
 	}
 
 	private List<HashMap<String, Object>> getPointGroups(int dim, PointType pointType) throws SQLException {

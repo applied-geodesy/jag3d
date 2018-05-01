@@ -72,7 +72,12 @@
 				<#include "default/observation_table.ftlh" parse=true>
 				<#include "default/additional_parameter_table.ftlh" parse=true>
 			</article>
-
+			
+			<article>
+				<#include "default/reliability_table.ftlh" parse=true>
+				<#include "default/chart.ftlh" parse=true>
+			</article>
+			
 		</body>
 	</html>
 </#compress>
