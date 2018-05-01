@@ -1160,7 +1160,6 @@ public class ColumnImportDialog {
 		label.setPadding(new Insets(0,0,0,3));
 		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		label.setPadding(new Insets(0,0,0,3));
 		RadioButton radioButton = new RadioButton();
 		radioButton.setGraphic(label);
 		radioButton.setTooltip(new Tooltip(tooltip));
