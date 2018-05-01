@@ -36,6 +36,7 @@ import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ProjectionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.RankDefectDialog;
 import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog;
+import org.applied_geodesy.jag3d.ui.dialog.TableRowHighlightDialog;
 import org.applied_geodesy.jag3d.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.jag3d.ui.graphic.layer.dialog.LayerManagerDialog;
 import org.applied_geodesy.jag3d.ui.io.DefaultFileChooser;
@@ -107,6 +108,7 @@ public class JAG3D extends Application {
 		SearchAndReplaceDialog.setOwner(primaryStage);
 		AboutDialog.setOwner(primaryStage);
 		ColumnImportDialog.setOwner(primaryStage);
+		TableRowHighlightDialog.setOwner(primaryStage);
 	}
 
 	@Override

@@ -19,8 +19,30 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.table;
+package org.applied_geodesy.jag3d.ui.table.rowhighlight;
 
-enum TableRowHighlightRangeType {
-	NONE, INADEQUATE, ADEQUATE, SATISFACTORY, EXCELLENT
+public enum TableRowHighlightType {
+	NONE(0), 
+	TEST_STATISTIC(1), 
+	REDUNDANCY(2), 
+	INFLUENCE_ON_POSITION(3), 
+	P_PRIO_VALUE(4)
+	;
+
+	private int id;
+	private TableRowHighlightType(int id) {
+		this.id = id;
+	}
+
+	public final int getId() {
+		return id;
+	}
+
+	public static TableRowHighlightType getEnumByValue(int value) {
+		for(TableRowHighlightType element : TableRowHighlightType.values()) {
+			if(element.id == value)
+				return element;
+		}
+		return NONE;
+	}  
 }

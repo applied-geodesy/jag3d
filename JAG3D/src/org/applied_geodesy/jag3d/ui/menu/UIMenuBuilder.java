@@ -57,11 +57,6 @@ import org.applied_geodesy.jag3d.ui.JAG3D;
 import org.applied_geodesy.jag3d.ui.dialog.ColumnImportDialog;
 import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.io.DefaultFileChooser;
-import org.applied_geodesy.jag3d.ui.table.TableRowHighlightType;
-import org.applied_geodesy.jag3d.ui.table.UICongruenceAnalysisTableBuilder;
-import org.applied_geodesy.jag3d.ui.table.UIGNSSObservationTableBuilder;
-import org.applied_geodesy.jag3d.ui.table.UIPointTableBuilder;
-import org.applied_geodesy.jag3d.ui.table.UITerrestrialObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.i18.I18N;
@@ -93,9 +88,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.KeyCode;
@@ -251,31 +244,11 @@ public class UIMenuBuilder {
 
 	private void createAnalysisMenu(Menu parentMenu) {
 		MenuItem congruentPointItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.congruentpoint.label", "Congr_uent points"), true, MenuItemType.CONGRUENT_POINT, new KeyCodeCombination(KeyCode.P, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-
-		Menu rowHighlightMenu = createMenu(i18n.getString("UIMenuBuilder.menu.analysis.highlight.label", "Ro_w highlighting"), true);
-		ToggleGroup highlightToggleGroup = new ToggleGroup();
-		
-		RadioMenuItem noneRowHighlightItem = createRadioMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.highlight.none.label", "None"), true, MenuItemType.HIGHLIGHT_NONE, new KeyCodeCombination(KeyCode.J, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-		noneRowHighlightItem.setToggleGroup(highlightToggleGroup);
-		
-		RadioMenuItem significanceRowHighlightItem = createRadioMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.highlight.significance.label", "Significance"), true, MenuItemType.HIGHLIGHT_SIGNIFICANCE, new KeyCodeCombination(KeyCode.K, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-		significanceRowHighlightItem.setToggleGroup(highlightToggleGroup);
-		
-		RadioMenuItem redundancyRowHighlightItem = createRadioMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.highlight.redundancy.label", "Redundancy"), true, MenuItemType.HIGHLIGHT_REDUNDANCY, new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-		redundancyRowHighlightItem.setToggleGroup(highlightToggleGroup);
-		
-		noneRowHighlightItem.setSelected(true);
-		
-		rowHighlightMenu.getItems().addAll(
-				noneRowHighlightItem,
-				significanceRowHighlightItem,
-				redundancyRowHighlightItem
-				);
+		MenuItem rowHighlightItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.highlight.label", "Ro_w highlighting"), true, MenuItemType.HIGHLIGHT_TABLE_ROWS, new KeyCodeCombination(KeyCode.H, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 				
 		parentMenu.getItems().addAll(
 				congruentPointItem,
-				new SeparatorMenuItem(),
-				rowHighlightMenu
+				rowHighlightItem
 				);
 	}
 
@@ -576,16 +549,16 @@ public class UIMenuBuilder {
 		return menu;
 	}
 
-	private static RadioMenuItem createRadioMenuItem(String label, boolean mnemonicParsing, MenuItemType menuItemType, KeyCodeCombination keyCodeCombination, MenuEventHandler menuEventHandler, boolean disable) {
-		RadioMenuItem menuItem = new RadioMenuItem(label);
-		menuItem.setMnemonicParsing(mnemonicParsing);
-		if (keyCodeCombination != null)
-			menuItem.setAccelerator(keyCodeCombination);
-		menuItem.setOnAction(menuEventHandler);
-		menuItem.setDisable(disable);
-		menuItem.setUserData(menuItemType);
-		return menuItem;
-	}
+//	private static RadioMenuItem createRadioMenuItem(String label, boolean mnemonicParsing, MenuItemType menuItemType, KeyCodeCombination keyCodeCombination, MenuEventHandler menuEventHandler, boolean disable) {
+//		RadioMenuItem menuItem = new RadioMenuItem(label);
+//		menuItem.setMnemonicParsing(mnemonicParsing);
+//		if (keyCodeCombination != null)
+//			menuItem.setAccelerator(keyCodeCombination);
+//		menuItem.setOnAction(menuEventHandler);
+//		menuItem.setDisable(disable);
+//		menuItem.setUserData(menuItemType);
+//		return menuItem;
+//	}
 	
 	private static MenuItem createMenuItem(MenuItem menuItem, boolean mnemonicParsing, MenuItemType menuItemType, KeyCodeCombination keyCodeCombination, MenuEventHandler menuEventHandler, boolean disable) {
 		menuItem.setMnemonicParsing(mnemonicParsing);
@@ -788,28 +761,6 @@ public class UIMenuBuilder {
 			int index = treeView.getRow(lastItem);
 			treeView.scrollTo(index);
 		}
-	}
-	
-	void highlightTableRows(MenuItemType menuItemType) {
-		TableRowHighlightType tableRowHighlightType;
-		switch(menuItemType) {
-		case HIGHLIGHT_SIGNIFICANCE:
-			tableRowHighlightType = TableRowHighlightType.SIGNIFICANCE;
-			break;
-
-		case HIGHLIGHT_REDUNDANCY:
-			tableRowHighlightType = TableRowHighlightType.REDUNDANCY;
-			break;
-
-		default:
-			tableRowHighlightType = TableRowHighlightType.NONE;
-			break;
-		}
-		
-		UITerrestrialObservationTableBuilder.getInstance().setTableRowHighlightType(tableRowHighlightType);
-		UIGNSSObservationTableBuilder.getInstance().setTableRowHighlightType(tableRowHighlightType);
-		UIPointTableBuilder.getInstance().setTableRowHighlightType(tableRowHighlightType);
-		UICongruenceAnalysisTableBuilder.getInstance().setTableRowHighlightType(tableRowHighlightType);
 	}
 
 	void importFile(MenuItemType menuItemType) {

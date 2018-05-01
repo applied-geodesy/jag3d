@@ -50,7 +50,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 		NON_NULL_VALUE_SUPPORT;
 	}
 	
-	FormatterOptions options = FormatterOptions.getInstance();
+	private FormatterOptions options = FormatterOptions.getInstance();
 	private final static int EDITOR_ADDITIONAL_DIGITS = 10;
 	private NumberFormat editorNumberFormat;
 	private final CellValueType type;
@@ -78,20 +78,20 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 		this.valueSupport = valueSupport;
 		this.displayUnit  = displayUnit;
 
-		if (!this.check(value))
-			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, value is not supported " + value + " vs. " + valueSupport);
-		
-		this.setNumber(value);
+		if (this.check(value))
+			this.setNumber(value);
 		this.prepareEditorNumberFormat();
 		this.initHandlers();
 		this.setTextFormatter(this.addTextFormatter());
-		this.setText(this.getRendererFormat(value));
 		
-		options.addFormatterChangedListener(this);
+		if (this.check(value))
+			this.setText(this.getRendererFormat(value));
+		
+		this.options.addFormatterChangedListener(this);
 	}
 	
 	private void prepareEditorNumberFormat() {
-		this.editorNumberFormat = (NumberFormat)options.getFormatterOptions().get(this.type).getFormatter().clone();
+		this.editorNumberFormat = (NumberFormat)this.options.getFormatterOptions().get(this.type).getFormatter().clone();
 		this.editorNumberFormat.setMinimumFractionDigits(this.editorNumberFormat.getMaximumFractionDigits());
 		this.editorNumberFormat.setMaximumFractionDigits(this.editorNumberFormat.getMaximumFractionDigits() + EDITOR_ADDITIONAL_DIGITS);
 	}
@@ -178,41 +178,41 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 
 		switch(this.type) {
 		case ANGLE:
-			return editorNumberFormat.format(options.convertAngleToView(value.doubleValue()));
+			return editorNumberFormat.format(this.options.convertAngleToView(value.doubleValue()));
 			
 		case ANGLE_RESIDUAL:
-			return editorNumberFormat.format(options.convertAngleResidualToView(value.doubleValue()));
+			return editorNumberFormat.format(this.options.convertAngleResidualToView(value.doubleValue()));
 
 		case ANGLE_UNCERTAINTY:
-			return editorNumberFormat.format(options.convertAngleUncertaintyToView(value.doubleValue()));
+			return editorNumberFormat.format(this.options.convertAngleUncertaintyToView(value.doubleValue()));
 
 		case LENGTH:
-			return editorNumberFormat.format(options.convertLengthToView(value.doubleValue()));
+			return editorNumberFormat.format(this.options.convertLengthToView(value.doubleValue()));
 
 		case LENGTH_RESIDUAL:
-			return editorNumberFormat.format(options.convertLengthResidualToView(value.doubleValue()));
+			return editorNumberFormat.format(this.options.convertLengthResidualToView(value.doubleValue()));
 
 		case LENGTH_UNCERTAINTY:
-			return editorNumberFormat.format(options.convertLengthUncertaintyToView(value.doubleValue()));
+			return editorNumberFormat.format(this.options.convertLengthUncertaintyToView(value.doubleValue()));
 	
 		case SCALE:
-			return editorNumberFormat.format(options.convertScaleToView(value.doubleValue()));
+			return editorNumberFormat.format(this.options.convertScaleToView(value.doubleValue()));
 			
 		case SCALE_RESIDUAL:
-			return editorNumberFormat.format(options.convertScaleResidualToView(value.doubleValue()));
+			return editorNumberFormat.format(this.options.convertScaleResidualToView(value.doubleValue()));
 
 		case SCALE_UNCERTAINTY:
-			return editorNumberFormat.format(options.convertScaleUncertaintyToView(value.doubleValue()));
+			return editorNumberFormat.format(this.options.convertScaleUncertaintyToView(value.doubleValue()));
 			
 		case STATISTIC:
 		case DOUBLE:
 			return editorNumberFormat.format(value.doubleValue());
 
 		case VECTOR:
-			return editorNumberFormat.format(options.convertVectorToView(value.doubleValue()));
+			return editorNumberFormat.format(this.options.convertVectorToView(value.doubleValue()));
 
 		case VECTOR_UNCERTAINTY:
-			return editorNumberFormat.format(options.convertVectorUncertaintyToView(value.doubleValue()));
+			return editorNumberFormat.format(this.options.convertVectorUncertaintyToView(value.doubleValue()));
 
 		default:
 			return editorNumberFormat.format(value.doubleValue());
@@ -227,40 +227,40 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 		
 		switch(this.type) {
 		case ANGLE:
-			return options.toAngleFormat(value.doubleValue(), this.displayUnit);
+			return this.options.toAngleFormat(value.doubleValue(), this.displayUnit);
 			
 		case ANGLE_RESIDUAL:
-			return options.toAngleResidualFormat(value.doubleValue(), this.displayUnit);
+			return this.options.toAngleResidualFormat(value.doubleValue(), this.displayUnit);
 
 		case ANGLE_UNCERTAINTY:
-			return options.toAngleUncertaintyFormat(value.doubleValue(), this.displayUnit);
+			return this.options.toAngleUncertaintyFormat(value.doubleValue(), this.displayUnit);
 
 		case LENGTH:
-			return options.toLengthFormat(value.doubleValue(), this.displayUnit);
+			return this.options.toLengthFormat(value.doubleValue(), this.displayUnit);
 
 		case LENGTH_RESIDUAL:
-			return options.toLengthResidualFormat(value.doubleValue(), this.displayUnit);
+			return this.options.toLengthResidualFormat(value.doubleValue(), this.displayUnit);
 
 		case LENGTH_UNCERTAINTY:
-			return options.toLengthUncertaintyFormat(value.doubleValue(), this.displayUnit);
+			return this.options.toLengthUncertaintyFormat(value.doubleValue(), this.displayUnit);
 
 		case SCALE:
-			return options.toScaleFormat(value.doubleValue(), this.displayUnit);
+			return this.options.toScaleFormat(value.doubleValue(), this.displayUnit);
 			
 		case SCALE_RESIDUAL:
-			return options.toScaleResidualFormat(value.doubleValue(), this.displayUnit);
+			return this.options.toScaleResidualFormat(value.doubleValue(), this.displayUnit);
 
 		case SCALE_UNCERTAINTY:
-			return options.toScaleUncertaintyFormat(value.doubleValue(), this.displayUnit);
+			return this.options.toScaleUncertaintyFormat(value.doubleValue(), this.displayUnit);
 
 		case STATISTIC:
-			return options.toStatisticFormat(value.doubleValue());
+			return this.options.toStatisticFormat(value.doubleValue());
 
 		case VECTOR:
-			return options.toVectorFormat(value.doubleValue(), this.displayUnit);
+			return this.options.toVectorFormat(value.doubleValue(), this.displayUnit);
 
 		case VECTOR_UNCERTAINTY:
-			return options.toVectorUncertaintyFormat(value.doubleValue(), this.displayUnit);
+			return this.options.toVectorUncertaintyFormat(value.doubleValue(), this.displayUnit);
 
 		default:
 			return null;
@@ -277,44 +277,44 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 			String input = this.getText();
 			if (input != null && !input.trim().isEmpty()) {
 				input = input.replaceAll(",", ".");
-				newValue = options.getFormatterOptions().get(this.type).parse(input).doubleValue();
+				newValue = this.options.getFormatterOptions().get(this.type).parse(input).doubleValue();
 				if (newValue != null) {
 					switch(this.type) {
 					case ANGLE:
-						newValue = options.convertAngleToModel(newValue.doubleValue());
+						newValue = this.options.convertAngleToModel(newValue.doubleValue());
 						break;
 					case ANGLE_RESIDUAL:
-						newValue = options.convertAngleResidualToModel(newValue.doubleValue());
+						newValue = this.options.convertAngleResidualToModel(newValue.doubleValue());
 						break;
 					case ANGLE_UNCERTAINTY:
-						newValue = options.convertAngleUncertaintyToModel(newValue.doubleValue());
+						newValue = this.options.convertAngleUncertaintyToModel(newValue.doubleValue());
 						break;
 					case LENGTH:
-						newValue = options.convertLengthToModel(newValue.doubleValue());
+						newValue = this.options.convertLengthToModel(newValue.doubleValue());
 						break;
 					case LENGTH_RESIDUAL:
-						newValue = options.convertLengthResidualToModel(newValue.doubleValue());
+						newValue = this.options.convertLengthResidualToModel(newValue.doubleValue());
 						break;
 					case LENGTH_UNCERTAINTY:
-						newValue = options.convertLengthUncertaintyToModel(newValue.doubleValue());
+						newValue = this.options.convertLengthUncertaintyToModel(newValue.doubleValue());
 						break;
 					case SCALE:
-						newValue = options.convertScaleToModel(newValue.doubleValue());
+						newValue = this.options.convertScaleToModel(newValue.doubleValue());
 						break;
 					case SCALE_RESIDUAL:
-						newValue = options.convertScaleResidualToModel(newValue.doubleValue());
+						newValue = this.options.convertScaleResidualToModel(newValue.doubleValue());
 						break;
 					case SCALE_UNCERTAINTY:
-						newValue = options.convertScaleUncertaintyToModel(newValue.doubleValue());
+						newValue = this.options.convertScaleUncertaintyToModel(newValue.doubleValue());
 						break;
 					case STATISTIC:
 						newValue = newValue.doubleValue();
 						break;
 					case VECTOR:
-						newValue = options.convertVectorToModel(newValue.doubleValue());
+						newValue = this.options.convertVectorToModel(newValue.doubleValue());
 						break;
 					case VECTOR_UNCERTAINTY:
-						newValue = options.convertVectorUncertaintyToModel(newValue.doubleValue());
+						newValue = this.options.convertVectorUncertaintyToModel(newValue.doubleValue());
 						break;
 					default:
 						newValue = newValue.doubleValue();
@@ -354,6 +354,10 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 	
 	public boolean isDisplayUnit() {
 		return this.displayUnit;
+	}
+	
+	public ValueSupport getValueSupport() {
+		return this.valueSupport;
 	}
 
 	@Override

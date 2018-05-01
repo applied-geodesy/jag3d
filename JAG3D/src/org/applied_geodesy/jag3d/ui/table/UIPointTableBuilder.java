@@ -36,6 +36,9 @@ import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dnd.PointRowDnD;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 import org.applied_geodesy.jag3d.ui.tree.EditableMenuCheckBoxTreeCell;
 import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
@@ -1226,9 +1229,14 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 	}
 	
 	@Override
-	void highlightTableRow(TableRow<PointRow> row, TableRowHighlightType tableRowHighlightType) {
+	void highlightTableRow(TableRow<PointRow> row) {
 		if (row == null)
 			return;
+		
+		TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
+		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getTableRowHighlightType(); 
+		double leftBoundary  = tableRowHighlight.getLeftBoundary(); 
+		double rightBoundary = tableRowHighlight.getRightBoundary();
 
 		PointRow item = row.getItem();
 
@@ -1244,52 +1252,65 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 					Double redundancyX = item.getRedundancyX();
 					Double redundancyY = item.getRedundancyY();
 					Double redundancyZ = item.getRedundancyZ();
+					Double redundancy = null;
+					
+					if (this.dimension == 1 && redundancyZ != null) 
+						redundancy = redundancyZ;
 
-					if (this.dimension != 2 && redundancyZ == null)
-						redundancyZ = 1.0;
-
-					if (this.dimension != 1 && redundancyY == null)
-						redundancyY = 1.0;
-
-					if (this.dimension != 1 && redundancyX == null)
-						redundancyX = 1.0;
-
-					boolean inadequate = false, adequate = false, satisfactory = false;
-					switch (this.dimension) {
-					case 3:
-						inadequate   = redundancyX < 0.1 && redundancyY < 0.1 && redundancyZ < 0.1;
-						adequate     = !inadequate && redundancyX < 0.3 && redundancyY < 0.3 && redundancyZ < 0.3;
-						satisfactory = !inadequate && !adequate && redundancyX < 0.7 && redundancyY < 0.7 && redundancyZ < 0.7;
-
+					else if (this.dimension == 2 && redundancyY != null && redundancyX != null) 
+						redundancy = Math.min(redundancyY, redundancyX);
+					
+					else if (this.dimension == 3 && redundancyY != null && redundancyX != null && redundancyZ != null) {
+						redundancy = Math.min(redundancyZ, Math.min(redundancyY, redundancyX));
 						// check deflections
 						if (item.getRedundancyXDeflection() != null && item.getRedundancyYDeflection() != null) {
-							inadequate   = redundancyX < 0.1 && redundancyY < 0.1 && redundancyZ < 0.1 && item.getRedundancyXDeflection() < 0.1 && item.getRedundancyYDeflection() < 0.1;
-							adequate     = !inadequate && redundancyX < 0.3 && redundancyY < 0.3 && redundancyZ < 0.3 && item.getRedundancyXDeflection() < 0.3 && item.getRedundancyYDeflection() < 0.3;
-							satisfactory = !inadequate && !adequate && redundancyX < 0.7 && redundancyY < 0.7 && redundancyZ < 0.7 && item.getRedundancyXDeflection() < 0.7 && item.getRedundancyYDeflection() < 0.7;
+							redundancy = Math.min(redundancy, item.getRedundancyXDeflection());
+							redundancy = Math.min(redundancy, item.getRedundancyYDeflection());
 						}
-
-						break;
-
-					case 2:
-						inadequate   = redundancyX < 0.1 && redundancyY < 0.1;
-						adequate     = !inadequate && redundancyX < 0.3 && redundancyY < 0.3;
-						satisfactory = !inadequate && !adequate && redundancyX < 0.7 && redundancyY < 0.7;
-
-						break;
-
-					default: // 1
-						inadequate   = redundancyZ < 0.1;
-						adequate     = !inadequate && redundancyZ < 0.3;
-						satisfactory = !inadequate && !adequate && redundancyZ < 0.7;
-
-						break;
 					}
-
-					this.setTableRowHighlight(row, inadequate ? TableRowHighlightRangeType.INADEQUATE : 
-						adequate ? TableRowHighlightRangeType.ADEQUATE :
-						satisfactory ? TableRowHighlightRangeType.SATISFACTORY :
-						TableRowHighlightRangeType.EXCELLENT);
+					
+					if (redundancy == null) 
+						this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+					else
+						this.setTableRowHighlight(row, redundancy <= leftBoundary ? TableRowHighlightRangeType.INADEQUATE : 
+							redundancy < rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
+								TableRowHighlightRangeType.EXCELLENT);
 				}
+				
+				break;
+				
+			case INFLUENCE_ON_POSITION:
+				Double influenceOnPositionX = item.getInfluenceOnPointPositionX();
+				Double influenceOnPositionY = item.getInfluenceOnPointPositionY();
+				Double influenceOnPositionZ = item.getInfluenceOnPointPositionZ();
+				Double influenceOnPosition = null;
+				
+				if (this.dimension == 1 && influenceOnPositionZ != null) 
+					influenceOnPosition = influenceOnPositionZ;
+
+				else if (this.dimension == 2 && influenceOnPositionY != null && influenceOnPositionX != null) 
+					influenceOnPosition = Math.max(influenceOnPositionY, influenceOnPositionX);
+				
+				else if (this.dimension == 3 && influenceOnPositionY != null && influenceOnPositionX != null && influenceOnPositionZ != null)
+					influenceOnPosition = Math.max(influenceOnPositionZ, Math.max(influenceOnPositionY, influenceOnPositionX));
+				
+				if (influenceOnPosition == null) 
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				else
+					this.setTableRowHighlight(row, Math.abs(influenceOnPosition) <= leftBoundary ? TableRowHighlightRangeType.EXCELLENT : 
+						Math.abs(influenceOnPosition) < rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
+							TableRowHighlightRangeType.INADEQUATE);
+				
+				break;
+				
+			case P_PRIO_VALUE:
+				Double pValue = item.getPValueApriori();
+				if (pValue == null) 
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				else
+					this.setTableRowHighlight(row, pValue <= Math.log(leftBoundary / 100.0) ? TableRowHighlightRangeType.INADEQUATE : 
+						pValue < Math.log(rightBoundary / 100.0) ? TableRowHighlightRangeType.SATISFACTORY :
+							TableRowHighlightRangeType.EXCELLENT);
 				
 				break;
 				

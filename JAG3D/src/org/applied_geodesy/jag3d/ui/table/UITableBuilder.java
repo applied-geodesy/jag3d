@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
 import org.applied_geodesy.util.FormatterChangedListener;
 import org.applied_geodesy.util.FormatterEvent;
 import org.applied_geodesy.util.FormatterOptions;
@@ -130,7 +132,6 @@ public abstract class UITableBuilder<T> {
 	final NumberAndUnitFormatterChangedListener numberAndUnitFormatterChangedListener = new NumberAndUnitFormatterChangedListener();
 	static FormatterOptions options = FormatterOptions.getInstance();
 	static I18N i18n = I18N.getInstance();
-	private TableRowHighlightType tableRowHighlightType = TableRowHighlightType.NONE;
 	TableView<T> table = this.createTable();
 
 	UITableBuilder() {
@@ -214,7 +215,7 @@ public abstract class UITableBuilder<T> {
 					public void updateItem(T item, boolean empty) {
 						super.updateItem(item, empty);
 						// highlight current row
-						highlightTableRow(this, tableRowHighlightType);
+						highlightTableRow(this);
 					}
 				};
 				// Set context menu on row, but use a binding to make it only show for non-empty rows:  
@@ -272,44 +273,16 @@ public abstract class UITableBuilder<T> {
 		return column;
 	}
 	
-	public void setTableRowHighlightType(TableRowHighlightType tableRowHighlightType) {
-		this.tableRowHighlightType = tableRowHighlightType;
+	public void refreshTable() {
 		if (this.table != null)
 			this.table.refresh();
 	}
 
-	void highlightTableRow(TableRow<T> row, TableRowHighlightType tableRowHighlightType) {}
+	void highlightTableRow(TableRow<T> row) {}
 	
 	void setTableRowHighlight(TableRow<T> row, TableRowHighlightRangeType type) {
-		Color color = null;
-		switch (type) {
-		case EXCELLENT:
-			// default green colors
-			color = row.getIndex() % 2 == 0 ? Color.rgb(188,238,104) : Color.rgb(162,205, 90);
-			break;
-			
-		case SATISFACTORY:
-			// default yellow colors
-			color = row.getIndex() % 2 == 0 ? Color.rgb(255,236,139) : Color.rgb(238,220,130);
-			break;
-			
-		case ADEQUATE:
-			// default orange colors
-			color = row.getIndex() % 2 == 0 ? Color.rgb(243, 140, 0) : Color.rgb(255, 174, 65);
-			break;
-			
-		case INADEQUATE:
-			// default red colors
-			color = row.getIndex() % 2 == 0 ? Color.rgb(255, 48, 48) : Color.rgb(238, 44, 44);
-			break;
-			
-		case NONE:
-			color = null;
-			break;
-		}
-
-		row.setStyle(color != null ? String.format("-fx-background-color: #%s;", Integer.toHexString(color.hashCode())) : "");
-
+		Color color = TableRowHighlight.getInstance().getColor(type);
+		row.setStyle(color != null && color != Color.TRANSPARENT ? String.format("-fx-background-color: #%s;", Integer.toHexString(row.getIndex() % 2 == 0 ? color.hashCode() : color.darker().hashCode())) : "");
 	}
 	
 	public abstract T getEmptyRow();

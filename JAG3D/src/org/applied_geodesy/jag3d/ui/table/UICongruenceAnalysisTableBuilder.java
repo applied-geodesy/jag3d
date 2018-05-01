@@ -35,6 +35,9 @@ import java.util.Map;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dnd.CongruenceAnalysisRowDnD;
 import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 import org.applied_geodesy.jag3d.ui.tree.CongruenceAnalysisTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.EditableMenuCheckBoxTreeCell;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
@@ -656,9 +659,12 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 	}
 	
 	@Override
-	void highlightTableRow(TableRow<CongruenceAnalysisRow> row, TableRowHighlightType tableRowHighlightType) {
+	void highlightTableRow(TableRow<CongruenceAnalysisRow> row) {
 		if (row == null)
 			return;
+		
+		TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
+		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getTableRowHighlightType(); 
 
 		CongruenceAnalysisRow item = row.getItem();
 

@@ -86,6 +86,10 @@ import org.applied_geodesy.jag3d.ui.table.row.Row;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.TestStatisticRow;
 import org.applied_geodesy.jag3d.ui.table.row.VarianceComponentRow;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.DefaultTableRowHighlightValue;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 import org.applied_geodesy.jag3d.ui.tree.CongruenceAnalysisTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
@@ -109,6 +113,7 @@ import javafx.application.HostServices;
 import javafx.collections.FXCollections;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableView;
+import javafx.scene.paint.Color;
 
 public class SQLManager {
 	private I18N i18n = I18N.getInstance();
@@ -187,6 +192,7 @@ public class SQLManager {
 	}
 
 	private void loadExistingDataBase() throws SQLException {
+		this.loadTableRowHighlight();
 		this.loadPointGroups();
 		this.loadObservationGroups();
 		this.loadGNSSObservationGroups();
@@ -273,8 +279,7 @@ public class SQLManager {
 			for ( Map.Entry<Double, String> query : querys.entrySet() ) {
 				double subDBVersion = query.getKey();
 				String sql          = query.getValue();
-
-				if (subDBVersion > databaseVersion) {
+				if (subDBVersion > databaseVersion && subDBVersion <= Version.get(VersionType.DATABASE)) {
 					stmt = this.dataBase.getPreparedStatement(sql);
 					stmt.execute();
 
@@ -428,6 +433,17 @@ public class SQLManager {
 		
 		sqls.put(20180410.0031, "ALTER TABLE \"DeflectionAposteriori\" ADD \"residual_dx\" DOUBLE DEFAULT 0 NOT NULL\r\n");
 		sqls.put(20180410.0032, "ALTER TABLE \"DeflectionAposteriori\" ADD \"residual_dy\" DOUBLE DEFAULT 0 NOT NULL\r\n");
+		
+		// add table row highlighting
+		sqls.put(20180411.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TableRowHighlightRange\" (\"type\" SMALLINT NOT NULL PRIMARY KEY, \"left_boundary\" DOUBLE NOT NULL, \"right_boundary\" DOUBLE NOT NULL);\r\n");
+		sqls.put(20180411.0002, "INSERT INTO \"TableRowHighlightRange\" (\"type\", \"left_boundary\", \"right_boundary\") VALUES (" + TableRowHighlightType.REDUNDANCY.getId() + ", '" + DefaultTableRowHighlightValue.getRange(TableRowHighlightType.REDUNDANCY)[0] + "', '" + DefaultTableRowHighlightValue.getRange(TableRowHighlightType.REDUNDANCY)[1] + "'), (" + TableRowHighlightType.P_PRIO_VALUE.getId() + ", '" + DefaultTableRowHighlightValue.getRange(TableRowHighlightType.P_PRIO_VALUE)[0] + "', '" + DefaultTableRowHighlightValue.getRange(TableRowHighlightType.P_PRIO_VALUE)[1] + "'), (" + TableRowHighlightType.INFLUENCE_ON_POSITION.getId() + ", '" + DefaultTableRowHighlightValue.getRange(TableRowHighlightType.INFLUENCE_ON_POSITION)[0] + "', '" + DefaultTableRowHighlightValue.getRange(TableRowHighlightType.INFLUENCE_ON_POSITION)[1] + "');\r\n");
+
+		sqls.put(20180411.0011, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TableRowHighlightProperty\" (\"type\" SMALLINT NOT NULL PRIMARY KEY, \"red\" DOUBLE DEFAULT 0.5 NOT NULL, \"green\" DOUBLE DEFAULT 0.5 NOT NULL, \"blue\" DOUBLE DEFAULT 0.5 NOT NULL);\r\n");
+		sqls.put(20180411.0012, "INSERT INTO \"TableRowHighlightProperty\" (\"type\", \"red\", \"green\", \"blue\") VALUES (" + TableRowHighlightRangeType.EXCELLENT.getId() + ", '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.EXCELLENT).getRed() + "', '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.EXCELLENT).getGreen() + "', '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.EXCELLENT).getBlue() + "'), (" + TableRowHighlightRangeType.SATISFACTORY.getId() + ", '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.SATISFACTORY).getRed() + "', '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.SATISFACTORY).getGreen() + "', '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.SATISFACTORY).getBlue() + "'), (" + TableRowHighlightRangeType.INADEQUATE.getId() + ", '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.INADEQUATE).getRed() + "', '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.INADEQUATE).getGreen() + "', '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.INADEQUATE).getBlue() + "');\r\n");
+
+		sqls.put(20180411.0021, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TableRowHighlightScheme\" (\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + TableRowHighlightType.NONE.getId() + " NOT NULL);\r\n");
+		sqls.put(20180411.0022, "INSERT INTO \"TableRowHighlightScheme\" (\"id\") VALUES (1);\r\n");
+
 		
 		return sqls;
 	}
@@ -3670,6 +3686,160 @@ public class SQLManager {
 		}
 
 		return names;
+	}
+
+	public void loadTableRowHighlight() throws SQLException {
+		TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
+		
+		this.loadTableRowHighlightProperties(tableRowHighlight);
+		this.loadTableRowHighlightType(tableRowHighlight);
+		this.loadTableRowHighlightRange(tableRowHighlight);
+	}
+	
+	private void loadTableRowHighlightProperties(TableRowHighlight tableRowHighlight) throws SQLException {
+		String sql = "SELECT "
+				+ "\"red\", \"green\", \"blue\" "
+				+ "FROM \"TableRowHighlightProperty\" "
+				+ "WHERE \"type\" = ? LIMIT 1";
+		
+		for (TableRowHighlightRangeType tableRowHighlightRangeType : TableRowHighlightRangeType.values()) {
+			int idx = 1;
+			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+			stmt.setInt(idx++, tableRowHighlightRangeType.getId());
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				double opacity = 1.0;
+
+				double red = rs.getDouble("red");
+				red = Math.min(Math.max(0, red), 1);
+
+				double green = rs.getDouble("green");
+				green = Math.min(Math.max(0, green), 1);
+
+				double blue = rs.getDouble("blue");
+				blue = Math.min(Math.max(0, blue), 1);
+				
+				tableRowHighlight.setColor(tableRowHighlightRangeType, new Color(red, green, blue, opacity));
+			}
+		}
+	}
+	
+	private void loadTableRowHighlightRange(TableRowHighlight tableRowHighlight) throws SQLException {
+		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getTableRowHighlightType();
+		String sql = "SELECT "
+				+ "\"left_boundary\", \"right_boundary\" "
+				+ "FROM \"TableRowHighlightRange\" "
+				+ "WHERE \"type\" = ? LIMIT 1";
+
+		int idx = 1;
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(idx++, tableRowHighlightType.getId());
+
+		ResultSet rs = stmt.executeQuery();
+		if (rs.next()) {
+			double leftBoundary  = rs.getDouble("left_boundary");
+			double rightBoundary = rs.getDouble("right_boundary");
+			tableRowHighlight.setRange(leftBoundary, rightBoundary);
+		}
+	}
+	
+	private void loadTableRowHighlightType(TableRowHighlight tableRowHighlight) throws SQLException {
+		String sql = "SELECT "
+				+ "\"type\" "
+				+ "FROM \"TableRowHighlightScheme\" "
+				+ "WHERE \"id\" = 1 LIMIT 1";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+
+		ResultSet rs = stmt.executeQuery();
+		if (rs.next()) {
+			TableRowHighlightType tableRowHighlightType = TableRowHighlightType.getEnumByValue(rs.getInt("type"));
+			if (tableRowHighlightType != null)
+				tableRowHighlight.setTableRowHighlightType(tableRowHighlightType);
+		}
+	}
+
+	public void saveTableRowHighlight() throws SQLException {
+		TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
+		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getTableRowHighlightType();
+		
+		// save color properties
+		this.save(TableRowHighlightRangeType.EXCELLENT,    tableRowHighlight.getColor(TableRowHighlightRangeType.EXCELLENT));
+		this.save(TableRowHighlightRangeType.SATISFACTORY, tableRowHighlight.getColor(TableRowHighlightRangeType.SATISFACTORY));
+		this.save(TableRowHighlightRangeType.INADEQUATE,   tableRowHighlight.getColor(TableRowHighlightRangeType.INADEQUATE));
+
+		// save range and display options
+		switch(tableRowHighlightType) {
+		case INFLUENCE_ON_POSITION:
+		case REDUNDANCY:
+		case P_PRIO_VALUE:
+			this.save(tableRowHighlightType, tableRowHighlight.getLeftBoundary(), tableRowHighlight.getRightBoundary());
+			// no break, to enter default-case 
+
+		default:
+			this.save(tableRowHighlightType);
+			break;
+		}
+	}
+	
+	private void save(TableRowHighlightRangeType tableRowHighlightRangeType, Color color) throws SQLException {
+		String sql = "MERGE INTO \"TableRowHighlightProperty\" USING (VALUES "
+				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"type\", \"red\", \"green\", \"blue\") ON \"TableRowHighlightProperty\".\"type\" = \"vals\".\"type\" "
+				+ "WHEN MATCHED THEN UPDATE SET "
+				+ "\"TableRowHighlightProperty\".\"red\"   = \"vals\".\"red\", "
+				+ "\"TableRowHighlightProperty\".\"green\" = \"vals\".\"green\", "
+				+ "\"TableRowHighlightProperty\".\"blue\"  = \"vals\".\"blue\" "
+				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "\"vals\".\"type\", "
+				+ "\"vals\".\"red\", "
+				+ "\"vals\".\"green\", "
+				+ "\"vals\".\"blue\"";
+		
+		int idx = 1;
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(idx++, tableRowHighlightRangeType.getId());
+		stmt.setDouble(idx++, color.getRed());
+		stmt.setDouble(idx++, color.getGreen());
+		stmt.setDouble(idx++, color.getBlue());
+		stmt.execute();
+	}
+	
+	private void save(TableRowHighlightType tableRowHighlightType, double leftBoundary, double rightBoundary) throws SQLException {
+		String sql = "MERGE INTO \"TableRowHighlightRange\" USING (VALUES "
+				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"type\", \"left_boundary\", \"right_boundary\") ON \"TableRowHighlightRange\".\"type\" = \"vals\".\"type\" "
+				+ "WHEN MATCHED THEN UPDATE SET "
+				+ "\"TableRowHighlightRange\".\"left_boundary\"  = \"vals\".\"left_boundary\", "
+				+ "\"TableRowHighlightRange\".\"right_boundary\" = \"vals\".\"right_boundary\" "
+				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "\"vals\".\"type\", "
+				+ "\"vals\".\"left_boundary\", "
+				+ "\"vals\".\"right_boundary\"";
+
+		int idx = 1;
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(idx++, tableRowHighlightType.getId());
+		stmt.setDouble(idx++, leftBoundary);
+		stmt.setDouble(idx++, rightBoundary);
+		stmt.execute();
+	}
+	
+	private void save(TableRowHighlightType tableRowHighlightType) throws SQLException {
+		String sql = "MERGE INTO \"TableRowHighlightScheme\" USING (VALUES "
+				+ "(CAST(? AS INT), CAST(? AS INT)) "
+				+ ") AS \"vals\" (\"id\", \"type\") ON \"TableRowHighlightScheme\".\"id\" = \"vals\".\"id\" "
+				+ "WHEN MATCHED THEN UPDATE SET "
+				+ "\"TableRowHighlightScheme\".\"type\" = \"vals\".\"type\" "
+				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "\"vals\".\"id\", "
+				+ "\"vals\".\"type\"";
+		
+		int idx = 1;
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(idx++, 1); // default id
+		stmt.setInt(idx++, tableRowHighlightType.getId());
+		stmt.execute();
 	}
 	
 	public DataBase getDataBase() {

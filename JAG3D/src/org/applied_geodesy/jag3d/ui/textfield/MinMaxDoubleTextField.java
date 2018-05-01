@@ -19,8 +19,34 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.table;
+package org.applied_geodesy.jag3d.ui.textfield;
 
-public enum TableRowHighlightType {
-	NONE, TEST_STATISTIC, REDUNDANCY
+import org.applied_geodesy.jag3d.ui.table.CellValueType;
+
+public class MinMaxDoubleTextField extends DoubleTextField {
+	private double min = Double.NEGATIVE_INFINITY, max = Double.POSITIVE_INFINITY;
+	private boolean exclusiveMin = true, exclusiveMax = true;
+	
+	public MinMaxDoubleTextField(Double value, double min, double max, CellValueType type, boolean displayUnit, boolean exclusiveMin, boolean exclusiveMax) {
+		super(value, type, displayUnit, ValueSupport.NON_NULL_VALUE_SUPPORT);
+		this.exclusiveMin = exclusiveMin;
+		this.exclusiveMax = exclusiveMax;
+		this.min = Math.min(min, max);
+		this.max = Math.max(min, max);
+		this.setNumber(value);
+		this.setText(this.getRendererFormat(value));
+	}
+	
+	@Override
+	public boolean check(Double value) {
+		boolean validNumber = super.check(value);
+
+		if (!validNumber)
+			return false;
+		
+		if (value == null)
+			return true;
+		
+		return (this.exclusiveMin ? this.min < value : this.min <= value) && (this.exclusiveMax ? value < this.max : value <= this.max);
+	}
 }

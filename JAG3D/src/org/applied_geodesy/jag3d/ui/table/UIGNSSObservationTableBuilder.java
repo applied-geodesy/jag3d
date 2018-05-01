@@ -36,6 +36,9 @@ import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dnd.GNSSObservationRowDnD;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 import org.applied_geodesy.jag3d.ui.tree.EditableMenuCheckBoxTreeCell;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
@@ -815,9 +818,14 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 	}
 	
 	@Override
-	void highlightTableRow(TableRow<GNSSObservationRow> row, TableRowHighlightType tableRowHighlightType) {
+	void highlightTableRow(TableRow<GNSSObservationRow> row) {
 		if (row == null)
 			return;
+		
+		TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
+		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getTableRowHighlightType(); 
+		double leftBoundary  = tableRowHighlight.getLeftBoundary(); 
+		double rightBoundary = tableRowHighlight.getRightBoundary();
 
 		GNSSObservationRow item = row.getItem();
 
@@ -831,43 +839,58 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 				Double redundancyX = item.getRedundancyX();
 				Double redundancyY = item.getRedundancyY();
 				Double redundancyZ = item.getRedundancyZ();
-				if (this.type != ObservationType.GNSS2D && redundancyZ == null)
-					redundancyZ = 1.0;
+				Double redundancy = null;
 				
-				if (this.type != ObservationType.GNSS1D && redundancyY == null)
-					redundancyY = 1.0;
+				if (this.type == ObservationType.GNSS1D && redundancyZ != null) 
+					redundancy = redundancyZ;
+
+				else if (this.type == ObservationType.GNSS2D && redundancyY != null && redundancyX != null) 
+					redundancy = Math.min(redundancyY, redundancyX);
 				
-				if (this.type != ObservationType.GNSS1D && redundancyX == null)
-					redundancyX = 1.0;
+				else if (this.type == ObservationType.GNSS3D && redundancyY != null && redundancyX != null && redundancyZ != null)
+					redundancy = Math.min(redundancyZ, Math.min(redundancyY, redundancyX));
 				
-				boolean inadequate = false, adequate = false, satisfactory = false;
-				switch (this.type) {
-				case GNSS3D:
-					inadequate   = redundancyX < 0.1 && redundancyY < 0.1 && redundancyZ < 0.1;
-					adequate     = !inadequate && redundancyX < 0.3 && redundancyY < 0.3 && redundancyZ < 0.3;
-					satisfactory = !inadequate && !adequate && redundancyX < 0.7 && redundancyY < 0.7 && redundancyZ < 0.7;
-					
-					break;
-					
-				case GNSS2D:
-					inadequate   = redundancyX < 0.1 && redundancyY < 0.1;
-					adequate     = !inadequate && redundancyX < 0.3 && redundancyY < 0.3;
-					satisfactory = !inadequate && !adequate && redundancyX < 0.7 && redundancyY < 0.7;
-					
-					break;
+				if (redundancy == null) 
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				else
+					this.setTableRowHighlight(row, redundancy <= leftBoundary ? TableRowHighlightRangeType.INADEQUATE : 
+						redundancy < rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
+							TableRowHighlightRangeType.EXCELLENT);
 				
-				default: // GNSS1D
-					inadequate   = redundancyZ < 0.1;
-					adequate     = !inadequate && redundancyZ < 0.3;
-					satisfactory = !inadequate && !adequate && redundancyZ < 0.7;
-					
-					break;
-				}
+				break;
 				
-				this.setTableRowHighlight(row, inadequate ? TableRowHighlightRangeType.INADEQUATE : 
-					adequate ? TableRowHighlightRangeType.ADEQUATE :
-					satisfactory ? TableRowHighlightRangeType.SATISFACTORY :
-					TableRowHighlightRangeType.EXCELLENT);
+			case INFLUENCE_ON_POSITION:
+				Double influenceOnPositionX = item.getInfluenceOnPointPositionX();
+				Double influenceOnPositionY = item.getInfluenceOnPointPositionY();
+				Double influenceOnPositionZ = item.getInfluenceOnPointPositionZ();
+				Double influenceOnPosition = null;
+				
+				if (this.type == ObservationType.GNSS1D && influenceOnPositionZ != null) 
+					influenceOnPosition = influenceOnPositionZ;
+
+				else if (this.type == ObservationType.GNSS2D && influenceOnPositionY != null && influenceOnPositionX != null) 
+					influenceOnPosition = Math.max(influenceOnPositionY, influenceOnPositionX);
+				
+				else if (this.type == ObservationType.GNSS3D && influenceOnPositionY != null && influenceOnPositionX != null && influenceOnPositionZ != null)
+					influenceOnPosition = Math.max(influenceOnPositionZ, Math.max(influenceOnPositionY, influenceOnPositionX));
+				
+				if (influenceOnPosition == null) 
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				else
+					this.setTableRowHighlight(row, Math.abs(influenceOnPosition) <= leftBoundary ? TableRowHighlightRangeType.EXCELLENT : 
+						Math.abs(influenceOnPosition) < rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
+							TableRowHighlightRangeType.INADEQUATE);
+				
+				break;
+				
+			case P_PRIO_VALUE:
+				Double pValue = item.getPValueApriori();
+				if (pValue == null) 
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				else
+					this.setTableRowHighlight(row, pValue <= Math.log(leftBoundary / 100.0) ? TableRowHighlightRangeType.INADEQUATE : 
+						pValue < Math.log(rightBoundary / 100.0) ? TableRowHighlightRangeType.SATISFACTORY :
+							TableRowHighlightRangeType.EXCELLENT);
 				
 				break;
 				

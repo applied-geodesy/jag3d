@@ -32,6 +32,7 @@ import org.applied_geodesy.jag3d.ui.dialog.FormatterOptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.LeastSquaresSettingDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ProjectionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.RankDefectDialog;
+import org.applied_geodesy.jag3d.ui.dialog.TableRowHighlightDialog;
 import org.applied_geodesy.jag3d.ui.dialog.TestStatisticDialog;
 
 import javafx.event.ActionEvent;
@@ -61,45 +62,59 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 		case EXIT:
 			JAG3D.close();
 			break;
+			
 		case ABOUT:
 			AboutDialog.showAndWait();
 			break;
+			
 		case NEW:
 			this.menuBuilder.newProject();
 			break;
+			
 		case OPEN:
 			this.menuBuilder.openProject();
 			break;
+			
 		case COPY:
 			this.menuBuilder.copyProject();
 			break;
+			
 		case PREFERENCES:
 			FormatterOptionDialog.showAndWait();
 			break;
+			
 		case LEAST_SQUARES:
 			LeastSquaresSettingDialog.showAndWait();
 			break;
+			
 		case TEST_STATISTIC:
 			TestStatisticDialog.showAndWait();
 			break;
+			
 		case RANK_DEFECT:
 			RankDefectDialog.showAndWait();
 			break;
+			
 		case HORIZONTAL_PROJECTION:
 			ProjectionDialog.showAndWait();
 			break;
+			
 		case CONGRUENT_POINT:
 			CongruentPointDialog.showAndWait();
 			break;
+			
 		case APROXIMATE_VALUES:
 			ApproximationValuesDialog.showAndWait();
 			break;
+			
 		case AVERAGE:
 			AverageDialog.showAndWait();
 			break;
+			
 		case CHECK_UPDATES:
 			this.menuBuilder.checkUpdates();
 			break;
+			
 		case IMPORT_FLAT_DIRECTION:
 		case IMPORT_FLAT_GNSS1D:
 		case IMPORT_FLAT_GNSS2D:
@@ -143,10 +158,8 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 			this.menuBuilder.importFile(menuItemType);
 			break;
 			
-		case HIGHLIGHT_NONE:
-		case HIGHLIGHT_SIGNIFICANCE:
-		case HIGHLIGHT_REDUNDANCY:
-			this.menuBuilder.highlightTableRows(menuItemType);
+		case HIGHLIGHT_TABLE_ROWS:
+			TableRowHighlightDialog.showAndWait();
 			break;
 			
 		case MODULE_COORDTRANS:

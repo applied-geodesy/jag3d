@@ -36,6 +36,9 @@ import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dnd.TerrestrialObservationRowDnD;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 import org.applied_geodesy.jag3d.ui.tree.EditableMenuCheckBoxTreeCell;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
@@ -886,10 +889,15 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 	}
 	
 	@Override
-	void highlightTableRow(TableRow<TerrestrialObservationRow> row, TableRowHighlightType tableRowHighlightType) {
+	void highlightTableRow(TableRow<TerrestrialObservationRow> row) {
 		if (row == null)
 			return;
 
+		TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
+		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getTableRowHighlightType(); 
+		double leftBoundary  = tableRowHighlight.getLeftBoundary(); 
+		double rightBoundary = tableRowHighlight.getRightBoundary();
+		
 		TerrestrialObservationRow item = row.getItem();
 
 		if (!row.isSelected() && item != null) {
@@ -901,12 +909,33 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			case REDUNDANCY:
 				Double redundancy = item.getRedundancy();
 				if (redundancy == null) 
-					redundancy = 1.0;
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				else
+					this.setTableRowHighlight(row, redundancy <= leftBoundary ? TableRowHighlightRangeType.INADEQUATE : 
+						redundancy < rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
+							TableRowHighlightRangeType.EXCELLENT);
 				
-				this.setTableRowHighlight(row, redundancy < 0.1 ? TableRowHighlightRangeType.INADEQUATE : 
-					redundancy < 0.3 ? TableRowHighlightRangeType.ADEQUATE :
-					redundancy < 0.7 ? TableRowHighlightRangeType.SATISFACTORY :
-					TableRowHighlightRangeType.EXCELLENT);
+				break;
+				
+			case INFLUENCE_ON_POSITION:
+				Double influenceOnPosition = item.getInfluenceOnPointPosition();
+				if (influenceOnPosition == null) 
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				else
+					this.setTableRowHighlight(row, Math.abs(influenceOnPosition) <= leftBoundary ? TableRowHighlightRangeType.EXCELLENT : 
+						Math.abs(influenceOnPosition) < rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
+							TableRowHighlightRangeType.INADEQUATE);
+				
+				break;
+				
+			case P_PRIO_VALUE:
+				Double pValue = item.getPValueApriori();
+				if (pValue == null) 
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				else
+					this.setTableRowHighlight(row, pValue <= Math.log(leftBoundary / 100.0) ? TableRowHighlightRangeType.INADEQUATE : 
+						pValue < Math.log(rightBoundary / 100.0) ? TableRowHighlightRangeType.SATISFACTORY :
+							TableRowHighlightRangeType.EXCELLENT);
 				
 				break;
 				

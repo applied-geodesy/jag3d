@@ -1,0 +1,25 @@
+# !!! This is an example file and will not be used by JAG3D. Please !!!
+# !!! create a copy of this file named "tablerowhighlight.default", !!!
+# !!! located in the same directory. Modify the copied file w.r.t.  !!!
+# !!! the desired values.                                           !!!
+#
+# Comments are indicated by # as first character
+# Valid units are Meter and Per Cent w.r.t. the highlight type
+#
+# The followind values are the default values of JAG3D
+#
+# For valid color specifications, see JAVA-API: 
+# https://docs.oracle.com/javafx/2/api/javafx/scene/paint/Color.html
+#
+EXCELLENT_COLOR    = #bcee68
+SATISFACTORY_COLOR = #ffec8b
+INADEQUATE_COLOR   = #ff3030
+
+REDUNDANCY_LEFT_BOUNDARY  = 0.3
+REDUNDANCY_RIGHT_BOUNDARY = 0.7
+
+P_PRIO_VALUE_LEFT_BOUNDARY  = 1.0
+P_PRIO_VALUE_RIGHT_BOUNDARY = 5.0
+
+INFLUENCE_ON_POSITION_LEFT_BOUNDARY  = 0.001
+INFLUENCE_ON_POSITION_RIGHT_BOUNDARY = 0.005
