@@ -99,7 +99,6 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 				finally {
 					ignoreChangeEvent = false;
 				}
-				
 				save();
 			}
 		}
@@ -112,6 +111,13 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 				TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
 				TableRowHighlightType tableRowHighlightType = (TableRowHighlightType)newValue.getUserData();
 				tableRowHighlight.setTableRowHighlightType(tableRowHighlightType);
+				
+				if (highlightRangeFieldMap.containsKey(tableRowHighlightType) && highlightRangeFieldMap.get(tableRowHighlightType) != null) {
+					DoubleTextField[] fields = highlightRangeFieldMap.get(tableRowHighlightType);
+					double leftBoundary  = fields[0].getNumber();
+					double rightBoundary = fields[1].getNumber();
+					tableRowHighlight.setRange(leftBoundary, rightBoundary);
+				}
 				save();
 			}
 		}
@@ -299,10 +305,10 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 		case P_PRIO_VALUE:
 			radioButtonLabelText = String.format(
 					Locale.ENGLISH, "%s [%s]", 
-					i18n.getString("TableRowHighlightDialog.range.probability_value.label", "Probability value \u03B1"),
+					i18n.getString("TableRowHighlightDialog.range.probability_value.label", "Probability value p"),
 					"\u0025"
 					);
-			radioButtonToolTipText = i18n.getString("TableRowHighlightDialog.range.probability_value.tooltip", "Highlighting table rows depending on probability value");
+			radioButtonToolTipText = i18n.getString("TableRowHighlightDialog.range.probability_value.tooltip", "Highlighting table rows depending on (a-priori) p-value");
 			leftBoundary    = new Label("0 \u003C "); 
 			middleBoundaray = new Label(" \u003C ");
 			rightBoundary   = new Label(" \u003C 100");
@@ -379,8 +385,8 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 
 			if (tableRowHighlightType != TableRowHighlightType.NONE && this.highlightRangeFieldMap.containsKey(tableRowHighlightType) && this.highlightRangeFieldMap.get(tableRowHighlightType) != null) {
 				DoubleTextField[] fields = this.highlightRangeFieldMap.get(tableRowHighlightType);
-				fields[0].setValue(leftBoundary);
-				fields[1].setValue(rightBoundary);
+				fields[0].setNumber(leftBoundary);
+				fields[1].setNumber(rightBoundary);
 			}
 
 			this.excellentColorPicker.setValue(tableRowHighlight.getColor(TableRowHighlightRangeType.EXCELLENT));
