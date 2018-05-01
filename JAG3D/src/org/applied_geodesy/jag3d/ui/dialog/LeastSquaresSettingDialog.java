@@ -159,6 +159,7 @@ public class LeastSquaresSettingDialog {
 		@Override
 		public void changed(ObservableValue<? extends EstimationType> observable, EstimationType oldValue, EstimationType newValue) {
 			settings.setEstimationType(newValue);
+			estimationTypeComboBox.setValue(newValue);
 		}
 	}
 
@@ -251,6 +252,7 @@ public class LeastSquaresSettingDialog {
 		this.principalComponentSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.principalComponentsProperty());
 		this.robustSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.robustEstimationLimitProperty());
 		
+		this.settings.estimationTypeProperty().addListener(new EstimationTypeChangeListener());
 		this.estimationTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new EstimationTypeChangeListener());
 		
 		GridPane gridPane = new GridPane();
