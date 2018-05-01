@@ -911,8 +911,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				if (redundancy == null) 
 					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 				else
-					this.setTableRowHighlight(row, redundancy <= leftBoundary ? TableRowHighlightRangeType.INADEQUATE : 
-						redundancy < rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
+					this.setTableRowHighlight(row, redundancy < leftBoundary ? TableRowHighlightRangeType.INADEQUATE : 
+						redundancy <= rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
 							TableRowHighlightRangeType.EXCELLENT);
 				
 				break;
@@ -922,8 +922,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				if (influenceOnPosition == null) 
 					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 				else
-					this.setTableRowHighlight(row, Math.abs(influenceOnPosition) <= leftBoundary ? TableRowHighlightRangeType.EXCELLENT : 
-						Math.abs(influenceOnPosition) < rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
+					this.setTableRowHighlight(row, Math.abs(influenceOnPosition) < leftBoundary ? TableRowHighlightRangeType.EXCELLENT : 
+						Math.abs(influenceOnPosition) <= rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
 							TableRowHighlightRangeType.INADEQUATE);
 				
 				break;
@@ -933,8 +933,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				if (pValue == null) 
 					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 				else
-					this.setTableRowHighlight(row, pValue <= Math.log(leftBoundary / 100.0) ? TableRowHighlightRangeType.INADEQUATE : 
-						pValue < Math.log(rightBoundary / 100.0) ? TableRowHighlightRangeType.SATISFACTORY :
+					this.setTableRowHighlight(row, pValue < Math.log(leftBoundary / 100.0) ? TableRowHighlightRangeType.INADEQUATE : 
+						pValue <= Math.log(rightBoundary / 100.0) ? TableRowHighlightRangeType.SATISFACTORY :
 							TableRowHighlightRangeType.EXCELLENT);
 				
 				break;

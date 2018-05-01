@@ -665,13 +665,26 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		
 		TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
 		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getTableRowHighlightType(); 
-
+		double leftBoundary  = tableRowHighlight.getLeftBoundary(); 
+		double rightBoundary = tableRowHighlight.getRightBoundary();
+		
 		CongruenceAnalysisRow item = row.getItem();
 
 		if (!row.isSelected() && item != null) {
 			switch(tableRowHighlightType) {
 			case TEST_STATISTIC:
 				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.INADEQUATE : TableRowHighlightRangeType.EXCELLENT);
+				break;
+				
+			case P_PRIO_VALUE:
+				Double pValue = item.getPValueApriori();
+				if (pValue == null) 
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				else
+					this.setTableRowHighlight(row, pValue < Math.log(leftBoundary / 100.0) ? TableRowHighlightRangeType.INADEQUATE : 
+						pValue <= Math.log(rightBoundary / 100.0) ? TableRowHighlightRangeType.SATISFACTORY :
+							TableRowHighlightRangeType.EXCELLENT);
+				
 				break;
 				
 			default:
