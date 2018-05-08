@@ -64,6 +64,7 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.ToolBar;
@@ -143,14 +144,13 @@ public class LayerManager {
 		}
 	}
 
-//	private class ColorChangeListener implements ChangeListener<Color> {
-//		@Override
-//		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
-//			BackgroundFill fill = new BackgroundFill(getColor(), CornerRadii.EMPTY, Insets.EMPTY);
-//			Background background = new Background(fill);
-//			stackPane.setBackground(background);
-//		}
-//	}
+	private class ToggleChangeListener implements ChangeListener<Toggle> {
+		@Override
+		public void changed(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
+        	if (newValue == null && oldValue != null)
+        		oldValue.setSelected(true);
+        }
+	}
 	
 	private class GraphicExtentChangeListener implements ChangeListener<Boolean> {
 		@Override
@@ -442,6 +442,8 @@ public class LayerManager {
 				moveButton,
 				windowZoomButton
 				);
+		
+		group.selectedToggleProperty().addListener(new ToggleChangeListener());
 
 		this.layerToolbar.getItems().addAll(
 				moveButton,
