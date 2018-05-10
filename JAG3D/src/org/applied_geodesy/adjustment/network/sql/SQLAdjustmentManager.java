@@ -1318,6 +1318,10 @@ public class SQLAdjustmentManager {
 			for ( Map.Entry<Integer, AdditionalUnknownParameter> parameterItem : this.additionalParametersToBeEstimated.entrySet() ) {
 				int paramId = parameterItem.getKey();
 				AdditionalUnknownParameter parameter = parameterItem.getValue();
+				
+				if (parameter.getColInJacobiMatrix() <= 0)
+					continue;
+				
 				double value = parameter.getValue();
 				switch(parameter.getParameterType()) {
 				case ORIENTATION:
