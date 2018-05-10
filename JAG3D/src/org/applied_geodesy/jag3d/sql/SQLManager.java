@@ -1060,42 +1060,59 @@ public class SQLManager {
 				AdditionalParameterRow row = new AdditionalParameterRow();
 				row.setId(paramId);
 				row.setParameterType(paramType);
-
 				double value = rs.getDouble("value");
-				if (!rs.wasNull())
+				if (!rs.wasNull()) 
 					row.setValueAposteriori(value);
+				else
+					continue;
 
 				value = rs.getDouble("sigma");
 				if (!rs.wasNull())
 					row.setSigmaAposteriori(value);
+				else
+					continue;
 
 				value = rs.getDouble("confidence");
 				if (!rs.wasNull())
 					row.setConfidence(value);
+				else
+					continue;
 
 				value = rs.getDouble("gross_error");
 				if (!rs.wasNull())
 					row.setGrossError(value);
+				else
+					continue;
 
 				value = rs.getDouble("minimal_detectable_bias");
 				if (!rs.wasNull())
 					row.setMinimalDetectableBias(value);
+				else
+					continue;
 
 				value = rs.getDouble("p_prio");
 				if (!rs.wasNull())
 					row.setPValueApriori(value);
+				else
+					continue;
 
 				value = rs.getDouble("p_post");
 				if (!rs.wasNull())
 					row.setPValueAposteriori(value);
+				else
+					continue;
 
 				value = rs.getDouble("t_prio");
 				if (!rs.wasNull())
 					row.setTestStatisticApriori(value);
+				else
+					continue;
 
 				value = rs.getDouble("t_post");
 				if (!rs.wasNull())
 					row.setTestStatisticAposteriori(value);
+				else
+					continue;
 
 				boolean significant = rs.getBoolean("significant");
 				row.setSignificant(!rs.wasNull() && significant == Boolean.TRUE);
