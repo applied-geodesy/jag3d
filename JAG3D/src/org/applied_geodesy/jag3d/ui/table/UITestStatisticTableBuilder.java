@@ -83,7 +83,7 @@ public class UITestStatisticTableBuilder extends UITableBuilder<TestStatisticRow
 
 		// test power
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UITestStatisticTableBuilder.tableheader.power_of_test.label", "\u03B2 [\u0025]");
+		labelText   = i18n.getString("UITestStatisticTableBuilder.tableheader.power_of_test.label", "1 - \u03B2 [\u0025]");
 		tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.power_of_test.tooltip", "Power of test (type II-error)");
 		header = new ColumnTooltipHeader(cellValueTypeStatistic, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::powerOfTestProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
