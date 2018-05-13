@@ -507,12 +507,24 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 			for (Toggle toggleButton : this.highlightOptionGroup.getToggles()) {
 				if (toggleButton.getUserData() == TableRowHighlightType.INFLUENCE_ON_POSITION && toggleButton instanceof RadioButton) {
 					RadioButton radioButton = (RadioButton)toggleButton;
-					radioButton.setText(String.format(
-							Locale.ENGLISH, "%s [%s]", 
-							i18n.getString("TableRowHighlightDialog.range.influenceonposition.label", "Influence on point position"),
-							options.getFormatterOptions().get(CellValueType.LENGTH_RESIDUAL).getUnit().getAbbreviation()
-							)
-							);
+					if (radioButton.getGraphic() instanceof Label) {
+						((Label)radioButton.getGraphic()).setText(
+								String.format(
+										Locale.ENGLISH, "%s [%s]", 
+										i18n.getString("TableRowHighlightDialog.range.influenceonposition.label", "Influence on point position"),
+										options.getFormatterOptions().get(CellValueType.LENGTH_RESIDUAL).getUnit().getAbbreviation()
+										)
+								);
+					}
+					else {
+						radioButton.setText(
+								String.format(
+										Locale.ENGLISH, "%s [%s]", 
+										i18n.getString("TableRowHighlightDialog.range.influenceonposition.label", "Influence on point position"),
+										options.getFormatterOptions().get(CellValueType.LENGTH_RESIDUAL).getUnit().getAbbreviation()
+										)
+								);
+					}
 					break;
 				}
 			}
