@@ -86,7 +86,7 @@ public class NetworkAdjustmentDialog {
 				SQLManager.getInstance().checkNumberOfObersvationsPerUnknownParameter();
 
 				this.adjustment = this.dataBaseManager.getNetworkAdjustment();
-				this.finalStepProcesses = 0.25 / (this.adjustment.hasCovarianceExportPathAndBaseName() ? 5.0 : 4.0);
+				this.finalStepProcesses = 0.25 / (this.adjustment.hasCovarianceExportPathAndBaseName() ? 6.0 : 4.0);
 				this.adjustment.addPropertyChangeListener(this);
 
 				this.processState = 0.0;
@@ -265,6 +265,7 @@ public class NetworkAdjustmentDialog {
 				break;
 
 			case EXPORT_COVARIANCE_MATRIX:
+			case EXPORT_COVARIANCE_INFORMATION:
 				this.processState += this.finalStepProcesses;
 				this.updateProgress(this.processState, 1.0);
 				this.updateMessage(i18n.getString("NetworkAdjustmentDialog.export_covariance_matrix.label", "Export covariance matrix\u2026"));
