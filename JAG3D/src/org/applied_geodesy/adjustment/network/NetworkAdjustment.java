@@ -4598,11 +4598,11 @@ public class NetworkAdjustment implements Runnable {
 	 */
 	private boolean exportCovarianceMatrixInfoToFile(File f) {
 		// noch keine Loesung vorhanden
-		if (this.Qxx == null)
+		if (f == null || this.Qxx == null)
     		return false;
 		
-		this.currentEstimationStatus = EstimationStateType.EXPORT_COVARIANCE_MATRIX;
-		this.change.firePropertyChange(this.currentEstimationStatus.name(), null, this.coVarExportPathAndFileName + ".cxx");
+		this.currentEstimationStatus = EstimationStateType.EXPORT_COVARIANCE_INFORMATION;
+		this.change.firePropertyChange(this.currentEstimationStatus.name(), null, f.toString());
 		
 		boolean isComplete = false;
     	PrintWriter pw = null;
@@ -4647,11 +4647,11 @@ public class NetworkAdjustment implements Runnable {
 	 */
 	private boolean exportCovarianceMatrixToFile(File f) {
 		// noch keine Loesung vorhanden
-		if (this.Qxx == null || this.Qxx.numRows() < this.numberOfUnknownParameters)
+		if (f == null || this.Qxx == null || this.Qxx.numRows() < this.numberOfUnknownParameters)
 			return false;
 		
 		this.currentEstimationStatus = EstimationStateType.EXPORT_COVARIANCE_MATRIX;
-		this.change.firePropertyChange(this.currentEstimationStatus.name(), null, this.coVarExportPathAndFileName + ".info");
+		this.change.firePropertyChange(this.currentEstimationStatus.name(), null, f.toString());
 		
     	boolean isComplete = false;
     	boolean isDEBUG = false;
