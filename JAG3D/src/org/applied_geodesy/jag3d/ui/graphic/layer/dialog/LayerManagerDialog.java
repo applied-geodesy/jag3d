@@ -60,6 +60,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 
@@ -168,6 +169,20 @@ public class LayerManagerDialog {
 		layerManagerDialog.layers = layers;
 		layerManagerDialog.init();
 		layerManagerDialog.load();
+		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					layerManagerDialog.dialog.getDialogPane().requestLayout();
+					Stage stage = (Stage) layerManagerDialog.dialog.getDialogPane().getScene().getWindow();
+					stage.sizeToScene();
+				} 
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});		
 		return layerManagerDialog.dialog.showAndWait();
 	}
 

@@ -48,6 +48,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 
@@ -72,6 +73,20 @@ public class ProjectionDialog {
 	public static Optional<Projection> showAndWait() {
 		projectionDialog.init();
 		projectionDialog.load();
+		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					projectionDialog.dialog.getDialogPane().requestLayout();
+					Stage stage = (Stage) projectionDialog.dialog.getDialogPane().getScene().getWindow();
+					stage.sizeToScene();
+				} 
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		return projectionDialog.dialog.showAndWait();
 	}
 

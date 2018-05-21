@@ -90,6 +90,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -287,6 +288,20 @@ public class ColumnImportDialog {
 			e.printStackTrace();
 		}
 
+		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					columnImportDialog.dialog.getDialogPane().requestLayout();
+					Stage stage = (Stage) columnImportDialog.dialog.getDialogPane().getScene().getWindow();
+					stage.sizeToScene();
+				} 
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		return columnImportDialog.dialog.showAndWait();
 	}
 

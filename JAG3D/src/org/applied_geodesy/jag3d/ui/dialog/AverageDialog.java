@@ -69,6 +69,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
@@ -149,6 +150,20 @@ public class AverageDialog {
 		averageDialog.init();
 		averageDialog.load();
 		averageDialog.reset();
+		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					averageDialog.dialog.getDialogPane().requestLayout();
+					Stage stage = (Stage) averageDialog.dialog.getDialogPane().getScene().getWindow();
+					stage.sizeToScene();
+				} 
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		return averageDialog.dialog.showAndWait();
 	}
 

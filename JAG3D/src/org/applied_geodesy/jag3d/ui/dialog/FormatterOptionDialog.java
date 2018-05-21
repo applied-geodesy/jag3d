@@ -63,6 +63,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.StringConverter;
 
@@ -122,6 +123,20 @@ public class FormatterOptionDialog {
 		formatterOptionDialog.init();
 		formatterOptionDialog.load();
 		formatterOptionDialog.accordion.setExpandedPane(formatterOptionDialog.accordion.getPanes().get(0));
+		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					formatterOptionDialog.dialog.getDialogPane().requestLayout();
+					Stage stage = (Stage) formatterOptionDialog.dialog.getDialogPane().getScene().getWindow();
+					stage.sizeToScene();
+				} 
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		return formatterOptionDialog.dialog.showAndWait();
 	}
 	
@@ -150,7 +165,7 @@ public class FormatterOptionDialog {
 		this.dialog.setOnCloseRequest(new EventHandler<DialogEvent>() {
 			@Override
 			public void handle(DialogEvent event) {
-				formatterOptionDialog.accordion.setExpandedPane(formatterOptionDialog.accordion.getPanes().get(0));
+				accordion.setExpandedPane(accordion.getPanes().get(0));
 			}
 		});
 		

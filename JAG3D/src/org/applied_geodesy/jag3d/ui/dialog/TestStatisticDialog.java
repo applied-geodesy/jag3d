@@ -52,6 +52,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -75,6 +76,20 @@ public class TestStatisticDialog implements FormatterChangedListener {
 	public static Optional<TestStatisticDefinition> showAndWait() {
 		testStatisticDialog.init();
 		testStatisticDialog.load();
+		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					testStatisticDialog.dialog.getDialogPane().requestLayout();
+					Stage stage = (Stage) testStatisticDialog.dialog.getDialogPane().getScene().getWindow();
+					stage.sizeToScene();
+				} 
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		return testStatisticDialog.dialog.showAndWait();
 	}
 

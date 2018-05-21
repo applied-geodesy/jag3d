@@ -55,6 +55,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -183,6 +184,20 @@ public class LeastSquaresSettingDialog {
 	public static Optional<LeastSquaresSettings> showAndWait() {
 		leastSquaresSettingDialog.init();
 		leastSquaresSettingDialog.load();
+		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
+		Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+            	try {
+            		leastSquaresSettingDialog.dialog.getDialogPane().requestLayout();
+            		Stage stage = (Stage) leastSquaresSettingDialog.dialog.getDialogPane().getScene().getWindow();
+            		stage.sizeToScene();
+            	} 
+            	catch (Exception e) {
+            		e.printStackTrace();
+            	}
+            }
+		});
 		return leastSquaresSettingDialog.dialog.showAndWait();
 	}
 

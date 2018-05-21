@@ -27,6 +27,7 @@ import org.applied_geodesy.version.jag3d.Version;
 import org.applied_geodesy.version.jag3d.VersionType;
 
 import javafx.application.HostServices;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -47,6 +48,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 
 public class AboutDialog {
@@ -66,6 +68,20 @@ public class AboutDialog {
 
 	public static Optional<Void> showAndWait() {
 		aboutDialog.init();
+		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
+		Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+            	try {
+            		aboutDialog.dialog.getDialogPane().requestLayout();
+            		Stage stage = (Stage) aboutDialog.dialog.getDialogPane().getScene().getWindow();
+            		stage.sizeToScene();
+            	} 
+            	catch (Exception e) {
+            		e.printStackTrace();
+            	}
+            }
+		});
 		return aboutDialog.dialog.showAndWait();
 	}
 

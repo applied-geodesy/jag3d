@@ -58,6 +58,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
@@ -127,6 +128,20 @@ public class CongruentPointDialog {
 	
 	public static Optional<Void> showAndWait() {
 		congruentPointDialog.init();
+		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					congruentPointDialog.dialog.getDialogPane().requestLayout();
+					Stage stage = (Stage) congruentPointDialog.dialog.getDialogPane().getScene().getWindow();
+					stage.sizeToScene();
+				} 
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		return congruentPointDialog.dialog.showAndWait();
 	}
 

@@ -43,6 +43,7 @@ import org.applied_geodesy.util.i18.I18N;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -51,6 +52,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TitledPane;
@@ -61,6 +63,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 
@@ -165,6 +168,20 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 	public static Optional<TableRowHighlight> showAndWait() {
 		tableRowHighlightDialog.init();
 		tableRowHighlightDialog.load();
+		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					tableRowHighlightDialog.dialog.getDialogPane().requestLayout();
+					Stage stage = (Stage) tableRowHighlightDialog.dialog.getDialogPane().getScene().getWindow();
+					stage.sizeToScene();
+				} 
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		return tableRowHighlightDialog.dialog.showAndWait();
 	}
 
@@ -191,8 +208,14 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 			this.dialog.setResultConverter(new Callback<ButtonType, TableRowHighlight>() {
 				@Override
 				public TableRowHighlight call(ButtonType buttonType) {
-					accordion.setExpandedPane(accordion.getPanes().get(0));
 					return TableRowHighlight.getInstance();
+				}
+			});
+			
+			this.dialog.setOnCloseRequest(new EventHandler<DialogEvent>() {
+				@Override
+				public void handle(DialogEvent event) {
+					accordion.setExpandedPane(accordion.getPanes().get(0));
 				}
 			});
 		}

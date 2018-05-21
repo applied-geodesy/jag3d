@@ -31,6 +31,7 @@ import org.applied_geodesy.util.i18.I18N;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
@@ -38,12 +39,14 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 
@@ -101,9 +104,22 @@ public class RankDefectDialog {
 		rankDefectDialog.init();
 		rankDefectDialog.load();
 		rankDefectDialog.accordion.setExpandedPane(rankDefectDialog.accordion.getPanes().get(0));
+		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					rankDefectDialog.dialog.getDialogPane().requestLayout();
+					Stage stage = (Stage) rankDefectDialog.dialog.getDialogPane().getScene().getWindow();
+					stage.sizeToScene();
+				} 
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		return rankDefectDialog.dialog.showAndWait();
 	}
-
 
 	private void init() {
 		if (this.dialog != null)
@@ -171,6 +187,13 @@ public class RankDefectDialog {
 					save(rankDefect);				
 				}
 				return null;
+			}
+		});
+		
+		this.dialog.setOnCloseRequest(new EventHandler<DialogEvent>() {
+			@Override
+			public void handle(DialogEvent event) {
+				accordion.setExpandedPane(accordion.getPanes().get(0));
 			}
 		});
 	}

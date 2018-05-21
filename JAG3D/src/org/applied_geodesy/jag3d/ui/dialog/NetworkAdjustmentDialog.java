@@ -53,6 +53,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
@@ -316,6 +317,21 @@ public class NetworkAdjustmentDialog {
 
 		adjustmentDialog.dialog.show();
 		adjustmentDialog.process();
+		
+		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					adjustmentDialog.dialog.getDialogPane().requestLayout();
+					Stage stage = (Stage) adjustmentDialog.dialog.getDialogPane().getScene().getWindow();
+					stage.sizeToScene();
+				} 
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 
 	public static void setOwner(Window owner) {
