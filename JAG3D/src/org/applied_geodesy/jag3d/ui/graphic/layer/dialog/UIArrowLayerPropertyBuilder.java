@@ -100,7 +100,8 @@ public class UIArrowLayerPropertyBuilder extends UILayerPropertyBuilder {
 			return;
 		
 		this.propertyPane = new VBox(20);
-		this.propertyPane.setMaxWidth(Double.MAX_VALUE);
+		this.propertyPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		this.propertyPane.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.propertyPane.getChildren().addAll(
 				this.createSymbolPane()
 //				,

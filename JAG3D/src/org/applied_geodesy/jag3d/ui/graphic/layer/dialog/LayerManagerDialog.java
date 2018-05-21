@@ -206,6 +206,7 @@ public class LayerManagerDialog {
 			@Override
 			public void handle(DialogEvent event) {
 				save();
+				layerListView.getSelectionModel().select(0);
 			}
 		});
 	}

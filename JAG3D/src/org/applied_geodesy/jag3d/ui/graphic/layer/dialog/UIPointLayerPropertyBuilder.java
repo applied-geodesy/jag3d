@@ -194,7 +194,8 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		
 		this.highlightPane = this.createHighlightPane();
 		this.propertyPane = new VBox(20);
-		this.propertyPane.setMaxWidth(Double.MAX_VALUE);
+		this.propertyPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		this.propertyPane.setMinHeight(Control.USE_PREF_SIZE);
 		this.propertyPane.getChildren().addAll(
 				this.createSymbolPane(),
 				this.createFontPane(),
