@@ -264,6 +264,7 @@ public class ColumnImportDialog {
 	private CheckBox importCSVFileCheckBox;
 	private int startColumn = -1;
 	private int endColumn   = -1;
+	private static final int MAX_LINES = 10;
 	private final String TABULATOR = "     ";
 	private char separator = CSVParser.DEFAULT_SEPARATOR;
 	private char quotechar = CSVParser.DEFAULT_QUOTE_CHARACTER;
@@ -815,7 +816,21 @@ public class ColumnImportDialog {
 		
 		this.editor.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 		this.editor.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+
+		VBox column = new VBox(0);
+		column.setBackground( new Background( new BackgroundFill( Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY ) ) );
+		column.setBorder(new Border(new BorderStroke(Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT,
+				BorderStrokeStyle.NONE, BorderStrokeStyle.NONE, BorderStrokeStyle.NONE, BorderStrokeStyle.NONE,
+				CornerRadii.EMPTY, new BorderWidths(1), Insets.EMPTY)));
 		
+		for (int j=0; j<MAX_LINES; j++) {
+			Text text = new Text(" ");
+			text.setFont(Font.font("MonoSpace", FontWeight.NORMAL, 12));
+			column.getChildren().add(text);
+		}
+
+		this.editor.getChildren().add(column);
+
 		ScrollPane editorScrollPane = new ScrollPane(this.editor);
 		editorScrollPane.setFitToHeight(true);
 		editorScrollPane.setFitToWidth(true);
@@ -886,10 +901,17 @@ public class ColumnImportDialog {
 			VBox column = this.columns.get(columnIndex);
 			if (columnIndex >= startColumn && columnIndex <= endColumn) {
 				column.setBackground( new Background( new BackgroundFill( Color.LIGHTGRAY, CornerRadii.EMPTY, Insets.EMPTY ) ) );
-				column.setBorder(new Border(new BorderStroke(Color.BLACK, columnIndex == endColumn ? Color.BLACK : Color.TRANSPARENT, Color.TRANSPARENT, columnIndex == startColumn ? Color.BLACK : Color.TRANSPARENT,
-						BorderStrokeStyle.DOTTED, columnIndex == endColumn ? BorderStrokeStyle.DOTTED : BorderStrokeStyle.NONE, BorderStrokeStyle.NONE, columnIndex == startColumn ? BorderStrokeStyle.DOTTED : BorderStrokeStyle.NONE,
-								CornerRadii.EMPTY, new BorderWidths(1), Insets.EMPTY)));
-
+				column.setBorder(new Border(new BorderStroke(
+						Color.BLACK, 
+						columnIndex == endColumn ? Color.BLACK : Color.TRANSPARENT, 
+						Color.BLACK, 
+						columnIndex == startColumn ? Color.BLACK : 	Color.TRANSPARENT,
+						BorderStrokeStyle.DOTTED, 
+						columnIndex == endColumn ? BorderStrokeStyle.DOTTED : BorderStrokeStyle.NONE, 
+						BorderStrokeStyle.DOTTED, 
+						columnIndex == startColumn ? BorderStrokeStyle.DOTTED : BorderStrokeStyle.NONE,
+						CornerRadii.EMPTY, new BorderWidths(1), Insets.EMPTY)
+				));
 			}
 			else {
 				column.setBackground( new Background( new BackgroundFill( Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY ) ) );
@@ -901,7 +923,7 @@ public class ColumnImportDialog {
 	}
 	
 	private void readPreview(File f) throws IOException, SQLException {
-		PreviewFileReader reader = new PreviewFileReader(f, 10);
+		PreviewFileReader reader = new PreviewFileReader(f, MAX_LINES);
 		reader.ignoreLinesWhichStartWith("#");
 		
 		reader.read();
@@ -1017,7 +1039,7 @@ public class ColumnImportDialog {
 		this.addColumnHeader(contentColumns, this.maxCharactersPerColumn);
 
 		// add content
-		for (int i = 0; i < contentRows; i++) {
+		for (int i = 0; i < Math.min(formattedLines.size(), MAX_LINES); i++) {
 			String line = String.format(Locale.ENGLISH, "%-" + contentColumns + "s", formattedLines.get(i));
 			for (int j = 0; j < contentColumns; j++) {
 				Text character = new Text(String.valueOf(line.charAt(j)));
@@ -1025,6 +1047,16 @@ public class ColumnImportDialog {
 				character.setFill(Color.BLACK);
 				character.setTextAlignment(TextAlignment.CENTER);
 
+				this.columns.get(j).getChildren().add(character);
+			}
+		}
+		
+		for (int i = formattedLines.size(); i < MAX_LINES; i++) {
+			for (int j = 0; j < contentColumns; j++) {
+				Text character = new Text(" ");
+				character.setFont(Font.font("MonoSpace", FontWeight.NORMAL, 12));
+				character.setFill(Color.TRANSPARENT);
+				character.setTextAlignment(TextAlignment.CENTER);
 				this.columns.get(j).getChildren().add(character);
 			}
 		}
@@ -1102,8 +1134,7 @@ public class ColumnImportDialog {
 
 		typeComboBox.setTooltip(new Tooltip(i18n.getString("ColumnImportDialog.import.type.tooltip", "Select import type")));
 		
-		typeComboBox.setMinWidth(150);
-		typeComboBox.setPrefWidth(200);
+		typeComboBox.setMinWidth(Control.USE_PREF_SIZE);
 		typeComboBox.setMaxWidth(Double.MAX_VALUE);
 		typeComboBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Enum<?>>() {
 			@Override
@@ -1157,7 +1188,7 @@ public class ColumnImportDialog {
 		checkBox.setGraphic(label);
 		checkBox.setTooltip(new Tooltip(tooltip));
 		checkBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		checkBox.setMaxWidth(Double.MAX_VALUE);
+		checkBox.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
 		checkBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
 			@Override
