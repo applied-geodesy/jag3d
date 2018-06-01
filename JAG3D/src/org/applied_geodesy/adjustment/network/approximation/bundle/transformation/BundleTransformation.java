@@ -65,8 +65,8 @@ public abstract class BundleTransformation {
 	private List<PointBundle> excludedSystems = new ArrayList<PointBundle>();
 
 	public BundleTransformation(double threshold, List<PointBundle> sourceSystems) {
-		if (sourceSystems.size() < 2)
-			throw new IllegalArgumentException(this.getClass().getSimpleName() + " Fehler, mind. zwei Systeme werden benoetigt! " + sourceSystems.size());
+		if (sourceSystems.size() < 1)
+			throw new IllegalArgumentException(this.getClass().getSimpleName() + " Fehler, mind. ein System wird benoetigt! " + sourceSystems.size());
 		this.setThreshold(threshold);
 		this.initSystems(sourceSystems);
 		this.init();
