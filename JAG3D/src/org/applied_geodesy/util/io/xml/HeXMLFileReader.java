@@ -310,7 +310,7 @@ public class HeXMLFileReader extends SourceFileReader implements ErrorHandler {
 					String setupId = "";
 					double ih = 0.0;
 					PointRow point = null;
-					
+					boolean isDeleted = false;
 					if (node.getNodeName().equalsIgnoreCase("CgPoint")) {
 						pointName = attr.getNamedItem("oID") == null ? attr.getNamedItem("name").getNodeValue() : attr.getNamedItem("oID").getNodeValue();
 						code = attr.getNamedItem("code") == null ? null : attr.getNamedItem("code").getNodeValue();
@@ -319,6 +319,8 @@ public class HeXMLFileReader extends SourceFileReader implements ErrorHandler {
 					else if (node.getNodeName().equalsIgnoreCase("InstrumentPoint")) {
 						NamedNodeMap parentNodeAttr = node.getParentNode().getAttributes();
 						pointName = parentNodeAttr.getNamedItem("stationName").getNodeValue();
+						Node status = parentNodeAttr.getNamedItem("status");
+						isDeleted = status != null && status.getNodeValue() != null && status.getNodeValue().equalsIgnoreCase("deleted");
 						// ermittle die Setup-ID
 						setupId = parentNodeAttr.getNamedItem("id") == null ? "" : parentNodeAttr.getNamedItem("id").getNodeValue();
 						
@@ -329,7 +331,7 @@ public class HeXMLFileReader extends SourceFileReader implements ErrorHandler {
 						pointName = attr.getNamedItem("name").getNodeValue();
 					}
 					
-					if (!pointName.isEmpty() && !this.pointNames.contains(pointName)) {
+					if (!isDeleted && !pointName.isEmpty() && !this.pointNames.contains(pointName)) {
 						this.pointNames.add(pointName);
 						String pointContent[] = node.getFirstChild().getNodeValue().trim().split("\\s+");
 						double xyz[] = new double[pointContent.length];
@@ -383,8 +385,13 @@ public class HeXMLFileReader extends SourceFileReader implements ErrorHandler {
 					Node node = nodeList.item(i);				
 					double th = 0.0;
 					Double dir = null, zenith = null, dist2d = null, dist3d = null;
+					Boolean isDeleted = false;
 					
 					NamedNodeMap attr = node.getAttributes();
+					try {isDeleted = attr.getNamedItem("status") == null ? false : attr.getNamedItem("status").getNodeValue().equalsIgnoreCase("deleted");} catch (Exception e) {isDeleted = false;}
+					if (isDeleted)
+						continue;
+					
 					try {th     = attr.getNamedItem("targetHeight")  == null ? 0.0  : this.convertToMeter(Double.parseDouble(attr.getNamedItem("targetHeight").getNodeValue())); } catch (NumberFormatException e) {th     = 0.0;}
 					try {dir    = attr.getNamedItem("horizAngle")    == null ? null : this.convertToRadian(Double.parseDouble(attr.getNamedItem("horizAngle").getNodeValue()));  } catch (NumberFormatException e) {dir    = null;}
 					try {zenith = attr.getNamedItem("zenithAngle")   == null ? null : this.convertToRadian(Double.parseDouble(attr.getNamedItem("zenithAngle").getNodeValue())); } catch (NumberFormatException e) {zenith = null;}

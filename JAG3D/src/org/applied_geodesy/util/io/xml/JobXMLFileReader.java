@@ -222,6 +222,11 @@ public class JobXMLFileReader extends SourceFileReader implements ErrorHandler {
 				
 				String pointName = (String)XMLUtilities.xpathSearch(pointNode, "../Name", this.namespaceContext, XPathConstants.STRING);
 				String pointCode = (String)XMLUtilities.xpathSearch(pointNode, "../Code", this.namespaceContext, XPathConstants.STRING);
+				String deleted   = (String)XMLUtilities.xpathSearch(pointNode, "../Deleted", this.namespaceContext, XPathConstants.STRING);
+				boolean isDeleted = deleted != null && Boolean.parseBoolean(deleted);
+				
+				if (isDeleted)
+					continue;
 				
 				Double x0 = (Double)XMLUtilities.xpathSearch(pointNode, "North",     this.namespaceContext, XPathConstants.NUMBER);
 				Double y0 = (Double)XMLUtilities.xpathSearch(pointNode, "East",      this.namespaceContext, XPathConstants.NUMBER);
@@ -318,12 +323,14 @@ public class JobXMLFileReader extends SourceFileReader implements ErrorHandler {
 				final double R          = Constant.EARTH_RADIUS; 
 				nodeList = (NodeList)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, stationId), this.namespaceContext, XPathConstants.NODESET);
 				for (int i=0; i<nodeList.getLength(); i++) {
-					Node stationNode = nodeList.item(i);
-					String targetID    = (String)XMLUtilities.xpathSearch(stationNode, "TargetID", this.namespaceContext, XPathConstants.STRING);
-					String targetName  = (String)XMLUtilities.xpathSearch(stationNode, "Name", this.namespaceContext, XPathConstants.STRING);
+					Node stationNode  = nodeList.item(i);
+					String targetID   = (String)XMLUtilities.xpathSearch(stationNode, "TargetID", this.namespaceContext, XPathConstants.STRING);
+					String targetName = (String)XMLUtilities.xpathSearch(stationNode, "Name", this.namespaceContext, XPathConstants.STRING);
+					String deleted    = (String)XMLUtilities.xpathSearch(stationNode, "Deleted",          this.namespaceContext, XPathConstants.STRING);
+					boolean isDeleted = deleted != null && Boolean.parseBoolean(deleted);
 					
-					// Keine Punktnummer fuer den Zielpunkt vorhanden
-					if (targetName == null || targetName.trim().isEmpty())
+					// Keine Punktnummer fuer den Zielpunkt vorhanden oder Messung als geloescht markiert
+					if (isDeleted || targetName == null || targetName.trim().isEmpty())
 						continue;
 					
 					Double direction   = (Double)XMLUtilities.xpathSearch(stationNode, "Circle/HorizontalCircle", this.namespaceContext, XPathConstants.NUMBER);
