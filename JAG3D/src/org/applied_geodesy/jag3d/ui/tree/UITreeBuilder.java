@@ -452,6 +452,7 @@ public class UITreeBuilder {
 
 				default:
 					System.err.println(this.getClass().getSimpleName() + " : Error, unsupported TreeItemType (only directories) " + itemValue.getItemType());
+					this.tabPaneBuilder.setTreeItemValue(itemValue);
 					break;
 				}
 			}
@@ -536,17 +537,20 @@ public class UITreeBuilder {
 	private void selectChildren(TreeItem<TreeItemValue> parent) {
 		this.treeView.getSelectionModel().selectedItemProperty().removeListener(this.treeSelectionChangeListener);
 		if (!parent.isLeaf() && parent.isExpanded()) {
-			treeView.getSelectionModel().clearSelection();
+			this.treeView.getSelectionModel().clearSelection();
 			ObservableList<TreeItem<TreeItemValue>> children = parent.getChildren();
 			TreeItem<TreeItemValue> lastSelectedChild = null;
 			for (TreeItem<TreeItemValue> child : children) {
-				treeView.getSelectionModel().select(child);
+				this.treeView.getSelectionModel().select(child);
 				lastSelectedChild = child;
 			}
 			//int currentTreeItemIndex = treeView.getSelectionModel().getSelectedIndex();
 			//treeView.getSelectionModel().selectRange(currentTreeItemIndex + 1, currentTreeItemIndex + 1 + children.size());
 			if (lastSelectedChild != null)
 				this.load(lastSelectedChild.getValue(), parent.getChildren());
+		}
+		else if (!parent.isLeaf() && !parent.isExpanded()) {
+			this.load(parent.getValue(), null);
 		}
 		this.treeView.getSelectionModel().selectedItemProperty().addListener(this.treeSelectionChangeListener);
 	}
