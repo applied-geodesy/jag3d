@@ -23,6 +23,7 @@ package org.applied_geodesy.jag3d.ui.dialog;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 import java.util.Locale;
 
 import org.applied_geodesy.adjustment.EstimationStateType;
@@ -457,13 +458,27 @@ public class NetworkAdjustmentDialog {
 					}
 					
 					MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
-					TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
-					selectionModel.clearSelection();
-					if (treeItem != null)
-						selectionModel.select(treeItem);
-					else
-						selectionModel.select(0);
+					List<Integer> treeItemIndices = selectionModel.getSelectedIndices();
 					
+					if (treeItemIndices == null || treeItemIndices.size() == 0) {
+						selectionModel.clearSelection();
+						selectionModel.select(0);
+					}
+					else {
+						int[] indices = new int[treeItemIndices.size()];
+						for (int i=0; i<indices.length; i++)
+							indices[i] = treeItemIndices.get(i);
+						
+						selectionModel.clearSelection();
+						selectionModel.selectIndices(indices[0], indices);
+					}				
+					
+//					TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
+//					
+//					if (treeItem != null)
+//						selectionModel.select(treeItem);
+//					else
+//						selectionModel.select(0);
 				}
 			}
 		});
