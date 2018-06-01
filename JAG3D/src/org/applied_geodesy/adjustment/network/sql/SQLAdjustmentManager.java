@@ -1006,9 +1006,9 @@ public class SQLAdjustmentManager {
 				stmt.setDouble(idx++, dimension != 1 && point.getStdXApriori() > 0 ? point.getStdXApriori() : 0.0);
 				stmt.setDouble(idx++, dimension != 2 && point.getStdZApriori() > 0 ? point.getStdZApriori() : 0.0);
 
-				stmt.setDouble(idx++, dimension != 1 ? point.getStdY() : 0.0);
-				stmt.setDouble(idx++, dimension != 1 ? point.getStdX() : 0.0);
-				stmt.setDouble(idx++, dimension != 2 ? point.getStdZ() : 0.0);
+				stmt.setDouble(idx++, dimension != 1 && point.getStdY() > 0 ? point.getStdY() : 0.0);
+				stmt.setDouble(idx++, dimension != 1 && point.getStdX() > 0 ? point.getStdX() : 0.0);
+				stmt.setDouble(idx++, dimension != 2 && point.getStdZ() > 0 ? point.getStdZ() : 0.0);
 
 				stmt.setDouble(idx++, point.getConfidenceAxis(0));
 				stmt.setDouble(idx++, dimension == 3 ? point.getConfidenceAxis(1) : 0.0);
@@ -1102,8 +1102,8 @@ public class SQLAdjustmentManager {
 					stmt.setDouble(idx++, (point.getDeflectionY().getStdApriori() > 0 ? point.getDeflectionY().getStdApriori() : 0.0));
 					stmt.setDouble(idx++, (point.getDeflectionX().getStdApriori() > 0 ? point.getDeflectionX().getStdApriori() : 0.0));
 
-					stmt.setDouble(idx++, point.getDeflectionY().getStd());
-					stmt.setDouble(idx++, point.getDeflectionX().getStd());
+					stmt.setDouble(idx++, point.getDeflectionY().getStd() > 0 ? point.getDeflectionY().getStd() : 0.0);
+					stmt.setDouble(idx++, point.getDeflectionX().getStd() > 0 ? point.getDeflectionX().getStd() : 0.0);
 
 					stmt.setDouble(idx++, Math.max(point.getDeflectionX().getConfidence(), point.getDeflectionY().getConfidence()));
 					stmt.setDouble(idx++, Math.min(point.getDeflectionX().getConfidence(), point.getDeflectionY().getConfidence()));
@@ -1213,13 +1213,13 @@ public class SQLAdjustmentManager {
 						stmt.setDouble(idx++, gnssX == null ? 0.0 : gnssX.getValueAposteriori());
 						stmt.setDouble(idx++, gnssZ == null ? 0.0 : gnssZ.getValueAposteriori());
 
-						stmt.setDouble(idx++, gnssY == null ? 0.0 : gnssY.getStdApriori());
-						stmt.setDouble(idx++, gnssX == null ? 0.0 : gnssX.getStdApriori());
-						stmt.setDouble(idx++, gnssZ == null ? 0.0 : gnssZ.getStdApriori());
+						stmt.setDouble(idx++, gnssY == null || gnssY.getStdApriori() < 0 ? 0.0 : gnssY.getStdApriori());
+						stmt.setDouble(idx++, gnssX == null || gnssX.getStdApriori() < 0 ? 0.0 : gnssX.getStdApriori());
+						stmt.setDouble(idx++, gnssZ == null || gnssZ.getStdApriori() < 0 ? 0.0 : gnssZ.getStdApriori());
 
-						stmt.setDouble(idx++, gnssY == null ? 0.0 : gnssY.getStd());
-						stmt.setDouble(idx++, gnssX == null ? 0.0 : gnssX.getStd());
-						stmt.setDouble(idx++, gnssZ == null ? 0.0 : gnssZ.getStd());
+						stmt.setDouble(idx++, gnssY == null || gnssY.getStd() < 0 ? 0.0 : gnssY.getStd());
+						stmt.setDouble(idx++, gnssX == null || gnssX.getStd() < 0 ? 0.0 : gnssX.getStd());
+						stmt.setDouble(idx++, gnssZ == null || gnssZ.getStd() < 0 ? 0.0 : gnssZ.getStd());
 						
 						stmt.setDouble(idx++, gnssY == null ? 0.0 : gnssY.getCorrection());
 						stmt.setDouble(idx++, gnssX == null ? 0.0 : gnssX.getCorrection());
@@ -1270,8 +1270,8 @@ public class SQLAdjustmentManager {
 						stmt.setInt(idx++, observation.getId());
 
 						stmt.setDouble(idx++, value);
-						stmt.setDouble(idx++, observation.getStdApriori());
-						stmt.setDouble(idx++, observation.getStd());
+						stmt.setDouble(idx++, observation.getStdApriori() > 0 ? observation.getStdApriori() : 0.0);
+						stmt.setDouble(idx++, observation.getStd() > 0 ? observation.getStd() : 0.0);
 
 						stmt.setDouble(idx++, observation.getCorrection());
 						stmt.setDouble(idx++, observation.getRedundancy());
@@ -1339,7 +1339,7 @@ public class SQLAdjustmentManager {
 				stmt.setInt(idx++,    paramId);
 
 				stmt.setDouble(idx++, value); // parameter.getValue()
-				stmt.setDouble(idx++, parameter.getStd());
+				stmt.setDouble(idx++, parameter.getStd() > 0 ? parameter.getStd() : 0.0);
 				stmt.setDouble(idx++, parameter.getConfidence());
 
 				stmt.setDouble(idx++, parameter.getGrossError());
@@ -1542,9 +1542,9 @@ public class SQLAdjustmentManager {
 						stmt.setDouble(idx++, dimension != 1 ? pointPair.getDeltaX() : 0.0);
 						stmt.setDouble(idx++, dimension != 2 ? pointPair.getDeltaZ() : 0.0);
 
-						stmt.setDouble(idx++, dimension != 1 ? pointPair.getStdY() : 0.0);
-						stmt.setDouble(idx++, dimension != 1 ? pointPair.getStdX() : 0.0);
-						stmt.setDouble(idx++, dimension != 2 ? pointPair.getStdZ() : 0.0);
+						stmt.setDouble(idx++, dimension != 1 && pointPair.getStdY() > 0 ? pointPair.getStdY() : 0.0);
+						stmt.setDouble(idx++, dimension != 1 && pointPair.getStdX() > 0 ? pointPair.getStdX() : 0.0);
+						stmt.setDouble(idx++, dimension != 2 && pointPair.getStdZ() > 0 ? pointPair.getStdZ() : 0.0);
 
 						stmt.setDouble(idx++, pointPair.getConfidenceAxis(0));
 						stmt.setDouble(idx++, dimension == 3 ? pointPair.getConfidenceAxis(1) : 0.0);
@@ -1654,7 +1654,7 @@ public class SQLAdjustmentManager {
 							stmt.setInt(idx++, type.getId());
 							
 							stmt.setDouble(idx++, value); // strainParameter.getValue()
-							stmt.setDouble(idx++, strainParameter.getStd());
+							stmt.setDouble(idx++, strainParameter.getStd() > 0 ? strainParameter.getStd() : 0.0);
 							stmt.setDouble(idx++, strainParameter.getConfidence());
 							
 							stmt.setDouble(idx++, strainParameter.getGrossError());

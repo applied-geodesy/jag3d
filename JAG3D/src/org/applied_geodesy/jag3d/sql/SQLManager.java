@@ -1219,7 +1219,7 @@ public class SQLManager {
 
 			value = rs.getDouble("sigma");
 			if (!rs.wasNull())
-				row.setSigmaAposteriori(value);
+				row.setSigmaAposteriori(value > 0 ? value : 0.0);
 
 			value = rs.getDouble("confidence");
 			if (!rs.wasNull())
@@ -1370,7 +1370,7 @@ public class SQLManager {
 
 			value = rs.getDouble("sigma");
 			if (!rs.wasNull())
-				row.setSigmaAposteriori(value);
+				row.setSigmaAposteriori(value > 0 ? value : 0.0);
 			
 			value = rs.getDouble("residual");
 			if (!rs.wasNull())
@@ -1485,13 +1485,13 @@ public class SQLManager {
 			row.setZApriori(rs.wasNull() ? 0 : value);
 
 			value = rs.getDouble("sigma_x0");
-			row.setSigmaXapriori(rs.wasNull() || value <= 0 ? null : Math.abs(value));
+			row.setSigmaXapriori(rs.wasNull() || value <= 0 ? null : value);
 
 			value = rs.getDouble("sigma_y0");
-			row.setSigmaYapriori(rs.wasNull() || value <= 0 ? null : Math.abs(value));
+			row.setSigmaYapriori(rs.wasNull() || value <= 0 ? null : value);
 
 			value = rs.getDouble("sigma_z0");
-			row.setSigmaZapriori(rs.wasNull() || value <= 0 ? null : Math.abs(value));
+			row.setSigmaZapriori(rs.wasNull() || value <= 0 ? null : value);
 
 
 			// Aposteriori
@@ -1505,13 +1505,13 @@ public class SQLManager {
 			row.setZAposteriori(rs.wasNull() ? null : value);
 
 			value = rs.getDouble("sigma_x");
-			row.setSigmaXaposteriori(rs.wasNull() ? null : Math.abs(value));
+			row.setSigmaXaposteriori(rs.wasNull() ? null : value > 0 ? value : 0.0);
 
 			value = rs.getDouble("sigma_y");
-			row.setSigmaYaposteriori(rs.wasNull() ? null : Math.abs(value));
+			row.setSigmaYaposteriori(rs.wasNull() ? null : value > 0 ? value : 0.0);
 
 			value = rs.getDouble("sigma_z");
-			row.setSigmaZaposteriori(rs.wasNull() ? null : Math.abs(value));
+			row.setSigmaZaposteriori(rs.wasNull() ? null : value > 0 ? value : 0.0);
 			
 			// Residuals
 			value = rs.getDouble("residual_x");
@@ -1720,13 +1720,13 @@ public class SQLManager {
 			row.setZApriori(rs.wasNull() ? 0 : value);
 
 			value = rs.getDouble("sigma_x0");
-			row.setSigmaXapriori(rs.wasNull() || value <= 0 ? null : Math.abs(value));
+			row.setSigmaXapriori(rs.wasNull() || value <= 0 ? null : value);
 
 			value = rs.getDouble("sigma_y0");
-			row.setSigmaYapriori(rs.wasNull() || value <= 0 ? null : Math.abs(value));
+			row.setSigmaYapriori(rs.wasNull() || value <= 0 ? null : value);
 
 			value = rs.getDouble("sigma_z0");
-			row.setSigmaZapriori(rs.wasNull() || value <= 0 ? null : Math.abs(value));
+			row.setSigmaZapriori(rs.wasNull() || value <= 0 ? null : value);
 
 
 			// Aposteriori
@@ -1740,13 +1740,13 @@ public class SQLManager {
 			row.setZAposteriori(rs.wasNull() ? 0 : value);
 
 			value = rs.getDouble("sigma_x");
-			row.setSigmaXaposteriori(rs.wasNull() ? null : Math.abs(value));
+			row.setSigmaXaposteriori(rs.wasNull() ? null : value > 0 ? value : 0.0);
 
 			value = rs.getDouble("sigma_y");
-			row.setSigmaYaposteriori(rs.wasNull() ? null : Math.abs(value));
+			row.setSigmaYaposteriori(rs.wasNull() ? null : value > 0 ? value : 0.0);
 
 			value = rs.getDouble("sigma_z");
-			row.setSigmaZaposteriori(rs.wasNull() ? null : Math.abs(value));
+			row.setSigmaZaposteriori(rs.wasNull() ? null : value > 0 ? value : 0.0);
 
 			// Confidence
 			value = rs.getDouble("confidence_major_axis_point");
@@ -1859,10 +1859,10 @@ public class SQLManager {
 			row.setYAprioriDeflection(rs.wasNull() ? 0 : value);
 
 			value = rs.getDouble("sigma_dx0");
-			row.setSigmaXaprioriDeflection(rs.wasNull() || value <= 0 ? null : Math.abs(value));
+			row.setSigmaXaprioriDeflection(rs.wasNull() || value <= 0 ? null : value);
 
 			value = rs.getDouble("sigma_dy0");
-			row.setSigmaYaprioriDeflection(rs.wasNull() || value <= 0 ? null : Math.abs(value));
+			row.setSigmaYaprioriDeflection(rs.wasNull() || value <= 0 ? null : value);
 
 			// a-posteriori
 			value = rs.getDouble("dx");
@@ -1872,10 +1872,10 @@ public class SQLManager {
 			row.setYAposterioriDeflection(rs.wasNull() ? 0 : value);
 
 			value = rs.getDouble("sigma_dx");
-			row.setSigmaXaposterioriDeflection(rs.wasNull() || value <= 0 ? null : Math.abs(value));
+			row.setSigmaXaposterioriDeflection(rs.wasNull() ? null : value > 0 ? value : 0.0);
 
 			value = rs.getDouble("sigma_dy");
-			row.setSigmaYaposterioriDeflection(rs.wasNull() || value <= 0 ? null : Math.abs(value));
+			row.setSigmaYaposterioriDeflection(rs.wasNull() ? null : value > 0 ? value : 0.0);
 
 			// Confidence
 			value = rs.getDouble("confidence_major_axis_deflection");
@@ -2000,13 +2000,13 @@ public class SQLManager {
 			row.setZAposteriori(rs.wasNull() ? 0 : value);
 
 			value = rs.getDouble("sigma_x");
-			row.setSigmaXaposteriori(rs.wasNull() ? null : Math.abs(value));
+			row.setSigmaXaposteriori(rs.wasNull() ? null : value > 0 ? value : 0.0);
 
 			value = rs.getDouble("sigma_y");
-			row.setSigmaYaposteriori(rs.wasNull() ? null : Math.abs(value));
+			row.setSigmaYaposteriori(rs.wasNull() ? null : value > 0 ? value : 0.0);
 
 			value = rs.getDouble("sigma_z");
-			row.setSigmaZaposteriori(rs.wasNull() ? null : Math.abs(value));
+			row.setSigmaZaposteriori(rs.wasNull() ? null : value > 0 ? value : 0.0);
 
 			// Confidence
 			value = rs.getDouble("confidence_major_axis");
