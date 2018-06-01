@@ -52,6 +52,8 @@ public class AutomatedApproximationAdjustment implements PropertyChangeListener 
 	public AutomatedApproximationAdjustment(PointBundle targetSystem, List<Point> points) {
 		this.systems = this.getBundles(points);
 		this.targetSystem = targetSystem;
+		if (this.targetSystem != null)
+			this.systems.add(this.targetSystem);
 	}
 	
 	public void addSystems(List<PointBundle> bundles) {
@@ -103,7 +105,7 @@ public class AutomatedApproximationAdjustment implements PropertyChangeListener 
 			return EstimationStateType.ERROR_FREE_ESTIMATION;
 		}
 		int dim = this.systems.get(0).getDimension();
-		
+
 		while(this.systemsCounter != this.systems.size() && this.systems.size() > 1) {
 			this.systemsCounter = this.systems.size();
 			if (dim == 1)
@@ -116,8 +118,8 @@ public class AutomatedApproximationAdjustment implements PropertyChangeListener 
 			this.bundleTransformation.addPropertyChangeListener(this);
 			status = this.bundleTransformation.estimateModel();
 
-			this.systems = bundleTransformation.getExcludedSystems();
-			this.systems.add(bundleTransformation.getTargetSystem());
+			this.systems = this.bundleTransformation.getExcludedSystems();
+			this.systems.add(this.bundleTransformation.getTargetSystem());
 			
 			Set<String> outliers = this.bundleTransformation.getOutliers();
 			if (outliers.size() > 0)
@@ -135,7 +137,7 @@ public class AutomatedApproximationAdjustment implements PropertyChangeListener 
 	    	// Wenn Anschluss vorgegeben, dann
 	    	// transformiere auf FP-Feld
 	    	else {
-	    		Transformation trans = bundleTransformation.getSimpleTransformationModel(this.getLargestPointBundle(), this.targetSystem);
+	    		Transformation trans = this.bundleTransformation.getSimpleTransformationModel(this.getLargestPointBundle(), this.targetSystem);
 		    	
 		    	if (trans != null && trans.transformL2Norm()) {
 	    			this.targetSystem = trans.getTransformdPoints();
@@ -145,7 +147,9 @@ public class AutomatedApproximationAdjustment implements PropertyChangeListener 
 		    	}
 	    	}
 		}
-	    this.bundleTransformation.removePropertyChangeListener(this);
+
+	    if (this.bundleTransformation != null)
+	    	this.bundleTransformation.removePropertyChangeListener(this);
 	    this.bundleTransformation = null;
 	    return status;
 	}
