@@ -305,7 +305,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.sigma.y.tooltip", "A-posteriori uncertainty of y-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, PointRow::sigmaYaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, PointRow::sigmaYaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 && type != PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -315,7 +315,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.sigma.x.tooltip", "A-posteriori uncertainty of x-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, PointRow::sigmaXaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, PointRow::sigmaXaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 && type != PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -325,7 +325,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.sigma.z.tooltip", "A-posteriori uncertainty of z-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, PointRow::sigmaZaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 2 ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, PointRow::sigmaZaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 2 && type != PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
