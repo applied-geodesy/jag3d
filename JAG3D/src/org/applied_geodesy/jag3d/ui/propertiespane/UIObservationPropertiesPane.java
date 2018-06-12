@@ -21,6 +21,9 @@
 
 package org.applied_geodesy.jag3d.ui.propertiespane;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.applied_geodesy.adjustment.network.Epoch;
 import org.applied_geodesy.adjustment.network.ObservationGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.ParameterType;
@@ -34,23 +37,28 @@ import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.util.i18.I18N;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.SequentialTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 public class UIObservationPropertiesPane {
 	private class NumberChangeListener implements ChangeListener<Double> {
@@ -95,6 +103,17 @@ public class UIObservationPropertiesPane {
 			}
 		}
 	}
+	
+	private class SequentialTransitionFinishedListener implements ChangeListener<EventHandler<ActionEvent>> {
+		@Override
+		public void changed(ObservableValue<? extends EventHandler<ActionEvent>> observable, EventHandler<ActionEvent> oldValue, EventHandler<ActionEvent> newValue) {
+			if (databaseTransactionProgressIndicators != null)
+				for (ProgressIndicator progressIndicator : databaseTransactionProgressIndicators.values())
+					progressIndicator.setVisible(false);
+			if (sequentialTransition != null)
+				sequentialTransition.setNode(null);
+		}
+	}
 
 	private I18N i18n = I18N.getInstance();
 	private Node propertiesNode = null;
@@ -128,9 +147,12 @@ public class UIObservationPropertiesPane {
 	private RadioButton referenceEpochRadioButton;
 	private RadioButton controlEpochRadioButton;
 	
+	private Map<Object, ProgressIndicator> databaseTransactionProgressIndicators = new HashMap<Object, ProgressIndicator>(10);
+	private SequentialTransition sequentialTransition = new SequentialTransition();
+	
 	private boolean ignoreValueUpdate = false;
 	private ObservationTreeItemValue selectedObservationItemValues[] = null;
-	
+		
 	UIObservationPropertiesPane(TreeItemType type) {
 		switch(type) {
 		case LEVELING_LEAF:
@@ -338,53 +360,61 @@ public class UIObservationPropertiesPane {
 		for (ParameterType paramType : paramTypes) {
 			CheckBox box = null;
 			DoubleTextField field = null;
+			ProgressIndicator progressIndicator = null;
 			switch(paramType) {
 
 			case ORIENTATION:
 				
-				box   = this.orientationOffsetCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.label", "Orientation o"), i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.label.tooltip", "Checked, if orientation is an unknown parameter"), false, ParameterType.ORIENTATION);
-				field = this.orientationOffsetField    = this.createDoubleTextField(orientation, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.tooltip", "Set orientation offset"), ParameterType.ORIENTATION);				
+				box   = this.orientationOffsetCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.label", "Orientation o"), i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.label.tooltip", "Checked, if orientation is an unknown parameter"), false, paramType);
+				field = this.orientationOffsetField    = this.createDoubleTextField(orientation, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.tooltip", "Set orientation offset"), paramType);				
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
 
 				break;
 				
 			case REFRACTION_INDEX:
 				
-				box   = this.refractionIndexCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.label", "Refraction index k"), i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.label.tooltip", "Checked, if refraction index is an unknown parameter"), true, ParameterType.REFRACTION_INDEX);
-				field = this.refractionIndexField    = this.createDoubleTextField(refraction, CellValueType.STATISTIC, false, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.tooltip", "Set refraction index offset"), ParameterType.REFRACTION_INDEX);
-
+				box   = this.refractionIndexCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.label", "Refraction index k"), i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.label.tooltip", "Checked, if refraction index is an unknown parameter"), true, paramType);
+				field = this.refractionIndexField    = this.createDoubleTextField(refraction, CellValueType.STATISTIC, false, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.tooltip", "Set refraction index offset"), paramType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
+				
 				break;
 				
 			case ROTATION_Y:
 				
-				box   = this.rotationYCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.label", "Rotation angle ry"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.label.tooltip", "Checked, if rotation angle around y-axis is an unknown parameter"), true, ParameterType.ROTATION_Y);
-				field = this.rotationYField    = this.createDoubleTextField(rotationY, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.tooltip", "Set rotation angle around y-axis"), ParameterType.ROTATION_Y);
-
+				box   = this.rotationYCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.label", "Rotation angle ry"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.label.tooltip", "Checked, if rotation angle around y-axis is an unknown parameter"), true, paramType);
+				field = this.rotationYField    = this.createDoubleTextField(rotationY, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.tooltip", "Set rotation angle around y-axis"), paramType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
+				
 				break;
 				
 			case ROTATION_X:
 				
-				box   = this.rotationXCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.label", "Rotation angle rx"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.label.tooltip", "Checked, if rotation angle around x-axis is an unknown parameter"), true, ParameterType.ROTATION_X);
-				field = this.rotationXField    = this.createDoubleTextField(rotationX, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.tooltip", "Set rotation angle around x-axis"), ParameterType.ROTATION_X);
-
+				box   = this.rotationXCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.label", "Rotation angle rx"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.label.tooltip", "Checked, if rotation angle around x-axis is an unknown parameter"), true, paramType);
+				field = this.rotationXField    = this.createDoubleTextField(rotationX, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.tooltip", "Set rotation angle around x-axis"), paramType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
+				
 				break;
 				
 			case ROTATION_Z:
 				
-				box   = this.rotationZCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.label", "Rotation angle rz"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.label.tooltip", "Checked, if rotation angle around z-axis is an unknown parameter"), true, ParameterType.ROTATION_Z);
-				field = this.rotationZField    = this.createDoubleTextField(rotationZ, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.tooltip", "Set rotation angle around z-axis"), ParameterType.ROTATION_Z);
-
+				box   = this.rotationZCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.label", "Rotation angle rz"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.label.tooltip", "Checked, if rotation angle around z-axis is an unknown parameter"), true, paramType);
+				field = this.rotationZField    = this.createDoubleTextField(rotationZ, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.tooltip", "Set rotation angle around z-axis"), paramType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
+				
 				break;
 			case SCALE:
 				
-				box   = this.scaleCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.label", "Scale s"), i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.label.tooltip", "Checked, if scale is an unknown parameter"), true, ParameterType.SCALE);
-				field = this.scaleField    = this.createDoubleTextField(scale, CellValueType.SCALE, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.tooltip", "Set scale"), ParameterType.SCALE);
-
+				box   = this.scaleCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.label", "Scale s"), i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.label.tooltip", "Checked, if scale is an unknown parameter"), true, paramType);
+				field = this.scaleField    = this.createDoubleTextField(scale, CellValueType.SCALE, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.tooltip", "Set scale"), paramType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
+				
 				break;
 
 			case ZERO_POINT_OFFSET:
 				
-				box   = this.zeroPointOffsetCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.label", "Offset a"), i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.label.tooltip", "Checked, if zero point offset is an unknown parameter"), true, ParameterType.ZERO_POINT_OFFSET);
-				field = this.zeroPointOffsetField    = this.createDoubleTextField(offset, CellValueType.LENGTH_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.tooltip", "Set zero point offset"), ParameterType.ZERO_POINT_OFFSET);
+				box   = this.zeroPointOffsetCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.label", "Offset a"), i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.label.tooltip", "Checked, if zero point offset is an unknown parameter"), true, paramType);
+				field = this.zeroPointOffsetField    = this.createDoubleTextField(offset, CellValueType.LENGTH_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.tooltip", "Set zero point offset"), paramType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
 				
 				break;
 				
@@ -393,12 +423,10 @@ public class UIObservationPropertiesPane {
 			
 			}
 			
-			if (field != null && box != null) {
-				GridPane.setHgrow(box, Priority.SOMETIMES);
-				GridPane.setHgrow(field, Priority.ALWAYS);
-				
-				gridPane.add(box,   0, row);
-				gridPane.add(field, 1, row++);
+			if (field != null && box != null && progressIndicator != null) {
+				gridPane.add(box,  0, row);
+				gridPane.add(field, 1, row);
+				gridPane.add(progressIndicator, 2, row++);
 			}
 		}
 
@@ -450,17 +478,21 @@ public class UIObservationPropertiesPane {
 			return null;
 		}
 
+		double fieldMinWidth = 200;
+		double fieldMaxWidth = 350;
 		GridPane gridPane = this.createGridPane();
 
+		ProgressIndicator databaseTransactionUncertaintyTypeAProgressIndicator = this.createDatabaseTransactionProgressIndicator(ObservationGroupUncertaintyType.ZERO_POINT_OFFSET);
 		Label uncertaintyTypeALabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.ua.label", "\u03C3a"));
 		uncertaintyTypeALabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.zeroPointOffsetUncertaintyField = new UncertaintyTextField(sigmaZeroPointOffset, constantUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
 		this.zeroPointOffsetUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.ua.tooltip", "Set constant part of combined uncertainty")));
 		this.zeroPointOffsetUncertaintyField.setUserData(ObservationGroupUncertaintyType.ZERO_POINT_OFFSET);
 		this.zeroPointOffsetUncertaintyField.numberProperty().addListener(new NumberChangeListener(this.zeroPointOffsetUncertaintyField));
-		this.zeroPointOffsetUncertaintyField.setMinWidth(150);
-		this.zeroPointOffsetUncertaintyField.setMaxWidth(250);
+		this.zeroPointOffsetUncertaintyField.setMinWidth(fieldMinWidth);
+		this.zeroPointOffsetUncertaintyField.setMaxWidth(fieldMaxWidth);
 		
+		ProgressIndicator databaseTransactionUncertaintyTypeBProgressIndicator = this.createDatabaseTransactionProgressIndicator(ObservationGroupUncertaintyType.SQUARE_ROOT_DISTANCE_DEPENDENT);
 		Label uncertaintyTypeBLabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.ub.label", "\u03C3b(\u221Ad)"));
 		uncertaintyTypeBLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		//this.squareRootDistanceDependentUncertaintyField = new LengthUnceraintySquareRootTextField(sigmaSquareRootDistance, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO, true);
@@ -468,39 +500,46 @@ public class UIObservationPropertiesPane {
 		this.squareRootDistanceDependentUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.ub.tooltip", "Set square-root distance dependent part of combined uncertainty")));
 		this.squareRootDistanceDependentUncertaintyField.setUserData(ObservationGroupUncertaintyType.SQUARE_ROOT_DISTANCE_DEPENDENT);
 		this.squareRootDistanceDependentUncertaintyField.numberProperty().addListener(new NumberChangeListener(this.squareRootDistanceDependentUncertaintyField));
-		this.squareRootDistanceDependentUncertaintyField.setMinWidth(150);
-		this.squareRootDistanceDependentUncertaintyField.setMaxWidth(250);
+		this.squareRootDistanceDependentUncertaintyField.setMinWidth(fieldMinWidth);
+		this.squareRootDistanceDependentUncertaintyField.setMaxWidth(fieldMaxWidth);
 		
+		ProgressIndicator databaseTransactionUncertaintyTypeCProgressIndicator = this.createDatabaseTransactionProgressIndicator(ObservationGroupUncertaintyType.DISTANCE_DEPENDENT);
 		Label uncertaintyTypeCLabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.uc.label", "\u03C3c(d)"));
 		uncertaintyTypeCLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.distanceDependentUncertaintyField = new UncertaintyTextField(sigmaDistanceDependent, distanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO);
 		this.distanceDependentUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.uc.tooltip", "Set distance dependent part of combined uncertainty")));
 		this.distanceDependentUncertaintyField.setUserData(ObservationGroupUncertaintyType.DISTANCE_DEPENDENT);
 		this.distanceDependentUncertaintyField.numberProperty().addListener(new NumberChangeListener(this.distanceDependentUncertaintyField));
-		this.distanceDependentUncertaintyField.setMinWidth(150);
-		this.distanceDependentUncertaintyField.setMaxWidth(250);
+		this.distanceDependentUncertaintyField.setMinWidth(fieldMinWidth);
+		this.distanceDependentUncertaintyField.setMaxWidth(fieldMaxWidth);
 		
 		uncertaintyTypeALabel.setLabelFor(this.zeroPointOffsetUncertaintyField);
 		uncertaintyTypeBLabel.setLabelFor(this.squareRootDistanceDependentUncertaintyField);
 		uncertaintyTypeCLabel.setLabelFor(this.distanceDependentUncertaintyField);
-		
-		GridPane.setHgrow(uncertaintyTypeALabel, Priority.SOMETIMES);
-		GridPane.setHgrow(this.zeroPointOffsetUncertaintyField, Priority.ALWAYS);
-		
-		GridPane.setHgrow(uncertaintyTypeBLabel, Priority.SOMETIMES);
-		GridPane.setHgrow(this.squareRootDistanceDependentUncertaintyField, Priority.ALWAYS);
-		
-		GridPane.setHgrow(uncertaintyTypeCLabel, Priority.SOMETIMES);
-		GridPane.setHgrow(this.distanceDependentUncertaintyField, Priority.ALWAYS);
+				
+//		GridPane.setHgrow(uncertaintyTypeALabel, Priority.SOMETIMES);
+//		GridPane.setHgrow(this.zeroPointOffsetUncertaintyField, Priority.ALWAYS);
+//		GridPane.setHgrow(databaseTransactionUncertaintyTypeAProgressIndicator, Priority.NEVER);
+//		
+//		GridPane.setHgrow(uncertaintyTypeBLabel, Priority.SOMETIMES);
+//		GridPane.setHgrow(this.squareRootDistanceDependentUncertaintyField, Priority.ALWAYS);
+//		GridPane.setHgrow(databaseTransactionUncertaintyTypeBProgressIndicator, Priority.NEVER);
+//		
+//		GridPane.setHgrow(uncertaintyTypeCLabel, Priority.SOMETIMES);
+//		GridPane.setHgrow(this.distanceDependentUncertaintyField, Priority.ALWAYS);
+//		GridPane.setHgrow(databaseTransactionUncertaintyTypeCProgressIndicator, Priority.NEVER);
 		
 		gridPane.add(uncertaintyTypeALabel, 0, 0);
 		gridPane.add(this.zeroPointOffsetUncertaintyField, 1, 0);
+		gridPane.add(databaseTransactionUncertaintyTypeAProgressIndicator, 2, 0);
 
 		gridPane.add(uncertaintyTypeBLabel, 0, 1);
 		gridPane.add(this.squareRootDistanceDependentUncertaintyField, 1, 1);
+		gridPane.add(databaseTransactionUncertaintyTypeBProgressIndicator, 2, 1);
 
 		gridPane.add(uncertaintyTypeCLabel, 0, 2);
 		gridPane.add(this.distanceDependentUncertaintyField, 1, 2);
+		gridPane.add(databaseTransactionUncertaintyTypeCProgressIndicator, 2, 2);
 
 		TitledPane uncertaintiesTitledPane = this.createTitledPane(i18n.getString("UIObservationPropertiesPane.uncertainty.title", "Uncertainties"));
 		uncertaintiesTitledPane.setContent(gridPane);
@@ -510,6 +549,9 @@ public class UIObservationPropertiesPane {
 	private Node createCongruenceAnalysisPane() {
 		GridPane gridPane = this.createGridPane();
 
+		ProgressIndicator databaseTransactionReferenceEpochProgressIndicator = this.createDatabaseTransactionProgressIndicator(Epoch.REFERENCE);
+		ProgressIndicator databaseTransactionControlEpochProgressIndicator = this.createDatabaseTransactionProgressIndicator(Epoch.CONTROL);
+		
 		ToggleGroup group = new ToggleGroup();
 
 		this.referenceEpochRadioButton = this.createRadioButton(i18n.getString("UIObservationPropertiesPane.congruenceanalysis.referenceepoch.label", "Reference epoch"), 
@@ -519,7 +561,10 @@ public class UIObservationPropertiesPane {
 				i18n.getString("UIObservationPropertiesPane.congruenceanalysis.controlepoch.tooltip", "Selected, if group is refer to control epoch"), group, false, Epoch.CONTROL);
 
 		gridPane.add(this.referenceEpochRadioButton, 0, 0);
-		gridPane.add(this.controlEpochRadioButton,   0, 1);
+		gridPane.add(databaseTransactionReferenceEpochProgressIndicator, 1, 0);
+		
+		gridPane.add(this.controlEpochRadioButton, 0, 1);
+		gridPane.add(databaseTransactionControlEpochProgressIndicator, 1, 1);
 
 		TitledPane congruenceAnalysisTitledPane = this.createTitledPane(i18n.getString("UIObservationPropertiesPane.congruenceanalysis.title", "Congruence analysis"));
 		congruenceAnalysisTitledPane.setContent(gridPane);
@@ -541,19 +586,36 @@ public class UIObservationPropertiesPane {
 		scroller.setFitToHeight(true);
 		scroller.setFitToWidth(true);
 		this.propertiesNode = scroller;
+		
+		FadeTransition fadeIn  = new FadeTransition(Duration.millis(150));
+		FadeTransition fadeOut = new FadeTransition(Duration.millis(150));
+
+	    fadeIn.setFromValue(0.0);
+	    fadeIn.setToValue(1.0);
+	    fadeIn.setCycleCount(1);
+	    fadeIn.setAutoReverse(false);
+
+	    fadeOut.setFromValue(1.0);
+	    fadeOut.setToValue(0.0);
+	    fadeOut.setCycleCount(1);
+	    fadeOut.setAutoReverse(false);
+	    
+	    this.sequentialTransition.getChildren().addAll(fadeIn, fadeOut);
+	    this.sequentialTransition.setAutoReverse(false);
+	    this.sequentialTransition.onFinishedProperty().addListener(new SequentialTransitionFinishedListener());
 	}
 	
-	private DoubleTextField createDoubleTextField(double value, CellValueType type, boolean displayUnit, ValueSupport valueSupport, String tooltipText, Object userData) {
+	private DoubleTextField createDoubleTextField(double value, CellValueType type, boolean displayUnit, ValueSupport valueSupport, String tooltipText, ParameterType userData) {
 		DoubleTextField field = new DoubleTextField(value, type, displayUnit, valueSupport);
 		field.setTooltip(new Tooltip(tooltipText));
-		field.setMinWidth(150);
-		field.setMaxWidth(250);
+		field.setMinWidth(200);
+		field.setMaxWidth(350);
 		field.setUserData(userData);
 		field.numberProperty().addListener(new NumberChangeListener(field));
 		return field;
 	}
 
-	private CheckBox createCheckBox(String label, String tooltipText, boolean selected, Object userData) {
+	private CheckBox createCheckBox(String label, String tooltipText, boolean selected, ParameterType userData) {
 		CheckBox checkBox = new CheckBox(label);
 		checkBox.setTooltip(new Tooltip(tooltipText));
 		checkBox.setMinWidth(Control.USE_PREF_SIZE);
@@ -563,7 +625,7 @@ public class UIObservationPropertiesPane {
 		return checkBox;
 	}
 	
-	private RadioButton createRadioButton(String label, String tooltipText, ToggleGroup group, boolean selected, Object userData) {
+	private RadioButton createRadioButton(String label, String tooltipText, ToggleGroup group, boolean selected, Epoch userData) {
 		RadioButton radioButton = new RadioButton(label);
 		radioButton.setTooltip(new Tooltip(tooltipText));
 		radioButton.setMinWidth(Control.USE_PREF_SIZE);
@@ -574,9 +636,22 @@ public class UIObservationPropertiesPane {
 		return radioButton;
 	}
 	
+	private ProgressIndicator createDatabaseTransactionProgressIndicator(Object userData) {
+		ProgressIndicator progressIndicator = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
+
+		progressIndicator.setVisible(false);
+		progressIndicator.setMinSize(17, 17);
+		progressIndicator.setMaxSize(17, 17);
+		progressIndicator.setUserData(userData);
+				
+		this.databaseTransactionProgressIndicators.put(userData, progressIndicator);
+		return progressIndicator;
+	}
+	
 	private GridPane createGridPane() {
 		GridPane gridPane = new GridPane();
 		gridPane.setMaxWidth(Double.MAX_VALUE);
+		//gridPane.setGridLinesVisible(true);
 		gridPane.setHgap(10);
 		gridPane.setVgap(10);
 		gridPane.setPadding(new Insets(20, 10, 20, 10)); // oben, links, unten, rechts
@@ -612,11 +687,20 @@ public class UIObservationPropertiesPane {
 			}
 
 			if (value != null && value.doubleValue() >= 0 && this.selectedObservationItemValues != null && this.selectedObservationItemValues.length > 0) {
+				if (this.databaseTransactionProgressIndicators.containsKey(uncertaintyType)) {
+					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(uncertaintyType);
+					node.setVisible(true);
+					this.sequentialTransition.setNode(node);
+					this.sequentialTransition.playFromStart();
+				}
 				SQLManager.getInstance().saveUncertainty(uncertaintyType, value.doubleValue(), this.selectedObservationItemValues);
 			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+			
+			this.sequentialTransition.stop();
+			
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
@@ -669,11 +753,20 @@ public class UIObservationPropertiesPane {
 			}
 			
 			if (value != null && this.selectedObservationItemValues != null && this.selectedObservationItemValues.length > 0) {
+				if (this.databaseTransactionProgressIndicators.containsKey(parameterType)) {
+					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(parameterType);
+					node.setVisible(true);
+					this.sequentialTransition.setNode(node);
+					this.sequentialTransition.playFromStart();
+				}
 				SQLManager.getInstance().saveAdditionalParameter(parameterType, enable, value.doubleValue(), this.selectedObservationItemValues);
 			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+			
+			this.sequentialTransition.stop();
+			
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
@@ -689,11 +782,21 @@ public class UIObservationPropertiesPane {
 	
 	private void save() {
 		try {
-			if (this.selectedObservationItemValues != null && this.selectedObservationItemValues.length > 0)
+			if (this.selectedObservationItemValues != null && this.selectedObservationItemValues.length > 0) {
+				if (this.databaseTransactionProgressIndicators.containsKey(this.referenceEpochRadioButton.isSelected() ? this.referenceEpochRadioButton.getUserData() : this.controlEpochRadioButton.getUserData())) {
+					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(this.referenceEpochRadioButton.isSelected() ? this.referenceEpochRadioButton.getUserData() : this.controlEpochRadioButton.getUserData());
+					node.setVisible(true);
+					this.sequentialTransition.setNode(node);
+					this.sequentialTransition.playFromStart();
+				}
 				SQLManager.getInstance().saveEpoch(this.referenceEpochRadioButton.isSelected(), this.selectedObservationItemValues);
+			}
 		} catch (Exception e) {
-			this.setReferenceEpoch(!this.referenceEpochRadioButton.isSelected());
 			e.printStackTrace();
+			
+			this.setReferenceEpoch(!this.referenceEpochRadioButton.isSelected());
+			this.sequentialTransition.stop();
+			
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
@@ -706,4 +809,5 @@ public class UIObservationPropertiesPane {
 			});
 		}
 	}
+
 }

@@ -21,6 +21,9 @@
 
 package org.applied_geodesy.jag3d.ui.propertiespane;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.applied_geodesy.adjustment.network.PointGroupUncertaintyType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
@@ -31,21 +34,28 @@ import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.util.i18.I18N;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.SequentialTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 public class UIPointPropertiesPane {
 
@@ -79,7 +89,17 @@ public class UIPointPropertiesPane {
 			}
 		}
 	}
-
+	
+	private class SequentialTransitionFinishedListener implements ChangeListener<EventHandler<ActionEvent>> {
+		@Override
+		public void changed(ObservableValue<? extends EventHandler<ActionEvent>> observable, EventHandler<ActionEvent> oldValue, EventHandler<ActionEvent> newValue) {
+			if (databaseTransactionProgressIndicators != null)
+				for (ProgressIndicator progressIndicator : databaseTransactionProgressIndicators.values())
+					progressIndicator.setVisible(false);
+			if (sequentialTransition != null)
+				sequentialTransition.setNode(null);
+		}
+	}
 
 	private I18N i18n = I18N.getInstance();
 	private Node propertiesNode = null;
@@ -92,6 +112,9 @@ public class UIPointPropertiesPane {
 	private CheckBox deflectionCheckBox;
 	private UncertaintyTextField uncertaintyDeflectionXField;
 	private UncertaintyTextField uncertaintyDeflectionYField;
+	
+	private Map<Object, ProgressIndicator> databaseTransactionProgressIndicators = new HashMap<Object, ProgressIndicator>(10);
+	private SequentialTransition sequentialTransition = new SequentialTransition();
 
 	private boolean ignoreValueUpdate = false;
 	private PointTreeItemValue selectedPointItemValues[] = null;
@@ -216,24 +239,29 @@ public class UIPointPropertiesPane {
 			double sigmaX = PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.CONSTANT_X);
 			double sigmaZ = PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.CONSTANT_Z);
 
+			double fieldMinWidth = 200;
+			double fieldMaxWidth = 350;
+			
 			int row = 0;
 
 			if (this.type == TreeItemType.STOCHASTIC_POINT_2D_LEAF || this.type == TreeItemType.STOCHASTIC_POINT_3D_LEAF) {
+				ProgressIndicator databaseTransactionuncertaintyCoordinateYLabelProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.CONSTANT_Y);
 				Label uncertaintyCoordinateYLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.y.label", "\u03C3y"));
 				this.uncertaintyCoordinateYField = new UncertaintyTextField(sigmaY, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
 				this.uncertaintyCoordinateYField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.y.tooltip", "Uncertainty of y-component of stochastic points")));
 				this.uncertaintyCoordinateYField.setUserData(PointGroupUncertaintyType.CONSTANT_Y);
 				this.uncertaintyCoordinateYField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateYField));
-				this.uncertaintyCoordinateYField.setMinWidth(150);
-				this.uncertaintyCoordinateYField.setMaxWidth(250);
+				this.uncertaintyCoordinateYField.setMinWidth(fieldMinWidth);
+				this.uncertaintyCoordinateYField.setMaxWidth(fieldMaxWidth);
 				
+				ProgressIndicator databaseTransactionuncertaintyCoordinateXLabelProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.CONSTANT_X);
 				Label uncertaintyCoordinateXLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.x.label", "\u03C3x"));
 				this.uncertaintyCoordinateXField = new UncertaintyTextField(sigmaX, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
 				this.uncertaintyCoordinateXField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.x.tooltip", "Uncertainty of x-component of stochastic points")));
 				this.uncertaintyCoordinateXField.setUserData(PointGroupUncertaintyType.CONSTANT_X);
 				this.uncertaintyCoordinateXField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateXField));
-				this.uncertaintyCoordinateXField.setMinWidth(150);
-				this.uncertaintyCoordinateXField.setMaxWidth(250);
+				this.uncertaintyCoordinateXField.setMinWidth(fieldMinWidth);
+				this.uncertaintyCoordinateXField.setMaxWidth(fieldMaxWidth);
 				
 				uncertaintyCoordinateYLabel.setLabelFor(this.uncertaintyCoordinateYField);
 				uncertaintyCoordinateXLabel.setLabelFor(this.uncertaintyCoordinateXField);
@@ -241,34 +269,38 @@ public class UIPointPropertiesPane {
 				uncertaintyCoordinateYLabel.setMinWidth(Control.USE_PREF_SIZE);
 				uncertaintyCoordinateXLabel.setMinWidth(Control.USE_PREF_SIZE);
 				
-				GridPane.setHgrow(uncertaintyCoordinateYLabel, Priority.SOMETIMES);
-				GridPane.setHgrow(uncertaintyCoordinateXLabel, Priority.SOMETIMES);
-				GridPane.setHgrow(this.uncertaintyCoordinateYField, Priority.ALWAYS);
-				GridPane.setHgrow(this.uncertaintyCoordinateXField, Priority.ALWAYS);
+//				GridPane.setHgrow(uncertaintyCoordinateYLabel, Priority.SOMETIMES);
+//				GridPane.setHgrow(uncertaintyCoordinateXLabel, Priority.SOMETIMES);
+//				GridPane.setHgrow(this.uncertaintyCoordinateYField, Priority.ALWAYS);
+//				GridPane.setHgrow(this.uncertaintyCoordinateXField, Priority.ALWAYS);
 
 				gridPane.add(uncertaintyCoordinateYLabel,      0, row);
-				gridPane.add(this.uncertaintyCoordinateYField, 1, row++);
+				gridPane.add(this.uncertaintyCoordinateYField, 1, row);
+				gridPane.add(databaseTransactionuncertaintyCoordinateYLabelProgressIndicator, 2, row++);
 
 				gridPane.add(uncertaintyCoordinateXLabel,      0, row);
-				gridPane.add(this.uncertaintyCoordinateXField, 1, row++);
+				gridPane.add(this.uncertaintyCoordinateXField, 1, row);
+				gridPane.add(databaseTransactionuncertaintyCoordinateXLabelProgressIndicator, 2, row++);
 			}
 
 			if (this.type == TreeItemType.STOCHASTIC_POINT_1D_LEAF || this.type == TreeItemType.STOCHASTIC_POINT_3D_LEAF) {		
+				ProgressIndicator databaseTransactionuncertaintyCoordinateZLabelProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.CONSTANT_Z);
 				Label uncertaintyCoordinateZLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.z.label", "\u03C3z"));
 				this.uncertaintyCoordinateZField = new UncertaintyTextField(sigmaZ, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
 				this.uncertaintyCoordinateZField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.z.tooltip", "Uncertainty of z-component of stochastic points")));
 				this.uncertaintyCoordinateZField.setUserData(PointGroupUncertaintyType.CONSTANT_Z);
 				this.uncertaintyCoordinateZField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateZField));
-				this.uncertaintyCoordinateZField.setMinWidth(150);
-				this.uncertaintyCoordinateZField.setMaxWidth(250);
+				this.uncertaintyCoordinateZField.setMinWidth(fieldMinWidth);
+				this.uncertaintyCoordinateZField.setMaxWidth(fieldMaxWidth);
 				
 				uncertaintyCoordinateZLabel.setLabelFor(this.uncertaintyCoordinateZField);
 				
-				GridPane.setHgrow(uncertaintyCoordinateZLabel, Priority.SOMETIMES);
-				GridPane.setHgrow(this.uncertaintyCoordinateZField, Priority.ALWAYS);
+//				GridPane.setHgrow(uncertaintyCoordinateZLabel, Priority.SOMETIMES);
+//				GridPane.setHgrow(this.uncertaintyCoordinateZField, Priority.ALWAYS);
 				
 				gridPane.add(uncertaintyCoordinateZLabel,      0, row);
-				gridPane.add(this.uncertaintyCoordinateZField, 1, row++);
+				gridPane.add(this.uncertaintyCoordinateZField, 1, row);
+				gridPane.add(databaseTransactionuncertaintyCoordinateZLabelProgressIndicator, 2, row++);
 			}
 
 			TitledPane uncertaintiesTitledPane = this.createTitledPane(i18n.getString("UIPointPropertiesPane.uncertainty.title", "Uncertainties of stochastic points"));
@@ -280,9 +312,15 @@ public class UIPointPropertiesPane {
 
 	private Node createDeflectionUncertaintiesPane() {
 		if (this.type == TreeItemType.STOCHASTIC_POINT_3D_LEAF) {
+			double fieldMinWidth = 200;
+			double fieldMaxWidth = 350;
+			
 			double sigmaY = PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.DEFLECTION_Y);
-			double sigmaX = PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.DEFLECTION_Y);
+			double sigmaX = PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.DEFLECTION_X);
 
+			ProgressIndicator uncertaintyDeflectionYProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.DEFLECTION_Y);
+			ProgressIndicator uncertaintyDeflectionXProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.DEFLECTION_X); 
+									
 			Label uncertaintyDeflectionYLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.deflection.y.label", "\u03C3y"));
 			Label uncertaintyDeflectionXLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.deflection.x.label", "\u03C3x"));
 			uncertaintyDeflectionYLabel.setMinWidth(Control.USE_PREF_SIZE);
@@ -292,36 +330,50 @@ public class UIPointPropertiesPane {
 			this.uncertaintyDeflectionYField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.deflection.y.tooltip", "Uncertainty of y-component of deflections of vertical")));
 			this.uncertaintyDeflectionYField.setUserData(PointGroupUncertaintyType.DEFLECTION_Y);
 			this.uncertaintyDeflectionYField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyDeflectionYField));
-			this.uncertaintyDeflectionYField.setMinWidth(150);
-			this.uncertaintyDeflectionYField.setMaxWidth(250);
+			this.uncertaintyDeflectionYField.setMinWidth(fieldMinWidth);
+			this.uncertaintyDeflectionYField.setMaxWidth(fieldMaxWidth);
 						
 			this.uncertaintyDeflectionXField = new UncertaintyTextField(sigmaX, CellValueType.ANGLE_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
 			this.uncertaintyDeflectionXField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.deflection.x.tooltip", "Uncertainty of x-component of deflections of vertical")));
 			this.uncertaintyDeflectionXField.setUserData(PointGroupUncertaintyType.DEFLECTION_X);
 			this.uncertaintyDeflectionXField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyDeflectionXField));
-			this.uncertaintyDeflectionXField.setMinWidth(150);
-			this.uncertaintyDeflectionXField.setMaxWidth(250);
+			this.uncertaintyDeflectionXField.setMinWidth(fieldMinWidth);
+			this.uncertaintyDeflectionXField.setMaxWidth(fieldMaxWidth);
 			
 			uncertaintyDeflectionYLabel.setLabelFor(this.uncertaintyDeflectionYField);
 			uncertaintyDeflectionXLabel.setLabelFor(this.uncertaintyDeflectionXField);
 			
 			GridPane gridPane = this.createGridPane();
-			GridPane.setHgrow(uncertaintyDeflectionYLabel, Priority.SOMETIMES);
-			GridPane.setHgrow(uncertaintyDeflectionXLabel, Priority.SOMETIMES);
-			GridPane.setHgrow(this.uncertaintyDeflectionYField, Priority.ALWAYS);
-			GridPane.setHgrow(this.uncertaintyDeflectionXField, Priority.ALWAYS);
+//			GridPane.setHgrow(uncertaintyDeflectionYLabel, Priority.SOMETIMES);
+//			GridPane.setHgrow(uncertaintyDeflectionXLabel, Priority.SOMETIMES);
+//			GridPane.setHgrow(this.uncertaintyDeflectionYField, Priority.ALWAYS);
+//			GridPane.setHgrow(this.uncertaintyDeflectionXField, Priority.ALWAYS);
 			
 			gridPane.add(uncertaintyDeflectionYLabel,      0, 0);
 			gridPane.add(this.uncertaintyDeflectionYField, 1, 0);
+			gridPane.add(uncertaintyDeflectionYProgressIndicator, 2, 0);
 
 			gridPane.add(uncertaintyDeflectionXLabel,      0, 1);
 			gridPane.add(this.uncertaintyDeflectionXField, 1, 1);
+			gridPane.add(uncertaintyDeflectionXProgressIndicator, 2, 1);
 
 			TitledPane uncertaintiesTitledPane = this.createTitledPane(i18n.getString("UIPointPropertiesPane.uncertainty.deflection.title", "Uncertainties of deflections of vertical"));
 			uncertaintiesTitledPane.setContent(gridPane);
 			return uncertaintiesTitledPane;
 		}
 		return null;
+	}
+	
+	private ProgressIndicator createDatabaseTransactionProgressIndicator(Object userData) {
+		ProgressIndicator progressIndicator = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
+
+		progressIndicator.setVisible(false);
+		progressIndicator.setMinSize(17, 17);
+		progressIndicator.setMaxSize(17, 17);
+		progressIndicator.setUserData(userData);
+				
+		this.databaseTransactionProgressIndicators.put(userData, progressIndicator);
+		return progressIndicator;
 	}
 	
 	private GridPane createGridPane() {
@@ -369,8 +421,13 @@ public class UIPointPropertiesPane {
 		this.deflectionCheckBox      = this.createDeflectionCheckBox();
 		if (coordinateUncertainties != null)
 			content.getChildren().add(coordinateUncertainties);
-		if (this.deflectionCheckBox != null)
-			content.getChildren().add(this.deflectionCheckBox);
+		if (this.deflectionCheckBox != null) {
+			ProgressIndicator progressIndicator = this.createDatabaseTransactionProgressIndicator(this.deflectionCheckBox);
+			HBox hbox = new HBox(this.deflectionCheckBox, progressIndicator);
+			hbox.setAlignment(Pos.CENTER_LEFT);
+			hbox.setSpacing(10);
+			content.getChildren().add(hbox);
+		}
 		if (deflectionUncertainties != null)
 			content.getChildren().add(deflectionUncertainties);
 		
@@ -381,6 +438,23 @@ public class UIPointPropertiesPane {
 		scroller.setFitToHeight(true);
 		scroller.setFitToWidth(true);
 		this.propertiesNode = scroller;
+		
+		FadeTransition fadeIn  = new FadeTransition(Duration.millis(150));
+		FadeTransition fadeOut = new FadeTransition(Duration.millis(150));
+
+	    fadeIn.setFromValue(0.0);
+	    fadeIn.setToValue(1.0);
+	    fadeIn.setCycleCount(1);
+	    fadeIn.setAutoReverse(false);
+
+	    fadeOut.setFromValue(1.0);
+	    fadeOut.setToValue(0.0);
+	    fadeOut.setCycleCount(1);
+	    fadeOut.setAutoReverse(false);
+	    
+	    this.sequentialTransition.getChildren().addAll(fadeIn, fadeOut);
+	    this.sequentialTransition.setAutoReverse(false);
+	    this.sequentialTransition.onFinishedProperty().addListener(new SequentialTransitionFinishedListener());
 	}
 
 	private void save(PointGroupUncertaintyType uncertaintyType) {
@@ -408,11 +482,20 @@ public class UIPointPropertiesPane {
 			}
 
 			if (value != null && value.doubleValue() > 0 && this.selectedPointItemValues != null && this.selectedPointItemValues.length > 0) {
+				if (this.databaseTransactionProgressIndicators.containsKey(uncertaintyType)) {
+					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(uncertaintyType);
+					node.setVisible(true);
+					this.sequentialTransition.setNode(node);
+					this.sequentialTransition.playFromStart();
+				}
 				SQLManager.getInstance().saveUncertainty(uncertaintyType, value.doubleValue(), this.selectedPointItemValues);
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			
+			this.sequentialTransition.stop();
+			
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
@@ -428,11 +511,21 @@ public class UIPointPropertiesPane {
 
 	private void save() {
 		try {
-			if (this.selectedPointItemValues != null && this.selectedPointItemValues.length > 0)
+			if (this.selectedPointItemValues != null && this.selectedPointItemValues.length > 0) {
+				if (this.databaseTransactionProgressIndicators.containsKey(this.deflectionCheckBox)) {
+					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(this.deflectionCheckBox);
+					node.setVisible(true);
+					this.sequentialTransition.setNode(node);
+					this.sequentialTransition.playFromStart();
+				}
 				SQLManager.getInstance().saveDeflection(this.deflectionCheckBox.isSelected(), this.selectedPointItemValues);
+			}
 		} catch (Exception e) {
-			this.setDeflection(!this.deflectionCheckBox.isSelected());
 			e.printStackTrace();
+			
+			this.setDeflection(!this.deflectionCheckBox.isSelected());			
+			this.sequentialTransition.stop();
+			
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (

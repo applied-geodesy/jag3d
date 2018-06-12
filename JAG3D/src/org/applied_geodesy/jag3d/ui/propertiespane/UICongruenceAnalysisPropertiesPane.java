@@ -21,6 +21,9 @@
 
 package org.applied_geodesy.jag3d.ui.propertiespane;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.applied_geodesy.adjustment.network.congruence.strain.RestrictionType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
@@ -28,18 +31,24 @@ import org.applied_geodesy.jag3d.ui.tree.CongruenceAnalysisTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.util.i18.I18N;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.SequentialTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Control;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 public class UICongruenceAnalysisPropertiesPane {
 
@@ -103,6 +112,17 @@ public class UICongruenceAnalysisPropertiesPane {
 			}
 		}
 	}
+	
+	private class SequentialTransitionFinishedListener implements ChangeListener<EventHandler<ActionEvent>> {
+		@Override
+		public void changed(ObservableValue<? extends EventHandler<ActionEvent>> observable, EventHandler<ActionEvent> oldValue, EventHandler<ActionEvent> newValue) {
+			if (databaseTransactionProgressIndicators != null)
+				for (ProgressIndicator progressIndicator : databaseTransactionProgressIndicators.values())
+					progressIndicator.setVisible(false);
+			if (sequentialTransition != null)
+				sequentialTransition.setNode(null);
+		}
+	}
 
 	private I18N i18n = I18N.getInstance();
 	private Node propertiesNode = null;
@@ -127,6 +147,9 @@ public class UICongruenceAnalysisPropertiesPane {
 	private CheckBox shearXCheckBox;
 	private CheckBox shearYCheckBox;
 	private CheckBox shearZCheckBox;
+	
+	private Map<Object, ProgressIndicator> databaseTransactionProgressIndicators = new HashMap<Object, ProgressIndicator>(10);
+	private SequentialTransition sequentialTransition = new SequentialTransition();
 	
 	private boolean ignoreValueUpdate = false;
 	private CongruenceAnalysisTreeItemValue selectedCongruenceAnalysisItemValues[] = null;
@@ -355,23 +378,35 @@ public class UICongruenceAnalysisPropertiesPane {
 
 		for (RestrictionType restrictionType : restrictionTypes) {
 			CheckBox box = null;
+			ProgressIndicator progressIndicator = null;
 			
 			switch (restrictionType) {
 			case FIXED_TRANSLATION_Y:
+				
 				box = this.translationYCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.translation.y.label", "Translation y"), i18n.getString("UICongruenceAnalysisPropertiesPane.translation.y.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			case FIXED_TRANSLATION_X:
+				
 				box = this.translationXCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.translation.x.label", "Translation x"), i18n.getString("UICongruenceAnalysisPropertiesPane.translation.x.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			case FIXED_TRANSLATION_Z:
+				
 				box = this.translationZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.translation.z.label", "Translation z"), i18n.getString("UICongruenceAnalysisPropertiesPane.translation.z.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			default:
 				continue;
 			}
 			
-			if (box != null)
-				gridPane.add(box, 0, row++);
+			if (box != null && progressIndicator != null) {
+				gridPane.add(box, 0, row);
+				gridPane.add(progressIndicator, 1, row++);
+			}
 		}
 		
 		if (row == 0)
@@ -389,23 +424,35 @@ public class UICongruenceAnalysisPropertiesPane {
 
 		for (RestrictionType restrictionType : restrictionTypes) {
 			CheckBox box = null;
+			ProgressIndicator progressIndicator = null;
 			
 			switch (restrictionType) {
 			case FIXED_ROTATION_Y:
+				
 				box = this.rotationYCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.y.label", "Rotation y"), i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.y.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			case FIXED_ROTATION_X:
+				
 				box = this.rotationXCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.x.label", "Rotation x"), i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.x.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			case FIXED_ROTATION_Z:
+				
 				box = this.rotationZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.z.label", "Rotation z"), i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.z.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			default:
 				continue;
 			}
 				
-			if (box != null)
-				gridPane.add(box,   0, row++);
+			if (box != null && progressIndicator != null) {
+				gridPane.add(box, 0, row);
+				gridPane.add(progressIndicator, 1, row++);
+			}
 		}
 		
 		if (row == 0)
@@ -423,23 +470,34 @@ public class UICongruenceAnalysisPropertiesPane {
 
 		for (RestrictionType restrictionType : restrictionTypes) {
 			CheckBox box = null;
-			
+			ProgressIndicator progressIndicator = null; 
 			switch (restrictionType) {
 			case FIXED_SHEAR_Y:
+				
 				box = this.shearYCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.shear.y.label", "Shear y"), i18n.getString("UICongruenceAnalysisPropertiesPane.shear.y.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			case FIXED_SHEAR_X:
+				
 				box = this.shearXCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.shear.x.label", "Shear x"), i18n.getString("UICongruenceAnalysisPropertiesPane.shear.x.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			case FIXED_SHEAR_Z:
+				
 				box = this.shearZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.shear.z.label", "Shear z"), i18n.getString("UICongruenceAnalysisPropertiesPane.shear.z.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			default:
 				continue;
 			}
 			
-			if (box != null)
-				gridPane.add(box,   0, row++);
+			if (box != null) {
+				gridPane.add(box, 0, row);
+				gridPane.add(progressIndicator, 1, row++);
+			}
 		}
 
 		if (row == 0)
@@ -457,23 +515,35 @@ public class UICongruenceAnalysisPropertiesPane {
 
 		for (RestrictionType restrictionType : restrictionTypes) {
 			CheckBox box = null;
-
+			ProgressIndicator progressIndicator = null;
+			
 			switch (restrictionType) {
 			case FIXED_SCALE_Y:
+				
 				box = this.scaleYCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.scale.y.label", "Scale y"), i18n.getString("UICongruenceAnalysisPropertiesPane.scale.y.label.tooltip", "Checked, if scale is a strain parameter to be estimate"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			case FIXED_SCALE_X:
+				
 				box = this.scaleXCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.scale.x.label", "Scale x"), i18n.getString("UICongruenceAnalysisPropertiesPane.scale.x.label.tooltip", "Checked, if scale is a strain parameter to be estimate"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			case FIXED_SCALE_Z:
+				
 				box = this.scaleZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.scale.z.label", "Scale z"), i18n.getString("UICongruenceAnalysisPropertiesPane.scale.z.label.tooltip", "Checked, if scale is a strain parameter to be estimate"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			default:
 				continue;
 			}
 
-			if (box != null)
-				gridPane.add(box, 0, row++);
+			if (box != null) {
+				gridPane.add(box, 0, row);
+				gridPane.add(progressIndicator, 1, row++);
+			}
 		}
 
 		if (row == 0)
@@ -491,23 +561,35 @@ public class UICongruenceAnalysisPropertiesPane {
 
 		for (RestrictionType restrictionType : restrictionTypes) {
 			CheckBox box = null;
-
+			ProgressIndicator progressIndicator = null;
+			
 			switch (restrictionType) {
 			case IDENT_SCALES_XY:
+				
 				box = this.scaleXYCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.scale.restriction.xy.label", "Scale y = x"), i18n.getString("UICongruenceAnalysisPropertiesPane.scale.restriction.xy.label.tooltip", "Checked, if scale restriction has to applied"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			case IDENT_SCALES_YZ:
+				
 				box = this.scaleYZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.scale.restriction.yz.label", "Scale y = z"), i18n.getString("UICongruenceAnalysisPropertiesPane.scale.restriction.yz.label.tooltip", "Checked, if scale restriction has to applied"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			case IDENT_SCALES_XZ:
+				
 				box = this.scaleXZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.scale.restriction.xz.label", "Scale x = z"), i18n.getString("UICongruenceAnalysisPropertiesPane.scale.restriction.xz.label.tooltip", "Checked, if scale restriction has to applied"), false, restrictionType);
+				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
+				
 				break;
 			default:
 				continue;
 			}
 
-			if (box != null)
-				gridPane.add(box, 0, row++);
+			if (box != null) {
+				gridPane.add(box, 0, row);
+				gridPane.add(progressIndicator, 1, row++);
+			}
 		}
 
 		if (row == 0)
@@ -590,9 +672,26 @@ public class UICongruenceAnalysisPropertiesPane {
 		scroller.setFitToHeight(true);
 		scroller.setFitToWidth(true);
 		this.propertiesNode = scroller;
+		
+		FadeTransition fadeIn  = new FadeTransition(Duration.millis(150));
+		FadeTransition fadeOut = new FadeTransition(Duration.millis(150));
+
+	    fadeIn.setFromValue(0.0);
+	    fadeIn.setToValue(1.0);
+	    fadeIn.setCycleCount(1);
+	    fadeIn.setAutoReverse(false);
+
+	    fadeOut.setFromValue(1.0);
+	    fadeOut.setToValue(0.0);
+	    fadeOut.setCycleCount(1);
+	    fadeOut.setAutoReverse(false);
+	    
+	    this.sequentialTransition.getChildren().addAll(fadeIn, fadeOut);
+	    this.sequentialTransition.setAutoReverse(false);
+	    this.sequentialTransition.onFinishedProperty().addListener(new SequentialTransitionFinishedListener());
 	}
 	
-	private CheckBox createCheckBox(String label, String tooltipText, boolean selected, Object userData) {
+	private CheckBox createCheckBox(String label, String tooltipText, boolean selected, RestrictionType userData) {
 		CheckBox checkBox = new CheckBox(label);
 		checkBox.setTooltip(new Tooltip(tooltipText));
 		checkBox.setMinWidth(Control.USE_PREF_SIZE);
@@ -601,14 +700,36 @@ public class UICongruenceAnalysisPropertiesPane {
 		checkBox.selectedProperty().addListener(new BooleanChangeListener(checkBox));
 		return checkBox;
 	}
+	
+	private ProgressIndicator createDatabaseTransactionProgressIndicator(Object userData) {
+		ProgressIndicator progressIndicator = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
+
+		progressIndicator.setVisible(false);
+		progressIndicator.setMinSize(17, 17);
+		progressIndicator.setMaxSize(17, 17);
+		progressIndicator.setUserData(userData);
+				
+		this.databaseTransactionProgressIndicators.put(userData, progressIndicator);
+		return progressIndicator;
+	}
 
 	private void save(RestrictionType parameterType, boolean selected) {
 		try {
-			if (this.selectedCongruenceAnalysisItemValues != null && this.selectedCongruenceAnalysisItemValues.length > 0)
+			if (this.selectedCongruenceAnalysisItemValues != null && this.selectedCongruenceAnalysisItemValues.length > 0) {
+				if (this.databaseTransactionProgressIndicators.containsKey(parameterType)) {
+					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(parameterType);
+					node.setVisible(true);
+					this.sequentialTransition.setNode(node);
+					this.sequentialTransition.playFromStart();
+				}
 				SQLManager.getInstance().saveStrainParameter(parameterType, selected, this.selectedCongruenceAnalysisItemValues);
+			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+			
+			this.sequentialTransition.stop();
+			
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
