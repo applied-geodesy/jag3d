@@ -1175,18 +1175,19 @@ public class NetworkAdjustment implements Runnable {
 			double r   = observation.getRedundancy();
 			double v   = this.estimationType == EstimationType.SIMULATION ? 0.0 : observation.getCorrection();
 
-			if (qll > SQRT_EPS && r > SQRT_EPS) {
+			if (qll > 0.0 && r > SQRT_EPS) {
 				double nv2 = v*v/qll/r;
 				if (nv2 > maxNV2) {
 					maxNV2   = nv2;
 					maxNVObs = observation;
 				}	
 			}
-			
+
 			// Pruefe, ob Grenzwert fuer robustes Intervall angepasst werden sollte
-			if (Math.abs(v) > 500.0 * u)
+			if (Math.abs(v) >= 500.0 * u)
 				counter++;
 		}
+
 		// Bestimme stochastischen Punkt mit groesster NV
 		for (int i=0; i<this.stochasticDeflectionPoints.size(); i++) {
 			Point point = this.stochasticPoints.get(i);
@@ -1205,7 +1206,7 @@ public class NetworkAdjustment implements Runnable {
 			double qx = ux*ux;
 			double qy = uy*uy;
 			
-			if (qx > SQRT_EPS && rx > SQRT_EPS) {
+			if (qx > 0 && rx >= SQRT_EPS) {
 				double nv2 = vx*vx/qx/rx;
 				if (nv2 > maxNV2) {
 					maxNV2 = nv2;
@@ -1214,7 +1215,7 @@ public class NetworkAdjustment implements Runnable {
 				}	
 			}
 			
-			if (qy > SQRT_EPS && ry > SQRT_EPS) {
+			if (qy > 0 && ry >= SQRT_EPS) {
 				double nv2 = vy*vy/qy/ry;
 				if (nv2 > maxNV2) {
 					maxNV2 = nv2;
@@ -1223,7 +1224,7 @@ public class NetworkAdjustment implements Runnable {
 				}	
 			}
 			
-			if (Math.abs(vx) > 500.0 * ux)
+			if (Math.abs(vx) >= 500.0 * ux)
 				counter++;
 			
 			if (Math.abs(vy) > 500.0 * uy)
@@ -1256,7 +1257,7 @@ public class NetworkAdjustment implements Runnable {
 					r   = point.getRedundancyZ();
 				}
 				
-				if (qll > SQRT_EPS && r > SQRT_EPS) {
+				if (qll > 0.0 && r >= SQRT_EPS) {
 					double nv2 = v*v/qll/r;
 					if (nv2 > maxNV2) {
 						maxNV2     = nv2;
@@ -1268,7 +1269,7 @@ public class NetworkAdjustment implements Runnable {
 					}	
 				}
 				
-				if (Math.abs(v) > 500.0 * u)
+				if (Math.abs(v) >= 500.0 * u)
 					counter++;
 			}
 		}
