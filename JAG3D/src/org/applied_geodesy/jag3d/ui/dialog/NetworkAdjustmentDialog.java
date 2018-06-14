@@ -469,16 +469,20 @@ public class NetworkAdjustmentDialog {
 						for (int i=0; i<indices.length; i++)
 							indices[i] = treeItemIndices.get(i);
 						
-						selectionModel.clearSelection();
-						selectionModel.selectIndices(indices[0], indices);
+						try {
+							selectionModel.clearSelection();
+							selectionModel.selectIndices(indices[0], indices);
+						}
+						catch (Exception e) {
+							e.printStackTrace();
+							
+							TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
+							if (treeItem != null)
+								selectionModel.select(treeItem);
+							else
+								selectionModel.select(0);
+						}
 					}				
-					
-//					TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
-//					
-//					if (treeItem != null)
-//						selectionModel.select(treeItem);
-//					else
-//						selectionModel.select(0);
 				}
 			}
 		});
