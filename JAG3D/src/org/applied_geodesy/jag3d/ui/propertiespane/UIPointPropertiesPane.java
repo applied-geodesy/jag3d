@@ -93,9 +93,7 @@ public class UIPointPropertiesPane {
 	private class SequentialTransitionFinishedListener implements ChangeListener<EventHandler<ActionEvent>> {
 		@Override
 		public void changed(ObservableValue<? extends EventHandler<ActionEvent>> observable, EventHandler<ActionEvent> oldValue, EventHandler<ActionEvent> newValue) {
-			if (databaseTransactionProgressIndicators != null)
-				for (ProgressIndicator progressIndicator : databaseTransactionProgressIndicators.values())
-					progressIndicator.setVisible(false);
+			setProgressIndicatorsVisible(false);
 			if (sequentialTransition != null)
 				sequentialTransition.setNode(null);
 		}
@@ -145,7 +143,14 @@ public class UIPointPropertiesPane {
 		return this.propertiesNode;
 	}
 	
-	public void reset() {		
+	private void reset() {
+		this.sequentialTransition.stop();
+		this.setProgressIndicatorsVisible(false);
+		
+		// set focus to panel to commit text field values and to force db transaction
+		if (this.propertiesNode != null)
+			this.propertiesNode.requestFocus();
+		
 		this.setUncertaintyY(PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.CONSTANT_Y));
 		this.setUncertaintyX(PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.CONSTANT_X));
 		this.setUncertaintyZ(PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.CONSTANT_Z));
@@ -157,7 +162,10 @@ public class UIPointPropertiesPane {
 	}
 	
 	public void setTreeItemValue(PointTreeItemValue... selectedPointItemValues) {
-		this.selectedPointItemValues = selectedPointItemValues;
+		if (this.selectedPointItemValues != selectedPointItemValues) {
+			this.reset();
+			this.selectedPointItemValues = selectedPointItemValues;
+		}
 	}
 	
 	public boolean setUncertaintyDeflectionY(Double value) {
@@ -456,6 +464,12 @@ public class UIPointPropertiesPane {
 	    this.sequentialTransition.setAutoReverse(false);
 	    this.sequentialTransition.onFinishedProperty().addListener(new SequentialTransitionFinishedListener());
 	}
+	
+	private void setProgressIndicatorsVisible(boolean visible) {
+		if (this.databaseTransactionProgressIndicators != null)
+			for (ProgressIndicator progressIndicator : this.databaseTransactionProgressIndicators.values())
+				progressIndicator.setVisible(visible);
+	}
 
 	private void save(PointGroupUncertaintyType uncertaintyType) {
 		try {
@@ -482,9 +496,11 @@ public class UIPointPropertiesPane {
 			}
 
 			if (value != null && value.doubleValue() > 0 && this.selectedPointItemValues != null && this.selectedPointItemValues.length > 0) {
+				this.setProgressIndicatorsVisible(false);
 				if (this.databaseTransactionProgressIndicators.containsKey(uncertaintyType)) {
 					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(uncertaintyType);
 					node.setVisible(true);
+					this.sequentialTransition.stop();
 					this.sequentialTransition.setNode(node);
 					this.sequentialTransition.playFromStart();
 				}
@@ -494,6 +510,7 @@ public class UIPointPropertiesPane {
 		} catch (Exception e) {
 			e.printStackTrace();
 			
+			this.setProgressIndicatorsVisible(false);
 			this.sequentialTransition.stop();
 			
 			Platform.runLater(new Runnable() {
@@ -512,9 +529,11 @@ public class UIPointPropertiesPane {
 	private void save() {
 		try {
 			if (this.selectedPointItemValues != null && this.selectedPointItemValues.length > 0) {
+				this.setProgressIndicatorsVisible(false);
 				if (this.databaseTransactionProgressIndicators.containsKey(this.deflectionCheckBox)) {
 					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(this.deflectionCheckBox);
 					node.setVisible(true);
+					this.sequentialTransition.stop();
 					this.sequentialTransition.setNode(node);
 					this.sequentialTransition.playFromStart();
 				}
@@ -523,6 +542,7 @@ public class UIPointPropertiesPane {
 		} catch (Exception e) {
 			e.printStackTrace();
 			
+			this.setProgressIndicatorsVisible(false);
 			this.setDeflection(!this.deflectionCheckBox.isSelected());			
 			this.sequentialTransition.stop();
 			

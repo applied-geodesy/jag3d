@@ -116,9 +116,7 @@ public class UICongruenceAnalysisPropertiesPane {
 	private class SequentialTransitionFinishedListener implements ChangeListener<EventHandler<ActionEvent>> {
 		@Override
 		public void changed(ObservableValue<? extends EventHandler<ActionEvent>> observable, EventHandler<ActionEvent> oldValue, EventHandler<ActionEvent> newValue) {
-			if (databaseTransactionProgressIndicators != null)
-				for (ProgressIndicator progressIndicator : databaseTransactionProgressIndicators.values())
-					progressIndicator.setVisible(false);
+			setProgressIndicatorsVisible(false);
 			if (sequentialTransition != null)
 				sequentialTransition.setNode(null);
 		}
@@ -168,14 +166,24 @@ public class UICongruenceAnalysisPropertiesPane {
 	}
 	
 	public void setTreeItemValue(CongruenceAnalysisTreeItemValue... selectedCongruenceAnalysisItemValues) {
-		this.selectedCongruenceAnalysisItemValues = selectedCongruenceAnalysisItemValues;
+		if (this.selectedCongruenceAnalysisItemValues != selectedCongruenceAnalysisItemValues) {
+			this.reset();
+			this.selectedCongruenceAnalysisItemValues = selectedCongruenceAnalysisItemValues;
+		}
 	}
 
 	public Node getNode() {
 		return this.propertiesNode;
 	}
 	
-	public void reset() {
+	private void reset() {
+		this.sequentialTransition.stop();
+		this.setProgressIndicatorsVisible(false);
+		
+		// set focus to panel to commit text field values and to force db transaction
+		if (this.propertiesNode != null)
+			this.propertiesNode.requestFocus();
+		
 		this.setTranslationY(false);
 		this.setTranslationX(false);
 		this.setTranslationZ(false);
@@ -712,13 +720,21 @@ public class UICongruenceAnalysisPropertiesPane {
 		this.databaseTransactionProgressIndicators.put(userData, progressIndicator);
 		return progressIndicator;
 	}
+	
+	private void setProgressIndicatorsVisible(boolean visible) {
+		if (this.databaseTransactionProgressIndicators != null)
+			for (ProgressIndicator progressIndicator : this.databaseTransactionProgressIndicators.values())
+				progressIndicator.setVisible(visible);
+	}
 
 	private void save(RestrictionType parameterType, boolean selected) {
 		try {
 			if (this.selectedCongruenceAnalysisItemValues != null && this.selectedCongruenceAnalysisItemValues.length > 0) {
+				this.setProgressIndicatorsVisible(false);
 				if (this.databaseTransactionProgressIndicators.containsKey(parameterType)) {
 					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(parameterType);
 					node.setVisible(true);
+					this.sequentialTransition.stop();
 					this.sequentialTransition.setNode(node);
 					this.sequentialTransition.playFromStart();
 				}
@@ -729,6 +745,7 @@ public class UICongruenceAnalysisPropertiesPane {
 			e.printStackTrace();
 			
 			this.sequentialTransition.stop();
+			this.setProgressIndicatorsVisible(false);
 			
 			Platform.runLater(new Runnable() {
 				@Override public void run() {

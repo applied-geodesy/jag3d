@@ -747,10 +747,10 @@ public class SQLManager {
 				}
 				selectedCongruenceAnalysisItemValuesArray = selectedCongruenceAnalysisItemValues.toArray(new CongruenceAnalysisTreeItemValue[selectedCongruenceAnalysisItemValues.size()]);
 
-				UICongruenceAnalysisPropertiesPaneBuilder.getInstance().getCongruenceAnalysisPropertiesPane(congruenceAnalysisTreeItemValue.getItemType()).reset();
+				//UICongruenceAnalysisPropertiesPaneBuilder.getInstance().getCongruenceAnalysisPropertiesPane(congruenceAnalysisTreeItemValue.getItemType()).reset();
 
 				this.loadCongruenceAnalysisPointPair(congruenceAnalysisTreeItemValue, selectedCongruenceAnalysisItemValuesArray);
-				this.loadStrainParameterRestrictions(congruenceAnalysisTreeItemValue);
+				this.loadStrainParameterRestrictions(congruenceAnalysisTreeItemValue, selectedCongruenceAnalysisItemValuesArray);
 				this.loadStrainParameters(congruenceAnalysisTreeItemValue, selectedCongruenceAnalysisItemValuesArray);
 			}
 
@@ -784,7 +784,7 @@ public class SQLManager {
 				selectedPointItemValuesArray = selectedPointItemValues.toArray(new PointTreeItemValue[selectedPointItemValues.size()]);
 				this.loadPoints(pointItemValue, selectedPointItemValuesArray);
 
-				UIPointPropertiesPaneBuilder.getInstance().getPointPropertiesPane(pointItemValue.getItemType()).reset();
+				//UIPointPropertiesPaneBuilder.getInstance().getPointPropertiesPane(pointItemValue.getItemType()).reset();
 
 				switch(treeItemType) {
 				case REFERENCE_POINT_3D_LEAF:
@@ -846,7 +846,7 @@ public class SQLManager {
 					break;
 				}
 
-				UIObservationPropertiesPaneBuilder.getInstance().getObservationPropertiesPane(observationItemValue.getItemType()).reset();
+				//UIObservationPropertiesPaneBuilder.getInstance().getObservationPropertiesPane(observationItemValue.getItemType()).reset();
 
 				this.loadUncertainties(observationItemValue, selectedObservationItemValuesArray);
 				this.loadEpoch(observationItemValue, selectedObservationItemValuesArray);
@@ -1127,13 +1127,14 @@ public class SQLManager {
 		table.sort();
 	}
 
-	private void loadStrainParameterRestrictions(CongruenceAnalysisTreeItemValue congruenceAnalysisItemValue) throws SQLException {
+	private void loadStrainParameterRestrictions(CongruenceAnalysisTreeItemValue congruenceAnalysisItemValue, CongruenceAnalysisTreeItemValue... selectedCongruenceAnalysisItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
 		UICongruenceAnalysisPropertiesPaneBuilder propertiesPaneBuilder = UICongruenceAnalysisPropertiesPaneBuilder.getInstance();
 		UICongruenceAnalysisPropertiesPane propertiesPane = propertiesPaneBuilder.getCongruenceAnalysisPropertiesPane(congruenceAnalysisItemValue.getItemType());
-
+		propertiesPane.setTreeItemValue(selectedCongruenceAnalysisItemValues);
+		
 		RestrictionType[] restrictionTypes = CongruenceAnalysisTreeItemValue.getRestrictionTypes(congruenceAnalysisItemValue.getItemType());
 		StringBuilder inTypeArrayValues = new StringBuilder("?");
 		for (int i=1; i<restrictionTypes.length; i++) 

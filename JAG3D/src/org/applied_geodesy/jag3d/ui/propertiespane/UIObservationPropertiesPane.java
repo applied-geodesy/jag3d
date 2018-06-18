@@ -107,9 +107,7 @@ public class UIObservationPropertiesPane {
 	private class SequentialTransitionFinishedListener implements ChangeListener<EventHandler<ActionEvent>> {
 		@Override
 		public void changed(ObservableValue<? extends EventHandler<ActionEvent>> observable, EventHandler<ActionEvent> oldValue, EventHandler<ActionEvent> newValue) {
-			if (databaseTransactionProgressIndicators != null)
-				for (ProgressIndicator progressIndicator : databaseTransactionProgressIndicators.values())
-					progressIndicator.setVisible(false);
+			setProgressIndicatorsVisible(false);
 			if (sequentialTransition != null)
 				sequentialTransition.setNode(null);
 		}
@@ -172,14 +170,24 @@ public class UIObservationPropertiesPane {
 	}
 	
 	public void setTreeItemValue(ObservationTreeItemValue... selectedObservationItemValues) {
-		this.selectedObservationItemValues = selectedObservationItemValues;
+		if (this.selectedObservationItemValues != selectedObservationItemValues) {
+			this.reset();
+			this.selectedObservationItemValues = selectedObservationItemValues;
+		}
 	}
 
 	public Node getNode() {
 		return this.propertiesNode;
 	}
 	
-	public void reset() {
+	private void reset() {
+		this.sequentialTransition.stop();
+		this.setProgressIndicatorsVisible(false);
+		
+		// set focus to panel to commit text field values and to force db transaction
+		if (this.propertiesNode != null)
+			this.propertiesNode.requestFocus();
+		
 		double offset      = 0.0;
 		double scale       = 1.0;
 		double orientation = 0.0;
@@ -668,6 +676,12 @@ public class UIObservationPropertiesPane {
 		return parametersTitledPane;
 	}
 	
+	private void setProgressIndicatorsVisible(boolean visible) {
+		if (this.databaseTransactionProgressIndicators != null)
+			for (ProgressIndicator progressIndicator : this.databaseTransactionProgressIndicators.values())
+				progressIndicator.setVisible(visible);
+	}
+	
 	private void save(ObservationGroupUncertaintyType uncertaintyType) {
 		try {
 			Double value = null;
@@ -687,9 +701,11 @@ public class UIObservationPropertiesPane {
 			}
 
 			if (value != null && value.doubleValue() >= 0 && this.selectedObservationItemValues != null && this.selectedObservationItemValues.length > 0) {
+				this.setProgressIndicatorsVisible(false);
 				if (this.databaseTransactionProgressIndicators.containsKey(uncertaintyType)) {
 					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(uncertaintyType);
 					node.setVisible(true);
+					this.sequentialTransition.stop();
 					this.sequentialTransition.setNode(node);
 					this.sequentialTransition.playFromStart();
 				}
@@ -699,6 +715,7 @@ public class UIObservationPropertiesPane {
 		} catch (Exception e) {
 			e.printStackTrace();
 			
+			this.setProgressIndicatorsVisible(false);
 			this.sequentialTransition.stop();
 			
 			Platform.runLater(new Runnable() {
@@ -753,9 +770,11 @@ public class UIObservationPropertiesPane {
 			}
 			
 			if (value != null && this.selectedObservationItemValues != null && this.selectedObservationItemValues.length > 0) {
+				this.setProgressIndicatorsVisible(false);
 				if (this.databaseTransactionProgressIndicators.containsKey(parameterType)) {
 					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(parameterType);
 					node.setVisible(true);
+					this.sequentialTransition.stop();
 					this.sequentialTransition.setNode(node);
 					this.sequentialTransition.playFromStart();
 				}
@@ -765,6 +784,7 @@ public class UIObservationPropertiesPane {
 		} catch (Exception e) {
 			e.printStackTrace();
 			
+			this.setProgressIndicatorsVisible(false);
 			this.sequentialTransition.stop();
 			
 			Platform.runLater(new Runnable() {
@@ -783,9 +803,11 @@ public class UIObservationPropertiesPane {
 	private void save() {
 		try {
 			if (this.selectedObservationItemValues != null && this.selectedObservationItemValues.length > 0) {
+				this.setProgressIndicatorsVisible(false);
 				if (this.databaseTransactionProgressIndicators.containsKey(this.referenceEpochRadioButton.isSelected() ? this.referenceEpochRadioButton.getUserData() : this.controlEpochRadioButton.getUserData())) {
 					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(this.referenceEpochRadioButton.isSelected() ? this.referenceEpochRadioButton.getUserData() : this.controlEpochRadioButton.getUserData());
 					node.setVisible(true);
+					this.sequentialTransition.stop();
 					this.sequentialTransition.setNode(node);
 					this.sequentialTransition.playFromStart();
 				}
@@ -794,6 +816,7 @@ public class UIObservationPropertiesPane {
 		} catch (Exception e) {
 			e.printStackTrace();
 			
+			this.setProgressIndicatorsVisible(false);
 			this.setReferenceEpoch(!this.referenceEpochRadioButton.isSelected());
 			this.sequentialTransition.stop();
 			
