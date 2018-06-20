@@ -302,10 +302,9 @@ public class UIMenuBuilder {
 					pw.printf(Locale.ENGLISH, "%s\r\n", fileMenuItem.getFile());
 				}
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			if (pw != null)
 				pw.close();
 		}
@@ -345,7 +344,7 @@ public class UIMenuBuilder {
 			this.historyMenu.setDisable(items.isEmpty());
 			this.writeProjectHistory();
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -383,13 +382,13 @@ public class UIMenuBuilder {
 							break;
 					}
 				}
-				this.historyMenu.setDisable(newItems.isEmpty());
-
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
+				newItems.clear();
 			} finally {
 				if (scanner != null)
 					scanner.close();
+				this.historyMenu.setDisable(newItems.isEmpty());
 			}
 		}
 		return this.historyMenu;
