@@ -594,19 +594,15 @@ public class FTLReport {
 			statistics.put("group_name",       rs.getString("group_name"));
 			statistics.put("type",             observationType.name());
 			
-			switch(observationType) {
-			case DIRECTION:
-			case ZENITH_ANGLE:
-				statistics.put("value",   options.convertAngleToView(rs.getDouble("value")));
-				statistics.put("average", options.convertAngleToView(rs.getDouble("average")));
-				break;
-				
-			default:
-				statistics.put("value",   options.convertLengthToView(rs.getDouble("value")));
-				statistics.put("average", options.convertLengthToView(rs.getDouble("average")));
-				break;
+			if (tableRowHighlightType == TableRowHighlightType.INFLUENCE_ON_POSITION) {
+				statistics.put("value",   options.convertLengthResidualToView(rs.getDouble("value")));
+				statistics.put("average", options.convertLengthResidualToView(rs.getDouble("average")));
 			}
-			
+			else {
+				statistics.put("value",   rs.getDouble("value"));
+				statistics.put("average", rs.getDouble("average"));
+			}
+	
 			summary.add(statistics);
 		}
 		
