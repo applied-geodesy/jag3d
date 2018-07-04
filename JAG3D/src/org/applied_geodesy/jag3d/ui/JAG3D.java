@@ -78,8 +78,10 @@ public class JAG3D extends Application {
 	private class DatabaseStateChangedListener implements ProjectDatabaseStateChangedListener {
 		@Override
 		public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt) {
-			boolean disable = evt.getEventType() != ProjectDatabaseStateType.OPENED;
-			adjusmentButton.setDisable(disable);
+			if (adjusmentButton != null) {
+				boolean disable = evt.getEventType() != ProjectDatabaseStateType.OPENED;
+				adjusmentButton.setDisable(disable);
+			}
 		}
 	}
 	
