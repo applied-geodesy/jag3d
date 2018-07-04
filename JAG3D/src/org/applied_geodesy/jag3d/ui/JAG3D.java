@@ -23,6 +23,9 @@ package org.applied_geodesy.jag3d.ui;
 
 import java.util.Locale;
 
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dialog.AboutDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ApproximationValuesDialog;
@@ -71,8 +74,18 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class JAG3D extends Application {
+	
+	private class DatabaseStateChangedListener implements ProjectDatabaseStateChangedListener {
+		@Override
+		public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt) {
+			boolean disable = evt.getEventType() != ProjectDatabaseStateType.OPENED;
+			adjusmentButton.setDisable(disable);
+		}
+	}
+	
 	private final static String TITLE_TEMPLATE = "%s%sJAG3D \u00B7 Least-Squares Adjustment \u0026 Deformation Analysis \u00B7";
 	private static Stage primaryStage;
+	private Button adjusmentButton;
 	
 	public static void setTitle(String title) {
 		if (primaryStage != null && title != null && !title.trim().isEmpty())
@@ -146,14 +159,15 @@ public class JAG3D extends Application {
 			UITreeBuilder.getInstance().getTree().getSelectionModel().clearSelection();
 			UITreeBuilder.getInstance().getTree().getSelectionModel().selectFirst();
 
-			Button adjusmentButton = new Button(i18n.getString("JavaGraticule3D.button.adjust.label", "Adjust network"));
-			adjusmentButton.setTooltip(new Tooltip(i18n.getString("JavaGraticule3D.button.adjust.tooltip", "Start network adjustment process")));
-			adjusmentButton.setOnAction(new EventHandler<ActionEvent>() { 
+			this.adjusmentButton = new Button(i18n.getString("JavaGraticule3D.button.adjust.label", "Adjust network"));
+			this.adjusmentButton.setTooltip(new Tooltip(i18n.getString("JavaGraticule3D.button.adjust.tooltip", "Start network adjustment process")));
+			this.adjusmentButton.setOnAction(new EventHandler<ActionEvent>() { 
 				@Override
 				public void handle(ActionEvent event) {	    	
 					NetworkAdjustmentDialog.show();
 				}
 			});
+			this.adjusmentButton.setDisable(true);
 
 			DropShadow ds = new DropShadow();
 			ds.setOffsetY(0.5f);
@@ -170,7 +184,7 @@ public class JAG3D extends Application {
 			HBox hbox = new HBox(10);
 			hbox.setPadding(new Insets(5, 10, 5, 15));
 			HBox.setHgrow(spacer, Priority.ALWAYS);
-			hbox.getChildren().addAll(applicationName, spacer, adjusmentButton);
+			hbox.getChildren().addAll(applicationName, spacer, this.adjusmentButton);
 			border.setBottom(hbox);
 
 			Scene scene = new Scene(border);
@@ -194,7 +208,7 @@ public class JAG3D extends Application {
 
 			this.setStageToDialogs(primaryStage);
 			this.setHostServices();
-
+			SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
 		}
 		finally {
 			if (splashScreen != null)
