@@ -140,7 +140,7 @@ public class FormatterOptions {
 		angleResidualFormatter.setGroupingUsed(false);
 		scaleResidualFormatter.setGroupingUsed(false);
 		
-		this.setFractionDigits(lengthFormatter, 5);
+		this.setFractionDigits(lengthFormatter, 4);
 		this.setFractionDigits(angleFormatter,  5);
 		this.setFractionDigits(scaleFormatter,  2);
 		this.setFractionDigits(vectorFormatter, 7);
