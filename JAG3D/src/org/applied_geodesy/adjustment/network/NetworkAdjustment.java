@@ -2354,7 +2354,7 @@ public class NetworkAdjustment implements Runnable {
 			// bestimmt werden koennen. 
 			int dof = this.degreeOfFreedom();
 			double sigma2apost = this.getVarianceFactorAposteriori();
-			this.significanceTestStatisticParameters        = this.getSignificanceTestStatisticParameters();
+			this.significanceTestStatisticParameters = this.getSignificanceTestStatisticParameters();
 
 			// Bestimme die kritischen Werte der Standardteststatistiken
 			TestStatisticParameterSet tsGlobal = this.significanceTestStatisticParameters.getTestStatisticParameter(dof, Double.POSITIVE_INFINITY);
@@ -4121,7 +4121,7 @@ public class NetworkAdjustment implements Runnable {
 		switch (testStatisticDefinition.getTestStatisticType()) {
 		case SIDAK:
 			// alle Hypothesen + GlobalTest
-			int noh = this.referencePoints.size() + this.numberOfHypotesis + (dof > 0 ?  1: 0);
+			int noh = this.referencePoints.size() + this.numberOfHypotesis + (dof > 0 ? 1 : 0);
 			testStatistic = new SidakTestStatistic(noh, alpha, beta, testStatisticDefinition.isFamilywiseErrorRate());
 			break;
 		case BAARDA_METHOD:

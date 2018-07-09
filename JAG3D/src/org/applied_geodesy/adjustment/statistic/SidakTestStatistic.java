@@ -95,7 +95,7 @@ public class SidakTestStatistic extends TestStatistic {
 	public static void main(String args[]) {
 		int numberOfIndependentHypothesis = 100;
 
-		SidakTestStatistic bMeth = new SidakTestStatistic(numberOfIndependentHypothesis, 0.1, 80.0, false);
+		SidakTestStatistic testStatistic = new SidakTestStatistic(numberOfIndependentHypothesis, 0.1, 80.0, false);
 		
 		TestStatisticParameterSet set[] = new TestStatisticParameterSet[] {
 				new TestStatisticParameterSet(1, Double.POSITIVE_INFINITY),
@@ -109,7 +109,7 @@ public class SidakTestStatistic extends TestStatistic {
 				
 				new TestStatisticParameterSet(numberOfIndependentHypothesis, Double.POSITIVE_INFINITY),
 		};
-		bMeth.adjustTestStatisticParameters(set);
+		testStatistic.adjustTestStatisticParameters(set);
 		for (TestStatisticParameterSet s : set)
 			System.out.println(s);
 		
