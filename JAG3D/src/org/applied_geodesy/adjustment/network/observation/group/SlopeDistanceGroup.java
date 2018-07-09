@@ -57,9 +57,9 @@ public class SlopeDistanceGroup extends ObservationGroup {
 	
 	@Override
 	public double getStdB(Observation observation) {
-		double dist = observation.getDistanceForUncertaintyModel();
+		double dist = observation.getDistanceForUncertaintyModel() / 1000.0; // [km]
 		if (dist < Constant.EPS)
-			dist = observation.getCalculatedAprioriDistance3D();
+			dist = observation.getCalculatedAprioriDistance3D() / 1000.0; // [km]
 		return this.getStdB() * Math.sqrt(dist);
 	}
 	
