@@ -85,7 +85,7 @@ public class GNSSBaseline1DGroup extends ObservationGroup {
 	public double getStdB(Observation observation) {
 		double dist = observation.getDistanceForUncertaintyModel();
 		if (dist < Constant.EPS)
-			dist = observation.getCalculatedAprioriDistance3D();
+			dist = Math.abs(observation.getValueApriori()); // should be equal to distance for uncertainty model
 		return this.getStdB() * Math.sqrt(dist / 1000.0); // [km]
 	}
 	
@@ -93,7 +93,7 @@ public class GNSSBaseline1DGroup extends ObservationGroup {
 	public double getStdC(Observation observation) {
 		double dist = observation.getDistanceForUncertaintyModel();
 		if (dist < Constant.EPS)
-			dist = observation.getCalculatedAprioriDistance3D();
+			dist = Math.abs(observation.getValueApriori()); // should be equal to distance for uncertainty model
 		return this.getStdC() * dist;
 	}
 
