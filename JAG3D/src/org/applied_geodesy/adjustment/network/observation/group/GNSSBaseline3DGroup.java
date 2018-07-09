@@ -110,10 +110,10 @@ public class GNSSBaseline3DGroup extends ObservationGroup {
 	
 	@Override
 	public double getStdB(Observation observation) {
-		double distKM = observation.getDistanceForUncertaintyModel() / 1000.0; // [km]
-		if (distKM < Constant.EPS)
-			distKM = observation.getCalculatedAprioriDistance3D() / 1000.0; // [km]
-		return this.getStdB() * Math.sqrt(distKM);
+		double dist = observation.getDistanceForUncertaintyModel();
+		if (dist < Constant.EPS)
+			dist = observation.getCalculatedAprioriDistance3D(); 
+		return this.getStdB() * Math.sqrt(dist / 1000.0);// [km]
 	}
 	
 	@Override

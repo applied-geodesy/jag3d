@@ -56,18 +56,18 @@ public class DeltaZGroup extends ObservationGroup {
 	
 	@Override
 	public double getStdB(Observation observation) {
-		double distKM = observation.getDistanceForUncertaintyModel() / 1000.0; // [km]
-		if (distKM < Constant.EPS) // Strecke aus Koordinaten, wenn keine gegeben ist; 
-			distKM = observation.getCalculatedAprioriDistance2D() / 1000.0; // [km]
-		return this.getStdB() * Math.sqrt(distKM);
+		double dist = observation.getDistanceForUncertaintyModel(); 
+		if (dist < Constant.EPS) // Strecke aus Koordinaten, wenn keine gegeben ist; 
+			dist = observation.getCalculatedAprioriDistance2D();
+		return this.getStdB() * Math.sqrt(dist / 1000.0); // [km]
 	}
 	
 	@Override
 	public double getStdC(Observation observation) {
-		double distKM = observation.getDistanceForUncertaintyModel();
-		if (distKM < Constant.EPS) // Strecke aus Koordinaten, wenn keine gegeben ist
-			distKM = observation.getCalculatedAprioriDistance2D();
-		return this.getStdC() * distKM;
+		double dist = observation.getDistanceForUncertaintyModel();
+		if (dist < Constant.EPS) // Strecke aus Koordinaten, wenn keine gegeben ist
+			dist = observation.getCalculatedAprioriDistance2D();
+		return this.getStdC() * dist;
 	}
 
 	@Override
