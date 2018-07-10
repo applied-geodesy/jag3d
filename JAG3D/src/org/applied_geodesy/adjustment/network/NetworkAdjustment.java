@@ -2010,7 +2010,7 @@ public class NetworkAdjustment implements Runnable {
 		//Fuehre stochastische Anschlusspunkte ins Modell ein
 		this.addStochasticPointsToModel();
 
-		// ermittle Rank-Defekt anahnd der Beobachtungen
+		// ermittle Rank-Defekt anhand der Beobachtungen
 		this.freeNetwork = this.freeNetwork || (this.referencePoints == null || this.referencePoints.isEmpty()) && (this.stochasticPoints == null || this.stochasticPoints.isEmpty());
 		this.detectRankDefect();
 
@@ -2354,10 +2354,30 @@ public class NetworkAdjustment implements Runnable {
 			// bestimmt werden koennen. 
 			int dof = this.degreeOfFreedom();
 			double sigma2apost = this.getVarianceFactorAposteriori();
+			
+			if (this.estimationType != EstimationType.SIMULATION && this.significanceTestStatisticDefinition.getTestStatisticType() == TestStatisticType.SIDAK) {
+				for (int i = 0; i < this.referencePoints.size(); i++) {
+					if (this.interrupt)
+						return;
+					
+					Point point = this.referencePoints.get(i);
+					this.numberOfHypotesis++;
+										
+					if (point.considerDeflection())
+						this.numberOfHypotesis++;
+				}
+				
+				for (VarianceComponent varianceEstimation : this.varianceComponents.values()) {
+					double r = Math.round(varianceEstimation.getRedundancy() * 1.0E5) / 1.0E5;
+					if (r > 0) 
+						this.numberOfHypotesis++;
+				}
+			}
+
 			this.significanceTestStatisticParameters = this.getSignificanceTestStatisticParameters();
 
 			// Bestimme die kritischen Werte der Standardteststatistiken
-			TestStatisticParameterSet tsGlobal = this.significanceTestStatisticParameters.getTestStatisticParameter(dof, Double.POSITIVE_INFINITY);
+			TestStatisticParameterSet tsGlobal = this.significanceTestStatisticParameters.getTestStatisticParameter(dof, Double.POSITIVE_INFINITY, Boolean.TRUE);
 			
 			// Bestimme maximalen Helmert'schen Punktfehler sigmaPointMax zur Ableitung von EF*SP
 			double sigma2PointMax = 0.0;
@@ -3258,7 +3278,7 @@ public class NetworkAdjustment implements Runnable {
 			else {
 				this.congruenceAnalysisGroup = new ArrayList<CongruenceAnalysisGroup>(0);
 			}
-			
+
 			if (this.estimationType != EstimationType.SIMULATION) {
 				for (VarianceComponent varianceEstimation : this.varianceComponents.values()) {
 					double r = Math.round(varianceEstimation.getRedundancy() * 1.0E5) / 1.0E5;
@@ -4120,9 +4140,8 @@ public class NetworkAdjustment implements Runnable {
 		TestStatistic testStatistic;
 		switch (testStatisticDefinition.getTestStatisticType()) {
 		case SIDAK:
-			// alle Hypothesen + GlobalTest
-			int noh = this.referencePoints.size() + this.numberOfHypotesis + (dof > 0 ? 1 : 0);
-			testStatistic = new SidakTestStatistic(noh, alpha, beta, testStatisticDefinition.isFamilywiseErrorRate());
+			// alle Hypothesen + Test der Varianzkomponenten + Test der Festpunkte
+			testStatistic = new SidakTestStatistic(this.numberOfHypotesis, alpha, beta, testStatisticDefinition.isFamilywiseErrorRate());
 			break;
 		case BAARDA_METHOD:
 			testStatistic = new BaardaMethodTestStatistic(testStatisticDefinition.isFamilywiseErrorRate() ? dof : 1, alpha, beta);
