@@ -24,12 +24,16 @@ package org.applied_geodesy.adjustment.statistic;
 public class TestStatisticParameterSet {
 	private double quantile, ncp, alpha, beta, logP;
 	private final double f1, f2;
+	private final boolean isGlobalTestStatistic;
 	
-	public TestStatisticParameterSet(double f1, double f2) {
+	public TestStatisticParameterSet(double f1, double f2, boolean isGlobalTestStatistic) {
 		this.f1 = f1;
 		this.f2 = f2;
+		this.isGlobalTestStatistic = isGlobalTestStatistic;
 	}
-	
+	public TestStatisticParameterSet(double f1, double f2) {
+		this(f1, f2, Boolean.FALSE);
+	}
 	public double getQuantile() {
 		return this.quantile;
 	}
@@ -65,6 +69,9 @@ public class TestStatisticParameterSet {
 	}
 	public double getLogarithmicProbabilityValue() {
 		return this.logP;
+	}
+	public boolean isGlobalTestStatistic() {
+		return this.isGlobalTestStatistic;
 	}
 	@Override
 	public String toString() {

@@ -100,9 +100,13 @@ public class TestStatisticParameters  {
 	}
 	
 	public TestStatisticParameterSet getTestStatisticParameter(double f1, double f2) {
+		return this.getTestStatisticParameter(f1, f2, Boolean.FALSE);
+	}
+	
+	public TestStatisticParameterSet getTestStatisticParameter(double f1, double f2, boolean isGlobalTestStatistic) {
 		KeySet key = new KeySet(f1,f2);
 		if (!this.params.containsKey(key))
-			this.params.put(key, this.testStatistic.adjustTestStatisticParameter(new TestStatisticParameterSet(f1,f2)));
+			this.params.put(key, this.testStatistic.adjustTestStatisticParameter(new TestStatisticParameterSet(f1, f2, isGlobalTestStatistic)));
 		return this.params.get(key);
 	}
 }
