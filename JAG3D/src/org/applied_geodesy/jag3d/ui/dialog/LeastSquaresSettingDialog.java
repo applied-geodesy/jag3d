@@ -377,7 +377,8 @@ public class LeastSquaresSettingDialog {
 		    	else {
 		    		try {
 		    			return numberFormat.parse(s).intValue();
-		    		}catch (Exception nfe) {
+		    		}
+		    		catch (Exception nfe) {
 						nfe.printStackTrace();
 					}
 		    	}
@@ -430,8 +431,9 @@ public class LeastSquaresSettingDialog {
 					return null;
 				else {
 					try {
-						return numberFormat.parse(s).doubleValue();
-					}catch (Exception nfe) {
+						return numberFormat.parse(s.replaceAll(",", ".")).doubleValue();
+					}
+					catch (Exception nfe) {
 						nfe.printStackTrace();
 					}
 				}

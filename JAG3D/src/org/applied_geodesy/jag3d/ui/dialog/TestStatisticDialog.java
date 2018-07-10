@@ -239,8 +239,9 @@ public class TestStatisticDialog implements FormatterChangedListener {
 					return null;
 				else {
 					try {
-						return numberFormat.parse(s).doubleValue();
-					}catch (Exception nfe) {
+						return numberFormat.parse(s.replaceAll(",", ".")).doubleValue();
+					}
+					catch (Exception nfe) {
 						nfe.printStackTrace();
 					}
 				}
