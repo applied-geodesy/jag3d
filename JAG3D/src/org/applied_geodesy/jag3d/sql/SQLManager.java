@@ -962,9 +962,11 @@ public class SQLManager {
 		List<TestStatisticRow> tableModel = FXCollections.observableArrayList();
 		
 		String sql = "SELECT "
-				+ "\"d1\" ,\"d2\",\"probability_value\",\"power_of_test\",\"quantile\",\"non_centrality_parameter\",\"p_value\" "
+				+ "ABS(\"d1\") AS \"d1\", ABS(\"d2\") AS \"d2\","
+				+ "\"probability_value\",\"power_of_test\",\"quantile\","
+				+ "\"non_centrality_parameter\",\"p_value\" "
 				+ "FROM \"TestStatistic\" "
-				+ "ORDER BY \"d1\" ASC, \"d2\" DESC";
+				+ "ORDER BY ABS(\"d1\") ASC, ABS(\"d2\") DESC";
 		
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		ResultSet rs = stmt.executeQuery();

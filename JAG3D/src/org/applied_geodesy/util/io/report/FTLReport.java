@@ -340,11 +340,11 @@ public class FTLReport {
 		String sqlDefinition = "SELECT \"type\", \"probability_value\", \"power_of_test\" FROM \"TestStatisticDefinition\" WHERE \"id\" = 1 LIMIT 1";
 
 		String sqlTestStatistic = "SELECT "
-				+ "\"d1\",\"d2\","
+				+ "ABS(\"d1\") AS \"d1\", ABS(\"d2\") AS \"d2\","
 				+ "\"probability_value\",\"power_of_test\","
 				+ "\"quantile\",\"non_centrality_parameter\",\"p_value\" "
 				+ "FROM \"TestStatistic\" "
-				+ "ORDER BY \"d1\" ASC, \"d2\" DESC";
+				+ "ORDER BY ABS(\"d1\") ASC, ABS(\"d2\") DESC";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sqlDefinition);
 		ResultSet rs = stmt.executeQuery();
