@@ -44,7 +44,7 @@ import javafx.scene.control.TreeView;
 import javafx.util.Callback;
 
 public class UITreeBuilder {
-
+	
 	private class TreeCheckBoxChangeListener implements ChangeListener<Boolean> {
 		private final TreeItemValue treeItemValue;
 
@@ -96,6 +96,19 @@ public class UITreeBuilder {
 			handleTreeSelections(newValue);
 		}
 	}
+	
+//	private class TreeListSelectionChangeListener implements ListChangeListener<TreeItem<TreeItemValue>> {
+//		@Override
+//		public void onChanged(Change<? extends TreeItem<TreeItemValue>> change) {
+//			if (treeView != null && treeView.getSelectionModel() != null && treeView.getSelectionModel().getSelectedItems().size() > 0 && change != null && change.next()) {
+//				TreeItem<TreeItemValue> treeItem = treeView.getSelectionModel().getSelectedItem();
+//				int treeItemIndex = treeView.getSelectionModel().getSelectedIndex();
+//				if (treeItem == null || !treeView.getSelectionModel().isSelected(treeItemIndex))
+//					treeItem = treeView.getSelectionModel().getSelectedItems().get(0);
+//				handleTreeSelections(treeItem);
+//			}
+//		}
+//	}
 
 	private static UITreeBuilder treeBuilder = new UITreeBuilder();
 	private I18N i18n = I18N.getInstance();
@@ -105,6 +118,7 @@ public class UITreeBuilder {
 	private boolean ignoreExpanding = false;
 	private BooleanProperty ignoreEvent = new SimpleBooleanProperty(Boolean.FALSE);
 	private TreeSelectionChangeListener treeSelectionChangeListener = new TreeSelectionChangeListener();
+//	private TreeListSelectionChangeListener treeListSelectionChangeListener = new TreeListSelectionChangeListener();
 	private UITreeBuilder() {}
 
 	public static UITreeBuilder getInstance() {
@@ -213,6 +227,7 @@ public class UITreeBuilder {
 		this.treeView.getSelectionModel().select(rootItem);
 		this.treeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		this.treeView.getSelectionModel().selectedItemProperty().addListener(this.treeSelectionChangeListener);
+		//this.treeView.getSelectionModel().getSelectedItems().addListener(this.treeListSelectionChangeListener);
 	}
 
 	public void removeAllItems() {
@@ -259,11 +274,13 @@ public class UITreeBuilder {
 		CheckBoxTreeItem<TreeItemValue> newItem = new CheckBoxTreeItem<TreeItemValue>(itemValue);
 		itemValue.setEnable(enable);
 
-		directoryItemMap.get(parentType).getChildren().add(newItem);
-		treeView.getSelectionModel().clearSelection();
-		expand(newItem, true);
+		this.directoryItemMap.get(parentType).getChildren().add(newItem);
+		this.treeView.getSelectionModel().clearSelection();
+		
+		this.expand(newItem, true);
 		if (select)
-			treeView.getSelectionModel().select(newItem);
+			this.treeView.getSelectionModel().select(newItem);
+		
 		newItem.selectedProperty().bindBidirectional(itemValue.enableProperty());
 		newItem.selectedProperty().addListener(new TreeCheckBoxChangeListener(newItem.getValue()));
 		newItem.getValue().nameProperty().addListener(new TreeItemNameChangeListener(newItem.getValue()));
@@ -303,7 +320,7 @@ public class UITreeBuilder {
 
 		if (this.remove(itemValue)) {
 			setIgnoreEvent(true);
-			CheckBoxTreeItem<TreeItemValue> parent = directoryItemMap.get(parentType); 
+			CheckBoxTreeItem<TreeItemValue> parent = this.directoryItemMap.get(parentType); 
 			parent.getChildren().remove(treeItem);
 			updateSelectionStageOfParentNode(parent);
 			setIgnoreEvent(false);
@@ -313,7 +330,7 @@ public class UITreeBuilder {
 	public void moveItems(TreeItemType newItemType, List<TreeItem<TreeItemValue>> selectedItems) {
 		TreeItemType newParentType = TreeItemType.getDirectoryByLeafType(newItemType);
 		if (TreeItemType.isPointTypeLeaf(newItemType) && this.directoryItemMap.containsKey(newParentType) && selectedItems != null && selectedItems.size() > 0) {
-			CheckBoxTreeItem<TreeItemValue> newParent = directoryItemMap.get(newParentType);
+			CheckBoxTreeItem<TreeItemValue> newParent = this.directoryItemMap.get(newParentType);
 			TreeItem<TreeItemValue> lastItem = null;
 			this.setIgnoreEvent(true);
 			for (TreeItem<TreeItemValue> selectedItem : selectedItems) {
@@ -328,7 +345,7 @@ public class UITreeBuilder {
 							continue;
 						}
 						lastItem = selectedItem;
-						CheckBoxTreeItem<TreeItemValue> oldParent = directoryItemMap.get(oldParentType);
+						CheckBoxTreeItem<TreeItemValue> oldParent = this.directoryItemMap.get(oldParentType);
 						// Remove Item
 						oldParent.getChildren().remove(selectedItem);
 						updateSelectionStageOfParentNode(oldParent);
@@ -344,7 +361,7 @@ public class UITreeBuilder {
 				TreeItem<TreeItemValue> lastSelectedItem = lastItem;
 				updateSelectionStageOfParentNode(newParent);
 				setIgnoreEvent(false);
-				treeView.getSelectionModel().select(lastSelectedItem);
+				this.treeView.getSelectionModel().select(lastSelectedItem);
 			}
 		}
 	}
@@ -353,18 +370,11 @@ public class UITreeBuilder {
 		if (this.directoryItemMap.containsKey(parentType)) {
 			TreeItem<TreeItemValue> newMenuItem = this.addItem(parentType);
 			if (!this.save(newMenuItem.getValue())) {
-				TreeItem<TreeItemValue> parentItem = directoryItemMap.get(parentType);
+				TreeItem<TreeItemValue> parentItem = this.directoryItemMap.get(parentType);
 				parentItem.getChildren().remove(newMenuItem);
 			}
 		}		
 	}
-	
-//	public List<TreeItem<TreeItemValue>> getChildrenByParent(TreeItemType parentType) {
-//		if (this.directoryItemMap.containsKey(parentType)) {
-//			return this.directoryItemMap.get(parentType).getChildren();
-//		}
-//		return null;
-//	}
 	
 	private void updateSelectionStageOfParentNode(CheckBoxTreeItem<TreeItemValue> parentNode) {
 		if (parentNode.isLeaf()) {
@@ -398,7 +408,7 @@ public class UITreeBuilder {
 
 		TreeItemType currentItemType = currentTreeItem.getValue().getItemType();
 		boolean isValidSelection = true;
-		ObservableList<TreeItem<TreeItemValue>> treeItems = treeView.getSelectionModel().getSelectedItems();
+		ObservableList<TreeItem<TreeItemValue>> treeItems = this.treeView.getSelectionModel().getSelectedItems();
 		for (TreeItem<TreeItemValue> item : treeItems) {
 			if (item == null || item.getValue() == null || item.getValue().getItemType() != currentItemType) {
 				isValidSelection = false;
@@ -407,8 +417,8 @@ public class UITreeBuilder {
 		}
 
 		if (!isValidSelection) {
-			treeView.getSelectionModel().clearSelection();
-			treeView.getSelectionModel().select(currentTreeItem);
+			this.treeView.getSelectionModel().clearSelection();
+			this.treeView.getSelectionModel().select(currentTreeItem);
 		}
 		else if (currentTreeItem != null && currentTreeItem.getValue() != null) {
 			TreeItemValue itemValue = currentTreeItem.getValue();
@@ -536,6 +546,7 @@ public class UITreeBuilder {
 
 	private void selectChildren(TreeItem<TreeItemValue> parent) {
 		this.treeView.getSelectionModel().selectedItemProperty().removeListener(this.treeSelectionChangeListener);
+		//this.treeView.getSelectionModel().getSelectedItems().removeListener(this.treeListSelectionChangeListener);
 		if (!parent.isLeaf() && parent.isExpanded()) {
 			this.treeView.getSelectionModel().clearSelection();
 			ObservableList<TreeItem<TreeItemValue>> children = parent.getChildren();
@@ -544,8 +555,6 @@ public class UITreeBuilder {
 				this.treeView.getSelectionModel().select(child);
 				lastSelectedChild = child;
 			}
-			//int currentTreeItemIndex = treeView.getSelectionModel().getSelectedIndex();
-			//treeView.getSelectionModel().selectRange(currentTreeItemIndex + 1, currentTreeItemIndex + 1 + children.size());
 			if (lastSelectedChild != null)
 				this.load(lastSelectedChild.getValue(), parent.getChildren());
 		}
@@ -553,6 +562,7 @@ public class UITreeBuilder {
 			this.load(parent.getValue(), null);
 		}
 		this.treeView.getSelectionModel().selectedItemProperty().addListener(this.treeSelectionChangeListener);
+		//this.treeView.getSelectionModel().getSelectedItems().addListener(this.treeListSelectionChangeListener);
 	}
 
 	final BooleanProperty ignoreEventProperty() {
