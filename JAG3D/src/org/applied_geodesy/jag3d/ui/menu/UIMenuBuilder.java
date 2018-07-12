@@ -24,6 +24,7 @@ package org.applied_geodesy.jag3d.ui.menu;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -695,6 +696,9 @@ public class UIMenuBuilder {
 					this.addHistoryFile(selectedFile);
 					this.historyMenu.getParentMenu().hide();
 					DefaultFileChooser.setLastSelectedDirectory(selectedFile);
+				}
+				else {
+					throw new FileNotFoundException(selectedFile.toString());
 				}
 			}
 		}
