@@ -194,6 +194,7 @@ public class SearchAndReplaceDialog {
 	private RadioButton createRadioButton(String text, String tooltip) {
 		Label label = new Label(text);
 		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setPadding(new Insets(0,0,0,3));
 		RadioButton radioButton = new RadioButton();
 		radioButton.setGraphic(label);
 		radioButton.setTooltip(new Tooltip(tooltip));
