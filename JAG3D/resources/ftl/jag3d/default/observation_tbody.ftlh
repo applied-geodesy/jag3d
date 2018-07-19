@@ -32,9 +32,9 @@
 					<td>${observation.sigma_z0?string[df_length_uncertainty]}</td>
 				</#if>
 			<#elseif apply_angle_unit>
-				<td>${observation.sigma0?string[df_angle_uncertainty]}</td>
+				<td>${observation.sigma_0?string[df_angle_uncertainty]}</td>
 			<#else>
-				<td>${observation.sigma0?string[df_length_uncertainty]}</td>
+				<td>${observation.sigma_0?string[df_length_uncertainty]}</td>
 			</#if>
 			
 			<#if group.type == "GNSS1D" || group.type == "GNSS2D" || group.type == "GNSS3D">

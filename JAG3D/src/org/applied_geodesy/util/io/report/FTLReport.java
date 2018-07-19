@@ -1010,8 +1010,8 @@ public class FTLReport {
 
 		String sqlObservation = "SELECT "
 				+ "\"start_point_name\",\"end_point_name\",\"instrument_height\",\"reflector_height\", "
-				+ "\"value_0\",\"sigma_0\",\"distance_0\", "
-				+ "\"ObservationAposteriori\".\"sigma_0\" AS \"sigma0\", "
+				+ "\"value_0\",\"distance_0\", "
+				+ "\"ObservationAposteriori\".\"sigma_0\" AS \"sigma_0\", "
 				+ "\"value\",\"redundancy\",\"gross_error\",\"minimal_detectable_bias\", "
 				+ "CASEWHEN(\"sigma\" < 0, 0.0, \"sigma\") AS \"sigma\", "
 				+ "\"influence_on_position\",\"influence_on_network_distortion\", "
