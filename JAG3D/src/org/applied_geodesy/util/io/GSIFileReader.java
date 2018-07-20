@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.applied_geodesy.adjustment.Constant;
+import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
@@ -324,6 +325,17 @@ public class GSIFileReader extends SourceFileReader {
 			catch (Exception e) {
 				e.printStackTrace();
 				continue;
+			}
+		}
+		
+		// Reduziere Richtungen und Zenitwinkel auf Lage I
+		if (this.dim != DimensionType.HEIGHT) {
+			boolean isFaceI = !(zenith != null && !Double.isNaN(zenith) && !Double.isInfinite(zenith) && zenith > Math.PI);
+			if (!isFaceI) {
+				if (dir != null)
+					dir = MathExtension.MOD(dir + Math.PI, 2.0*Math.PI);
+				if (this.dim == DimensionType.SPATIAL && zenith != null && zenith > Math.PI)
+					zenith = MathExtension.MOD(2.0*Math.PI - zenith, 2.0*Math.PI);
 			}
 		}
 
