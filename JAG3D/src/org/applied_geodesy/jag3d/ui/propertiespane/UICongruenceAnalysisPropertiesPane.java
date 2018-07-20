@@ -29,6 +29,7 @@ import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.tree.CongruenceAnalysisTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
+import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.i18.I18N;
 
 import javafx.animation.FadeTransition;
@@ -75,7 +76,6 @@ public class UICongruenceAnalysisPropertiesPane {
 						break;
 					
 					}
-					
 				}
 			}
 		}
@@ -181,8 +181,9 @@ public class UICongruenceAnalysisPropertiesPane {
 		this.setProgressIndicatorsVisible(false);
 		
 		// set focus to panel to commit text field values and to force db transaction
-		if (this.propertiesNode != null)
-			this.propertiesNode.requestFocus();
+		UITreeBuilder.getInstance().getTree().requestFocus();
+//		if (this.propertiesNode != null)
+//			this.propertiesNode.requestFocus();
 		
 		this.setTranslationY(false);
 		this.setTranslationX(false);
