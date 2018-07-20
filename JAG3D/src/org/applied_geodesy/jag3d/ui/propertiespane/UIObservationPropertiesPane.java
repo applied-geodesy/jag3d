@@ -35,6 +35,7 @@ import org.applied_geodesy.jag3d.ui.textfield.UncertaintyTextField;
 import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField.ValueSupport;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
+import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.i18.I18N;
 
 import javafx.animation.FadeTransition;
@@ -185,8 +186,9 @@ public class UIObservationPropertiesPane {
 		this.setProgressIndicatorsVisible(false);
 		
 		// set focus to panel to commit text field values and to force db transaction
-		if (this.propertiesNode != null)
-			this.propertiesNode.requestFocus();
+		UITreeBuilder.getInstance().getTree().requestFocus();
+//		if (this.propertiesNode != null)
+//			this.propertiesNode.requestFocus();
 		
 		double offset      = 0.0;
 		double scale       = 1.0;
