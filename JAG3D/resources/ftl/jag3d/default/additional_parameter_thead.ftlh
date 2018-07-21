@@ -17,6 +17,6 @@
 		<th>T<sub>prio</sub></th>
 		<th>T<sub>post</sub></th>
 		-->
-		<th>T &le; &Phi;<sup>-1</sup> | H<sub>0</sub></th>
+		<th>T &le; q | H<sub>0</sub></th>
 	</tr>
 </thead>
