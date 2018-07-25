@@ -333,11 +333,16 @@ public class NetworkAdjustment implements Runnable {
 					col = idxAddParamGlobal2LocalInQxx.get(col);
 					aAdd.set(d, col, observation.diffRotZ());
 				}
+			}
+			
+			// Bestimme um Zusatzunbekannte reduzierten Anteil der Designmatrix A
+			aAdd.mult(QzzNzx, aRedu);
+			aRedu = aRedu.scale(-1.0);
+			
+			for (int d=0; d<numOfObs; d++) {
+				Observation observation = observations.get(d);
 				
-				aAdd.mult(QzzNzx, aRedu);
-				aRedu = aRedu.scale(-1.0);
-				
-				col = observation.getStartPoint().getColInJacobiMatrix();
+				int col = observation.getStartPoint().getColInJacobiMatrix();
 				int dim = observation.getStartPoint().getDimension();
 				
 				// Startpunkt
@@ -363,7 +368,7 @@ public class NetworkAdjustment implements Runnable {
 						aRedu.add(d, col++, observation.diffYe());
 					}
 					if (dim != 2) {
-						aRedu.set(d, col++, observation.diffZe());
+						aRedu.add(d, col++, observation.diffZe());
 					}
 				}
 			}
