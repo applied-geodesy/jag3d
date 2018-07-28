@@ -25,9 +25,9 @@ import java.util.Map;
 
 public class Version {
 	private final static Map<VersionType, Integer> versions = Map.of(
-			VersionType.ADJUSTMENT_CORE,   20180710,
+			VersionType.ADJUSTMENT_CORE,   20180728,
 			VersionType.DATABASE,          20180430,
-			VersionType.USER_INTERFACE,    20180714
+			VersionType.USER_INTERFACE,    20180728
 	);
 	
 	private Version() {}
