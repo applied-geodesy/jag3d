@@ -85,7 +85,7 @@ public class JobXMLNamespaceContext implements NamespaceContext {
 	}
 
 	@Override
-	public Iterator<?> getPrefixes(String ns) {
-		return this.ns2prefix.containsKey(ns) ? this.ns2prefix.get(ns).iterator() : Collections.EMPTY_SET.iterator();
+	public Iterator<String> getPrefixes(String ns) {
+		return this.ns2prefix.containsKey(ns) ? this.ns2prefix.get(ns).iterator() : Collections.<String>emptyList().iterator();
 	}
 }
