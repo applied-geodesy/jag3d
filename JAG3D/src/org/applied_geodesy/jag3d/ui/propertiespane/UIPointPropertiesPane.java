@@ -411,10 +411,16 @@ public class UIPointPropertiesPane {
 		case STOCHASTIC_POINT_3D_LEAF:
 		case DATUM_POINT_3D_LEAF:
 		case NEW_POINT_3D_LEAF:
-			this.deflectionCheckBox = new CheckBox(i18n.getString("UIPointPropertiesPane.deflection.label", "Consider deflections of the vertical"));
+			String title = i18n.getString("UIPointPropertiesPane.deflection.label", "Consider deflections of the vertical");
+			Label label = new Label(title);
+			label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+			label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+			label.setPadding(new Insets(0,0,0,3));
+			this.deflectionCheckBox = new CheckBox();
+			this.deflectionCheckBox.setGraphic(label);
 			this.deflectionCheckBox.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.deflection.tooltip", "If checked, deflections of the vertical are considered during adjustment")));
 			this.deflectionCheckBox.setSelected(false);
-			this.deflectionCheckBox.setMinWidth(Control.USE_PREF_SIZE);
+			this.deflectionCheckBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 			this.deflectionCheckBox.setPadding(new Insets(10, 0, 5, 0)); // oben, rechts, unten, links
 			this.deflectionCheckBox.selectedProperty().addListener(new BooleanChangeListener(this.deflectionCheckBox));
 			return this.deflectionCheckBox;

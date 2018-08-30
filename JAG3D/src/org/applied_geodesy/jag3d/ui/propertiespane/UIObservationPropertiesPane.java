@@ -625,20 +625,30 @@ public class UIObservationPropertiesPane {
 		return field;
 	}
 
-	private CheckBox createCheckBox(String label, String tooltipText, boolean selected, ParameterType userData) {
-		CheckBox checkBox = new CheckBox(label);
+	private CheckBox createCheckBox(String title, String tooltipText, boolean selected, ParameterType userData) {
+		Label label = new Label(title);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setPadding(new Insets(0,0,0,3));
+		CheckBox checkBox = new CheckBox();
+		checkBox.setGraphic(label);
 		checkBox.setTooltip(new Tooltip(tooltipText));
-		checkBox.setMinWidth(Control.USE_PREF_SIZE);
+		checkBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		checkBox.setSelected(selected);
 		checkBox.setUserData(userData);
 		checkBox.selectedProperty().addListener(new BooleanChangeListener(checkBox));
 		return checkBox;
 	}
 	
-	private RadioButton createRadioButton(String label, String tooltipText, ToggleGroup group, boolean selected, Epoch userData) {
-		RadioButton radioButton = new RadioButton(label);
+	private RadioButton createRadioButton(String title, String tooltipText, ToggleGroup group, boolean selected, Epoch userData) {
+		Label label = new Label(title);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setPadding(new Insets(0,0,0,3));
+		RadioButton radioButton = new RadioButton();
+		radioButton.setGraphic(label);
 		radioButton.setTooltip(new Tooltip(tooltipText));
-		radioButton.setMinWidth(Control.USE_PREF_SIZE);
+		radioButton.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		radioButton.setToggleGroup(group);
 		radioButton.setSelected(selected);
 		radioButton.setUserData(userData);

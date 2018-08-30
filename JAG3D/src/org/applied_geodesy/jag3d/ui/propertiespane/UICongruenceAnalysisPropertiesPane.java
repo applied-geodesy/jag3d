@@ -43,6 +43,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Control;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
@@ -700,10 +701,15 @@ public class UICongruenceAnalysisPropertiesPane {
 	    this.sequentialTransition.onFinishedProperty().addListener(new SequentialTransitionFinishedListener());
 	}
 	
-	private CheckBox createCheckBox(String label, String tooltipText, boolean selected, RestrictionType userData) {
-		CheckBox checkBox = new CheckBox(label);
+	private CheckBox createCheckBox(String title, String tooltipText, boolean selected, RestrictionType userData) {
+		Label label = new Label(title);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setPadding(new Insets(0,0,0,3));
+		CheckBox checkBox = new CheckBox();
+		checkBox.setGraphic(label);
 		checkBox.setTooltip(new Tooltip(tooltipText));
-		checkBox.setMinWidth(Control.USE_PREF_SIZE);
+		checkBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		checkBox.setSelected(selected);
 		checkBox.setUserData(userData);
 		checkBox.selectedProperty().addListener(new BooleanChangeListener(checkBox));
