@@ -22,6 +22,8 @@
 package org.applied_geodesy.jag3d.ui;
 
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
@@ -225,6 +227,22 @@ public class JAG3D extends Application {
 
 	public static void main(String[] args) {
 		//Locale.setDefault(Locale.GERMAN);
+		try {
+			Logger[] loggers = new Logger[] {
+					Logger.getLogger("hsqldb.db"),
+					Logger.getLogger("com.github.fommil.netlib.LAPACK"),
+					Logger.getLogger("com.github.fommil.netlib.BLAS")
+			};
+
+			for (Logger logger : loggers) {
+				logger.setUseParentHandlers(false);
+				logger.setLevel(Level.OFF);
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		Application.launch(JAG3D.class, args);
     }
 }
