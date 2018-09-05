@@ -21,7 +21,12 @@
 
 package org.applied_geodesy.jag3d.ui;
 
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,6 +56,7 @@ import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.ImageUtils;
 import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.util.sql.HSQLDB;
 
 import javafx.application.Application;
 import javafx.application.HostServices;
@@ -213,6 +219,26 @@ public class JAG3D extends Application {
 			this.setStageToDialogs(primaryStage);
 			this.setHostServices();
 			SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
+			
+			try {
+				// check for command line arguments
+				// --database=D:\\data\\project.script
+				final Parameters params = this.getParameters();
+				final Map<String, String> parameterMap = params.getNamed();
+				if (parameterMap.containsKey("database")) {
+					Path path = Paths.get (parameterMap.get("database") );
+					String regex = "(?i)(.+?)(\\.)(backup$|data$|properties$|script$)";
+					String project = Files.exists(path, LinkOption.NOFOLLOW_LINKS) ? path.toAbsolutePath().toString().replaceFirst(regex, "$1") : null;
+
+					if (project != null) {
+						SQLManager.openExistingProject(new HSQLDB(project));
+						JAG3D.setTitle(path.getFileName() == null ? null : path.getFileName().toString().replaceFirst(regex, "$1"));
+					}
+				}
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
 		}
 		finally {
 			if (splashScreen != null)
@@ -242,7 +268,6 @@ public class JAG3D extends Application {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 		Application.launch(JAG3D.class, args);
     }
 }
