@@ -617,8 +617,8 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 						(getTreeItem().getValue().getItemType() == TreeItemType.ROOT ||
 						getTreeItem().getValue().getItemType() == TreeItemType.UNSPECIFIC))
 					setGraphic(new Text());
-				else if (checkBox != null) {
-					setGraphic(checkBox);
+				else if (this.checkBox != null) {
+					setGraphic(this.checkBox);
 				}
 			}
 		}
