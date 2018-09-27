@@ -69,6 +69,15 @@
 			<#if group.dimension != 2>
 				<th><#outputformat "plainText">r<sub>Z</sub></#outputformat></th>
 			</#if>
+			
+			<#if group.dimension != 1>
+				<th><#outputformat "plainText">&epsilon;<sub>Y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&epsilon;<sub>X</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+			</#if>
+		
+			<#if group.dimension != 2>
+				<th><#outputformat "plainText">&epsilon;<sub>Z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+			</#if>
 		</#if>
 		
 		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>

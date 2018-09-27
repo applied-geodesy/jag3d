@@ -62,6 +62,14 @@
 			</#if>
 			
 			<#if group.type == "GNSS2D" || group.type == "GNSS3D">
+				<td></td>
+				<td></td>
+			</#if>
+			<#if group.type == "GNSS1D" || group.type == "GNSS3D">
+				<td></td>
+			</#if>
+			
+			<#if group.type == "GNSS2D" || group.type == "GNSS3D">
 				<td>${group.max_gross_error_y?string[df_length_residual]}</td>
 				<td>${group.max_gross_error_x?string[df_length_residual]}</td>
 			</#if>
@@ -89,6 +97,7 @@
 		<#else>
 			<td></td>
 			<td>${group.redundancy?string[df_statistic]}</td>
+			<td></td>
 			<td>${group.max_gross_error?string[apply_angle_unit?then(df_angle_residual, df_length_residual)]}</td>
 			<td></td>
 			<td></td>

@@ -78,6 +78,14 @@
 			</#if>
 			
 			<#if group.type == "GNSS2D" || group.type == "GNSS3D">
+				<th><#outputformat "plainText">&epsilon;<sub>Y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&epsilon;<sub>X</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+			</#if>
+			<#if group.type == "GNSS1D" || group.type == "GNSS3D">
+				<th><#outputformat "plainText">&epsilon;<sub>Z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+			</#if>
+			
+			<#if group.type == "GNSS2D" || group.type == "GNSS3D">
 				<th><#outputformat "plainText">&nabla;<sub>Y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 				<th><#outputformat "plainText">&nabla;<sub>X</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			</#if>
@@ -105,6 +113,7 @@
 		<#else>
 			<th><#outputformat "plainText">&sigma;<span class="unit">${apply_angle_unit?then(unit_abbr_angle_uncertainty, unit_abbr_length_uncertainty)}</span></#outputformat></th>
 			<th><#outputformat "plainText">r</#outputformat></th>
+			<th><#outputformat "plainText">&epsilon;<span class="unit">${apply_angle_unit?then(unit_abbr_angle_residual, unit_abbr_length_residual)}</span></#outputformat></th>
 			<th><#outputformat "plainText">&nabla;<span class="unit">${apply_angle_unit?then(unit_abbr_angle_residual, unit_abbr_length_residual)}</span></#outputformat></th>
 			<th><#outputformat "plainText">EP<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			<th><#outputformat "plainText">EF&#183;SP<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>

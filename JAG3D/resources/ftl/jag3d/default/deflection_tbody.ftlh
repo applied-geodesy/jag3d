@@ -25,6 +25,9 @@
 			<#if group.type == "STOCHASTIC_POINT">
 				<td>${deflection.redundancy_dy?string[df_statistic]}</td>
 				<td>${deflection.redundancy_dx?string[df_statistic]}</td>
+				
+				<td>${deflection.residual_dy?string[df_angle_residual]}</td>
+				<td>${deflection.residual_dx?string[df_angle_residual]}</td>
 			</#if>
 			
 			<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>

@@ -719,6 +719,7 @@ public class FTLReport {
 				"\"confidence_major_axis\", \"confidence_middle_axis\", \"confidence_minor_axis\", " +
 				"\"confidence_alpha\", \"confidence_beta\", \"confidence_gamma\", " +
 				"\"redundancy_x\", \"redundancy_y\", \"redundancy_z\", " +
+				"\"residual_y\", \"residual_x\", \"residual_z\", " + 
 				"\"gross_error_x\", \"gross_error_y\", \"gross_error_z\", " +
 				"\"influence_on_position_x\", \"influence_on_position_y\", \"influence_on_position_z\", \"influence_on_network_distortion\", " +
 				"\"minimal_detectable_bias_x\", \"minimal_detectable_bias_y\", \"minimal_detectable_bias_z\", " +
@@ -782,6 +783,9 @@ public class FTLReport {
 						h.put(key, options.convertAngleToView(pointSet.getDouble(i)));
 						break;
 
+					case "residual_x":
+					case "residual_y":
+					case "residual_z": 
 					case "gross_error_x":
 					case "gross_error_y":
 					case "gross_error_z":
@@ -881,6 +885,7 @@ public class FTLReport {
 				+ "\"redundancy_dx\", \"redundancy_dy\", "
 				+ "\"gross_error_dx\", \"gross_error_dy\", "
 
+				+ "\"residual_dx\", \"residual_dy\", "
 				+ "\"minimal_detectable_bias_dx\", \"minimal_detectable_bias_dy\", "
 
 				+ "CASEWHEN(\"sigma_dx\" < 0, 0.0, \"sigma_dx\") AS \"sigma_dx\", "
@@ -934,6 +939,8 @@ public class FTLReport {
 						h.put(key, options.convertAngleUncertaintyToView(deflectionSet.getDouble(i)));
 						break;
 
+					case "residual_dy":
+					case "residual_dx":
 					case "gross_error_dx":
 					case "gross_error_dy":
 					case "minimal_detectable_bias_dx":
@@ -1012,7 +1019,7 @@ public class FTLReport {
 				+ "\"start_point_name\",\"end_point_name\",\"instrument_height\",\"reflector_height\", "
 				+ "\"value_0\",\"distance_0\", "
 				+ "\"ObservationAposteriori\".\"sigma_0\" AS \"sigma_0\", "
-				+ "\"value\",\"redundancy\",\"gross_error\",\"minimal_detectable_bias\", "
+				+ "\"value\",\"redundancy\",\"residual\",\"gross_error\",\"minimal_detectable_bias\", "
 				+ "CASEWHEN(\"sigma\" < 0, 0.0, \"sigma\") AS \"sigma\", "
 				+ "\"influence_on_position\",\"influence_on_network_distortion\", "
 				+ "\"omega\",\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\" "
@@ -1080,6 +1087,7 @@ public class FTLReport {
 
 					case "gross_error":
 					case "minimal_detectable_bias":
+					case "residual":
 						switch(obsType) {
 						case DIRECTION:
 						case ZENITH_ANGLE:
@@ -1180,6 +1188,7 @@ public class FTLReport {
 				+ "CASEWHEN(\"sigma_y\" < 0, 0.0, \"sigma_y\") AS \"sigma_y\", "
 				+ "CASEWHEN(\"sigma_z\" < 0, 0.0, \"sigma_z\") AS \"sigma_z\", "
 				+ "\"y\",\"x\",\"z\","
+				+ "\"residual_y\", \"residual_x\", \"residual_z\", "
 				+ "\"redundancy_y\",\"redundancy_x\",\"redundancy_z\","
 				+ "\"gross_error_y\",\"gross_error_x\",\"gross_error_z\","
 				+ "\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\",\"minimal_detectable_bias_z\","
@@ -1242,6 +1251,9 @@ public class FTLReport {
 					case "gross_error_x":
 					case "gross_error_y":
 					case "gross_error_z":
+					case "residual_x":
+					case "residual_y":
+					case "residual_z":
 					case "minimal_detectable_bias_x":
 					case "minimal_detectable_bias_y":
 					case "minimal_detectable_bias_z":

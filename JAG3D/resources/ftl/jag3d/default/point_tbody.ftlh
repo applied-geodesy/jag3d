@@ -70,6 +70,15 @@
 				<#if group.dimension != 2>
 					<td>${point.redundancy_z?string[df_statistic]}</td>
 				</#if>
+				
+				<#if group.dimension != 1>
+					<td>${point.residual_y?string[df_length_residual]}</td>
+					<td>${point.residual_x?string[df_length_residual]}</td>
+				</#if>
+			
+				<#if group.dimension != 2>
+					<td>${point.residual_z?string[df_length_residual]}</td>
+				</#if>
 			</#if>
 			
 			<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>

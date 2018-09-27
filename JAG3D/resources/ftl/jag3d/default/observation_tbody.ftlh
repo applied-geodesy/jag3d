@@ -67,6 +67,14 @@
 				</#if>
 				
 				<#if group.type == "GNSS2D" || group.type == "GNSS3D">
+					<td>${observation.residual_y?string[df_length_residual]}</td>
+					<td>${observation.residual_x?string[df_length_residual]}</td>
+				</#if>
+				<#if group.type == "GNSS1D" || group.type == "GNSS3D">
+					<td>${observation.residual_z?string[df_length_residual]}</td>
+				</#if>
+				
+				<#if group.type == "GNSS2D" || group.type == "GNSS3D">
 					<td>${observation.gross_error_y?string[df_length_residual]}</td>
 					<td>${observation.gross_error_x?string[df_length_residual]}</td>
 				</#if>
@@ -94,6 +102,7 @@
 			<#else>
 				<td>${observation.sigma?string[apply_angle_unit?then(df_angle_uncertainty, df_length_uncertainty)]}</td>
 				<td>${observation.redundancy?string[df_statistic]}</td>
+				<td>${observation.residual?string[apply_angle_unit?then(df_angle_residual, df_length_residual)]}</td>
 				<td>${observation.gross_error?string[apply_angle_unit?then(df_angle_residual, df_length_residual)]}</td>
 				<td>${observation.influence_on_position?string[df_length_residual]}</td>
 				<td>${observation.influence_on_network_distortion?string[df_length_residual]}</td>

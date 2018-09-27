@@ -24,6 +24,9 @@
 		<#if group.type == "STOCHASTIC_POINT">
 			<th><#outputformat "plainText">r<sub>Y</sub></#outputformat></th>
 			<th><#outputformat "plainText">r<sub>X</sub></#outputformat></th>
+			
+			<th><#outputformat "plainText">&epsilon;<sub>Y</sub></#outputformat></th>
+			<th><#outputformat "plainText">&epsilon;<sub>X</sub></#outputformat></th>
 		</#if>
 		
 		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>
