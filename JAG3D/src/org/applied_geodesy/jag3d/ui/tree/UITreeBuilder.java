@@ -29,14 +29,17 @@ import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.tabpane.UITabPaneBuilder;
 import org.applied_geodesy.util.i18.I18N;
 
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.scene.control.CheckBoxTreeItem;
+import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
@@ -90,25 +93,25 @@ public class UITreeBuilder {
 		}
 	}
 
-	private class TreeSelectionChangeListener implements ChangeListener<TreeItem<TreeItemValue>> {
-		@Override
-		public void changed(ObservableValue<? extends TreeItem<TreeItemValue>> observable, TreeItem<TreeItemValue> oldValue, TreeItem<TreeItemValue> newValue) {
-			handleTreeSelections(newValue);
-		}
-	}
-	
-//	private class TreeListSelectionChangeListener implements ListChangeListener<TreeItem<TreeItemValue>> {
+//	private class TreeSelectionChangeListener implements ChangeListener<TreeItem<TreeItemValue>> {
 //		@Override
-//		public void onChanged(Change<? extends TreeItem<TreeItemValue>> change) {
-//			if (treeView != null && treeView.getSelectionModel() != null && treeView.getSelectionModel().getSelectedItems().size() > 0 && change != null && change.next()) {
-//				TreeItem<TreeItemValue> treeItem = treeView.getSelectionModel().getSelectedItem();
-//				int treeItemIndex = treeView.getSelectionModel().getSelectedIndex();
-//				if (treeItem == null || !treeView.getSelectionModel().isSelected(treeItemIndex))
-//					treeItem = treeView.getSelectionModel().getSelectedItems().get(0);
-//				handleTreeSelections(treeItem);
-//			}
+//		public void changed(ObservableValue<? extends TreeItem<TreeItemValue>> observable, TreeItem<TreeItemValue> oldValue, TreeItem<TreeItemValue> newValue) {
+//			handleTreeSelections(newValue);
 //		}
 //	}
+	
+	private class TreeListSelectionChangeListener implements ListChangeListener<TreeItem<TreeItemValue>> {
+		@Override
+		public void onChanged(Change<? extends TreeItem<TreeItemValue>> change) {
+			if (change != null && change.next() && treeView != null && treeView.getSelectionModel() != null && treeView.getSelectionModel().getSelectedItems().size() > 0) {				
+				TreeItem<TreeItemValue> treeItem = treeView.getSelectionModel().getSelectedItem();
+				int treeItemIndex = treeView.getSelectionModel().getSelectedIndex();
+				if (treeItemIndex < 0 || treeItem == null || !treeView.getSelectionModel().isSelected(treeItemIndex))
+					treeItem = treeView.getSelectionModel().getSelectedItems().get(0);
+				handleTreeSelections(treeItem);
+			}
+		}
+	}
 
 	private static UITreeBuilder treeBuilder = new UITreeBuilder();
 	private I18N i18n = I18N.getInstance();
@@ -117,8 +120,8 @@ public class UITreeBuilder {
 	private TreeView<TreeItemValue> treeView;
 	private boolean ignoreExpanding = false;
 	private BooleanProperty ignoreEvent = new SimpleBooleanProperty(Boolean.FALSE);
-	private TreeSelectionChangeListener treeSelectionChangeListener = new TreeSelectionChangeListener();
-//	private TreeListSelectionChangeListener treeListSelectionChangeListener = new TreeListSelectionChangeListener();
+//	private TreeSelectionChangeListener treeSelectionChangeListener = new TreeSelectionChangeListener();
+	private TreeListSelectionChangeListener treeListSelectionChangeListener = new TreeListSelectionChangeListener();
 	private UITreeBuilder() {}
 
 	public static UITreeBuilder getInstance() {
@@ -226,8 +229,8 @@ public class UITreeBuilder {
 		});
 		this.treeView.getSelectionModel().select(rootItem);
 		this.treeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-		this.treeView.getSelectionModel().selectedItemProperty().addListener(this.treeSelectionChangeListener);
-		//this.treeView.getSelectionModel().getSelectedItems().addListener(this.treeListSelectionChangeListener);
+//		this.treeView.getSelectionModel().selectedItemProperty().addListener(this.treeSelectionChangeListener);
+		this.treeView.getSelectionModel().getSelectedItems().addListener(this.treeListSelectionChangeListener);
 	}
 
 	public void removeAllItems() {
@@ -405,70 +408,85 @@ public class UITreeBuilder {
 	private void handleTreeSelections(TreeItem<TreeItemValue> currentTreeItem) {
 		if (currentTreeItem == null)
 			return;
+		
+		MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = this.treeView.getSelectionModel();
+		try {
+//			selectionModel.selectedItemProperty().removeListener(this.treeSelectionChangeListener);
+			selectionModel.getSelectedItems().removeListener(this.treeListSelectionChangeListener);
+			
+			TreeItemType currentItemType = currentTreeItem.getValue().getItemType();
+			boolean isValidSelection = true;
 
-		TreeItemType currentItemType = currentTreeItem.getValue().getItemType();
-		boolean isValidSelection = true;
-		ObservableList<TreeItem<TreeItemValue>> treeItems = this.treeView.getSelectionModel().getSelectedItems();
-		for (TreeItem<TreeItemValue> item : treeItems) {
-			if (item == null || item.getValue() == null || item.getValue().getItemType() != currentItemType) {
-				isValidSelection = false;
-				break;
-			}
-		}
-
-		if (!isValidSelection) {
-			this.treeView.getSelectionModel().clearSelection();
-			this.treeView.getSelectionModel().select(currentTreeItem);
-		}
-		else if (currentTreeItem != null && currentTreeItem.getValue() != null) {
-			TreeItemValue itemValue = currentTreeItem.getValue();
-			if (!currentTreeItem.isLeaf()) {
-				switch(itemValue.getItemType()) {
-				case ROOT:
-					this.load(itemValue, treeItems);
-					break;
-					
-				case REFERENCE_POINT_1D_DIRECTORY:
-				case STOCHASTIC_POINT_1D_DIRECTORY:
-				case DATUM_POINT_1D_DIRECTORY:
-				case NEW_POINT_1D_DIRECTORY:
-
-				case REFERENCE_POINT_2D_DIRECTORY:
-				case STOCHASTIC_POINT_2D_DIRECTORY:
-				case DATUM_POINT_2D_DIRECTORY:
-				case NEW_POINT_2D_DIRECTORY:
-
-				case REFERENCE_POINT_3D_DIRECTORY:
-				case STOCHASTIC_POINT_3D_DIRECTORY:
-				case DATUM_POINT_3D_DIRECTORY:
-				case NEW_POINT_3D_DIRECTORY:
-
-				case LEVELING_DIRECTORY:
-				case DIRECTION_DIRECTORY:
-				case HORIZONTAL_DISTANCE_DIRECTORY:
-				case SLOPE_DISTANCE_DIRECTORY:
-				case ZENITH_ANGLE_DIRECTORY:
-
-				case GNSS_1D_DIRECTORY:
-				case GNSS_2D_DIRECTORY:
-				case GNSS_3D_DIRECTORY:
-
-				case CONGRUENCE_ANALYSIS_1D_DIRECTORY:
-				case CONGRUENCE_ANALYSIS_2D_DIRECTORY:
-				case CONGRUENCE_ANALYSIS_3D_DIRECTORY:
-
-					this.selectChildren(currentTreeItem);
-					break;
-
-				default:
-					System.err.println(this.getClass().getSimpleName() + " : Error, unsupported TreeItemType (only directories) " + itemValue.getItemType());
-					this.tabPaneBuilder.setTreeItemValue(itemValue);
+			ObservableList<TreeItem<TreeItemValue>> treeItems = selectionModel.getSelectedItems();
+			for (TreeItem<TreeItemValue> item : treeItems) {
+				if (item == null || item.getValue() == null || item.getValue().getItemType() != currentItemType) {
+					isValidSelection = false;
 					break;
 				}
 			}
-			else if (currentTreeItem.isLeaf()) {
-				this.load(itemValue, treeItems);
+
+			if (!isValidSelection) {
+				Platform.runLater(new Runnable() {
+					@Override public void run() {
+						selectionModel.clearSelection();
+						selectionModel.select(currentTreeItem);
+					}
+				});
 			}
+			else if (currentTreeItem != null && currentTreeItem.getValue() != null) {
+				TreeItemValue itemValue = currentTreeItem.getValue();
+				if (!currentTreeItem.isLeaf()) {
+					switch(itemValue.getItemType()) {
+					case ROOT:
+						this.load(itemValue, treeItems);
+						break;
+
+					case REFERENCE_POINT_1D_DIRECTORY:
+					case STOCHASTIC_POINT_1D_DIRECTORY:
+					case DATUM_POINT_1D_DIRECTORY:
+					case NEW_POINT_1D_DIRECTORY:
+
+					case REFERENCE_POINT_2D_DIRECTORY:
+					case STOCHASTIC_POINT_2D_DIRECTORY:
+					case DATUM_POINT_2D_DIRECTORY:
+					case NEW_POINT_2D_DIRECTORY:
+
+					case REFERENCE_POINT_3D_DIRECTORY:
+					case STOCHASTIC_POINT_3D_DIRECTORY:
+					case DATUM_POINT_3D_DIRECTORY:
+					case NEW_POINT_3D_DIRECTORY:
+
+					case LEVELING_DIRECTORY:
+					case DIRECTION_DIRECTORY:
+					case HORIZONTAL_DISTANCE_DIRECTORY:
+					case SLOPE_DISTANCE_DIRECTORY:
+					case ZENITH_ANGLE_DIRECTORY:
+
+					case GNSS_1D_DIRECTORY:
+					case GNSS_2D_DIRECTORY:
+					case GNSS_3D_DIRECTORY:
+
+					case CONGRUENCE_ANALYSIS_1D_DIRECTORY:
+					case CONGRUENCE_ANALYSIS_2D_DIRECTORY:
+					case CONGRUENCE_ANALYSIS_3D_DIRECTORY:
+
+						this.selectChildren(currentTreeItem);
+						break;
+
+					default:
+						System.err.println(this.getClass().getSimpleName() + " : Error, unsupported TreeItemType (only directories) " + itemValue.getItemType());
+						this.tabPaneBuilder.setTreeItemValue(itemValue);
+						break;
+					}
+				}
+				else if (currentTreeItem.isLeaf()) {
+					this.load(itemValue, treeItems);
+				}
+			}
+		}
+		finally {
+//			selectionModel.selectedItemProperty().addListener(this.treeSelectionChangeListener);
+			selectionModel.getSelectedItems().addListener(this.treeListSelectionChangeListener);
 		}
 	}
 
@@ -545,24 +563,28 @@ public class UITreeBuilder {
 	}
 
 	private void selectChildren(TreeItem<TreeItemValue> parent) {
-		this.treeView.getSelectionModel().selectedItemProperty().removeListener(this.treeSelectionChangeListener);
-		//this.treeView.getSelectionModel().getSelectedItems().removeListener(this.treeListSelectionChangeListener);
-		if (!parent.isLeaf() && parent.isExpanded()) {
-			this.treeView.getSelectionModel().clearSelection();
-			ObservableList<TreeItem<TreeItemValue>> children = parent.getChildren();
-			TreeItem<TreeItemValue> lastSelectedChild = null;
-			for (TreeItem<TreeItemValue> child : children) {
-				this.treeView.getSelectionModel().select(child);
-				lastSelectedChild = child;
+		try {
+//			this.treeView.getSelectionModel().selectedItemProperty().removeListener(this.treeSelectionChangeListener);
+			this.treeView.getSelectionModel().getSelectedItems().removeListener(this.treeListSelectionChangeListener);
+			if (!parent.isLeaf() && parent.isExpanded()) {
+				this.treeView.getSelectionModel().clearSelection();
+				ObservableList<TreeItem<TreeItemValue>> children = parent.getChildren();
+				TreeItem<TreeItemValue> lastSelectedChild = null;
+				for (TreeItem<TreeItemValue> child : children) {
+					this.treeView.getSelectionModel().select(child);
+					lastSelectedChild = child;
+				}
+				if (lastSelectedChild != null)
+					this.load(lastSelectedChild.getValue(), parent.getChildren());
 			}
-			if (lastSelectedChild != null)
-				this.load(lastSelectedChild.getValue(), parent.getChildren());
+			else if (!parent.isLeaf() && !parent.isExpanded()) {
+				this.load(parent.getValue(), null);
+			}
 		}
-		else if (!parent.isLeaf() && !parent.isExpanded()) {
-			this.load(parent.getValue(), null);
+		finally {
+//			this.treeView.getSelectionModel().selectedItemProperty().addListener(this.treeSelectionChangeListener);
+			this.treeView.getSelectionModel().getSelectedItems().addListener(this.treeListSelectionChangeListener);
 		}
-		this.treeView.getSelectionModel().selectedItemProperty().addListener(this.treeSelectionChangeListener);
-		//this.treeView.getSelectionModel().getSelectedItems().addListener(this.treeListSelectionChangeListener);
 	}
 
 	final BooleanProperty ignoreEventProperty() {
