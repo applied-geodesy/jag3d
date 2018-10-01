@@ -17,8 +17,8 @@
 			<th><#outputformat "plainText">&sigma;<sub>Y</sub><span class="unit">${unit_abbr_angle_uncertainty}</span></#outputformat></th>
 			<th><#outputformat "plainText">&sigma;<sub>X</sub><span class="unit">${unit_abbr_angle_uncertainty}</span></#outputformat></th>
 
-			<th><#outputformat "plainText">A<span class="unit">${unit_abbr_angle_uncertainty}</span></#outputformat></th>
-			<th><#outputformat "plainText">B<span class="unit">${unit_abbr_angle_uncertainty}</span></#outputformat></th>
+			<th><#outputformat "plainText">a<span class="unit">${unit_abbr_angle_uncertainty}</span></#outputformat></th>
+			<th><#outputformat "plainText">b<span class="unit">${unit_abbr_angle_uncertainty}</span></#outputformat></th>
 		</#if>
 		
 		<#if group.type == "STOCHASTIC_POINT">

@@ -5,7 +5,7 @@
 		<th><#outputformat "plainText">${strain_parameter_header_map['value']}</#outputformat></th>
 		
 		<th>&sigma;</th>
-		<th>A</th>
+		<th>a</th>
 
 		<th>&nabla;</th>
 		<th>&nabla;(&alpha;,&beta;)</th>

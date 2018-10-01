@@ -42,12 +42,12 @@
 				<th><#outputformat "plainText">&sigma;<sub>Z</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
 			</#if>
 
-			<th><#outputformat "plainText">A<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+			<th><#outputformat "plainText">a<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
 			<#if group.dimension != 1>
 				<#if group.dimension == 3>
-					<th><#outputformat "plainText">B<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+					<th><#outputformat "plainText">b<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
 				</#if>
-				<th><#outputformat "plainText">C<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+				<th><#outputformat "plainText">c<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
 			</#if>
 			
 			<#if group.dimension == 3>
