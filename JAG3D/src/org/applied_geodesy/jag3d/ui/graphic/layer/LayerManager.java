@@ -89,6 +89,12 @@ public class LayerManager {
 			if (layerToolbar != null) {
 				boolean disable = evt.getEventType() != ProjectDatabaseStateType.OPENED;
 				layerToolbar.setDisable(disable);
+				
+				if (evt.getEventType() == ProjectDatabaseStateType.CLOSED) {
+					currentGraphicExtent.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+					clearAllLayers();
+					draw();
+				}
 			}
 		}
 	}

@@ -21,6 +21,10 @@
 
 package org.applied_geodesy.jag3d.ui.resultpane;
 
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
+import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.table.UIPrincipalComponentTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITestStatisticTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIVarianceComponentTableBuilder;
@@ -46,6 +50,19 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
 
 public class UIGlobalResultPaneBuilder {
+	private class DatabaseStateChangedListener implements ProjectDatabaseStateChangedListener {
+
+		@Override
+		public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt) {
+			if (evt.getEventType() == ProjectDatabaseStateType.CLOSED) {
+				// clear all global result tables
+				UITestStatisticTableBuilder.getInstance().getTable().getItems().setAll(UITestStatisticTableBuilder.getInstance().getEmptyRow());
+				UIVarianceComponentTableBuilder.getInstance().getTable().getItems().setAll(UIVarianceComponentTableBuilder.getInstance().getEmptyRow());
+				UIPrincipalComponentTableBuilder.getInstance().getTable().getItems().setAll(UIPrincipalComponentTableBuilder.getInstance().getEmptyRow());
+			}
+		}
+	}
+	
 	private static UIGlobalResultPaneBuilder resultPaneBuilder = new UIGlobalResultPaneBuilder();
 
 	private Node resultDataNode = null;
@@ -119,5 +136,7 @@ public class UIGlobalResultPaneBuilder {
 		borderPane.setCenter(contenPane);
 		
 		this.resultDataNode = borderPane;
+		
+		SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
 	}
 }

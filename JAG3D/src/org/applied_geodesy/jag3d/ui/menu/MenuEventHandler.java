@@ -23,6 +23,7 @@ package org.applied_geodesy.jag3d.ui.menu;
 
 import java.io.File;
 
+import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.JAG3D;
 import org.applied_geodesy.jag3d.ui.dialog.AboutDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ApproximationValuesDialog;
@@ -61,6 +62,10 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 		switch(menuItemType) {
 		case EXIT:
 			JAG3D.close();
+			break;
+			
+		case CLOSE:
+			SQLManager.closeProject();
 			break;
 			
 		case ABOUT:

@@ -54,6 +54,8 @@ public class UIMetaDataPaneBuilder {
 			if (metaDataNode != null) {
 				boolean disable = evt.getEventType() != ProjectDatabaseStateType.OPENED;
 				disableComponents(disable);
+				if (evt.getEventType() == ProjectDatabaseStateType.CLOSED)
+					clearComponents();
 			}
 		}
 	}
@@ -168,24 +170,24 @@ public class UIMetaDataPaneBuilder {
 		gridPane.add(nameLabel,                 0, ++row, 2, 1);
 		gridPane.add(this.nameLimitedTextField, 0, ++row, 2, 1);
 		
-		gridPane.add(new Region(),           0, ++row, 2, 1);
+		gridPane.add(new Region(),              0, ++row, 2, 1);
 		
-		gridPane.add(operatorLabel,          0, ++row);
-		gridPane.add(dateLabel,              1,   row);
+		gridPane.add(operatorLabel,             0, ++row);
+		gridPane.add(dateLabel,                 1,   row);
 		gridPane.add(this.operatorLimitedTextField, 0, ++row);
-		gridPane.add(this.datePicker,        1,   row);
+		gridPane.add(this.datePicker,           1,   row);
 		
-		gridPane.add(new Region(),             0, ++row, 2, 1);
+		gridPane.add(new Region(),              0, ++row, 2, 1);
 		
-		gridPane.add(customerIdLabel,          0, ++row);
-		gridPane.add(projectIdLabel,           1,   row);
+		gridPane.add(customerIdLabel,           0, ++row);
+		gridPane.add(projectIdLabel,            1,   row);
 		gridPane.add(this.customerIdLimitedTextField, 0, ++row);
 		gridPane.add(this.projectIdLimitedTextField,  1,   row);
 		
-		gridPane.add(new Region(),             0, ++row, 2, 1);
+		gridPane.add(new Region(),              0, ++row, 2, 1);
 		
-		gridPane.add(descriptionLabel,         0, ++row, 2, 1);
-		gridPane.add(this.descriptionTextArea, 0, ++row, 2, 1);
+		gridPane.add(descriptionLabel,          0, ++row, 2, 1);
+		gridPane.add(this.descriptionTextArea,  0, ++row, 2, 1);
 				
 		ScrollPane scroller = new ScrollPane(gridPane);
 		scroller.setPadding(new Insets(20, 30, 20, 30)); // oben, links, unten, rechts
@@ -201,6 +203,7 @@ public class UIMetaDataPaneBuilder {
 		
 		this.metaDataNode = scroller;
 		this.disableComponents(true);
+		this.clearComponents();
 	}
 	
 	private LimitedTextField createLimitedTextField(String tooltip, String promptText) {
@@ -258,6 +261,14 @@ public class UIMetaDataPaneBuilder {
 		this.customerIdLimitedTextField.setDisable(disable);
 		this.projectIdLimitedTextField.setDisable(disable);
 		this.descriptionTextArea.setDisable(disable);
+	}
+	
+	private void clearComponents() {
+		this.nameLimitedTextField.setText(null);
+		this.operatorLimitedTextField.setText(null);
+		this.customerIdLimitedTextField.setText(null);
+		this.projectIdLimitedTextField.setText(null);
+		this.descriptionTextArea.setText(null);
 	}
 	
 	private void save() {

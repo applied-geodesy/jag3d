@@ -153,6 +153,14 @@ public class SQLManager {
 	public static void setHostServices(HostServices hostServices) {
 		SQL_MANAGER.hostServices = hostServices;
 	}
+	
+	public static void closeProject() {
+		SQL_MANAGER.closeDataBase();
+		
+		UITreeBuilder.getInstance().getTree().getSelectionModel().clearSelection();
+		UITreeBuilder.getInstance().removeAllItems();
+		UITreeBuilder.getInstance().getTree().getSelectionModel().selectFirst();
+	}
 
 	public FTLReport getFTLReport() {
 		if (this.hasDatabase() && this.dataBase.isOpen()) {

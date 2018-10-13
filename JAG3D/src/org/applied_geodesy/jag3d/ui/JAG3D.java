@@ -89,6 +89,9 @@ public class JAG3D extends Application {
 			if (adjusmentButton != null) {
 				boolean disable = evt.getEventType() != ProjectDatabaseStateType.OPENED;
 				adjusmentButton.setDisable(disable);
+
+				if (evt.getEventType() == ProjectDatabaseStateType.CLOSING || evt.getEventType() == ProjectDatabaseStateType.CLOSED)
+					JAG3D.setTitle(null);
 			}
 		}
 	}

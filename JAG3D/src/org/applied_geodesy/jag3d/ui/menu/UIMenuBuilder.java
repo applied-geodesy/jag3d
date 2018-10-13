@@ -273,12 +273,14 @@ public class UIMenuBuilder {
 		MenuItem newItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.new.label", "Create _new project"), true, MenuItemType.NEW, new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 		MenuItem openItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.open.label", "_Open existing project"), true, MenuItemType.OPEN, new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 		MenuItem copyItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.copy.label", "_Copy current project and open"), true, MenuItemType.COPY, new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
+		MenuItem closeItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.close.label", "C_lose current project"), true, MenuItemType.CLOSE, new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 		MenuItem exitItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.exit.label", "_Exit"), true, MenuItemType.EXIT, new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 		Menu historyMenu = this.createHistoryMenu();
 		
 		parentMenu.getItems().addAll(
 				newItem, 
 				openItem,
+				closeItem,
 				copyItem,
 				new SeparatorMenuItem(),
 				historyMenu,
