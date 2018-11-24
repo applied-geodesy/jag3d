@@ -234,9 +234,9 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 								case STOCHASTIC_POINT_1D_COMPONENT:
 									return i18n.getString("UIVarianceComponentTableBuilder.type.point.1d.label", "Stochastic point 1D");
 								case STOCHASTIC_POINT_2D_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.point.1d.label", "Stochastic point 2D");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.point.2d.label", "Stochastic point 2D");
 								case STOCHASTIC_POINT_3D_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.point.1d.label", "Stochastic point 3D");
+									return i18n.getString("UIVarianceComponentTableBuilder.type.point.3d.label", "Stochastic point 3D");
 								case STOCHASTIC_POINT_DEFLECTION_COMPONENT:
 									return i18n.getString("UIVarianceComponentTableBuilder.type.deflection.label", "Deflection of vertical");
 								}
