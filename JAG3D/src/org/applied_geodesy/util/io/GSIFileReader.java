@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -85,7 +84,9 @@ public class GSIFileReader extends SourceFileReader {
 	private boolean isDirectionGroupWithEqualStation = true;
 
 	private double ih = 0.0, th = 0.0;
-	private Double rb = null, vb = null, zb = null, distRb = null, distVb = null, distZb = null;
+	private Double rb1 = null, vb1 = null, distRb1 = null, distVb1 = null;
+	private Double rb2 = null, vb2 = null, distRb2 = null, distVb2 = null;
+	private Double zb = null, distZb = null, lastRb4Zb = null, distLastRb4Zb;
 
 	private List<PointRow> points1d = null;
 	private List<PointRow> points2d = null;
@@ -128,12 +129,18 @@ public class GSIFileReader extends SourceFileReader {
 		this.endPointName = null;
 		this.ih = 0.0;
 		this.th = 0.0;
-		this.rb = null;
-		this.vb = null;
+		this.rb1 = null;
+		this.vb1 = null;
+		this.rb2 = null;
+		this.vb2 = null;
 		this.zb = null;
-		this.distRb = null;
-		this.distVb = null;
+		this.distRb1 = null;
+		this.distVb1 = null;
+		this.distRb2 = null;
+		this.distVb2 = null;
 		this.distZb = null;
+		this.lastRb4Zb = null;
+		this.distLastRb4Zb = null;
 		
 		if (this.points1d == null)
 			this.points1d = new ArrayList<PointRow>();
@@ -217,37 +224,44 @@ public class GSIFileReader extends SourceFileReader {
 		// entferne Withspaces und fuege am Ende ein Leerzeichen an (GSI-Datensatzblockende)
 		line = line.trim() + " ";
 		// Bestimme das GSI-Format GSI8 bzw. GSI16
-		int gsiType = line.startsWith("*")?16:8;
+		int gsiType = line.startsWith("*") ? 16 : 8;
 
 		// Wenn GSI16 - entferne fuehrenden *
 		if (gsiType == 16)
 			line = line.substring(1);
 
-		String dataBlocks[] = line.split("\\s+");
-		String blockTemplate = String.format(Locale.ENGLISH, "%%-%ds", (7 + gsiType));
+		//String dataBlocks[] = line.split("\\s+");
+		//String blockTemplate = String.format(Locale.ENGLISH, "%%-%ds", (7 + gsiType));
 
 		String pointName = null, pointCode = "";
 		Double ih = null, th = null;
 		Double deltaH = null, dir = null, dist2d = null, dist3d = null, zenith = null;
 		Double x = null, y = null, z = null;
 
-		for (String dataBlock : dataBlocks) {
-
-			// Pruefe, ob Datenblock genuegend Zeichen enthaelt
-			// 7 Schluesselzeichen, <gsiType> Datenzeichen, Leerzeichen
-			if (dataBlock.length() < 7 + gsiType) 
-				dataBlock = String.format(Locale.ENGLISH, blockTemplate, dataBlock);
-			else if (dataBlock.length() > 7 + gsiType) 
-				continue;
+		int startIdx = 0;
+		int endIdx = 7 + gsiType;
+		
+		while (endIdx < line.length()){
+			String dataBlock = line.substring(startIdx, endIdx);
+			startIdx = endIdx + 1;
+			endIdx = startIdx + 7 + gsiType;
+		
+//		for (String dataBlock : dataBlocks) {
+//			// Pruefe, ob Datenblock genuegend Zeichen enthaelt
+//			// 7 Schluesselzeichen, <gsiType> Datenzeichen, Leerzeichen
+//			if (dataBlock.length() < 7 + gsiType) 
+//				dataBlock = String.format(Locale.ENGLISH, blockTemplate, dataBlock);
+//			else if (dataBlock.length() > 7 + gsiType) 
+//				continue;
 
 			// Bestimme die Laenge der Wortidentifikation 2 oder 3
-			int wordIndexLength = dataBlock.charAt(2) == '.'?2:3;
+			int wordIndexLength = dataBlock.charAt(2) == '.' ? 2 : 3;
 			// Zerlege Zeichenkette
 			try {
 				int key  = Integer.parseInt(dataBlock.substring(0, wordIndexLength));
 				UnitType unit = UnitType.getEnumByValue(dataBlock.charAt(5) == '.'?-1:Character.getNumericValue(dataBlock.charAt(5)));
-				int sign = dataBlock.charAt(6) == '-'?-1:1;
-				String data = dataBlock.substring(7, 7+gsiType);
+				int sign = dataBlock.charAt(6) == '-' ? -1 : 1;
+				String data = dataBlock.substring(7, 7 + gsiType);
 
 				if (key == 11 || key > 100 && key/10 == 11) {
 					pointName = this.removeLeadingZeros(data).trim();
@@ -309,12 +323,18 @@ public class GSIFileReader extends SourceFileReader {
 
 						// Nivellement
 					case 331:
+						this.rb1 = this.convertToTrueValue(unit, sign, data);
+						this.lastRb4Zb = this.rb1;
+						break;
 					case 335:
-						this.rb = this.convertToTrueValue(unit, sign, data);
+						this.rb2 = this.convertToTrueValue(unit, sign, data);
+						this.lastRb4Zb = this.lastRb4Zb == null ? this.rb2 : 0.5 * (this.lastRb4Zb + this.rb2);
 						break;
 					case 332:
+						this.vb1 = this.convertToTrueValue(unit, sign, data);
+						break;
 					case 336:
-						this.vb = this.convertToTrueValue(unit, sign, data);
+						this.vb2 = this.convertToTrueValue(unit, sign, data);
 						break;
 					case 333:
 						this.zb  = this.convertToTrueValue(unit, sign, data);
@@ -346,7 +366,9 @@ public class GSIFileReader extends SourceFileReader {
 			this.th = th==null ? 0.0 : th;
 
 			// Strecken beim Niv sind hier zu reseten, da Zwischenblicke immer nach dem Vorblick kommen.
-			this.distRb = null;
+			this.distRb1 = null;
+			this.distRb2 = null;
+			this.distLastRb4Zb = null;
 
 			// Speichere Richtungen, da diese Satzweise zu halten sind
 			if (this.dim != DimensionType.HEIGHT && !this.directions.isEmpty()) {
@@ -404,41 +426,61 @@ public class GSIFileReader extends SourceFileReader {
 			this.ih = ih == null ? this.ih : ih;
 			this.th = th == null ? this.th : th;
 
-			// Speichere Abstand zwischen Rueckblick und Instrument
-			if (this.rb != null && dist2d != null && this.distRb == null) {
-				this.distRb = dist2d;
+			// Speichere Abstand zwischen 1. Rueckblick und Instrument
+			if (this.rb1 != null && dist2d != null && this.distRb1 == null) {
+				this.distRb1       = dist2d;
+				this.distLastRb4Zb = dist2d;
 				dist2d = null;
 			}
-			// Speichere Abstand zwischen Vorblick und Instrument
-			else if (this.vb != null && dist2d != null && this.distVb == null) {
-				this.distVb = dist2d;
+			// Speichere Abstand zwischen 2. Rueckblick und Instrument
+			else if (this.rb2 != null && dist2d != null && this.distRb2 == null) {
+				this.distRb2       = dist2d;
+				this.distLastRb4Zb = this.distLastRb4Zb == null ? dist2d : 0.5 * (this.distLastRb4Zb + dist2d);
+				dist2d = null;
+			}			
+			// Speichere Abstand zwischen 1. Vorblick und Instrument
+			else if (this.vb1 != null && dist2d != null && this.distVb1 == null) {
+				this.distVb1 = dist2d;
 				dist2d = null;
 			}
+			// Speichere Abstand zwischen 2. Vorblick und Instrument
+			else if (this.vb2 != null && dist2d != null && this.distVb2 == null) {
+				this.distVb2 = dist2d;
+				dist2d = null;
+			}			
 			// Speichere Abstand zwischen Zwischenblick und Instrument
 			else if (this.zb != null && dist2d != null && this.distZb == null) {
 				this.distZb = dist2d;
 				dist2d = null;
 			}
 
-			// ermittle Hoehenunterschied aus RI und ZB
-			if (this.rb != null && this.zb != null) {
-				deltaH = this.rb - this.zb;
+			// ermittle Hoehenunterschied aus 0.5 * (RI+RII) und ZB
+			if (this.lastRb4Zb != null && this.zb != null) {
+				deltaH = this.lastRb4Zb - this.zb;
 				this.zb = null;
-				if (this.distRb != null && this.distZb != null) {
-					dist2d = this.distRb + this.distZb;
+				if (this.distLastRb4Zb != null && this.distZb != null) {
+					dist2d = this.distLastRb4Zb + this.distZb;
 					this.distZb = null;
 				}
 			}
 
-			// ermittle Hoehenunterschied aus R und V - setze R nicht auf null, da noch Zwischenblicke folgen koennten 
-			if (this.rb != null && this.vb != null) {
-				deltaH = this.rb - this.vb;
-				//this.rb = this.vb = null;
-				this.vb = null;
-				if (this.distRb != null && this.distVb != null) {
-					dist2d = this.distRb + this.distVb;
-					//this.distRb1 = this.distVb1 = null;
-					this.distVb = null;
+			// ermittle Hoehenunterschied aus R1 und V1
+			if (this.rb1 != null && this.vb1 != null) {
+				deltaH = this.rb1 - this.vb1;
+				this.rb1 = this.vb1 = null;
+				if (this.distRb1 != null && this.distVb1 != null) {
+					dist2d = this.distRb1 + this.distVb1;
+					this.distRb1 = this.distVb1 = null;
+				}
+			}
+			
+			// ermittle Hoehenunterschied aus R2 und V2
+			else if (this.rb2 != null && this.vb2 != null) {
+				deltaH = this.rb2 - this.vb2;
+				this.rb2 = this.vb2 = null;
+				if (this.distRb2 != null && this.distVb2 != null) {
+					dist2d = this.distRb2 + this.distVb2;
+					this.distRb2 = this.distVb2 = null;
 				}
 			}
 
