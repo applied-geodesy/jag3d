@@ -21,6 +21,7 @@
 
 module org.applied_geodesy.jag3d {
 	exports org.applied_geodesy.jag3d;
+	exports org.applied_geodesy.jag3d.ui;
 
 	requires arpack.combined.all;
 	requires core;
@@ -37,8 +38,8 @@ module org.applied_geodesy.jag3d {
 	requires java.sql;
 	requires java.xml;
 
-	requires javafx.base;
-	requires javafx.controls;
-	requires javafx.graphics;
-	requires javafx.swing;
+	requires transitive javafx.base;
+	requires transitive javafx.controls;
+	requires transitive javafx.graphics;
+	requires transitive javafx.swing;
 }
