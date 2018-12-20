@@ -226,7 +226,7 @@ public class ColumnDefinedObservationFileReader extends SourceFileReader {
 					default:
 						row.setValueApriori(options.convertLengthToModel(value));
 						if (this.observationType == ObservationType.HORIZONTAL_DISTANCE || this.observationType == ObservationType.SLOPE_DISTANCE)
-							row.setDistanceApriori(value);
+							row.setDistanceApriori(options.convertLengthToModel(value));
 						break;
 					}
 					break;
@@ -256,7 +256,7 @@ public class ColumnDefinedObservationFileReader extends SourceFileReader {
 				return;
 			}
 		}
-		
+
 		if (row.getStartPointName() != null && row.getEndPointName() != null && row.getValueApriori() != null && !row.getStartPointName().isEmpty() && !row.getEndPointName().isEmpty() && !row.getStartPointName().equals(row.getEndPointName()))
 			this.observations.add(row);
 	}
