@@ -148,4 +148,12 @@ public class PointBundle {
 	public boolean contains(String pointId) {
 		return this.pointHashMap.containsKey(pointId);
 	}
+	@Override
+	public String toString() {
+		String str = "PointBundle = [";
+		for (Point p : this.pointArrayList)
+			str += p + ", ";
+		str += "]";
+		return str;
+	}
 }
