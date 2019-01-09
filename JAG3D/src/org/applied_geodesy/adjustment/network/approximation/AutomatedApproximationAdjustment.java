@@ -52,8 +52,6 @@ public class AutomatedApproximationAdjustment implements PropertyChangeListener 
 	public AutomatedApproximationAdjustment(PointBundle targetSystem, List<Point> points) {
 		this.systems = this.getBundles(points);
 		this.targetSystem = targetSystem;
-		if (this.targetSystem != null)
-			this.systems.add(this.targetSystem);
 	}
 	
 	public void addSystems(List<PointBundle> bundles) {
@@ -96,62 +94,74 @@ public class AutomatedApproximationAdjustment implements PropertyChangeListener 
 	
 	public EstimationStateType estimateApproximatedValues() {
 		EstimationStateType status = EstimationStateType.BUSY;
-		this.systemsCounter = 0;
+		this.bundleTransformation = null;
 		
-		if (this.systems == null || this.systems.size() < 1)
-			return EstimationStateType.NOT_INITIALISED;
-		else if (this.systems.size() == 1 && this.targetSystem == null) {
-			this.targetSystem = this.systems.get(0);
-			return EstimationStateType.ERROR_FREE_ESTIMATION;
-		}
-		int dim = this.systems.get(0).getDimension();
-
-		while(this.systemsCounter != this.systems.size() && this.systems.size() > 1) {
-			this.systemsCounter = this.systems.size();
-			if (dim == 1)
-				this.bundleTransformation = new BundleTransformation1D(this.threshold, this.systems);
-			else if (dim == 2)
-				this.bundleTransformation = new BundleTransformation2D(this.threshold, this.systems);
-			else 
+		if (this.systems != null && this.systems.size() > 0) {
+			if (this.targetSystem != null && (!this.freeNetwork || (this.freeNetwork && !this.estimateDatumPoints)))
+				this.systems.add(this.targetSystem);
+			
+			this.systemsCounter = 0;
+			
+			if (this.systems == null || this.systems.size() < 1)
 				return EstimationStateType.NOT_INITIALISED;
-			
-			this.bundleTransformation.addPropertyChangeListener(this);
-			status = this.bundleTransformation.estimateModel();
+			else if (this.systems.size() == 1 && this.targetSystem == null) {
+				this.targetSystem = this.systems.get(0);
+				return EstimationStateType.ERROR_FREE_ESTIMATION;
+			}
+			int dim = this.systems.get(0).getDimension();
 
-			this.systems = this.bundleTransformation.getExcludedSystems();
-			this.systems.add(this.bundleTransformation.getTargetSystem());
-			
-			Set<String> outliers = this.bundleTransformation.getOutliers();
-			if (outliers.size() > 0)
-				this.outliers.addAll(outliers);
-	    }
-		this.systemsCounter = this.systems.size();
-	    
-	    if (this.bundleTransformation != null && this.systems.size() > 0) {
-	    	// Wenn es eine freie AGL ist,
-	    	// nimm das groesste verbleibende System als 
-	    	// finales Zielsystem
-	    	if (this.freeNetwork && this.estimateDatumPoints || this.targetSystem == null) {
-		    	this.targetSystem = this.getLargestPointBundle(); //systems.get(0);
-	    	}
-	    	// Wenn Anschluss vorgegeben, dann
-	    	// transformiere auf FP-Feld
-	    	else {
-	    		Transformation trans = this.bundleTransformation.getSimpleTransformationModel(this.getLargestPointBundle(), this.targetSystem);
-		    	
-		    	if (trans != null && trans.transformL2Norm()) {
-	    			this.targetSystem = trans.getTransformdPoints();
+			while(this.systemsCounter != this.systems.size() && this.systems.size() > 1) {
+				this.systemsCounter = this.systems.size();
+				if (dim == 1)
+					this.bundleTransformation = new BundleTransformation1D(this.threshold, this.systems);
+				else if (dim == 2)
+					this.bundleTransformation = new BundleTransformation2D(this.threshold, this.systems);
+				else 
+					return EstimationStateType.NOT_INITIALISED;
+				
+				this.bundleTransformation.addPropertyChangeListener(this);
+				status = this.bundleTransformation.estimateModel();
+
+				this.systems = this.bundleTransformation.getExcludedSystems();
+				this.systems.add(this.bundleTransformation.getTargetSystem());
+				
+				Set<String> outliers = this.bundleTransformation.getOutliers();
+				if (outliers.size() > 0)
+					this.outliers.addAll(outliers);
+		    }
+			this.systemsCounter = this.systems.size();
+		    
+		    if (this.bundleTransformation != null && this.systems.size() > 0) {
+		    	// Wenn es eine freie AGL ist,
+		    	// nimm das groesste verbleibende System als 
+		    	// finales Zielsystem
+		    	if (this.freeNetwork && this.estimateDatumPoints || this.targetSystem == null) {
+			    	this.targetSystem = this.getLargestPointBundle(); //systems.get(0);
 		    	}
+		    	// Wenn Anschluss vorgegeben, dann
+		    	// transformiere auf FP-Feld
 		    	else {
-	    			this.targetSystem = null;
+		    		Transformation trans = this.bundleTransformation.getSimpleTransformationModel(this.getLargestPointBundle(), this.targetSystem);
+			    	
+			    	if (trans != null && trans.transformL2Norm()) {
+		    			this.targetSystem = trans.getTransformdPoints();
+			    	}
+			    	else {
+		    			this.targetSystem = null;
+			    	}
 		    	}
-	    	}
-		}
+			}
 
-	    if (this.bundleTransformation != null)
-	    	this.bundleTransformation.removePropertyChangeListener(this);
-	    this.bundleTransformation = null;
-	    return status;
+		    if (this.bundleTransformation != null)
+		    	this.bundleTransformation.removePropertyChangeListener(this);
+		    this.bundleTransformation = null;
+		    
+		    return status;
+		}
+		else 
+			status = EstimationStateType.ERROR_FREE_ESTIMATION;
+
+		return status;
 	}
 	
 	public PointBundle getLargestPointBundle() {
