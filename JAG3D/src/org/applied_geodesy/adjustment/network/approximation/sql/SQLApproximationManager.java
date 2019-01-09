@@ -62,10 +62,6 @@ public class SQLApproximationManager implements PropertyChangeListener {
 	private Set<String> outlier1d = new HashSet<String>();
 	private Set<String> outlier2d = new HashSet<String>();
 	private Map<String, Set<String>> directionLinks = new LinkedHashMap<String, Set<String>>();
-	private List<Point> points1d = new ArrayList<Point>();
-	private List<Point> points2d = new ArrayList<Point>();
-	private Map<String, Point> points1dMap = new LinkedHashMap<String, Point>();
-	private Map<String, Point> points2dMap = new LinkedHashMap<String, Point>();
 	private PointBundle targetSystem1d, targetSystem2d;
 	private int subSystemsCounter1d = 0, subSystemsCounter2d = 0; 
 	private EstimationStateType estimationStatus1D = EstimationStateType.ERROR_FREE_ESTIMATION;
@@ -86,10 +82,6 @@ public class SQLApproximationManager implements PropertyChangeListener {
 		this.outlier1d.clear();
 		this.outlier2d.clear();
 		this.directionLinks.clear();
-		this.points1d.clear();
-		this.points2d.clear();
-		this.points1dMap.clear();
-		this.points2dMap.clear();
 		this.targetSystem1d = null;
 		this.targetSystem2d = null;
 		this.approximationAdjustment = null;
@@ -140,14 +132,14 @@ public class SQLApproximationManager implements PropertyChangeListener {
 		this.initNonEstimatedPointNames();
 
 		// Initialisiere Lageausgleichung
-		this.initStationPointsWithSubSystems(2);
-		if (this.points2d != null && this.points2d.size() > 0) {
+		List<Point> points2d = this.getStationPointsWithSubSystems(2);
+		if (points2d != null && points2d.size() > 0) {
 			int targetCounter = -1;
 			boolean converge = false;
 			List<PointBundle> notTransFormedBundles = new ArrayList<PointBundle>(1);
 			do {
 				converge = false;
-				this.approximationAdjustment = new AutomatedApproximationAdjustment(this.targetSystem2d, this.points2d);
+				this.approximationAdjustment = new AutomatedApproximationAdjustment(this.targetSystem2d, points2d);
 				this.approximationAdjustment.addPropertyChangeListener(this);
 
 				if (this.interrupt) {
@@ -197,7 +189,7 @@ public class SQLApproximationManager implements PropertyChangeListener {
 				}
 				if (this.targetSystem2d != null && this.approximationAdjustment.getSystems().size() > 1 && this.targetSystem2d.size() != targetCounter) {
 					targetCounter = this.targetSystem2d.size();
-					this.initStationPointsWithSubSystems(2);
+					points2d = this.getStationPointsWithSubSystems(2);
 					converge = true;
 				}
 
@@ -209,11 +201,13 @@ public class SQLApproximationManager implements PropertyChangeListener {
 				this.subSystemsCounter2d = this.approximationAdjustment.getSubSystemsCounter();
 				this.outlier2d = this.approximationAdjustment.getOutliers();
 			}
+			
+			points2d = null;
 		}
 
-		this.initStationPointsWithSubSystems(1);
-		if (this.points1d != null && this.points1d.size() > 0) {
-			this.approximationAdjustment = new AutomatedApproximationAdjustment(this.targetSystem1d, this.points1d);
+		List<Point> points1d = this.getStationPointsWithSubSystems(1);
+		if (points1d != null && points1d.size() > 0) {
+			this.approximationAdjustment = new AutomatedApproximationAdjustment(this.targetSystem1d, points1d);
 			this.approximationAdjustment.addPropertyChangeListener(this);
 
 			if (this.interrupt) {
@@ -242,6 +236,7 @@ public class SQLApproximationManager implements PropertyChangeListener {
 				this.outlier1d = this.approximationAdjustment.getOutliers();
 			}
 			this.approximationAdjustment.removePropertyChangeListener(this);
+			points1d = null;
 		}
 	}
 
@@ -297,58 +292,63 @@ public class SQLApproximationManager implements PropertyChangeListener {
 		}
 	}
 
-	private void initStationPointsWithSubSystems(int dim) throws SQLException {
+	private List<Point> getStationPointsWithSubSystems(int dim) throws SQLException {
 		// Speichere alle Punktnummern von Standpunkten
 		List<String> stationNames;
+		
+		List<Point> pointList = new ArrayList<Point>();
+		Map<String, Point> pointMap = new LinkedHashMap<String, Point>();
 
+		
 		if (dim != 2) {
-			// Ermittle die Standpunkte und ihre zugehoerigen Beobachtungen
+			// Ermittle die Standpunkte und ihre zugehoerigen Beobachtungen fuer Hoehe
 			stationNames = this.getPointNames(1, true);
 			for (String pointName : stationNames) {
 				Point1D point = new Point1D(pointName, 0.0);
-				this.points1d.add(point);
-				this.points1dMap.put(pointName, point);
+				pointList.add(point);
+				pointMap.put(pointName, point);
 
-				this.addObservation(point); //addObservation1D(point);
+				this.addObservation(point);
 			}
 
 			stationNames = this.getPointNames(3, true);
 			for (String pointName : stationNames) {
 				Point1D point1d = new Point1D(pointName, 0.0);
-				this.points1d.add( point1d );
-				this.points1dMap.put(pointName, point1d);
+				pointList.add( point1d );
+				pointMap.put(pointName, point1d);
 
-				this.addObservation(point1d); //this.addObservation3D(point1d, point2d);
+				this.addObservation(point1d); 
 			}
 		}
 		else if (dim != 1) {
+			// Ermittle die Standpunkte und ihre zugehoerigen Beobachtungen fuer Lage
 			stationNames = this.getPointNames(2, true);
 			for (String pointName : stationNames) {
 				Point2D point = new Point2D(pointName, 0.0, 0.0);
-				this.points2d.add(point);
-				this.points2dMap.put(pointName, point);
+				pointList.add(point);
+				pointMap.put(pointName, point);
 
-				this.addObservation(point); //this.addObservation2D(point);
+				this.addObservation(point); 
 			}
 
 			stationNames = this.getPointNames(3, true);
 			for (String pointName : stationNames) {
 				Point2D point2d = new Point2D(pointName, 0.0, 0.0);
-				this.points2d.add( point2d );
-				this.points2dMap.put(pointName, point2d);
+				pointList.add( point2d );
+				pointMap.put(pointName, point2d);
 
-				this.addObservation(point2d); //this.addObservation3D(point1d, point2d);
+				this.addObservation(point2d); 
 			}
 
 			// Fuege Systeme hinzu, die per Vorwaertsschnitt entstehen
 			for (Map.Entry<String, Set<String>> directionLink : this.directionLinks.entrySet()) {
 				String fixPointIdA = directionLink.getKey();
-				Point fixPointA = this.points2dMap.get(fixPointIdA);
+				Point fixPointA = pointMap.get(fixPointIdA);
 				for (String fixPointIdB : directionLink.getValue()) {
 					if (this.directionLinks.containsKey(fixPointIdB) && this.directionLinks.get(fixPointIdB).contains(fixPointIdA)) {
 						// Suche nach Vorwaertsschnitten
 						//System.out.println(fixPointIdA+"  "+fixPointIdB);
-						Point fixPointB = this.points2dMap.get(fixPointIdB);
+						Point fixPointB = pointMap.get(fixPointIdB);
 						this.addForwardIntersectionCombinations(fixPointA, fixPointB);
 					}
 				}
@@ -358,6 +358,9 @@ public class SQLApproximationManager implements PropertyChangeListener {
 			}
 			this.directionLinks.clear();
 		}
+		
+		pointMap.clear();
+		return pointList;
 	}
 
 	private void addObservation(Point point) throws SQLException {
@@ -932,7 +935,7 @@ public class SQLApproximationManager implements PropertyChangeListener {
 
 				TerrestrialObservationRow obs = new TerrestrialObservationRow();
 				obs.setStartPointName(referencePointNameA);
-				obs.setStartPointName(endPointName);
+				obs.setEndPointName(endPointName);
 				obs.setValueApriori(value);
 
 				observationsA.get(groupId).add(obs);
@@ -952,7 +955,7 @@ public class SQLApproximationManager implements PropertyChangeListener {
 
 				TerrestrialObservationRow obs = new TerrestrialObservationRow();
 				obs.setStartPointName(referencePointNameB);
-				obs.setStartPointName(endPointName);
+				obs.setEndPointName(endPointName);
 				obs.setValueApriori(value);
 
 				observationsB.get(groupId).add(obs);

@@ -96,10 +96,7 @@ public abstract class BundleTransformation {
 		for (int i=0; i<sourceSystems.size(); i++) {
 			PointBundle b1 = sourceSystems.get(i);
 
-			for (int j=0; j<sourceSystems.size(); j++) {
-				if (i==j)
-					continue;
-
+			for (int j=i+1; j<sourceSystems.size(); j++) {
 				PointBundle b2 = sourceSystems.get(j);
 				Transformation t = this.getSimpleTransformationModel(b1, b2);
 
@@ -216,7 +213,7 @@ public abstract class BundleTransformation {
 				else
 					src2trg = true;
 
-				// Tasuche Systeme
+				// Tausche Systeme
 				if (src2trg) {
 					PointBundle tmpBundle = maxTRG;
 					maxTRG = maxSRC;
@@ -225,7 +222,7 @@ public abstract class BundleTransformation {
 				
 				Transformation trans = this.getSimpleTransformationModel(maxSRC, maxTRG);
 
-				// Ist Transformation durchfuehrbar und erfolgreich
+				// Ist Transformation durchfuehrbar und erfolgreich ?
 				if (trans != null && trans.numberOfIdenticalPoints() >= trans.numberOfRequiredPoints()) {
 					// Halte Massstab fest auf m=1 bei Naeherungswertbestimmung
 					trans.setFixedParameter(TransformationParameterType.SCALE, !maxSRC.isIntersection() && !maxTRG.isIntersection());
