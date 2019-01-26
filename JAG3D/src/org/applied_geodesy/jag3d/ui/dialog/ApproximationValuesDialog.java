@@ -185,6 +185,7 @@ public class ApproximationValuesDialog {
 			@Override
 			public void run() {
 				try {
+					approximationValuesDialog.reset();
 					approximationValuesDialog.dialog.getDialogPane().requestLayout();
 					Stage stage = (Stage) approximationValuesDialog.dialog.getDialogPane().getScene().getWindow();
 					stage.sizeToScene();
