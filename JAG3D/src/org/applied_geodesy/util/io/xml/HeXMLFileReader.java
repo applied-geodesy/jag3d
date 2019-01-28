@@ -86,7 +86,6 @@ public class HeXMLFileReader extends SourceFileReader implements ErrorHandler {
 	
 	private LengthUnit  lengthUnit  = LengthUnit.METER;
 	private AngularUnit angularUnit = AngularUnit.RADIAN;
-	private HeXMLNamespaceContext namespaceContext = new HeXMLNamespaceContext();
 	private Map<String, InstrumentSetup> setups = new LinkedHashMap<String, InstrumentSetup>();
 	private boolean isValidDocument = true;
 	private final DimensionType dim;
@@ -257,10 +256,12 @@ public class HeXMLFileReader extends SourceFileReader implements ErrorHandler {
 			builder = factory.newDocumentBuilder();
 			File xmlFile = this.getPath().toFile();
 			Document document = builder.parse(xmlFile);
-		
+			
+			HeXMLNamespaceContext namespaceContext = new HeXMLNamespaceContext(document);
+					
 			// Bestimme Einheiten
 			String xpathPattern = "//landxml:LandXML/landxml:Units/*[1]";
-			Node units = (Node)XMLUtilities.xpathSearch(document, xpathPattern, this.namespaceContext, XPathConstants.NODE);
+			Node units = (Node)XMLUtilities.xpathSearch(document, xpathPattern, namespaceContext, XPathConstants.NODE);
 			if (units != null) {				
 				NamedNodeMap attr = units.getAttributes();
 				// ENUM { millimeter, centimeter, meter, kilometer, foot, USSurveyFoot, inch, mile }
@@ -300,7 +301,7 @@ public class HeXMLFileReader extends SourceFileReader implements ErrorHandler {
 					+ "//landxml:LandXML/landxml:Survey//landxml:TargetPoint[@name] |"
 					+ "//landxml:LandXML/landxml:Survey//landxml:InstrumentSetup[@stationName]/landxml:InstrumentPoint";
 
-			NodeList nodeList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, this.namespaceContext, XPathConstants.NODESET);
+			NodeList nodeList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, namespaceContext, XPathConstants.NODESET);
 			for (int i=0; i<nodeList.getLength(); i++) {
 				Node node = nodeList.item(i);
 				if (node.hasChildNodes() && node.getFirstChild().getNodeType() == Node.TEXT_NODE && !node.getFirstChild().getNodeValue().trim().isEmpty()) {
@@ -380,7 +381,7 @@ public class HeXMLFileReader extends SourceFileReader implements ErrorHandler {
 			xpathPattern = "//landxml:LandXML/landxml:Survey//landxml:RawObservation[@setupID=\"%s\"]";
 			for (String setupId : this.setups.keySet()) {
 				InstrumentSetup setup = this.setups.get(setupId);
-				nodeList = (NodeList)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, setupId), this.namespaceContext, XPathConstants.NODESET);
+				nodeList = (NodeList)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, setupId), namespaceContext, XPathConstants.NODESET);
 				for (int i=0; i<nodeList.getLength(); i++) {
 					Node node = nodeList.item(i);				
 					double th = 0.0;
@@ -412,7 +413,7 @@ public class HeXMLFileReader extends SourceFileReader implements ErrorHandler {
 					}
 
 					String xpath = "./landxml:TargetPoint/@name";
-					String endPointName = (String)XMLUtilities.xpathSearch(node, xpath, this.namespaceContext, XPathConstants.STRING);
+					String endPointName = (String)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.STRING);
 					
 					int targetPointDim = this.point3DName.contains(endPointName) ? 3 : this.pointNames.contains(endPointName) ? 2 : this.dim == DimensionType.PLAN ? 2 : 3;
 					int startPointDim  = this.point3DName.contains(setup.getSetupPointName()) ? 3 : this.pointNames.contains(setup.getSetupPointName()) ? 2 : this.dim == DimensionType.PLAN ? 2 : 3;
@@ -425,25 +426,25 @@ public class HeXMLFileReader extends SourceFileReader implements ErrorHandler {
 						// Bestimme Korrekturparameter fuer 3D-Strecke
 						if (dist3d != null) {
 							xpath = "./landxml:Feature[@code=\"observationInfo\"]/landxml:Property[@label=\"TPSCorrectionRef\"]/@value";
-							String tpsCorr = (String)XMLUtilities.xpathSearch(node, xpath, this.namespaceContext, XPathConstants.STRING);
+							String tpsCorr = (String)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.STRING);
 							
 							xpath = "./landxml:TargetPoint/@pntRef";
-							tpsCorr = tpsCorr == null || tpsCorr.isEmpty() ? (String)XMLUtilities.xpathSearch(node, xpath, this.namespaceContext, XPathConstants.STRING) : tpsCorr;
+							tpsCorr = tpsCorr == null || tpsCorr.isEmpty() ? (String)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.STRING) : tpsCorr;
 													
 							// HeXML
 							xpath = "1.0 + //landxml:LandXML/hexml:HexagonLandXML/hexml:Survey/hexml:TPSCorrection[@uniqueID = ./../hexml:InstrumentSetup[@uniqueID=\"%s\"]/hexml:RawObservation[@targetPntRef=\"%s\"]/@tpsCorrectionRef ]/@atmosphericPPM * 0.000001";
-							Double scale = (Double)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpath, setupId, tpsCorr), this.namespaceContext, XPathConstants.NUMBER);
+							Double scale = (Double)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpath, setupId, tpsCorr), namespaceContext, XPathConstants.NUMBER);
 						
 							xpath = "//landxml:LandXML/hexml:HexagonLandXML/hexml:Survey/hexml:InstrumentSetup[@uniqueID=\"%s\"]/hexml:RawObservation[@targetPntRef=\"%s\"]/@reflectorConstant";
-							Double add = (Double)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpath, setupId, tpsCorr), this.namespaceContext, XPathConstants.NUMBER);
+							Double add = (Double)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpath, setupId, tpsCorr), namespaceContext, XPathConstants.NUMBER);
 
 							// LandXML
 							xpath = "1.0 + //landxml:LandXML/landxml:Survey//landxml:Corrections/landxml:Feature[@code=\"TPSCorrection\"]/landxml:Property[@label=\"oID\"][@value = \"%s\"]/../landxml:Property[@label=\"atmosphericPPM\"]/@value * 0.000001";
-							scale = scale == null || Double.isNaN(scale) ? (Double)XMLUtilities.xpathSearch(node, String.format(Locale.ENGLISH, xpath, tpsCorr), this.namespaceContext, XPathConstants.NUMBER) : scale;
+							scale = scale == null || Double.isNaN(scale) ? (Double)XMLUtilities.xpathSearch(node, String.format(Locale.ENGLISH, xpath, tpsCorr), namespaceContext, XPathConstants.NUMBER) : scale;
 							
 							xpath = "./landxml:Feature[@code=\"observationInfo\"]/landxml:Property[@label=\"reflectorConstant\"]/@value";
-							add = add == null || Double.isNaN(add) ? (Double)XMLUtilities.xpathSearch(node, xpath, this.namespaceContext, XPathConstants.NUMBER) : add;
-							
+							add = add == null || Double.isNaN(add) ? (Double)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.NUMBER) : add;
+	
 							// Validiere Korrekturwerte
 							scale = scale == null || Double.isNaN(scale) ? 1.0 : scale;
 							add = add == null || Double.isNaN(add)       ? 0.0 : add;
@@ -506,7 +507,7 @@ public class HeXMLFileReader extends SourceFileReader implements ErrorHandler {
 
 			// GNSS-Vector
 			xpathPattern = "//landxml:LandXML/landxml:Survey//landxml:GPSVector";
-			nodeList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, this.namespaceContext, XPathConstants.NODESET);
+			nodeList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, namespaceContext, XPathConstants.NODESET);
 			for (int i=0; i<nodeList.getLength(); i++) {
 				Node node = nodeList.item(i);
 				NamedNodeMap attr = node.getAttributes();
@@ -518,8 +519,8 @@ public class HeXMLFileReader extends SourceFileReader implements ErrorHandler {
 					continue;
 				
 				xpathPattern = "//landxml:LandXML/landxml:Survey//landxml:GPSSetup[@id=\"%s\"]//landxml:TargetPoint[1]";
-				Node startNode  = (Node)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, startPointName),  this.namespaceContext, XPathConstants.NODE);
-				Node targetNode = (Node)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, endPointName), this.namespaceContext, XPathConstants.NODE);
+				Node startNode  = (Node)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, startPointName),  namespaceContext, XPathConstants.NODE);
+				Node targetNode = (Node)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, endPointName), namespaceContext, XPathConstants.NODE);
 				
 				if (startNode == null || targetNode == null)
 					continue;

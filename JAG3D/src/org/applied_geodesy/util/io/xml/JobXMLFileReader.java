@@ -95,7 +95,6 @@ public class JobXMLFileReader extends SourceFileReader implements ErrorHandler {
 		}
 	}
 	
-	private JobXMLNamespaceContext namespaceContext = new JobXMLNamespaceContext();
 	private Map<String, StationRecord> stations = new LinkedHashMap<String, StationRecord>();
 	private boolean isValidDocument = true;
 	private final DimensionType dim;
@@ -211,26 +210,28 @@ public class JobXMLFileReader extends SourceFileReader implements ErrorHandler {
 			builder = factory.newDocumentBuilder();
 			File xmlFile = this.getPath().toFile();
 			Document document = builder.parse(xmlFile);
+			
+			JobXMLNamespaceContext namespaceContextJobXML = new JobXMLNamespaceContext(document);
 
 			String xpathPattern = "//JOBFile/FieldBook/PointRecord/Grid | "
 					+ "//JOBFile/FieldBook/PointRecord/ComputedGrid | "
 					+ "//JOBFile/Reductions/Point/Grid";
 			
-			NodeList nodeList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, this.namespaceContext, XPathConstants.NODESET);
+			NodeList nodeList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, namespaceContextJobXML, XPathConstants.NODESET);
 			for (int i=0; i<nodeList.getLength(); i++) {
 				Node pointNode = nodeList.item(i);
 				
-				String pointName = (String)XMLUtilities.xpathSearch(pointNode, "../Name", this.namespaceContext, XPathConstants.STRING);
-				String pointCode = (String)XMLUtilities.xpathSearch(pointNode, "../Code", this.namespaceContext, XPathConstants.STRING);
-				String deleted   = (String)XMLUtilities.xpathSearch(pointNode, "../Deleted", this.namespaceContext, XPathConstants.STRING);
+				String pointName = (String)XMLUtilities.xpathSearch(pointNode, "../Name",    namespaceContextJobXML, XPathConstants.STRING);
+				String pointCode = (String)XMLUtilities.xpathSearch(pointNode, "../Code",    namespaceContextJobXML, XPathConstants.STRING);
+				String deleted   = (String)XMLUtilities.xpathSearch(pointNode, "../Deleted", namespaceContextJobXML, XPathConstants.STRING);
 				boolean isDeleted = deleted != null && Boolean.parseBoolean(deleted);
 				
 				if (isDeleted)
 					continue;
 				
-				Double x0 = (Double)XMLUtilities.xpathSearch(pointNode, "North",     this.namespaceContext, XPathConstants.NUMBER);
-				Double y0 = (Double)XMLUtilities.xpathSearch(pointNode, "East",      this.namespaceContext, XPathConstants.NUMBER);
-				Double z0 = (Double)XMLUtilities.xpathSearch(pointNode, "Elevation", this.namespaceContext, XPathConstants.NUMBER);
+				Double x0 = (Double)XMLUtilities.xpathSearch(pointNode, "North",     namespaceContextJobXML, XPathConstants.NUMBER);
+				Double y0 = (Double)XMLUtilities.xpathSearch(pointNode, "East",      namespaceContextJobXML, XPathConstants.NUMBER);
+				Double z0 = (Double)XMLUtilities.xpathSearch(pointNode, "Elevation", namespaceContextJobXML, XPathConstants.NUMBER);
 
 				if (pointName != null && !pointName.trim().isEmpty() && !this.pointNames.contains(pointName)) {
 					x0 = x0 == null || Double.isNaN(x0) ||  Double.isInfinite(x0) ? 0.0 : x0;
@@ -260,30 +261,30 @@ public class JobXMLFileReader extends SourceFileReader implements ErrorHandler {
 
 			// Bestimme Stationen
 			xpathPattern = "//JOBFile/FieldBook/StationRecord";
-			nodeList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, this.namespaceContext, XPathConstants.NODESET);
+			nodeList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, namespaceContextJobXML, XPathConstants.NODESET);
 			for (int i=0; i<nodeList.getLength(); i++) {
 				Node node = nodeList.item(i);
 				if (node != null && node.hasChildNodes()) {
 					NamedNodeMap attr = node.getAttributes();
 					String stationId = attr.getNamedItem("ID") == null ? null : attr.getNamedItem("ID").getNodeValue();
-					String stationName   = (String)XMLUtilities.xpathSearch(node, "StationName",      this.namespaceContext, XPathConstants.STRING);
-					Double stationHeight = (Double)XMLUtilities.xpathSearch(node, "TheodoliteHeight", this.namespaceContext, XPathConstants.NUMBER);
-					String atmosphereId  = (String)XMLUtilities.xpathSearch(node, "AtmosphereID",     this.namespaceContext, XPathConstants.STRING);
+					String stationName   = (String)XMLUtilities.xpathSearch(node, "StationName",      namespaceContextJobXML, XPathConstants.STRING);
+					Double stationHeight = (Double)XMLUtilities.xpathSearch(node, "TheodoliteHeight", namespaceContextJobXML, XPathConstants.NUMBER);
+					String atmosphereId  = (String)XMLUtilities.xpathSearch(node, "AtmosphereID",     namespaceContextJobXML, XPathConstants.STRING);
 					stationHeight = stationHeight == null || Double.isNaN(stationHeight) ||  Double.isInfinite(stationHeight) ? 0.0 : stationHeight;
 
 					if (stationId != null && !stationId.trim().isEmpty() && stationName != null && !stationName.trim().isEmpty()) {
 						xpathPattern = "//JOBFile/FieldBook/AtmosphereRecord[@ID=\"%s\"]";
-						Node atmNode = (Node)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, atmosphereId), this.namespaceContext, XPathConstants.NODE);
+						Node atmNode = (Node)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, atmosphereId), namespaceContextJobXML, XPathConstants.NODE);
 						
 						Double ppm = 0.0, refraction = 0.0;
 						boolean applyEarthCurveCorr = false;
 						if (atmNode != null && atmNode.hasChildNodes()) {
-							String applyPPM = (String)XMLUtilities.xpathSearch(atmNode, "ApplyPPMToRawDistances", this.namespaceContext, XPathConstants.STRING);
-							String applyRefraction = (String)XMLUtilities.xpathSearch(atmNode, "ApplyRefractionCorrection", this.namespaceContext, XPathConstants.STRING);
+							String applyPPM        = (String)XMLUtilities.xpathSearch(atmNode, "ApplyPPMToRawDistances",    namespaceContextJobXML, XPathConstants.STRING);
+							String applyRefraction = (String)XMLUtilities.xpathSearch(atmNode, "ApplyRefractionCorrection", namespaceContextJobXML, XPathConstants.STRING);
 							
-							String applyEarthCurve = (String)XMLUtilities.xpathSearch(atmNode, "ApplyEarthCurvatureCorrection", this.namespaceContext, XPathConstants.STRING);
-							ppm = (Double)XMLUtilities.xpathSearch(atmNode, "PPM", this.namespaceContext, XPathConstants.NUMBER);
-							refraction = (Double)XMLUtilities.xpathSearch(atmNode, "RefractionCoefficient", this.namespaceContext, XPathConstants.NUMBER);
+							String applyEarthCurve = (String)XMLUtilities.xpathSearch(atmNode, "ApplyEarthCurvatureCorrection", namespaceContextJobXML, XPathConstants.STRING);
+							ppm = (Double)XMLUtilities.xpathSearch(atmNode, "PPM", namespaceContextJobXML, XPathConstants.NUMBER);
+							refraction = (Double)XMLUtilities.xpathSearch(atmNode, "RefractionCoefficient", namespaceContextJobXML, XPathConstants.NUMBER);
 							
 							boolean applyPPMCorr = applyPPM != null && Boolean.parseBoolean(applyPPM);
 							boolean applyRefractionCorr = applyRefraction != null && Boolean.parseBoolean(applyRefraction);
@@ -321,22 +322,22 @@ public class JobXMLFileReader extends SourceFileReader implements ErrorHandler {
 				double refraction       = station.getAtmosphereRefractionValue();
 				boolean applyEarthCurve = station.applyEarthCurveCorrection();
 				final double R          = Constant.EARTH_RADIUS; 
-				nodeList = (NodeList)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, stationId), this.namespaceContext, XPathConstants.NODESET);
+				nodeList = (NodeList)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, stationId), namespaceContextJobXML, XPathConstants.NODESET);
 				for (int i=0; i<nodeList.getLength(); i++) {
 					Node stationNode  = nodeList.item(i);
-					String targetID   = (String)XMLUtilities.xpathSearch(stationNode, "TargetID", this.namespaceContext, XPathConstants.STRING);
-					String targetName = (String)XMLUtilities.xpathSearch(stationNode, "Name", this.namespaceContext, XPathConstants.STRING);
-					String deleted    = (String)XMLUtilities.xpathSearch(stationNode, "Deleted",          this.namespaceContext, XPathConstants.STRING);
+					String targetID   = (String)XMLUtilities.xpathSearch(stationNode, "TargetID", namespaceContextJobXML, XPathConstants.STRING);
+					String targetName = (String)XMLUtilities.xpathSearch(stationNode, "Name",     namespaceContextJobXML, XPathConstants.STRING);
+					String deleted    = (String)XMLUtilities.xpathSearch(stationNode, "Deleted",  namespaceContextJobXML, XPathConstants.STRING);
 					boolean isDeleted = deleted != null && Boolean.parseBoolean(deleted);
 					
 					// Keine Punktnummer fuer den Zielpunkt vorhanden oder Messung als geloescht markiert
 					if (isDeleted || targetName == null || targetName.trim().isEmpty())
 						continue;
 					
-					Double direction   = (Double)XMLUtilities.xpathSearch(stationNode, "Circle/HorizontalCircle", this.namespaceContext, XPathConstants.NUMBER);
-					Double zenithAngle = (Double)XMLUtilities.xpathSearch(stationNode, "Circle/VerticalCircle",   this.namespaceContext, XPathConstants.NUMBER);
-					Double distance3d  = (Double)XMLUtilities.xpathSearch(stationNode, "Circle/EDMDistance",      this.namespaceContext, XPathConstants.NUMBER);
-					String faceType    = (String)XMLUtilities.xpathSearch(stationNode, "Circle/Face",             this.namespaceContext, XPathConstants.STRING);
+					Double direction   = (Double)XMLUtilities.xpathSearch(stationNode, "Circle/HorizontalCircle", namespaceContextJobXML, XPathConstants.NUMBER);
+					Double zenithAngle = (Double)XMLUtilities.xpathSearch(stationNode, "Circle/VerticalCircle",   namespaceContextJobXML, XPathConstants.NUMBER);
+					Double distance3d  = (Double)XMLUtilities.xpathSearch(stationNode, "Circle/EDMDistance",      namespaceContextJobXML, XPathConstants.NUMBER);
+					String faceType    = (String)XMLUtilities.xpathSearch(stationNode, "Circle/Face",             namespaceContextJobXML, XPathConstants.STRING);
 					
 					boolean isFaceI    = true;
 					//Valid values Face1, Face2 *AND* FaceNull
@@ -364,10 +365,10 @@ public class JobXMLFileReader extends SourceFileReader implements ErrorHandler {
 					
 					if (targetID != null && !targetID.trim().isEmpty()) {
 						String xpathPatternTargetRecord = "//JOBFile/FieldBook/TargetRecord[@ID=\"%s\"]";	
-						Node targetNode = (Node)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPatternTargetRecord, targetID), this.namespaceContext, XPathConstants.NODE);
+						Node targetNode = (Node)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPatternTargetRecord, targetID), namespaceContextJobXML, XPathConstants.NODE);
 
-						prismConstant = (Double)XMLUtilities.xpathSearch(targetNode, "PrismConstant", this.namespaceContext, XPathConstants.NUMBER);
-						targetHeight  = (Double)XMLUtilities.xpathSearch(targetNode, "TargetHeight",  this.namespaceContext, XPathConstants.NUMBER);
+						prismConstant = (Double)XMLUtilities.xpathSearch(targetNode, "PrismConstant", namespaceContextJobXML, XPathConstants.NUMBER);
+						targetHeight  = (Double)XMLUtilities.xpathSearch(targetNode, "TargetHeight",  namespaceContextJobXML, XPathConstants.NUMBER);
 						
 						prismConstant = prismConstant == null || Double.isNaN(prismConstant) ||  Double.isInfinite(prismConstant) ? 0.0 : prismConstant;
 						targetHeight  = targetHeight == null  || Double.isNaN(targetHeight)  ||  Double.isInfinite(targetHeight)  ? 0.0 : targetHeight;
