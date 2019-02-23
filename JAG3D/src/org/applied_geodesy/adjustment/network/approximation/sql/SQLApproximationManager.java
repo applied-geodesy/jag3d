@@ -1372,63 +1372,35 @@ public class SQLApproximationManager implements PropertyChangeListener {
 	}
 	
 	public void transferAposteriori2AprioriValues(boolean transferDatumPoints) throws SQLException {
-		//		this.estimationStatus1D = EstimationStateType.BUSY;
-		//		this.estimationStatus2D = EstimationStateType.BUSY;
-		
 		String sql = "UPDATE \"AdditionalParameterApriori\" "
-				+ "SET \"value_0\" = "
-				+ "CASE WHEN "
-				+ "(SELECT \"value\" FROM \"AdditionalParameterAposteriori\" WHERE \"AdditionalParameterApriori\".\"id\" = \"AdditionalParameterAposteriori\".\"id\")  "
-				+ "IS NOT NULL THEN  "
-				+ "(SELECT \"value\" FROM \"AdditionalParameterAposteriori\" WHERE \"AdditionalParameterApriori\".\"id\" = \"AdditionalParameterAposteriori\".\"id\")  "
-				+ "ELSE \"value_0\" "
-				+ "END "
+				+ "SET \"value_0\" = IFNULL("
+				+ "(SELECT \"value\" FROM \"AdditionalParameterAposteriori\" WHERE \"AdditionalParameterApriori\".\"id\" = \"AdditionalParameterAposteriori\".\"id\"),  "
+				+ "\"value_0\") "
 				+ "WHERE \"enable\" = TRUE";
 		
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		stmt.execute();
 
-		sql = "UPDATE \"PointApriori\"  "
-				+ "SET \"x0\" = "
-				+ "CASE WHEN "
-				+ "(SELECT \"x\" FROM \"PointAposteriori\" JOIN \"PointGroup\" ON \"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"PointAposteriori\".\"id\" AND \"enable\" = TRUE)  "
-				+ "IS NOT NULL THEN  "
-				+ "(SELECT \"x\" FROM \"PointAposteriori\" JOIN \"PointGroup\" ON \"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"PointAposteriori\".\"id\" AND \"enable\" = TRUE)  "
-				+ "ELSE \"x0\" "
-				+ "END, "
-				+ "\"y0\" = "
-				+ "CASE WHEN "
-				+ "(SELECT \"y\" FROM \"PointAposteriori\" JOIN \"PointGroup\" ON \"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"PointAposteriori\".\"id\" AND \"enable\" = TRUE)  "
-				+ "IS NOT NULL THEN  "
-				+ "(SELECT \"y\" FROM \"PointAposteriori\" JOIN \"PointGroup\" ON \"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"PointAposteriori\".\"id\" AND \"enable\" = TRUE)  "
-				+ "ELSE \"y0\" "
-				+ "END, "
-				+ "\"z0\" = "
-				+ "CASE WHEN "
-				+ "(SELECT \"z\" FROM \"PointAposteriori\" JOIN \"PointGroup\" ON \"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"PointAposteriori\".\"id\" AND \"enable\" = TRUE)  "
-				+ "IS NOT NULL THEN "
-				+ "(SELECT \"z\" FROM \"PointAposteriori\" JOIN \"PointGroup\" ON \"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"PointAposteriori\".\"id\" AND \"enable\" = TRUE)  "
-				+ "ELSE \"z0\" "
-				+ "END, "
-				+ "\"dy0\" = "
-				+ "CASE WHEN "
-				+ "(SELECT \"dy\" FROM \"DeflectionAposteriori\" JOIN \"PointApriori\" ON \"DeflectionAposteriori\".\"id\" = \"PointApriori\".\"id\" JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"dimension\" = 3 AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"DeflectionAposteriori\".\"id\" AND \"enable\" = TRUE)  "
-				+ "IS NOT NULL THEN "
-				+ "(SELECT \"dy\" FROM \"DeflectionAposteriori\" JOIN \"PointApriori\" ON \"DeflectionAposteriori\".\"id\" = \"PointApriori\".\"id\" JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"dimension\" = 3 AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"DeflectionAposteriori\".\"id\" AND \"enable\" = TRUE)  "
-				+ "ELSE \"dy0\" "
-				+ "END, "
-				+ "\"dx0\" = "
-				+ "CASE WHEN "
-				+ "(SELECT \"dx\" FROM \"DeflectionAposteriori\" JOIN \"PointApriori\" ON \"DeflectionAposteriori\".\"id\" = \"PointApriori\".\"id\" JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"dimension\" = 3 AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"DeflectionAposteriori\".\"id\" AND \"enable\" = TRUE)  "
-				+ "IS NOT NULL THEN "
-				+ "(SELECT \"dy\" FROM \"DeflectionAposteriori\" JOIN \"PointApriori\" ON \"DeflectionAposteriori\".\"id\" = \"PointApriori\".\"id\" JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"dimension\" = 3 AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"DeflectionAposteriori\".\"id\" AND \"enable\" = TRUE)  "
-				+ "ELSE \"dx0\" "
-				+ "END "
+		sql = "UPDATE \"PointApriori\" SET "
+				+ "\"x0\" = IFNULL("
+				+ "(SELECT \"x\" FROM \"PointAposteriori\" JOIN \"PointGroup\" ON \"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"PointAposteriori\".\"id\" AND \"enable\" = TRUE), "
+				+ "\"x0\"), "
+				+ "\"y0\" = IFNULL("
+				+ "(SELECT \"y\" FROM \"PointAposteriori\" JOIN \"PointGroup\" ON \"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"PointAposteriori\".\"id\" AND \"enable\" = TRUE), "
+				+ "\"y0\"), "
+				+ "\"z0\" = IFNULL("
+				+ "(SELECT \"z\" FROM \"PointAposteriori\" JOIN \"PointGroup\" ON \"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"PointAposteriori\".\"id\" AND \"enable\" = TRUE), "
+				+ "\"z0\"), "
+				+ "\"dy0\" = IFNULL("
+				+ "(SELECT \"dy\" FROM \"DeflectionAposteriori\" JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE  AND \"PointGroup\".\"dimension\" = 3 AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"DeflectionAposteriori\".\"id\" = \"PointApriori\".\"id\"), "
+				+ "\"dy0\"), "
+				+ "\"dx0\" = IFNULL("
+				+ "(SELECT \"dx\" FROM \"DeflectionAposteriori\" JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE  AND \"PointGroup\".\"dimension\" = 3 AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"DeflectionAposteriori\".\"id\" = \"PointApriori\".\"id\"), "
+				+ "\"dx0\") "
 				+ "WHERE \"enable\" = TRUE";
 
-
 		stmt = this.dataBase.getPreparedStatement(sql);
-		for (int i=1, j=1; i <= 10; i++) {
+		for (int i=1, j=1; i <= 5; i++) {
 			stmt.setInt(j++, PointType.NEW_POINT.getId());
 			stmt.setInt(j++, transferDatumPoints ? PointType.DATUM_POINT.getId() : PointType.NEW_POINT.getId());
 		}
