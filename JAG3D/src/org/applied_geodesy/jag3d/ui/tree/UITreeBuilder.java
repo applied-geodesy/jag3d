@@ -57,8 +57,19 @@ public class UITreeBuilder {
 
 		@Override
 		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-			if (!isIgnoreEvent())
-				save(this.treeItemValue);
+			boolean isSaved = false;
+			if (!isIgnoreEvent()) {
+				List<TreeItem<TreeItemValue>> treeItems = treeView.getSelectionModel().getSelectedItems();
+				for (TreeItem<TreeItemValue> treeItem : treeItems) {
+					if (treeItem.isLeaf() && treeItem.getValue().getItemType() == this.treeItemValue.getItemType()) {
+						treeItem.getValue().setEnable(newValue);
+						isSaved = treeItem.getValue() == this.treeItemValue;
+						save(treeItem.getValue());
+					}
+				}
+				if (!isSaved)
+					save(this.treeItemValue);
+			}
 		}
 	}
 
