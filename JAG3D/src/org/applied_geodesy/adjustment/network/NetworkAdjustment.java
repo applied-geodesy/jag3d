@@ -114,7 +114,8 @@ public class NetworkAdjustment implements Runnable {
 	
 	private boolean interrupt          = false,
 					freeNetwork	 	   = false,
-					congruenceAnalysis = false;
+					congruenceAnalysis = false,
+					applyAposterioriVarianceOfUnitWeight = true;
 
 	private double maxDx            = Double.MIN_VALUE,
 	               degreeOfFreedom  = 0.0,
@@ -2682,7 +2683,7 @@ public class NetworkAdjustment implements Runnable {
 					return;
 				Point point = this.referencePoints.get(i);
 				int dim = point.getDimension();
-				point.calcStochasticParameters(sigma2apost, dof);
+				point.calcStochasticParameters(sigma2apost, dof, this.applyAposterioriVarianceOfUnitWeight);
 
 				TestStatisticParameterSet tsPrio = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, Double.POSITIVE_INFINITY);
 				TestStatisticParameterSet tsPost = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, dof-dim);
@@ -2707,7 +2708,7 @@ public class NetworkAdjustment implements Runnable {
 					double tPrio = point.getTprio();
 					double tPost = point.getTpost();
 					double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, dim);
-					double pPost = TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim);
+					double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim) : 0.0;
 					point.setProbabilityValues(pPrio, pPost);
 					point.setSignificant(tPrio > kPrio || tPost > kPost);
 				}
@@ -2742,7 +2743,7 @@ public class NetworkAdjustment implements Runnable {
 						double tPrio = deflectionX.getTprio();
 						double tPost = deflectionX.getTpost();
 						double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, dim);
-						double pPost = TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim);
+						double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim) : 0.0;
 						// deflectionX strellt stoch. Parameter fuer beide Lotparameter bereit
 						deflectionX.setPprio(pPrio);
 						deflectionX.setPpost(pPost);
@@ -2783,7 +2784,7 @@ public class NetworkAdjustment implements Runnable {
 					}
 
 					if (point.getRowInJacobiMatrix() >= 0 || (this.congruenceAnalysis && this.freeNetwork)) {
-						point.calcStochasticParameters(sigma2apost, dof);
+						point.calcStochasticParameters(sigma2apost, dof, this.applyAposterioriVarianceOfUnitWeight);
 									
 						TestStatisticParameterSet tsPrio = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, Double.POSITIVE_INFINITY);
 						TestStatisticParameterSet tsPost = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, dof-dim);
@@ -2818,7 +2819,7 @@ public class NetworkAdjustment implements Runnable {
 							double tPrio = point.getTprio();
 							double tPost = point.getTpost();
 							double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, dim);
-							double pPost = TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim);
+							double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim) : 0.0;
 							point.setProbabilityValues(pPrio, pPost);
 							point.setSignificant(tPrio > Kprio || tPost > Kpost || this.adaptedPointUncertainties.containsKey(point));
 						}	
@@ -2886,7 +2887,7 @@ public class NetworkAdjustment implements Runnable {
 								double tPrio = deflectionX.getTprio();
 								double tPost = deflectionX.getTpost();
 								double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, 2);
-								double pPost = TestStatistic.getLogarithmicProbabilityValue(tPost, 2, dof-2);
+								double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, 2, dof-2) : 0.0;
 								deflectionX.setPprio(pPrio);
 								deflectionX.setPpost(pPost);
 								deflectionX.setSignificant(tPrio > Kprio || tPost > Kpost || this.adaptedDeflectionUncertainties.containsKey(deflectionX) || this.adaptedDeflectionUncertainties.containsKey(deflectionY));
@@ -2920,9 +2921,9 @@ public class NetworkAdjustment implements Runnable {
 
 					double nabla = value - additionalUnknownParameter.getExpectationValue();
 					double tPrio = qxxPrio < Constant.EPS ? Double.POSITIVE_INFINITY : nabla*nabla/qxxPrio;
-					double tPost = qxxPost < Constant.EPS ? Double.POSITIVE_INFINITY : nabla*nabla/qxxPost;
+					double tPost = this.applyAposterioriVarianceOfUnitWeight ? (qxxPost < Constant.EPS ? Double.POSITIVE_INFINITY : nabla*nabla/qxxPost) : 0.0;
 					double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, 1);
-					double pPost = TestStatistic.getLogarithmicProbabilityValue(tPost, 1, dof);
+					double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, 1, dof) : 0.0;
 					double nabla0 = Math.signum(nabla) * Math.sqrt(Math.abs(lamda * qxxPrio));
 
 					additionalUnknownParameter.setTprio(tPrio);
@@ -3048,7 +3049,7 @@ public class NetworkAdjustment implements Runnable {
 									tPrio += tmp * nabla[r];
 								}
 								tPrio /= dim;
-								tPost = tPrio / sigma2apost;
+								tPost = this.applyAposterioriVarianceOfUnitWeight && sigma2apost > SQRT_EPS ? tPrio / sigma2apost : 0.0;
 
 								if (this.estimationType != EstimationType.SIMULATION) {
 									Vector nabla0 = new DenseVector(nabla, true);
@@ -3091,7 +3092,7 @@ public class NetworkAdjustment implements Runnable {
 							double tPrio = tie.getTprio();
 							double tPost = tie.getTpost();
 							double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, dim);
-							double pPost = TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof);
+							double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof) : 0.0;
 
 							tie.setProbabilityValues(pPrio, pPost);
 							tie.setSignificant(tPrio > kPrio || tPost > kPost);
@@ -3125,14 +3126,14 @@ public class NetworkAdjustment implements Runnable {
 								subQxx.set(r,c, this.Qxx.get(row, col));
 							}
 						}
-						strainAnalysisEquations.expandParameters(sigma2apost, subQxx);
+						strainAnalysisEquations.expandParameters(sigma2apost, subQxx, this.applyAposterioriVarianceOfUnitWeight);
 						for (int i=0; i<strainAnalysisEquations.numberOfParameters(); i++) {
 							StrainParameter parameter = strainAnalysisEquations.get(i);
 							parameter.setMinimalDetectableBias(parameter.getMinimalDetectableBias() * sqrtLambdaParam);
 							double tPrio = parameter.getTprio();
 							double tPost = parameter.getTpost();
 							double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, 1);
-							double pPost = TestStatistic.getLogarithmicProbabilityValue(tPost, 1, dof);
+							double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, 1, dof) : 0.0;
 							parameter.setConfidence(parameter.getStd() * Math.sqrt( kPrioParam ));
 							parameter.setPprio(pPrio);
 							parameter.setPpost(pPost);
@@ -3253,7 +3254,7 @@ public class NetworkAdjustment implements Runnable {
 						    	double NablaQnnNabla = BTPv.dot(nabla);
 						    	double sigma2apostTie = (dof - dim) > 0 ? (this.omega - NablaQnnNabla) / (dof - dim) : 0;
 						    	double tPrio = NablaQnnNabla / dim;
-						    	double tPost = sigma2apostTie > SQRT_EPS ? tPrio / sigma2apostTie : 0;
+						    	double tPost = this.applyAposterioriVarianceOfUnitWeight && sigma2apostTie > SQRT_EPS ? tPrio / sigma2apostTie : 0;
 						    			
 						    	nabla = nabla.scale(-1.0);
 							    // Bestimme Nabla auf der Grenzwertellipse mit nabla0*Pnn*nabla0 == 1
@@ -3270,7 +3271,7 @@ public class NetworkAdjustment implements Runnable {
 								tie.setGrossErrors(Matrices.getArray(nabla));
 
 								double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, dim);
-								double pPost = TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim);
+								double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim) : 0.0;
 								
 								tie.setTeststatisticValues(tPrio, tPost);
 								tie.setProbabilityValues(pPrio, pPost);
@@ -3508,10 +3509,10 @@ public class NetworkAdjustment implements Runnable {
 		if (this.estimationType != EstimationType.SIMULATION) {
 			int dim = obs.getObservationType() == ObservationType.GNSS1D || obs.getObservationType() == ObservationType.GNSS2D || obs.getObservationType() == ObservationType.GNSS3D ? ((GNSSBaseline)obs).getDimension() : 1;
 			double tPrio = nPn/dim;
-			double tPost = (sigma2apostObs == 0)?0.0:tPrio/sigma2apostObs;
+			double tPost = (!this.applyAposterioriVarianceOfUnitWeight || sigma2apostObs == 0) ? 0.0 : tPrio/sigma2apostObs;
 			
 			double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, dim);
-			double pPost = TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim);
+			double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim) : 0.0;
 			obs.setTestAndProbabilityValues(tPrio, tPost, pPrio, pPost);
 
 			TestStatisticParameterSet tsPrio = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, Double.POSITIVE_INFINITY);
@@ -4244,8 +4245,20 @@ public class NetworkAdjustment implements Runnable {
 			this.maximalNumberOfIterations = maximalNumberOfIterations;
 	}
 	
+	/**
+	 * Legt das Schaetzverfahren fest
+	 * @param estimationType
+	 */
 	public void setEstimationType(EstimationType estimationType) {
 		this.estimationType = estimationType;
+	}
+	
+	/**
+	 * Beruecksichtigung des geschaetzten Varianzfaktors zur Skallierung der Kovarianzmatrix
+	 * @param applyAposterioriVarianceOfUnitWeight
+	 */
+	public void setApplyAposterioriVarianceOfUnitWeight(boolean applyAposterioriVarianceOfUnitWeight) {
+		this.applyAposterioriVarianceOfUnitWeight = applyAposterioriVarianceOfUnitWeight;
 	}
 	
 	/**
@@ -4496,7 +4509,7 @@ public class NetworkAdjustment implements Runnable {
 	 * @return sigma2apost
 	 */
 	public double getVarianceFactorAposteriori() {
-		return this.degreeOfFreedom > 0 && this.omega > 0 && this.estimationType != EstimationType.SIMULATION ? Math.abs(this.omega/this.degreeOfFreedom) : 1.0;
+		return this.degreeOfFreedom > 0 && this.omega > 0 && this.estimationType != EstimationType.SIMULATION && this.applyAposterioriVarianceOfUnitWeight ? Math.abs(this.omega/this.degreeOfFreedom) : 1.0;
 	}
 	
 	/**

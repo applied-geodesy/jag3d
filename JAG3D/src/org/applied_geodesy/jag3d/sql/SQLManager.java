@@ -452,6 +452,8 @@ public class SQLManager {
 		sqls.put(20180411.0021, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TableRowHighlightScheme\" (\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + TableRowHighlightType.NONE.getId() + " NOT NULL);\r\n");
 		sqls.put(20180411.0022, "INSERT INTO \"TableRowHighlightScheme\" (\"id\") VALUES (1);\r\n");
 
+		// add variance of unit weight
+		sqls.put(20180430.0001, "ALTER TABLE \"AdjustmentDefinition\" ADD \"apply_variance_of_unit_weight\" BOOLEAN DEFAULT TRUE NOT NULL\r\n");
 		
 		return sqls;
 	}
@@ -3362,7 +3364,8 @@ public class SQLManager {
 	
 		String sql = "SELECT "
 				+ "\"type\", \"number_of_iterations\", \"robust_estimation_limit\", "
-				+ "\"number_of_principal_components\", \"estimate_direction_set_orientation_approximation\", "
+				+ "\"number_of_principal_components\", \"apply_variance_of_unit_weight\", "
+				+ "\"estimate_direction_set_orientation_approximation\", "
 				+ "\"congruence_analysis\", \"export_covariance_matrix\" "
 				+ "FROM \"AdjustmentDefinition\" "
 				+ "WHERE \"id\" = 1 LIMIT 1";
@@ -3377,6 +3380,7 @@ public class SQLManager {
 				settings.setIteration(rs.getInt("number_of_iterations"));
 				settings.setRobustEstimationLimit(rs.getDouble("robust_estimation_limit"));
 				settings.setPrincipalComponents(rs.getInt("number_of_principal_components"));
+				settings.setApplyVarianceOfUnitWeight(rs.getBoolean("apply_variance_of_unit_weight"));
 				settings.setOrientation(rs.getBoolean("estimate_direction_set_orientation_approximation"));
 				settings.setCongruenceAnalysis(rs.getBoolean("congruence_analysis"));
 				settings.setExportCovarianceMatrix(rs.getBoolean("export_covariance_matrix"));
@@ -3389,14 +3393,15 @@ public class SQLManager {
 			return;
 	
 		String sql = "MERGE INTO \"AdjustmentDefinition\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN)) "
-				+ ") AS \"vals\" (\"id\", \"type\", \"number_of_iterations\", \"robust_estimation_limit\", \"number_of_principal_components\", \"estimate_direction_set_orientation_approximation\", \"congruence_analysis\", \"export_covariance_matrix\") ON \"AdjustmentDefinition\".\"id\" = \"vals\".\"id\" AND \"AdjustmentDefinition\".\"id\" = 1 "
+				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN)) "
+				+ ") AS \"vals\" (\"id\", \"type\", \"number_of_iterations\", \"robust_estimation_limit\", \"number_of_principal_components\", \"apply_variance_of_unit_weight\", \"estimate_direction_set_orientation_approximation\", \"congruence_analysis\", \"export_covariance_matrix\") ON \"AdjustmentDefinition\".\"id\" = \"vals\".\"id\" AND \"AdjustmentDefinition\".\"id\" = 1 "
 				+ "WHEN MATCHED THEN UPDATE SET "
 				+ "\"AdjustmentDefinition\".\"type\"                            = \"vals\".\"type\", "
 				+ "\"AdjustmentDefinition\".\"number_of_iterations\"            = \"vals\".\"number_of_iterations\", "
 				+ "\"AdjustmentDefinition\".\"robust_estimation_limit\"         = \"vals\".\"robust_estimation_limit\", "
 				+ "\"AdjustmentDefinition\".\"number_of_principal_components\"  = \"vals\".\"number_of_principal_components\", "
-				+ "\"AdjustmentDefinition\".\"estimate_direction_set_orientation_approximation\"  = \"vals\".\"estimate_direction_set_orientation_approximation\", "
+				+ "\"AdjustmentDefinition\".\"apply_variance_of_unit_weight\"   = \"vals\".\"apply_variance_of_unit_weight\", "
+				+ "\"AdjustmentDefinition\".\"estimate_direction_set_orientation_approximation\" = \"vals\".\"estimate_direction_set_orientation_approximation\", "
 				+ "\"AdjustmentDefinition\".\"congruence_analysis\"      = \"vals\".\"congruence_analysis\", "
 				+ "\"AdjustmentDefinition\".\"export_covariance_matrix\" = \"vals\".\"export_covariance_matrix\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
@@ -3405,6 +3410,7 @@ public class SQLManager {
 				+ "\"vals\".\"number_of_iterations\", "
 				+ "\"vals\".\"robust_estimation_limit\", "
 				+ "\"vals\".\"number_of_principal_components\", "
+				+ "\"vals\".\"apply_variance_of_unit_weight\", "
 				+ "\"vals\".\"estimate_direction_set_orientation_approximation\", "
 				+ "\"vals\".\"congruence_analysis\", "
 				+ "\"vals\".\"export_covariance_matrix\" ";
@@ -3418,6 +3424,7 @@ public class SQLManager {
 		stmt.setDouble(idx++,   settings.getRobustEstimationLimit());
 		stmt.setInt(idx++,      settings.getPrincipalComponents());
 		
+		stmt.setBoolean(idx++,  settings.isApplyVarianceOfUnitWeight());
 		stmt.setBoolean(idx++,  settings.isOrientation());
 		stmt.setBoolean(idx++,  settings.isCongruenceAnalysis());
 		stmt.setBoolean(idx++,  settings.isExportCovarianceMatrix());

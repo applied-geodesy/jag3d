@@ -165,10 +165,10 @@ public class StrainAnalysisEquations1D extends StrainAnalysisEquations {
 	void initDefaultRestictions() {}
 	
 	@Override
-	public void expandParameters(double sigma2apost, Matrix Quu) {
+	public void expandParameters(double sigma2apost, Matrix Quu, boolean applyAposterioriVarianceOfUnitWeight) {
 		for (int i=0; i<this.strainParameters.length; i++) {
 			StrainParameter param = this.strainParameters[i];
-			this.setStochasticParameters(param, sigma2apost, Quu.get(i, i));
+			this.setStochasticParameters(param, sigma2apost, Quu.get(i, i), applyAposterioriVarianceOfUnitWeight);
 		}
 	}
 	

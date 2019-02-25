@@ -374,7 +374,7 @@ public class StrainAnalysisEquations2D extends StrainAnalysisEquations {
 	void initDefaultRestictions() {}
 	
 	@Override
-	public void expandParameters(double sigma2apost, Matrix Quu) {
+	public void expandParameters(double sigma2apost, Matrix Quu, boolean applyAposterioriVarianceOfUnitWeight) {
 		int addPar = this.numberOfExpandedParameters();
 		// Transformationsparameter
 		double a11 = this.getParameterByType(ParameterType.STRAIN_A11).getValue();
@@ -437,7 +437,7 @@ public class StrainAnalysisEquations2D extends StrainAnalysisEquations {
 		
 		for (int i=0; i<this.strainParameters.length; i++) {
 			StrainParameter param = this.strainParameters[i];
-			this.setStochasticParameters(param, sigma2apost, AQuuAT.get(i, i));
+			this.setStochasticParameters(param, sigma2apost, AQuuAT.get(i, i), applyAposterioriVarianceOfUnitWeight);
 		}
 	}
 	
