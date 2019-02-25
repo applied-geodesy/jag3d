@@ -93,6 +93,7 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticParameters;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.util.sql.DataBase;
 import org.applied_geodesy.util.sql.HSQLDB;
+import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
 import org.applied_geodesy.version.jag3d.Version;
 import org.applied_geodesy.version.jag3d.VersionType;
 
@@ -127,11 +128,27 @@ public class SQLAdjustmentManager {
 	private void setDataBaseSchema() throws SQLException {
 		this.dataBase.getPreparedStatement("SET SCHEMA \"OpenAdjustment\"").execute();
 	}
+	
+	private void checkDatabaseVersion() throws SQLException, DatabaseVersionMismatchException {
+		final String sql = "SELECT \"version\" FROM \"Version\" WHERE \"type\" = ? LIMIT 1";
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
-	public NetworkAdjustment getNetworkAdjustment() throws SQLException, IllegalProjectionPropertyException {
+		stmt.setInt(1, VersionType.DATABASE.getId());
+
+		int databaseVersion = -1;
+		ResultSet rs = stmt.executeQuery();
+		if (rs.next())
+			databaseVersion = rs.getInt("version");
+		
+		if (databaseVersion != Version.get(VersionType.DATABASE))
+			throw new DatabaseVersionMismatchException("Error, database version of the stored project is greater than accepted database version of the application: " + databaseVersion + " > " +  Version.get(VersionType.DATABASE));
+	}
+
+	public NetworkAdjustment getNetworkAdjustment() throws SQLException, DatabaseVersionMismatchException, IllegalProjectionPropertyException {
 		this.clear();
 		
 		this.setDataBaseSchema();
+		this.checkDatabaseVersion();
 		this.setProjection();
 
 		this.networkAdjustment = new NetworkAdjustment();
@@ -1684,8 +1701,15 @@ public class SQLAdjustmentManager {
 		}
 	}
 	
-	/** Average **/
-	public List<Observation> averageDetermination(boolean saveAvarageValues) throws SQLException, IllegalProjectionPropertyException {
+	/**
+	 * Average observations per group
+	 * @param saveAvarageValues
+	 * @return observations
+	 * @throws SQLException
+	 * @throws IllegalProjectionPropertyException
+	 * @throws DatabaseVersionMismatchException 
+	 */
+	public List<Observation> averageDetermination(boolean saveAvarageValues) throws SQLException, IllegalProjectionPropertyException, DatabaseVersionMismatchException {
 		// erzeuge ein Objekt zur Netzausgleichung
 		// Hierdurch werden alle Punkte, Beobachtungen und Zusatzparameter 
 		// geladen und inizialisiert.
@@ -1835,7 +1859,7 @@ public class SQLAdjustmentManager {
 		stmt.execute();
 	}
 	
-	public double getAverageThreshold(ObservationType type) throws SQLException {
+	private double getAverageThreshold(ObservationType type) throws SQLException {
 		String sql = "SELECT \"value\" "
 				+ "FROM \"AverageThreshold\" "
 				+ "WHERE \"type\" = ? LIMIT 1";
