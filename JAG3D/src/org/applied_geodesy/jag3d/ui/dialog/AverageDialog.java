@@ -41,6 +41,7 @@ import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField.ValueSupport;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -431,6 +432,18 @@ public class AverageDialog {
 										i18n.getString("AverageDialog.message.error.projection.exception.title",  "Initialization error"),
 										i18n.getString("AverageDialog.message.error.projection.exception.header", "Error, the project contains unsupported projection properties."),
 										i18n.getString("AverageDialog.message.error.projection.exception.message", "An exception has occurred during estimation of approximation."),
+										throwable
+										);
+							}
+						});
+					}
+					else if (throwable instanceof DatabaseVersionMismatchException) {
+						Platform.runLater(new Runnable() {
+							@Override public void run() {
+								OptionDialog.showThrowableDialog (
+										i18n.getString("AverageDialog.message.error.databaseversion.exception.title",  "Version error"),
+										i18n.getString("AverageDialog.message.error.databaseversion.exception.header", "Error, the database version is unsupported."),
+										i18n.getString("AverageDialog.message.error.databaseversion.exception.message", "An exception has occurred during network adjustment."),
 										throwable
 										);
 							}

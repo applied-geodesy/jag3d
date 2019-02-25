@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.sql;
+package org.applied_geodesy.version.jag3d;
 
 public class DatabaseVersionMismatchException extends Exception {
 	private static final long serialVersionUID = 801280202342575901L;

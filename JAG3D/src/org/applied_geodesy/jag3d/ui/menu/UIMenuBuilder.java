@@ -49,7 +49,6 @@ import javax.swing.SwingUtilities;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
-import org.applied_geodesy.jag3d.sql.DatabaseVersionMismatchException;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
@@ -78,6 +77,7 @@ import org.applied_geodesy.util.io.report.FTLReport;
 import org.applied_geodesy.util.io.xml.HeXMLFileReader;
 import org.applied_geodesy.util.io.xml.JobXMLFileReader;
 import org.applied_geodesy.util.sql.HSQLDB;
+import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
 import org.applied_geodesy.version.jag3d.Version;
 
 import com.derletztekick.geodesy.coordtrans.v2.gui.CoordTrans;

@@ -106,6 +106,7 @@ import org.applied_geodesy.util.unit.LengthUnit;
 import org.applied_geodesy.util.unit.ScaleUnit;
 import org.applied_geodesy.util.unit.Unit;
 import org.applied_geodesy.util.unit.UnitType;
+import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
 import org.applied_geodesy.version.jag3d.Version;
 import org.applied_geodesy.version.jag3d.VersionType;
 
