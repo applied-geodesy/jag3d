@@ -11,7 +11,7 @@
 				<#if adjustment_type == 'L1NORM'>
 					Robust estimator (Danish method), k = ${threshold?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}
 				<#elseif adjustment_type == 'L2NORM'>
-					Least square adjustment (Gau&szlig;-Helmert modell)
+					Least squares adjustment (Gau&szlig;-Helmert model)
 				</#if>
 			</dd>
 			
