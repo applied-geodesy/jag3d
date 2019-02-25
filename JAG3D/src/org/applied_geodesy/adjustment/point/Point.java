@@ -218,14 +218,14 @@ public abstract class Point extends UnknownParameter {
 			this.nablaCoVarNable = ncn;
 	}
 
-	public void calcStochasticParameters(double sigma2apost, int redundancy) {
+	public void calcStochasticParameters(double sigma2apost, int redundancy, boolean applyAposterioriVarianceOfUnitWeight) {
 		// Bestimmung der Testgroessen
 		double omega = sigma2apost*(double)redundancy;
 		int dim = this.getDimension();
 		double sigma2apostPoint = (redundancy-dim)>0?(omega-this.nablaCoVarNable)/(redundancy-dim):0.0;
 		
 		this.Tprio = this.nablaCoVarNable/dim;
-		this.Tpost = (sigma2apostPoint > Point.ZERO)?this.nablaCoVarNable/(dim*sigma2apostPoint):0.0;
+		this.Tpost = (applyAposterioriVarianceOfUnitWeight && sigma2apostPoint > Point.ZERO) ? this.nablaCoVarNable/(dim*sigma2apostPoint) : 0.0;
 
 		// Berechnung der Standardabweichungen
 		for (int i=0; i<this.sigma.length; i++) {

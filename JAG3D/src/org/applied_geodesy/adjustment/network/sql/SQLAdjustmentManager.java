@@ -268,7 +268,8 @@ public class SQLAdjustmentManager {
 	private void addAdjustmentDefinition(NetworkAdjustment adjustment) throws SQLException {
 		String sql = "SELECT "
 				+ "\"type\", \"number_of_iterations\", \"robust_estimation_limit\", "
-				+ "\"number_of_principal_components\", \"estimate_direction_set_orientation_approximation\", "
+				+ "\"number_of_principal_components\", \"apply_variance_of_unit_weight\", "
+				+ "\"estimate_direction_set_orientation_approximation\", "
 				+ "\"congruence_analysis\", \"export_covariance_matrix\" "
 				+ "FROM \"AdjustmentDefinition\" "
 				+ "WHERE \"id\" = 1 LIMIT 1";
@@ -277,20 +278,21 @@ public class SQLAdjustmentManager {
 
 		ResultSet rs = stmt.executeQuery();
 		if (rs.next()) {
-			EstimationType type             = EstimationType.getEnumByValue(rs.getInt("type"));
-			int maximalNumberOfIterations   = rs.getInt("number_of_iterations");
-			double robustEstimationLimit    = rs.getDouble("robust_estimation_limit");
-			int numberOfPrincipalComponents = rs.getInt("number_of_principal_components");
+			EstimationType type                   = EstimationType.getEnumByValue(rs.getInt("type"));
+			int maximalNumberOfIterations         = rs.getInt("number_of_iterations");
+			double robustEstimationLimit          = rs.getDouble("robust_estimation_limit");
+			int numberOfPrincipalComponents       = rs.getInt("number_of_principal_components");
 			this.estimateOrientationApproximation = rs.getBoolean("estimate_direction_set_orientation_approximation");
-			this.congruenceAnalysis         = rs.getBoolean("congruence_analysis");
-			boolean exportCovarianceMatrix  = rs.getBoolean("export_covariance_matrix");
+			this.congruenceAnalysis               = rs.getBoolean("congruence_analysis");
+			boolean exportCovarianceMatrix        = rs.getBoolean("export_covariance_matrix");
+			boolean applyVarianceOfUnitWeight     = rs.getBoolean("apply_variance_of_unit_weight");
 			
 			adjustment.setMaximalNumberOfIterations(maximalNumberOfIterations);
 			adjustment.setRobustEstimationLimit(robustEstimationLimit);
 			adjustment.setNumberOfPrincipalComponents(numberOfPrincipalComponents);
 			adjustment.setEstimationType(type == null ? EstimationType.L2NORM : type);
 			adjustment.setCongruenceAnalysis(this.congruenceAnalysis);
-
+			adjustment.setApplyAposterioriVarianceOfUnitWeight(applyVarianceOfUnitWeight);
 			// export path of covariance matrix
 			if (exportCovarianceMatrix && this.dataBase instanceof HSQLDB) 
 				this.networkAdjustment.setCovarianceExportPathAndBaseName(((HSQLDB)this.dataBase).getDataBaseFileName());

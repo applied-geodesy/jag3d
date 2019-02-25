@@ -874,7 +874,7 @@ public class StrainAnalysisEquations3D extends StrainAnalysisEquations {
 	}
 
 	@Override
-	public void expandParameters(double sigma2apost, Matrix Quu) {
+	public void expandParameters(double sigma2apost, Matrix Quu, boolean applyAposterioriVarianceOfUnitWeight) {
 		int addPar = this.numberOfExpandedParameters();
 		// Transformationsparameter
 		double q0 = this.getParameterByType(ParameterType.STRAIN_Q0).getValue();
@@ -1005,7 +1005,7 @@ public class StrainAnalysisEquations3D extends StrainAnalysisEquations {
 		
 		for (int i=0; i<this.strainParameters.length; i++) {
 			StrainParameter param = this.strainParameters[i];
-			this.setStochasticParameters(param, sigma2apost, AQuuAT.get(i, i));
+			this.setStochasticParameters(param, sigma2apost, AQuuAT.get(i, i), applyAposterioriVarianceOfUnitWeight);
 		}
 	}
 	

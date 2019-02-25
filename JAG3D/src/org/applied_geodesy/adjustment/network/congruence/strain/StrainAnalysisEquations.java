@@ -218,7 +218,7 @@ public abstract class StrainAnalysisEquations {
 	 * @param qxxPrio
 	 * @return param
 	 */
-	StrainParameter setStochasticParameters(StrainParameter param, double sigma2apost, double qxxPrio) {
+	StrainParameter setStochasticParameters(StrainParameter param, double sigma2apost, double qxxPrio, boolean applyAposterioriVarianceOfUnitWeight) {
 		qxxPrio        = Math.abs(qxxPrio);
 		double value   = param.getValue();
 		
@@ -241,7 +241,7 @@ public abstract class StrainAnalysisEquations {
 		double nabla0  = Math.signum(nabla) * Math.sqrt(qxxPrio);
 		
 		param.setTprio(tPrio);
-		param.setTpost(tPost);
+		param.setTpost(applyAposterioriVarianceOfUnitWeight ? tPost : 0.0);
 		param.setStd(Math.sqrt(qxxPost));
 		param.setGrossError(nabla);
 		param.setMinimalDetectableBias(nabla0);
@@ -249,7 +249,7 @@ public abstract class StrainAnalysisEquations {
 		return param;
 	}
 	
-	public abstract void expandParameters(double sigma2apost, Matrix Quu);
+	public abstract void expandParameters(double sigma2apost, Matrix Quu, boolean applyAposterioriVarianceOfUnitWeight);
 	abstract void initDefaultRestictions();
 	abstract StrainParameter[] initStrainParameters();
 	public abstract boolean isSupportedRestriction(RestrictionType restriction);

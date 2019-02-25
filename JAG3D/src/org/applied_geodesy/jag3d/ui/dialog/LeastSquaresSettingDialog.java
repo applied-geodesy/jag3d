@@ -68,6 +68,7 @@ public class LeastSquaresSettingDialog {
 		private ObjectProperty<Double> robustEstimationLimit  = new SimpleObjectProperty<Double>(DefaultValue.getRobustEstimationLimit());
 		private BooleanProperty orientation                   = new SimpleBooleanProperty(Boolean.TRUE);
 		private BooleanProperty congruenceAnalysis            = new SimpleBooleanProperty(Boolean.FALSE);
+		private BooleanProperty applyVarianceOfUnitWeight     = new SimpleBooleanProperty(Boolean.TRUE);
 		private BooleanProperty exportCovarianceMatrix        = new SimpleBooleanProperty(Boolean.FALSE);
 		private ObjectProperty<EstimationType> estimationType = new SimpleObjectProperty<EstimationType>(EstimationType.L2NORM);
 
@@ -122,13 +123,25 @@ public class LeastSquaresSettingDialog {
 		public BooleanProperty congruenceAnalysisProperty() {
 			return this.congruenceAnalysis;
 		}
-		
+
 		public boolean isCongruenceAnalysis() {
 			return this.congruenceAnalysisProperty().get();
 		}
 		
 		public void setCongruenceAnalysis(final boolean congruenceAnalysis) {
 			this.congruenceAnalysisProperty().set(congruenceAnalysis);
+		}
+		
+		public BooleanProperty applyVarianceOfUnitWeightProperty() {
+			return this.applyVarianceOfUnitWeight;
+		}
+		
+		public boolean isApplyVarianceOfUnitWeight() {
+			return this.applyVarianceOfUnitWeightProperty().get();
+		}
+		
+		public void setApplyVarianceOfUnitWeight(final boolean applyVarianceOfUnitWeight) {
+			this.applyVarianceOfUnitWeightProperty().set(applyVarianceOfUnitWeight);
 		}
 		
 		public ObjectProperty<EstimationType> estimationTypeProperty() {
@@ -174,7 +187,7 @@ public class LeastSquaresSettingDialog {
 	private Spinner<Integer> iterationSpinner;
 	private Spinner<Integer> principalComponentSpinner;
 	private Spinner<Double> robustSpinner;
-	private CheckBox orientationApproximationCheckBox, congruenceAnalysisCheckBox, exportCovarianceMatrixCheckBox;
+	private CheckBox orientationApproximationCheckBox, congruenceAnalysisCheckBox, applyVarianceOfUnitWeightCheckBox, exportCovarianceMatrixCheckBox;
 	private LeastSquaresSettingDialog() {}
 
 	public static void setOwner(Window owner) {
@@ -255,14 +268,20 @@ public class LeastSquaresSettingDialog {
 				i18n.getString("LeastSquaresSettingDialog.congruenceanalysis.tooltip", "If checked, a congruence analysis will be carry out in case of a free network adjustment")
 		);
 		
+		this.applyVarianceOfUnitWeightCheckBox = this.createCheckBox(
+				i18n.getString("LeastSquaresSettingDialog.applyvarianceofunitweight.label", "Variance of the unit weight"),
+				i18n.getString("LeastSquaresSettingDialog.applyvarianceofunitweight.tooltip", "If checked, the estimated variance of the unit weight will be applied to scale the variance-covariance matrix")
+		);
+		
 		this.exportCovarianceMatrixCheckBox = this.createCheckBox(
 				i18n.getString("LeastSquaresSettingDialog.covariance.label", "Export variance-covariance matrix"),
 				i18n.getString("LeastSquaresSettingDialog.covariance.tooltip", "If checked, variance-covariance matrix will be exported to the working directory")
 		);
 		
-		this.exportCovarianceMatrixCheckBox.selectedProperty().bindBidirectional(this.settings.exportCovarianceMatrix);
+		this.exportCovarianceMatrixCheckBox.selectedProperty().bindBidirectional(this.settings.exportCovarianceMatrixProperty());
 		this.orientationApproximationCheckBox.selectedProperty().bindBidirectional(this.settings.orientationProperty());
 		this.congruenceAnalysisCheckBox.selectedProperty().bindBidirectional(this.settings.congruenceAnalysisProperty());
+		this.applyVarianceOfUnitWeightCheckBox.selectedProperty().bindBidirectional(this.settings.applyVarianceOfUnitWeightProperty());
 		this.iterationSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.iterationProperty());
 		this.principalComponentSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.principalComponentsProperty());
 		this.robustSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.robustEstimationLimitProperty());
@@ -284,6 +303,7 @@ public class LeastSquaresSettingDialog {
 		GridPane.setHgrow(robustLabel, Priority.NEVER);
 		
 		GridPane.setHgrow(this.orientationApproximationCheckBox, Priority.ALWAYS);
+		GridPane.setHgrow(this.applyVarianceOfUnitWeightCheckBox, Priority.ALWAYS);
 		GridPane.setHgrow(this.congruenceAnalysisCheckBox, Priority.ALWAYS);
 		GridPane.setHgrow(this.exportCovarianceMatrixCheckBox, Priority.ALWAYS);
 		
@@ -293,8 +313,9 @@ public class LeastSquaresSettingDialog {
 		
 		int row = 0;
 		gridPane.add(this.estimationTypeComboBox, 0, ++row, 2, 1);
-		
-		gridPane.add(this.orientationApproximationCheckBox, 0, ++row, 2, 1);
+
+		gridPane.add(this.applyVarianceOfUnitWeightCheckBox, 0, ++row, 2, 1);
+		gridPane.add(this.orientationApproximationCheckBox,  0, ++row, 2, 1);
 
 		gridPane.add(iterationLabel,        0, ++row);
 		gridPane.add(this.iterationSpinner, 1,   row);
@@ -305,8 +326,8 @@ public class LeastSquaresSettingDialog {
 		gridPane.add(principalComponentLabel,        0, ++row);
 		gridPane.add(this.principalComponentSpinner, 1,   row);
 
-		gridPane.add(this.congruenceAnalysisCheckBox,       0, ++row, 2, 1);
-		gridPane.add(this.exportCovarianceMatrixCheckBox,   0, ++row, 2, 1);
+		gridPane.add(this.congruenceAnalysisCheckBox,     0, ++row, 2, 1);
+		gridPane.add(this.exportCovarianceMatrixCheckBox, 0, ++row, 2, 1);
 
 		Platform.runLater(new Runnable() {
 			@Override public void run() {
