@@ -147,7 +147,7 @@ public class UITreeBuilder {
 
 	private void init() {
 		// TreeItemType.ROOT
-		TreeItem<TreeItemValue> rootItem = new TreeItem<TreeItemValue> (new RootTreeItemValue(i18n.getString("UITreeBuiler.root", "JAG3D-Projekt")));
+		TreeItem<TreeItemValue> rootItem = new TreeItem<TreeItemValue> (new RootTreeItemValue(i18n.getString("UITreeBuiler.root", "JAG3D-Project")));
 
 		TreeItem<TreeItemValue> referencePointItem           = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.referencepoints", "Reference points")));
 		CheckBoxTreeItem<TreeItemValue> referencePoint1DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.REFERENCE_POINT_1D_DIRECTORY, i18n.getString("UITreeBuiler.directory.referencepoints.1d", "Reference points 1D")));
