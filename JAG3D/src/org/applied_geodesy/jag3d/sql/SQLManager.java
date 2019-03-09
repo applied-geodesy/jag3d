@@ -2426,15 +2426,17 @@ public class SQLManager {
 				+ "\"PointGroup\".\"dimension\"           = \"vals\".\"dimension\", "
 				+ "\"PointGroup\".\"enable\"              = \"vals\".\"enable\", "
 				+ "\"PointGroup\".\"order\"               = \"vals\".\"order\" "
-				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "WHEN NOT MATCHED THEN INSERT "
+				+ "(\"id\", \"name\", \"type\", \"dimension\", \"enable\", \"order\", \"consider_deflection\") "
+				+ "VALUES "
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"name\", "
 				+ "\"vals\".\"type\", "
 				+ "\"vals\".\"dimension\", "
 				+ "\"vals\".\"enable\", "
 				+ "\"vals\".\"order\", "
-				+ "DEFAULT";
-
+				+ "DEFAULT"; // consider_deflection type is set to DEFAULT";
+		
 		int groupId        = pointTreeItemValue.getGroupId();
 		String name        = pointTreeItemValue.getName().trim();
 		int dimension      = pointTreeItemValue.getDimension();
@@ -2489,13 +2491,15 @@ public class SQLManager {
 				+ "\"ObservationGroup\".\"type\"           = \"vals\".\"type\", "
 				+ "\"ObservationGroup\".\"enable\"         = \"vals\".\"enable\", "
 				+ "\"ObservationGroup\".\"order\"          = \"vals\".\"order\" "
-				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "WHEN NOT MATCHED THEN INSERT "
+				+ "(\"id\", \"name\", \"type\", \"enable\", \"order\", \"reference_epoch\") "
+				+ "VALUES "
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"name\", "
 				+ "\"vals\".\"type\", "
 				+ "\"vals\".\"enable\", "
 				+ "\"vals\".\"order\", "
-				+ "DEFAULT";
+				+ "DEFAULT"; // reference_epoch type is set to DEFAULT
 
 		int groupId           = observationTreeItemValue.getGroupId();
 		String name           = observationTreeItemValue.getName().trim();
@@ -2559,7 +2563,9 @@ public class SQLManager {
 				+ "\"CongruenceAnalysisGroup\".\"name\"   = \"vals\".\"name\", "
 				+ "\"CongruenceAnalysisGroup\".\"enable\" = \"vals\".\"enable\", "
 				+ "\"CongruenceAnalysisGroup\".\"order\"  = \"vals\".\"order\" "
-				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "WHEN NOT MATCHED THEN INSERT "
+				+ "(\"id\", \"name\", \"dimension\", \"enable\", \"order\") "
+				+ "VALUES "
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"name\", "
 				+ "\"vals\".\"dimension\", "
