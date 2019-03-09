@@ -23,7 +23,7 @@ package org.applied_geodesy.jag3d.ui.dnd;
 
 import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
 
-public class CongruenceAnalysisRowDnD extends RowDnD{
+public class CongruenceAnalysisRowDnD extends TableRowDnD {
 	private static final long serialVersionUID = 6317004442775639322L;
 	private String nameInReferenceEpoch = null;
 	private String nameInControlEpoch = null;
