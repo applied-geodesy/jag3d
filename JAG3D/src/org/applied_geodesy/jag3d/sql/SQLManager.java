@@ -456,6 +456,16 @@ public class SQLManager {
 		// add variance of unit weight
 		sqls.put(20180430.0001, "ALTER TABLE \"AdjustmentDefinition\" ADD \"apply_variance_of_unit_weight\" BOOLEAN DEFAULT TRUE NOT NULL\r\n");
 		
+		// add order id of items
+		sqls.put(20190225.0001, "ALTER TABLE \"ObservationGroup\" ADD \"order\" INTEGER DEFAULT 0 NOT NULL\r\n");
+		sqls.put(20190225.0002, "UPDATE \"ObservationGroup\" SET \"order\" = \"id\";\r\n");
+		
+		sqls.put(20190225.0011, "ALTER TABLE \"PointGroup\" ADD \"order\" INTEGER DEFAULT 0 NOT NULL\r\n");
+		sqls.put(20190225.0012, "UPDATE \"PointGroup\" SET \"order\" = \"id\";\r\n");
+		
+		sqls.put(20190225.0021, "ALTER TABLE \"CongruenceAnalysisGroup\" ADD \"order\" INTEGER DEFAULT 0 NOT NULL\r\n");
+		sqls.put(20190225.0022, "UPDATE \"CongruenceAnalysisGroup\" SET \"order\" = \"id\";\r\n");
+		
 		return sqls;
 	}
 
@@ -539,7 +549,7 @@ public class SQLManager {
 		String sql = "SELECT \"id\", \"name\", \"enable\" "
 				+ "FROM \"ObservationGroup\" "
 				+ "WHERE \"type\" = ? "
-				+ "ORDER BY \"id\" ASC";
+				+ "ORDER BY \"order\" ASC";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		TreeItemType[] types = new TreeItemType[] {
@@ -577,7 +587,7 @@ public class SQLManager {
 		String sql = "SELECT \"id\", \"name\", \"enable\" "
 				+ "FROM \"ObservationGroup\" "
 				+ "WHERE \"type\" = ? "
-				+ "ORDER BY \"id\" ASC";
+				+ "ORDER BY \"order\" ASC";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		TreeItemType[] types = new TreeItemType[] {						
@@ -613,7 +623,7 @@ public class SQLManager {
 		String sql = "SELECT \"id\", \"name\", \"enable\" "
 				+ "FROM \"PointGroup\" "
 				+ "WHERE \"type\" = ? AND \"dimension\" = ? "
-				+ "ORDER BY \"id\" ASC";
+				+ "ORDER BY \"order\" ASC";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		TreeItemType[] types = new TreeItemType[] {
@@ -689,7 +699,7 @@ public class SQLManager {
 		String sql = "SELECT \"id\", \"name\", \"enable\" "
 				+ "FROM \"CongruenceAnalysisGroup\" "
 				+ "WHERE \"dimension\" = ? "
-				+ "ORDER BY \"id\" ASC";
+				+ "ORDER BY \"order\" ASC";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		TreeItemType[] types = new TreeItemType[] {
@@ -1341,7 +1351,7 @@ public class SQLManager {
 				"LEFT JOIN \"ObservationAposteriori\" ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" " + 
 				"WHERE \"ObservationGroup\".\"type\" = ? " +
 				"AND \"ObservationGroup\".\"id\" IN (" + inArrayValues + ") " + 
-				"ORDER BY \"ObservationGroup\".\"id\" ASC, \"ObservationApriori\".\"id\" ASC";
+				"ORDER BY \"ObservationGroup\".\"order\" ASC, \"ObservationApriori\".\"id\" ASC";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
@@ -1471,7 +1481,7 @@ public class SQLManager {
 				"LEFT JOIN \"GNSSObservationAposteriori\" ON \"GNSSObservationApriori\".\"id\" = \"GNSSObservationAposteriori\".\"id\" " + 
 				"WHERE \"ObservationGroup\".\"type\" = ? " +
 				"AND \"ObservationGroup\".\"id\" IN (" + inArrayValues + ") " + 
-				"ORDER BY \"ObservationGroup\".\"id\" ASC, \"GNSSObservationApriori\".\"id\" ASC";
+				"ORDER BY \"ObservationGroup\".\"order\" ASC, \"GNSSObservationApriori\".\"id\" ASC";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
@@ -1700,7 +1710,7 @@ public class SQLManager {
 				"WHERE \"PointGroup\".\"type\" = ? AND \"PointGroup\".\"dimension\" = ? " +
 				"AND \"PointGroup\".\"id\" IN (" + inArrayValues + ") " + 
 
-				"ORDER BY \"PointGroup\".\"id\" ASC, \"PointApriori\".\"id\" ASC";
+				"ORDER BY \"PointGroup\".\"order\" ASC, \"PointApriori\".\"id\" ASC";
 
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -1981,7 +1991,7 @@ public class SQLManager {
 				+ "LEFT JOIN \"CongruenceAnalysisPointPairAposteriori\" ON \"CongruenceAnalysisPointPairApriori\".\"id\" = \"CongruenceAnalysisPointPairAposteriori\".\"id\" "
 				+ "WHERE \"CongruenceAnalysisGroup\".\"dimension\" = ? "
 				+ "AND \"CongruenceAnalysisGroup\".\"id\" IN (" + inArrayValues + ") "
-				+ "ORDER BY \"CongruenceAnalysisGroup\".\"id\" ASC, \"CongruenceAnalysisPointPairApriori\".\"id\" ASC";
+				+ "ORDER BY \"CongruenceAnalysisGroup\".\"order\" ASC, \"CongruenceAnalysisPointPairApriori\".\"id\" ASC";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
@@ -2408,21 +2418,21 @@ public class SQLManager {
 			return;
 		
 		String sql = "MERGE INTO \"PointGroup\" USING (VALUES "
-//				+ "(CAST(? AS INT), ?, CAST(? AS INT), CAST(? AS INT), CAST(? AS BOOLEAN), ?) "
-//				+ ") AS \"vals\" (\"id\", \"name\", \"type\", \"dimension\", \"enable\", \"consider_deflection\") ON \"PointGroup\".\"id\" = \"vals\".\"id\" "
-				+ "(CAST(? AS INT), ?, CAST(? AS INT), CAST(? AS INT), CAST(? AS BOOLEAN)) "
-				+ ") AS \"vals\" (\"id\", \"name\", \"type\", \"dimension\", \"enable\") ON \"PointGroup\".\"id\" = \"vals\".\"id\" "
+				+ "(CAST(? AS INT), ?, CAST(? AS INT), CAST(? AS INT), CAST(? AS BOOLEAN), CAST(? AS INT)) "
+				+ ") AS \"vals\" (\"id\", \"name\", \"type\", \"dimension\", \"enable\", \"order\") ON \"PointGroup\".\"id\" = \"vals\".\"id\" "
 				+ "WHEN MATCHED THEN UPDATE SET "
 				+ "\"PointGroup\".\"name\"                = \"vals\".\"name\", "
 				+ "\"PointGroup\".\"type\"                = \"vals\".\"type\", "
 				+ "\"PointGroup\".\"dimension\"           = \"vals\".\"dimension\", "
-				+ "\"PointGroup\".\"enable\"              = \"vals\".\"enable\" "
+				+ "\"PointGroup\".\"enable\"              = \"vals\".\"enable\", "
+				+ "\"PointGroup\".\"order\"               = \"vals\".\"order\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"name\", "
 				+ "\"vals\".\"type\", "
 				+ "\"vals\".\"dimension\", "
 				+ "\"vals\".\"enable\", "
+				+ "\"vals\".\"order\", "
 				+ "DEFAULT";
 
 		int groupId        = pointTreeItemValue.getGroupId();
@@ -2430,7 +2440,8 @@ public class SQLManager {
 		int dimension      = pointTreeItemValue.getDimension();
 		PointType type     = pointTreeItemValue.getPointType();
 		boolean enable     = pointTreeItemValue.isEnable();
-
+		int orderId        = pointTreeItemValue.getOrderId();
+		
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		// Insert new item
@@ -2444,6 +2455,7 @@ public class SQLManager {
 		stmt.setInt(idx++,     type.getId());
 		stmt.setInt(idx++,     dimension);
 		stmt.setBoolean(idx++, enable);
+		stmt.setInt(idx++,     orderId);
 		//stmt.setBoolean(idx++, false); // consider_deflection: not used for insert/update
 
 		stmt.execute();
@@ -2469,27 +2481,27 @@ public class SQLManager {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
-		//"ObservationGroup\"(\"id\",\"name\",\"type\",\"enable\" );");
 		String sql = "MERGE INTO \"ObservationGroup\" USING (VALUES "
-//				+ "(CAST(? AS INT), ?, CAST(? AS INT), CAST(? AS BOOLEAN), ?) "
-//				+ ") AS \"vals\" (\"id\", \"name\", \"type\", \"enable\", \"reference_epoch\") ON \"ObservationGroup\".\"id\" = \"vals\".\"id\" "
-				+ "(CAST(? AS INT), ?, CAST(? AS INT), CAST(? AS BOOLEAN)) "
-				+ ") AS \"vals\" (\"id\", \"name\", \"type\", \"enable\") ON \"ObservationGroup\".\"id\" = \"vals\".\"id\" "
+				+ "(CAST(? AS INT), ?, CAST(? AS INT), CAST(? AS BOOLEAN), CAST(? AS INT)) "
+				+ ") AS \"vals\" (\"id\", \"name\", \"type\", \"enable\", \"order\") ON \"ObservationGroup\".\"id\" = \"vals\".\"id\" "
 				+ "WHEN MATCHED THEN UPDATE SET "
-				+ "\"ObservationGroup\".\"name\"            = \"vals\".\"name\", "
-				+ "\"ObservationGroup\".\"type\"            = \"vals\".\"type\", "
-				+ "\"ObservationGroup\".\"enable\"          = \"vals\".\"enable\" "
+				+ "\"ObservationGroup\".\"name\"           = \"vals\".\"name\", "
+				+ "\"ObservationGroup\".\"type\"           = \"vals\".\"type\", "
+				+ "\"ObservationGroup\".\"enable\"         = \"vals\".\"enable\", "
+				+ "\"ObservationGroup\".\"order\"          = \"vals\".\"order\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"name\", "
 				+ "\"vals\".\"type\", "
 				+ "\"vals\".\"enable\", "
+				+ "\"vals\".\"order\", "
 				+ "DEFAULT";
 
 		int groupId           = observationTreeItemValue.getGroupId();
 		String name           = observationTreeItemValue.getName().trim();
 		ObservationType type  = observationTreeItemValue.getObservationType();
 		boolean enable        = observationTreeItemValue.isEnable();
+		int orderId           = observationTreeItemValue.getOrderId();
 
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -2503,7 +2515,8 @@ public class SQLManager {
 		stmt.setString(idx++,  name);
 		stmt.setInt(idx++,     type.getId());
 		stmt.setBoolean(idx++, enable);
-
+		stmt.setInt(idx++,     orderId);
+		
 		//stmt.setBoolean(idx++, true); // reference epoch; not used for update/insert
 
 		stmt.execute();
@@ -2540,22 +2553,25 @@ public class SQLManager {
 			return;
 		
 		String sql = "MERGE INTO \"CongruenceAnalysisGroup\" USING (VALUES "
-				+ "(CAST(? AS INT), ?, CAST(? AS INT), CAST(? AS BOOLEAN)) "
-				+ ") AS \"vals\" (\"id\", \"name\", \"dimension\", \"enable\") ON \"CongruenceAnalysisGroup\".\"id\" = \"vals\".\"id\" "
+				+ "(CAST(? AS INT), ?, CAST(? AS INT), CAST(? AS BOOLEAN), CAST(? AS INT)) "
+				+ ") AS \"vals\" (\"id\", \"name\", \"dimension\", \"enable\", \"order\") ON \"CongruenceAnalysisGroup\".\"id\" = \"vals\".\"id\" "
 				+ "WHEN MATCHED THEN UPDATE SET "
 				+ "\"CongruenceAnalysisGroup\".\"name\"   = \"vals\".\"name\", "
-				+ "\"CongruenceAnalysisGroup\".\"enable\" = \"vals\".\"enable\" "
+				+ "\"CongruenceAnalysisGroup\".\"enable\" = \"vals\".\"enable\", "
+				+ "\"CongruenceAnalysisGroup\".\"order\"  = \"vals\".\"order\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"name\", "
 				+ "\"vals\".\"dimension\", "
-				+ "\"vals\".\"enable\"";
+				+ "\"vals\".\"enable\", "
+				+ "\"vals\".\"order\"";
 
 		int groupId    = congruenceAnalysisTreeItemValue.getGroupId();
 		String name    = congruenceAnalysisTreeItemValue.getName().trim();
 		int dimension  = congruenceAnalysisTreeItemValue.getDimension();
 		boolean enable = congruenceAnalysisTreeItemValue.isEnable();
-
+		int orderId    = congruenceAnalysisTreeItemValue.getOrderId();
+		
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		// Insert new item
@@ -2568,7 +2584,8 @@ public class SQLManager {
 		stmt.setString(idx++,  name);
 		stmt.setInt(idx++,  dimension);
 		stmt.setBoolean(idx++, enable);
-
+		stmt.setInt(idx++,  orderId);
+		
 		stmt.execute();
 
 		// insert new group

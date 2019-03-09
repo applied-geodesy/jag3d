@@ -273,14 +273,16 @@ public class UITreeBuilder {
 
 		final TreeItemValue itemValue;
 
+		int orderId = this.directoryItemMap.get(parentType).getChildren().size();
+
 		if (TreeItemType.isPointTypeLeaf(itemType))
-			itemValue = new PointTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.points", "Points") : name);
+			itemValue = new PointTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.points", "Points") : name, orderId);
 
 		else if (TreeItemType.isObservationTypeLeaf(itemType) || TreeItemType.isGNSSObservationTypeLeaf(itemType))
-			itemValue = new ObservationTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.observations", "Observations") : name);
+			itemValue = new ObservationTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.observations", "Observations") : name, orderId);
 
 		else if (TreeItemType.isCongruenceAnalysisTypeLeaf(itemType))
-			itemValue = new CongruenceAnalysisTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.congruenceanalysis", "Point nexus") : name);
+			itemValue = new CongruenceAnalysisTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.congruenceanalysis", "Point nexus") : name, orderId);
 			
 		else	
 			throw new IllegalArgumentException(this.getClass().getSimpleName() + " NOT IMPLEMENTED YET!");
