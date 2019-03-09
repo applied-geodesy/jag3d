@@ -23,7 +23,9 @@ package org.applied_geodesy.jag3d.ui.tree;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
@@ -34,6 +36,7 @@ import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog;
 import org.applied_geodesy.jag3d.ui.dnd.CongruenceAnalysisRowDnD;
 import org.applied_geodesy.jag3d.ui.dnd.GNSSObservationRowDnD;
+import org.applied_geodesy.jag3d.ui.dnd.GroupTreeItemDnD;
 import org.applied_geodesy.jag3d.ui.dnd.PointRowDnD;
 import org.applied_geodesy.jag3d.ui.dnd.TerrestrialObservationRowDnD;
 import org.applied_geodesy.jag3d.ui.io.DefaultFileChooser;
@@ -70,23 +73,27 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.CheckBoxTreeCell;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.text.Text;
 
 public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue> {
-	public static final DataFormat TREE_ITEM_TYPE_DATA_FORMAT = new DataFormat(TreeItemType.class.toString());
+	public static final DataFormat TREE_PARENT_ITEM_TYPE_DATA_FORMAT = new DataFormat(TreeItemType.class.toString());
+	public static final DataFormat TREE_ITEM_TYPE_DATA_FORMAT = new DataFormat(EditableMenuCheckBoxTreeCell.class.toString());
 	public static final DataFormat GROUP_ID_DATA_FORMAT = new DataFormat(TreeItemValue.class.toString());
 	public static final DataFormat DIMENSION_DATA_FORMAT = new DataFormat(Integer.class.toString());
 	public static final DataFormat TERRESTRIAL_OBSERVATION_ROWS_DATA_FORMAT = new DataFormat(TerrestrialObservationRowDnD.class.toString());
 	public static final DataFormat GNSS_OBSERVATION_ROWS_DATA_FORMAT = new DataFormat(GNSSObservationRowDnD.class.toString());
 	public static final DataFormat POINT_ROWS_DATA_FORMAT = new DataFormat(PointRowDnD.class.toString());
 	public static final DataFormat CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT = new DataFormat(CongruenceAnalysisRowDnD.class.toString());
-
+	private static final DataFormat TREE_ITEMS_DATA_FORMAT = new DataFormat(GroupTreeItemDnD.class.toString());
+	
 	private I18N i18n = I18N.getInstance();
 	private BooleanProperty ignoreEvent = new SimpleBooleanProperty(Boolean.FALSE);
 	private ContextMenu contextMenu;
@@ -124,6 +131,50 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		}
 	}
 
+	private class DropMouseEventHandler implements EventHandler<MouseEvent>  {
+
+		@Override
+		public void handle(MouseEvent event) {
+			if (event.getEventType() == MouseEvent.DRAG_DETECTED) {
+				List<TreeItem<TreeItemValue>> draggedItems = new ArrayList<TreeItem<TreeItemValue>>(getTreeView().getSelectionModel().getSelectedItems());
+
+				TreeItemType itemType = getItem() != null ? getItem().getItemType() : null;
+				
+				if (itemType != null) {
+					List<GroupTreeItemDnD> groupItemsDnD = new ArrayList<GroupTreeItemDnD>(draggedItems.size());
+					for (TreeItem<TreeItemValue> draggedItem : draggedItems) {
+						if (draggedItem.getValue() == null || draggedItem.getValue().getItemType() != itemType)
+							return;
+
+						GroupTreeItemDnD itemDnD = GroupTreeItemDnD.fromTreeItem(draggedItem);
+						if (itemDnD == null) 
+							return;					
+
+						groupItemsDnD.add(itemDnD);
+					}
+
+					if (groupItemsDnD.size() > 0) {
+						Dragboard db = startDragAndDrop(TransferMode.MOVE);
+
+						TreeItemType parentType = groupItemsDnD.get(0).getParentType();
+						int groupId             = groupItemsDnD.get(0).getGroupId();
+						int dimension           = groupItemsDnD.get(0).getDimension();
+
+						ClipboardContent content = new ClipboardContent();
+						content.put(TREE_PARENT_ITEM_TYPE_DATA_FORMAT, parentType);
+						content.put(TREE_ITEM_TYPE_DATA_FORMAT, itemType);
+						content.put(GROUP_ID_DATA_FORMAT, groupId);
+						content.put(DIMENSION_DATA_FORMAT, dimension);
+						content.put(TREE_ITEMS_DATA_FORMAT, groupItemsDnD);
+						
+						db.setContent(content);
+						event.consume();
+					}
+				}
+			}
+		}
+	}
+	
 	private class DropEventHandler implements EventHandler<DragEvent> {
 		@Override
 		public void handle(DragEvent event) {
@@ -138,76 +189,147 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 				boolean success = false;
 				if (acceptTransfer(event)) {
 					success = true;
-					int groupId = -1;
-					List<?> droppedRows = null;
-
-					if (TreeItemType.isObservationTypeLeaf(getItem().getItemType()) && db.hasContent(TERRESTRIAL_OBSERVATION_ROWS_DATA_FORMAT)) {
-						groupId = ((ObservationTreeItemValue)getItem()).getGroupId();
-						droppedRows = (List<?>)db.getContent(TERRESTRIAL_OBSERVATION_ROWS_DATA_FORMAT);
-					}
-					else if (TreeItemType.isGNSSObservationTypeLeaf(getItem().getItemType()) && db.hasContent(GNSS_OBSERVATION_ROWS_DATA_FORMAT)) {
-						groupId = ((ObservationTreeItemValue)getItem()).getGroupId();
-						droppedRows = (List<?>)db.getContent(GNSS_OBSERVATION_ROWS_DATA_FORMAT);
-					}
-					else if (TreeItemType.isPointTypeLeaf(getItem().getItemType()) && db.hasContent(POINT_ROWS_DATA_FORMAT)) {
-						groupId = ((PointTreeItemValue)getItem()).getGroupId();
-						droppedRows = (List<?>)db.getContent(POINT_ROWS_DATA_FORMAT);
-					}
-					else if (TreeItemType.isCongruenceAnalysisTypeLeaf(getItem().getItemType()) && db.hasContent(CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT)) {
-						groupId = ((CongruenceAnalysisTreeItemValue)getItem()).getGroupId();
-						droppedRows = (List<?>)db.getContent(CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT);
-					}
-
-					if (droppedRows != null && groupId >= 0) {
-						for (int i=0; i<droppedRows.size(); i++) {
-							if (droppedRows.get(i) == null)
+					
+					if (db.hasContent(TREE_ITEMS_DATA_FORMAT)) {
+						TreeItem<TreeItemValue> droppedOverItem = getTreeItem();
+						boolean isDirectoryNode = db.hasContent(TREE_PARENT_ITEM_TYPE_DATA_FORMAT) && droppedOverItem != null && droppedOverItem.getValue() != null && droppedOverItem.getValue().getItemType() == db.getContent(TREE_PARENT_ITEM_TYPE_DATA_FORMAT); 
+						
+						TreeItem<TreeItemValue> droppedOverParentItem = isDirectoryNode ? droppedOverItem : droppedOverItem.getParent();
+						List<TreeItem<TreeItemValue>> childItems = droppedOverParentItem.getChildren();
+						
+						List<?> groupItemsDnD = (List<?>)db.getContent(TREE_ITEMS_DATA_FORMAT);
+						List<TreeItem<TreeItemValue>> draggedItems = new ArrayList<TreeItem<TreeItemValue>>(groupItemsDnD.size());
+						
+						for (int i = 0; i < groupItemsDnD.size(); i++) {
+							if (groupItemsDnD.get(i) == null || !(groupItemsDnD.get(i) instanceof GroupTreeItemDnD))
 								continue;
-							try {
-								if (droppedRows.get(i) instanceof TerrestrialObservationRowDnD) {
-									TerrestrialObservationRowDnD rowDnD = (TerrestrialObservationRowDnD)droppedRows.get(i);
-									TerrestrialObservationRow row = rowDnD.toTerrestrialObservationRow();
-									row.setGroupId(groupId);
-									SQLManager.getInstance().saveItem(row);
+							GroupTreeItemDnD itemDnD = (GroupTreeItemDnD)groupItemsDnD.get(i);
+							draggedItems.add(childItems.get(itemDnD.getIndex()));
+						}
+						if (draggedItems.size() > 0) {
+							childItems.removeAll(draggedItems);
+							int indexInParent = isDirectoryNode ? 0 : childItems.indexOf(droppedOverItem) + 1;
+							childItems.addAll(indexInParent, draggedItems);
+
+							// Save new order in item values
+							for (int orderId = 0;  orderId < childItems.size(); orderId++) {
+								TreeItem<TreeItemValue> item = childItems.get(orderId);
+								TreeItemValue itemValue = item.getValue();
+								
+								if (!(itemValue instanceof Sortable) || itemValue.getItemType() == null)
+									continue;
+
+								((Sortable)itemValue).setOrderId(orderId);
+
+								try {
+									if (TreeItemType.isObservationTypeLeaf(itemValue.getItemType())) 
+										SQLManager.getInstance().saveGroup((ObservationTreeItemValue)itemValue);
+
+									else if (TreeItemType.isGNSSObservationTypeLeaf(itemValue.getItemType())) 
+										SQLManager.getInstance().saveGroup((ObservationTreeItemValue)itemValue);
+
+									else if (TreeItemType.isPointTypeLeaf(itemValue.getItemType())) 
+										SQLManager.getInstance().saveGroup((PointTreeItemValue)itemValue);
+
+									else if (TreeItemType.isCongruenceAnalysisTypeLeaf(itemValue.getItemType())) 
+										SQLManager.getInstance().saveGroup((CongruenceAnalysisTreeItemValue)itemValue);
+
+								} catch (Exception e) {
+									e.printStackTrace();
+									OptionDialog.showThrowableDialog (
+											i18n.getString("EditableMenuCheckBoxTreeCell.message.error.save_dropped_tree_item.exception.title",   "Unexpected SQL-Error"),
+											i18n.getString("EditableMenuCheckBoxTreeCell.message.error.save_dropped_tree_item.exception.header",  "Error, could not drop selected item to tree menu."),
+											i18n.getString("EditableMenuCheckBoxTreeCell.message.error.save_dropped_tree_item.exception.message", "An exception has occurred during database transaction."),
+											e);
+									success = false;
+									break;
 								}
-								else if (droppedRows.get(i) instanceof GNSSObservationRowDnD) {
-									GNSSObservationRowDnD rowDnD = (GNSSObservationRowDnD)droppedRows.get(i);
-									GNSSObservationRow row = rowDnD.toGNSSObservationRow();
-									row.setGroupId(groupId);
-									SQLManager.getInstance().saveItem(row);
+							}
+							
+							Platform.runLater(new Runnable() {
+							    public void run() {
+							    	if (draggedItems.size() > 0) {
+							    		getTreeView().getSelectionModel().clearSelection();
+							    		getTreeView().getSelectionModel().select(draggedItems.get(0));
+							    	}
+							    }
+							});
+						}
+					}
+					else {
+						List<?> droppedRows = null;
+						int targetGroupId = -1;
+						
+						if (TreeItemType.isObservationTypeLeaf(getItem().getItemType()) && db.hasContent(TERRESTRIAL_OBSERVATION_ROWS_DATA_FORMAT)) {
+							targetGroupId = ((ObservationTreeItemValue)getItem()).getGroupId();
+							droppedRows = (List<?>)db.getContent(TERRESTRIAL_OBSERVATION_ROWS_DATA_FORMAT);
+						}
+						else if (TreeItemType.isGNSSObservationTypeLeaf(getItem().getItemType()) && db.hasContent(GNSS_OBSERVATION_ROWS_DATA_FORMAT)) {
+							targetGroupId = ((ObservationTreeItemValue)getItem()).getGroupId();
+							droppedRows = (List<?>)db.getContent(GNSS_OBSERVATION_ROWS_DATA_FORMAT);
+						}
+						else if (TreeItemType.isPointTypeLeaf(getItem().getItemType()) && db.hasContent(POINT_ROWS_DATA_FORMAT)) {
+							targetGroupId = ((PointTreeItemValue)getItem()).getGroupId();
+							droppedRows = (List<?>)db.getContent(POINT_ROWS_DATA_FORMAT);
+						}
+						else if (TreeItemType.isCongruenceAnalysisTypeLeaf(getItem().getItemType()) && db.hasContent(CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT)) {
+							targetGroupId = ((CongruenceAnalysisTreeItemValue)getItem()).getGroupId();
+							droppedRows = (List<?>)db.getContent(CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT);
+						}
+
+						if (droppedRows != null && targetGroupId >= 0) {
+							for (int i=0; i<droppedRows.size(); i++) {
+								if (droppedRows.get(i) == null)
+									continue;
+								try {
+									if (droppedRows.get(i) instanceof TerrestrialObservationRowDnD) {
+										TerrestrialObservationRowDnD rowDnD = (TerrestrialObservationRowDnD)droppedRows.get(i);
+										TerrestrialObservationRow row = rowDnD.toTerrestrialObservationRow();
+										row.setGroupId(targetGroupId);
+										SQLManager.getInstance().saveItem(row);
+									}
+									else if (droppedRows.get(i) instanceof GNSSObservationRowDnD) {
+										GNSSObservationRowDnD rowDnD = (GNSSObservationRowDnD)droppedRows.get(i);
+										GNSSObservationRow row = rowDnD.toGNSSObservationRow();
+										row.setGroupId(targetGroupId);
+										SQLManager.getInstance().saveItem(row);
+									}
+									else if (droppedRows.get(i) instanceof PointRowDnD) {
+										PointRowDnD rowDnD = (PointRowDnD)droppedRows.get(i);
+										PointRow row = rowDnD.toPointRow();
+										row.setGroupId(targetGroupId);
+										SQLManager.getInstance().saveItem(row);
+									}
+									else if (droppedRows.get(i) instanceof CongruenceAnalysisRowDnD) {
+										CongruenceAnalysisRowDnD rowDnD = (CongruenceAnalysisRowDnD)droppedRows.get(i);
+										CongruenceAnalysisRow row = rowDnD.toCongruenceAnalysisRow();
+										row.setGroupId(targetGroupId);
+										SQLManager.getInstance().saveItem(row);
+									}
+								} catch (Exception e) {
+									e.printStackTrace();
+									OptionDialog.showThrowableDialog (
+											i18n.getString("EditableMenuCheckBoxTreeCell.message.error.save_dropped_table_row.exception.title",   "Unexpected SQL-Error"),
+											i18n.getString("EditableMenuCheckBoxTreeCell.message.error.save_dropped_table_row.exception.header",  "Error, could not drop selected row to new table."),
+											i18n.getString("EditableMenuCheckBoxTreeCell.message.error.save_dropped_table_row.exception.message", "An exception has occurred during database transaction."),
+											e);
+									success = false;
+									break;
 								}
-								else if (droppedRows.get(i) instanceof PointRowDnD) {
-									PointRowDnD rowDnD = (PointRowDnD)droppedRows.get(i);
-									PointRow row = rowDnD.toPointRow();
-									row.setGroupId(groupId);
-									SQLManager.getInstance().saveItem(row);
-								}
-								else if (droppedRows.get(i) instanceof CongruenceAnalysisRowDnD) {
-									CongruenceAnalysisRowDnD rowDnD = (CongruenceAnalysisRowDnD)droppedRows.get(i);
-									CongruenceAnalysisRow row = rowDnD.toCongruenceAnalysisRow();
-									row.setGroupId(groupId);
-									SQLManager.getInstance().saveItem(row);
-								}
-							} catch (Exception e) {
-								e.printStackTrace();
-								OptionDialog.showThrowableDialog (
-										i18n.getString("EditableMenuCheckBoxTreeCell.message.error.save.exception.title", "Unexpected SQL-Error"),
-										i18n.getString("EditableMenuCheckBoxTreeCell.message.error.save.exception.header", "Error, could not drop selected rows to new table."),
-										i18n.getString("EditableMenuCheckBoxTreeCell.message.error.save.exception.message", "An exception has occurred during database transaction."),
-										e);
-								success = false;
-								break;
 							}
 						}
-					}	
+						final TreeItem<TreeItemValue> targetTreeItem = getTreeItem();
+						Platform.runLater(new Runnable() {
+						    public void run() {
+						    	if (targetTreeItem != null) {
+									getTreeView().getSelectionModel().clearSelection();
+									getTreeView().getSelectionModel().select(targetTreeItem);
+								}
+						    }
+						});
+					}
 				}
 				event.setDropCompleted(success);
-				//event.consume();
-
-				final TreeItem<TreeItemValue> targetTreeItem = getTreeItem();
-				if (targetTreeItem != null) {
-					getTreeView().getSelectionModel().clearSelection();
-					getTreeView().getSelectionModel().select(targetTreeItem);
-				}
 			}
 			event.consume();
 		}
@@ -216,50 +338,71 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 			Dragboard db = event.getDragboard();
 			TreeItemValue itemValue = getItem();
 			TreeItemType itemType = itemValue != null && itemValue.getItemType() != null ? itemValue.getItemType() : null;
+			Set<Integer> groupItemIdsDnD = new HashSet<Integer>(0);
 
-			return (itemType != null && event.getGestureSource() instanceof TableView && 
+			if (db.hasContent(TREE_ITEMS_DATA_FORMAT)) {
+				List<?> groupItemsDnD = (List<?>)db.getContent(TREE_ITEMS_DATA_FORMAT);
+				groupItemIdsDnD = new HashSet<Integer>(groupItemsDnD.size());
+				
+				for (int i = 0; i < groupItemsDnD.size(); i++) {
+					if (groupItemsDnD.get(i) == null || !(groupItemsDnD.get(i) instanceof GroupTreeItemDnD))
+						continue;
+					GroupTreeItemDnD itemDnD = (GroupTreeItemDnD)groupItemsDnD.get(i);
+					groupItemIdsDnD.add(itemDnD.getGroupId());
+				}
+			}
+
+			return (itemType != null && 
+					(event.getGestureSource() instanceof TableView || event.getGestureSource() instanceof EditableMenuCheckBoxTreeCell) && 
 					db.hasContent(TREE_ITEM_TYPE_DATA_FORMAT) &&
 					db.hasContent(GROUP_ID_DATA_FORMAT) &&
 					db.hasContent(DIMENSION_DATA_FORMAT) &&
 
 					(
+							// DnD is it the parent node
+							db.hasContent(TREE_ITEMS_DATA_FORMAT) && db.hasContent(TREE_PARENT_ITEM_TYPE_DATA_FORMAT) && itemType == db.getContent(TREE_PARENT_ITEM_TYPE_DATA_FORMAT)
+							||
+							
 							// Terrestrial observations
-							(db.hasContent(TERRESTRIAL_OBSERVATION_ROWS_DATA_FORMAT) && 
+							((db.hasContent(TERRESTRIAL_OBSERVATION_ROWS_DATA_FORMAT) || db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
 									TreeItemType.isObservationTypeLeaf(itemType) &&
 									itemType == db.getContent(TREE_ITEM_TYPE_DATA_FORMAT) &&
 									itemValue instanceof ObservationTreeItemValue &&
-									((ObservationTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT))
+									((ObservationTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT)) &&
+									!groupItemIdsDnD.contains(((ObservationTreeItemValue)itemValue).getGroupId())
 
 							||
 
 							// GNSS observations
-							(db.hasContent(GNSS_OBSERVATION_ROWS_DATA_FORMAT) && 
+							((db.hasContent(GNSS_OBSERVATION_ROWS_DATA_FORMAT) || db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
 									TreeItemType.isGNSSObservationTypeLeaf(itemType) &&
 									itemType == db.getContent(TREE_ITEM_TYPE_DATA_FORMAT) &&
 									itemValue instanceof ObservationTreeItemValue &&
 									((ObservationTreeItemValue)itemValue).getDimension() == (Integer)db.getContent(DIMENSION_DATA_FORMAT) &&
-									((ObservationTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT))
+									((ObservationTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT)) &&
+									!groupItemIdsDnD.contains(((ObservationTreeItemValue)itemValue).getGroupId())
 
 							||
 
 							// points
-							(db.hasContent(POINT_ROWS_DATA_FORMAT) && 
+							((db.hasContent(POINT_ROWS_DATA_FORMAT) || db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
 									TreeItemType.isPointTypeLeaf(itemType) && 
 									TreeItemType.isPointTypeLeaf((TreeItemType)db.getContent(TREE_ITEM_TYPE_DATA_FORMAT)) && 
 									itemValue instanceof PointTreeItemValue &&
 									((PointTreeItemValue)itemValue).getDimension() == (Integer)db.getContent(DIMENSION_DATA_FORMAT) &&
-									((PointTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT))
+									((PointTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT)) &&
+									!groupItemIdsDnD.contains(((PointTreeItemValue)itemValue).getGroupId())
 					
 							||
 
 							// congruence analysis
-							(db.hasContent(CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT) && 
+							((db.hasContent(CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT) || db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
 									TreeItemType.isCongruenceAnalysisTypeLeaf(itemType) && 
 									itemType == db.getContent(TREE_ITEM_TYPE_DATA_FORMAT) &&
 									itemValue instanceof CongruenceAnalysisTreeItemValue &&
 									((CongruenceAnalysisTreeItemValue)itemValue).getDimension() == (Integer)db.getContent(DIMENSION_DATA_FORMAT) &&
-									((CongruenceAnalysisTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT))
-
+									((CongruenceAnalysisTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT)) &&
+									!groupItemIdsDnD.contains(((CongruenceAnalysisTreeItemValue)itemValue).getGroupId())
 							)
 					);
 		}
@@ -367,10 +510,13 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		}
 	}			
 
-	public EditableMenuCheckBoxTreeCell() {
+	EditableMenuCheckBoxTreeCell() {
 		DropEventHandler dropEventHandler = new DropEventHandler();
+		DropMouseEventHandler dropMouseEventHandler = new DropMouseEventHandler();
+		
 		this.setOnDragOver(dropEventHandler);
 		this.setOnDragDropped(dropEventHandler);
+		this.setOnDragDetected(dropMouseEventHandler);		
 	}
 
 	private void initContextMenu(TreeItemType itemType) {

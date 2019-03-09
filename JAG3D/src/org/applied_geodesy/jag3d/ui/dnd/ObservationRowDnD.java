@@ -21,7 +21,7 @@
 
 package org.applied_geodesy.jag3d.ui.dnd;
 
-public abstract class ObservationRowDnD extends RowDnD {
+public abstract class ObservationRowDnD extends TableRowDnD {
 	private static final long serialVersionUID = 4855377431348113363L;
 	private String startPointName; 
 	private String endPointName;

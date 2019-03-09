@@ -28,21 +28,23 @@ import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-public class CongruenceAnalysisTreeItemValue extends TreeItemValue {
+public class CongruenceAnalysisTreeItemValue extends TreeItemValue implements Sortable {
 	private IntegerProperty groupId = new SimpleIntegerProperty(-1);
+	private int orderId;
 	
-	CongruenceAnalysisTreeItemValue(TreeItemType type, String name) throws IllegalArgumentException {
-		this(-1, type, name);
+//	CongruenceAnalysisTreeItemValue(TreeItemType type, String name) throws IllegalArgumentException {
+//		this(-1, type, name);
+//	}
+	
+	CongruenceAnalysisTreeItemValue(int groupId, TreeItemType type, String name, int orderId) throws IllegalArgumentException {
+		this(groupId, type, name, Boolean.TRUE, orderId);
 	}
 	
-	CongruenceAnalysisTreeItemValue(int groupId, TreeItemType type, String name) throws IllegalArgumentException {
-		this(groupId, type, name, Boolean.TRUE);
-	}
-	
-	CongruenceAnalysisTreeItemValue(int groupId, TreeItemType type, String name, boolean enable) throws IllegalArgumentException {
+	CongruenceAnalysisTreeItemValue(int groupId, TreeItemType type, String name, boolean enable, int orderId) throws IllegalArgumentException {
 		super(type, name);
 		this.setGroupId(groupId);
 		this.setEnable(enable);
+		this.setOrderId(orderId);
 	}
 	
 	public IntegerProperty groupIdProperty() {
@@ -164,5 +166,15 @@ public class CongruenceAnalysisTreeItemValue extends TreeItemValue {
 				TabType.RESULT_CONGRUENCE_ANALYSIS_POINT,
 				TabType.ADDITIONAL_PARAMETER
 		};
+	}
+
+	@Override
+	public int getOrderId() {
+		return this.orderId;
+	}
+
+	@Override
+	public void setOrderId(int orderId) {
+		this.orderId = orderId;
 	}
 }

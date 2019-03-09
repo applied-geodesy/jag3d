@@ -23,7 +23,7 @@ package org.applied_geodesy.jag3d.ui.dnd;
 
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 
-public class PointRowDnD extends RowDnD{
+public class PointRowDnD extends TableRowDnD {
 	private static final long serialVersionUID = 7564914007654701928L;
 	private String name = null;
 	private String code = null;
