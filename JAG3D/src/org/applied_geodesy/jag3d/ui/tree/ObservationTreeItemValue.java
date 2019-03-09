@@ -30,21 +30,23 @@ import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-public class ObservationTreeItemValue extends TreeItemValue {
+public class ObservationTreeItemValue extends TreeItemValue implements Sortable {
 	private IntegerProperty groupId = new SimpleIntegerProperty(-1);
+	private int orderId;
 	
-	ObservationTreeItemValue(TreeItemType type, String name) throws IllegalArgumentException {
-		this(-1, type, name);
+//	ObservationTreeItemValue(TreeItemType type, String name) throws IllegalArgumentException {
+//		this(-1, type, name);
+//	}
+	
+	ObservationTreeItemValue(int groupId, TreeItemType type, String name, int orderId) throws IllegalArgumentException {
+		this(groupId, type, name, Boolean.TRUE, Boolean.TRUE, orderId);
 	}
 	
-	ObservationTreeItemValue(int groupId, TreeItemType type, String name) throws IllegalArgumentException {
-		this(groupId, type, name, Boolean.TRUE, Boolean.TRUE);
-	}
-	
-	ObservationTreeItemValue(int groupId, TreeItemType type, String name, boolean referenceEpoch, boolean enable) throws IllegalArgumentException { 
+	ObservationTreeItemValue(int groupId, TreeItemType type, String name, boolean referenceEpoch, boolean enable, int orderId) throws IllegalArgumentException { 
 		super(type, name);
 		this.setGroupId(groupId);
 		this.setEnable(enable);
+		this.setOrderId(orderId);
 	}
 	
 	public final ObservationType getObservationType() {
@@ -207,5 +209,15 @@ public class ObservationTreeItemValue extends TreeItemValue {
 		default:
 			return 0;
 		}
+	}
+
+	@Override
+	public int getOrderId() {
+		return this.orderId;
+	}
+
+	@Override
+	public void setOrderId(int orderId) {
+		this.orderId = orderId;
 	}
 }
