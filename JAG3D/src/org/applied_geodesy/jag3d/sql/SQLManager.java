@@ -549,7 +549,7 @@ public class SQLManager {
 		String sql = "SELECT \"id\", \"name\", \"enable\" "
 				+ "FROM \"ObservationGroup\" "
 				+ "WHERE \"type\" = ? "
-				+ "ORDER BY \"order\" ASC";
+				+ "ORDER BY \"order\" ASC, \"id\" ASC";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		TreeItemType[] types = new TreeItemType[] {
@@ -587,7 +587,7 @@ public class SQLManager {
 		String sql = "SELECT \"id\", \"name\", \"enable\" "
 				+ "FROM \"ObservationGroup\" "
 				+ "WHERE \"type\" = ? "
-				+ "ORDER BY \"order\" ASC";
+				+ "ORDER BY \"order\" ASC, \"id\" ASC";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		TreeItemType[] types = new TreeItemType[] {						
@@ -623,7 +623,7 @@ public class SQLManager {
 		String sql = "SELECT \"id\", \"name\", \"enable\" "
 				+ "FROM \"PointGroup\" "
 				+ "WHERE \"type\" = ? AND \"dimension\" = ? "
-				+ "ORDER BY \"order\" ASC";
+				+ "ORDER BY \"order\" ASC, \"id\" ASC";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		TreeItemType[] types = new TreeItemType[] {
@@ -699,7 +699,7 @@ public class SQLManager {
 		String sql = "SELECT \"id\", \"name\", \"enable\" "
 				+ "FROM \"CongruenceAnalysisGroup\" "
 				+ "WHERE \"dimension\" = ? "
-				+ "ORDER BY \"order\" ASC";
+				+ "ORDER BY \"order\" ASC, \"id\" ASC";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		TreeItemType[] types = new TreeItemType[] {
@@ -1351,7 +1351,7 @@ public class SQLManager {
 				"LEFT JOIN \"ObservationAposteriori\" ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" " + 
 				"WHERE \"ObservationGroup\".\"type\" = ? " +
 				"AND \"ObservationGroup\".\"id\" IN (" + inArrayValues + ") " + 
-				"ORDER BY \"ObservationGroup\".\"order\" ASC, \"ObservationApriori\".\"id\" ASC";
+				"ORDER BY \"ObservationGroup\".\"order\" ASC, \"ObservationGroup\".\"id\" ASC, \"ObservationApriori\".\"id\" ASC";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
@@ -1481,7 +1481,7 @@ public class SQLManager {
 				"LEFT JOIN \"GNSSObservationAposteriori\" ON \"GNSSObservationApriori\".\"id\" = \"GNSSObservationAposteriori\".\"id\" " + 
 				"WHERE \"ObservationGroup\".\"type\" = ? " +
 				"AND \"ObservationGroup\".\"id\" IN (" + inArrayValues + ") " + 
-				"ORDER BY \"ObservationGroup\".\"order\" ASC, \"GNSSObservationApriori\".\"id\" ASC";
+				"ORDER BY \"ObservationGroup\".\"order\" ASC, \"ObservationGroup\".\"id\" ASC, \"GNSSObservationApriori\".\"id\" ASC";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
@@ -1710,7 +1710,7 @@ public class SQLManager {
 				"WHERE \"PointGroup\".\"type\" = ? AND \"PointGroup\".\"dimension\" = ? " +
 				"AND \"PointGroup\".\"id\" IN (" + inArrayValues + ") " + 
 
-				"ORDER BY \"PointGroup\".\"order\" ASC, \"PointApriori\".\"id\" ASC";
+				"ORDER BY \"PointGroup\".\"order\" ASC, \"PointGroup\".\"id\" ASC, \"PointApriori\".\"id\" ASC";
 
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -1991,7 +1991,7 @@ public class SQLManager {
 				+ "LEFT JOIN \"CongruenceAnalysisPointPairAposteriori\" ON \"CongruenceAnalysisPointPairApriori\".\"id\" = \"CongruenceAnalysisPointPairAposteriori\".\"id\" "
 				+ "WHERE \"CongruenceAnalysisGroup\".\"dimension\" = ? "
 				+ "AND \"CongruenceAnalysisGroup\".\"id\" IN (" + inArrayValues + ") "
-				+ "ORDER BY \"CongruenceAnalysisGroup\".\"order\" ASC, \"CongruenceAnalysisPointPairApriori\".\"id\" ASC";
+				+ "ORDER BY \"CongruenceAnalysisGroup\".\"order\" ASC, \"CongruenceAnalysisGroup\".\"id\" ASC, \"CongruenceAnalysisPointPairApriori\".\"id\" ASC";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
