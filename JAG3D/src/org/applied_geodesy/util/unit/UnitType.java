@@ -39,6 +39,7 @@ public enum UnitType {
 	ARCSECOND(34),
 	MILLIGRADIAN(35),
 	MIL6400(36),
+	DEGREE_SEXAGESIMAL(37),
 	
 	;
 

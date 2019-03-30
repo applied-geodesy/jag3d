@@ -55,6 +55,7 @@ import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.util.FormatterOptions.FormatterOption;
 import org.applied_geodesy.util.sql.DataBase;
+import org.applied_geodesy.util.unit.UnitType;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -166,11 +167,13 @@ public class FTLReport {
 		for (FormatterOption option : options.values()) {
 			String keyDigits = null;
 			String keyUnit   = null;
+			String keySexagesimal = null;
 			CellValueType cellValueType = option.getType();
 			switch(cellValueType) {
 			case ANGLE:
 				keyDigits = "digits_angle";
 				keyUnit   = "unit_abbr_angle";
+				keySexagesimal = option.getUnit().getType() == UnitType.DEGREE_SEXAGESIMAL ? "sexagesimal_angle" : null;
 				break;
 			case ANGLE_RESIDUAL:
 				keyDigits = "digits_angle_residual";
@@ -216,11 +219,12 @@ public class FTLReport {
 				// break;
 			}
 			if (keyDigits != null)
-				this.setParam(keyDigits, option.getFormatter().format(0.0) );
+				this.setParam(keyDigits,      option.getFormatter().format(0.0) );
 			if (keyUnit != null)
-				this.setParam(keyUnit,   option.getUnit().getAbbreviation() );
+				this.setParam(keyUnit,        option.getUnit().getAbbreviation() );
+			if (keySexagesimal != null)
+				this.setParam(keySexagesimal, Boolean.TRUE );
 		}
-		//		String sql = "SELECT \"unit\", \"digits\" FROM \"FormatterOption\" WHERE \"type\" = ?";
 	}
 
 	private void addAdjustmentDefinitions() throws SQLException {

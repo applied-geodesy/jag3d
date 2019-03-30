@@ -166,7 +166,7 @@ public class HTTPPropertiesLoader {
 
 
 	public static void main(String[] args) throws IOException {
-		String address = "https://software.applied-geodesy.org/update.php"; //"https://software.applied-geodesy.org/update.php";
+		String address = "https://software.applied-geodesy.org/update.php";
 
 		URLParameter param = new URLParameter("checkupdate", "jag3d");
 

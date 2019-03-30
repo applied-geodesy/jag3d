@@ -2,6 +2,7 @@
 <#setting url_escaping_charset="UTF-8">
 
 <#-- Decimal format w.r.t. user preferences -->
+<#assign sexagesimal_angle     = "${sexagesimal_angle???then(1, 0)};;">
 <#assign df_angle              = "${digits_angle???then(digits_angle, 0.00000)};;                      roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
 <#assign df_angle_residual     = "${digits_angle_residual???then(digits_angle_residual, 0.00)};;       roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
 <#assign df_angle_uncertainty  = "${digits_angle_uncertainty???then(digits_angle_uncertainty, 0.00)};; roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
@@ -35,8 +36,8 @@
 		<head>
 			<title>${project_name} - JAG3D</title>
 			<meta charset="UTF-8">
-			<meta name="generator" content="JAG3D - Java Graticule 3D v${version?string["#"]}">
-			<meta name="application-name" content="JAG3D - Java Applied Geodesy 3D - (c) by Michael Loesler - http://applied-geodesy.org">
+			<meta name="generator" content="JAG3D - Java Applied Geodesy 3D v${version?string["#"]}">
+			<meta name="application-name" content="JAG3D - Java Applied Geodesy 3D - (c) by Michael Loesler - https://software.applied-geodesy.org">
 			<meta name="author" content="${project_operator}">
 			<meta name="description" content="${project_description}">
 			<meta name="date" content="${project_date?datetime?string("yyyy-MM-dd'T'HH:mm:ss")}">

@@ -18,7 +18,14 @@
 					<td>${observation.z0?string[df_length]}</td>
 				</#if>
 			<#elseif apply_angle_unit>
-				<td>${observation.value_0?string[df_angle]}</td>
+				<#if sexagesimal_angle??>
+					<#assign degree  = observation.value_0?floor>
+					<#assign minutes = ((observation.value_0 - degree) * 60)?floor>
+					<#assign seconds = ((((observation.value_0 - degree) * 60) - minutes) * 60)>
+					<td>${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
+				<#else>
+					<td>${observation.value_0?string[df_angle]}</td>
+				</#if>
 			<#else>
 				<td>${observation.value_0?string[df_length]}</td>
 			</#if>
@@ -46,7 +53,18 @@
 					<td>${observation.z?string[df_length]}</td>
 				</#if>
 			<#else>
-				<td>${observation.value?string[apply_angle_unit?then(df_angle, df_length)]}</td>
+				<#if apply_angle_unit??>
+					<#if sexagesimal_angle??>
+						<#assign degree  = observation.value?floor>
+						<#assign minutes = ((observation.value - degree) * 60)?floor>
+						<#assign seconds = ((((observation.value - degree) * 60) - minutes) * 60)>
+						<td>${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
+					<#else>
+						<td>${observation.value?string[df_angle]}</td>
+					</#if>
+				<#else>
+					<td>${observation.value?string[df_length]}</td>
+				</#if>
 			</#if>
 						
 			<#if group.type == "GNSS1D" || group.type == "GNSS2D" || group.type == "GNSS3D">

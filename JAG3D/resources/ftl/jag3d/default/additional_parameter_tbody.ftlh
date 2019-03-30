@@ -28,7 +28,15 @@
 
 			<td>
 				<#if param_unit_type == "ANGLE">
-					${param.value?string[df_angle]} ${unit_abbr_angle}
+					<#if sexagesimal_angle??>
+						<#assign degree  = param.value?floor>
+						<#assign minutes = ((param.value - degree) * 60)?floor>
+						<#assign seconds = ((((param.value - degree) * 60) - minutes) * 60)>
+						<td>${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
+					<#else>
+						${param.value?string[df_angle]}
+					</#if>
+					${unit_abbr_angle}
 				<#elseif param_unit_type == "LENGTH">
 					${param.value?string[df_length_residual]} ${unit_abbr_length_residual}
 				<#else>

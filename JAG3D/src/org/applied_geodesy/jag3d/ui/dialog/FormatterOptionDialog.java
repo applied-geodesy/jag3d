@@ -24,6 +24,7 @@ package org.applied_geodesy.jag3d.ui.dialog;
 import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -367,7 +368,11 @@ public class FormatterOptionDialog {
 		Unit unit = option.getUnit();
 		if (unit != null) {
 			if (AngleUnit.getUnit(unit.getType()) != null) {
-				unitComboBox = this.createUnitComboBox(type, comboboxTooltip, AngleUnit.UNITS.values());
+				Collection<? extends Unit> angleUnits = new LinkedHashSet<AngleUnit>(AngleUnit.UNITS.values());
+				if (option.getType() != CellValueType.ANGLE) 
+					angleUnits.remove(AngleUnit.DEGREE_SEXAGESIMAL);
+
+				unitComboBox = this.createUnitComboBox(type, comboboxTooltip, angleUnits);
 			}
 			else if (ScaleUnit.getUnit(unit.getType()) != null) {
 				List<ScaleUnit> scaleUnits = null; 

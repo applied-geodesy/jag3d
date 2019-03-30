@@ -21,6 +21,7 @@
 
 package org.applied_geodesy.util;
 
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
@@ -36,6 +37,7 @@ import org.applied_geodesy.util.unit.AngleUnit;
 import org.applied_geodesy.util.unit.LengthUnit;
 import org.applied_geodesy.util.unit.ScaleUnit;
 import org.applied_geodesy.util.unit.Unit;
+import org.applied_geodesy.util.unit.UnitType;
 
 public class FormatterOptions {	
 	public class FormatterOption {
@@ -72,7 +74,7 @@ public class FormatterOptions {
 			if (o != d) {
 				this.format.setMaximumFractionDigits(d);
 				this.format.setMinimumFractionDigits(d);
-				fireResolutionChanged(this.type, unit, o, d);
+				fireResolutionChanged(this.type, this.unit, o, d);
 			}
 		}
 		public Number parse(String source, ParsePosition parsePosition) throws ParseException {
@@ -140,10 +142,25 @@ public class FormatterOptions {
 		angleResidualFormatter.setGroupingUsed(false);
 		scaleResidualFormatter.setGroupingUsed(false);
 		
-		this.setFractionDigits(lengthFormatter, 4);
-		this.setFractionDigits(angleFormatter,  5);
-		this.setFractionDigits(scaleFormatter,  2);
-		this.setFractionDigits(vectorFormatter, 7);
+		lengthFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		angleFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		scaleFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		vectorFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		statisticFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		
+		lengthUncertaintyFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		angleUncertaintyFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		scaleUncertaintyFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		vectorUncertaintyFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+
+		lengthResidualFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		angleResidualFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		scaleResidualFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+
+		this.setFractionDigits(lengthFormatter,    4);
+		this.setFractionDigits(angleFormatter,     5);
+		this.setFractionDigits(scaleFormatter,     2);
+		this.setFractionDigits(vectorFormatter,    7);
 		this.setFractionDigits(statisticFormatter, 2);
 		
 		this.setFractionDigits(lengthUncertaintyFormatter, 1);
@@ -152,8 +169,8 @@ public class FormatterOptions {
 		this.setFractionDigits(vectorUncertaintyFormatter, 1);
 				
 		this.setFractionDigits(lengthResidualFormatter, 1);
-		this.setFractionDigits(angleResidualFormatter, 2);
-		this.setFractionDigits(scaleResidualFormatter, 2);
+		this.setFractionDigits(angleResidualFormatter,  2);
+		this.setFractionDigits(scaleResidualFormatter,  2);
 		
 		this.formatterOptions.put(CellValueType.LENGTH,             new FormatterOption(CellValueType.LENGTH,             lengthFormatter, LENGTH_UNIT));
 		this.formatterOptions.put(CellValueType.LENGTH_UNCERTAINTY, new FormatterOption(CellValueType.LENGTH_UNCERTAINTY, lengthUncertaintyFormatter, LENGTH_UNCERTAINTY_UNIT));
@@ -277,27 +294,35 @@ public class FormatterOptions {
 	}
 	
 	public String toAngleFormat(double d, boolean displayUnit) {
-		return String.format(Locale.ENGLISH, "%s %s",
-				this.formatterOptions.get(CellValueType.ANGLE).getFormatter().format(this.convertAngleToView(d)), 
-				displayUnit ? this.formatterOptions.get(CellValueType.ANGLE).getUnit().getAbbreviation():"").trim();
+		Unit unit = this.formatterOptions.get(CellValueType.ANGLE).getUnit();
+		d = this.convertAngleToView(d);
+		if (unit.getType() == UnitType.DEGREE_SEXAGESIMAL) {
+			double dms[] = this.toSexagesimalDegree(d);
+			
+			int degrees    = (int)dms[0];
+			int minutes    = (int)dms[1];
+			double seconds = dms[2]; 
+			
+			return String.format(Locale.ENGLISH, "%d \u00B7 %02d \u00B7 %s %s",
+					degrees,
+					minutes,
+					this.formatterOptions.get(CellValueType.ANGLE).getFormatter().format(100+seconds).substring(1), // add 100 to get a leading zero (removed by substring)
+					displayUnit ? unit.getAbbreviation():"").trim();
+		}
+		// in any other case
+		return this.toViewFormat(CellValueType.ANGLE, d, displayUnit);
 	}
 	
 	public String toLengthFormat(double d, boolean displayUnit) {
-		return String.format(Locale.ENGLISH, "%s %s",
-				this.formatterOptions.get(CellValueType.LENGTH).getFormatter().format(this.convertLengthToView(d)), 
-				displayUnit ? this.formatterOptions.get(CellValueType.LENGTH).getUnit().getAbbreviation():"").trim();
+		return this.toViewFormat(CellValueType.LENGTH, this.convertLengthToView(d), displayUnit);
 	}
 	
 	public String toScaleFormat(double d, boolean displayUnit) {
-		return String.format(Locale.ENGLISH, "%s %s",
-				this.formatterOptions.get(CellValueType.SCALE).getFormatter().format(this.convertScaleToView(d)), 
-				displayUnit ? this.formatterOptions.get(CellValueType.SCALE).getUnit().getAbbreviation():"").trim();
+		return this.toViewFormat(CellValueType.SCALE, this.convertScaleToView(d), displayUnit);
 	}
 	
 	public String toVectorFormat(double d, boolean displayUnit) {
-		return String.format(Locale.ENGLISH, "%s %s",
-				this.formatterOptions.get(CellValueType.VECTOR).getFormatter().format(this.convertVectorToView(d)), 
-				displayUnit ? this.formatterOptions.get(CellValueType.VECTOR).getUnit().getAbbreviation():"").trim();
+		return this.toViewFormat(CellValueType.VECTOR, this.convertVectorToView(d), displayUnit);
 	}
 	
 	public String toStatisticFormat(double d) {
@@ -305,57 +330,73 @@ public class FormatterOptions {
 	}
 	
 	public String toAngleUncertaintyFormat(double d, boolean displayUnit) {
-		return String.format(Locale.ENGLISH, "%s %s",
-				this.formatterOptions.get(CellValueType.ANGLE_UNCERTAINTY).getFormatter().format(this.convertAngleUncertaintyToView(d)), 
-				displayUnit ? this.formatterOptions.get(CellValueType.ANGLE_UNCERTAINTY).getUnit().getAbbreviation():"").trim();
+		return this.toViewFormat(CellValueType.ANGLE_UNCERTAINTY, this.convertAngleUncertaintyToView(d), displayUnit);
 	}
 	
 	public String toLengthUncertaintyFormat(double d, boolean displayUnit) {
-		return String.format(Locale.ENGLISH, "%s %s",
-				this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getFormatter().format(this.convertLengthUncertaintyToView(d)), 
-				displayUnit ? this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getUnit().getAbbreviation():"").trim();
+		return this.toViewFormat(CellValueType.LENGTH_UNCERTAINTY, this.convertLengthUncertaintyToView(d), displayUnit);
 	}
 	
-	public String toSquareRootLengthUncertaintyFormat(double d, boolean displayUnit) {
-		return String.format(Locale.ENGLISH, "%s %s",
-				this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getFormatter().format(this.convertLengthUncertaintyToView(d)), 
-				displayUnit ? "\u221A"+this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getUnit().getAbbreviation():"").trim();
-	}
-	
-	public String toLengthUncertaintyDividedBySquareRootLengthFormat(double d, boolean displayUnit) {
-		return String.format(Locale.ENGLISH, "%s %s",
-				this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getFormatter().format(this.convertLengthUncertaintyToView(d)), 
-				displayUnit ? this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getUnit().getAbbreviation() + "/\u221A" + this.formatterOptions.get(CellValueType.LENGTH).getUnit().getAbbreviation():"").trim();
-	}
+//	public String toSquareRootLengthUncertaintyFormat(double d, boolean displayUnit) {
+//		return String.format(Locale.ENGLISH, "%s %s",
+//				this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getFormatter().format(this.convertLengthUncertaintyToView(d)), 
+//				displayUnit ? "\u221A"+this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getUnit().getAbbreviation():"").trim();
+//	}
 	
 	public String toAngleResidualFormat(double d, boolean displayUnit) {
-		return String.format(Locale.ENGLISH, "%s %s",
-				this.formatterOptions.get(CellValueType.ANGLE_RESIDUAL).getFormatter().format(this.convertAngleResidualToView(d)), 
-				displayUnit ? this.formatterOptions.get(CellValueType.ANGLE_RESIDUAL).getUnit().getAbbreviation():"").trim();
+		return this.toViewFormat(CellValueType.ANGLE_RESIDUAL, this.convertAngleResidualToView(d), displayUnit);
 	}
 	
 	public String toLengthResidualFormat(double d, boolean displayUnit) {
-		return String.format(Locale.ENGLISH, "%s %s",
-				this.formatterOptions.get(CellValueType.LENGTH_RESIDUAL).getFormatter().format(this.convertLengthResidualToView(d)), 
-				displayUnit ? this.formatterOptions.get(CellValueType.LENGTH_RESIDUAL).getUnit().getAbbreviation():"").trim();
+		return this.toViewFormat(CellValueType.LENGTH_RESIDUAL, this.convertLengthResidualToView(d), displayUnit);
 	}
 	
 	public String toScaleUncertaintyFormat(double d, boolean displayUnit) {
-		return String.format(Locale.ENGLISH, "%s %s",
-				this.formatterOptions.get(CellValueType.SCALE_UNCERTAINTY).getFormatter().format(this.convertScaleUncertaintyToView(d)), 
-				displayUnit ? this.formatterOptions.get(CellValueType.SCALE_UNCERTAINTY).getUnit().getAbbreviation():"").trim();
+		return this.toViewFormat(CellValueType.SCALE_UNCERTAINTY, this.convertScaleUncertaintyToView(d), displayUnit);
 	}
 	
 	public String toScaleResidualFormat(double d, boolean displayUnit) {
-		return String.format(Locale.ENGLISH, "%s %s",
-				this.formatterOptions.get(CellValueType.SCALE_RESIDUAL).getFormatter().format(this.convertScaleResidualToView(d)), 
-				displayUnit ? this.formatterOptions.get(CellValueType.SCALE_RESIDUAL).getUnit().getAbbreviation():"").trim();
+		return this.toViewFormat(CellValueType.SCALE_RESIDUAL, this.convertScaleResidualToView(d), displayUnit);
 	}
 	
+//	public String toVectorUncertaintyFormat(double d, boolean displayUnit) {
+//		return String.format(Locale.ENGLISH, "%s %s",
+//				this.formatterOptions.get(CellValueType.VECTOR_UNCERTAINTY).getFormatter().format(this.convertVectorUncertaintyToView(d)), 
+//				displayUnit ? this.formatterOptions.get(CellValueType.SCALE_UNCERTAINTY).getUnit().getAbbreviation():"").trim();
+//	}
+	
 	public String toVectorUncertaintyFormat(double d, boolean displayUnit) {
+		return this.toViewFormat(CellValueType.VECTOR_UNCERTAINTY, this.convertVectorUncertaintyToView(d), displayUnit);
+	}
+	
+	private String toViewFormat(CellValueType type, double d, boolean displayUnit) {
 		return String.format(Locale.ENGLISH, "%s %s",
-				this.formatterOptions.get(CellValueType.VECTOR_UNCERTAINTY).getFormatter().format(this.convertVectorUncertaintyToView(d)), 
-				displayUnit ? this.formatterOptions.get(CellValueType.SCALE_UNCERTAINTY).getUnit().getAbbreviation():"").trim();
+				this.formatterOptions.get(type).getFormatter().format(d), 
+				displayUnit ? this.formatterOptions.get(type).getUnit().getAbbreviation():"").trim();
+	}
+	
+	private double[] toSexagesimalDegree(double d) {
+		double sign = Math.signum(d);
+		d = sign * d;
+		int degrees = (int) Math.floor(d);
+		double fractions =  ((d - degrees) * 60.0);
+		int minutes = (int) Math.floor(fractions);
+		double seconds = (fractions - minutes) * 60.0;
+
+        if (seconds == 60.0) {
+        	minutes++;
+        	seconds = 0;
+        }
+        if (minutes == 60.0) {
+        	degrees++;
+        	minutes = 0;
+        }
+		
+		return new double[] {
+				sign * degrees,
+				minutes,
+				seconds
+		};
 	}
 	
 	protected void fireUnitChanged(CellValueType type, Unit oldUnit, Unit newUnit, int res) {

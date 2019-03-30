@@ -31,12 +31,31 @@
 			</#if>
 				
 			<#if group.dimension == 3>
-				<td>${point_pair.confidence_alpha?string[df_angle]}</td>
-				<td>${point_pair.confidence_beta?string[df_angle]}</td>
+				<#if sexagesimal_angle??>
+					<#assign degree  = point_pair.confidence_alpha?floor>
+					<#assign minutes = ((point_pair.confidence_alpha - degree) * 60)?floor>
+					<#assign seconds = ((((point_pair.confidence_alpha - degree) * 60) - minutes) * 60)>
+					<td>${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
+
+					<#assign degree  = point_pair.confidence_beta?floor>
+					<#assign minutes = ((point_pair.confidence_beta - degree) * 60)?floor>
+					<#assign seconds = ((((point_pair.confidence_beta - degree) * 60) - minutes) * 60)>
+					<td>${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
+				<#else>
+					<td>${point_pair.confidence_alpha?string[df_angle]}</td>
+					<td>${point_pair.confidence_beta?string[df_angle]}</td>
+				</#if>
 			</#if>
 				
 			<#if group.dimension != 1>
-				<td>${point_pair.confidence_gamma?string[df_angle]}</td>
+				<#if sexagesimal_angle??>
+					<#assign degree  = point_pair.confidence_gamma?floor>
+					<#assign minutes = ((point_pair.confidence_gamma - degree) * 60)?floor>
+					<#assign seconds = ((((point_pair.confidence_gamma - degree) * 60) - minutes) * 60)>
+					<td>${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
+				<#else>
+					<td>${point_pair.confidence_gamma?string[df_angle]}</td>
+				</#if>
 			</#if>
 			
 			<#if group.dimension != 1>
