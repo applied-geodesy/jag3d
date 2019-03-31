@@ -927,13 +927,6 @@ public class FTLReport {
 				for(int i = 1; i <= cnt; i++) {
 					String key = rsmd.getColumnLabel(i);
 					switch(key) {
-					case "dx0":
-					case "dy0":
-					case "dx":
-					case "dy":
-						h.put(key, options.convertAngleToView(deflectionSet.getDouble(i)));
-						break;
-
 					case "sigma_dx0":
 					case "sigma_dy0":
 					case "sigma_dx":
@@ -943,6 +936,10 @@ public class FTLReport {
 						h.put(key, options.convertAngleUncertaintyToView(deflectionSet.getDouble(i)));
 						break;
 
+					case "dx0":
+					case "dy0":
+					case "dx":
+					case "dy":
 					case "residual_dy":
 					case "residual_dx":
 					case "gross_error_dx":

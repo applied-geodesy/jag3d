@@ -2,21 +2,8 @@
 	<#list group.deflections as deflection>
 		<tr>
 			<th>${deflection.name}</th>
-			
-			<#if sexagesimal_angle??>
-				<#assign degree  = deflection.dy0?floor>
-				<#assign minutes = ((deflection.dy0 - degree) * 60)?floor>
-				<#assign seconds = ((((deflection.dy0 - degree) * 60) - minutes) * 60)>
-				<td>${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
-
-				<#assign degree  = deflection.dx0?floor>
-				<#assign minutes = ((deflection.dx0 - degree) * 60)?floor>
-				<#assign seconds = ((((deflection.dx0 - degree) * 60) - minutes) * 60)>
-				<td>${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
-			<#else>
-				<td>${deflection.dy0?string[df_angle]}</td>
-				<td>${deflection.dx0?string[df_angle]}</td>
-			</#if>
+			<td>${deflection.dy0?string[df_angle_residual]}</td>
+			<td>${deflection.dx0?string[df_angle_residual]}</td>
 
 			<#if group.type == "STOCHASTIC_POINT">
 				<td>${deflection.sigma_dy0?string[df_angle_uncertainty]}</td>
@@ -24,21 +11,8 @@
 			</#if>
 			
 			<#if group.type != "REFERENCE_POINT">
-				<#if sexagesimal_angle??>
-					<#assign degree  = deflection.dy?floor>
-					<#assign minutes = ((deflection.dy - degree) * 60)?floor>
-					<#assign seconds = ((((deflection.dy - degree) * 60) - minutes) * 60)>
-					<td>${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
-
-					<#assign degree  = deflection.dx?floor>
-					<#assign minutes = ((deflection.dx - degree) * 60)?floor>
-					<#assign seconds = ((((deflection.dx - degree) * 60) - minutes) * 60)>
-					<td>${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
-				<#else>
-					<td>${deflection.dy?string[df_angle]}</td>
-					<td>${deflection.dx?string[df_angle]}</td>
-				</#if>
-				
+				<td>${deflection.dy?string[df_angle_residual]}</td>
+				<td>${deflection.dx?string[df_angle_residual]}</td>
 				<td>${deflection.sigma_dy?string[df_angle_uncertainty]}</td>
 				<td>${deflection.sigma_dx?string[df_angle_uncertainty]}</td>
 				<td>${deflection.confidence_major_axis?string[df_angle_uncertainty]}</td>
