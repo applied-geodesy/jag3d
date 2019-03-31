@@ -19,10 +19,12 @@
 				</#if>
 			<#elseif apply_angle_unit>
 				<#if sexagesimal_angle??>
-					<#assign degree  = observation.value_0?floor>
-					<#assign minutes = ((observation.value_0 - degree) * 60)?floor>
-					<#assign seconds = ((((observation.value_0 - degree) * 60) - minutes) * 60)>
-					<td>${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
+					<#assign signum  = (observation.value_0 < 0)?then(-1, 1)>
+					<#assign value   = signum * observation.value_0>
+					<#assign degree  = value?floor>
+					<#assign minutes = ((value - degree) * 60)?floor>
+					<#assign seconds = ((((value - degree) * 60) - minutes) * 60)>
+					<td>${signum * degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
 				<#else>
 					<td>${observation.value_0?string[df_angle]}</td>
 				</#if>
@@ -55,10 +57,12 @@
 			<#else>
 				<#if apply_angle_unit??>
 					<#if sexagesimal_angle??>
-						<#assign degree  = observation.value?floor>
-						<#assign minutes = ((observation.value - degree) * 60)?floor>
-						<#assign seconds = ((((observation.value - degree) * 60) - minutes) * 60)>
-						<td>${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
+						<#assign signum  = (observation.value < 0)?then(-1, 1)>
+						<#assign value   = signum * observation.value>
+						<#assign degree  = value?floor>
+						<#assign minutes = ((value - degree) * 60)?floor>
+						<#assign seconds = ((((value - degree) * 60) - minutes) * 60)>
+						<td>${signum * degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
 					<#else>
 						<td>${observation.value?string[df_angle]}</td>
 					</#if>

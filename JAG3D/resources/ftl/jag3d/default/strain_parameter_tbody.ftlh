@@ -39,10 +39,12 @@
 			<td>
 				<#if param_unit_type == "ANGLE">
 					<#if sexagesimal_angle??>
-						<#assign degree  = param.value?floor>
-						<#assign minutes = ((param.value - degree) * 60)?floor>
-						<#assign seconds = ((((param.value - degree) * 60) - minutes) * 60)>
-					${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}
+						<#assign signum  = (param.value < 0)?then(-1, 1)>
+						<#assign value   = signum * param.value>
+						<#assign degree  = value?floor>
+						<#assign minutes = ((value - degree) * 60)?floor>
+						<#assign seconds = ((((value - degree) * 60) - minutes) * 60)>
+						${signum * degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}
 					<#else>
 						${param.value?string[df_angle]}
 					</#if>
