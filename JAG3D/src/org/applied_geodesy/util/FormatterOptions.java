@@ -294,23 +294,15 @@ public class FormatterOptions {
 	}
 	
 	public String toAngleFormat(double d, boolean displayUnit) {
-		Unit unit = this.formatterOptions.get(CellValueType.ANGLE).getUnit();
-		d = this.convertAngleToView(d);
-		if (unit.getType() == UnitType.DEGREE_SEXAGESIMAL) {
-			double dms[] = this.toSexagesimalDegree(d);
-			
-			int degrees    = (int)dms[0];
-			int minutes    = (int)dms[1];
-			double seconds = dms[2]; 
-			
-			return String.format(Locale.ENGLISH, "%d \u00B7 %02d \u00B7 %s %s",
-					degrees,
-					minutes,
-					this.formatterOptions.get(CellValueType.ANGLE).getFormatter().format(100+seconds).substring(1), // add 100 to get a leading zero (removed by substring)
-					displayUnit ? unit.getAbbreviation():"").trim();
-		}
-		// in any other case
-		return this.toViewFormat(CellValueType.ANGLE, d, displayUnit);
+		return this.toViewFormat(CellValueType.ANGLE, this.convertAngleToView(d), displayUnit);
+	}
+	
+	public String toAngleUncertaintyFormat(double d, boolean displayUnit) {
+		return this.toViewFormat(CellValueType.ANGLE_UNCERTAINTY, this.convertAngleUncertaintyToView(d), displayUnit);
+	}
+	
+	public String toAngleResidualFormat(double d, boolean displayUnit) {
+		return this.toViewFormat(CellValueType.ANGLE_RESIDUAL, this.convertAngleResidualToView(d), displayUnit);
 	}
 	
 	public String toLengthFormat(double d, boolean displayUnit) {
@@ -329,10 +321,6 @@ public class FormatterOptions {
 		return this.formatterOptions.get(CellValueType.STATISTIC).getFormatter().format(d).trim();
 	}
 	
-	public String toAngleUncertaintyFormat(double d, boolean displayUnit) {
-		return this.toViewFormat(CellValueType.ANGLE_UNCERTAINTY, this.convertAngleUncertaintyToView(d), displayUnit);
-	}
-	
 	public String toLengthUncertaintyFormat(double d, boolean displayUnit) {
 		return this.toViewFormat(CellValueType.LENGTH_UNCERTAINTY, this.convertLengthUncertaintyToView(d), displayUnit);
 	}
@@ -342,10 +330,6 @@ public class FormatterOptions {
 //				this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getFormatter().format(this.convertLengthUncertaintyToView(d)), 
 //				displayUnit ? "\u221A"+this.formatterOptions.get(CellValueType.LENGTH_UNCERTAINTY).getUnit().getAbbreviation():"").trim();
 //	}
-	
-	public String toAngleResidualFormat(double d, boolean displayUnit) {
-		return this.toViewFormat(CellValueType.ANGLE_RESIDUAL, this.convertAngleResidualToView(d), displayUnit);
-	}
 	
 	public String toLengthResidualFormat(double d, boolean displayUnit) {
 		return this.toViewFormat(CellValueType.LENGTH_RESIDUAL, this.convertLengthResidualToView(d), displayUnit);
@@ -370,6 +354,22 @@ public class FormatterOptions {
 	}
 	
 	private String toViewFormat(CellValueType type, double d, boolean displayUnit) {
+		Unit unit = this.formatterOptions.get(type).getUnit();
+		if (unit.getType() == UnitType.DEGREE_SEXAGESIMAL) {
+			double dms[] = this.toSexagesimalDegree(d);
+			
+			int degrees    = (int)dms[0];
+			int minutes    = (int)dms[1];
+			double seconds = dms[2]; 
+			
+			return String.format(Locale.ENGLISH, "%d \u00B7 %02d \u00B7 %s %s",
+					degrees,
+					minutes,
+					this.formatterOptions.get(type).getFormatter().format(100+seconds).substring(1), // add 100 to get a leading zero (removed by substring)
+					displayUnit ? unit.getAbbreviation():"").trim();
+		}
+		
+		// in any other case
 		return String.format(Locale.ENGLISH, "%s %s",
 				this.formatterOptions.get(type).getFormatter().format(d), 
 				displayUnit ? this.formatterOptions.get(type).getUnit().getAbbreviation():"").trim();

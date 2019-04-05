@@ -41,7 +41,16 @@
 					<td>${observation.sigma_z0?string[df_length_uncertainty]}</td>
 				</#if>
 			<#elseif apply_angle_unit>
-				<td>${observation.sigma_0?string[df_angle_uncertainty]}</td>
+				<#if sexagesimal_angle_uncertainty??>
+					<#assign signum  = (observation.sigma_0 < 0)?then(-1, 1)>
+					<#assign value   = signum * observation.sigma_0>
+					<#assign degree  = value?floor>
+					<#assign minutes = ((value - degree) * 60)?floor>
+					<#assign seconds = ((((value - degree) * 60) - minutes) * 60)>
+					<td>${signum * degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle_uncertainty]?string[1..])}</td>
+				<#else>
+					<td>${observation.sigma_0?string[df_angle_uncertainty]}</td>
+				</#if>
 			<#else>
 				<td>${observation.sigma_0?string[df_length_uncertainty]}</td>
 			</#if>
@@ -122,13 +131,63 @@
 					<td>${observation.minimal_detectable_bias_z?string[df_length_residual]}</td>
 				</#if>
 			<#else>
-				<td>${observation.sigma?string[apply_angle_unit?then(df_angle_uncertainty, df_length_uncertainty)]}</td>
+				<#if apply_angle_unit??>
+					<#if sexagesimal_angle_uncertainty??>
+						<#assign signum  = (observation.sigma < 0)?then(-1, 1)>
+						<#assign value   = signum * observation.sigma>
+						<#assign degree  = value?floor>
+						<#assign minutes = ((value - degree) * 60)?floor>
+						<#assign seconds = ((((value - degree) * 60) - minutes) * 60)>
+						<td>${signum * degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle_uncertainty]?string[1..])}</td>
+					<#else>
+						<td>${observation.sigma?string[df_angle_uncertainty]}</td>
+					</#if>
+				<#else>
+					<td>${observation.sigma?string[df_length_uncertainty]}</td>
+				</#if>	
 				<td>${observation.redundancy?string[df_statistic]}</td>
-				<td>${observation.residual?string[apply_angle_unit?then(df_angle_residual, df_length_residual)]}</td>
-				<td>${observation.gross_error?string[apply_angle_unit?then(df_angle_residual, df_length_residual)]}</td>
+				
+				<#if apply_angle_unit??>
+					<#if sexagesimal_angle_residual??>
+						<#assign signum  = (observation.residual < 0)?then(-1, 1)>
+						<#assign value   = signum * observation.residual>
+						<#assign degree  = value?floor>
+						<#assign minutes = ((value - degree) * 60)?floor>
+						<#assign seconds = ((((value - degree) * 60) - minutes) * 60)>
+						<td>${signum * degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle_residual]?string[1..])}</td>
+						
+						<#assign signum  = (observation.gross_error < 0)?then(-1, 1)>
+						<#assign value   = signum * observation.gross_error>
+						<#assign degree  = value?floor>
+						<#assign minutes = ((value - degree) * 60)?floor>
+						<#assign seconds = ((((value - degree) * 60) - minutes) * 60)>
+						<td>${signum * degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle_residual]?string[1..])}</td>
+					<#else>
+						<td>${observation.residual?string[df_angle_residual]}</td>
+						<td>${observation.gross_error?string[df_angle_residual]}</td>
+					</#if>
+				<#else>
+					<td>${observation.residual?string[df_length_residual]}</td>
+					<td>${observation.gross_error?string[df_length_residual]}</td>
+				</#if>
+
 				<td>${observation.influence_on_position?string[df_length_residual]}</td>
 				<td>${observation.influence_on_network_distortion?string[df_length_residual]}</td>
-				<td>${observation.minimal_detectable_bias?string[apply_angle_unit?then(df_angle_residual, df_length_residual)]}</td>
+				
+				<#if apply_angle_unit??>
+					<#if sexagesimal_angle_residual??>
+						<#assign signum  = (observation.minimal_detectable_bias < 0)?then(-1, 1)>
+						<#assign value   = signum * observation.minimal_detectable_bias>
+						<#assign degree  = value?floor>
+						<#assign minutes = ((value - degree) * 60)?floor>
+						<#assign seconds = ((((value - degree) * 60) - minutes) * 60)>
+						<td>${signum * degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle_residual]?string[1..])}</td>
+					<#else>
+						<td>${observation.minimal_detectable_bias?string[df_angle_residual]}</td>
+					</#if>
+				<#else>
+					<td>${observation.minimal_detectable_bias?string[df_length_residual]}</td>
+				</#if>
 			</#if>
 			
 			<td>${observation.omega?string[df_statistic]}</td>

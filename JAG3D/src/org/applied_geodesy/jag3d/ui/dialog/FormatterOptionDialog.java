@@ -369,9 +369,6 @@ public class FormatterOptionDialog {
 		if (unit != null) {
 			if (AngleUnit.getUnit(unit.getType()) != null) {
 				Collection<? extends Unit> angleUnits = new LinkedHashSet<AngleUnit>(AngleUnit.UNITS.values());
-				if (option.getType() != CellValueType.ANGLE) 
-					angleUnits.remove(AngleUnit.DEGREE_SEXAGESIMAL);
-
 				unitComboBox = this.createUnitComboBox(type, comboboxTooltip, angleUnits);
 			}
 			else if (ScaleUnit.getUnit(unit.getType()) != null) {

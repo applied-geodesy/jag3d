@@ -2,7 +2,6 @@
 <#setting url_escaping_charset="UTF-8">
 
 <#-- Decimal format w.r.t. user preferences -->
-<#assign sexagesimal_angle     = "${sexagesimal_angle???then(1, 0)};;">
 <#assign df_angle              = "${digits_angle???then(digits_angle, 0.00000)};;                      roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
 <#assign df_angle_residual     = "${digits_angle_residual???then(digits_angle_residual, 0.00)};;       roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
 <#assign df_angle_uncertainty  = "${digits_angle_uncertainty???then(digits_angle_uncertainty, 0.00)};; roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">

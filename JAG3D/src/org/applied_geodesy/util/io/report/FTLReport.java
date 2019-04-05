@@ -178,10 +178,12 @@ public class FTLReport {
 			case ANGLE_RESIDUAL:
 				keyDigits = "digits_angle_residual";
 				keyUnit   = "unit_abbr_angle_residual";
+				keySexagesimal = option.getUnit().getType() == UnitType.DEGREE_SEXAGESIMAL ? "sexagesimal_angle_residual" : null;
 				break;
 			case ANGLE_UNCERTAINTY:
 				keyDigits = "digits_angle_uncertainty";
 				keyUnit   = "unit_abbr_angle_uncertainty";
+				keySexagesimal = option.getUnit().getType() == UnitType.DEGREE_SEXAGESIMAL ? "sexagesimal_angle_uncertainty" : null;
 				break;
 
 			case LENGTH:
