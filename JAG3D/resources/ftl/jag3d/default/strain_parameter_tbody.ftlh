@@ -38,59 +38,59 @@
 
 			<td>
 				<#if param_unit_type == "ANGLE">
-					${param.value?string[df_angle]} ${unit_abbr_angle}
+					<@printFormattedNumber value=param.value format=df_angle/> ${unit_abbr_angle}
 				<#elseif param_unit_type == "LENGTH">
-					${param.value?string[df_length]} ${unit_abbr_length}
+					<@printFormattedNumber value=param.value format=df_length/> ${unit_abbr_length}
 				<#else>
-					${param.value?string[df_scale]} ${unit_abbr_scale}
+					<@printFormattedNumber value=param.value format=df_scale/> ${unit_abbr_scale}
 				</#if>
 			</td>
 			
 			<td>
 				<#if param_unit_type == "ANGLE">
-					${param.sigma?string[df_angle_uncertainty]} ${unit_abbr_angle_uncertainty}
+					<@printFormattedNumber value=param.sigma format=df_angle_uncertainty/> ${unit_abbr_angle_uncertainty}
 				<#elseif param_unit_type == "LENGTH">
-					${param.sigma?string[df_length_uncertainty]} ${unit_abbr_length_uncertainty}
+					<@printFormattedNumber value=param.sigma format=df_length_uncertainty/> ${unit_abbr_length_uncertainty}
 				<#else>
-					${param.sigma?string[df_scale_uncertainty]} ${unit_abbr_scale_uncertainty}
+					<@printFormattedNumber value=param.sigma format=df_scale_uncertainty/> ${unit_abbr_scale_uncertainty}
 				</#if>
 			</td>
 			
 			<td>
 				<#if param_unit_type == "ANGLE">
-					${param.confidence?string[df_angle_uncertainty]} ${unit_abbr_angle_uncertainty}
+					<@printFormattedNumber value=param.confidence format=df_angle_uncertainty/> ${unit_abbr_angle_uncertainty}
 				<#elseif param_unit_type == "LENGTH">
-					${param.confidence?string[df_length_uncertainty]} ${unit_abbr_length_uncertainty}
+					<@printFormattedNumber value=param.confidence format=df_length_uncertainty/> ${unit_abbr_length_uncertainty}
 				<#else>
-					${param.confidence?string[df_scale_uncertainty]} ${unit_abbr_scale_uncertainty}
+					<@printFormattedNumber value=param.confidence format=df_scale_uncertainty/> ${unit_abbr_scale_uncertainty}
 				</#if>
 			</td>
 			
 			<td>
 				<#if param_unit_type == "ANGLE">
-					${param.gross_error?string[df_angle_residual]} ${unit_abbr_angle_residual}
+					<@printFormattedNumber value=param.gross_error format=df_angle_residual/> ${unit_abbr_angle_residual}
 				<#elseif param_unit_type == "LENGTH">
-					${param.gross_error?string[df_length_residual]} ${unit_abbr_length_residual}
+					<@printFormattedNumber value=param.gross_error format=df_length_residual/> ${unit_abbr_length_residual}
 				<#else>
-					${param.gross_error?string[df_scale_residual]} ${unit_abbr_scale_residual}
+					<@printFormattedNumber value=param.gross_error format=df_scale_residual/> ${unit_abbr_scale_residual}
 				</#if>
 			</td>
 			
 			<td>
 				<#if param_unit_type == "ANGLE">
-					${param.minimal_detectable_bias?string[df_angle_residual]} ${unit_abbr_angle_residual}
+					<@printFormattedNumber value=param.minimal_detectable_bias format=df_angle_residual/> ${unit_abbr_angle_residual}
 				<#elseif param_unit_type == "LENGTH">
-					${param.minimal_detectable_bias?string[df_length_residual]} ${unit_abbr_length_residual}
+					<@printFormattedNumber value=param.minimal_detectable_bias format=df_length_residual/> ${unit_abbr_length_residual}
 				<#else>
-					${param.minimal_detectable_bias?string[df_scale_residual]} ${unit_abbr_scale_residual}
+					<@printFormattedNumber value=param.minimal_detectable_bias format=df_scale_residual/> ${unit_abbr_scale_residual}
 				</#if>
 			</td>
 
-			<td>${param.p_prio?string[df_statistic]}</td>
-			<td>${param.p_post?string[df_statistic]}</td>
+			<td><@printFormattedNumber value=param.p_prio format=df_statistic/></td>
+			<td><@printFormattedNumber value=param.p_post format=df_statistic/></td>
 			
-			<td>${param.t_prio?string[df_statistic]}</td>
-			<td>${param.t_post?string[df_statistic]}</td>
+			<td><@printFormattedNumber value=param.t_prio format=df_statistic/></td>
+			<td><@printFormattedNumber value=param.t_post format=df_statistic/></td>
 			
 			<td><span class="${param.significant?then('rejected', 'accepted')}"><#outputformat "plainText">${param.significant?then('&#x2718;', '&#x2714;')}</#outputformat></span></td>
 		</tr>

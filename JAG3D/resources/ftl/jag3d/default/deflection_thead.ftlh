@@ -2,8 +2,8 @@
 	<tr>
 		<th><#outputformat "plainText">${deflection_table_header_map['id']}</#outputformat></th>
 		
-		<th><#outputformat "plainText">&zeta;Y0<span class="unit">${unit_abbr_angle}</span></#outputformat></th>
-		<th><#outputformat "plainText">&zeta;X0<span class="unit">${unit_abbr_angle}</span></#outputformat></th>
+		<th><#outputformat "plainText">&zeta;Y0<span class="unit">${unit_abbr_angle_residual}</span></#outputformat></th>
+		<th><#outputformat "plainText">&zeta;X0<span class="unit">${unit_abbr_angle_residual}</span></#outputformat></th>
 		
 		<#if group.type == "STOCHASTIC_POINT">
 			<th><#outputformat "plainText">&sigma;<sub>Y0</sub><span class="unit">${unit_abbr_angle_uncertainty}</span></#outputformat></th>
@@ -11,8 +11,8 @@
 		</#if>
 		
 		<#if group.type != "REFERENCE_POINT">
-			<th><#outputformat "plainText">&zeta;Y<span class="unit">${unit_abbr_angle}</span></#outputformat></th>
-			<th><#outputformat "plainText">&zeta;X<span class="unit">${unit_abbr_angle}</span></#outputformat></th>	
+			<th><#outputformat "plainText">&zeta;Y<span class="unit">${unit_abbr_angle_residual}</span></#outputformat></th>
+			<th><#outputformat "plainText">&zeta;X<span class="unit">${unit_abbr_angle_residual}</span></#outputformat></th>	
 			
 			<th><#outputformat "plainText">&sigma;<sub>Y</sub><span class="unit">${unit_abbr_angle_uncertainty}</span></#outputformat></th>
 			<th><#outputformat "plainText">&sigma;<sub>X</sub><span class="unit">${unit_abbr_angle_uncertainty}</span></#outputformat></th>

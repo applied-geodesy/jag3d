@@ -55,6 +55,7 @@ import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.util.FormatterOptions.FormatterOption;
 import org.applied_geodesy.util.sql.DataBase;
+import org.applied_geodesy.util.unit.UnitType;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -166,19 +167,23 @@ public class FTLReport {
 		for (FormatterOption option : options.values()) {
 			String keyDigits = null;
 			String keyUnit   = null;
+			String keySexagesimal = null;
 			CellValueType cellValueType = option.getType();
 			switch(cellValueType) {
 			case ANGLE:
 				keyDigits = "digits_angle";
 				keyUnit   = "unit_abbr_angle";
+				keySexagesimal = option.getUnit().getType() == UnitType.DEGREE_SEXAGESIMAL ? "sexagesimal_angle" : null;
 				break;
 			case ANGLE_RESIDUAL:
 				keyDigits = "digits_angle_residual";
 				keyUnit   = "unit_abbr_angle_residual";
+				keySexagesimal = option.getUnit().getType() == UnitType.DEGREE_SEXAGESIMAL ? "sexagesimal_angle_residual" : null;
 				break;
 			case ANGLE_UNCERTAINTY:
 				keyDigits = "digits_angle_uncertainty";
 				keyUnit   = "unit_abbr_angle_uncertainty";
+				keySexagesimal = option.getUnit().getType() == UnitType.DEGREE_SEXAGESIMAL ? "sexagesimal_angle_uncertainty" : null;
 				break;
 
 			case LENGTH:
@@ -216,11 +221,12 @@ public class FTLReport {
 				// break;
 			}
 			if (keyDigits != null)
-				this.setParam(keyDigits, option.getFormatter().format(0.0) );
+				this.setParam(keyDigits,      option.getFormatter().format(0.0) );
 			if (keyUnit != null)
-				this.setParam(keyUnit,   option.getUnit().getAbbreviation() );
+				this.setParam(keyUnit,        option.getUnit().getAbbreviation() );
+			if (keySexagesimal != null)
+				this.setParam(keySexagesimal, Boolean.TRUE );
 		}
-		//		String sql = "SELECT \"unit\", \"digits\" FROM \"FormatterOption\" WHERE \"type\" = ?";
 	}
 
 	private void addAdjustmentDefinitions() throws SQLException {
@@ -923,13 +929,6 @@ public class FTLReport {
 				for(int i = 1; i <= cnt; i++) {
 					String key = rsmd.getColumnLabel(i);
 					switch(key) {
-					case "dx0":
-					case "dy0":
-					case "dx":
-					case "dy":
-						h.put(key, options.convertAngleToView(deflectionSet.getDouble(i)));
-						break;
-
 					case "sigma_dx0":
 					case "sigma_dy0":
 					case "sigma_dx":
@@ -939,6 +938,10 @@ public class FTLReport {
 						h.put(key, options.convertAngleUncertaintyToView(deflectionSet.getDouble(i)));
 						break;
 
+					case "dx0":
+					case "dy0":
+					case "dx":
+					case "dy":
 					case "residual_dy":
 					case "residual_dx":
 					case "gross_error_dx":

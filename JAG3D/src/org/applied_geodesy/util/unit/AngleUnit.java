@@ -26,22 +26,24 @@ import java.util.Map;
 import org.applied_geodesy.adjustment.Constant;
 
 public class AngleUnit extends Unit {
-	public static AngleUnit RADIAN       = new AngleUnit(UnitType.RADIAN);
-	public static AngleUnit DEGREE       = new AngleUnit(UnitType.DEGREE);
-	public static AngleUnit GRADIAN      = new AngleUnit(UnitType.GRADIAN);
-	public static AngleUnit MILLIRADIAN  = new AngleUnit(UnitType.MILLIRADIAN);
-	public static AngleUnit ARCSECOND    = new AngleUnit(UnitType.ARCSECOND);
-	public static AngleUnit MILLIGRADIAN = new AngleUnit(UnitType.MILLIGRADIAN);
-	public static AngleUnit MIL6400      = new AngleUnit(UnitType.MIL6400);
+	public static AngleUnit RADIAN               = new AngleUnit(UnitType.RADIAN);
+	public static AngleUnit DEGREE               = new AngleUnit(UnitType.DEGREE);
+	public static AngleUnit DEGREE_SEXAGESIMAL   = new AngleUnit(UnitType.DEGREE_SEXAGESIMAL);
+	public static AngleUnit GRADIAN              = new AngleUnit(UnitType.GRADIAN);
+	public static AngleUnit MILLIRADIAN          = new AngleUnit(UnitType.MILLIRADIAN);
+	public static AngleUnit ARCSECOND            = new AngleUnit(UnitType.ARCSECOND);
+	public static AngleUnit MILLIGRADIAN         = new AngleUnit(UnitType.MILLIGRADIAN);
+	public static AngleUnit MIL6400              = new AngleUnit(UnitType.MIL6400);
 
 	public static final Map<UnitType, AngleUnit> UNITS = Map.of(
-			UnitType.RADIAN,       RADIAN,
-			UnitType.DEGREE,       DEGREE,
-			UnitType.GRADIAN,      GRADIAN,
-			UnitType.MILLIRADIAN,  MILLIRADIAN,
-			UnitType.ARCSECOND,    ARCSECOND,
-			UnitType.MILLIGRADIAN, MILLIGRADIAN,
-			UnitType.MIL6400,      MIL6400
+			UnitType.RADIAN,             RADIAN,
+			UnitType.DEGREE,             DEGREE,
+			UnitType.DEGREE_SEXAGESIMAL, DEGREE_SEXAGESIMAL,
+			UnitType.GRADIAN,            GRADIAN,
+			UnitType.MILLIRADIAN,        MILLIRADIAN,
+			UnitType.ARCSECOND,          ARCSECOND,
+			UnitType.MILLIGRADIAN,       MILLIGRADIAN,
+			UnitType.MIL6400,            MIL6400
 	);
 
 	private double conversionFactorToRadian = 1.0;
@@ -57,6 +59,11 @@ public class AngleUnit extends Unit {
 		case DEGREE:
 			this.name         = i18n.getString("Unit.degree.name", "Degree");
 			this.abbreviation = i18n.getString("Unit.degree.abbreviation", "\u00B0");
+			this.conversionFactorToRadian = Constant.RHO_DEG2RAD;
+		break;
+		case DEGREE_SEXAGESIMAL:
+			this.name         = i18n.getString("Unit.degree_sexagesimal.name", "Sexagesimal degree");
+			this.abbreviation = i18n.getString("Unit.degree_sexagesimal.abbreviation", "\u00B0 \u2032 \u2033");
 			this.conversionFactorToRadian = Constant.RHO_DEG2RAD;
 		break;
 		case GRADIAN:

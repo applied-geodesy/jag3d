@@ -21,8 +21,8 @@
 				<td>${observation.start_point_name}</td>
 				<td>${observation.end_point_name}</td>
 
-				<td>${observation.value?string[df_format]}</td>
-				<td>${observation.average?string[df_format]}</td>
+				<td><@printFormattedNumber value=observation.value format=df_format/></td>
+				<td><@printFormattedNumber value=observation.average format=df_format/></td>
 			</tr>
 		</#if>
 	</#list>

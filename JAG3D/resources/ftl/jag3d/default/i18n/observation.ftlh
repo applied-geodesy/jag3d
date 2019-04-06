@@ -8,8 +8,8 @@
 		"levelling" :           "&delta;h",
 		"horizontal_distance" : "s<sub>2D</sub>",
 		"slope_distance" :      "s<sub>3D</sub>",
-		"direction" :           "r",
-		"zenith_angle" :        "z",
+		"direction" :           "t",
+		"zenith_angle" :        "v",
 		
 		"gnss_dx" :             "&delta;X",
 		"gnss_dy" :             "&delta;Y",
