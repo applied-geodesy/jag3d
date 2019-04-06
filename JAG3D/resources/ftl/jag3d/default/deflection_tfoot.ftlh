@@ -22,8 +22,8 @@
 		</#if>
 		
 		<#if group.type == "STOCHASTIC_POINT">
-			<td>${group.redundancy_dy?string[df_statistic]}</td>
-			<td>${group.redundancy_dx?string[df_statistic]}</td>
+			<td><@printFormattedNumber value=group.redundancy_dy format=df_statistic/></td>
+			<td><@printFormattedNumber value=group.redundancy_dx format=df_statistic/></td>
 			
 			<td></td>
 			<td></td>
@@ -45,8 +45,8 @@
 				<#assign seconds = ((((value - degree) * 60) - minutes) * 60)>
 				<td>${signum * degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle_residual]?string[1..])}</td>
 			<#else>
-				<td>${group.max_gross_error_dy?string[df_angle_residual]}</td>
-				<td>${group.max_gross_error_dx?string[df_angle_residual]}</td>
+				<td><@printFormattedNumber value=group.max_gross_error_dy format=df_angle_residual/></td>
+				<td><@printFormattedNumber value=group.max_gross_error_dx format=df_angle_residual/></td>
 			</#if>
 		</#if>
 		

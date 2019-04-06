@@ -29,6 +29,20 @@
 <#assign unit_abbr_scale_residual     = "${unit_abbr_scale_residual???then(unit_abbr_scale_residual, '\xfffd')}">
 <#assign unit_abbr_scale_uncertainty  = "${unit_abbr_scale_uncertainty???then(unit_abbr_scale_uncertainty, '\xfffd')}">
 
+<#macro printFormattedNumber value format>
+	<#if format == df_angle && sexagesimal_angle?? || format == df_angle_residual && sexagesimal_angle_residual?? || format == df_angle_uncertainty && sexagesimal_angle_uncertainty??>
+		<#assign signum  = (value < 0)?then(-1, 1)>
+		<#assign value   = signum * value>
+		<#assign degree  = value?floor>
+		<#assign minutes = ((value - degree) * 60)?floor>
+		<#assign seconds = ((((value - degree) * 60) - minutes) * 60)>
+		${signum * degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[format]?string[1..])}
+	<#else>
+		${value?string[format]}
+	</#if>
+  <#return>
+</#macro>
+
 <#compress>
 	<!DOCTYPE html>
 	<html lang="<#include "default/i18n/locale.ftlh" parse=false>">

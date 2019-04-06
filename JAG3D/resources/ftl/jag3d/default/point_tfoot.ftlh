@@ -62,12 +62,12 @@
 		
 		<#if group.type == "STOCHASTIC_POINT">
 			<#if group.dimension != 1>
-				<td>${group.redundancy_y?string[df_statistic]}</td>
-				<td>${group.redundancy_x?string[df_statistic]}</td>
+				<td><@printFormattedNumber value=group.redundancy_y format=df_statistic/></td>
+				<td><@printFormattedNumber value=group.redundancy_x format=df_statistic/></td>
 			</#if>
 		
 			<#if group.dimension != 2>
-				<td>${group.redundancy_z?string[df_statistic]}</td>
+				<td><@printFormattedNumber value=group.redundancy_z format=df_statistic/></td>
 			</#if>
 			
 			<#if group.dimension != 1>
@@ -82,12 +82,12 @@
 
 		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>
 			<#if group.dimension != 1>
-				<td>${group.max_gross_error_y?string[df_length_residual]}</td>
-				<td>${group.max_gross_error_x?string[df_length_residual]}</td>
+				<td><@printFormattedNumber value=group.max_gross_error_y format=df_length_residual/></td>
+				<td><@printFormattedNumber value=group.max_gross_error_x format=df_length_residual/></td>
 			</#if>
 		
 			<#if group.dimension != 2>
-				<td>${group.max_gross_error_z?string[df_length_residual]}</td>
+				<td><@printFormattedNumber value=group.max_gross_error_z format=df_length_residual/></td>
 			</#if>
 		</#if>
 		
@@ -127,7 +127,7 @@
 		</#if>
 		
 		<#if group.type == "STOCHASTIC_POINT">
-			<td>${group.omega?string[df_statistic]}</td>
+			<td><@printFormattedNumber value=group.omega format=df_statistic/></td>
 		</#if>
 		
 		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>
