@@ -40,7 +40,7 @@ class LevelingData {
 			this.v1  = v;
 			this.dv1 = d;
 		}
-		else if (!isFirstForeSightReading && this.endPointName.equals(name)) {
+		else if (!isFirstForeSightReading && (name == null || this.endPointName.equals(name))) {
 			this.v2  = v;
 			this.dv2 = d;
 		}
@@ -52,32 +52,44 @@ class LevelingData {
 			this.r1  = r;
 			this.dr1 = d;
 		}
-		else if (!isFirstBackSightReading && this.startPointName.equals(name)) {
+		else if (!isFirstBackSightReading && (name == null || this.startPointName.equals(name))) {
 			this.r2  = r;
 			this.dr2 = d;
 		}
 	}
 	
 	public double getDistance() {
-		double dist = 0;
-		if (this.dr1 != null && this.dv1 != null)
-			dist = dr1 + dv1;
-		if (this.dr2 != null && this.dv2 != null) {
-			dist += this.dr2 + this.dv2;
-			dist *= 0.5;
-		}
-		return dist;
+		double dr = 0;
+		double dv = 0;
+		
+		if (this.dr1 != null && this.dr2 != null && this.dr1 > 0 && this.dr2 > 0)
+			dr = 0.5 * (this.dr1 + this.dr2);
+		else if (this.dr1 != null && this.dr1 > 0)
+			dr = this.dr1;
+		
+		if (this.dv1 != null && this.dv2 != null && this.dv1 > 0 && this.dv2 > 0)
+			dv = 0.5 * (this.dv1 + this.dv2);
+		else if (this.dv1 != null && this.dv1 > 0)
+			dv = this.dv1;
+
+		return dr + dv;
 	}
 	
 	public double getDeltaH() {
-		double dh = 0;
-		if (this.r1 != null && this.v1 != null)
-			dh = this.r1 - this.v1;
-		if (this.r2 != null && this.v2 != null) {
-			dh += this.r2 - this.v2;
-			dh *= 0.5;
-		}
-		return dh;	
+		double r = 0;
+		double v = 0;
+		
+		if (this.r1 != null && this.r2 != null)
+			r = 0.5 * (this.r1 + this.r2);
+		else if (this.r1 != null)
+			r = this.r1;
+		
+		if (this.v1 != null && this.v2 != null)
+			v = 0.5 * (this.v1 + this.v2);
+		else if (this.v1 != null)
+			v = this.v1;
+
+		return r - v;	
 	}
 	
 	public String getStartPointName() {

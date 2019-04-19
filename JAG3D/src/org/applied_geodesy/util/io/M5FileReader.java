@@ -45,7 +45,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 
 public class M5FileReader extends SourceFileReader {
 	private String startPointName = null, loopId = null, lastPointName = null;
-	private Double rb = null, distRb = null;
+	private Double lastRb4Zb = null, distLastRb4Zb;
 	private int cnt = 0;
 	private LevelingData levelingData = null;
 	private Set<String> pointNames = new HashSet<String>();
@@ -158,7 +158,7 @@ public class M5FileReader extends SourceFileReader {
 					// --> Manche M5-Files enthalten keine Pkt fuer Wechselpunkte
 					if (pointName.trim().isEmpty()) {
 						pointName = this.lastPointName;
-						code    = "JAG3D";
+						code      = "JAG3D";
 					}
 					
 					double d = 0;
@@ -174,8 +174,13 @@ public class M5FileReader extends SourceFileReader {
 					if (this.levelingData == null) {
 						this.levelingData = new LevelingData();
 						this.startPointName = pointName;
-						this.rb = r;
-						this.distRb = d;
+						// Speichere letzten Rueckblick fuer mgl. Zwischenblicke R-I
+						this.lastRb4Zb     = r;
+						this.distLastRb4Zb = d;
+					}
+					else { // Speichere letzten Rueckblick fuer mgl. Zwischenblicke R-II bei bspw. RVVR
+						this.lastRb4Zb     = 0.5 * (this.lastRb4Zb + r);
+						this.distLastRb4Zb = 0.5 * (this.distLastRb4Zb + d);
 					}
 					this.levelingData.addBackSightReading(pointName, r, d);
 				}
@@ -188,7 +193,7 @@ public class M5FileReader extends SourceFileReader {
 						//pointName = "W"+(++cnt)+"_"+this.getFile().getName().substring(0, this.getFile().getName().lastIndexOf('.'));
 						pointName = String.format(Locale.ENGLISH, "%c%07d", 'W', ++this.cnt);
 						this.lastPointName = pointName;
-						code    = "JAG3D";
+						code               = "JAG3D";
 					}
 					double d = 0;
 					double v = Double.parseDouble(value3.trim());
@@ -227,11 +232,10 @@ public class M5FileReader extends SourceFileReader {
 						this.pointNames.add(pointName);
 					}
 					
-					if (this.rb != null) {
+					if (this.lastRb4Zb != null) {
 						LevelingData sideLevelingData = new LevelingData();
-						sideLevelingData.addBackSightReading(this.startPointName, this.rb, this.distRb == null ? 0 : this.distRb);
+						sideLevelingData.addBackSightReading(this.startPointName, this.lastRb4Zb, this.distLastRb4Zb == null ? 0 : this.distLastRb4Zb);
 						sideLevelingData.addForeSightReading(pointName, s, d);
-						
 						if (sideLevelingData != null)
 							this.addLevelingData(sideLevelingData);
 					}
@@ -242,7 +246,7 @@ public class M5FileReader extends SourceFileReader {
 					// --> Manche M5-Files enthalten keine Pkt fuer Wechselpunkte
 					if (pointName.trim().isEmpty()) {
 						pointName = this.lastPointName;
-						code    = "JAG3D";
+						code      = "JAG3D";
 					}
 					if (!this.pointNames.contains(pointName)) {
 						double z = Double.parseDouble(value5.trim());
