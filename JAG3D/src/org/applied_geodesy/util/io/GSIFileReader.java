@@ -82,7 +82,8 @@ public class GSIFileReader extends SourceFileReader {
 	private Map<String, PointRow> pointMap = new HashMap<String, PointRow>();
 	private String startPointName = null, endPointName = null, directionStartPointName = null;
 	private boolean isDirectionGroupWithEqualStation = true;
-
+	private LevelingData levelingData = null;
+	
 	private double ih = 0.0, th = 0.0;
 	private Double rb1 = null, vb1 = null, distRb1 = null, distVb1 = null;
 	private Double rb2 = null, vb2 = null, distRb2 = null, distVb2 = null;
@@ -101,7 +102,7 @@ public class GSIFileReader extends SourceFileReader {
 	private List<TerrestrialObservationRow> zenithAngles = null;
 
 	private TreeItem<TreeItemValue> lastTreeItem = null;
-	
+
 	public GSIFileReader(DimensionType dim) {
 		this.dim = dim;
 		this.reset();
@@ -141,6 +142,7 @@ public class GSIFileReader extends SourceFileReader {
 		this.distZb = null;
 		this.lastRb4Zb = null;
 		this.distLastRb4Zb = null;
+		this.levelingData = null;
 		
 		if (this.points1d == null)
 			this.points1d = new ArrayList<PointRow>();
@@ -199,12 +201,13 @@ public class GSIFileReader extends SourceFileReader {
 			this.lastTreeItem = this.savePoints(itemName, TreeItemType.DATUM_POINT_3D_LEAF, this.points3d);
 
 		// Speichere Daten
-		if ((this.dim == DimensionType.HEIGHT || this.dim == DimensionType.PLAN_AND_HEIGHT) && !this.leveling.isEmpty()) 
+		if ((this.dim == DimensionType.HEIGHT || this.dim == DimensionType.PLAN_AND_HEIGHT) && !this.leveling.isEmpty()) {
+			this.addLevelingData(this.levelingData);
 			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.LEVELING_LEAF, this.leveling);
-
-		if (this.dim != DimensionType.HEIGHT && !this.directions.isEmpty()) {
-			this.saveDirectionGroup();
 		}
+		if (this.dim != DimensionType.HEIGHT && !this.directions.isEmpty())
+			this.saveDirectionGroup();
+
 		if ((this.dim == DimensionType.PLAN || this.dim == DimensionType.PLAN_AND_HEIGHT) && !this.horizontalDistances.isEmpty()) 
 			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
 
@@ -369,7 +372,7 @@ public class GSIFileReader extends SourceFileReader {
 			this.distRb1 = null;
 			this.distRb2 = null;
 			this.distLastRb4Zb = null;
-
+			
 			// Speichere Richtungen, da diese Satzweise zu halten sind
 			if (this.dim != DimensionType.HEIGHT && !this.directions.isEmpty()) {
 				this.saveDirectionGroup();
@@ -454,38 +457,58 @@ public class GSIFileReader extends SourceFileReader {
 				dist2d = null;
 			}
 
-			// ermittle Hoehenunterschied aus 0.5 * (RI+RII) und ZB
-			if (this.lastRb4Zb != null && this.zb != null) {
-				deltaH = this.lastRb4Zb - this.zb;
-				this.zb = null;
-				if (this.distLastRb4Zb != null && this.distZb != null) {
-					dist2d = this.distLastRb4Zb + this.distZb;
-					this.distZb = null;
-				}
-			}
-
-			// ermittle Hoehenunterschied aus R1 und V1
-			if (this.rb1 != null && this.vb1 != null) {
-				deltaH = this.rb1 - this.vb1;
-				this.rb1 = this.vb1 = null;
-				if (this.distRb1 != null && this.distVb1 != null) {
-					dist2d = this.distRb1 + this.distVb1;
-					this.distRb1 = this.distVb1 = null;
-				}
-			}
-			
-			// ermittle Hoehenunterschied aus R2 und V2
-			else if (this.rb2 != null && this.vb2 != null) {
-				deltaH = this.rb2 - this.vb2;
-				this.rb2 = this.vb2 = null;
-				if (this.distRb2 != null && this.distVb2 != null) {
-					dist2d = this.distRb2 + this.distVb2;
-					this.distRb2 = this.distVb2 = null;
-				}
-			}
-
 			// Fuege Beobachtungen hinzu
 			if (this.startPointName != null && this.endPointName != null) {
+				/** Nivellement **/
+				// ermittle Hoehenunterschied aus 0.5 * (RI+RII) und ZB
+				if (this.lastRb4Zb != null && this.zb != null) {
+					// speichere letzten Datensatz
+					this.addLevelingData(this.levelingData);
+					this.levelingData = null;
+
+					LevelingData sideLevelingData = new LevelingData();
+					sideLevelingData.addBackSightReading(this.startPointName, this.lastRb4Zb, this.distLastRb4Zb != null ? this.distLastRb4Zb : 0, true);
+					sideLevelingData.addForeSightReading(this.endPointName,   this.zb, this.distZb != null ? this.distZb : 0, true);
+					
+					// speichere Zwischenblick direkt, da keine zweite Messung moeglich
+					this.addLevelingData(sideLevelingData);
+					sideLevelingData = null;
+					
+					this.zb = null;
+					this.distZb = null;
+				}
+
+				// ermittle Hoehenunterschied aus R1 und V1
+				if (this.rb1 != null && this.vb1 != null) {
+					// speichere letzten Datensatz
+					this.addLevelingData(this.levelingData);
+					this.levelingData = null;
+					
+					// erzeuge neuen Datensatz
+					if (this.levelingData == null)
+						this.levelingData = new LevelingData();
+
+					this.levelingData.addBackSightReading(this.startPointName, this.rb1, this.distRb1 != null ? this.distRb1 : 0, true);
+					this.levelingData.addForeSightReading(this.endPointName,   this.vb1, this.distVb1 != null ? this.distVb1 : 0, true);
+					
+					this.rb1 = this.vb1 = null;
+					this.distRb1 = this.distVb1 = null;
+				}
+				
+				// ermittle Hoehenunterschied aus R2 und V2
+				if (this.rb2 != null && this.vb2 != null) {
+					this.levelingData.addBackSightReading(this.startPointName, this.rb2, this.distRb2 != null ? this.distRb2 : 0, false);
+					this.levelingData.addForeSightReading(this.endPointName,   this.vb2, this.distVb2 != null ? this.distVb2 : 0, false);
+		
+					// speichere Datensatz
+					this.addLevelingData(this.levelingData);
+					this.levelingData = null;
+					
+					this.rb2 = this.vb2 = null;
+					this.distRb2 = this.distVb2 = null;
+				}
+				
+				/** Tachymetrie **/
 				if (deltaH != null) {
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
@@ -719,5 +742,25 @@ public class GSIFileReader extends SourceFileReader {
 		}			
 
 		return newTreeItem;
+	}
+	
+	private void addLevelingData(LevelingData levelingData) {
+		if (levelingData != null) {
+			double dist2D = levelingData.getDistance();
+			double deltaH = levelingData.getDeltaH();
+			
+			TerrestrialObservationRow obs = new TerrestrialObservationRow();
+			obs.setStartPointName(levelingData.getStartPointName());
+			obs.setEndPointName(levelingData.getEndPointName());
+	
+			obs.setInstrumentHeight(0.0);
+			obs.setReflectorHeight(0.0);
+			
+			if (dist2D > 0)
+				obs.setDistanceApriori(dist2D);
+			
+			obs.setValueApriori(deltaH);
+			this.leveling.add(obs);
+		}
 	}
 }
