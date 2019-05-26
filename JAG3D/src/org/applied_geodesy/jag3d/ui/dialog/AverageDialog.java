@@ -110,8 +110,9 @@ public class AverageDialog {
 			List<Observation> observations = null;
 			try {
 				preventClosing = true;
+				okButton.setDisable(true);
 				progressIndicatorPane.setVisible(true);
-				thresholdPane.setDisable(true);
+				settingPane.setDisable(true);
 
 				observations = this.dataBaseManager.averageDetermination(false);
 				return observations;
@@ -120,7 +121,7 @@ public class AverageDialog {
 			finally {
 				okButton.setDisable(false);
 				progressIndicatorPane.setVisible(false);
-				thresholdPane.setDisable(false);
+				settingPane.setDisable(false);
 				if (observations == null || observations.isEmpty())
 					preventClosing = false;
 			}
@@ -138,8 +139,7 @@ public class AverageDialog {
 	private Button okButton;
 	private Map<ObservationType, DoubleTextField> thresholdFieldMap = new HashMap<ObservationType, DoubleTextField>(10);
 	private UIAverageObservationTableBuilder tableBuilder = UIAverageObservationTableBuilder.getInstance();
-
-	private Node thresholdPane, progressIndicatorPane;
+	private Node settingPane, progressIndicatorPane;
 
 	private AverageDialog() {}
 
@@ -156,6 +156,7 @@ public class AverageDialog {
 			@Override
 			public void run() {
 				try {
+					averageDialog.reset();
 					averageDialog.dialog.getDialogPane().requestLayout();
 					Stage stage = (Stage) averageDialog.dialog.getDialogPane().getScene().getWindow();
 					stage.sizeToScene();
@@ -170,7 +171,7 @@ public class AverageDialog {
 
 	private void reset() {
 		this.preventClosing = false;
-		this.thresholdPane.setDisable(false);
+		this.settingPane.setDisable(false);
 		this.progressIndicatorPane.setVisible(false);
 		this.okButton.setDisable(false);
 	}
@@ -204,18 +205,19 @@ public class AverageDialog {
 			}
 		});
 
-		this.thresholdPane = this.createThresholdPane();
+		this.settingPane = this.createSettingPane();
 		this.progressIndicatorPane = this.createProgressIndicatorPane();
 		this.progressIndicatorPane.setVisible(false);
+		
 		StackPane stackPane = new StackPane();
 		stackPane.setAlignment(Pos.CENTER);
 		stackPane.setMaxSize(Double.MAX_VALUE, Region.USE_PREF_SIZE);
-		stackPane.getChildren().addAll(this.thresholdPane, this.progressIndicatorPane);
+		stackPane.getChildren().addAll(this.settingPane, this.progressIndicatorPane);
 
 		this.okButton.addEventFilter(ActionEvent.ACTION, new AverageEvent());
 		this.dialog.getDialogPane().setContent(stackPane);
 	}
-
+	
 	private Node createProgressIndicatorPane() {
 		VBox box = new VBox();
 		box.setAlignment(Pos.CENTER);
@@ -223,7 +225,7 @@ public class AverageDialog {
 		return box;
 	}
 
-	private VBox createThresholdPane() {
+	private VBox createSettingPane() {
 		GridPane gridPane = new GridPane();
 		gridPane.setMaxWidth(Double.MAX_VALUE);
 		gridPane.setHgap(20);
@@ -380,6 +382,7 @@ public class AverageDialog {
 	}
 
 	private void process() {
+		this.reset();
 		this.averageTask = new AverageTask(SQLManager.getInstance().getAdjustmentManager());
 		this.averageTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
 			@Override

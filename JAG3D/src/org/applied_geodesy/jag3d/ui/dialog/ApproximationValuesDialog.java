@@ -73,6 +73,7 @@ public class ApproximationValuesDialog {
 	private class StartAdjustmentEvent implements EventHandler<ActionEvent> {
 		@Override
 		public void handle(ActionEvent event) {
+			okButton.setDisable(true);
 			process();
 			event.consume();
 		}
@@ -180,6 +181,7 @@ public class ApproximationValuesDialog {
 
 	public static Optional<EstimationStateType> showAndWait() {
 		approximationValuesDialog.init();
+		approximationValuesDialog.reset();
 		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
 		Platform.runLater(new Runnable() {
 			@Override
