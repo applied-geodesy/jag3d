@@ -64,6 +64,16 @@ import javafx.stage.WindowEvent;
 
 public class CongruentPointDialog {
 	
+	private class CongruentPointEvent implements EventHandler<ActionEvent> {
+		@Override
+		public void handle(ActionEvent event) {
+			okButton.setDisable(true);
+			process();
+			event.consume();
+		}
+	}
+
+	
 	private class DimensionChangeListener implements ChangeListener<Boolean> {		
 		@Override
 		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
@@ -88,10 +98,7 @@ public class CongruentPointDialog {
 				return rows;
 			}
 			finally {
-				progressIndicatorPane.setVisible(false);
-				settingPane.setDisable(false);
-				okButton.setDisable(false);
-				preventClosing = false;
+				reset();
 			}
 		}
 		
@@ -128,11 +135,17 @@ public class CongruentPointDialog {
 	
 	public static Optional<Void> showAndWait() {
 		congruentPointDialog.init();
+		congruentPointDialog.reset();
+		tableBuilder.getTable().getItems().clear();
+		tableBuilder.getTable().getItems().add(tableBuilder.getEmptyRow());
 		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
 				try {
+					congruentPointDialog.reset();
+					tableBuilder.getTable().getItems().clear();
+					tableBuilder.getTable().getItems().add(tableBuilder.getEmptyRow());
 					congruentPointDialog.dialog.getDialogPane().requestLayout();
 					Stage stage = (Stage) congruentPointDialog.dialog.getDialogPane().getScene().getWindow();
 					stage.sizeToScene();
@@ -144,6 +157,13 @@ public class CongruentPointDialog {
 		});
 		return congruentPointDialog.dialog.showAndWait();
 	}
+	
+	private void reset() {
+		this.progressIndicatorPane.setVisible(false);
+		this.settingPane.setDisable(false);
+		this.okButton.setDisable(false);
+		this.preventClosing = false;
+	}
 
 	private void init() {
 		if (this.dialog != null)
@@ -153,7 +173,6 @@ public class CongruentPointDialog {
 		this.dialog.setTitle(i18n.getString("CongruentPointDialog.title", "Congruent points"));
 		this.dialog.setHeaderText(i18n.getString("CongruentPointDialog.header", "Find congruent points in project"));
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
-		this.okButton = (Button)this.dialog.getDialogPane().lookupButton(ButtonType.OK);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
 //		this.dialog.initStyle(StageStyle.UTILITY);
 		this.dialog.initOwner(window);
@@ -174,14 +193,8 @@ public class CongruentPointDialog {
 			}
 		});
 
-		this.okButton.addEventFilter(ActionEvent.ACTION, new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				preventClosing = true;
-				process();
-				event.consume();
-			}
-		});
+		this.okButton = (Button)this.dialog.getDialogPane().lookupButton(ButtonType.OK);
+		this.okButton.addEventFilter(ActionEvent.ACTION, new CongruentPointEvent());
 		
 		this.settingPane = this.createSettingPane();
 		this.progressIndicatorPane = this.createProgressIndicatorPane();
@@ -263,6 +276,7 @@ public class CongruentPointDialog {
 	}
 	
 	private void process() {
+		this.reset();
 		this.processSQLTask = new ProcessSQLTask();
 		this.processSQLTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
 			@Override
