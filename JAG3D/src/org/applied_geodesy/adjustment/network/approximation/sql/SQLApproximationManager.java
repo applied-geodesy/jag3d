@@ -120,10 +120,6 @@ public class SQLApproximationManager implements PropertyChangeListener {
 		if (this.freeNetwork && !this.estimateDatumPoints) {
 			this.initTargetSystems(true);
 		}
-		
-		// Nur um Punkt, die nicht bestimmbar sind, auszugeben
-		//this.initPointIds(this.isFreeNet && this.estimateDatumPoints);
-		
 
 		// Ermittle alle Punktnummern, die Standpunkte sind
 		this.completestationNames = this.getCompletestationNames();
@@ -133,7 +129,7 @@ public class SQLApproximationManager implements PropertyChangeListener {
 
 		// Initialisiere Lageausgleichung
 		List<Point> points2d = this.getStationPointsWithSubSystems(2);
-		if (points2d != null && points2d.size() > 0) {
+		if (points2d != null) { // Hier *nicht* die Laenge der Liste pruefen, da sonst underdeterminedPointNames2D nicht um Festpunkte reduziert wird!
 			int targetCounter = -1;
 			boolean converge = false;
 			List<PointBundle> notTransFormedBundles = new ArrayList<PointBundle>(1);
@@ -206,7 +202,7 @@ public class SQLApproximationManager implements PropertyChangeListener {
 		}
 
 		List<Point> points1d = this.getStationPointsWithSubSystems(1);
-		if (points1d != null && points1d.size() > 0) {
+		if (points1d != null) { // Hier *nicht* die Laenge der Liste pruefen, da sonst underdeterminedPointNames1D nicht um Festpunkte reduziert wird!
 			this.approximationAdjustment = new AutomatedApproximationAdjustment(this.targetSystem1d, points1d);
 			this.approximationAdjustment.addPropertyChangeListener(this);
 
