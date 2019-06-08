@@ -267,7 +267,7 @@ public class ZFileReader extends SourceFileReader {
 						try {this.ih = 0.001 * Integer.parseInt(key1.substring(2).trim());} catch(Exception e){}
 				}
 
-				if (line.substring(70, 71).equals("|") && line.length() > 71) {
+				if (line.length() > 71 && line.substring(70, 71).equals("|")) {
 					String attributes[] = line.substring(71, line.length()).split("\\|");
 					if (attributes.length > 0)
 						this.startPointCode = attributes[0].trim();
@@ -288,7 +288,7 @@ public class ZFileReader extends SourceFileReader {
 				}
 
 				String endPointCode = "";
-				if (line.substring(70, 71).equals("|") && line.length() > 71) {
+				if (line.length() > 71 && line.substring(70, 71).equals("|")) {
 					String attributes[] = line.substring(71, line.length()).split("\\|");
 					if (attributes.length > 0)
 						endPointCode = attributes[0].trim();
@@ -380,7 +380,7 @@ public class ZFileReader extends SourceFileReader {
 				value1 = sign * Double.parseDouble(line.substring(44, 56).trim());
 				value2 = sign * Double.parseDouble(line.substring(56, 68).trim());
 
-				if (line.substring(70, 71).equals("|") && line.length() > 71) {
+				if (line.length() > 71 && line.substring(70, 71).equals("|")) {
 					String attributes[] = line.substring(71, line.length()).split("\\|");
 					if (attributes.length > 0)
 						code = attributes[0].trim();
