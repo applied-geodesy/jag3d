@@ -56,26 +56,26 @@ import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.JAG3D;
 import org.applied_geodesy.jag3d.ui.dialog.ColumnImportDialog;
 import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
+import org.applied_geodesy.jag3d.ui.io.BeoFileReader;
+import org.applied_geodesy.jag3d.ui.io.CongruenceAnalysisFlatFileReader;
+import org.applied_geodesy.jag3d.ui.io.DL100FileReader;
 import org.applied_geodesy.jag3d.ui.io.DefaultFileChooser;
+import org.applied_geodesy.jag3d.ui.io.GSIFileReader;
+import org.applied_geodesy.jag3d.ui.io.M5FileReader;
+import org.applied_geodesy.jag3d.ui.io.ObservationFlatFileReader;
+import org.applied_geodesy.jag3d.ui.io.PointFlatFileReader;
+import org.applied_geodesy.jag3d.ui.io.ZFileReader;
+import org.applied_geodesy.jag3d.ui.io.xml.HeXMLFileReader;
+import org.applied_geodesy.jag3d.ui.io.xml.JobXMLFileReader;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.i18.I18N;
-import org.applied_geodesy.util.io.BeoFileReader;
-import org.applied_geodesy.util.io.CongruenceAnalysisFlatFileReader;
-import org.applied_geodesy.util.io.DL100FileReader;
 import org.applied_geodesy.util.io.DimensionType;
-import org.applied_geodesy.util.io.GSIFileReader;
 import org.applied_geodesy.util.io.LockFileReader;
-import org.applied_geodesy.util.io.M5FileReader;
-import org.applied_geodesy.util.io.ObservationFlatFileReader;
-import org.applied_geodesy.util.io.PointFlatFileReader;
 import org.applied_geodesy.util.io.SourceFileReader;
-import org.applied_geodesy.util.io.ZFileReader;
 import org.applied_geodesy.util.io.properties.HTTPPropertiesLoader;
 import org.applied_geodesy.util.io.properties.URLParameter;
 import org.applied_geodesy.util.io.report.FTLReport;
-import org.applied_geodesy.util.io.xml.HeXMLFileReader;
-import org.applied_geodesy.util.io.xml.JobXMLFileReader;
 import org.applied_geodesy.util.sql.HSQLDB;
 import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
 import org.applied_geodesy.version.jag3d.Version;
@@ -726,7 +726,7 @@ public class UIMenuBuilder {
 		}
 	}
 
-	private void importFile(SourceFileReader fileReader, ExtensionFilter[] extensionFilters, String title) {
+	private void importFile(SourceFileReader<TreeItem<TreeItemValue>> fileReader, ExtensionFilter[] extensionFilters, String title) {
 		List<File> selectedFiles = DefaultFileChooser.showOpenMultipleDialog(
 				title,
 				null,
@@ -739,7 +739,7 @@ public class UIMenuBuilder {
 		this.importFile(fileReader, selectedFiles);
 	}
 	
-	private void importFile(SourceFileReader fileReader, List<File> selectedFiles) {
+	private void importFile(SourceFileReader<TreeItem<TreeItemValue>> fileReader, List<File> selectedFiles) {
 		if (selectedFiles == null || selectedFiles.isEmpty())
 			return;
 
@@ -900,9 +900,9 @@ public class UIMenuBuilder {
 			if (selectedFiles == null || selectedFiles.isEmpty())
 				return;
 			
-			Optional<SourceFileReader> optional = ColumnImportDialog.showAndWait(selectedFiles.get(0));
+			Optional<SourceFileReader<TreeItem<TreeItemValue>>> optional = ColumnImportDialog.showAndWait(selectedFiles.get(0));
 			if (optional.isPresent() && optional.get() != null) {
-				SourceFileReader fileReader = optional.get();
+				SourceFileReader<TreeItem<TreeItemValue>> fileReader = optional.get();
 				this.importFile(fileReader, selectedFiles);
 			}	
 			break;

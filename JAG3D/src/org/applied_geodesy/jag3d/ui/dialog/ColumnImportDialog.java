@@ -35,12 +35,13 @@ import java.util.regex.Pattern;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.jag3d.ui.io.CSVObservationFileReader;
+import org.applied_geodesy.jag3d.ui.io.CSVPointFileReader;
+import org.applied_geodesy.jag3d.ui.io.ColumnDefinedObservationFileReader;
+import org.applied_geodesy.jag3d.ui.io.ColumnDefinedPointFileReader;
 import org.applied_geodesy.jag3d.ui.textfield.LimitedTextField;
+import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.util.i18.I18N;
-import org.applied_geodesy.util.io.CSVObservationFileReader;
-import org.applied_geodesy.util.io.CSVPointFileReader;
-import org.applied_geodesy.util.io.ColumnDefinedObservationFileReader;
-import org.applied_geodesy.util.io.ColumnDefinedPointFileReader;
 import org.applied_geodesy.util.io.PreviewFileReader;
 import org.applied_geodesy.util.io.SourceFileReader;
 import org.applied_geodesy.util.io.csv.CSVColumnType;
@@ -72,6 +73,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.TextFormatter.Change;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -246,7 +248,7 @@ public class ColumnImportDialog {
 	
 	private I18N i18n = I18N.getInstance();
 	private static ColumnImportDialog columnImportDialog = new ColumnImportDialog();
-	private Dialog<SourceFileReader> dialog = null;
+	private Dialog<SourceFileReader<TreeItem<TreeItemValue>>> dialog = null;
 	private Window window;
 
 	private int maxCharactersPerColumn[] = null;
@@ -277,7 +279,7 @@ public class ColumnImportDialog {
 		columnImportDialog.window = owner;
 	}
 	
-	public static Optional<SourceFileReader> showAndWait(File selectedFile) {
+	public static Optional<SourceFileReader<TreeItem<TreeItemValue>>> showAndWait(File selectedFile) {
 		if (selectedFile == null)
 			return null;
 
@@ -310,7 +312,7 @@ public class ColumnImportDialog {
 		if (this.dialog != null)
 			return;
 		
-		this.dialog = new Dialog<SourceFileReader>();
+		this.dialog = new Dialog<SourceFileReader<TreeItem<TreeItemValue>>>();
 		this.dialog.setTitle(i18n.getString("ColumnImportDialog.title", "Column based file import"));
 		this.dialog.setHeaderText(i18n.getString("ColumnImportDialog.header", "User-defined import of column-based files"));
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
@@ -320,9 +322,9 @@ public class ColumnImportDialog {
 		
 		this.dialog.getDialogPane().setContent(this.createMainPane());
 
-		this.dialog.setResultConverter(new Callback<ButtonType, SourceFileReader>() {
+		this.dialog.setResultConverter(new Callback<ButtonType, SourceFileReader<TreeItem<TreeItemValue>>>() {
 			@Override
-			public SourceFileReader call(ButtonType buttonType) {
+			public SourceFileReader<TreeItem<TreeItemValue>> call(ButtonType buttonType) {
 				if (buttonType == ButtonType.OK) {
 					return getSourceFileReader();					
 				}
@@ -1284,7 +1286,7 @@ public class ColumnImportDialog {
 	    return null;
 	}
     
-    private SourceFileReader getSourceFileReader() {
+    private SourceFileReader<TreeItem<TreeItemValue>> getSourceFileReader() {
     	List<ColumnRange> columnRanges = new ArrayList<ColumnRange>(this.textFieldList.size());
     	for (TextField textField : this.textFieldList) {
     		ColumnRange columnRange = this.getColumnRange(textField);
