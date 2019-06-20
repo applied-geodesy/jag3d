@@ -26,12 +26,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 
-import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.util.i18.I18N;
 
-import javafx.scene.control.TreeItem;
-
-public abstract class SourceFileReader extends LockFileReader {
+public abstract class SourceFileReader<T> extends LockFileReader {
 	protected static I18N i18n = I18N.getInstance();
 	
 	protected SourceFileReader() {
@@ -57,7 +54,7 @@ public abstract class SourceFileReader extends LockFileReader {
 		super.setPath(path);
 	}
 	
-	public abstract TreeItem<TreeItemValue> readAndImport() throws IOException, SQLException;
+	public abstract T readAndImport() throws IOException, SQLException;
 
 	public abstract void reset();
 

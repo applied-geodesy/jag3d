@@ -75,7 +75,7 @@ public abstract class LockFileReader {
 		this.ignoreStartString = str;
 	}
   
-	void read() throws IOException, SQLException {
+	public void read() throws IOException, SQLException {
 		if (this.sourceFilePath == null || 
 				!Files.exists(this.sourceFilePath) ||
 				!Files.isRegularFile(this.sourceFilePath) ||

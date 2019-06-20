@@ -36,33 +36,33 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-abstract class XMLNamespaceContext implements NamespaceContext {
+public abstract class XMLNamespaceContext implements NamespaceContext {
 	// https://www.ibm.com/developerworks/library/x-nmspccontext/
 	private final String defaultPrefix;
 	private Map<String, String> prefix2Uri = new HashMap<String, String>();
 	private Map<String, LinkedHashSet<String>> uri2Prefix = new HashMap<String, LinkedHashSet<String>>();
 
-	XMLNamespaceContext(Document document) {
+	public XMLNamespaceContext(Document document) {
 		this(document, Boolean.FALSE);
 	}
 	
-	XMLNamespaceContext(Document document, boolean topLevelOnly) {
+	public XMLNamespaceContext(Document document, boolean topLevelOnly) {
 		this(document, XMLConstants.DEFAULT_NS_PREFIX, XMLConstants.NULL_NS_URI, topLevelOnly);
 	}
 	
-	XMLNamespaceContext(Document document, String defaultPrefix, String defaultURI) {
+	public XMLNamespaceContext(Document document, String defaultPrefix, String defaultURI) {
 		this(document, defaultPrefix, defaultURI, Boolean.FALSE);
 	}
 	
-	XMLNamespaceContext(Document document, String defaultPrefixes[], String defaultURIs[]) {
+	public XMLNamespaceContext(Document document, String defaultPrefixes[], String defaultURIs[]) {
 		this(document, defaultPrefixes, defaultURIs, Boolean.FALSE);
 	}
 	
-	XMLNamespaceContext(Document document, String defaultPrefix, String defaultURI, boolean topLevelOnly) {
+	public XMLNamespaceContext(Document document, String defaultPrefix, String defaultURI, boolean topLevelOnly) {
 		this(document, new String[] {defaultPrefix}, new String[] {defaultURI}, Boolean.FALSE);
 	}
 	
-	XMLNamespaceContext(Document document, String defaultPrefixes[], String defaultURIs[], boolean topLevelOnly) {
+	public XMLNamespaceContext(Document document, String defaultPrefixes[], String defaultURIs[], boolean topLevelOnly) {
 		this.defaultPrefix = defaultPrefixes == null || defaultPrefixes.length == 0 ? XMLConstants.DEFAULT_NS_PREFIX : defaultPrefixes[0];
 		for (int i = 0; i < defaultPrefixes.length; i++) {
 			this.putInCache(
@@ -110,9 +110,9 @@ abstract class XMLNamespaceContext implements NamespaceContext {
 		}
 	}
 	
-	abstract String getPrefix(Attr attribute);
+	public abstract String getPrefix(Attr attribute);
 	
-	String getDefaultPrefix() {
+	public String getDefaultPrefix() {
 		return this.defaultPrefix;
 	}
 
