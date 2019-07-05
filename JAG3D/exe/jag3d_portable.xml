@@ -3,7 +3,7 @@
   <dontWrapJar>true</dontWrapJar>
   <headerType>gui</headerType>
   <jar>jag3d.jar</jar>
-  <outfile>jag3d_portable.exe</outfile>
+  <outfile>jag3d.exe</outfile>
   <errTitle>Error</errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
@@ -15,7 +15,7 @@
   <manifest></manifest>
   <icon>JAG3D.ico</icon>
   <jre>
-    <path>openjdk-11.0.2_windows-x64_bin\jdk-11.0.2\</path>
+    <path>openjdk\</path>
     <bundledJre64Bit>true</bundledJre64Bit>
     <bundledJreAsFallback>true</bundledJreAsFallback>
     <minVersion>9.0.0</minVersion>
@@ -24,16 +24,16 @@
     <runtimeBits>64/32</runtimeBits>
   </jre>
   <versionInfo>
-    <fileVersion>20.19.01.29</fileVersion>
-    <txtFileVersion>20190129</txtFileVersion>
+    <fileVersion>20.19.07.05</fileVersion>
+    <txtFileVersion>20190705</txtFileVersion>
     <fileDescription>Java Applied Geodesy 3D (JAG3D) - Least-Squares Adjustment Software for Geodetic Sciences</fileDescription>
     <copyright>Michael Loesler</copyright>
-    <productVersion>20.19.01.29</productVersion>
-    <txtProductVersion>20190129</txtProductVersion>
+    <productVersion>20.19.07.05</productVersion>
+    <txtProductVersion>20190705</txtProductVersion>
     <productName>Java Applied Geodesy 3D (JAG3D) - Least-Squares Adjustment Software for Geodetic Sciences</productName>
     <companyName>Applied Geodesy - https://applied-geodesy.org</companyName>
     <internalName>JAG3D</internalName>
-    <originalFilename>jag3d_portable.exe</originalFilename>
+    <originalFilename>jag3d.exe</originalFilename>
     <trademarks>Applied Geodesy</trademarks>
     <language>ENGLISH_UK</language>
   </versionInfo>
