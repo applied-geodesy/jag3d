@@ -76,23 +76,23 @@ public class GraphicExtent {
 	public void reset() {
 		boolean isExtended = false;
 
-		if (this.getMinX() != Double.MAX_VALUE) {
-			this.setMinX(Double.MAX_VALUE);
+		if (this.getMinX() != Double.POSITIVE_INFINITY) { // MAX_VALUE
+			this.setMinX(Double.POSITIVE_INFINITY);
 			isExtended = true;
 		}
 
-		if (this.getMinY() != Double.MAX_VALUE) {
-			this.setMinY(Double.MAX_VALUE);
+		if (this.getMinY() != Double.POSITIVE_INFINITY) { // MAX_VALUE
+			this.setMinY(Double.POSITIVE_INFINITY);
 			isExtended = true;
 		}
 
-		if (this.getMaxX() != Double.MIN_VALUE) {
-			this.setMaxX(Double.MIN_VALUE);
+		if (this.getMaxX() != Double.NEGATIVE_INFINITY) { // -MAX_VALUE
+			this.setMaxX(Double.NEGATIVE_INFINITY);
 			isExtended = true;
 		}
 
-		if (this.getMaxY() != Double.MIN_VALUE) {
-			this.setMaxY(Double.MIN_VALUE);
+		if (this.getMaxY() != Double.NEGATIVE_INFINITY) { // -MAX_VALUE
+			this.setMaxY(Double.NEGATIVE_INFINITY);
 			isExtended = true;
 		}
 
@@ -114,7 +114,7 @@ public class GraphicExtent {
 
 	public GraphicExtent merge(double x, double y) {
 		boolean isExtended = false;
-		
+
 		if (this.getMinX() > x) {
 			this.setMinX(x);
 			isExtended = true;
