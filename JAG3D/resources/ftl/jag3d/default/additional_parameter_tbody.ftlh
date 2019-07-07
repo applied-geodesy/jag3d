@@ -4,6 +4,8 @@
 			<#assign param_unit_type="ANGLE">
 		<#elseif param.type == 'SCALE'>
 			<#assign param_unit_type="SCALE">
+		<#elseif param.type == 'REFRACTION_INDEX'>
+			<#assign param_unit_type="REFRACTION_INDEX">	
 		</#if>
 		<tr>
 			<th>${param?is_first?then(group.name,'')}</th>
@@ -30,9 +32,11 @@
 				<#if param_unit_type == "ANGLE">
 					<@printFormattedNumber value=param.value format=df_angle/> ${unit_abbr_angle}
 				<#elseif param_unit_type == "LENGTH">
-					<@printFormattedNumber value=param.value format=df_length_residual/> ${unit_abbr_length_residual}
-				<#else>
+					<@printFormattedNumber value=param.value format=df_length/> ${unit_abbr_length}
+				<#elseif param_unit_type == "SCALE">
 					<@printFormattedNumber value=param.value format=df_scale/> ${unit_abbr_scale}
+				<#else>
+					<@printFormattedNumber value=param.value format=df_statistic/>
 				</#if>
 			</td>
 			
@@ -41,8 +45,10 @@
 					<@printFormattedNumber value=param.sigma format=df_angle_uncertainty/> ${unit_abbr_angle_uncertainty}
 				<#elseif param_unit_type == "LENGTH">
 					<@printFormattedNumber value=param.sigma format=df_length_uncertainty/> ${unit_abbr_length_uncertainty}
-				<#else>
+				<#elseif param_unit_type == "SCALE">
 					<@printFormattedNumber value=param.sigma format=df_scale_uncertainty/> ${unit_abbr_scale_uncertainty}
+				<#else>
+					<@printFormattedNumber value=param.sigma format=df_statistic/>
 				</#if>
 			</td>
 			
@@ -51,8 +57,10 @@
 					<@printFormattedNumber value=param.confidence format=df_angle_uncertainty/> ${unit_abbr_angle_uncertainty}
 				<#elseif param_unit_type == "LENGTH">
 					<@printFormattedNumber value=param.confidence format=df_length_uncertainty/> ${unit_abbr_length_uncertainty}
-				<#else>
+				<#elseif param_unit_type == "SCALE">
 					<@printFormattedNumber value=param.confidence format=df_scale_uncertainty/> ${unit_abbr_scale_uncertainty}
+				<#else>
+					<@printFormattedNumber value=param.confidence format=df_statistic/>
 				</#if>
 			</td>
 			
@@ -62,8 +70,10 @@
 					<@printFormattedNumber value=param.gross_error format=df_angle_residual/> ${unit_abbr_angle_residual}
 				<#elseif param_unit_type == "LENGTH">
 					<@printFormattedNumber value=param.gross_error format=df_length_residual/> ${unit_abbr_length_residual}
-				<#else>
+				<#elseif param_unit_type == "SCALE">
 					<@printFormattedNumber value=param.gross_error format=df_scale_residual/> ${unit_abbr_scale_residual}
+				<#else>
+					<@printFormattedNumber value=param.gross_error format=df_statistic/>
 				</#if>
 			</td>
 			
@@ -72,8 +82,10 @@
 					<@printFormattedNumber value=param.minimal_detectable_bias format=df_angle_residual/> ${unit_abbr_angle_residual}
 				<#elseif param_unit_type == "LENGTH">
 					<@printFormattedNumber value=param.minimal_detectable_bias format=df_length_residual/> ${unit_abbr_length_residual}
-				<#else>
+				<#elseif param_unit_type == "SCALE">
 					<@printFormattedNumber value=param.minimal_detectable_bias format=df_scale_residual/> ${unit_abbr_scale_residual}
+				<#else>
+					<@printFormattedNumber value=param.minimal_detectable_bias format=df_statistic/>
 				</#if>
 			</td>
 
