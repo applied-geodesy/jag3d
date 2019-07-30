@@ -35,7 +35,6 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 
 import org.applied_geodesy.adjustment.Constant;
@@ -372,7 +371,6 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 							}
 						}
 					}
-					
 					if (!setupId.isEmpty() && !pointName.isEmpty() && this.pointNames.contains(pointName))
 						this.setups.put(setupId, new InstrumentSetup(pointName, ih));
 				}
@@ -599,15 +597,33 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 			if (this.dim == DimensionType.SPATIAL && !this.gnss3D.isEmpty())
 				this.lastTreeItem = this.saveGNSSObservations(itemName, TreeItemType.GNSS_3D_LEAF, this.gnss3D);
 
-		} catch (ParserConfigurationException e) {
+		} 
+//		catch (ParserConfigurationException e) {
+//			e.printStackTrace();
+//			this.isValidDocument = false;
+//		} 
+//		catch (SAXException e) {
+//			this.isValidDocument = false;
+//			e.printStackTrace();
+//		} 
+//		catch (IOException e) {
+//			this.isValidDocument = false;
+//			e.printStackTrace();
+//		}
+		catch (IOException e) {
 			e.printStackTrace();
 			this.isValidDocument = false;
-		} catch (SAXException e) {
-			this.isValidDocument = false;
+			throw new IOException(e);
+		}
+		catch (SQLException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
 			this.isValidDocument = false;
+			throw new SQLException(e);
+		}
+		catch (Exception e) {
 			e.printStackTrace();
+			this.isValidDocument = false;
+			throw new IOException(e);
 		}
 		
 		this.reset();
