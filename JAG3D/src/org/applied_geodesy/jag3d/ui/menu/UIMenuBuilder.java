@@ -33,7 +33,6 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -748,7 +747,7 @@ public class UIMenuBuilder {
 			fileReader.setPath(file.toPath());
 			try {
 				lastItem = fileReader.readAndImport();
-			} catch (IOException | SQLException e) {
+			} catch (Exception e) { //IOException | SQLException
 				e.printStackTrace();
 				OptionDialog.showThrowableDialog (
 						i18n.getString("UIMenuBuilder.message.error.import.exception.title", "I/O Error"),
