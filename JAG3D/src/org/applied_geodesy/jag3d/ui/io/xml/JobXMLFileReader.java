@@ -35,7 +35,6 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 
 import org.applied_geodesy.adjustment.Constant;
@@ -492,15 +491,33 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 			if (this.dim == DimensionType.SPATIAL && !this.zenithAngles.isEmpty()) 
 				this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
 
-		} catch (ParserConfigurationException e) {
+		} 
+//		catch (ParserConfigurationException e) {
+//			e.printStackTrace();
+//			this.isValidDocument = false;
+//		} 
+//		catch (SAXException e) {
+//			this.isValidDocument = false;
+//			e.printStackTrace();
+//		} 
+//		catch (IOException e) {
+//			this.isValidDocument = false;
+//			e.printStackTrace();
+//		}
+		catch (IOException e) {
 			e.printStackTrace();
 			this.isValidDocument = false;
-		} catch (SAXException e) {
-			this.isValidDocument = false;
+			throw new IOException(e);
+		}
+		catch (SQLException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
 			this.isValidDocument = false;
+			throw new SQLException(e);
+		}
+		catch (Exception e) {
 			e.printStackTrace();
+			this.isValidDocument = false;
+			throw new IOException(e);
 		}
 		
 		this.reset();
