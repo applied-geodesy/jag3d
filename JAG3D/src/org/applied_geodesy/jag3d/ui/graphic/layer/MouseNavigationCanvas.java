@@ -253,7 +253,7 @@ class MouseNavigationCanvas extends ResizableCanvas {
 		double x = this.getWidth() - padding;
 		double y = this.getHeight() - padding;
 
-		double worldScale = options.convertLengthToView(extentScale * scaleBarWidth);
+		double worldScale = this.options.convertLengthToView(extentScale * scaleBarWidth);
 		int exponent = (int)Math.log10(worldScale);
 		double magnitude = Math.pow(10, exponent);
 		double ratio = Math.ceil(worldScale/magnitude);
@@ -281,7 +281,7 @@ class MouseNavigationCanvas extends ResizableCanvas {
 			format = "%." + Math.abs(exponent) + "f %s";
 		
 		// estimate text size
-		Text scaleLabel = new Text(String.format(Locale.ENGLISH, format, scaleSegments*ratio*magnitude, options.getFormatterOptions().get(CellValueType.LENGTH).getUnit().getAbbreviation()));
+		Text scaleLabel = new Text(String.format(Locale.ENGLISH, format, scaleSegments*ratio*magnitude, this.options.getFormatterOptions().get(CellValueType.LENGTH).getUnit().getAbbreviation()));
 		scaleLabel.setFont(gc.getFont());
 		double scaleLabelWidth = scaleLabel.getBoundsInLocal().getWidth();
 
@@ -303,10 +303,10 @@ class MouseNavigationCanvas extends ResizableCanvas {
 		if (Double.isNaN(worldCoordinate.getX()) || Double.isNaN(worldCoordinate.getY()))
 			this.coordinatePanel.setText(null);
 		else {
-			String x = options.toLengthFormat(worldCoordinate.getX(), true);
-			String y = options.toLengthFormat(worldCoordinate.getY(), true);
-
-			this.coordinatePanel.setText(String.format("[x = %s / y = %s]", x, y));
+			String x = this.options.toLengthFormat(worldCoordinate.getX(), true);
+			String y = this.options.toLengthFormat(worldCoordinate.getY(), true);
+			// x,y (math. System)
+			this.coordinatePanel.setText(String.format("[y = %s / x = %s]", x, y));
 		}
 	}
 	
