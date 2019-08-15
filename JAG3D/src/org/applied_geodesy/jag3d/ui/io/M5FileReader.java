@@ -115,7 +115,8 @@ public class M5FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 	@Override
 	public void parse(String line) { 
-		if (!line.toUpperCase().startsWith("FOR M5") || line.length() < 118 || line.length() < 119 && line.toUpperCase().charAt(118) == 'E')
+		// an error in M5 is denoted by an E after the last |-seperator
+		if (!line.toUpperCase().startsWith("FOR M5") || line.length() < 118 || !line.trim().endsWith("|"))
 			return;
 
 		String T2a    = line.substring( 17, 20).trim();
