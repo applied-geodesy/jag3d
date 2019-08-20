@@ -191,7 +191,10 @@ public class SQLAdjustmentManager {
 
 		// wenn 2D Projektionen nicht moeglich sind, werden keine Reduktionen durchgefuehrt
 		if (this.projection.getType() != ProjectionType.NONE && !this.applyableProjection) {
-			throw new IllegalProjectionPropertyException("Projection cannot applied to observations! " + this.projection.getType());
+			if (this.pure1DNetwork)
+				throw new IllegalProjectionPropertyException("Projection cannot applied to observations of leveling network! " + this.projection.getType());
+			else
+				throw new IllegalProjectionPropertyException("Projection cannot applied to observations because the coordinates are invalid, e.g. missing zone number! " + this.projection.getType());
 		}
 
 		// Fuege Beobachtungen zu den Punkten hinzu
