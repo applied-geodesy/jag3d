@@ -611,4 +611,8 @@ public class UITreeBuilder {
 	final void setIgnoreEvent(final boolean ignoreEvent) {
 		this.ignoreEventProperty().set(ignoreEvent);
 	}
+	
+	public TreeItem<TreeItemValue> getDirectoryItemByType(TreeItemType itemType) {
+		return this.directoryItemMap.get(itemType);
+	}
 }

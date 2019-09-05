@@ -114,6 +114,7 @@ import javafx.application.HostServices;
 import javafx.collections.FXCollections;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TreeItem;
 import javafx.scene.paint.Color;
 
 public class SQLManager {
@@ -3456,95 +3457,126 @@ public class SQLManager {
 		stmt.execute();
 	}
 	
-	public void searchAndReplacePointNames(String searchRegex, String replaceRegex, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
+	public void searchAndReplacePointNames(String searchRegex, String replaceRegex, boolean applyToWholeProject, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
-		TreeItemType treeItemType = itemValue.getItemType();
+		if (applyToWholeProject) {
+			UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
+			TreeItemType[] itemTypes = TreeItemType.values();
+			for (TreeItemType itemType : itemTypes) {
+				if (TreeItemType.isPointTypeDirectory(itemType) ||
+						TreeItemType.isObservationTypeDirectory(itemType) ||
+						TreeItemType.isGNSSObservationTypeDirectory(itemType) ||
+						TreeItemType.isCongruenceAnalysisTypeDirectory(itemType)) {
 
-		switch(treeItemType) {
-		case REFERENCE_POINT_1D_LEAF:
-		case REFERENCE_POINT_2D_LEAF:
-		case REFERENCE_POINT_3D_LEAF:
-		case STOCHASTIC_POINT_1D_LEAF:
-		case STOCHASTIC_POINT_2D_LEAF:
-		case STOCHASTIC_POINT_3D_LEAF:
-		case DATUM_POINT_1D_LEAF:
-		case DATUM_POINT_2D_LEAF:
-		case DATUM_POINT_3D_LEAF:
-		case NEW_POINT_1D_LEAF:
-		case NEW_POINT_2D_LEAF:
-		case NEW_POINT_3D_LEAF:
-			if (itemValue instanceof PointTreeItemValue) {
-				PointTreeItemValue pointItemValue = (PointTreeItemValue)itemValue;
-				PointTreeItemValue[] selectedPointItemValuesArray = null;
-				Set<PointTreeItemValue> selectedPointItemValues = new LinkedHashSet<PointTreeItemValue>();
-				selectedPointItemValues.add(pointItemValue);
+					TreeItem<TreeItemValue> parent = treeBuilder.getDirectoryItemByType(itemType);
 
-				if (selectedTreeItemValues != null) {
-					for (TreeItemValue selectedItem : selectedTreeItemValues) {
-						if (selectedItem instanceof PointTreeItemValue)
-							selectedPointItemValues.add((PointTreeItemValue)selectedItem);
+					if (parent != null && !parent.getChildren().isEmpty()) {
+						List<TreeItem<TreeItemValue>> items = parent.getChildren();
+						TreeItemValue[] itemValues = new TreeItemValue[items.size()];
+						for (int i = 0; i < itemValues.length; i++) 
+							itemValues[i] = items.get(i).getValue();
+						
+						this.searchAndReplacePointNames(searchRegex, replaceRegex, false, itemValues[0], itemValues);
 					}
 				}
-				selectedPointItemValuesArray = selectedPointItemValues.toArray(new PointTreeItemValue[selectedPointItemValues.size()]);
-				this.searchAndReplacePointNames(searchRegex, replaceRegex, selectedPointItemValuesArray);
-				this.loadPoints(pointItemValue, selectedPointItemValuesArray);
 			}
-			break;
 			
-		case CONGRUENCE_ANALYSIS_1D_LEAF:
-		case CONGRUENCE_ANALYSIS_2D_LEAF:
-		case CONGRUENCE_ANALYSIS_3D_LEAF:
-			if (itemValue instanceof CongruenceAnalysisTreeItemValue) {
-				CongruenceAnalysisTreeItemValue congruenceAnalysisTreeItemValue = (CongruenceAnalysisTreeItemValue)itemValue;
-				CongruenceAnalysisTreeItemValue[] selectedCongruenceAnalysisItemValuesArray = null;
-				Set<CongruenceAnalysisTreeItemValue> selectedCongruenceAnalysisItemValues = new LinkedHashSet<CongruenceAnalysisTreeItemValue>();
-				selectedCongruenceAnalysisItemValues.add(congruenceAnalysisTreeItemValue);
+			List<TreeItem<TreeItemValue>> selectedItems = new ArrayList<TreeItem<TreeItemValue>>(treeBuilder.getTree().getSelectionModel().getSelectedItems());
+			if (selectedItems != null && !selectedItems.isEmpty()) {
+				treeBuilder.getTree().getSelectionModel().clearSelection();
+				for (TreeItem<TreeItemValue> selectedItem : selectedItems)
+					treeBuilder.getTree().getSelectionModel().select(selectedItem);
+			}
+		}
+		else {
+			TreeItemType treeItemType = itemValue.getItemType();
 
-				if (selectedTreeItemValues != null) {
-					for (TreeItemValue selectedItem : selectedTreeItemValues) {
-						if (selectedItem instanceof CongruenceAnalysisTreeItemValue)
-							selectedCongruenceAnalysisItemValues.add((CongruenceAnalysisTreeItemValue)selectedItem);
-					}
-				}
-				selectedCongruenceAnalysisItemValuesArray = selectedCongruenceAnalysisItemValues.toArray(new CongruenceAnalysisTreeItemValue[selectedCongruenceAnalysisItemValues.size()]);
-				this.searchAndReplacePointNames(searchRegex, replaceRegex, selectedCongruenceAnalysisItemValuesArray);
-				this.loadCongruenceAnalysisPointPair(congruenceAnalysisTreeItemValue, selectedCongruenceAnalysisItemValuesArray);
-			}
-			break;
-			
-		case LEVELING_LEAF:
-		case DIRECTION_LEAF:
-		case HORIZONTAL_DISTANCE_LEAF:
-		case SLOPE_DISTANCE_LEAF:
-		case ZENITH_ANGLE_LEAF:
-		case GNSS_1D_LEAF:
-		case GNSS_2D_LEAF:
-		case GNSS_3D_LEAF:
-			if (itemValue instanceof ObservationTreeItemValue) {
-				ObservationTreeItemValue observationItemValue = (ObservationTreeItemValue)itemValue;
-				ObservationTreeItemValue[] selectedObservationItemValuesArray = null;
-				Set<ObservationTreeItemValue> selectedObservationItemValues = new LinkedHashSet<ObservationTreeItemValue>();
-				selectedObservationItemValues.add(observationItemValue);
+			switch(treeItemType) {
+			case REFERENCE_POINT_1D_LEAF:
+			case REFERENCE_POINT_2D_LEAF:
+			case REFERENCE_POINT_3D_LEAF:
+			case STOCHASTIC_POINT_1D_LEAF:
+			case STOCHASTIC_POINT_2D_LEAF:
+			case STOCHASTIC_POINT_3D_LEAF:
+			case DATUM_POINT_1D_LEAF:
+			case DATUM_POINT_2D_LEAF:
+			case DATUM_POINT_3D_LEAF:
+			case NEW_POINT_1D_LEAF:
+			case NEW_POINT_2D_LEAF:
+			case NEW_POINT_3D_LEAF:
+				if (itemValue instanceof PointTreeItemValue) {
+					PointTreeItemValue pointItemValue = (PointTreeItemValue)itemValue;
+					PointTreeItemValue[] selectedPointItemValuesArray = null;
+					Set<PointTreeItemValue> selectedPointItemValues = new LinkedHashSet<PointTreeItemValue>();
+					selectedPointItemValues.add(pointItemValue);
 
-				if (selectedTreeItemValues != null) {
-					for (TreeItemValue selectedItem : selectedTreeItemValues) {
-						if (selectedItem instanceof ObservationTreeItemValue)
-							selectedObservationItemValues.add((ObservationTreeItemValue)selectedItem);
+					if (selectedTreeItemValues != null) {
+						for (TreeItemValue selectedItem : selectedTreeItemValues) {
+							if (selectedItem instanceof PointTreeItemValue)
+								selectedPointItemValues.add((PointTreeItemValue)selectedItem);
+						}
 					}
+					selectedPointItemValuesArray = selectedPointItemValues.toArray(new PointTreeItemValue[selectedPointItemValues.size()]);
+					this.searchAndReplacePointNames(searchRegex, replaceRegex, selectedPointItemValuesArray);
+					this.loadPoints(pointItemValue, selectedPointItemValuesArray);
 				}
-				selectedObservationItemValuesArray = selectedObservationItemValues.toArray(new ObservationTreeItemValue[selectedObservationItemValues.size()]);
-				this.searchAndReplacePointNames(searchRegex, replaceRegex, selectedObservationItemValuesArray);
-				if (TreeItemType.isObservationTypeLeaf(treeItemType))
-					this.loadObservations(observationItemValue, selectedObservationItemValuesArray);
-				else if (TreeItemType.isGNSSObservationTypeLeaf(treeItemType))
-					this.loadGNSSObservations(observationItemValue, selectedObservationItemValuesArray);
+				break;
+
+			case CONGRUENCE_ANALYSIS_1D_LEAF:
+			case CONGRUENCE_ANALYSIS_2D_LEAF:
+			case CONGRUENCE_ANALYSIS_3D_LEAF:
+				if (itemValue instanceof CongruenceAnalysisTreeItemValue) {
+					CongruenceAnalysisTreeItemValue congruenceAnalysisTreeItemValue = (CongruenceAnalysisTreeItemValue)itemValue;
+					CongruenceAnalysisTreeItemValue[] selectedCongruenceAnalysisItemValuesArray = null;
+					Set<CongruenceAnalysisTreeItemValue> selectedCongruenceAnalysisItemValues = new LinkedHashSet<CongruenceAnalysisTreeItemValue>();
+					selectedCongruenceAnalysisItemValues.add(congruenceAnalysisTreeItemValue);
+
+					if (selectedTreeItemValues != null) {
+						for (TreeItemValue selectedItem : selectedTreeItemValues) {
+							if (selectedItem instanceof CongruenceAnalysisTreeItemValue)
+								selectedCongruenceAnalysisItemValues.add((CongruenceAnalysisTreeItemValue)selectedItem);
+						}
+					}
+					selectedCongruenceAnalysisItemValuesArray = selectedCongruenceAnalysisItemValues.toArray(new CongruenceAnalysisTreeItemValue[selectedCongruenceAnalysisItemValues.size()]);
+					this.searchAndReplacePointNames(searchRegex, replaceRegex, selectedCongruenceAnalysisItemValuesArray);
+					this.loadCongruenceAnalysisPointPair(congruenceAnalysisTreeItemValue, selectedCongruenceAnalysisItemValuesArray);
+				}
+				break;
+
+			case LEVELING_LEAF:
+			case DIRECTION_LEAF:
+			case HORIZONTAL_DISTANCE_LEAF:
+			case SLOPE_DISTANCE_LEAF:
+			case ZENITH_ANGLE_LEAF:
+			case GNSS_1D_LEAF:
+			case GNSS_2D_LEAF:
+			case GNSS_3D_LEAF:
+				if (itemValue instanceof ObservationTreeItemValue) {
+					ObservationTreeItemValue observationItemValue = (ObservationTreeItemValue)itemValue;
+					ObservationTreeItemValue[] selectedObservationItemValuesArray = null;
+					Set<ObservationTreeItemValue> selectedObservationItemValues = new LinkedHashSet<ObservationTreeItemValue>();
+					selectedObservationItemValues.add(observationItemValue);
+
+					if (selectedTreeItemValues != null) {
+						for (TreeItemValue selectedItem : selectedTreeItemValues) {
+							if (selectedItem instanceof ObservationTreeItemValue)
+								selectedObservationItemValues.add((ObservationTreeItemValue)selectedItem);
+						}
+					}
+					selectedObservationItemValuesArray = selectedObservationItemValues.toArray(new ObservationTreeItemValue[selectedObservationItemValues.size()]);
+					this.searchAndReplacePointNames(searchRegex, replaceRegex, selectedObservationItemValuesArray);
+					if (TreeItemType.isObservationTypeLeaf(treeItemType))
+						this.loadObservations(observationItemValue, selectedObservationItemValuesArray);
+					else if (TreeItemType.isGNSSObservationTypeLeaf(treeItemType))
+						this.loadGNSSObservations(observationItemValue, selectedObservationItemValuesArray);
+				}
+				break;
+
+			default:
+				break;
 			}
-			break;
-			
-		default:
-			break;
 		}
 	}
 	

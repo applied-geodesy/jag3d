@@ -33,6 +33,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
@@ -59,6 +60,7 @@ public class SearchAndReplaceDialog {
 	private ComboBox<String> replaceComboBox = new ComboBox<String>();
 	private RadioButton normalModeRadioButton;
 	private RadioButton regularExpressionRadioButton;
+	private CheckBox applyToWholeProjectCheckBox;
 	private TreeItemValue itemValue;
 	private TreeItemValue selectedTreeItemValues[];
 	private SearchAndReplaceDialog() {}
@@ -71,6 +73,7 @@ public class SearchAndReplaceDialog {
 		searchAndReplaceDialog.itemValue = itemValue;
 		searchAndReplaceDialog.selectedTreeItemValues = selectedTreeItemValues;
 		searchAndReplaceDialog.init();
+
 		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
 		Platform.runLater(new Runnable() {
 			@Override
@@ -87,7 +90,6 @@ public class SearchAndReplaceDialog {
 		});
 		return searchAndReplaceDialog.dialog.showAndWait();
 	}
-
 
 	private void init() {
 		if (this.dialog != null)
@@ -116,11 +118,11 @@ public class SearchAndReplaceDialog {
 
 	private Node createPane() {
 
-		this.searchComboBox = createComboBox(
+		this.searchComboBox = this.createComboBox(
 				i18n.getString("SearchAndReplaceDialog.search.promt", "Old point name"),
 				i18n.getString("SearchAndReplaceDialog.search.tooltip", "Enter old point name"));
 		
-		this.replaceComboBox = createComboBox(
+		this.replaceComboBox = this.createComboBox(
 				i18n.getString("SearchAndReplaceDialog.replace.promt", "Old point name"),
 				i18n.getString("SearchAndReplaceDialog.replace.tooltip", "Enter old point name"));
 		
@@ -131,6 +133,12 @@ public class SearchAndReplaceDialog {
 		this.regularExpressionRadioButton = this.createRadioButton(
 				i18n.getString("SearchAndReplaceDialog.mode.regex.label", "Regular expression"), 
 				i18n.getString("SearchAndReplaceDialog.mode.regex.tooltip", "If selected, regular expression mode will be applied"));
+		
+		this.applyToWholeProjectCheckBox = this.createCheckBox(
+				i18n.getString("SearchAndReplaceDialog.scope.label", "Apply to whole project"), 
+				i18n.getString("SearchAndReplaceDialog.scope.tooltip", "If checked, the point will be renamed in the whole project"));
+		
+		this.applyToWholeProjectCheckBox.setSelected(false);
 
 		Label searchLabel  = new Label(i18n.getString("SearchAndReplaceDialog.search.label", "Find what:"));
 		Label replaceLabel = new Label(i18n.getString("SearchAndReplaceDialog.replace.label", "Replace with:"));
@@ -158,19 +166,24 @@ public class SearchAndReplaceDialog {
 		
 		GridPane.setHgrow(searchLabel,  Priority.NEVER);
 		GridPane.setHgrow(replaceLabel, Priority.NEVER);
+		GridPane.setHgrow(modeLabel,    Priority.NEVER);
 		
 		GridPane.setHgrow(this.searchComboBox,  Priority.ALWAYS);
 		GridPane.setHgrow(this.replaceComboBox, Priority.ALWAYS);
+		GridPane.setHgrow(hbox,                 Priority.ALWAYS);
+		GridPane.setHgrow(this.applyToWholeProjectCheckBox, Priority.ALWAYS);
 				
 		int row = 1;
 		gridPane.add(searchLabel,           0, row);
-		gridPane.add(this.searchComboBox,  1, row++);
+		gridPane.add(this.searchComboBox,   1, row++);
 
 		gridPane.add(replaceLabel,          0, row);
-		gridPane.add(this.replaceComboBox, 1, row++);
+		gridPane.add(this.replaceComboBox,  1, row++);
 		
 		gridPane.add(modeLabel,             0, row);
 		gridPane.add(hbox,                  1, row++);
+		
+		gridPane.add(this.applyToWholeProjectCheckBox, 1, row++);
 		
 		Platform.runLater(new Runnable() {
 			@Override public void run() {
@@ -202,6 +215,18 @@ public class SearchAndReplaceDialog {
 		radioButton.setMaxWidth(Double.MAX_VALUE);
 		return radioButton;
 	}
+	
+	private CheckBox createCheckBox(String text, String tooltip) {
+		Label label = new Label(text);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setPadding(new Insets(0,0,0,3));
+		CheckBox checkBox = new CheckBox();
+		checkBox.setGraphic(label);
+		checkBox.setTooltip(new Tooltip(tooltip));
+		checkBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		checkBox.setMaxWidth(Double.MAX_VALUE);
+		return checkBox;
+	}
 
 	private void save() {
 		try {
@@ -220,13 +245,14 @@ public class SearchAndReplaceDialog {
 				this.replaceComboBox.getItems().add(replace);
 			this.replaceComboBox.setValue(replace);
 			
+			boolean applayToWholeProject = this.applyToWholeProjectCheckBox.isSelected();
 			boolean regExp = this.regularExpressionRadioButton.isSelected();
 			
 			// masking values
 			if (!regExp)
 				search = "^\\Q"+search+"\\E";
 
-			SQLManager.getInstance().searchAndReplacePointNames(search, replace, this.itemValue, this.selectedTreeItemValues);
+			SQLManager.getInstance().searchAndReplacePointNames(search, replace, applayToWholeProject, this.itemValue, this.selectedTreeItemValues);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
