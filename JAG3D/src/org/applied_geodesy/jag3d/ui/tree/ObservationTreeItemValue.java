@@ -34,15 +34,11 @@ public class ObservationTreeItemValue extends TreeItemValue implements Sortable 
 	private IntegerProperty groupId = new SimpleIntegerProperty(-1);
 	private int orderId;
 	
-//	ObservationTreeItemValue(TreeItemType type, String name) throws IllegalArgumentException {
-//		this(-1, type, name);
-//	}
-	
 	ObservationTreeItemValue(int groupId, TreeItemType type, String name, int orderId) throws IllegalArgumentException {
-		this(groupId, type, name, Boolean.TRUE, Boolean.TRUE, orderId);
+		this(groupId, type, name, Boolean.TRUE, orderId);
 	}
 	
-	ObservationTreeItemValue(int groupId, TreeItemType type, String name, boolean referenceEpoch, boolean enable, int orderId) throws IllegalArgumentException { 
+	ObservationTreeItemValue(int groupId, TreeItemType type, String name, boolean enable, int orderId) throws IllegalArgumentException { 
 		super(type, name);
 		this.setGroupId(groupId);
 		this.setEnable(enable);
