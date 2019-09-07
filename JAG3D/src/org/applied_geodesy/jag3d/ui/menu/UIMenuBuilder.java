@@ -64,6 +64,7 @@ import org.applied_geodesy.jag3d.ui.io.M5FileReader;
 import org.applied_geodesy.jag3d.ui.io.ObservationFlatFileReader;
 import org.applied_geodesy.jag3d.ui.io.PointFlatFileReader;
 import org.applied_geodesy.jag3d.ui.io.ZFileReader;
+import org.applied_geodesy.jag3d.ui.io.sql.OADBReader;
 import org.applied_geodesy.jag3d.ui.io.xml.HeXMLFileReader;
 import org.applied_geodesy.jag3d.ui.io.xml.JobXMLFileReader;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
@@ -269,16 +270,18 @@ public class UIMenuBuilder {
 	}
 
 	private void createProjectMenu(Menu parentMenu) {
-		MenuItem newItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.new.label", "Create _new project"), true, MenuItemType.NEW, new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
-		MenuItem openItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.open.label", "_Open existing project"), true, MenuItemType.OPEN, new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
-		MenuItem copyItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.copy.label", "_Copy current project and open"), true, MenuItemType.COPY, new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
+		MenuItem newItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.new.label", "Create _new project"), true, MenuItemType.NEW, new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
+		MenuItem openItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.open.label", "_Open existing project"), true, MenuItemType.OPEN, new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
+		MenuItem mergeItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.merge.label", "Merge exi_sting project"), true, MenuItemType.MERGE, new KeyCodeCombination(KeyCode.M, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
+		MenuItem copyItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.copy.label", "_Copy current project and open"), true, MenuItemType.COPY, new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
 		MenuItem closeItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.close.label", "C_lose current project"), true, MenuItemType.CLOSE, new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-		MenuItem exitItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.exit.label", "_Exit"), true, MenuItemType.EXIT, new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
-		Menu historyMenu = this.createHistoryMenu();
+		MenuItem exitItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.exit.label", "_Exit"), true, MenuItemType.EXIT, new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
+		Menu historyMenu   = this.createHistoryMenu();
 		
 		parentMenu.getItems().addAll(
 				newItem, 
 				openItem,
+				mergeItem,
 				closeItem,
 				copyItem,
 				new SeparatorMenuItem(),
@@ -429,6 +432,10 @@ public class UIMenuBuilder {
 		MenuItem importCongruenceAnalysisPair2DFlatMenu = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.congruence_analysis.2d.label", "Point nexus 2D"), true, MenuItemType.IMPORT_FLAT_CONGRUENCE_ANALYSIS_PAIR_2D, null, this.menuEventHandler, true);
 		MenuItem importCongruenceAnalysisPair3DFlatMenu = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.congruence_analysis.3d.label", "Point nexus 3D"), true, MenuItemType.IMPORT_FLAT_CONGRUENCE_ANALYSIS_PAIR_3D, null, this.menuEventHandler, true);
 
+		Menu importGNSSFlatMenu       = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.gnss.label", "GNSS baselines"), true);
+		MenuItem importGNSS1DFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.gnss.1d.label", "GNSS baselines 1D"), true, MenuItemType.IMPORT_FLAT_GNSS1D, null, this.menuEventHandler, true);
+		MenuItem importGNSS2DFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.gnss.2d.label", "GNSS baselines 2D"), true, MenuItemType.IMPORT_FLAT_GNSS2D, null, this.menuEventHandler, true);
+		MenuItem importGNSS3DFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.gnss.3d.label", "GNSS baselines 3D"), true, MenuItemType.IMPORT_FLAT_GNSS3D, null, this.menuEventHandler, true);
 
 		Menu importHexagonFlatMenu = createMenu(i18n.getString("UIMenuBuilder.menu.import.hexagon.label", "Hexagon/Leica"), true);
 		MenuItem gsi1DFileItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.hexagon.gsi.1d.label",  "GSI 1D"),   true, MenuItemType.IMPORT_GSI1D,  null, this.menuEventHandler, true);
@@ -451,7 +458,6 @@ public class UIMenuBuilder {
 		MenuItem beoFileItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.beo.label", "Beo-File (Neptan)"), true, MenuItemType.IMPORT_BEO, null, this.menuEventHandler, true);
 
 		MenuItem columnBasedFileItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.column_based.label", "Column-based data"), true, MenuItemType.IMPORT_COLUMN_BASED_FILES, null, this.menuEventHandler, true);
-
 		
 		importHexagonFlatMenu.getItems().addAll(
 				gsi1DFileItem,
@@ -510,11 +516,6 @@ public class UIMenuBuilder {
 				importCongruenceAnalysisPair2DFlatMenu,
 				importCongruenceAnalysisPair3DFlatMenu
 				);
-
-		Menu importGNSSFlatMenu       = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.gnss.label", "GNSS baselines"), true);
-		MenuItem importGNSS1DFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.gnss.1d.label", "GNSS baselines 1D"), true, MenuItemType.IMPORT_FLAT_GNSS1D, null, this.menuEventHandler, true);
-		MenuItem importGNSS2DFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.gnss.2d.label", "GNSS baselines 2D"), true, MenuItemType.IMPORT_FLAT_GNSS2D, null, this.menuEventHandler, true);
-		MenuItem importGNSS3DFlatItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.gnss.3d.label", "GNSS baselines 3D"), true, MenuItemType.IMPORT_FLAT_GNSS3D, null, this.menuEventHandler, true);
 
 		importGNSSFlatMenu.getItems().addAll(
 				importGNSS1DFlatItem,
@@ -586,8 +587,8 @@ public class UIMenuBuilder {
 	void newProject() {
 		File selectedFile = DefaultFileChooser.showSaveDialog(
 				i18n.getString("UIMenuBuilder.filechooser.new.title", "Create new project"),
-				"project.script",
-				new ExtensionFilter("HSQLDB (*.script)", "*.script")
+				"jag3d_project.script",
+				new ExtensionFilter(i18n.getString("OADBReader.extension.script", "HyperSQL"), "*.script")
 				);
 
 		try {
@@ -631,7 +632,7 @@ public class UIMenuBuilder {
 			File selectedFile = DefaultFileChooser.showSaveDialog(
 					i18n.getString("UIMenuBuilder.filechooser.copy.title", "Create deep copy of current project"),
 					null,
-					new ExtensionFilter("HSQLDB (*.script)", "*.script")
+					new ExtensionFilter(i18n.getString("OADBReader.extension.script", "HyperSQL"), "*.script")
 					);
 
 			if (selectedFile == null)
@@ -677,7 +678,7 @@ public class UIMenuBuilder {
 		File selectedFile = DefaultFileChooser.showOpenDialog(
 				i18n.getString("UIMenuBuilder.filechooser.open.title", "Open existing project"),
 				null,
-				new ExtensionFilter("HSQLDB (*.script)", "*.script")
+				new ExtensionFilter(i18n.getString("OADBReader.extension.script", "HyperSQL"), "*.script")
 				);
 
 		if (selectedFile != null)
@@ -888,13 +889,16 @@ public class UIMenuBuilder {
 		case IMPORT_Z:
 			this.importFile(new ZFileReader(), ZFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.z.title", "Import data from Z files"));
 			break;
+		case MERGE:
+			this.importFile(new OADBReader(), OADBReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.merge.title", "Merge existing JAG3D project"));
+			break;
 			
 		case IMPORT_COLUMN_BASED_FILES:
 			List<File> selectedFiles = DefaultFileChooser.showOpenMultipleDialog(
 					i18n.getString("UIMenuBuilder.filechooser.import.column_based.title", "Import user-defined column-based flat files"),
 					null,
 					LockFileReader.getExtensionFilters()
-					);
+			);
 
 			if (selectedFiles == null || selectedFiles.isEmpty())
 				return;
@@ -909,7 +913,6 @@ public class UIMenuBuilder {
 		default:
 			System.err.println(this.getClass().getSimpleName() + " Error, unknwon import-type: " + menuItemType);
 			break;
-
 		}
 	}
 

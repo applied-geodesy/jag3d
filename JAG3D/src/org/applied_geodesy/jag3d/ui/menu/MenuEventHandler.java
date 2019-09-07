@@ -160,9 +160,11 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 		case IMPORT_FLAT_CONGRUENCE_ANALYSIS_PAIR_3D:
 			
 		case IMPORT_COLUMN_BASED_FILES:
+			
+		case MERGE:
 			this.menuBuilder.importFile(menuItemType);
 			break;
-			
+
 		case HIGHLIGHT_TABLE_ROWS:
 			TableRowHighlightDialog.showAndWait();
 			break;
