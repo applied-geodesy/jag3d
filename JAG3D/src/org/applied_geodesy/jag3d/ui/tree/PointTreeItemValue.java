@@ -36,10 +36,6 @@ public class PointTreeItemValue extends TreeItemValue implements Sortable {
 	private IntegerProperty groupId = new SimpleIntegerProperty(-1);
 	private int orderId;
 	
-//	PointTreeItemValue(TreeItemType type, String name) throws IllegalArgumentException {
-//		this(-1, type, name);
-//	}
-	
 	PointTreeItemValue(int groupId, TreeItemType type, String name, int orderId) throws IllegalArgumentException {
 		this(groupId, type, name, Boolean.TRUE, orderId);
 	}
