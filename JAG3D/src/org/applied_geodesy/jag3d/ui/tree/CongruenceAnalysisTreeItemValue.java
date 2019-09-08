@@ -32,10 +32,6 @@ public class CongruenceAnalysisTreeItemValue extends TreeItemValue implements So
 	private IntegerProperty groupId = new SimpleIntegerProperty(-1);
 	private int orderId;
 	
-//	CongruenceAnalysisTreeItemValue(TreeItemType type, String name) throws IllegalArgumentException {
-//		this(-1, type, name);
-//	}
-	
 	CongruenceAnalysisTreeItemValue(int groupId, TreeItemType type, String name, int orderId) throws IllegalArgumentException {
 		this(groupId, type, name, Boolean.TRUE, orderId);
 	}

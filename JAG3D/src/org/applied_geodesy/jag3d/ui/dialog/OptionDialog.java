@@ -25,11 +25,11 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Window;
 
@@ -54,7 +54,7 @@ public class OptionDialog {
 		alert.initModality(Modality.APPLICATION_MODAL);
 		alert.initOwner(window);
 		alert.setResizable(true);
-		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+		alert.getDialogPane().setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		return alert.showAndWait();
 	}
 	
@@ -95,6 +95,7 @@ public class OptionDialog {
 		}
 		content.add(node, 0, ++row);
 		alert.getDialogPane().setContent(content);
+		alert.getDialogPane().setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
 		return alert.showAndWait();
     }
@@ -127,7 +128,8 @@ public class OptionDialog {
 		expContent.add(label, 0, 0);
 		expContent.add(textArea, 0, 1);
 		alert.getDialogPane().setExpandableContent(expContent);
-
+		alert.getDialogPane().setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		
 		return alert.showAndWait();
     }
 }

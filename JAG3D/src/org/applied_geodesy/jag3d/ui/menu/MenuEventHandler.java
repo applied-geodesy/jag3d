@@ -80,6 +80,10 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 			this.menuBuilder.openProject();
 			break;
 			
+		case MERGE:
+			this.menuBuilder.mergeProject();
+			break;
+			
 		case COPY:
 			this.menuBuilder.copyProject();
 			break;
@@ -162,7 +166,7 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 		case IMPORT_COLUMN_BASED_FILES:
 			this.menuBuilder.importFile(menuItemType);
 			break;
-			
+
 		case HIGHLIGHT_TABLE_ROWS:
 			TableRowHighlightDialog.showAndWait();
 			break;
