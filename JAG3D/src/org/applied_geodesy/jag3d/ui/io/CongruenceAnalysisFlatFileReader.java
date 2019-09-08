@@ -77,19 +77,10 @@ public class CongruenceAnalysisFlatFileReader extends SourceFileReader<TreeItem<
 	private List<CongruenceAnalysisRow> congruenceAnalysisPairs = null;
 	
 	public CongruenceAnalysisFlatFileReader(int dimension) {
-		switch(dimension) {
-		case 1:
-			this.treeItemType = TreeItemType.CONGRUENCE_ANALYSIS_1D_LEAF;
-			break;
-		case 2:
-			this.treeItemType = TreeItemType.CONGRUENCE_ANALYSIS_2D_LEAF;
-			break;
-		case 3:
-			this.treeItemType = TreeItemType.CONGRUENCE_ANALYSIS_3D_LEAF;
-			break;
-			default:
-				throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, dimension could not be transformed to tree item type. " + dimension);
-		}
+		this.treeItemType = TreeItemType.getTreeItemTypeByCongruenceAnalysisDimension(dimension);
+		if (this.treeItemType == null)
+			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, dimension could not be transformed to tree item type. " + dimension);
+
 		this.reset();
 	}
 	
@@ -103,19 +94,10 @@ public class CongruenceAnalysisFlatFileReader extends SourceFileReader<TreeItem<
 	
 	public CongruenceAnalysisFlatFileReader(Path path, int dimension) {
 		super(path);
-		switch(dimension) {
-		case 1:
-			this.treeItemType = TreeItemType.CONGRUENCE_ANALYSIS_1D_LEAF;
-			break;
-		case 2:
-			this.treeItemType = TreeItemType.CONGRUENCE_ANALYSIS_2D_LEAF;
-			break;
-		case 3:
-			this.treeItemType = TreeItemType.CONGRUENCE_ANALYSIS_3D_LEAF;
-			break;
-			default:
-				throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, dimension could not be transformed to tree item type. " + dimension);
-		}
+		this.treeItemType = TreeItemType.getTreeItemTypeByCongruenceAnalysisDimension(dimension);
+		if (this.treeItemType == null)
+			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, dimension could not be transformed to tree item type. " + dimension);
+
 		this.reset();
 	}
 	
