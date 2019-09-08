@@ -349,6 +349,19 @@ public enum TreeItemType {
 		}
 	}
 	
+	public static TreeItemType getTreeItemTypeByCongruenceAnalysisDimension(int dimension) {
+		switch (dimension) {
+		case 1:
+			return TreeItemType.CONGRUENCE_ANALYSIS_1D_LEAF;
+		case 2:
+			return TreeItemType.CONGRUENCE_ANALYSIS_2D_LEAF;
+		case 3:
+			return TreeItemType.CONGRUENCE_ANALYSIS_3D_LEAF;
+		default:
+			return null;
+		}
+	}
+	
 	public static boolean isPointTypeLeaf(TreeItemType type) {
 		switch (type) {
 		case DATUM_POINT_1D_LEAF:

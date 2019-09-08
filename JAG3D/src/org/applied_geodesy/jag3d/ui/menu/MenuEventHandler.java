@@ -80,6 +80,10 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 			this.menuBuilder.openProject();
 			break;
 			
+		case MERGE:
+			this.menuBuilder.mergeProject();
+			break;
+			
 		case COPY:
 			this.menuBuilder.copyProject();
 			break;
@@ -160,8 +164,6 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 		case IMPORT_FLAT_CONGRUENCE_ANALYSIS_PAIR_3D:
 			
 		case IMPORT_COLUMN_BASED_FILES:
-			
-		case MERGE:
 			this.menuBuilder.importFile(menuItemType);
 			break;
 

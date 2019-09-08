@@ -76,6 +76,7 @@ import org.applied_geodesy.util.io.SourceFileReader;
 import org.applied_geodesy.util.io.properties.HTTPPropertiesLoader;
 import org.applied_geodesy.util.io.properties.URLParameter;
 import org.applied_geodesy.util.io.report.FTLReport;
+import org.applied_geodesy.util.sql.DataBase;
 import org.applied_geodesy.util.sql.HSQLDB;
 import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
 import org.applied_geodesy.version.jag3d.Version;
@@ -632,7 +633,7 @@ public class UIMenuBuilder {
 			File selectedFile = DefaultFileChooser.showSaveDialog(
 					i18n.getString("UIMenuBuilder.filechooser.copy.title", "Create deep copy of current project"),
 					null,
-					new ExtensionFilter(i18n.getString("OADBReader.extension.script", "HyperSQL"), "*.script")
+					OADBReader.getExtensionFilters()
 					);
 
 			if (selectedFile == null)
@@ -678,7 +679,7 @@ public class UIMenuBuilder {
 		File selectedFile = DefaultFileChooser.showOpenDialog(
 				i18n.getString("UIMenuBuilder.filechooser.open.title", "Open existing project"),
 				null,
-				new ExtensionFilter(i18n.getString("OADBReader.extension.script", "HyperSQL"), "*.script")
+				OADBReader.getExtensionFilters()
 				);
 
 		if (selectedFile != null)
@@ -723,6 +724,52 @@ public class UIMenuBuilder {
 					e
 					);
 			SQLManager.getInstance().closeDataBase();
+		}
+	}
+	
+	public void mergeProject() {
+		File selectedFile = DefaultFileChooser.showOpenDialog(
+				i18n.getString("UIMenuBuilder.filechooser.merge.title", "Merge existing JAG3D project"),
+				null,
+				OADBReader.getExtensionFilters()
+				);
+
+		if (selectedFile == null)
+			return;
+		
+		try {
+			Path path = selectedFile.toPath();
+			String regex = "(?i)(.+?)(\\.)(backup$|data$|properties$|script$)";
+			String project = Files.exists(path, LinkOption.NOFOLLOW_LINKS) ? path.toAbsolutePath().toString().replaceFirst(regex, "$1") : null;
+
+			if (project != null) {
+				DataBase dataBase = new HSQLDB(project);
+				if (!OADBReader.isCurrentOADBVersion(dataBase)) 
+					throw new DatabaseVersionMismatchException(this.getClass().getSimpleName() + ": Error, database version of the stored project is unequal to the required version of the application!");
+					
+				SourceFileReader<TreeItem<TreeItemValue>> fileReader = new OADBReader(dataBase);
+				TreeItem<TreeItemValue> lastItem = fileReader.readAndImport();
+				
+				if (lastItem != null) {
+					TreeView<TreeItemValue> treeView = UITreeBuilder.getInstance().getTree();
+					treeView.getSelectionModel().clearSelection();
+					treeView.getSelectionModel().select(lastItem);
+					int index = treeView.getRow(lastItem);
+					treeView.scrollTo(index);
+				}
+			}
+			else {
+				throw new FileNotFoundException(selectedFile.toString());
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			OptionDialog.showThrowableDialog (
+					i18n.getString("UIMenuBuilder.message.error.merge.exception.title", "I/O Error"),
+					i18n.getString("UIMenuBuilder.message.error.merge.exception.header", "Error, could not merge selected project."),
+					i18n.getString("UIMenuBuilder.message.error.merge.exception.message", "An exception has occurred during project merging."),
+					e
+					);
 		}
 	}
 
@@ -889,10 +936,7 @@ public class UIMenuBuilder {
 		case IMPORT_Z:
 			this.importFile(new ZFileReader(), ZFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.z.title", "Import data from Z files"));
 			break;
-		case MERGE:
-			this.importFile(new OADBReader(), OADBReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.merge.title", "Merge existing JAG3D project"));
-			break;
-			
+					
 		case IMPORT_COLUMN_BASED_FILES:
 			List<File> selectedFiles = DefaultFileChooser.showOpenMultipleDialog(
 					i18n.getString("UIMenuBuilder.filechooser.import.column_based.title", "Import user-defined column-based flat files"),

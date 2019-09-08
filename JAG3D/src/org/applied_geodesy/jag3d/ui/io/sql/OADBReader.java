@@ -21,11 +21,7 @@
 
 package org.applied_geodesy.jag3d.ui.io.sql;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,11 +35,14 @@ import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.adjustment.network.PointGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.adjustment.network.congruence.strain.RestrictionType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.ObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
+import org.applied_geodesy.jag3d.ui.tree.CongruenceAnalysisTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
@@ -51,7 +50,6 @@ import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.io.SourceFileReader;
 import org.applied_geodesy.util.sql.DataBase;
-import org.applied_geodesy.util.sql.HSQLDB;
 import org.applied_geodesy.version.jag3d.Version;
 import org.applied_geodesy.version.jag3d.VersionType;
 
@@ -66,16 +64,8 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		this.reset();
 	}
 	
-	public OADBReader(File f) {
-		this(f.toPath());
-	}
-
-	public OADBReader(String s) {
-		this(new File(s));
-	}
-	
-	public OADBReader(Path p) {
-		super(p);
+	public OADBReader(DataBase dataBase) {
+		this.dataBase = dataBase;
 		this.reset();
 	}
 
@@ -92,32 +82,36 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 	@Override
 	public TreeItem<TreeItemValue> readAndImport() throws IOException, SQLException {
-		TreeItem<TreeItemValue> lastPointTreeItem = null;
-		TreeItem<TreeItemValue> lastObservationTreeItem = null; 
+		TreeItem<TreeItemValue> lastTreeItem = null;
 				
 		this.reset();
-		
-		Path path = this.getPath();
-		String regex = "(?i)(.+?)(\\.)(backup$|data$|properties$|script$)";
-		String oadbName = Files.exists(path, LinkOption.NOFOLLOW_LINKS) ? path.toAbsolutePath().toString().replaceFirst(regex, "$1") : null;
-		
+
 		try {
-			this.dataBase = new HSQLDB(oadbName);
 			if (SQLManager.getInstance().getDataBase().getURI().equals(this.dataBase.getURI()))
 				throw new IOException(this.getClass().getSimpleName() + " : Error, cannot re-import data to the same database!");
 			
 			this.dataBase.open();
-			if (this.isCurrentOADBVersion()) {
+			if (OADBReader.isCurrentOADBVersion(this.dataBase)) {
 				this.reservedNames = SQLManager.getInstance().getFullPointNameSet();
 				
-				lastPointTreeItem       = this.transferPointGroups();
-				lastObservationTreeItem = this.transferObservationGroups();
+				TreeItem<TreeItemValue> lastPointTreeItem              = this.transferPointGroups();
+				TreeItem<TreeItemValue> lastObservationTreeItem        = this.transferObservationGroups();
+				TreeItem<TreeItemValue> lastCongruenceAnalysisTreeItem = this.transferCongruenceAnalysisGroups();
+				
+				if (lastPointTreeItem != null)
+					lastTreeItem = lastPointTreeItem;
+				else if (lastObservationTreeItem != null)
+					lastTreeItem = lastObservationTreeItem;
+				else if (lastCongruenceAnalysisTreeItem != null)
+					lastTreeItem = lastCongruenceAnalysisTreeItem;
 			}
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 			throw new SQLException(e);
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			throw new IOException(e);
 		}
 		finally {
@@ -127,7 +121,7 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		
 		// Clear all lists
 		this.reset();
-		return lastObservationTreeItem != null ? lastObservationTreeItem : lastPointTreeItem;
+		return lastTreeItem;
 	}
 
 	@Override
@@ -141,7 +135,7 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		String sql = "SELECT " + 
 				"\"id\", \"name\", \"type\", \"enable\", \"dimension\" " + 
 				"FROM \"PointGroup\" " + 
-				"ORDER BY \"PointGroup\".\"order\" ASC, \"PointGroup\".\"id\" ASC";
+				"ORDER BY \"order\" ASC, \"id\" ASC";
 		
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		ResultSet rs = stmt.executeQuery();
@@ -182,7 +176,7 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		String sql = "SELECT " + 
 				"\"id\", \"name\", \"type\", \"enable\" " + 
 				"FROM \"ObservationGroup\" " + 
-				"ORDER BY \"ObservationGroup\".\"order\" ASC, \"ObservationGroup\".\"id\" ASC";
+				"ORDER BY \"order\" ASC, \"id\" ASC";
 		
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		ResultSet rs = stmt.executeQuery();
@@ -213,6 +207,42 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				this.transferEpoch(groupId, (ObservationTreeItemValue)treeItem.getValue());
 				this.transferAdditionalParameters(groupId, (ObservationTreeItemValue)treeItem.getValue());
 
+				lastValidTreeItem = treeItem;
+			}
+		}
+		return lastValidTreeItem;
+	}
+	
+	private TreeItem<TreeItemValue> transferCongruenceAnalysisGroups() throws SQLException {
+		TreeItem<TreeItemValue> lastValidTreeItem = null;
+		
+		String sql = "SELECT " + 
+				"\"id\", \"name\", \"enable\", \"dimension\" " + 
+				"FROM \"CongruenceAnalysisGroup\" " + 
+				"ORDER BY \"order\" ASC, \"id\" ASC";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			int groupId       = rs.getInt("id");
+			int dimension     = rs.getInt("dimension");
+			String groupName  = rs.getString("name");
+			boolean enable    = rs.getBoolean("enable");
+			
+			TreeItemType treeItemType = TreeItemType.getTreeItemTypeByCongruenceAnalysisDimension(dimension);
+			
+			List<CongruenceAnalysisRow> pairs = null;
+			
+			if (TreeItemType.isCongruenceAnalysisTypeLeaf(treeItemType)) 
+				pairs = this.getCongruenceAnalysisPairs(groupId);
+				
+			if (pairs == null)
+				continue;
+			
+			TreeItem<TreeItemValue> treeItem = this.saveCongruenceAnalysisPairs(treeItemType, groupName, enable, pairs);
+			if (treeItem != null) {
+				this.transferStrainParameters(groupId, (CongruenceAnalysisTreeItemValue)treeItem.getValue());
+				
 				lastValidTreeItem = treeItem;
 			}
 		}
@@ -323,6 +353,30 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			observations.add(observation);
 		}
 		return observations;
+	}
+	
+	private List<CongruenceAnalysisRow> getCongruenceAnalysisPairs(int groupId) throws SQLException {
+		List<CongruenceAnalysisRow> pairs = new ArrayList<CongruenceAnalysisRow>();
+		
+		String sql = "SELECT "
+				+ "\"start_point_name\", \"end_point_name\", \"enable\" "
+				+ "WHERE \"group_id\" = ? "
+				+ "ORDER BY \"id\" ASC";
+
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(1, groupId);
+
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			CongruenceAnalysisRow pair = new CongruenceAnalysisRow();
+
+			pair.setNameInReferenceEpoch(rs.getString("start_point_name"));
+			pair.setNameInControlEpoch(rs.getString("end_point_name"));
+			pair.setEnable(rs.getBoolean("enable"));
+
+			pairs.add(pair);
+		}
+		return pairs;
 	}
 	
 	private List<ObservationRow> getGNSSObservations(int groupId) throws SQLException {
@@ -438,7 +492,7 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	}
 	
 	private void transferAdditionalParameters(int srcGroupId, ObservationTreeItemValue destObservationItemValue) throws SQLException {
-		String sql = "SELECT \"type\", \"value_0\", \"enable\"" +
+		String sql = "SELECT \"type\", \"value_0\", \"enable\" " +
 				"FROM \"AdditionalParameterApriori\" " +
 				"WHERE \"group_id\" = ? ";
 		
@@ -456,41 +510,68 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			SQLManager.getInstance().saveAdditionalParameter(parameterType, enable, value, destObservationItemValue);
 		}
 	}
-
-	private boolean isCurrentOADBVersion() throws SQLException {
-		String sql = "SELECT TRUE AS \"exists\" "
-				+ "FROM \"INFORMATION_SCHEMA\".\"COLUMNS\" "
-				+ "WHERE \"TABLE_SCHEMA\" = 'OpenAdjustment' "
-				+ "AND \"TABLE_NAME\" = 'Version' "
-				+ "AND \"COLUMN_NAME\" = 'version'";
-
+	
+	private void transferStrainParameters(int srcGroupId, CongruenceAnalysisTreeItemValue destCongruenceAnalysisItemValue) throws SQLException {
+		String sql = "SELECT \"type\", \"enable\" " +
+				"FROM \"CongruenceAnalysisStrainParameterRestriction\" " +
+				"WHERE \"group_id\" = ? ";
+		
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(1, srcGroupId);
+
 		ResultSet rs = stmt.executeQuery();
-
-		if (rs.next()) {
-			boolean exists = rs.getBoolean("exists");
+		while (rs.next()) {
+			RestrictionType restrictionType = RestrictionType.getEnumByValue(rs.getInt("type"));
+			if (restrictionType == null)
+				continue;
 			
-			if (!rs.wasNull() && exists) {
-				sql = "SET SCHEMA \"OpenAdjustment\";";
-				stmt = this.dataBase.getPreparedStatement(sql);
-				stmt.execute();
-				
-				sql = "SELECT \"version\" FROM \"Version\" WHERE \"type\" = ?";
-				stmt = this.dataBase.getPreparedStatement(sql);
-				stmt.setInt(1, VersionType.DATABASE.getId());
-				rs = stmt.executeQuery();
-				
-				if (rs.next()) {
-					double databaseVersion = rs.getDouble("version");
-					if (rs.wasNull()) 
-						throw new SQLException(this.getClass().getSimpleName() + " : Error, could not detect database version!");
+			boolean enable = rs.getBoolean("enable");
+			SQLManager.getInstance().saveStrainParameter(restrictionType, enable, destCongruenceAnalysisItemValue);
+		}
+	}
 
-					if (databaseVersion != Version.get(VersionType.DATABASE))
-						throw new SQLException("Error, database version of the stored project is unequal to the required version of the application: " + databaseVersion + " <> " +  Version.get(VersionType.DATABASE));
+	public static boolean isCurrentOADBVersion(DataBase dataBase) throws SQLException, ClassNotFoundException {
+		boolean isOpen = dataBase.isOpen();
+		
+		try {
+			if (!isOpen)
+				dataBase.open();
 
-					return true;
+			String sql = "SELECT TRUE AS \"exists\" "
+					+ "FROM \"INFORMATION_SCHEMA\".\"COLUMNS\" "
+					+ "WHERE \"TABLE_SCHEMA\" = 'OpenAdjustment' "
+					+ "AND \"TABLE_NAME\" = 'Version' "
+					+ "AND \"COLUMN_NAME\" = 'version'";
+
+			PreparedStatement stmt = dataBase.getPreparedStatement(sql);
+			ResultSet rs = stmt.executeQuery();
+
+			if (rs.next()) {
+				boolean exists = rs.getBoolean("exists");
+
+				if (!rs.wasNull() && exists) {
+					sql = "SET SCHEMA \"OpenAdjustment\";";
+					stmt = dataBase.getPreparedStatement(sql);
+					stmt.execute();
+
+					sql = "SELECT \"version\" FROM \"Version\" WHERE \"type\" = ?";
+					stmt = dataBase.getPreparedStatement(sql);
+					stmt.setInt(1, VersionType.DATABASE.getId());
+					rs = stmt.executeQuery();
+
+					if (rs.next()) {
+						double databaseVersion = rs.getDouble("version");
+						if (rs.wasNull()) 
+							throw new SQLException("Error, could not detect database version!");
+
+						return databaseVersion == Version.get(VersionType.DATABASE);
+					}
 				}
 			}
+		}
+		finally {
+			if (!isOpen)
+				dataBase.close();
 		}
 		return false;
 	}
@@ -548,6 +629,35 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					SQLManager.getInstance().saveItem((TerrestrialObservationRow)row);
 				else if (TreeItemType.isGNSSObservationTypeLeaf(treeItemType)) 
 					SQLManager.getInstance().saveItem((GNSSObservationRow)row);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new SQLException(e);
+		}			
+
+		return newTreeItem;
+	}
+	
+	private TreeItem<TreeItemValue> saveCongruenceAnalysisPairs(TreeItemType treeItemType, String groupName, boolean enable, List<CongruenceAnalysisRow> pairs) throws SQLException {
+		if (pairs == null || pairs.isEmpty())
+			return null;
+
+		TreeItemType parentType = TreeItemType.getDirectoryByLeafType(treeItemType);
+		TreeItem<TreeItemValue> newTreeItem = UITreeBuilder.getInstance().addItem(parentType, -1, groupName, enable, false);
+
+		try {
+			SQLManager.getInstance().saveGroup((CongruenceAnalysisTreeItemValue)newTreeItem.getValue());
+		} catch (SQLException e) {
+			UITreeBuilder.getInstance().removeItem(newTreeItem);
+			e.printStackTrace();
+			throw new SQLException(e);
+		}
+
+		try {
+			int groupId = ((CongruenceAnalysisTreeItemValue)newTreeItem.getValue()).getGroupId();
+			for (CongruenceAnalysisRow row : pairs) {
+				row.setGroupId(groupId);
+				SQLManager.getInstance().saveItem(row);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
