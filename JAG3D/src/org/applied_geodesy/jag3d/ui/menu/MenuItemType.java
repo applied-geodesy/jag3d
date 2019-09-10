@@ -24,7 +24,7 @@ package org.applied_geodesy.jag3d.ui.menu;
 enum MenuItemType {
 	NEW, 
 	OPEN,
-	MERGE,
+	MIGRATE,
 	COPY,
 	CLOSE,
 	EXIT,

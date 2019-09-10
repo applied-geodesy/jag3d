@@ -80,8 +80,8 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 			this.menuBuilder.openProject();
 			break;
 			
-		case MERGE:
-			this.menuBuilder.mergeProject();
+		case MIGRATE:
+			this.menuBuilder.migrateProject();
 			break;
 			
 		case COPY:
