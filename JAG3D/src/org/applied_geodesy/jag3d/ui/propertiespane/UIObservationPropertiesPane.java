@@ -375,7 +375,7 @@ public class UIObservationPropertiesPane {
 
 			case ORIENTATION:
 				
-				box   = this.orientationOffsetCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.label", "Orientation o"), i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.label.tooltip", "Checked, if orientation is an unknown parameter"), false, paramType);
+				box   = this.orientationOffsetCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.label", "Orientation o"), i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.label.tooltip", "Checked, if orientation is an unknown parameter to be estimated"), false, paramType);
 				field = this.orientationOffsetField    = this.createDoubleTextField(orientation, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.orientation.tooltip", "Set orientation offset"), paramType);				
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
 
@@ -383,7 +383,7 @@ public class UIObservationPropertiesPane {
 				
 			case REFRACTION_INDEX:
 				
-				box   = this.refractionIndexCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.label", "Refraction index k"), i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.label.tooltip", "Checked, if refraction index is an unknown parameter"), true, paramType);
+				box   = this.refractionIndexCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.label", "Refraction index k"), i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.label.tooltip", "Checked, if refraction index is an unknown parameter to be estimated"), true, paramType);
 				field = this.refractionIndexField    = this.createDoubleTextField(refraction, CellValueType.STATISTIC, false, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.refraction.tooltip", "Set refraction index offset"), paramType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
 				
@@ -391,7 +391,7 @@ public class UIObservationPropertiesPane {
 				
 			case ROTATION_Y:
 				
-				box   = this.rotationYCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.label", "Rotation angle ry"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.label.tooltip", "Checked, if rotation angle around y-axis is an unknown parameter"), true, paramType);
+				box   = this.rotationYCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.label", "Rotation angle ry"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.label.tooltip", "Checked, if rotation angle around y-axis is an unknown parameter to be estimated"), true, paramType);
 				field = this.rotationYField    = this.createDoubleTextField(rotationY, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.y.tooltip", "Set rotation angle around y-axis"), paramType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
 				
@@ -399,7 +399,7 @@ public class UIObservationPropertiesPane {
 				
 			case ROTATION_X:
 				
-				box   = this.rotationXCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.label", "Rotation angle rx"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.label.tooltip", "Checked, if rotation angle around x-axis is an unknown parameter"), true, paramType);
+				box   = this.rotationXCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.label", "Rotation angle rx"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.label.tooltip", "Checked, if rotation angle around x-axis is an unknown parameter to be estimated"), true, paramType);
 				field = this.rotationXField    = this.createDoubleTextField(rotationX, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.x.tooltip", "Set rotation angle around x-axis"), paramType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
 				
@@ -407,14 +407,14 @@ public class UIObservationPropertiesPane {
 				
 			case ROTATION_Z:
 				
-				box   = this.rotationZCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.label", "Rotation angle rz"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.label.tooltip", "Checked, if rotation angle around z-axis is an unknown parameter"), true, paramType);
+				box   = this.rotationZCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.label", "Rotation angle rz"), i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.label.tooltip", "Checked, if rotation angle around z-axis is an unknown parameter to be estimated"), true, paramType);
 				field = this.rotationZField    = this.createDoubleTextField(rotationZ, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.rotation.z.tooltip", "Set rotation angle around z-axis"), paramType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
 				
 				break;
 			case SCALE:
 				
-				box   = this.scaleCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.label", "Scale s"), i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.label.tooltip", "Checked, if scale is an unknown parameter"), true, paramType);
+				box   = this.scaleCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.label", "Scale s"), i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.label.tooltip", "Checked, if scale is an unknown parameter to be estimated"), true, paramType);
 				field = this.scaleField    = this.createDoubleTextField(scale, CellValueType.SCALE, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.scale.tooltip", "Set scale"), paramType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
 				
@@ -422,7 +422,7 @@ public class UIObservationPropertiesPane {
 
 			case ZERO_POINT_OFFSET:
 				
-				box   = this.zeroPointOffsetCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.label", "Offset a"), i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.label.tooltip", "Checked, if zero point offset is an unknown parameter"), true, paramType);
+				box   = this.zeroPointOffsetCheckBox = this.createCheckBox(i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.label", "Offset a"), i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.label.tooltip", "Checked, if zero point offset is an unknown parameter to be estimated"), true, paramType);
 				field = this.zeroPointOffsetField    = this.createDoubleTextField(offset, CellValueType.LENGTH_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIObservationPropertiesPane.additionalparameter.zero_point_offset.tooltip", "Set zero point offset"), paramType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(paramType);
 				
