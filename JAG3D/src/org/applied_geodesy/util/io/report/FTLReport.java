@@ -722,6 +722,7 @@ public class FTLReport {
 				"CASEWHEN(\"sigma_x\" < 0, 0.0, \"sigma_x\") AS \"sigma_x\", " +
 				"CASEWHEN(\"sigma_y\" < 0, 0.0, \"sigma_y\") AS \"sigma_y\", " +
 				"CASEWHEN(\"sigma_z\" < 0, 0.0, \"sigma_z\") AS \"sigma_z\", " +
+				"\"helmert_major_axis\", \"helmert_minor_axis\", \"helmert_alpha\", " + 
 				"\"confidence_major_axis\", \"confidence_middle_axis\", \"confidence_minor_axis\", " +
 				"\"confidence_alpha\", \"confidence_beta\", \"confidence_gamma\", " +
 				"\"redundancy_x\", \"redundancy_y\", \"redundancy_z\", " +
@@ -780,12 +781,15 @@ public class FTLReport {
 					case "confidence_major_axis":
 					case "confidence_middle_axis":
 					case "confidence_minor_axis":
+					case "helmert_major_axis":
+					case "helmert_minor_axis":
 						h.put(key, options.convertLengthUncertaintyToView(pointSet.getDouble(i)));
 						break;
 
 					case "confidence_alpha":
 					case "confidence_beta":
 					case "confidence_gamma":
+					case "helmert_alpha":
 						h.put(key, options.convertAngleToView(pointSet.getDouble(i)));
 						break;
 
