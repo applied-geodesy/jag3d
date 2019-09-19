@@ -393,19 +393,19 @@ public class UICongruenceAnalysisPropertiesPane {
 			switch (restrictionType) {
 			case FIXED_TRANSLATION_Y:
 				
-				box = this.translationYCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.translation.y.label", "Translation y"), i18n.getString("UICongruenceAnalysisPropertiesPane.translation.y.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				box = this.translationYCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.translation.y.label", "Translation y"), i18n.getString("UICongruenceAnalysisPropertiesPane.translation.y.label.tooltip", "Checked, if translation in y is a strain parameter to be estimated"), false, restrictionType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
 				
 				break;
 			case FIXED_TRANSLATION_X:
 				
-				box = this.translationXCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.translation.x.label", "Translation x"), i18n.getString("UICongruenceAnalysisPropertiesPane.translation.x.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				box = this.translationXCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.translation.x.label", "Translation x"), i18n.getString("UICongruenceAnalysisPropertiesPane.translation.x.label.tooltip", "Checked, if translation in x is a strain parameter to be estimated"), false, restrictionType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
 				
 				break;
 			case FIXED_TRANSLATION_Z:
 				
-				box = this.translationZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.translation.z.label", "Translation z"), i18n.getString("UICongruenceAnalysisPropertiesPane.translation.z.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				box = this.translationZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.translation.z.label", "Translation z"), i18n.getString("UICongruenceAnalysisPropertiesPane.translation.z.label.tooltip", "Checked, if translation in z is a strain parameter to be estimated"), false, restrictionType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
 				
 				break;
@@ -439,19 +439,19 @@ public class UICongruenceAnalysisPropertiesPane {
 			switch (restrictionType) {
 			case FIXED_ROTATION_Y:
 				
-				box = this.rotationYCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.y.label", "Rotation y"), i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.y.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				box = this.rotationYCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.y.label", "Rotation y"), i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.y.label.tooltip", "Checked, if rotation angle around y-axis is a strain parameter to be estimated"), false, restrictionType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
 				
 				break;
 			case FIXED_ROTATION_X:
 				
-				box = this.rotationXCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.x.label", "Rotation x"), i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.x.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				box = this.rotationXCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.x.label", "Rotation x"), i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.x.label.tooltip", "Checked, if rotation angle around x-axis is a strain parameter to be estimated"), false, restrictionType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
 				
 				break;
 			case FIXED_ROTATION_Z:
 				
-				box = this.rotationZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.z.label", "Rotation z"), i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.z.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				box = this.rotationZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.z.label", "Rotation z"), i18n.getString("UICongruenceAnalysisPropertiesPane.rotation.z.label.tooltip", "Checked, if rotation angle around z-axis is a strain parameter to be estimated"), false, restrictionType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
 				
 				break;
@@ -484,19 +484,19 @@ public class UICongruenceAnalysisPropertiesPane {
 			switch (restrictionType) {
 			case FIXED_SHEAR_Y:
 				
-				box = this.shearYCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.shear.y.label", "Shear y"), i18n.getString("UICongruenceAnalysisPropertiesPane.shear.y.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				box = this.shearYCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.shear.y.label", "Shear y"), i18n.getString("UICongruenceAnalysisPropertiesPane.shear.y.label.tooltip", "Checked, if shear in y is a strain parameter to be estimated"), false, restrictionType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
 				
 				break;
 			case FIXED_SHEAR_X:
 				
-				box = this.shearXCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.shear.x.label", "Shear x"), i18n.getString("UICongruenceAnalysisPropertiesPane.shear.x.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				box = this.shearXCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.shear.x.label", "Shear x"), i18n.getString("UICongruenceAnalysisPropertiesPane.shear.x.label.tooltip", "Checked, if shear in x is a strain parameter to be estimated"), false, restrictionType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
 				
 				break;
 			case FIXED_SHEAR_Z:
 				
-				box = this.shearZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.shear.z.label", "Shear z"), i18n.getString("UICongruenceAnalysisPropertiesPane.shear.z.label.tooltip", "Checked, if translation is a strain parameter to be estimate"), false, restrictionType);
+				box = this.shearZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.shear.z.label", "Shear z"), i18n.getString("UICongruenceAnalysisPropertiesPane.shear.z.label.tooltip", "Checked, if shear in z is a strain parameter to be estimated"), false, restrictionType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
 				
 				break;
@@ -530,19 +530,19 @@ public class UICongruenceAnalysisPropertiesPane {
 			switch (restrictionType) {
 			case FIXED_SCALE_Y:
 				
-				box = this.scaleYCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.scale.y.label", "Scale y"), i18n.getString("UICongruenceAnalysisPropertiesPane.scale.y.label.tooltip", "Checked, if scale is a strain parameter to be estimate"), false, restrictionType);
+				box = this.scaleYCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.scale.y.label", "Scale y"), i18n.getString("UICongruenceAnalysisPropertiesPane.scale.y.label.tooltip", "Checked, if scale in y is a strain parameter to be estimated"), false, restrictionType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
 				
 				break;
 			case FIXED_SCALE_X:
 				
-				box = this.scaleXCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.scale.x.label", "Scale x"), i18n.getString("UICongruenceAnalysisPropertiesPane.scale.x.label.tooltip", "Checked, if scale is a strain parameter to be estimate"), false, restrictionType);
+				box = this.scaleXCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.scale.x.label", "Scale x"), i18n.getString("UICongruenceAnalysisPropertiesPane.scale.x.label.tooltip", "Checked, if scale in x is a strain parameter to be estimated"), false, restrictionType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
 				
 				break;
 			case FIXED_SCALE_Z:
 				
-				box = this.scaleZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.scale.z.label", "Scale z"), i18n.getString("UICongruenceAnalysisPropertiesPane.scale.z.label.tooltip", "Checked, if scale is a strain parameter to be estimate"), false, restrictionType);
+				box = this.scaleZCheckBox = this.createCheckBox(i18n.getString("UICongruenceAnalysisPropertiesPane.scale.z.label", "Scale z"), i18n.getString("UICongruenceAnalysisPropertiesPane.scale.z.label.tooltip", "Checked, if scale in z is a strain parameter to be estimated"), false, restrictionType);
 				progressIndicator = this.createDatabaseTransactionProgressIndicator(restrictionType);
 				
 				break;
