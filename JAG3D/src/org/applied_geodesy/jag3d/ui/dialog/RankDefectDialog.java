@@ -403,7 +403,10 @@ public class RankDefectDialog {
 
 	private void save(RankDefect rankDefect) {
 		try {
-			SQLManager.getInstance().save(this.userDefinedCheckBox.isSelected() || rankDefect.getDefect() == 0, rankDefect);
+			boolean userDefined = this.userDefinedCheckBox.isSelected();
+			if (userDefined && rankDefect.getDefect() == 0) // if no defect is selected, use the automated detection
+				userDefined = false;
+			SQLManager.getInstance().save(userDefined, rankDefect);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
