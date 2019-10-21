@@ -353,7 +353,7 @@ public class FormatterOptions {
 		return this.toViewFormat(CellValueType.VECTOR_UNCERTAINTY, this.convertVectorUncertaintyToView(d), displayUnit);
 	}
 	
-	private String toViewFormat(CellValueType type, double d, boolean displayUnit) {
+	public String toViewFormat(CellValueType type, double d, boolean displayUnit) {
 		Unit unit = this.formatterOptions.get(type).getUnit();
 		if (unit.getType() == UnitType.DEGREE_SEXAGESIMAL) {
 			double dms[] = this.toSexagesimalDegree(d);
