@@ -114,11 +114,22 @@ public class UITreeBuilder {
 	private class TreeListSelectionChangeListener implements ListChangeListener<TreeItem<TreeItemValue>> {
 		@Override
 		public void onChanged(Change<? extends TreeItem<TreeItemValue>> change) {
-			if (change != null && change.next() && treeView != null && treeView.getSelectionModel() != null && treeView.getSelectionModel().getSelectedItems().size() > 0) {				
-				TreeItem<TreeItemValue> treeItem = treeView.getSelectionModel().getSelectedItem();
-				int treeItemIndex = treeView.getSelectionModel().getSelectedIndex();
-				if (treeItemIndex < 0 || treeItem == null || !treeView.getSelectionModel().isSelected(treeItemIndex))
-					treeItem = treeView.getSelectionModel().getSelectedItems().get(0);
+			if (!ignoreTreeSelection && change != null && change.next() && treeView != null && treeView.getSelectionModel() != null && treeView.getSelectionModel().getSelectedItems().size() > 0) {				
+				TreeItem<TreeItemValue> treeItem = null;
+				boolean hasValidTreeItem = false;
+				
+				if ((change.wasAdded() || change.wasReplaced()) && !change.getAddedSubList().isEmpty()) {
+					treeItem = change.getAddedSubList().get(0);
+					hasValidTreeItem = true;
+				}
+				
+				if (!hasValidTreeItem) {
+					treeItem = treeView.getSelectionModel().getSelectedItem();
+					int treeItemIndex = treeView.getSelectionModel().getSelectedIndex();
+					if (treeItemIndex < 0 || treeItem == null || !treeView.getSelectionModel().isSelected(treeItemIndex))
+						treeItem = treeView.getSelectionModel().getSelectedItems().get(0);
+				}
+
 				handleTreeSelections(treeItem);
 			}
 		}
@@ -133,6 +144,7 @@ public class UITreeBuilder {
 	private BooleanProperty ignoreEvent = new SimpleBooleanProperty(Boolean.FALSE);
 //	private TreeSelectionChangeListener treeSelectionChangeListener = new TreeSelectionChangeListener();
 	private TreeListSelectionChangeListener treeListSelectionChangeListener = new TreeListSelectionChangeListener();
+	private boolean ignoreTreeSelection = false;
 	private UITreeBuilder() {}
 
 	public static UITreeBuilder getInstance() {
@@ -425,7 +437,8 @@ public class UITreeBuilder {
 		MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = this.treeView.getSelectionModel();
 		try {
 //			selectionModel.selectedItemProperty().removeListener(this.treeSelectionChangeListener);
-			selectionModel.getSelectedItems().removeListener(this.treeListSelectionChangeListener);
+//			selectionModel.getSelectedItems().removeListener(this.treeListSelectionChangeListener);
+			this.ignoreTreeSelection = true;
 			
 			TreeItemType currentItemType = currentTreeItem.getValue().getItemType();
 			boolean isValidSelection = true;
@@ -499,7 +512,8 @@ public class UITreeBuilder {
 		}
 		finally {
 //			selectionModel.selectedItemProperty().addListener(this.treeSelectionChangeListener);
-			selectionModel.getSelectedItems().addListener(this.treeListSelectionChangeListener);
+//			selectionModel.getSelectedItems().addListener(this.treeListSelectionChangeListener);
+			this.ignoreTreeSelection = false;
 		}
 	}
 
@@ -578,7 +592,8 @@ public class UITreeBuilder {
 	private void selectChildren(TreeItem<TreeItemValue> parent) {
 		try {
 //			this.treeView.getSelectionModel().selectedItemProperty().removeListener(this.treeSelectionChangeListener);
-			this.treeView.getSelectionModel().getSelectedItems().removeListener(this.treeListSelectionChangeListener);
+//			this.treeView.getSelectionModel().getSelectedItems().removeListener(this.treeListSelectionChangeListener);
+			this.ignoreTreeSelection = true;
 			if (!parent.isLeaf() && parent.isExpanded()) {
 				this.treeView.getSelectionModel().clearSelection();
 				ObservableList<TreeItem<TreeItemValue>> children = parent.getChildren();
@@ -596,7 +611,8 @@ public class UITreeBuilder {
 		}
 		finally {
 //			this.treeView.getSelectionModel().selectedItemProperty().addListener(this.treeSelectionChangeListener);
-			this.treeView.getSelectionModel().getSelectedItems().addListener(this.treeListSelectionChangeListener);
+//			this.treeView.getSelectionModel().getSelectedItems().addListener(this.treeListSelectionChangeListener);
+			this.ignoreTreeSelection = false;
 		}
 	}
 
