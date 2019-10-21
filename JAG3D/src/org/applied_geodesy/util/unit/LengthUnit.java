@@ -28,12 +28,14 @@ public class LengthUnit extends Unit {
 	public static LengthUnit MILLIMETER = new LengthUnit(UnitType.MILLIMETER);
 	public static LengthUnit MICROMETER = new LengthUnit(UnitType.MICROMETER);
 	public static LengthUnit INCH       = new LengthUnit(UnitType.INCH);
+	public static LengthUnit FOOT       = new LengthUnit(UnitType.FOOT);
 
 	public static final Map<UnitType, LengthUnit> UNITS = Map.of(
 			UnitType.METER,      METER,
 			UnitType.MILLIMETER, MILLIMETER,
 			UnitType.MICROMETER, MICROMETER,
-			UnitType.INCH,       INCH
+			UnitType.INCH,       INCH,
+			UnitType.FOOT,       FOOT
 	);
 		
 	private double conversionFactorToMeter = 1.0;
@@ -60,6 +62,11 @@ public class LengthUnit extends Unit {
 			this.name         = i18n.getString("Unit.inch.name", "Inch");
 			this.abbreviation = i18n.getString("Unit.inch.abbreviation", "in");
 			this.conversionFactorToMeter = 0.0254;
+			break;
+		case FOOT:
+			this.name         = i18n.getString("Unit.foot.name", "Foot");
+			this.abbreviation = i18n.getString("Unit.foot.abbreviation", "ft");
+			this.conversionFactorToMeter = 0.3048;
 			break;
 		default:
 			break;
