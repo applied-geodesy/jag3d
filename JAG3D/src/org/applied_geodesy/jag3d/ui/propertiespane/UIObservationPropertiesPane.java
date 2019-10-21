@@ -22,11 +22,32 @@
 package org.applied_geodesy.jag3d.ui.propertiespane;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.applied_geodesy.adjustment.network.Epoch;
 import org.applied_geodesy.adjustment.network.ObservationGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.ParameterType;
+import org.applied_geodesy.adjustment.network.observation.DeltaZ;
+import org.applied_geodesy.adjustment.network.observation.Direction;
+import org.applied_geodesy.adjustment.network.observation.GNSSBaselineDeltaX2D;
+import org.applied_geodesy.adjustment.network.observation.GNSSBaselineDeltaX3D;
+import org.applied_geodesy.adjustment.network.observation.GNSSBaselineDeltaZ1D;
+import org.applied_geodesy.adjustment.network.observation.HorizontalDistance;
+import org.applied_geodesy.adjustment.network.observation.Observation;
+import org.applied_geodesy.adjustment.network.observation.SlopeDistance;
+import org.applied_geodesy.adjustment.network.observation.ZenithAngle;
+import org.applied_geodesy.adjustment.network.observation.group.DeltaZGroup;
+import org.applied_geodesy.adjustment.network.observation.group.DirectionGroup;
+import org.applied_geodesy.adjustment.network.observation.group.GNSSBaseline1DGroup;
+import org.applied_geodesy.adjustment.network.observation.group.GNSSBaseline2DGroup;
+import org.applied_geodesy.adjustment.network.observation.group.GNSSBaseline3DGroup;
+import org.applied_geodesy.adjustment.network.observation.group.HorizontalDistanceGroup;
+import org.applied_geodesy.adjustment.network.observation.group.ObservationGroup;
+import org.applied_geodesy.adjustment.network.observation.group.SlopeDistanceGroup;
+import org.applied_geodesy.adjustment.network.observation.group.ZenithAngleGroup;
+import org.applied_geodesy.adjustment.point.Point;
+import org.applied_geodesy.adjustment.point.Point3D;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.table.CellValueType;
@@ -36,6 +57,9 @@ import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField.ValueSupport;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
+import org.applied_geodesy.util.FormatterChangedListener;
+import org.applied_geodesy.util.FormatterEvent;
+import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.util.i18.I18N;
 
 import javafx.animation.FadeTransition;
@@ -47,6 +71,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Control;
@@ -60,8 +87,18 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 
 public class UIObservationPropertiesPane {
+	private class TickFormatChangedListener implements FormatterChangedListener {
+
+		@Override
+		public void formatterChanged(FormatterEvent evt) {
+			updateUncertaintyChart(lineChart);
+			updateTickLabels(lineChart);
+		}
+	}
+	
 	private class NumberChangeListener implements ChangeListener<Double> {
 		private final DoubleTextField field;
 		
@@ -151,7 +188,13 @@ public class UIObservationPropertiesPane {
 	
 	private boolean ignoreValueUpdate = false;
 	private ObservationTreeItemValue selectedObservationItemValues[] = null;
-		
+	
+	private LineChart<Number,Number> lineChart;
+	private final double minDistanceForUncertaintyChart = 7.0;
+    private final double maxDistanceForUncertaintyChart = 153.0;
+	
+	private FormatterOptions options = FormatterOptions.getInstance();
+
 	UIObservationPropertiesPane(TreeItemType type) {
 		switch(type) {
 		case LEVELING_LEAF:
@@ -218,6 +261,8 @@ public class UIObservationPropertiesPane {
 			return false;
 		this.ignoreValueUpdate = true;
 		this.zeroPointOffsetUncertaintyField.setValue(value != null && value > 0 ? value : null);
+		this.updateUncertaintyChart(this.lineChart);
+        this.updateTickLabels(this.lineChart);
 		this.ignoreValueUpdate = false;
 		return true;
 	}
@@ -227,6 +272,8 @@ public class UIObservationPropertiesPane {
 			return false;
 		this.ignoreValueUpdate = true;
 		this.squareRootDistanceDependentUncertaintyField.setValue(value != null && value >= 0 ? value : null);
+		this.updateUncertaintyChart(this.lineChart);
+        this.updateTickLabels(this.lineChart);
 		this.ignoreValueUpdate = false;
 		return true;
 	}
@@ -236,6 +283,8 @@ public class UIObservationPropertiesPane {
 			return false;
 		this.ignoreValueUpdate = true;
 		this.distanceDependentUncertaintyField.setValue(value != null && value >= 0 ? value : null);
+		this.updateUncertaintyChart(this.lineChart);
+        this.updateTickLabels(this.lineChart);
 		this.ignoreValueUpdate = false;
 		return true;
 	}
@@ -488,40 +537,22 @@ public class UIObservationPropertiesPane {
 			return null;
 		}
 
-		double fieldMinWidth = 200;
-		double fieldMaxWidth = 350;
 		GridPane gridPane = this.createGridPane();
 
 		ProgressIndicator databaseTransactionUncertaintyTypeAProgressIndicator = this.createDatabaseTransactionProgressIndicator(ObservationGroupUncertaintyType.ZERO_POINT_OFFSET);
 		Label uncertaintyTypeALabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.ua.label", "\u03C3a"));
 		uncertaintyTypeALabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.zeroPointOffsetUncertaintyField = new UncertaintyTextField(sigmaZeroPointOffset, constantUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
-		this.zeroPointOffsetUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.ua.tooltip", "Set constant part of combined uncertainty")));
-		this.zeroPointOffsetUncertaintyField.setUserData(ObservationGroupUncertaintyType.ZERO_POINT_OFFSET);
-		this.zeroPointOffsetUncertaintyField.numberProperty().addListener(new NumberChangeListener(this.zeroPointOffsetUncertaintyField));
-		this.zeroPointOffsetUncertaintyField.setMinWidth(fieldMinWidth);
-		this.zeroPointOffsetUncertaintyField.setMaxWidth(fieldMaxWidth);
+		this.zeroPointOffsetUncertaintyField = this.createUncertaintyTextField(sigmaZeroPointOffset, constantUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO, i18n.getString("UIObservationPropertiesPane.uncertainty.ua.tooltip", "Set constant part of combined uncertainty"), ObservationGroupUncertaintyType.ZERO_POINT_OFFSET);
 		
 		ProgressIndicator databaseTransactionUncertaintyTypeBProgressIndicator = this.createDatabaseTransactionProgressIndicator(ObservationGroupUncertaintyType.SQUARE_ROOT_DISTANCE_DEPENDENT);
 		Label uncertaintyTypeBLabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.ub.label", "\u03C3b(\u221Ad)"));
 		uncertaintyTypeBLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		//this.squareRootDistanceDependentUncertaintyField = new LengthUnceraintySquareRootTextField(sigmaSquareRootDistance, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO, true);
-		this.squareRootDistanceDependentUncertaintyField = new UncertaintyTextField(sigmaSquareRootDistance, squareRootDistanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO);
-		this.squareRootDistanceDependentUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.ub.tooltip", "Set square-root distance dependent part of combined uncertainty")));
-		this.squareRootDistanceDependentUncertaintyField.setUserData(ObservationGroupUncertaintyType.SQUARE_ROOT_DISTANCE_DEPENDENT);
-		this.squareRootDistanceDependentUncertaintyField.numberProperty().addListener(new NumberChangeListener(this.squareRootDistanceDependentUncertaintyField));
-		this.squareRootDistanceDependentUncertaintyField.setMinWidth(fieldMinWidth);
-		this.squareRootDistanceDependentUncertaintyField.setMaxWidth(fieldMaxWidth);
+		this.squareRootDistanceDependentUncertaintyField = this.createUncertaintyTextField(sigmaSquareRootDistance, squareRootDistanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO, i18n.getString("UIObservationPropertiesPane.uncertainty.ub.tooltip", "Set square-root distance dependent part of combined uncertainty"), ObservationGroupUncertaintyType.SQUARE_ROOT_DISTANCE_DEPENDENT);  
 		
 		ProgressIndicator databaseTransactionUncertaintyTypeCProgressIndicator = this.createDatabaseTransactionProgressIndicator(ObservationGroupUncertaintyType.DISTANCE_DEPENDENT);
 		Label uncertaintyTypeCLabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.uc.label", "\u03C3c(d)"));
 		uncertaintyTypeCLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.distanceDependentUncertaintyField = new UncertaintyTextField(sigmaDistanceDependent, distanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO);
-		this.distanceDependentUncertaintyField.setTooltip(new Tooltip(i18n.getString("UIObservationPropertiesPane.uncertainty.uc.tooltip", "Set distance dependent part of combined uncertainty")));
-		this.distanceDependentUncertaintyField.setUserData(ObservationGroupUncertaintyType.DISTANCE_DEPENDENT);
-		this.distanceDependentUncertaintyField.numberProperty().addListener(new NumberChangeListener(this.distanceDependentUncertaintyField));
-		this.distanceDependentUncertaintyField.setMinWidth(fieldMinWidth);
-		this.distanceDependentUncertaintyField.setMaxWidth(fieldMaxWidth);
+		this.distanceDependentUncertaintyField = this.createUncertaintyTextField(sigmaDistanceDependent, distanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO, i18n.getString("UIObservationPropertiesPane.uncertainty.uc.tooltip", "Set distance dependent part of combined uncertainty"), ObservationGroupUncertaintyType.DISTANCE_DEPENDENT);
 		
 		uncertaintyTypeALabel.setLabelFor(this.zeroPointOffsetUncertaintyField);
 		uncertaintyTypeBLabel.setLabelFor(this.squareRootDistanceDependentUncertaintyField);
@@ -580,13 +611,40 @@ public class UIObservationPropertiesPane {
 		congruenceAnalysisTitledPane.setContent(gridPane);
 		return congruenceAnalysisTitledPane;
 	}
-	
+
+	private Node createUncertaintyChartPane() {
+		NumberAxis xAxis = new NumberAxis();
+        NumberAxis yAxis = new NumberAxis();
+        
+        xAxis.setForceZeroInRange(true);
+        xAxis.setMinorTickVisible(false);
+        xAxis.setAnimated(false);
+        
+        yAxis.setMinorTickVisible(false);
+        yAxis.setForceZeroInRange(false);
+        yAxis.setAnimated(false);
+        
+		this.lineChart = new LineChart<Number,Number>(xAxis,yAxis);
+		this.lineChart.setLegendVisible(false);
+		this.lineChart.setAnimated(false);
+		this.lineChart.setPadding(new Insets(0, 0, 0, 0));
+        this.lineChart.setCreateSymbols(false);
+        
+        this.updateUncertaintyChart(this.lineChart);
+        this.updateTickLabels(this.lineChart);
+
+        TitledPane uncertaintyChartTitledPane = this.createTitledPane(i18n.getString("UIObservationPropertiesPane.chart.title", "Combined Uncertainties"));
+		uncertaintyChartTitledPane.setContent(this.lineChart);
+		return uncertaintyChartTitledPane;
+	}
+
 	private void init() {
 		VBox content = new VBox();
 		content.getChildren().addAll(
 				this.createUncertaintiesPane(),
 				this.createAdditionalParametersPane(),
-				this.createCongruenceAnalysisPane()
+				this.createCongruenceAnalysisPane(),
+				this.createUncertaintyChartPane()
 				);
 		
 		this.reset();
@@ -613,10 +671,21 @@ public class UIObservationPropertiesPane {
 	    this.sequentialTransition.getChildren().addAll(fadeIn, fadeOut);
 	    this.sequentialTransition.setAutoReverse(false);
 	    this.sequentialTransition.onFinishedProperty().addListener(new SequentialTransitionFinishedListener());
+	    this.options.addFormatterChangedListener(new TickFormatChangedListener());
 	}
 	
 	private DoubleTextField createDoubleTextField(double value, CellValueType type, boolean displayUnit, ValueSupport valueSupport, String tooltipText, ParameterType userData) {
 		DoubleTextField field = new DoubleTextField(value, type, displayUnit, valueSupport);
+		field.setTooltip(new Tooltip(tooltipText));
+		field.setMinWidth(200);
+		field.setMaxWidth(350);
+		field.setUserData(userData);
+		field.numberProperty().addListener(new NumberChangeListener(field));
+		return field;
+	}
+	
+	private UncertaintyTextField createUncertaintyTextField(double value, CellValueType type, boolean displayUnit, ValueSupport valueSupport, String tooltipText, ObservationGroupUncertaintyType userData) {
+		UncertaintyTextField field = new UncertaintyTextField(value, type, displayUnit, valueSupport);
 		field.setTooltip(new Tooltip(tooltipText));
 		field.setMinWidth(200);
 		field.setMaxWidth(350);
@@ -722,6 +791,7 @@ public class UIObservationPropertiesPane {
 					this.sequentialTransition.playFromStart();
 				}
 				SQLManager.getInstance().saveUncertainty(uncertaintyType, value.doubleValue(), this.selectedObservationItemValues);
+				this.updateUncertaintyChart(this.lineChart);
 			}
 			
 		} catch (Exception e) {
@@ -843,6 +913,156 @@ public class UIObservationPropertiesPane {
 				}
 			});
 		}
+	}
+	
+	private void updateTickLabels(LineChart<Number,Number> lineChart) {
+		NumberAxis xAxis = (NumberAxis)lineChart.getXAxis();
+		NumberAxis yAxis = (NumberAxis)lineChart.getYAxis();
+
+		CellValueType cellValueType;
+		switch(this.type) {
+		case DIRECTION_LEAF:
+		case ZENITH_ANGLE_LEAF:
+			cellValueType = CellValueType.ANGLE_UNCERTAINTY;
+			yAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.chart.yaxis.label", "\u03C30 [%s]"), options.getFormatterOptions().get(CellValueType.ANGLE_UNCERTAINTY).getUnit().getAbbreviation()));
+			break;
+
+		default:
+			cellValueType = CellValueType.LENGTH_UNCERTAINTY;
+			yAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.chart.yaxis.label", "\u03C30 [%s]"), options.getFormatterOptions().get(CellValueType.LENGTH_UNCERTAINTY).getUnit().getAbbreviation()));
+			break;
+		}
+		
+		yAxis.setTickLabelFormatter(new StringConverter<Number>() {
+			@Override
+			public String toString(Number number) {
+				return options.toViewFormat(cellValueType, number.doubleValue(), false);
+			}
+
+			@Override
+			public Number fromString(String string) {
+				return null;
+			}
+		});
+
+		xAxis.setTickLabelFormatter(new StringConverter<Number>() {
+			@Override
+			public String toString(Number number) {
+				return (number.doubleValue() > maxDistanceForUncertaintyChart) ? "" : String.format(Locale.ENGLISH, "%.0f", number.doubleValue());
+			}
+
+			@Override
+			public Number fromString(String string) {
+				return null;
+			}
+		});
+		xAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.chart.xaxis.label", "d0 [%s]"), options.getFormatterOptions().get(CellValueType.LENGTH).getUnit().getAbbreviation()));
+	}
+	
+	private void updateUncertaintyChart(LineChart<Number,Number> lineChart) {
+		XYChart.Series<Number, Number> uncertaintyChartSeries = new XYChart.Series<Number, Number>();
+		
+		double uncertaintyA = this.zeroPointOffsetUncertaintyField.getNumber();
+		double uncertaintyB = this.squareRootDistanceDependentUncertaintyField.getNumber();
+		double uncertaintyC = this.distanceDependentUncertaintyField.getNumber();
+		
+        ObservationGroup group = null;
+        switch(this.type) {
+		case LEVELING_LEAF:
+			group = new DeltaZGroup(-1, uncertaintyA, uncertaintyB, uncertaintyC, Epoch.REFERENCE);
+			break;
+		case DIRECTION_LEAF:
+			group = new DirectionGroup(-1, uncertaintyA, uncertaintyB, uncertaintyC, Epoch.REFERENCE);
+			break;
+		case HORIZONTAL_DISTANCE_LEAF:
+			group = new HorizontalDistanceGroup(-1, uncertaintyA, uncertaintyB, uncertaintyC, Epoch.REFERENCE);
+			break;
+		case SLOPE_DISTANCE_LEAF:
+			group = new SlopeDistanceGroup(-1, uncertaintyA, uncertaintyB, uncertaintyC, Epoch.REFERENCE);
+			break;
+		case ZENITH_ANGLE_LEAF:
+			group = new ZenithAngleGroup(-1, uncertaintyA, uncertaintyB, uncertaintyC, Epoch.REFERENCE);
+			break;
+		case GNSS_1D_LEAF:
+			group = new GNSSBaseline1DGroup(-1, uncertaintyA, uncertaintyB, uncertaintyC, Epoch.REFERENCE);
+			break;
+		case GNSS_2D_LEAF:
+			group = new GNSSBaseline2DGroup(-1, uncertaintyA, uncertaintyB, uncertaintyC, Epoch.REFERENCE);
+			break;
+		case GNSS_3D_LEAF:
+			group = new GNSSBaseline3DGroup(-1, uncertaintyA, uncertaintyB, uncertaintyC, Epoch.REFERENCE);
+			break;
+		default:
+			System.err.println(this.getClass().getSimpleName() + " Error, unsupported obsewrvation group type " + type);	
+			break;
+        }
+        
+        if (group == null)
+        	return;
+
+        for (double distanceInViewUnit = this.minDistanceForUncertaintyChart; distanceInViewUnit <= this.maxDistanceForUncertaintyChart; distanceInViewUnit += 0.25) {
+        	double distanceInModelUnit = options.convertLengthToModel(distanceInViewUnit); // distance in meter
+        	Observation observation = this.createObservation(this.type, distanceInModelUnit);
+        	if (observation == null)
+        		break;
+
+        	double uncertaintyInModelUnit = group.getStd(observation);        	
+        	double uncertaintyInViewUnit = 0;
+        	
+        	switch(this.type) {
+        	case DIRECTION_LEAF:
+        	case ZENITH_ANGLE_LEAF:
+        		uncertaintyInViewUnit = options.convertAngleUncertaintyToView(uncertaintyInModelUnit);
+        		break;
+        	default:
+        		uncertaintyInViewUnit = options.convertLengthUncertaintyToView(uncertaintyInModelUnit);
+        		break;
+        	}
+        	uncertaintyChartSeries.getData().add(new XYChart.Data<Number,Number>(distanceInViewUnit, uncertaintyInViewUnit));
+        }
+
+        this.lineChart.getData().clear();
+        this.lineChart.getData().add(uncertaintyChartSeries);
+        
+        Node line = uncertaintyChartSeries.getNode().lookup(".chart-series-line");
+        line.setStyle("-fx-stroke: rgba(200, 0, 0, 1); -fx-stroke-width: 2.5px;");        
+	}
+	
+	private Observation createObservation(TreeItemType type, double distance) {
+		Point startPoint = new Point3D("0",        0, 0, 0);
+		Point endPoint   = new Point3D("1", distance, 0, 0);
+		
+		Observation observation = null;
+		switch(this.type) {
+		case LEVELING_LEAF:
+			observation = new DeltaZ(-1, startPoint, endPoint, 0.0, 0.0, 0.0, -1, distance);
+			break;
+		case DIRECTION_LEAF:
+			observation = new Direction(-1, startPoint, endPoint, 0.0, 0.0, 0.0, -1, distance);
+			break;
+		case HORIZONTAL_DISTANCE_LEAF:
+			observation = new HorizontalDistance(-1, startPoint, endPoint, 0.0, 0.0, 0.0, -1, distance);
+			break;
+		case SLOPE_DISTANCE_LEAF:
+			observation = new SlopeDistance(-1, startPoint, endPoint, 0.0, 0.0, 0.0, -1, distance);
+			break;
+		case ZENITH_ANGLE_LEAF:
+			observation = new ZenithAngle(-1, startPoint, endPoint, 0.0, 0.0, 0.0, -1, distance);
+			break;
+		case GNSS_1D_LEAF:
+			observation = new GNSSBaselineDeltaZ1D(-1, startPoint, endPoint, distance, -1);
+			break;
+		case GNSS_2D_LEAF:
+			observation = new GNSSBaselineDeltaX2D(-1, startPoint, endPoint, distance, -1);
+			break;
+		case GNSS_3D_LEAF:
+			observation = new GNSSBaselineDeltaX3D(-1, startPoint, endPoint, distance, -1);
+			break;
+		default:
+			System.err.println(this.getClass().getSimpleName() + " Error, unsupported obsewrvation group type " + type);	
+			break;
+        }
+		return observation;
 	}
 
 }
