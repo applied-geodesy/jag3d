@@ -118,9 +118,14 @@ public class UITreeBuilder {
 				TreeItem<TreeItemValue> treeItem = null;
 				boolean hasValidTreeItem = false;
 				
-				if ((change.wasAdded() || change.wasReplaced()) && !change.getAddedSubList().isEmpty()) {
-					treeItem = change.getAddedSubList().get(0);
-					hasValidTreeItem = true;
+				try {
+					if ((change.wasAdded() || change.wasReplaced()) && change.getAddedSubList() != null && !change.getAddedSubList().isEmpty()) {
+						treeItem = change.getAddedSubList().get(0);
+						hasValidTreeItem = true;
+					}
+				} catch (Exception e) {
+					hasValidTreeItem = false;
+					e.printStackTrace();
 				}
 				
 				if (!hasValidTreeItem) {
@@ -139,6 +144,7 @@ public class UITreeBuilder {
 	private I18N i18n = I18N.getInstance();
 	private UITabPaneBuilder tabPaneBuilder = UITabPaneBuilder.getInstance();
 	private ObservableMap<TreeItemType, CheckBoxTreeItem<TreeItemValue>> directoryItemMap = FXCollections.observableHashMap();
+	private TreeItem<TreeItemValue> lastValidSelectedTreeItem = null;
 	private TreeView<TreeItemValue> treeView;
 	private boolean ignoreExpanding = false;
 	private BooleanProperty ignoreEvent = new SimpleBooleanProperty(Boolean.FALSE);
@@ -429,8 +435,15 @@ public class UITreeBuilder {
 			this.ignoreExpanding = false;
 		}
 	}
+	
+	public void handleTreeSelections() {
+		this.handleTreeSelections(this.lastValidSelectedTreeItem);
+	}
 
 	private void handleTreeSelections(TreeItem<TreeItemValue> currentTreeItem) {
+		// Save last option
+		this.lastValidSelectedTreeItem = currentTreeItem;
+		
 		if (currentTreeItem == null)
 			return;
 		
