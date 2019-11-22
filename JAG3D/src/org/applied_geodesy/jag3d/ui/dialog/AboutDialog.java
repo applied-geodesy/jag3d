@@ -124,7 +124,7 @@ public class AboutDialog {
 		Label iconLabel        = this.createLabel("Icon set:");
 
 		// right-hand labels
-		Label author      = this.createLabel("Michael L\u00F6sler\r\n\r\nBahnhofsplatz 3\r\nDE-61118 Bad Vilbel");
+		Label author      = this.createLabel("Michael L\u00F6sler\r\n\r\nFriedberger Str. 50D\r\nDE-61118 Bad Vilbel");
 		Label licence     = this.createLabel("GNU General Public License v3.0");
 		Label uiVersion   = this.createLabel("v" + Version.get(VersionType.USER_INTERFACE));
 		Label dbVersion   = this.createLabel("v" + Version.get(VersionType.DATABASE));
