@@ -23,7 +23,6 @@ package org.applied_geodesy.jag3d.ui.dialog;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.List;
 import java.util.Locale;
 
 import org.applied_geodesy.adjustment.EstimationStateType;
@@ -33,7 +32,6 @@ import org.applied_geodesy.adjustment.network.sql.SQLAdjustmentManager;
 import org.applied_geodesy.jag3d.sql.PointTypeMismatchException;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.sql.UnderDeterminedPointException;
-import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.i18.I18N;
 import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
@@ -48,9 +46,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Label;
-import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TreeItem;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -458,32 +454,34 @@ public class NetworkAdjustmentDialog {
 						break;
 					}
 					
-					MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
-					List<Integer> treeItemIndices = selectionModel.getSelectedIndices();
+					UITreeBuilder.getInstance().handleTreeSelections();
 					
-					if (treeItemIndices == null || treeItemIndices.size() == 0) {
-						selectionModel.clearSelection();
-						selectionModel.select(0);
-					}
-					else {
-						int[] indices = new int[treeItemIndices.size()];
-						for (int i=0; i<indices.length; i++)
-							indices[i] = treeItemIndices.get(i);
-						
-						try {
-							selectionModel.clearSelection();
-							selectionModel.selectIndices(indices[0], indices);
-						}
-						catch (Exception e) {
-							e.printStackTrace();
-							
-							TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
-							if (treeItem != null)
-								selectionModel.select(treeItem);
-							else
-								selectionModel.select(0);
-						}
-					}				
+//					MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
+//					List<Integer> treeItemIndices = selectionModel.getSelectedIndices();
+//					
+//					if (treeItemIndices == null || treeItemIndices.size() == 0) {
+//						selectionModel.clearSelection();
+//						selectionModel.select(0);
+//					}
+//					else {
+//						int[] indices = new int[treeItemIndices.size()];
+//						for (int i=0; i<indices.length; i++)
+//							indices[i] = treeItemIndices.get(i);
+//						
+//						try {
+//							selectionModel.clearSelection();
+//							selectionModel.selectIndices(indices[0], indices);
+//						}
+//						catch (Exception e) {
+//							e.printStackTrace();
+//							
+//							TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
+//							if (treeItem != null)
+//								selectionModel.select(treeItem);
+//							else
+//								selectionModel.select(0);
+//						}
+//					}				
 				}
 			}
 		});
