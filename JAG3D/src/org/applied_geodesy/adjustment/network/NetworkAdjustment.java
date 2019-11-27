@@ -1967,8 +1967,10 @@ public class NetworkAdjustment implements Runnable {
 			}
 			
 		}
-		if (this.estimationType == EstimationType.SIMULATION)
-			n.zero();
+//		// Unnoetig, da Pseudobeobachtung und berechneter Wert identisch sind, d.h., 
+//		// observation.setValueApriori(observation.getValueAposteriori()); in SQLAdjustmentManager  
+//		if (this.estimationType == EstimationType.SIMULATION)
+//			n.zero();
 		
 		return new NormalEquationSystem(N, n);
 	}	

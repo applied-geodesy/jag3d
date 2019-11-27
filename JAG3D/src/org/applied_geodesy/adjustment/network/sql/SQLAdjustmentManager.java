@@ -113,6 +113,8 @@ public class SQLAdjustmentManager {
 
 	private NetworkAdjustment networkAdjustment = null;
 
+	private EstimationType estimationType = null;
+	
 	private boolean freeNetwork = false,
 			congruenceAnalysis = false,
 			pure1DNetwork = true,
@@ -306,11 +308,13 @@ public class SQLAdjustmentManager {
 			this.congruenceAnalysis               = rs.getBoolean("congruence_analysis");
 			boolean exportCovarianceMatrix        = rs.getBoolean("export_covariance_matrix");
 			boolean applyVarianceOfUnitWeight     = rs.getBoolean("apply_variance_of_unit_weight");
+
+			this.estimationType = type == null ? EstimationType.L2NORM : type;
 			
 			adjustment.setMaximalNumberOfIterations(maximalNumberOfIterations);
 			adjustment.setRobustEstimationLimit(robustEstimationLimit);
 			adjustment.setNumberOfPrincipalComponents(numberOfPrincipalComponents);
-			adjustment.setEstimationType(type == null ? EstimationType.L2NORM : type);
+			adjustment.setEstimationType(this.estimationType);
 			adjustment.setCongruenceAnalysis(this.congruenceAnalysis);
 			adjustment.setApplyAposterioriVarianceOfUnitWeight(applyVarianceOfUnitWeight);
 			// export path of covariance matrix
@@ -662,6 +666,9 @@ public class SQLAdjustmentManager {
 			else if (observationGroup instanceof ZenithAngleGroup && startPoint.getDimension() == 3 && endPoint.getDimension() == 3) 
 				observation = new ZenithAngle(id, startPoint, endPoint, startPointHeight, endPointHeight, observation0, sigma0, distanceForUncertaintyModel);
 
+			if (this.estimationType == EstimationType.SIMULATION)
+				observation.setValueApriori(observation.getValueAposteriori());
+			
 			if (observation != null) {
 				observation.setProjectionScheme(this.projection);
 				observationGroup.add(observation);
@@ -760,7 +767,7 @@ public class SQLAdjustmentManager {
 				if (observationGroup instanceof DirectionGroup) {
 					parameter = ((DirectionGroup)observationGroup).getOrientation();
 					parameter.setValue( value0 );
-					((Orientation)parameter).setEstimateApproximationValue(this.estimateOrientationApproximation);
+					((Orientation)parameter).setEstimateApproximationValue(this.estimateOrientationApproximation && this.estimationType != EstimationType.SIMULATION);
 				}
 				break;
 
