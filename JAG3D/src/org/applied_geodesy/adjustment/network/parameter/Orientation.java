@@ -31,12 +31,17 @@ import org.applied_geodesy.adjustment.network.observation.Observation;
 public class Orientation extends AdditionalUnknownParameter {
 	private boolean estimateApproximationValue = true;
 	
+	public Orientation() {
+		this(0.0, true);
+	}
+	
 	public Orientation(boolean estimateApproximationValue) {
-		super(0.0);
+		this(0.0, estimateApproximationValue);
 	}
 
 	public Orientation(double ori, boolean estimateApproximationValue) {
 		super(ori);
+		this.estimateApproximationValue = estimateApproximationValue;
 	}
 
 	@Override
