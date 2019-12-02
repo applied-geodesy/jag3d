@@ -548,7 +548,7 @@ public class LayerManager {
 			if (layer.isVisible())
 				maxGraphicExtent.merge(layer.getMaximumGraphicExtent());
 		}
-		
+
 		if (maxGraphicExtent.getMinX() == Double.MAX_VALUE && 
 				maxGraphicExtent.getMinY() == Double.MAX_VALUE && 
 				maxGraphicExtent.getMaxX() == Double.MIN_VALUE && 
@@ -556,6 +556,14 @@ public class LayerManager {
 			//this.redraw(); 
 		}
 		else {
+			if (maxGraphicExtent.getMinX() == maxGraphicExtent.getMaxX()) {
+				maxGraphicExtent.setMinX(maxGraphicExtent.getMinX()-1);
+				maxGraphicExtent.setMaxX(maxGraphicExtent.getMaxX()+1);
+			}
+			if (maxGraphicExtent.getMinY() == maxGraphicExtent.getMaxY()) {
+				maxGraphicExtent.setMinY(maxGraphicExtent.getMinY()-1);
+				maxGraphicExtent.setMaxY(maxGraphicExtent.getMaxY()+1);
+			}
 			this.currentGraphicExtent.set(maxGraphicExtent);
 			//this.draw();
 			this.zoomOut();
