@@ -47,7 +47,7 @@
 	<!DOCTYPE html>
 	<html lang="<#include "default/i18n/locale.ftlh" parse=false>">
 		<head>
-			<title>${project_name} - JAG3D</title>
+			<title><#if project_name?has_content>${project_name} :: </#if>Report &mdash; Java Applied Geodesy 3D</title>
 			<meta charset="UTF-8">
 			<meta name="generator" content="JAG3D - Java Applied Geodesy 3D v${version?string["#"]}">
 			<meta name="application-name" content="JAG3D - Java Applied Geodesy 3D - (c) by Michael Loesler - https://software.applied-geodesy.org">
