@@ -95,7 +95,9 @@
 				<#if group.dimension != 2>
 					<td><@printFormattedNumber value=point.redundancy_z format=df_statistic/></td>
 				</#if>
-				
+			</#if>
+			
+			<#if group.type != "REFERENCE_POINT">
 				<#if group.dimension != 1>
 					<td><@printFormattedNumber value=point.residual_y format=df_length_residual/></td>
 					<td><@printFormattedNumber value=point.residual_x format=df_length_residual/></td>

@@ -2,9 +2,9 @@
 		"id"   : "Point-Id",
 		"code" : "Code",
 
-		"y" :    "East Y",
-		"x" :    "North X",
-		"z" :    "Height Z"
+		"y" :    "East y",
+		"x" :    "North x",
+		"z" :    "Height z"
 }>
 
 <#assign point_type_map = {

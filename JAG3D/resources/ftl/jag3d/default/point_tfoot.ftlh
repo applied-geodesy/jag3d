@@ -69,7 +69,9 @@
 			<#if group.dimension != 2>
 				<td><@printFormattedNumber value=group.redundancy_z format=df_statistic/></td>
 			</#if>
+		</#if>
 			
+		<#if group.type != "REFERENCE_POINT">
 			<#if group.dimension != 1>
 				<td></td>
 				<td></td>
