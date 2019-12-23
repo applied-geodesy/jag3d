@@ -418,34 +418,34 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 		
-		// Residual
+		// Residual 
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.y.label", "\u03B5y");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component");
+		labelText   = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.y.label", "\u03B5y")                   : i18n.getString("UIPointTableBuilder.tableheader.deviation.y.label", "\u0394y");
+		tooltipText = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component") : i18n.getString("UIPointTableBuilder.tableheader.deviation.y.tooltip", "Deviation of y-component w.r.t. y0");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, PointRow::residualYProperty, getDoubleCallback(cellValueType), this.dimension != 1 && this.type == PointType.STOCHASTIC_POINT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, PointRow::residualYProperty, getDoubleCallback(cellValueType), this.dimension != 1 && this.type != PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.x.label", "\u03B5x");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component");
+		labelText   = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.x.label", "\u03B5x")                   : i18n.getString("UIPointTableBuilder.tableheader.deviation.x.label", "\u0394x");
+		tooltipText = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component") : i18n.getString("UIPointTableBuilder.tableheader.deviation.x.tooltip", "Deviation of x-component w.r.t. x0");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, PointRow::residualXProperty, getDoubleCallback(cellValueType), this.dimension != 1 && this.type == PointType.STOCHASTIC_POINT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, PointRow::residualXProperty, getDoubleCallback(cellValueType), this.dimension != 1 && this.type != PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.z.label", "\u03B5z");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component");
+		labelText   = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.z.label", "\u03B5z")                   : i18n.getString("UIPointTableBuilder.tableheader.deviation.z.label", "\u0394z");
+		tooltipText = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component") : i18n.getString("UIPointTableBuilder.tableheader.deviation.z.tooltip", "Deviation of z-component w.r.t. z0");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, PointRow::residualZProperty, getDoubleCallback(cellValueType), this.dimension != 2 && this.type == PointType.STOCHASTIC_POINT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, PointRow::residualZProperty, getDoubleCallback(cellValueType), this.dimension != 2 && this.type != PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 

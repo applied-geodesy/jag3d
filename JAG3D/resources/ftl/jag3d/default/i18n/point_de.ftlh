@@ -1,10 +1,10 @@
 <#assign point_table_header_map = {
-		"id" :   "Punktnummer",
+		"id"   : "Punktnummer",
 		"code" : "Code",
 
-		"y" :    "Rechts Y",
-		"x" :    "Hoch X",
-		"z" :    "H&ouml;he Z"	
+		"y" :    "Rechts y",
+		"x" :    "Hoch x",
+		"z" :    "H&ouml;he z"	
 }>
 
 <#assign point_type_map = {

@@ -14,12 +14,12 @@
 		
 		<#if group.type == "STOCHASTIC_POINT">
 			<#if group.dimension != 1>
-				<th><#outputformat "plainText">&sigma;<sub>Y0</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
-				<th><#outputformat "plainText">&sigma;<sub>X0</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+				<th><#outputformat "plainText">&sigma;<sub>y0</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+				<th><#outputformat "plainText">&sigma;<sub>x0</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
 			</#if>
 		
 			<#if group.dimension != 2>
-				<th><#outputformat "plainText">&sigma;<sub>Z0</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+				<th><#outputformat "plainText">&sigma;<sub>z0</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
 			</#if>
 		</#if>
 		
@@ -34,12 +34,12 @@
 			</#if>			
 			
 			<#if group.dimension != 1>
-				<th><#outputformat "plainText">&sigma;<sub>Y</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
-				<th><#outputformat "plainText">&sigma;<sub>X</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+				<th><#outputformat "plainText">&sigma;<sub>y</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+				<th><#outputformat "plainText">&sigma;<sub>x</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
 			</#if>
 			
 			<#if group.dimension != 2>
-				<th><#outputformat "plainText">&sigma;<sub>Z</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+				<th><#outputformat "plainText">&sigma;<sub>z</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
 			</#if>
 
 			<th><#outputformat "plainText">a<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
@@ -62,43 +62,45 @@
 		
 		<#if group.type == "STOCHASTIC_POINT">
 			<#if group.dimension != 1>
-				<th><#outputformat "plainText">r<sub>Y</sub></#outputformat></th>
-				<th><#outputformat "plainText">r<sub>X</sub></#outputformat></th>
+				<th><#outputformat "plainText">r<sub>y</sub></#outputformat></th>
+				<th><#outputformat "plainText">r<sub>x</sub></#outputformat></th>
 			</#if>
 		
 			<#if group.dimension != 2>
-				<th><#outputformat "plainText">r<sub>Z</sub></#outputformat></th>
+				<th><#outputformat "plainText">r<sub>z</sub></#outputformat></th>
 			</#if>
-			
+		</#if>
+		
+		<#if group.type != "REFERENCE_POINT">
 			<#if group.dimension != 1>
-				<th><#outputformat "plainText">&epsilon;<sub>Y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
-				<th><#outputformat "plainText">&epsilon;<sub>X</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">${(group.type == "STOCHASTIC_POINT")?string("&epsilon;", "&Delta;")}<sub>y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">${(group.type == "STOCHASTIC_POINT")?string("&epsilon;", "&Delta;")}<sub>x</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			</#if>
 		
 			<#if group.dimension != 2>
-				<th><#outputformat "plainText">&epsilon;<sub>Z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">${(group.type == "STOCHASTIC_POINT")?string("&epsilon;", "&Delta;")}<sub>z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			</#if>
 		</#if>
 		
 		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>
 			<#if group.dimension != 1>
-				<th><#outputformat "plainText">&nabla;<sub>Y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
-				<th><#outputformat "plainText">&nabla;<sub>X</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&nabla;<sub>y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&nabla;<sub>x</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			</#if>
 		
 			<#if group.dimension != 2>
-				<th><#outputformat "plainText">&nabla;<sub>Z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&nabla;<sub>z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			</#if>
 		</#if>
 		
 		<#if group.type == "STOCHASTIC_POINT">
 			<#if group.dimension != 1>
-				<th><#outputformat "plainText">EP<sub>Y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
-				<th><#outputformat "plainText">EP<sub>X</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">EP<sub>y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">EP<sub>x</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			</#if>
 		
 			<#if group.dimension != 2>
-				<th><#outputformat "plainText">EP<sub>Z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">EP<sub>z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			</#if>
 			
 			<th><#outputformat "plainText">EP&middot;SP<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
@@ -106,23 +108,23 @@
 		
 		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>
 			<#if group.dimension != 1>
-				<th><#outputformat "plainText">&nabla;<sub>Y</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
-				<th><#outputformat "plainText">&nabla;<sub>X</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&nabla;<sub>y</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&nabla;<sub>x</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			</#if>
 		
 			<#if group.dimension != 2>
-				<th><#outputformat "plainText">&nabla;<sub>Z</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&nabla;<sub>z</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			</#if>
 		</#if>
 		
 		<#if group.type != "REFERENCE_POINT">
 			<#if group.dimension != 1>
-				<th><#outputformat "plainText">&varsigma;<sub>Y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
-				<th><#outputformat "plainText">&varsigma;<sub>X</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&varsigma;<sub>y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&varsigma;<sub>x</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			</#if>
 		
 			<#if group.dimension != 2>
-				<th><#outputformat "plainText">&varsigma;<sub>Z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&varsigma;<sub>z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			</#if>
 		</#if>
 		
