@@ -99,7 +99,6 @@ public class NetworkAdjustment implements Runnable {
 	private boolean calculateStochasticParameters = false;
 	private static double SQRT_EPS = Math.sqrt(Constant.EPS);
 	private EstimationType estimationType = EstimationType.L2NORM;
-	
 	private UpperSymmPackMatrix Qxx = null;
 
 	private int maximalNumberOfIterations        = DefaultValue.getMaximalNumberOfIterations(),
@@ -151,12 +150,12 @@ public class NetworkAdjustment implements Runnable {
 	 * Nabla zu einem Vektor bzw. Skalar wird. Daher erfolgt die Speicherung in Maps.
 	 * 
 	 * Zusaetzlich werden die Normalgleichung und der Absolutgliedvektor in-situ ueberschrieben, 
-	 * sodass N == Qxx und n == dx am Ende ist.
+	 * sodass N == Qxx (wenn invert == true) und n == dx am Ende ist.
 	 * 
 	 * @param N NEG-Matrix
 	 * @param n neg-Vektor
 	 */
-	private void estimateFactorsForOutherAccracy(UpperSymmPackMatrix N, DenseVector n) {
+	private void estimateFactorsForOutherAccracy(UpperSymmPackMatrix N, DenseVector n, boolean invert) {
 		// Indexzuordnung Submatrix vs. Gesamtmatrix
 		Map<Integer, Integer> idxAddParamGlobal2LocalInQxx = new LinkedHashMap<Integer, Integer>();
 		Map<Integer, Integer> idxPointGlobal2LocalInQxx = new LinkedHashMap<Integer, Integer>();
@@ -224,7 +223,8 @@ public class NetworkAdjustment implements Runnable {
 		}
 
 		// In-Situ Invertierung der NGL: N <-- Qxx, n <-- dx 
-		MathExtension.solve(N, n, true);
+		//MathExtension.solve(N, n, true);
+		MathExtension.solve(N, n, invert);
 		this.Qxx = N;
 	
 		Set<Integer> gnssObsIds = new LinkedHashSet<Integer>();
@@ -2001,6 +2001,7 @@ public class NetworkAdjustment implements Runnable {
 	public EstimationStateType estimateModel() {
 		this.maxDx = Double.MIN_VALUE;
 		this.currentMaxAbsDx = this.maxDx;
+		this.numberOfHypotesis = 0;
 		this.calculateStochasticParameters = false;
 		this.currentEstimationStatus = EstimationStateType.BUSY;
     	this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
@@ -2039,113 +2040,175 @@ public class NetworkAdjustment implements Runnable {
 		this.unknownParameters.resortParameters();
 
 		try {
-			do {
-			    this.iterationStep = this.maximalNumberOfIterations-runs;
-			    this.currentEstimationStatus = EstimationStateType.ITERATE;
-			    this.change.firePropertyChange(this.currentEstimationStatus.name(), this.maximalNumberOfIterations, this.iterationStep);
+			double lastStepSignum = 0.0;
+			int numObs = this.numberOfObservations + this.numberOfStochasticPointRows + this.numberOfStochasticDeflectionRows;
+			int numberOfEstimationSteps = this.estimationType == EstimationType.UNSCENTED_TRANSFORMATION ? 2 * numObs + 1 : 1;
+			double kappa = 3.0 - numObs;
+			double sqrtNumObsKappa = Math.sqrt(numObs + kappa); // == sqrt(3)
+			double weightN  = 1.0 / (2.0 * (numObs + kappa)); // == 1/6
+			double weightC  = kappa / (numObs + kappa);
+			
+			Vector xUT = this.estimationType == EstimationType.UNSCENTED_TRANSFORMATION ? new DenseVector(this.numberOfUnknownParameters) : null;
+			Matrix solutionVectors = this.estimationType == EstimationType.UNSCENTED_TRANSFORMATION ? new DenseMatrix(this.numberOfUnknownParameters, numberOfEstimationSteps) : null;
+			
+			for (int estimationStep = 0; estimationStep < numberOfEstimationSteps; estimationStep++) {
+				// Reset aller Iterationseinstellungen
 				this.maxDx = Double.MIN_VALUE;
-				this.numberOfHypotesis = 0;
-				// erzeuge Normalgleichung		
-				NormalEquationSystem neq = this.createNormalEquation();
-				this.resetVarianceComponents();
+				this.currentMaxAbsDx = this.maxDx;
+				runs = this.maximalNumberOfIterations-1;
+				isEstimated = false;
+				estimateCompleteModel = false;
+				isConverge = true;
 				
-				if (this.interrupt || neq == null) {
-			    	this.currentEstimationStatus = EstimationStateType.INTERRUPT;
-			    	this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-			    	this.interrupt = false;
-			    	return this.currentEstimationStatus;
-			    }
-				DenseVector n = neq.getVector();
-				UpperSymmPackMatrix N = neq.getMatrix();
-				Vector dx = n;
-			
-				estimateCompleteModel = isEstimated;				
-		    	try {
-		    		if (estimateCompleteModel || this.estimationType == EstimationType.L1NORM) {
-		    			this.calculateStochasticParameters = (this.estimationType != EstimationType.L1NORM && estimateCompleteModel);
-		    			// Bestimme die Parameter der ausseren Genauigkeit und
-		    			// ueberschreibe die Normalgleichung und den Absolutgliedvektor
-		    			//  in-situ, sodass N == Qxx und n == dx am Ende ist.
-		    			if (this.estimationType != EstimationType.L1NORM) {
-		    				this.currentEstimationStatus = EstimationStateType.INVERT_NORMAL_EQUATION_MATRIX;
-		    				this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-		    			}
-			    		this.estimateFactorsForOutherAccracy(N, n);
-			    		
-			    		if (this.calculateStochasticParameters) {
-			    			this.currentEstimationStatus = EstimationStateType.ESTIAMTE_STOCHASTIC_PARAMETERS;
-			    			this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-			    		}
-			    	}
-		    		else
-		    			// Loese Nx=n und ueberschreibe n durch die Loesung x
-		    			MathExtension.solve(N, n, false);
-		    		
-		    		n = null;
-		    		N = null;
-			    }
-			    catch (MatrixSingularException | MatrixNotSPDException | IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
-			    	e.printStackTrace();
-			    	this.currentEstimationStatus = EstimationStateType.SINGULAR_MATRIX;
-			    	this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-			    	return this.currentEstimationStatus;
-			    }
-			    catch (Exception e) {
-			    	e.printStackTrace();
-			    	this.currentEstimationStatus = EstimationStateType.INTERRUPT;
-			    	this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-			    	return this.currentEstimationStatus;
-			    }
+				if (this.estimationType == EstimationType.UNSCENTED_TRANSFORMATION) {
+					this.currentEstimationStatus = EstimationStateType.UNSCENTED_TRANSFORMATION_STEP;
+					this.change.firePropertyChange(this.currentEstimationStatus.name(), numberOfEstimationSteps, estimationStep+1);
+					
+					// Reset der unbekannten Parameter
+					if (numberOfEstimationSteps > 1 && estimationStep != (numberOfEstimationSteps - 1))
+						this.resetDatumPoints();
+					
+					double signum = estimationStep == (numberOfEstimationSteps - 1) ? 0.0 : estimationStep < numObs ? +1.0 : -1.0;
+					int currentObsIdx = estimationStep % numObs;
+					
+					// Entferne letzte UT-Modifizierung
+					if (estimationStep > 0) {
+						int lastObsIdx = currentObsIdx - 1;
+						lastObsIdx = lastObsIdx < 0 ? numObs - 1 : lastObsIdx;
+						this.prepareUnscentedTransformationObservation(lastObsIdx, -lastStepSignum * sqrtNumObsKappa);
+					}
+					
+					// UT-Modifizierung des aktuellen Schritts
+					if (estimationStep < numberOfEstimationSteps - 1) {
+						this.prepareUnscentedTransformationObservation(currentObsIdx, signum * sqrtNumObsKappa);
+					}
+					lastStepSignum = signum;			
+				}
+				
+				do {
+					this.maxDx = Double.MIN_VALUE;
+					this.numberOfHypotesis = 0;
+					this.iterationStep = this.maximalNumberOfIterations-runs;
+					this.currentEstimationStatus = EstimationStateType.ITERATE;
+					if (this.estimationType != EstimationType.UNSCENTED_TRANSFORMATION)
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), this.maximalNumberOfIterations, this.iterationStep);
 
-			    this.updateModel(dx, estimateCompleteModel);
-			    dx = null;
-			    
-			    if (this.interrupt) {
-			    	this.currentEstimationStatus = EstimationStateType.INTERRUPT;
-			    	this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-			    	this.interrupt = false;
-			    	return this.currentEstimationStatus;
-			    }
-			    
-			    if (Double.isInfinite(this.maxDx) || Double.isNaN(this.maxDx)) {
-			    	this.currentEstimationStatus = EstimationStateType.SINGULAR_MATRIX;
-			    	this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-			    	return this.currentEstimationStatus;
-			    }
-			    else if (this.maxDx <= SQRT_EPS && runs > 0) {
-					isEstimated = true;
-					this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
-			    	this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxDx);
-			    }
-			    else if (runs-- <= 1) {
-			    	if (estimateCompleteModel) {
-			    		if (this.estimationType == EstimationType.L1NORM) {
-			    			this.currentEstimationStatus = EstimationStateType.ROBUST_ESTIMATION_FAILD;
-				    		this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-				    		return this.currentEstimationStatus;
-			    		}
-			    		else {
-			    			this.currentEstimationStatus = EstimationStateType.NO_CONVERGENCE;
-			    			this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxDx);
-			    			isConverge = false;
-			    		}
-			    	}
-			    	isEstimated = true;
-			    }
-			    else {
-			    	this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
-			    	this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxDx);
-			    	//this.change.firePropertyChange("INFO_CONVERGENCE", this.currentMaxAbsDx, this.maxDx);
-			    }
-			    
-				// Sollten nur stochastische Punkte enthalten sein, ist maxDx MIN_VALUE
-				if (this.maxDx > Double.MIN_VALUE)
-					this.currentMaxAbsDx = this.maxDx;
-				else
-					this.maxDx = this.currentMaxAbsDx;
+					// erzeuge Normalgleichung		
+					NormalEquationSystem neq = this.createNormalEquation();
+					this.resetVarianceComponents();
+
+					if (this.interrupt || neq == null) {
+						this.currentEstimationStatus = EstimationStateType.INTERRUPT;
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+						this.interrupt = false;
+						return this.currentEstimationStatus;
+					}
+					DenseVector n = neq.getVector();
+					UpperSymmPackMatrix N = neq.getMatrix();
+					Vector dx = n;
+
+					estimateCompleteModel = isEstimated;				
+					try {
+						if ( (estimateCompleteModel && estimationStep == (numberOfEstimationSteps - 1)) || this.estimationType == EstimationType.L1NORM) {
+							this.calculateStochasticParameters = (this.estimationType != EstimationType.L1NORM && estimateCompleteModel);
+							// Bestimme die Parameter der ausseren Genauigkeit und
+							// ueberschreibe die Normalgleichung und den Absolutgliedvektor
+							// in-situ, sodass N == Qxx und n == dx am Ende ist.
+							// Wenn UT gewaehlt, wird Qxx seperat aus den Einzelloesungen bestimmt
+							if (this.estimationType != EstimationType.L1NORM) {
+								this.currentEstimationStatus = EstimationStateType.INVERT_NORMAL_EQUATION_MATRIX;
+								this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+							}
+							this.estimateFactorsForOutherAccracy(N, n, this.estimationType != EstimationType.UNSCENTED_TRANSFORMATION);
+
+							if (this.calculateStochasticParameters) {
+								this.currentEstimationStatus = EstimationStateType.ESTIAMTE_STOCHASTIC_PARAMETERS;
+								this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+							}
+						}
+						else
+							// Loese Nx=n und ueberschreibe n durch die Loesung x
+							MathExtension.solve(N, n, false);
+						
+						n = null;
+						N = null;
+					}
+					catch (MatrixSingularException | MatrixNotSPDException | IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
+						e.printStackTrace();
+						this.currentEstimationStatus = EstimationStateType.SINGULAR_MATRIX;
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+						return this.currentEstimationStatus;
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+						this.currentEstimationStatus = EstimationStateType.INTERRUPT;
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+						return this.currentEstimationStatus;
+					}
+					
+
+					if (this.estimationType == EstimationType.UNSCENTED_TRANSFORMATION) {
+						if (estimateCompleteModel) {
+							this.addUnscentedTransformationSolution(dx, xUT, solutionVectors, estimationStep, estimationStep < (numberOfEstimationSteps - 1) ? weightN : weightC);
+						}
+						
+						// Letzter Durchlauf der UT
+						// Bestimme Parameterupdate dx und Kovarianzmatrix Qxx
+						if (estimateCompleteModel && estimationStep > 0 && estimationStep == (numberOfEstimationSteps - 1)) {
+							this.estimateUnscentedTransformationParameterUpdateAndCovarianceMatrix(dx, xUT, solutionVectors, weightN, weightC);
+						}
+					}
+
+					this.updateModel(dx, estimateCompleteModel && estimationStep == (numberOfEstimationSteps - 1));
+					dx = null;
+
+					if (this.interrupt) {
+						this.currentEstimationStatus = EstimationStateType.INTERRUPT;
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+						this.interrupt = false;
+						return this.currentEstimationStatus;
+					}
+
+					if (Double.isInfinite(this.maxDx) || Double.isNaN(this.maxDx)) {
+						this.currentEstimationStatus = EstimationStateType.SINGULAR_MATRIX;
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+						return this.currentEstimationStatus;
+					}
+					else if (this.maxDx <= SQRT_EPS && runs > 0) {
+						isEstimated = true;
+						this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
+						if (this.estimationType != EstimationType.UNSCENTED_TRANSFORMATION)
+							this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxDx);
+					}
+					else if (runs-- <= 1) {
+						if (estimateCompleteModel) {
+							if (this.estimationType == EstimationType.L1NORM) {
+								this.currentEstimationStatus = EstimationStateType.ROBUST_ESTIMATION_FAILD;
+								this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+								return this.currentEstimationStatus;
+							}
+							else {
+								this.currentEstimationStatus = EstimationStateType.NO_CONVERGENCE;
+								this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxDx);
+								isConverge = false;
+							}
+						}
+						isEstimated = true;
+					}
+					else {
+						this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
+						if (this.estimationType != EstimationType.UNSCENTED_TRANSFORMATION)
+							this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxDx);
+					}
+
+					// Sollten nur stochastische Punkte enthalten sein, ist maxDx MIN_VALUE
+					if (this.maxDx > Double.MIN_VALUE)
+						this.currentMaxAbsDx = this.maxDx;
+					else
+						this.maxDx = this.currentMaxAbsDx;
+				}
+				while (!estimateCompleteModel);
 			}
-			while (!estimateCompleteModel);
-			
 			// Exportiere CoVar (sofern aktiviert), da diese danach ueberschrieben wird
 			if (!this.exportCovarianceMatrix()) 
 				System.err.println("Fehler, Varianz-Kovarianz-Matrix konnte nicht exportiert werden.");
@@ -2179,6 +2242,257 @@ public class NetworkAdjustment implements Runnable {
 	 */
 	public double getMaxAbsDx() {
 		return this.currentMaxAbsDx;
+	}
+	
+	/**
+	 * Modifiziert die Beobachtung observation(index) fuer die
+	 * Unscented Transformation (bzw. macht die Modifikation rueckgaengig)
+	 * @param index
+	 * @param signum
+	 * @param scale
+	 */
+	private void prepareUnscentedTransformationObservation(int index, double scale) {
+		if (index < this.numberOfObservations) {
+			Observation observation = this.projectObservations.get(index);
+
+			double std   = observation.getStdApriori();
+			double value = observation.getValueApriori();
+
+			value = value + scale * std;
+			observation.setValueApriori(value);
+		}
+		else if (index < this.numberOfObservations + this.numberOfStochasticDeflectionRows) {
+			int deflectionIdx  = index - this.numberOfObservations;
+			int deflectionType = deflectionIdx % 2; // 0 == x oder 1 == y
+			deflectionIdx = deflectionIdx / 2;
+
+			Point point = this.stochasticDeflectionPoints.get(deflectionIdx);
+			
+			if (deflectionType == 0) {
+				Deflection deflectionX = point.getDeflectionX();
+
+				double std   = deflectionX.getStdApriori();
+				double value = deflectionX.getValue0();
+
+				value = value + scale * std;
+				deflectionX.setValue0(value);
+			}
+			else {
+				Deflection deflectionY = point.getDeflectionY();
+
+				double std   = deflectionY.getStdApriori();
+				double value = deflectionY.getValue0();
+
+				value = value + scale * std;
+				deflectionY.setValue0(value);
+			}
+		}
+		else if (index < this.numberOfObservations + this.numberOfStochasticDeflectionRows + this.numberOfStochasticPointRows) {
+			int pointIdx = index - this.numberOfObservations - this.numberOfStochasticDeflectionRows;
+			for (int i = 0, j = 0; i < this.stochasticPoints.size(); i++) {
+				Point point = this.stochasticPoints.get(i);
+				int dim = point.getDimension();
+				
+				if (pointIdx >= j + dim) {
+					j += dim;
+					continue;
+				}
+
+				for (int d = 0; d < dim; d++) {
+					if (pointIdx == j + d) {
+						if (dim != 1) {
+							if (d == 0) {
+								double std   = point.getStdXApriori();
+								double value = point.getX0();
+
+								value = value + scale * std;
+								point.setX0(value);
+							}
+							else if (d == 1) {
+								double std   = point.getStdYApriori();
+								double value = point.getY0();
+
+								value = value + scale * std;
+								point.setY0(value);
+							}
+						}
+						if (dim != 2 && d == dim-1) {
+							double std   = point.getStdZApriori();
+							double value = point.getZ0();
+
+							value = value + scale * std;
+							point.setZ0(value);
+						}
+					}
+				}
+				break;
+			}
+		}
+	}
+	
+	/**
+	 * Ueberschreibt die Schaetzung mit den Naeherungswerten der Datumspunkte.
+	 * Notwendig fuer die jeweilige Iteration mittels UnscentedTransformation
+	 */
+	private void resetDatumPoints() {
+		for (Point p : this.datumPoints) {
+			p.resetCoordinates();
+		}
+	}
+	
+	private void estimateUnscentedTransformationParameterUpdateAndCovarianceMatrix(Vector dx, Vector xUT, Matrix solutionVectors, double weightN, double weightC) {
+		int numberOfEstimationSteps = solutionVectors.numColumns();
+		this.Qxx.zero();
+		
+		for (int c = 0; c < this.unknownParameters.size(); c++) {
+			if (this.interrupt)
+				return;
+
+			UnknownParameter unknownParameterCol = this.unknownParameters.get(c);
+			int col = unknownParameterCol.getColInJacobiMatrix();
+	
+			int dimCol = 1;
+			switch (unknownParameterCol.getParameterType()) {
+			case POINT2D:
+				dimCol = 2;
+				break;
+			case POINT3D:
+				dimCol = 3;
+				break;
+			default:
+				dimCol = 1;
+				break;
+			}
+			
+			if (unknownParameterCol instanceof Point) {
+				Point point = (Point)unknownParameterCol;
+				dimCol = point.getDimension();
+				
+				// Erzeuge aus der finalen UT-Loesung den Zuschlagsvektor dx = x - x0 -  Koordinaten
+				if (dimCol != 1) {
+					dx.set(col+0, xUT.get(col+0) - point.getX());
+					dx.set(col+1, xUT.get(col+1) - point.getY());
+				}
+				if (dimCol != 2)
+					dx.set(col+dimCol-1, xUT.get(col+dimCol-1) - point.getZ());
+			}
+			// Erzeuge aus der finalen UT-Loesung den Zuschlagsvektor - Zusazuparameter
+			else if (unknownParameterCol instanceof Deflection){
+				Deflection deflectionParameter = (Deflection) unknownParameterCol;
+				dx.set(col, xUT.get(col) - deflectionParameter.getValue());
+			}
+			else if (unknownParameterCol instanceof AdditionalUnknownParameter){
+				AdditionalUnknownParameter additionalUnknownParameter = (AdditionalUnknownParameter) unknownParameterCol;
+				dx.set(col, xUT.get(col) - additionalUnknownParameter.getValue());
+			}
+			else if (unknownParameterCol instanceof StrainParameter){
+				StrainParameter strainParameter = (StrainParameter) unknownParameterCol;
+				dx.set(col, xUT.get(col) - strainParameter.getValue());
+			}
+			
+			for (int dCol = 0; dCol < dimCol; dCol++) {
+				for (int r = c; r < this.unknownParameters.size(); r++) {
+					if (this.interrupt)
+						return;
+
+					UnknownParameter unknownParameterRow = this.unknownParameters.get(r);
+					int row = unknownParameterRow.getColInJacobiMatrix();
+
+					int dimRow = 1;
+					switch (unknownParameterRow.getParameterType()) {
+					case POINT2D:
+						dimRow = 2;
+						break;
+					case POINT3D:
+						dimRow = 3;
+						break;
+					default:
+						dimRow = 1;
+						break;
+					}
+
+					if (unknownParameterRow instanceof Point) {
+						Point point = (Point)unknownParameterRow;
+						dimRow = point.getDimension();
+					}
+
+					for (int dRow = 0; dRow < dimRow; dRow++) {
+						// Laufindex des jeweiligen Spalten-/Zeilenvektors
+						for (int estimationStep = 0; estimationStep < numberOfEstimationSteps; estimationStep++) {
+							double weight = estimationStep == (numberOfEstimationSteps - 1) ? weightC : weightN;
+						
+							double valueCol = solutionVectors.get(col + dCol, estimationStep) - xUT.get(col + dCol);
+							double valueRow = solutionVectors.get(row + dRow, estimationStep) - xUT.get(row + dRow);
+							
+							double qxx = valueRow * weight * valueCol;
+							this.Qxx.set(col + dCol, row + dRow, this.Qxx.get(col + dCol, row + dRow) + qxx);
+						}
+					}
+				}
+			}
+		}
+		solutionVectors = null;
+		xUT = null;
+	}
+	
+	/**
+	 * Fuegt die einzelen UT-Loesungen (transformierte SIGMA-Punkte) der Matrix solutionVectors hinzu
+	 * Akkumuliert die Loesungen, sodass final das Ergebnis in dxUT steht. 
+	 * !!! HINWEIS: Der Vektor dxUT enthaelt den vollstaendigen Loesungsvektor !!!
+	 * !!!          und NICHT den Zuschlagsvektor.                             !!!
+	 * @param dX   Zuschag der letzten Iteration (theoretich ein Nullvektor)
+	 * @param dxUT UT-Loesung
+	 * @param solutionVectors Matrix mit allen UT-Loesungen
+	 * @param solutionNumber Aktuelle UT-Loesungsnummer 
+	 * @param weight UT-Gewicht
+	 */
+	private void addUnscentedTransformationSolution(Vector dX, Vector xUT, Matrix solutionVectors, int solutionNumber, double weight) {
+		for (int i=0; i<this.unknownParameters.size(); i++) {
+			if (this.interrupt)
+				return;
+			
+			UnknownParameter unknownParameter = this.unknownParameters.get(i);
+			int col = unknownParameter.getColInJacobiMatrix();
+			if (unknownParameter instanceof Point) {
+				Point point = (Point)unknownParameter;
+				int dim = point.getDimension();
+				if (dim != 1) {
+					double xValue = point.getX() + dX.get(col);
+					xUT.set(col, xUT.get(col) + weight * xValue);
+					solutionVectors.set(col, solutionNumber, xValue);
+					col++;
+					
+					double yValue = point.getY() + dX.get(col);
+					xUT.set(col, xUT.get(col) + weight * yValue);
+					solutionVectors.set(col, solutionNumber, yValue);
+					col++;
+				}
+				if (dim != 2) {
+					double zValue = point.getZ() + dX.get(col);
+					xUT.set(col, xUT.get(col) + weight * zValue);
+					solutionVectors.set(col, solutionNumber, zValue);
+					col++;
+				}
+			}
+			else if (unknownParameter instanceof Deflection){
+				Deflection deflectionParameter = (Deflection) unknownParameter;
+				double value = deflectionParameter.getValue() + dX.get(col);
+				xUT.set(col, xUT.get(col) + weight * value);
+				solutionVectors.set(col, solutionNumber, value);
+			}
+			else if (unknownParameter instanceof AdditionalUnknownParameter){
+				AdditionalUnknownParameter additionalUnknownParameter = (AdditionalUnknownParameter) unknownParameter;
+				double value = additionalUnknownParameter.getValue() + dX.get(col);
+				xUT.set(col, xUT.get(col) + weight * value);
+				solutionVectors.set(col, solutionNumber, value);
+			}
+			else if (unknownParameter instanceof StrainParameter){
+				StrainParameter strainParameter = (StrainParameter) unknownParameter;
+				double value = strainParameter.getValue() + dX.get(col);
+				xUT.set(col, xUT.get(col) + weight * value);
+				solutionVectors.set(col, solutionNumber, value);
+			}
+		}
 	}
 	
 	/**
@@ -3700,7 +4014,7 @@ public class NetworkAdjustment implements Runnable {
 	private void addUnknownParameter(UnknownParameter unknownParameter) {
 		this.addObservations( unknownParameter );
 		this.unknownParameters.add( unknownParameter );
-		this.numberOfUnknownParameters = this.unknownParameters.columnsInJacobi();
+		this.numberOfUnknownParameters = this.unknownParameters.columnsInJacobi();		
 	}
 	
 	/**

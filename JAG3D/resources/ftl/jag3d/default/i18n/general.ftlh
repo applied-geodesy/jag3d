@@ -44,6 +44,8 @@
 					Robust estimator (L<sub>1</sub>Norm), c = ${bounded_influence?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}
 				<#elseif estimation_type == 'L2NORM'>
 					Least squares adjustment (L<sub>2</sub>Norm)
+				<#elseif estimation_type == 'UNSCENTED_TRANSFORMATION'>
+					Unscented Transformation
 				<#elseif estimation_type == 'SIMULATION'>
 					Pre-analyses (Network Simulation)
 				</#if>

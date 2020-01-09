@@ -71,6 +71,10 @@ public abstract class Deflection extends UnknownParameter {
 		return this.value0;
 	}
 	
+	public void reset() {
+		this.setValue(this.value0);
+	}
+
 	@Override
 	public ObservationGroup getObservations() {
 		return this.point.getObservations();
@@ -141,4 +145,9 @@ public abstract class Deflection extends UnknownParameter {
 	public void setConfidence(double confidence) {
 		this.confidence = confidence;
 	}	
+	
+	@Override
+	public String toString() {
+		return "Deflection [point=" + point + ", value0=" + value0 + ", value=" + value + "]";
+	}
 }

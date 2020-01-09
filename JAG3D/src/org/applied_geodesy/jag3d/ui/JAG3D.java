@@ -226,6 +226,7 @@ public class JAG3D extends Application {
 			try {
 				// check for command line arguments
 				// --database=D:\\data\\project.script
+				// --ut
 				final Parameters params = this.getParameters();
 				final Map<String, String> parameterMap = params.getNamed();
 				if (parameterMap.containsKey("database")) {
@@ -237,6 +238,9 @@ public class JAG3D extends Application {
 						SQLManager.openExistingProject(new HSQLDB(project));
 						JAG3D.setTitle(path.getFileName() == null ? null : path.getFileName().toString().replaceFirst(regex, "$1"));
 					}
+				}
+				if (parameterMap.containsKey("ut") && parameterMap.getOrDefault("ut", "FALSE").equalsIgnoreCase("TRUE")) {
+					LeastSquaresSettingDialog.setEnableUnscentedTransformation(true);
 				}
 			}
 			catch(Exception e) {

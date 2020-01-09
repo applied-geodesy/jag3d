@@ -100,4 +100,9 @@ public class DeflectionX extends Deflection {
 		this.setTprio(this.nablaCoVarNable/dim);
 		this.setTpost((sigma2apostDeflection > DeflectionX.ZERO)?this.nablaCoVarNable/(dim*sigma2apostDeflection):0.0);
 	}
+	
+	@Override
+	public String toString() {
+		return "DeflectionX [point=" + this.getPoint() + ", value0=" + this.getValue0() + ", value=" + this.getValue() + "]";
+	}
 }

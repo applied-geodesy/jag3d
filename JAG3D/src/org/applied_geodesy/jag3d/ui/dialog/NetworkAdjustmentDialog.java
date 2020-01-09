@@ -60,6 +60,7 @@ public class NetworkAdjustmentDialog {
 	private class AdjustmentTask extends Task<EstimationStateType> implements PropertyChangeListener {
 		private final String iterationTextTemplate;
 		private final String convergenceTextTemplate;
+		private final String unscentedTransformationTextTemplate;
 		private NetworkAdjustment adjustment;
 		private double processState = 0.0;
 		private double finalStepProcesses = 0.0;
@@ -68,6 +69,7 @@ public class NetworkAdjustmentDialog {
 		private AdjustmentTask(SQLAdjustmentManager dataBaseManager) {
 			this.dataBaseManager = dataBaseManager;
 
+			this.unscentedTransformationTextTemplate = i18n.getString("NetworkAdjustmentDialog.unscentedtransformation.label",   "%d. unscented transformation step of %d \u2026");
 			this.iterationTextTemplate   = i18n.getString("NetworkAdjustmentDialog.iteration.label",   "%d. iteration step of maximal %d \u2026");
 			this.convergenceTextTemplate = i18n.getString("NetworkAdjustmentDialog.convergence.label", "Convergence max|dx| = %.2e");
 		}
@@ -240,7 +242,18 @@ public class NetworkAdjustmentDialog {
 					int maximal = (Integer)oldValue;
 					double frac = 0.75 * Math.min((double)current / (double)maximal, 1.0);
 					this.processState = Math.max(this.processState, frac);
-					this.updateIterationProgressMessage(String.format(Locale.ENGLISH, iterationTextTemplate, current, maximal));
+					this.updateIterationProgressMessage(String.format(Locale.ENGLISH, this.iterationTextTemplate, current, maximal));
+					this.updateProgress(this.processState, 1.0);
+				}
+				break;
+				
+			case UNSCENTED_TRANSFORMATION_STEP:
+				if (oldValue != null && newValue != null && oldValue instanceof Integer && newValue instanceof Integer) {
+					int current = (Integer)newValue;
+					int maximal = (Integer)oldValue;
+					double frac = 0.75 * Math.min((double)current / (double)maximal, 1.0);
+					this.processState = Math.max(this.processState, frac);
+					this.updateIterationProgressMessage(String.format(Locale.ENGLISH, this.unscentedTransformationTextTemplate, current, maximal));
 					this.updateProgress(this.processState, 1.0);
 				}
 				break;

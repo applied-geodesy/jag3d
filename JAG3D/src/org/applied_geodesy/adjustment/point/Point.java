@@ -176,6 +176,26 @@ public abstract class Point extends UnknownParameter {
 		//return this.coordinates0[this.getDimension()-1];
 		return this.coordinates0[2];
 	}
+	
+	public void setX0(double x0) {
+		this.coordinates0[0] = x0;
+		this.setX(x0);
+	}
+
+	public void setY0(double y0) {
+		this.coordinates0[1] = y0;
+		this.setY(y0);
+	}
+
+	public void setZ0(double z0) {
+		this.coordinates0[2] = z0;
+		this.setZ(z0);
+	}
+	
+	public void resetCoordinates() {
+		for (int i=0; i<this.coordinates0.length; i++)
+			this.coordinates[i] = this.coordinates0[i];
+	}
 
 	public double getDistance3D(Point p) {
 	    return Math.sqrt( Math.pow(this.getX()-p.getX(),2)

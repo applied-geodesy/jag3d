@@ -47,4 +47,9 @@ public class DeflectionY extends Deflection {
 	public ParameterType getParameterType() {
 		return ParameterType.DEFLECTION_Y;
 	}
+	
+	@Override
+	public String toString() {
+		return "DeflectionY [point=" + this.getPoint() + ", value0=" + this.getValue0() + ", value=" + this.getValue() + "]";
+	}
 }

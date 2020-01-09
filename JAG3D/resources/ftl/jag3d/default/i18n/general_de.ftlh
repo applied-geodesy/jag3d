@@ -43,6 +43,8 @@
 					Robuste Parametersch&auml;tzung (L<sub>1</sub>Norm), c = ${robust_estimation_limit?string[df_statistic]}
 				<#elseif estimation_type == 'L2NORM'>
 					Methode der kleinsten Quadrate (L<sub>2</sub>Norm)
+				<#elseif estimation_type == 'UNSCENTED_TRANSFORMATION'>
+					Unscented Transformation
 				<#elseif estimation_type == 'SIMULATION'>
 					Netzplanung (Pr&auml;analyse)
 				</#if>
