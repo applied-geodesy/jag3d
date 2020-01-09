@@ -310,6 +310,8 @@ public class SQLAdjustmentManager {
 			boolean applyVarianceOfUnitWeight     = rs.getBoolean("apply_variance_of_unit_weight");
 
 			this.estimationType = type == null ? EstimationType.L2NORM : type;
+			// Keine Schaetzung moeglich bei Simulationen 
+			applyVarianceOfUnitWeight = !(this.estimationType == EstimationType.L1NORM || this.estimationType == EstimationType.L2NORM) ? false : applyVarianceOfUnitWeight;
 			
 			adjustment.setMaximalNumberOfIterations(maximalNumberOfIterations);
 			adjustment.setRobustEstimationLimit(robustEstimationLimit);

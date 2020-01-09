@@ -22,6 +22,9 @@
 package org.applied_geodesy.jag3d.ui.dialog;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -177,6 +180,7 @@ public class LeastSquaresSettingDialog {
 		}
 	}
 
+	private boolean enableUnscentedTransformation = false;
 	private I18N i18n = I18N.getInstance();
 	private static LeastSquaresSettingDialog leastSquaresSettingDialog = new LeastSquaresSettingDialog();
 	private FormatterOptions options = FormatterOptions.getInstance();
@@ -341,7 +345,15 @@ public class LeastSquaresSettingDialog {
 	
 	private ComboBox<EstimationType> createEstimationTypeComboBox(EstimationType item, String tooltip) {
 		ComboBox<EstimationType> typeComboBox = new ComboBox<EstimationType>();
-		typeComboBox.getItems().setAll(EstimationType.values());
+		EstimationType[] estimationTypeArray = EstimationType.values();
+		if (!this.enableUnscentedTransformation) {
+			List<EstimationType> estimationTypeList = new ArrayList<EstimationType>(Arrays.asList(estimationTypeArray));
+			estimationTypeList.remove(EstimationType.UNSCENTED_TRANSFORMATION);
+			estimationTypeArray = estimationTypeList.toArray(new EstimationType[estimationTypeList.size()]);
+			if (item == EstimationType.UNSCENTED_TRANSFORMATION)
+				item = EstimationType.L2NORM;
+		}
+		typeComboBox.getItems().setAll(estimationTypeArray);  // EstimationType.values()
 		typeComboBox.getSelectionModel().select(item);
 		typeComboBox.setConverter(new StringConverter<EstimationType>() {
 
@@ -355,7 +367,9 @@ public class LeastSquaresSettingDialog {
 				case L2NORM:
 					return i18n.getString("LeastSquaresSettingDialog.estimationtype.l2norm.label", "Least-squares adjustment (L2-Norm)");
 				case SIMULATION:
-					return i18n.getString("LeastSquaresSettingDialog.estimationtype.simulation.label", "Simulation (Pre-analysis)");	
+					return i18n.getString("LeastSquaresSettingDialog.estimationtype.simulation.label", "Simulation (Pre-analysis)");
+				case UNSCENTED_TRANSFORMATION:
+					return i18n.getString("LeastSquaresSettingDialog.estimationtype.unscentedtransformation.label", "Unscented Transformation (UT)");	
 				}
 				return null;
 			}
@@ -531,5 +545,9 @@ public class LeastSquaresSettingDialog {
 				}
 			});
 		}
+	}
+	
+	public static void setEnableUnscentedTransformation(boolean enable) {
+		leastSquaresSettingDialog.enableUnscentedTransformation = enable;
 	}
 }
