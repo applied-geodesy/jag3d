@@ -539,8 +539,10 @@ public class SQLGraphicManager {
 				+ "\"CongruenceAnalysisGroup\".\"dimension\", "
 				+ "\"StartPointAposteriori\".\"x\" AS \"xs\", "
 				+ "\"StartPointAposteriori\".\"y\" AS \"ys\", "
+				+ "\"StartPointAposteriori\".\"z\" AS \"zs\", "
 				+ "\"EndPointAposteriori\".\"x\" AS \"xe\", "
 				+ "\"EndPointAposteriori\".\"y\" AS \"ye\", "
+				+ "\"EndPointAposteriori\".\"z\" AS \"ze\", "
 				+ "\"CongruenceAnalysisPointPairAposteriori\".\"confidence_major_axis_2d\", "
 				+ "\"CongruenceAnalysisPointPairAposteriori\".\"confidence_minor_axis_2d\", "
 				+ "0.5 * PI() + \"CongruenceAnalysisPointPairAposteriori\".\"confidence_alpha_2d\" AS \"confidence_alpha_2d\", "
@@ -564,8 +566,10 @@ public class SQLGraphicManager {
 				+ "\"dimension\", "
 				+ "\"x\" - 0.5 * \"gross_error_x\" AS \"xs\", "
 				+ "\"y\" - 0.5 * \"gross_error_y\" AS \"ys\", "
+				+ "\"z\" - 0.5 * \"gross_error_z\" AS \"zs\", "
 				+ "\"x\" + 0.5 * \"gross_error_x\" AS \"xe\", "
 				+ "\"y\" + 0.5 * \"gross_error_y\" AS \"ye\", "
+				+ "\"z\" + 0.5 * \"gross_error_z\" AS \"ze\", "
 				+ "0 AS \"confidence_major_axis_2d\", "
 				+ "0 AS \"confidence_minor_axis_2d\", "
 				+ "0 AS \"confidence_alpha_2d\", "
@@ -606,8 +610,42 @@ public class SQLGraphicManager {
 			GraphicPoint startPoint = completePointMap.get(startPointName);
 			GraphicPoint endPoint   = completePointMap.get(endPointName);
 			
-			// shift values of reference points
-			if (startPointName.equals(endPointName)) {
+			// Modify north-component of leveling points to show z-displacement 
+			// (ignore xe/ye)
+			if (startPoint.getDimension() != 2 && endPoint.getDimension() == 1) {
+				double zs = rs.getDouble("zs");
+				double ze = rs.getDouble("ze");
+
+				double xs = rs.getDouble("xs");
+				double ys = rs.getDouble("ys");
+				double xe = xs + (ze-zs);
+				double ye = ys;
+
+				startPoint = new GraphicPoint(startPointName, dimension, ys, xs);
+				endPoint   = new GraphicPoint(endPointName,   dimension, ye, xe);
+
+				startPoint.visibleProperty().bind(completePointMap.get(startPointName).visibleProperty());
+				endPoint.visibleProperty().bind(completePointMap.get(endPointName).visibleProperty());
+			}
+			// Modify north-component of leveling points to show z-displacement 
+			// (ignore xs/ys)
+			else if (endPoint.getDimension() != 2 && startPoint.getDimension() == 1) {
+				double zs = rs.getDouble("zs");
+				double ze = rs.getDouble("ze");
+
+				double xe = rs.getDouble("xe");
+				double ye = rs.getDouble("ye");
+				double xs = xe - (ze-zs);
+				double ys = ye;
+
+				startPoint = new GraphicPoint(startPointName, dimension, ys, xs);
+				endPoint   = new GraphicPoint(endPointName,   dimension, ye, xe);
+
+				startPoint.visibleProperty().bind(completePointMap.get(startPointName).visibleProperty());
+				endPoint.visibleProperty().bind(completePointMap.get(endPointName).visibleProperty());
+			}
+			// shift values of reference points in 2d/3d
+			else if (startPointName.equals(endPointName)) {
 				double xs = rs.getDouble("xs");
 				double ys = rs.getDouble("ys");
 				double xe = rs.getDouble("xe");
@@ -619,7 +657,7 @@ public class SQLGraphicManager {
 				startPoint.visibleProperty().bind(completePointMap.get(startPointName).visibleProperty());
 				endPoint.visibleProperty().bind(completePointMap.get(endPointName).visibleProperty());
 			}
-			
+
 			RelativeConfidence relativeConfidence = new RelativeConfidence(startPoint, endPoint, majorAxis, minorAxis, angle, significant);
 			relativeConfidences.put(key, relativeConfidence);
 		}
