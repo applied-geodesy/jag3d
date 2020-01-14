@@ -57,6 +57,7 @@ import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.ImageUtils;
 import org.applied_geodesy.util.i18.I18N;
 import org.applied_geodesy.util.sql.HSQLDB;
+import org.applied_geodesy.version.jag3d.Version;
 
 import javafx.application.Application;
 import javafx.application.HostServices;
@@ -96,15 +97,15 @@ public class JAG3D extends Application {
 		}
 	}
 	
-	private final static String TITLE_TEMPLATE = "%s%sJAG3D \u00B7 Least-Squares Adjustment \u0026 Deformation Analysis \u00B7";
+	private final static String TITLE_TEMPLATE = "%s%sJAG3D%s \u00B7 Least-Squares Adjustment \u0026 Deformation Analysis \u00B7";
 	private static Stage primaryStage;
 	private Button adjusmentButton;
 	
 	public static void setTitle(String title) {
 		if (primaryStage != null && title != null && !title.trim().isEmpty())
-			primaryStage.setTitle(String.format(Locale.ENGLISH, TITLE_TEMPLATE, title, " \u2014 "));
+			primaryStage.setTitle(String.format(Locale.ENGLISH, TITLE_TEMPLATE, title, " \u2014 ", (Version.isReleaseCandidate() ? " (RC)" : "")));
 		else if (primaryStage != null)
-			primaryStage.setTitle(String.format(Locale.ENGLISH, TITLE_TEMPLATE, "", ""));
+			primaryStage.setTitle(String.format(Locale.ENGLISH, TITLE_TEMPLATE, "", "", (Version.isReleaseCandidate() ? " (RC)" : "")));
 	}
 	
 	public static void close() {

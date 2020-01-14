@@ -92,7 +92,7 @@ public class AboutDialog {
 
 		this.dialog = new Dialog<Void>();
 		this.dialog.setTitle("JAG3D");
-		this.dialog.setHeaderText("JAG3D \u2014 Java\u00B7Applied\u00B7Geodesy\u00B73D");
+		this.dialog.setHeaderText("JAG3D \u2014 Java\u00B7Applied\u00B7Geodesy\u00B73D" + (Version.isReleaseCandidate() ? " (RC)" : ""));
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CLOSE);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
 		this.dialog.initOwner(window);
