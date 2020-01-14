@@ -238,6 +238,14 @@ public class CSVPointFileReader extends SourceFileReader<TreeItem<TreeItemValue>
 					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
 					row.setSigmaZapriori(options.convertLengthToModel(value));
 					break;
+				case DEFLECTION_X:
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setXAprioriDeflection(options.convertAngleToModel(value));
+					break;
+				case DEFLECTION_Y:
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setYAprioriDeflection(options.convertAngleToModel(value));
+					break;
 				default:
 					System.err.println(this.getClass().getSimpleName() + " Error, unsupported column type! " + type);
 					break;

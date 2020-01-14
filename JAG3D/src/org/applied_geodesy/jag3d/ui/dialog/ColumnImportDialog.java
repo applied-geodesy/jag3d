@@ -557,7 +557,7 @@ public class ColumnImportDialog {
 		String textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.name.text.tooltip", "Range for point-id column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.POINT_ID, buttonLabel, buttonTooltip, textFieldTooltip);
 
-		// a-priori y-com,ponent
+		// a-priori y-component
 		buttonLabel      = i18n.getString("ColumnImportDialog.column.point.y0.label",        "y0 \u25B6");
 		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.y0.tooltip",      "Add selected range for a-priori y-component");
 		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.y0.text.tooltip", "Range for a-priori y-component column");
@@ -601,7 +601,21 @@ public class ColumnImportDialog {
 		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.sigma.z0.tooltip",      "Add selected range for a-priori uncertainty of z-component");
 		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.sigma.z0.text.tooltip", "Range for a-priori uncertainty of z-component column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.UNCERTAINTY_Z, buttonLabel, buttonTooltip, textFieldTooltip);
+		
+		rowIndex++;
+		columnIndex = 2;
 
+		// Deflection in y
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.point.deflection.y0.label",        "\u03B6y0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.deflection.y0.tooltip",      "Add selected range for a-priori deflection of y-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.deflection.y0.text.tooltip", "Range for a-priori deflection of y-component column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.DEFLECTION_Y, buttonLabel, buttonTooltip, textFieldTooltip);
+
+		// Deflection in x
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.point.deflection.x0.label",        "\u03B6x0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.deflection.x0.tooltip",      "Add selected range for a-priori deflection of x-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.deflection.x0.text.tooltip", "Range for a-priori udeflection of x-component column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.DEFLECTION_X, buttonLabel, buttonTooltip, textFieldTooltip);
 		
 		TitledPane titledPane = this.createTitledPane(
 				i18n.getString("ColumnImportDialog.column.point.label",   "Column defintions for points"),
