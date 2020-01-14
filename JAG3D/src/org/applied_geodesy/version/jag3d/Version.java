@@ -42,4 +42,8 @@ public class Version {
 			max = Math.max(max, version);
 		return max;
 	}
+	
+	public static boolean isReleaseCandidate() {
+		return Boolean.TRUE;
+	}
 }
