@@ -22,7 +22,9 @@
 module org.applied_geodesy.jag3d {
 	exports org.applied_geodesy.jag3d;
 	exports org.applied_geodesy.jag3d.ui;
-
+	
+	exports org.applied_geodesy.adjustment.cmd;
+	
 	requires arpack.combined.all;
 	requires core;
 	requires freemarker;
