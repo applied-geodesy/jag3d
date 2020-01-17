@@ -245,13 +245,16 @@ public class LayerManager {
 			case RELATIVE_CONFIDENCE:
 				layer = new RelativeConfidenceLayer(layerType);
 				break;
-
+				
+			case LEGEND:	
+				layer = new LegendLayer(layerType, this.layers);
+				break;
 			}
 			
 			if (layer != null)
 				this.add(layer);
 		}
-		
+
 		AbsoluteConfidenceLayer absoluteConfidenceLayer = (AbsoluteConfidenceLayer)this.getLayer(LayerType.ABSOLUTE_CONFIDENCE);
 		absoluteConfidenceLayer.addAll(
 				(PointLayer)this.getLayer(LayerType.STOCHASTIC_POINT_APOSTERIORI),

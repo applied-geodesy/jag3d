@@ -23,11 +23,14 @@ package org.applied_geodesy.jag3d.ui.graphic.layer;
 
 import java.util.List;
 
+import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
+import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 public abstract class ConfidenceLayer<T extends Layer> extends Layer {
@@ -74,5 +77,24 @@ public abstract class ConfidenceLayer<T extends Layer> extends Layer {
 		GraphicExtent extent = new GraphicExtent();
 		extent.reset();
 		return extent;
+	}
+	
+	@Override
+	public void drawLegendSymbol(GraphicsContext graphicsContext, GraphicExtent graphicExtent, PixelCoordinate pixelCoordinate, double symbolHeight, double symbolWidth) {
+		if (this.contains(graphicExtent, pixelCoordinate) && Math.min(symbolHeight, symbolWidth) > 0) {
+			double lineWidth = this.getLineWidth();
+			double symbolSize = symbolHeight;
+			
+			graphicsContext.setLineWidth(lineWidth);
+			graphicsContext.setStroke(this.getStrokeColor());
+			graphicsContext.setFill(this.getColor());
+			graphicsContext.setLineDashes(null);
+			
+			double majorAxis = 0.75 * symbolSize;
+			double minorAxis = 0.7  * majorAxis;
+			double angle     = 0;
+
+			SymbolBuilder.drawEllipse(graphicsContext, new PixelCoordinate(pixelCoordinate.getX() + 0.5 * symbolWidth, pixelCoordinate.getY()), majorAxis, minorAxis, angle);
+		}
 	}
 }

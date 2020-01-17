@@ -35,12 +35,10 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-public abstract class Layer {
+public abstract class Layer implements IdentifiableLayer {
 	final static Properties PROPERTIES = new Properties();
 	static {
 		BufferedInputStream bis = null;
@@ -64,7 +62,6 @@ public abstract class Layer {
 	}
 
 	private final LayerType layerType;
-	private StringProperty name             = new SimpleStringProperty("Layer");
 	private ObjectProperty<Color> color     = new SimpleObjectProperty<Color>(Color.DARKBLUE);
 	private DoubleProperty lineWidth        = new SimpleDoubleProperty(1.0);
 	private DoubleProperty symbolSize       = new SimpleDoubleProperty(SymbolBuilder.DEFAULT_SIZE);
@@ -82,6 +79,10 @@ public abstract class Layer {
 
 	public abstract void clearLayer();
 	
+	public abstract void drawLegendSymbol(GraphicsContext graphicsContext, GraphicExtent graphicExtent, PixelCoordinate pixelCoordinate, double symbolHeight, double symbolWidth);
+	
+	public abstract boolean hasContent();
+	
 	public LayerType getLayerType() {
 		return this.layerType;
 	}
@@ -96,18 +97,6 @@ public abstract class Layer {
 	
 	public void setColor(final Color color) {
 		this.colorProperty().set(color);
-	}
-		
-	public StringProperty nameProperty() {
-		return this.name;
-	}
-	
-	public String getName() {
-		return this.nameProperty().get();
-	}
-	
-	public void setName(final String name) {
-		this.nameProperty().set(name);
 	}
 
 	public DoubleProperty lineWidthProperty() {

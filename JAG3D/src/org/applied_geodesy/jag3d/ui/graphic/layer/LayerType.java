@@ -44,6 +44,7 @@ public enum LayerType {
 	DATUM_POINT_APOSTERIORI(23),
 	NEW_POINT_APOSTERIORI(24),
 	
+	LEGEND(99),
 	;
 	
 	private int id;

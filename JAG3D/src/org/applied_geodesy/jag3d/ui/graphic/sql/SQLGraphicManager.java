@@ -34,10 +34,12 @@ import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ArrowLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ConfidenceLayer;
+import org.applied_geodesy.jag3d.ui.graphic.layer.FontLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.HighlightableLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.Layer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerManager;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerType;
+import org.applied_geodesy.jag3d.ui.graphic.layer.LegendLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationSymbolProperties;
 import org.applied_geodesy.jag3d.ui.graphic.layer.PointLayer;
@@ -112,6 +114,13 @@ public class SQLGraphicManager {
 					this.load((ConfidenceLayer<?>)layer);
 				else
 					this.save((ConfidenceLayer<?>)layer, order++);
+				break;
+				
+			case LEGEND:
+				if (exists)
+					this.load((LegendLayer)layer);
+				else
+					this.save((LegendLayer)layer, order++);
 				break;
 			}
 		}
@@ -204,6 +213,7 @@ public class SQLGraphicManager {
 			case OBSERVATION_APRIORI:
 			case ABSOLUTE_CONFIDENCE:
 			case RELATIVE_CONFIDENCE:
+			case LEGEND:
 				break;
 			}
 		}
@@ -247,6 +257,7 @@ public class SQLGraphicManager {
 			case PRINCIPAL_COMPONENT_HORIZONTAL:
 			case PRINCIPAL_COMPONENT_VERTICAL:
 			case POINT_SHIFT_VERTICAL:
+			case LEGEND:
 				break;
 			}
 		}
@@ -728,6 +739,12 @@ public class SQLGraphicManager {
 		this.saveSymbol(arrowLayer);
 	}
 	
+	public void save(LegendLayer legendLayer, int order) throws SQLException {
+		this.saveLayer(legendLayer);
+		this.saveLayerOrder(legendLayer.getLayerType(), order);
+		this.saveFont(legendLayer);
+	}
+	
 	public void save(ConfidenceLayer<?> confidenceLayer, int order) throws SQLException {
 		this.saveLayer(confidenceLayer);
 		this.saveLayerOrder(confidenceLayer.getLayerType(), order);
@@ -916,7 +933,7 @@ public class SQLGraphicManager {
 		stmt.execute();
 	}
 	
-	private void saveFont(PointLayer pointLayer) throws SQLException {
+	private void saveFont(FontLayer fontLayer) throws SQLException {
 		String sql = "MERGE INTO \"LayerFont\" USING (VALUES "
 				+ "(CAST(? AS INT), ?, CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
 				+ ") AS \"vals\" (\"layer\", \"family\", \"size\", \"red\", \"green\", \"blue\") ON \"LayerFont\".\"layer\" = \"vals\".\"layer\" "
@@ -935,12 +952,12 @@ public class SQLGraphicManager {
 				+ "\"vals\".\"blue\" ";
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
-		stmt.setInt(idx++, pointLayer.getLayerType().getId());
-		stmt.setString(idx++, pointLayer.getFontFamily());
-		stmt.setDouble(idx++, pointLayer.getFontSize());
-		stmt.setDouble(idx++, pointLayer.getFontColor().getRed());
-		stmt.setDouble(idx++, pointLayer.getFontColor().getGreen());
-		stmt.setDouble(idx++, pointLayer.getFontColor().getBlue());
+		stmt.setInt(idx++, fontLayer.getLayerType().getId());
+		stmt.setString(idx++, fontLayer.getFontFamily());
+		stmt.setDouble(idx++, fontLayer.getFontSize());
+		stmt.setDouble(idx++, fontLayer.getFontColor().getRed());
+		stmt.setDouble(idx++, fontLayer.getFontColor().getGreen());
+		stmt.setDouble(idx++, fontLayer.getFontColor().getBlue());
 		stmt.execute();
 	}
 	
@@ -1002,6 +1019,11 @@ public class SQLGraphicManager {
 	private void load(ArrowLayer arrowLayer) throws SQLException {
 		this.loadLayer(arrowLayer);
 		this.loadSymbol(arrowLayer);
+	}
+	
+	private void load(LegendLayer legendLayer) throws SQLException {
+		this.loadLayer(legendLayer);
+		this.loadFont(legendLayer);
 	}
 	
 	private void load(ConfidenceLayer<?> confidenceLayer) throws SQLException {
@@ -1079,7 +1101,7 @@ public class SQLGraphicManager {
 		}
 	}
 	
-	private void loadFont(PointLayer layer) throws SQLException {
+	private void loadFont(FontLayer layer) throws SQLException {
 		String sql = " SELECT "
 				+ "\"family\", \"size\", "
 				+ "\"red\", \"green\", \"blue\" "

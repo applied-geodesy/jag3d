@@ -46,7 +46,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 
-public class PointLayer extends Layer implements HighlightableLayer {
+public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 	private DoubleProperty fontSize   = new SimpleDoubleProperty(10);
 	private StringProperty fontFamily = new SimpleStringProperty(Font.getDefault().getFamily());
 	private ObjectProperty<Color> fontColor = new SimpleObjectProperty<Color>(Color.DIMGREY);
@@ -336,8 +336,8 @@ public class PointLayer extends Layer implements HighlightableLayer {
 		if (!this.isVisible() || this.points.isEmpty())
 			return;
 
-		graphicsContext.setLineCap(StrokeLineCap.BUTT);
-		graphicsContext.setLineDashes(null);
+//		graphicsContext.setLineCap(StrokeLineCap.BUTT);
+//		graphicsContext.setLineDashes(null);
 
 		PointSymbolType symbolType = this.getPointSymbolType();
 		double symbolSize = this.getSymbolSize();
@@ -365,23 +365,46 @@ public class PointLayer extends Layer implements HighlightableLayer {
 					fontColor   = this.getFontColor();
 					lineWidth   = this.getLineWidth();
 				}
-
-				graphicsContext.setLineWidth(lineWidth);
-
-				graphicsContext.setStroke(symbolColor);
-				graphicsContext.setFill(symbolColor);
-
-				SymbolBuilder.drawSymbol(graphicsContext, pixelCoordinate, symbolType, symbolSize);
-
-				// set text color
-				graphicsContext.setStroke(fontColor);
-				graphicsContext.setFill(fontColor);
-				graphicsContext.setFont(Font.font(fontFamily, FontWeight.NORMAL, FontPosture.REGULAR, fontSize));		
-				graphicsContext.fillText(point.getName().trim(), 
-						pixelCoordinate.getX() + 0.5 * (symbolSize + lineWidth + 1), 
-						pixelCoordinate.getY() + 0.5 * (symbolSize + fontSize + lineWidth + 1));
+				
+				this.drawPointSymbol(graphicsContext, pixelCoordinate, symbolColor, symbolType, symbolSize, lineWidth);
+				this.drawPointText(graphicsContext, pixelCoordinate, point.getName().trim(), fontColor, fontFamily, symbolSize, lineWidth, fontSize);
+//				graphicsContext.setLineWidth(lineWidth);
+//
+//				graphicsContext.setStroke(symbolColor);
+//				graphicsContext.setFill(symbolColor);
+//
+//				SymbolBuilder.drawSymbol(graphicsContext, pixelCoordinate, symbolType, symbolSize);
+//
+//				// set text color
+//				graphicsContext.setStroke(fontColor);
+//				graphicsContext.setFill(fontColor);
+//				graphicsContext.setFont(Font.font(fontFamily, FontWeight.NORMAL, FontPosture.REGULAR, fontSize));		
+//				graphicsContext.fillText(point.getName().trim(), 
+//						pixelCoordinate.getX() + 0.5 * (symbolSize + lineWidth + 1), 
+//						pixelCoordinate.getY() + 0.5 * (symbolSize + fontSize + lineWidth + 1));
 			}
 		}
+	}
+	
+	private void drawPointSymbol(GraphicsContext graphicsContext, PixelCoordinate pixelCoordinate, Color color, PointSymbolType symbolType, double symbolSize, double lineWidth) {
+		graphicsContext.setLineCap(StrokeLineCap.BUTT);
+		graphicsContext.setLineDashes(null);
+		
+		graphicsContext.setLineWidth(lineWidth);
+		graphicsContext.setStroke(color);
+		graphicsContext.setFill(color);
+
+		SymbolBuilder.drawSymbol(graphicsContext, pixelCoordinate, symbolType, symbolSize);
+	}
+	
+	private void drawPointText(GraphicsContext graphicsContext, PixelCoordinate pixelCoordinate, String name, Color color, String fontFamily, double symbolSize, double lineWidth, double fontSize) {
+		// set text color
+		graphicsContext.setStroke(color);
+		graphicsContext.setFill(color);
+		graphicsContext.setFont(Font.font(fontFamily, FontWeight.NORMAL, FontPosture.REGULAR, fontSize));		
+		graphicsContext.fillText(name, 
+				pixelCoordinate.getX() + 0.5 * (symbolSize + lineWidth + 1), 
+				pixelCoordinate.getY() + 0.5 * (symbolSize + fontSize + lineWidth + 1));
 	}
 
 	@Override
@@ -435,7 +458,6 @@ public class PointLayer extends Layer implements HighlightableLayer {
 		}
 	}
 
-
 	public ObjectProperty<PointSymbolType> pointSymbolTypeProperty() {
 		return this.pointSymbolType;
 	}
@@ -448,38 +470,47 @@ public class PointLayer extends Layer implements HighlightableLayer {
 		this.pointSymbolTypeProperty().set(pointSymbolType);
 	}
 
+	@Override
 	public final ObjectProperty<Color> fontColorProperty() {
 		return this.fontColor;
 	}
 
+	@Override
 	public final Color getFontColor() {
 		return this.fontColorProperty().get();
 	}
 
+	@Override
 	public final void setFontColor(final Color textColor) {
 		this.fontColorProperty().set(textColor);
 	}
 
+	@Override
 	public final DoubleProperty fontSizeProperty() {
 		return this.fontSize;
 	}
 
+	@Override
 	public final double getFontSize() {
 		return this.fontSizeProperty().get();
 	}
 
+	@Override
 	public final void setFontSize(final double fontSize) {
 		this.fontSizeProperty().set(fontSize);
 	}
 
+	@Override
 	public StringProperty fontFamilyProperty() {
 		return this.fontFamily;
 	}
 
+	@Override
 	public String getFontFamily() {
 		return this.fontFamilyProperty().get();
 	}
 
+	@Override
 	public void setFontFamily(final String fontFamily) {
 		this.fontFamilyProperty().set(fontFamily);
 	}
@@ -488,21 +519,21 @@ public class PointLayer extends Layer implements HighlightableLayer {
 	public String toString() {
 		switch(this.getLayerType()) {
 		case DATUM_POINT_APOSTERIORI:
-			return i18n.getString("PointAprioriLayer.type.datum.aposteriori", "Datum points (a-posteriori)");
+			return i18n.getString("PointLayer.type.datum.aposteriori", "Datum points (a-posteriori)");
 		case DATUM_POINT_APRIORI:
-			return i18n.getString("PointAprioriLayer.type.datum.apriori", "Datum points (a-priori)");
+			return i18n.getString("PointLayer.type.datum.apriori", "Datum points (a-priori)");
 		case NEW_POINT_APOSTERIORI:
-			return i18n.getString("PointAprioriLayer.type.new.aposteriori", "New points (a-posteriori)");
+			return i18n.getString("PointLayer.type.new.aposteriori", "New points (a-posteriori)");
 		case NEW_POINT_APRIORI:
-			return i18n.getString("PointAprioriLayer.type.new.apriori", "New points (a-priori)");
+			return i18n.getString("PointLayer.type.new.apriori", "New points (a-priori)");
 		case REFERENCE_POINT_APOSTERIORI:
-			return i18n.getString("PointAprioriLayer.type.reference.aposteriori", "Reference points (a-posteriori)");
+			return i18n.getString("PointLayer.type.reference.aposteriori", "Reference points (a-posteriori)");
 		case REFERENCE_POINT_APRIORI:
-			return i18n.getString("PointAprioriLayer.type.reference.apriori", "Reference points (a-priori)");
+			return i18n.getString("PointLayer.type.reference.apriori", "Reference points (a-priori)");
 		case STOCHASTIC_POINT_APOSTERIORI:
-			return i18n.getString("PointAprioriLayer.type.stochastic.aposteriori", "Stochastic points (a-posteriori)");
+			return i18n.getString("PointLayer.type.stochastic.aposteriori", "Stochastic points (a-posteriori)");
 		case STOCHASTIC_POINT_APRIORI:
-			return i18n.getString("PointAprioriLayer.type.stochastic.apriori", "Stochastic points (a-priori)");
+			return i18n.getString("PointLayer.type.stochastic.apriori", "Stochastic points (a-priori)");
 		default:
 			return "";		
 		}
@@ -547,27 +578,50 @@ public class PointLayer extends Layer implements HighlightableLayer {
 		this.point3DVisibleProperty().set(point3DVisible);
 	}
 
+	@Override
 	public final ObjectProperty<Color> highlightColorProperty() {
 		return this.highlightColor;
 	}
 
+	@Override
 	public final Color getHighlightColor() {
 		return this.highlightColorProperty().get();
 	}
 
+	@Override
 	public final void setHighlightColor(final Color highlightColor) {
 		this.highlightColorProperty().set(highlightColor);
 	}
 
+	@Override
 	public final DoubleProperty highlightLineWidthProperty() {
 		return this.highlightLineWidth;
 	}
 
+	@Override
 	public final double getHighlightLineWidth() {
 		return this.highlightLineWidthProperty().get();
 	}
 
+	@Override
 	public final void setHighlightLineWidth(final double highlightLineWidth) {
 		this.highlightLineWidthProperty().set(highlightLineWidth);
+	}
+
+	@Override
+	public void drawLegendSymbol(GraphicsContext graphicsContext, GraphicExtent graphicExtent, PixelCoordinate pixelCoordinate, double symbolHeight, double symbolWidth) {
+		if (this.contains(graphicExtent, pixelCoordinate)) {
+			PointSymbolType symbolType = this.getPointSymbolType();
+			Color symbolColor = this.getColor();
+			double lineWidth  = this.getLineWidth();
+			double symbolSize = symbolHeight;
+			
+			this.drawPointSymbol(graphicsContext, new PixelCoordinate(pixelCoordinate.getX() + 0.5 * symbolWidth, pixelCoordinate.getY()), symbolColor, symbolType, symbolSize, lineWidth);
+		}
+	}
+
+	@Override
+	public boolean hasContent() {
+		return this.points != null && !this.points.isEmpty();
 	}
 }

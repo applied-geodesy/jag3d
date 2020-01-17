@@ -22,8 +22,10 @@
 package org.applied_geodesy.jag3d.ui.graphic.layer;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationSymbolProperties.ObservationType;
@@ -226,16 +228,15 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 		if (!this.isVisible() || this.observableMeasurements.isEmpty())
 			return;
 
-		graphicsContext.setLineCap(StrokeLineCap.BUTT);
-
 		double symbolSize = this.getSymbolSize();
-		graphicsContext.setLineWidth(this.getLineWidth());
+//		graphicsContext.setLineCap(StrokeLineCap.BUTT);
+//		graphicsContext.setLineWidth(this.getLineWidth());
 
-		final double maxLength = 125;
-		double pointSymbolSize = this.getPointSymbolSize();
-		
-		double width  = graphicExtent.getDrawingBoardWidth();
-		double height = graphicExtent.getDrawingBoardHeight();
+//		final double maxLength = 125;
+//		double pointSymbolSize = this.getPointSymbolSize();
+//		
+//		double width  = graphicExtent.getDrawingBoardWidth();
+//		double height = graphicExtent.getDrawingBoardHeight();
 
 		for (ObservableMeasurement observableLink : this.observableMeasurements) {
 			GraphicPoint startPoint = observableLink.getStartPoint();
@@ -246,85 +247,182 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 
 			PixelCoordinate pixelCoordinateStartPoint = GraphicExtent.toPixelCoordinate(startPoint.getCoordinate(), graphicExtent);
 			PixelCoordinate pixelCoordinateEndPoint   = GraphicExtent.toPixelCoordinate(endPoint.getCoordinate(), graphicExtent);
-
+			
 			if (!this.contains(graphicExtent, pixelCoordinateStartPoint) && !this.contains(graphicExtent, pixelCoordinateEndPoint))
 				continue;
-
-			double xs = pixelCoordinateStartPoint.getX();
-			double ys = pixelCoordinateStartPoint.getY();
-
-			double xe = pixelCoordinateEndPoint.getX();
-			double ye = pixelCoordinateEndPoint.getY();
-
-			double distance = Math.hypot(xe-xs, ye-ys);
-			distance = distance > 0 ? distance : 1;
-			double dx = (xe-xs)/distance;
-			double dy = (ye-ys)/distance;
 			
-			Color color      = observableLink.isSignificant() ? this.getHighlightColor() : this.getColor();
+			Color color      = observableLink.isSignificant() ? this.getHighlightColor()     : this.getColor();
 			double lineWidth = observableLink.isSignificant() ? this.getHighlightLineWidth() : this.getLineWidth();
 			
-			graphicsContext.setStroke(color);
-			graphicsContext.setLineWidth(lineWidth);
-			graphicsContext.setLineDashes(null);
+			this.drawObservation(graphicsContext, graphicExtent, 
+					pixelCoordinateStartPoint, pixelCoordinateEndPoint, 
+					observableLink.getStartPointObservationType(), observableLink.getEndPointObservationType(), 
+					color, lineWidth, symbolSize);
 
-			// clipping line, if one of the points is outside
-			double layerDiagoal = Math.hypot(width, height);
-			if (distance > 1.005 * layerDiagoal) {
-				distance = 1.005 * layerDiagoal;
+//			if (!this.contains(graphicExtent, pixelCoordinateStartPoint) && !this.contains(graphicExtent, pixelCoordinateEndPoint))
+//				continue;
+//
+//			double xs = pixelCoordinateStartPoint.getX();
+//			double ys = pixelCoordinateStartPoint.getY();
+//
+//			double xe = pixelCoordinateEndPoint.getX();
+//			double ye = pixelCoordinateEndPoint.getY();
+//
+//			double distance = Math.hypot(xe-xs, ye-ys);
+//			distance = distance > 0 ? distance : 1;
+//			double dx = (xe-xs)/distance;
+//			double dy = (ye-ys)/distance;
+//			
+//			Color color      = observableLink.isSignificant() ? this.getHighlightColor() : this.getColor();
+//			double lineWidth = observableLink.isSignificant() ? this.getHighlightLineWidth() : this.getLineWidth();
+//			
+//			graphicsContext.setStroke(color);
+//			graphicsContext.setLineWidth(lineWidth);
+//			graphicsContext.setLineDashes(null);
+//
+//			// clipping line, if one of the points is outside
+//			double layerDiagoal = Math.hypot(width, height);
+//			if (distance > 1.005 * layerDiagoal) {
+//				distance = 1.005 * layerDiagoal;
+//
+//				if (!this.contains(graphicExtent, pixelCoordinateStartPoint)) {
+//					xs = xe - distance * dx;
+//					ys = ye - distance * dy;
+//				}
+//
+//				else if (!this.contains(graphicExtent, pixelCoordinateEndPoint)) {
+//					xe = xs + distance * dx;
+//					ye = ys + distance * dy;
+//				}
+//			}
+//
+//			double si = 0.0, ei = 0.0;
+//			if (this.contains(graphicExtent, pixelCoordinateStartPoint) && !observableLink.getStartPointObservationType().isEmpty()) {
+//				si = 1.0;
+//				graphicsContext.strokeLine(
+//						xs,
+//						ys,
+//						xs + Math.min(0.35*distance, maxLength) * dx,
+//						ys + Math.min(0.35*distance, maxLength) * dy
+//						);
+//			}
+//
+//			if (this.contains(graphicExtent, pixelCoordinateEndPoint) && !observableLink.getEndPointObservationType().isEmpty()) {
+//				ei = 1.0;
+//				graphicsContext.strokeLine(
+//						xe,
+//						ye,
+//						xe - Math.min(0.35*distance, maxLength) * dx,
+//						ye - Math.min(0.35*distance, maxLength) * dy
+//						);
+//			}
+//
+//			graphicsContext.setLineDashes(2.5, 3.5);
+//			graphicsContext.strokeLine(
+//					xs + si * (Math.min(0.35*distance, maxLength) * dx),
+//					ys + si * (Math.min(0.35*distance, maxLength) * dy),
+//					xe - ei * (Math.min(0.35*distance, maxLength) * dx),
+//					ye - ei * (Math.min(0.35*distance, maxLength) * dy)
+//					);
+//
+//			// check, if drawable
+//			if (distance > 3.0*symbolSize) {			
+//				double scale = distance > 4.0*pointSymbolSize + symbolSize ? 1.5*pointSymbolSize + 0.5*symbolSize : 0.5 * (distance - symbolSize);
+//				if (!observableLink.getStartPointObservationType().isEmpty()) {
+//					PixelCoordinate coordinate = new PixelCoordinate(xs - 0.5*symbolSize + scale * dx, ys - 0.5*symbolSize + scale * dy);
+//					SymbolBuilder.drawSymbol(graphicsContext, coordinate, this.symbolPropertiesMap, observableLink.getStartPointObservationType(), symbolSize);
+//				}
+//
+//				if (!observableLink.getEndPointObservationType().isEmpty()) {
+//					PixelCoordinate coordinate = new PixelCoordinate(xe - 0.5*symbolSize - scale * dx, ye - 0.5*symbolSize - scale * dy);
+//					SymbolBuilder.drawSymbol(graphicsContext, coordinate, this.symbolPropertiesMap, observableLink.getEndPointObservationType(), symbolSize);
+//				}
+//			}
+		}
+	}
+	private void drawObservation(GraphicsContext graphicsContext, GraphicExtent graphicExtent, 
+			PixelCoordinate pixelCoordinateStartPoint, PixelCoordinate pixelCoordinateEndPoint, 
+			Set<ObservationType> observationTypesStartPoint, Set<ObservationType> observationTypesEndPoint, 
+			Color color, double lineWidth, double symbolSize) {
+		
+		final double maxLength = 125;
+		double pointSymbolSize = this.getPointSymbolSize();
+		
+		double width  = graphicExtent.getDrawingBoardWidth();
+		double height = graphicExtent.getDrawingBoardHeight();
 
-				if (!this.contains(graphicExtent, pixelCoordinateStartPoint)) {
-					xs = xe - distance * dx;
-					ys = ye - distance * dy;
-				}
+		double xs = pixelCoordinateStartPoint.getX();
+		double ys = pixelCoordinateStartPoint.getY();
 
-				else if (!this.contains(graphicExtent, pixelCoordinateEndPoint)) {
-					xe = xs + distance * dx;
-					ye = ys + distance * dy;
-				}
+		double xe = pixelCoordinateEndPoint.getX();
+		double ye = pixelCoordinateEndPoint.getY();
+
+		double distance = Math.hypot(xe-xs, ye-ys);
+		distance = distance > 0 ? distance : 1;
+		double dx = (xe-xs)/distance;
+		double dy = (ye-ys)/distance;
+		
+		graphicsContext.setLineCap(StrokeLineCap.BUTT);
+		graphicsContext.setStroke(color);
+		graphicsContext.setLineWidth(lineWidth);
+		graphicsContext.setLineDashes(null);
+
+		// clipping line, if one of the points is outside
+		double layerDiagoal = Math.hypot(width, height);
+		if (distance > 1.005 * layerDiagoal) {
+			distance = 1.005 * layerDiagoal;
+
+			if (!this.contains(graphicExtent, pixelCoordinateStartPoint)) {
+				xs = xe - distance * dx;
+				ys = ye - distance * dy;
 			}
 
-			double si = 0.0, ei = 0.0;
-			if (this.contains(graphicExtent, pixelCoordinateStartPoint) && !observableLink.getStartPointObservationType().isEmpty()) {
-				si = 1.0;
-				graphicsContext.strokeLine(
-						xs,
-						ys,
-						xs + Math.min(0.35*distance, maxLength) * dx,
-						ys + Math.min(0.35*distance, maxLength) * dy
-						);
+			else if (!this.contains(graphicExtent, pixelCoordinateEndPoint)) {
+				xe = xs + distance * dx;
+				ye = ys + distance * dy;
 			}
+		}
 
-			if (this.contains(graphicExtent, pixelCoordinateEndPoint) && !observableLink.getEndPointObservationType().isEmpty()) {
-				ei = 1.0;
-				graphicsContext.strokeLine(
-						xe,
-						ye,
-						xe - Math.min(0.35*distance, maxLength) * dx,
-						ye - Math.min(0.35*distance, maxLength) * dy
-						);
-			}
-
-			graphicsContext.setLineDashes(2.5, 3.5);
+		double si = 0.0, ei = 0.0;
+		if (this.contains(graphicExtent, pixelCoordinateStartPoint) && !observationTypesStartPoint.isEmpty()) {
+			si = 1.0;
 			graphicsContext.strokeLine(
-					xs + si * (Math.min(0.35*distance, maxLength) * dx),
-					ys + si * (Math.min(0.35*distance, maxLength) * dy),
-					xe - ei * (Math.min(0.35*distance, maxLength) * dx),
-					ye - ei * (Math.min(0.35*distance, maxLength) * dy)
+					xs,
+					ys,
+					xs + Math.min(0.35*distance, maxLength) * dx,
+					ys + Math.min(0.35*distance, maxLength) * dy
 					);
+		}
 
-			// check, if drawable
-			if (distance > 3.0*symbolSize) {			
-				double scale = distance > 4.0*pointSymbolSize + symbolSize ? 1.5*pointSymbolSize + 0.5*symbolSize : 0.5 * (distance - symbolSize);
-				if (!observableLink.getStartPointObservationType().isEmpty()) {
-					PixelCoordinate coordinate = new PixelCoordinate(xs - 0.5*symbolSize + scale * dx, ys - 0.5*symbolSize + scale * dy);
-					SymbolBuilder.drawSymbol(graphicsContext, coordinate, this.symbolPropertiesMap, observableLink.getStartPointObservationType(), symbolSize);
-				}
+		if (this.contains(graphicExtent, pixelCoordinateEndPoint) && !observationTypesEndPoint.isEmpty()) {
+			ei = 1.0;
+			graphicsContext.strokeLine(
+					xe,
+					ye,
+					xe - Math.min(0.35*distance, maxLength) * dx,
+					ye - Math.min(0.35*distance, maxLength) * dy
+					);
+		}
 
-				if (!observableLink.getEndPointObservationType().isEmpty()) {
-					PixelCoordinate coordinate = new PixelCoordinate(xe - 0.5*symbolSize - scale * dx, ye - 0.5*symbolSize - scale * dy);
-					SymbolBuilder.drawSymbol(graphicsContext, coordinate, this.symbolPropertiesMap, observableLink.getEndPointObservationType(), symbolSize);
-				}
+		graphicsContext.setLineDashes(2.5, 3.5);
+		graphicsContext.strokeLine(
+				xs + si * (Math.min(0.35*distance, maxLength) * dx),
+				ys + si * (Math.min(0.35*distance, maxLength) * dy),
+				xe - ei * (Math.min(0.35*distance, maxLength) * dx),
+				ye - ei * (Math.min(0.35*distance, maxLength) * dy)
+				);
+
+		// check, if drawable
+		if (distance > 3.0*symbolSize) {			
+			double scale = distance > 4.0*pointSymbolSize + symbolSize ? 1.5*pointSymbolSize + 0.5*symbolSize : 0.5 * (distance - symbolSize);
+			if (!observationTypesStartPoint.isEmpty()) {
+				PixelCoordinate coordinate = new PixelCoordinate(xs - 0.5*symbolSize + scale * dx, ys - 0.5*symbolSize + scale * dy);
+				SymbolBuilder.drawSymbol(graphicsContext, coordinate, this.symbolPropertiesMap, observationTypesStartPoint, symbolSize);
+			}
+
+			if (!observationTypesEndPoint.isEmpty()) {
+				PixelCoordinate coordinate = new PixelCoordinate(xe - 0.5*symbolSize - scale * dx, ye - 0.5*symbolSize - scale * dy);
+				SymbolBuilder.drawSymbol(graphicsContext, coordinate, this.symbolPropertiesMap, observationTypesEndPoint, symbolSize);
 			}
 		}
 	}
@@ -396,27 +494,75 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 		return graphicExtent;
 	}
 
+	@Override
 	public final ObjectProperty<Color> highlightColorProperty() {
 		return this.highlightColor;
 	}
 	
+	@Override
 	public final Color getHighlightColor() {
 		return this.highlightColorProperty().get();
 	}
 	
+	@Override
 	public final void setHighlightColor(final Color highlightColor) {
 		this.highlightColorProperty().set(highlightColor);
 	}
 
+	@Override
 	public final DoubleProperty highlightLineWidthProperty() {
 		return this.highlightLineWidth;
 	}
 
+	@Override
 	public final double getHighlightLineWidth() {
 		return this.highlightLineWidthProperty().get();
 	}
 
+	@Override
 	public final void setHighlightLineWidth(final double highlightLineWidth) {
 		this.highlightLineWidthProperty().set(highlightLineWidth);
+	}
+	
+	@Override
+	public void drawLegendSymbol(GraphicsContext graphicsContext, GraphicExtent graphicExtent, PixelCoordinate pixelCoordinateStartPoint, double symbolHeight, double symbolWidth) {
+		PixelCoordinate pixelCoordinateEndPoint = new PixelCoordinate(pixelCoordinateStartPoint.getX() + 70, pixelCoordinateStartPoint.getY());
+		
+		if (!this.contains(graphicExtent, pixelCoordinateStartPoint) && !this.contains(graphicExtent, pixelCoordinateEndPoint))
+			return;
+		
+		Set<ObservationType> observationTypes = new LinkedHashSet<ObservationType>(10);
+		
+		for (ObservableMeasurement observableLink : this.observableMeasurements) {
+			GraphicPoint startPoint = observableLink.getStartPoint();
+			GraphicPoint endPoint   = observableLink.getEndPoint();
+
+			if (!startPoint.isVisible() || !endPoint.isVisible())
+				continue;
+
+			observationTypes.addAll(observableLink.getStartPointObservationType());
+			observationTypes.addAll(observableLink.getEndPointObservationType());
+		}
+		
+		if (observationTypes.isEmpty())
+			return;
+
+		graphicsContext.setLineWidth(this.getLineWidth());
+		graphicsContext.setStroke(this.getColor());
+		graphicsContext.setLineDashes(null);
+		graphicsContext.strokeLine(
+				pixelCoordinateStartPoint.getX(),
+				pixelCoordinateStartPoint.getY(),
+				pixelCoordinateStartPoint.getX() + symbolWidth,
+				pixelCoordinateStartPoint.getY()
+				);
+
+		PixelCoordinate coordinate = new PixelCoordinate(pixelCoordinateStartPoint.getX() + 0.5*(symbolWidth - symbolHeight), pixelCoordinateStartPoint.getY() - 0.5*symbolHeight);
+		SymbolBuilder.drawSymbol(graphicsContext, coordinate, this.symbolPropertiesMap, observationTypes, symbolHeight);		
+	}
+
+	@Override
+	public boolean hasContent() {
+		return this.observableMeasurements != null && !this.observableMeasurements.isEmpty();
 	}
 }
