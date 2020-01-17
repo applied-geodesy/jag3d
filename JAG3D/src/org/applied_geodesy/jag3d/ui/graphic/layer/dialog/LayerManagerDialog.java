@@ -108,7 +108,8 @@ public class LayerManagerDialog {
 						propertiesNode = UIConfidenceLayerPropertyBuilder.getLayerPropertyPane(layerManager, (ConfidenceLayer<?>)selectedLayer);
 						break;
 
-					case POINT_SHIFT:
+					case POINT_SHIFT_HORIZONTAL:
+					case POINT_SHIFT_VERTICAL:
 					case PRINCIPAL_COMPONENT_HORIZONTAL:
 					case PRINCIPAL_COMPONENT_VERTICAL:
 						propertiesNode = UIArrowLayerPropertyBuilder.getLayerPropertyPane(layerManager, (ArrowLayer)selectedLayer);
@@ -321,7 +322,8 @@ public class LayerManagerDialog {
 					sqlGraphicManager.save((ConfidenceLayer<?>)layer, order);
 					break;
 
-				case POINT_SHIFT:
+				case POINT_SHIFT_HORIZONTAL:
+				case POINT_SHIFT_VERTICAL:
 				case PRINCIPAL_COMPONENT_HORIZONTAL:
 				case PRINCIPAL_COMPONENT_VERTICAL:
 					sqlGraphicManager.save((ArrowLayer)layer, order);

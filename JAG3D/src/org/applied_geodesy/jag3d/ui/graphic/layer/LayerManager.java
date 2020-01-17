@@ -127,7 +127,8 @@ public class LayerManager {
 		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
 			if (newValue != null && !Double.isInfinite(newValue) && !Double.isNaN(newValue)) {
 				for (Layer layer : layers) {
-					if (layer.getLayerType() == LayerType.POINT_SHIFT || 
+					if (layer.getLayerType() == LayerType.POINT_SHIFT_HORIZONTAL || 
+							layer.getLayerType() == LayerType.POINT_SHIFT_VERTICAL || 
 							layer.getLayerType() == LayerType.PRINCIPAL_COMPONENT_HORIZONTAL || 
 							layer.getLayerType() == LayerType.PRINCIPAL_COMPONENT_VERTICAL)
 						((ArrowLayer)layer).setVectorScale(newValue);
@@ -229,11 +230,12 @@ public class LayerManager {
 
 			case PRINCIPAL_COMPONENT_HORIZONTAL:
 			case PRINCIPAL_COMPONENT_VERTICAL:
-				layer = new PrincipalComponentArrowLayer(layerType);;
+				layer = new PrincipalComponentArrowLayer(layerType);
 				break;
 
-			case POINT_SHIFT:
-				layer = new PointShiftArrowLayer(layerType);;
+			case POINT_SHIFT_HORIZONTAL:
+			case POINT_SHIFT_VERTICAL:
+				layer = new PointShiftArrowLayer(layerType);
 				break;
 
 			case ABSOLUTE_CONFIDENCE:
@@ -272,16 +274,20 @@ public class LayerManager {
 				(PointLayer)this.getLayer(LayerType.NEW_POINT_APOSTERIORI)
 				);
 		
-		PointShiftArrowLayer pointShiftArrowLayer = (PointShiftArrowLayer)this.getLayer(LayerType.POINT_SHIFT);
+		PointShiftArrowLayer pointShiftHorizontalArrowLayer = (PointShiftArrowLayer)this.getLayer(LayerType.POINT_SHIFT_HORIZONTAL);
+		PointShiftArrowLayer pointShiftVerticalArrowLayer = (PointShiftArrowLayer)this.getLayer(LayerType.POINT_SHIFT_VERTICAL);
 		RelativeConfidenceLayer relativeConfidenceLayer = (RelativeConfidenceLayer)this.getLayer(LayerType.RELATIVE_CONFIDENCE);
-		relativeConfidenceLayer.add(pointShiftArrowLayer);
+		relativeConfidenceLayer.add(pointShiftHorizontalArrowLayer);
+		relativeConfidenceLayer.add(pointShiftVerticalArrowLayer);
+		
 		
 		// add scale change listener
-		pointShiftArrowLayer.setVectorScale(this.scaleSpinner.getValueFactory().getValue());
+		pointShiftHorizontalArrowLayer.setVectorScale(this.scaleSpinner.getValueFactory().getValue());
+		pointShiftVerticalArrowLayer.setVectorScale(this.scaleSpinner.getValueFactory().getValue());
 		principalComponentHorizontalArrowLayer.setVectorScale(this.scaleSpinner.getValueFactory().getValue());
 		principalComponentVerticalArrowLayer.setVectorScale(this.scaleSpinner.getValueFactory().getValue());
 		absoluteConfidenceLayer.setConfidenceScale(this.scaleSpinner.getValueFactory().getValue());
-		this.scaleSpinner.valueProperty().addListener(new ScaleChangeListener(pointShiftArrowLayer, principalComponentHorizontalArrowLayer, principalComponentVerticalArrowLayer, absoluteConfidenceLayer));
+		this.scaleSpinner.valueProperty().addListener(new ScaleChangeListener(pointShiftHorizontalArrowLayer, pointShiftVerticalArrowLayer, principalComponentHorizontalArrowLayer, principalComponentVerticalArrowLayer, absoluteConfidenceLayer));
 		
 		// Bind apriori symbol size of point to observation layer
 		((ObservationLayer)this.getLayer(LayerType.OBSERVATION_APRIORI)).pointSymbolSizeProperty().bind(

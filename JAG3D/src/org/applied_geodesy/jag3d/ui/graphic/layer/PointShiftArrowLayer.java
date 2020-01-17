@@ -24,6 +24,7 @@ package org.applied_geodesy.jag3d.ui.graphic.layer;
 import java.util.List;
 
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
+import org.applied_geodesy.jag3d.ui.graphic.coordinate.WorldCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.ArrowSymbolType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.sql.GraphicPoint;
@@ -41,23 +42,49 @@ public class PointShiftArrowLayer extends ArrowLayer {
 		super(layerType);
 		
 		Color color;
+		ArrowSymbolType arrowSymbolType;
 		double symbolSize = -1, lineWidth = -1;
 		
-		try {
-			color = Color.web(PROPERTIES.getProperty("POINT_SHIFT_ARROW_COLOR", "#ff8c00"));
-		} catch (Exception e) {
-			color = Color.web("#ff8c00");
-		}
-		
-		ArrowSymbolType arrowSymbolType;
-		try {
-			arrowSymbolType = ArrowSymbolType.valueOf(PROPERTIES.getProperty("POINT_SHIFT_ARROW_SYMBOL_TYPE", "FILLED_TETRAGON_ARROW"));
-		} catch (Exception e) {
-			arrowSymbolType = ArrowSymbolType.FILLED_TETRAGON_ARROW;
-		}
+		switch(layerType) {			
+		case POINT_SHIFT_HORIZONTAL:
+			try {
+				color = Color.web(PROPERTIES.getProperty("POINT_SHIFT_HORIZONTAL_ARROW_COLOR", "#ff8c00"));
+			} catch (Exception e) {
+				color = Color.web("#ff8c00");
+			}
 
-		try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_ARROW_SYMBOL_SIZE")); } catch (Exception e) {}
-		try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_ARROW_LINE_WIDTH")); } catch (Exception e) {}
+			try {
+				arrowSymbolType = ArrowSymbolType.valueOf(PROPERTIES.getProperty("POINT_SHIFT_HORIZONTAL_ARROW_SYMBOL_TYPE", "FILLED_TETRAGON_ARROW"));
+			} catch (Exception e) {
+				arrowSymbolType = ArrowSymbolType.FILLED_TETRAGON_ARROW;
+			}
+
+			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_HORIZONTAL_ARROW_SYMBOL_SIZE")); } catch (Exception e) {}
+			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_HORIZONTAL_ARROW_LINE_WIDTH")); } catch (Exception e) {}
+
+			break;
+
+		case POINT_SHIFT_VERTICAL:
+			try {
+				color = Color.web(PROPERTIES.getProperty("POINT_SHIFT_VERTICAL_ARROW_COLOR", "#ffaf00"));
+			} catch (Exception e) {
+				color = Color.web("#ff8c00");
+			}
+
+			try {
+				arrowSymbolType = ArrowSymbolType.valueOf(PROPERTIES.getProperty("POINT_SHIFT_VERTICAL_ARROW_SYMBOL_TYPE", "FILLED_TETRAGON_ARROW"));
+			} catch (Exception e) {
+				arrowSymbolType = ArrowSymbolType.FILLED_TETRAGON_ARROW;
+			}
+
+			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_VERTICAL_ARROW_SYMBOL_SIZE")); } catch (Exception e) {}
+			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_VERTICAL_ARROW_LINE_WIDTH")); } catch (Exception e) {}
+			
+			break;
+			
+		default:
+			throw new IllegalArgumentException("Error, unsupported layer type " + layerType);		
+		}
 
 		symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
 		lineWidth = lineWidth >= 0 ? lineWidth : 1.0;
@@ -73,6 +100,7 @@ public class PointShiftArrowLayer extends ArrowLayer {
 		if (!this.isVisible() || this.relativeConfidences == null || this.relativeConfidences.isEmpty())
 			return;
 
+		LayerType layerType = this.getLayerType();
 		ArrowSymbolType arrowSymbolType = this.getSymbolType();
 		double scale      = this.getVectorScale();
 		double symbolSize = this.getSymbolSize();
@@ -80,74 +108,109 @@ public class PointShiftArrowLayer extends ArrowLayer {
 		
 		double width  = graphicExtent.getDrawingBoardWidth();
 		double height = graphicExtent.getDrawingBoardHeight();
+		double layerDiagonal = Math.hypot(width, height);
 		
 		graphicsContext.setStroke(this.getColor());
 		graphicsContext.setFill(this.getColor());
 		graphicsContext.setLineWidth(lineWidth);
 		graphicsContext.setLineDashes(null);
 
-		for (RelativeConfidence relativeConfidence : relativeConfidences) {
+		for (RelativeConfidence relativeConfidence : this.relativeConfidences) {
 			GraphicPoint startPoint = relativeConfidence.getStartPoint();
 			GraphicPoint endPoint   = relativeConfidence.getEndPoint();
-		
+			double deltaHeight      = relativeConfidence.getDeltaHeight();
+				
 			if (!startPoint.isVisible() || !endPoint.isVisible())
 				continue;
-			
+					
 			PixelCoordinate pixelCoordinateStartPoint = GraphicExtent.toPixelCoordinate(startPoint.getCoordinate(), graphicExtent);
 			PixelCoordinate pixelCoordinateEndPoint   = GraphicExtent.toPixelCoordinate(endPoint.getCoordinate(), graphicExtent);
-			
+
 			if (!this.contains(graphicExtent, pixelCoordinateStartPoint) && !this.contains(graphicExtent, pixelCoordinateEndPoint))
 				continue;
-
+			
 			double xs = pixelCoordinateStartPoint.getX();
 			double ys = pixelCoordinateStartPoint.getY();
 			
 			double xe = pixelCoordinateEndPoint.getX();
 			double ye = pixelCoordinateEndPoint.getY();
 			
-			double distance = Math.hypot(xe-xs, ye-ys);
-			
-			// skip, if symbol size larger than component
-			if (distance == 0 || distance * scale < symbolSize)
-				continue;
-			
-			distance = distance > 0 ? distance : 1;
-			double dx = (xe-xs)/distance;
-			double dy = (ye-ys)/distance;
+			double pxDistance = Math.hypot(xe-xs, ye-ys);
 			
 			double avgX = 0.5 * (xs + xe);
 			double avgY = 0.5 * (ys + ye);
 			
-			double angle = Math.atan2(dy, dx);
-
 			PixelCoordinate vectorStartCoordinate = new PixelCoordinate(avgX, avgY);
-			
 			if (!this.contains(graphicExtent, vectorStartCoordinate))
 				continue;
 			
-			distance = distance * scale;
+			switch(layerType) {
+			// Draw horizontal components
+			case POINT_SHIFT_HORIZONTAL:
+				// skip, if symbol size larger than component
+				if (startPoint.getDimension() != 1 && endPoint.getDimension() != 1 && pxDistance > 0 && pxDistance * scale >= symbolSize) {
+
+					pxDistance = pxDistance > 0 ? pxDistance : 1;
+					double dx = (xe-xs)/pxDistance;
+					double dy = (ye-ys)/pxDistance;
+
+					double angle = Math.atan2(dy, dx);
+
+					pxDistance = pxDistance * scale;
+
+					// clipping line, if one of the points is outside
+					if (pxDistance > 1.05 * layerDiagonal) {
+						pxDistance = 1.05 * layerDiagonal;
+					}
+
+					PixelCoordinate vectorEndCoordinate = new PixelCoordinate(avgX + pxDistance * dx, avgY + pxDistance * dy);
+
+					graphicsContext.strokeLine(
+							avgX,
+							avgY,
+							avgX + pxDistance * dx,
+							avgY + pxDistance * dy
+							);
+
+					SymbolBuilder.drawSymbol(graphicsContext, vectorEndCoordinate, arrowSymbolType, symbolSize, angle);
+				}
+				
+				break;
 			
-			// clipping line, if one of the points is outside
-			double layerDiagoal = Math.hypot(width, height);
-			if (distance > 1.05 * layerDiagoal) {
-				distance = 1.05 * layerDiagoal;
+			// Draw vertical component
+			case POINT_SHIFT_VERTICAL:
+				PixelCoordinate pixelCoordinateHeightComponent = GraphicExtent.toPixelCoordinate(new WorldCoordinate(startPoint.getCoordinate().getX(), startPoint.getCoordinate().getY() + deltaHeight), graphicExtent);
+				double pxHeightComponent = pixelCoordinateHeightComponent.getY() - pixelCoordinateStartPoint.getY();
+
+				// skip, if symbol size larger than component
+				if (startPoint.getDimension() != 2 && endPoint.getDimension() != 2 && Math.abs(pxHeightComponent) > 0 && Math.abs(pxHeightComponent) * scale >= symbolSize) {
+					// North or south direction
+					double angle = 0.5 * Math.signum(pxHeightComponent) * Math.PI;
+
+					pxHeightComponent = pxHeightComponent * scale;
+
+					// clipping line, if one of the points is outside
+					if (Math.abs(pxHeightComponent) > 1.05 * layerDiagonal) {
+						pxHeightComponent = 1.05 * Math.signum(pxHeightComponent) * layerDiagonal;
+					}
+
+					PixelCoordinate vectorEndCoordinate = new PixelCoordinate(avgX, avgY + pxHeightComponent);
+
+					graphicsContext.strokeLine(
+							avgX,
+							avgY,
+							avgX,
+							avgY + pxHeightComponent
+							);
+
+					SymbolBuilder.drawSymbol(graphicsContext, vectorEndCoordinate, arrowSymbolType, symbolSize, angle);
+				}
+
+				break;
+				
+			default:
+				continue;
 			}
-			
-			PixelCoordinate vectorEndCoordinate = new PixelCoordinate(avgX + distance * dx, avgY + distance * dy);
-
-//			graphicsContext.setStroke(this.getColor());
-//			graphicsContext.setFill(this.getColor());
-//			graphicsContext.setLineWidth(lineWidth);
-//			graphicsContext.setLineDashes(null);
-			
-			graphicsContext.strokeLine(
-					avgX,
-					avgY,
-					avgX + distance * dx,
-					avgY + distance * dy
-					);
-
-			SymbolBuilder.drawSymbol(graphicsContext, vectorEndCoordinate, arrowSymbolType, symbolSize, angle);
 		}
 	}
 	
@@ -173,7 +236,14 @@ public class PointShiftArrowLayer extends ArrowLayer {
 	
 	@Override
 	public String toString() {
-		return i18n.getString("PointShiftArrowLayer.type", "Point Shift (Congruence analysis)");
+		switch(this.getLayerType()) {
+		case POINT_SHIFT_HORIZONTAL:
+			return i18n.getString("PointShiftArrowLayer.type.horizontal", "Horizontal point shift (Congruence analysis)");
+		case POINT_SHIFT_VERTICAL:
+			return i18n.getString("PointShiftArrowLayer.type.vertical", "Vertical point shift (Congruence analysis)");
+		default:
+			return "";
+		}
 	}
 
 	@Override
