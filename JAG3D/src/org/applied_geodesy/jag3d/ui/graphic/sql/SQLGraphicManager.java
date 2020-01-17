@@ -96,7 +96,8 @@ public class SQLGraphicManager {
 					this.save((ObservationLayer)layer, order++);
 				break;
 				
-			case POINT_SHIFT:
+			case POINT_SHIFT_HORIZONTAL:
+			case POINT_SHIFT_VERTICAL:
 			case PRINCIPAL_COMPONENT_HORIZONTAL:
 			case PRINCIPAL_COMPONENT_VERTICAL:
 				if (exists)
@@ -195,7 +196,8 @@ public class SQLGraphicManager {
 				completeAprioriPointMap.putAll(this.loadPoints(pointAprioriLayer));
 				break;
 
-			case POINT_SHIFT:
+			case POINT_SHIFT_HORIZONTAL:
+			case POINT_SHIFT_VERTICAL:
 			case PRINCIPAL_COMPONENT_HORIZONTAL:
 			case PRINCIPAL_COMPONENT_VERTICAL:
 			case OBSERVATION_APOSTERIORI:
@@ -209,14 +211,17 @@ public class SQLGraphicManager {
 		layerTypes = new LayerType[] {
 				LayerType.OBSERVATION_APOSTERIORI,
 				LayerType.OBSERVATION_APRIORI,
-				LayerType.POINT_SHIFT
+				LayerType.POINT_SHIFT_HORIZONTAL,
+				LayerType.POINT_SHIFT_VERTICAL,
 		};
 		
 		for (LayerType layerType : layerTypes) {
 			switch(layerType) {
-			case POINT_SHIFT:
-				PointShiftArrowLayer pointShiftArrowLayer = (PointShiftArrowLayer)layerManager.getLayer(layerType);
-				this.loadCongruenceAnalysisNexus(pointShiftArrowLayer, completeAposterioriPointMap);
+			case POINT_SHIFT_HORIZONTAL:
+			//case POINT_SHIFT_VERTICAL: // load both layers simultaneous to use equal references
+				PointShiftArrowLayer pointShiftHorizontalArrowLayer = (PointShiftArrowLayer)layerManager.getLayer(LayerType.POINT_SHIFT_HORIZONTAL);
+				PointShiftArrowLayer pointShiftVerticalArrowLayer = (PointShiftArrowLayer)layerManager.getLayer(LayerType.POINT_SHIFT_VERTICAL);
+				this.loadCongruenceAnalysisNexus(pointShiftHorizontalArrowLayer, pointShiftVerticalArrowLayer, completeAposterioriPointMap);
 				break;
 								
 			case OBSERVATION_APOSTERIORI:
@@ -241,6 +246,7 @@ public class SQLGraphicManager {
 			case STOCHASTIC_POINT_APRIORI:
 			case PRINCIPAL_COMPONENT_HORIZONTAL:
 			case PRINCIPAL_COMPONENT_VERTICAL:
+			case POINT_SHIFT_VERTICAL:
 				break;
 			}
 		}
@@ -531,8 +537,9 @@ public class SQLGraphicManager {
 		observationLayer.setObservableMeasurements(new ArrayList<ObservableMeasurement>(observationMap.values()));
 	}
 	
-	private void loadCongruenceAnalysisNexus(PointShiftArrowLayer pointShiftArrowLayer, Map<String, GraphicPoint> completePointMap) throws SQLException {
-		Map<PointPairKey, RelativeConfidence> relativeConfidences = new HashMap<PointPairKey, RelativeConfidence>();
+	private void loadCongruenceAnalysisNexus(PointShiftArrowLayer pointShiftHorizontalArrowLayer, PointShiftArrowLayer pointShiftVerticalArrowLayer, Map<String, GraphicPoint> completePointMap) throws SQLException {
+		Map<PointPairKey, RelativeConfidence> relativeHorizontalConfidences = new HashMap<PointPairKey, RelativeConfidence>();
+		Map<PointPairKey, RelativeConfidence> relativeVerticalConfidences   = new HashMap<PointPairKey, RelativeConfidence>();
 
 		String sql = "SELECT "
 				+ "\"start_point_name\", \"end_point_name\", "
@@ -604,48 +611,21 @@ public class SQLGraphicManager {
 
 			PointPairKey key = new PointPairKey(startPointName, endPointName);
 		
-			if (relativeConfidences.containsKey(key))
+			if (relativeHorizontalConfidences.containsKey(key) && relativeVerticalConfidences.containsKey(key))
 				continue;
 			
 			GraphicPoint startPoint = completePointMap.get(startPointName);
 			GraphicPoint endPoint   = completePointMap.get(endPointName);
 			
-			// Modify north-component of leveling points to show z-displacement 
-			// (ignore xe/ye)
-			if (startPoint.getDimension() != 2 && endPoint.getDimension() == 1) {
+			double deltaHeight = 0.0;
+			if (startPoint.getDimension() != 2 && endPoint.getDimension() != 2) {
 				double zs = rs.getDouble("zs");
 				double ze = rs.getDouble("ze");
-
-				double xs = rs.getDouble("xs");
-				double ys = rs.getDouble("ys");
-				double xe = xs + (ze-zs);
-				double ye = ys;
-
-				startPoint = new GraphicPoint(startPointName, dimension, ys, xs);
-				endPoint   = new GraphicPoint(endPointName,   dimension, ye, xe);
-
-				startPoint.visibleProperty().bind(completePointMap.get(startPointName).visibleProperty());
-				endPoint.visibleProperty().bind(completePointMap.get(endPointName).visibleProperty());
+				deltaHeight = ze - zs;
 			}
-			// Modify north-component of leveling points to show z-displacement 
-			// (ignore xs/ys)
-			else if (endPoint.getDimension() != 2 && startPoint.getDimension() == 1) {
-				double zs = rs.getDouble("zs");
-				double ze = rs.getDouble("ze");
-
-				double xe = rs.getDouble("xe");
-				double ye = rs.getDouble("ye");
-				double xs = xe - (ze-zs);
-				double ys = ye;
-
-				startPoint = new GraphicPoint(startPointName, dimension, ys, xs);
-				endPoint   = new GraphicPoint(endPointName,   dimension, ye, xe);
-
-				startPoint.visibleProperty().bind(completePointMap.get(startPointName).visibleProperty());
-				endPoint.visibleProperty().bind(completePointMap.get(endPointName).visibleProperty());
-			}
-			// shift values of reference points in 2d/3d
-			else if (startPointName.equals(endPointName)) {
+			
+			// shift values of reference points
+			if (startPointName.equals(endPointName)) {
 				double xs = rs.getDouble("xs");
 				double ys = rs.getDouble("ys");
 				double xe = rs.getDouble("xe");
@@ -657,12 +637,20 @@ public class SQLGraphicManager {
 				startPoint.visibleProperty().bind(completePointMap.get(startPointName).visibleProperty());
 				endPoint.visibleProperty().bind(completePointMap.get(endPointName).visibleProperty());
 			}
-
-			RelativeConfidence relativeConfidence = new RelativeConfidence(startPoint, endPoint, majorAxis, minorAxis, angle, significant);
-			relativeConfidences.put(key, relativeConfidence);
+			
+			if (dimension != 1 && !relativeHorizontalConfidences.containsKey(key)) {
+				RelativeConfidence relativeHorizontalConfidence = new RelativeConfidence(startPoint, endPoint, deltaHeight, majorAxis, minorAxis, angle, significant);
+				relativeHorizontalConfidences.put(key, relativeHorizontalConfidence);
+			}
+			
+			if (dimension != 2 && !relativeVerticalConfidences.containsKey(key)) {
+				RelativeConfidence relativeVerticalConfidence = new RelativeConfidence(startPoint, endPoint, deltaHeight, dimension == 1 ? majorAxis : 0, dimension == 1 ? minorAxis : 0, angle, significant);
+				relativeVerticalConfidences.put(key, relativeVerticalConfidence);
+			}			
 		}
 		
-		pointShiftArrowLayer.setRelativeConfidences(new ArrayList<RelativeConfidence>(relativeConfidences.values()));
+		pointShiftHorizontalArrowLayer.setRelativeConfidences(new ArrayList<RelativeConfidence>(relativeHorizontalConfidences.values()));
+		pointShiftVerticalArrowLayer.setRelativeConfidences(new ArrayList<RelativeConfidence>(relativeVerticalConfidences.values()));
 	}
 
 	public void saveEllipseScale(double scale) throws SQLException {

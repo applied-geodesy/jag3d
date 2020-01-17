@@ -22,18 +22,19 @@
 package org.applied_geodesy.jag3d.ui.graphic.sql;
 
 public class RelativeConfidence extends PointPair {
-	private double minorAxis = 0.0, majorAxis = 0.0, angle = 0.0;
+	private double minorAxis = 0.0, majorAxis = 0.0, angle = 0.0, deltaHeight = 0;
 	
-	public RelativeConfidence(GraphicPoint startPoint, GraphicPoint endPoint, double majorAxis, double minorAxis, double angle, boolean significant) {
+	public RelativeConfidence(GraphicPoint startPoint, GraphicPoint endPoint, double deltaHeight, double majorAxis, double minorAxis, double angle, boolean significant) {
 		super(startPoint, endPoint);
 		this.setSignificant(significant);	
 		this.majorAxis = majorAxis;
 		this.minorAxis = minorAxis;
 		this.angle = angle;
+		this.deltaHeight = deltaHeight;
 	}
 
 	public double getMinorAxis() {
-		return minorAxis;
+		return this.minorAxis;
 	}
 
 	public void setMinorAxis(double minorAxis) {
@@ -41,7 +42,7 @@ public class RelativeConfidence extends PointPair {
 	}
 
 	public double getMajorAxis() {
-		return majorAxis;
+		return this.majorAxis;
 	}
 
 	public void setMajorAxis(double majorAxis) {
@@ -49,10 +50,18 @@ public class RelativeConfidence extends PointPair {
 	}
 
 	public double getAngle() {
-		return angle;
+		return this.angle;
 	}
 
 	public void setAngle(double angle) {
 		this.angle = angle;
+	}
+	
+	public void setDeltaHeight(double deltaHeight) {
+		this.deltaHeight = deltaHeight;
+	}
+
+	public double getDeltaHeight() {
+		return this.deltaHeight;
 	}
 }
