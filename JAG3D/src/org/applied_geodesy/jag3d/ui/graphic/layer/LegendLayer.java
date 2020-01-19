@@ -1,4 +1,28 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.jag3d.ui.graphic.layer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
@@ -27,19 +51,62 @@ public class LegendLayer extends Layer implements FontLayer {
 	private DoubleProperty fontSize   = new SimpleDoubleProperty(10);
 	private StringProperty fontFamily = new SimpleStringProperty(Font.getDefault().getFamily());
 	private ObjectProperty<Color> fontColor = new SimpleObjectProperty<Color>(Color.SLATEGREY);
-
+	private ObjectProperty<LegendPositionType> legendPositionType = new SimpleObjectProperty<LegendPositionType>(LegendPositionType.NORTH_EAST);
+	
 	LegendLayer(LayerType layerType, ObservableList<Layer> layers) {
 		super(layerType);
 		if (layerType != LayerType.LEGEND)
 			throw new IllegalArgumentException("Error, unsupported layer type " + layerType);
 		this.layers = layers;
+		
+		Color symbolColor, fontColor;
+		String fontFamily = null;
+		LegendPositionType legendPositionType;
+		double lineWidth = -1, fontSize = -1;
+
+		fontFamily = PROPERTIES.getProperty("LEGEND_FONT_FAMILY", "System");
+		try {
+			fontColor = Color.web(PROPERTIES.getProperty("LEGEND_FONT_COLOR", "#2F4F4F"));
+		} catch (Exception e) {
+			fontColor = Color.web("#2F4F4F");
+		}
+		
+		try {
+			symbolColor = Color.web(PROPERTIES.getProperty("LEGEND_FONT_COLOR", "#778899"));
+		} catch (Exception e) {
+			symbolColor = Color.web("#778899");
+		}
+		
+		try {
+			legendPositionType = LegendPositionType.valueOf(PROPERTIES.getProperty("LEGEND_POSITION", "NORTH_EAST"));
+		} catch (Exception e) {
+			legendPositionType = LegendPositionType.NORTH_EAST;
+		}
+		
+		try { fontSize = Double.parseDouble(PROPERTIES.getProperty("LEGEND_FONT_SIZE")); } catch (Exception e) {}
+		try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("LEGEND_LINE_WIDTH")); } catch (Exception e) {}
+
+		lineWidth = lineWidth >= 0 ? lineWidth : 0.25;
+		fontSize = fontSize >= 0 ? fontSize : 12.0;
+		fontFamily = fontFamily != null ? fontFamily : "System";
+
+		this.setColor(symbolColor);
+		this.setLineWidth(lineWidth);
+		this.setLegendPositionType(legendPositionType);
+
+		this.setFontSize(fontSize);
+		this.setFontFamily(fontFamily);
+		this.setFontColor(fontColor);
 	}
 	
 	@Override
 	public void draw(GraphicsContext graphicsContext, GraphicExtent graphicExtent) {
 		Color fontColor   = this.getFontColor();
-		double fontSize   = this.getFontSize();
 		String fontFamily = this.getFontFamily();
+		double fontSize   = this.getFontSize();
+		double lineWidth  = this.getLineWidth();
+		Color lineColor   = this.getColor();
+		
 		Font font = Font.font(fontFamily, FontWeight.NORMAL, FontPosture.REGULAR, fontSize);
 		
 		double sketchWidth  = graphicExtent.getDrawingBoardWidth();
@@ -52,11 +119,14 @@ public class LegendLayer extends Layer implements FontLayer {
 		double textColumnWidth   = 0;
 		double symbolColumnWidth = 3 * 0.7 * fontSize;
 		double textHeight = 0;
+		
+		List<Layer> legendLayers = new ArrayList<Layer>(this.layers.size());
 
 		for (Layer layer : this.layers) {
-			if (!layer.isVisible() || !layer.hasContent() || layer == this)
+			if (layer == this || layer.getLayerType() == LayerType.LEGEND || !layer.isVisible() || !layer.hasContent())
 				continue;
 
+			legendLayers.add(layer);
 			double textSize[] = this.getTextSize(font, layer.toString());
 			textColumnWidth   = Math.max(textColumnWidth,  textSize[0]);
 			textHeight        = Math.max(textHeight, textSize[1]);
@@ -75,27 +145,30 @@ public class LegendLayer extends Layer implements FontLayer {
 		graphicsContext.setLineDashes(null);
 		
 		// Draw legend box
-		graphicsContext.setLineWidth(this.getLineWidth());
-		graphicsContext.setStroke(new Color(1, 1, 1, 0.7));
-		graphicsContext.setFill(new Color(1, 1, 1, 0.7));
+		graphicsContext.setLineWidth(lineWidth);
+		graphicsContext.setStroke(new Color(1, 1, 1, 0.9));
+		graphicsContext.setFill(new Color(1, 1, 1, 0.9));
+		
+		PixelCoordinate leftCorner = this.getLeftUpperCorner(graphicExtent, legendWidth, legendHeight, xMargin, yMargin);
+		double xLeftUpperCorner = leftCorner.getX(); 
+		double yLeftUpperCorner = leftCorner.getY();
+		
 		// x, y, w, h, arcWidth, arcHeight
-		graphicsContext.fillRoundRect(sketchWidth - (legendWidth + xMargin), yMargin, legendWidth, legendHeight, 5, 5);
+		graphicsContext.fillRoundRect(xLeftUpperCorner, yLeftUpperCorner, legendWidth, legendHeight, 5, 5);
 
 		// Draw legend box border		
-		graphicsContext.setStroke(fontColor);
-		graphicsContext.setFill(fontColor);
-		graphicsContext.strokeRoundRect(sketchWidth - (legendWidth + xMargin), yMargin, legendWidth, legendHeight, 5, 5);
+		graphicsContext.setStroke(lineColor);
+		graphicsContext.setFill(lineColor);
+		graphicsContext.strokeRoundRect(xLeftUpperCorner, yLeftUpperCorner, legendWidth, legendHeight, 5, 5);
 
 		double x = sketchWidth - legendWidth;
-		double y = yMargin + textHeight; //  + this.yPadding
-		// draw items
-		int length = this.layers.size();
+		double y = yLeftUpperCorner + textHeight; //  + this.yPadding
+		// draw visible legend items
+		int length = legendLayers.size();
 		for (int i = length - 1; i >= 0; i--) {
-			Layer layer = this.layers.get(i); 
-			if (!layer.isVisible() || !layer.hasContent() || layer == this)
-				continue;
+			Layer layer = legendLayers.get(i); 
 
-			x = sketchWidth - (legendWidth + xMargin) + xPadding;
+			x = xLeftUpperCorner + xPadding;
 
 			layer.drawLegendSymbol(graphicsContext, graphicExtent, new PixelCoordinate(x, y - 0.3 * textHeight), 0.7 * fontSize, symbolColumnWidth);
 
@@ -108,6 +181,58 @@ public class LegendLayer extends Layer implements FontLayer {
 			
 			y += textHeight;
 		}
+	}
+	
+	private PixelCoordinate getLeftUpperCorner(GraphicExtent graphicExtent, double legendWidth, double legendHeight, double xMargin, double yMargin) {
+		double sketchWidth  = graphicExtent.getDrawingBoardWidth();
+		double sketchHeight = graphicExtent.getDrawingBoardHeight();
+		
+		double xLeftUpperCorner = 0, yLeftUpperCorner = 0;
+		
+		switch (this.legendPositionType.get()) {
+		case NORTH:
+			xLeftUpperCorner = 0.5 * (sketchWidth - legendWidth);
+			yLeftUpperCorner = yMargin;
+			break;
+			
+		case SOUTH:
+			xLeftUpperCorner = 0.5 * sketchWidth - 0.5 * legendWidth;
+			yLeftUpperCorner = sketchHeight - (legendHeight + 5*yMargin);
+			break;
+			
+		case EAST:
+			xLeftUpperCorner = sketchWidth - (legendWidth + xMargin);
+			yLeftUpperCorner = 0.5 * (sketchHeight - legendHeight);
+			break;
+			
+		case WEST:
+			xLeftUpperCorner = xMargin;
+			yLeftUpperCorner = 0.5 * (sketchHeight - legendHeight);
+			break;
+		
+		
+		case NORTH_EAST:
+			xLeftUpperCorner = sketchWidth - (legendWidth + xMargin);
+			yLeftUpperCorner = yMargin;
+			break;
+			
+		case NORTH_WEST:
+			xLeftUpperCorner = xMargin;
+			yLeftUpperCorner = yMargin;
+			break;
+
+		case SOUTH_EAST:
+			xLeftUpperCorner = sketchWidth - (legendWidth + xMargin);
+			yLeftUpperCorner = sketchHeight - (legendHeight + 5*yMargin);
+			break;
+			
+		case SOUTH_WEST:
+			xLeftUpperCorner = xMargin;
+			yLeftUpperCorner = sketchHeight - (legendHeight + 5*yMargin);
+			break;
+		}
+		
+		return new PixelCoordinate(xLeftUpperCorner, yLeftUpperCorner);
 	}
 
 	@Override
@@ -144,6 +269,18 @@ public class LegendLayer extends Layer implements FontLayer {
 	    		textBounds.getWidth(), 
 	    		textBounds.getHeight()
 	    };
+	}
+
+	public final ObjectProperty<LegendPositionType> legendPositionTypeProperty() {
+		return this.legendPositionType;
+	}
+
+	public final LegendPositionType getLegendPositionType() {
+		return this.legendPositionTypeProperty().get();
+	}
+
+	public final void setLegendPositionType(final LegendPositionType legendPositionType) {
+		this.legendPositionTypeProperty().set(legendPositionType);
 	}
 	
 	@Override

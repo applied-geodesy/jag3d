@@ -210,9 +210,9 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 	public String toString() {
 		switch(this.getLayerType()) {
 		case PRINCIPAL_COMPONENT_HORIZONTAL:
-			return i18n.getString("PrincipalComponentArrowLayer.type.horizontal", "1th principal horizontal component");
+			return i18n.getString("PrincipalComponentArrowLayer.type.horizontal", "Horizontal principal component");
 		case PRINCIPAL_COMPONENT_VERTICAL:
-			return i18n.getString("PrincipalComponentArrowLayer.type.vertical", "1th principal vertical component");
+			return i18n.getString("PrincipalComponentArrowLayer.type.vertical", "Vertical principal component");
 		default:
 			return "";
 		}

@@ -10,6 +10,13 @@
 # For valid color specifications, see JAVA-API: 
 # https://docs.oracle.com/javafx/2/api/javafx/scene/paint/Color.html
 #
+LEGEND_FONT_FAMILY = System
+LEGEND_FONT_COLOR  = #2F4F4F
+LEGEND_FONT_COLOR  = #778899
+LEGEND_FONT_SIZE   = 12
+LEGEND_LINE_WIDTH  = 1.5
+LEGEND_POSITION    = NORTH_EAST
+
 OBSERVATION_APRIORI_SYMBOL_SIZE = 12
 OBSERVATION_APRIORI_LINE_WIDTH  = 1
 OBSERVATION_APRIORI_COLOR       = #b0c4de

@@ -40,6 +40,7 @@ import org.applied_geodesy.jag3d.ui.graphic.layer.Layer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerManager;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LegendLayer;
+import org.applied_geodesy.jag3d.ui.graphic.layer.LegendPositionType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationSymbolProperties;
 import org.applied_geodesy.jag3d.ui.graphic.layer.PointLayer;
@@ -743,6 +744,7 @@ public class SQLGraphicManager {
 		this.saveLayer(legendLayer);
 		this.saveLayerOrder(legendLayer.getLayerType(), order);
 		this.saveFont(legendLayer);
+		this.savePosition(legendLayer);
 	}
 	
 	public void save(ConfidenceLayer<?> confidenceLayer, int order) throws SQLException {
@@ -907,6 +909,23 @@ public class SQLGraphicManager {
 		stmt.execute();
 	}
 	
+	private void savePosition(LegendLayer legendLayer) throws SQLException {
+		String sql = "MERGE INTO \"LegendLayerProperty\" USING (VALUES "
+				+ "(CAST(? AS INT), CAST(? AS INT)) "
+				+ ") AS \"vals\" (\"layer\", \"type\") ON \"LegendLayerProperty\".\"layer\" = \"vals\".\"layer\" "
+				+ "WHEN MATCHED THEN UPDATE SET "
+				+ "\"LegendLayerProperty\".\"type\" = \"vals\".\"type\" "
+				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "\"vals\".\"layer\", "
+				+ "\"vals\".\"type\" ";
+		
+		int idx = 1;
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(idx++, legendLayer.getLayerType().getId());
+		stmt.setInt(idx++, legendLayer.getLegendPositionType().getId());
+		stmt.execute();
+	}
+	
 	private void saveSymbolAndPointVisibleProperies(PointLayer pointLayer) throws SQLException {
 		String sql = "MERGE INTO \"PointLayerProperty\" USING (VALUES "
 				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN)) "
@@ -1024,6 +1043,7 @@ public class SQLGraphicManager {
 	private void load(LegendLayer legendLayer) throws SQLException {
 		this.loadLayer(legendLayer);
 		this.loadFont(legendLayer);
+		this.loadPosition(legendLayer);
 	}
 	
 	private void load(ConfidenceLayer<?> confidenceLayer) throws SQLException {
@@ -1098,6 +1118,26 @@ public class SQLGraphicManager {
 				return;
 
 			arrowLayer.setSymbolType(arrowSymbolType);
+		}
+	}
+	
+	private void loadPosition(LegendLayer legendLayer) throws SQLException {
+		String sql = "SELECT "
+				+ "\"type\" "
+				+ "FROM \"LegendLayerProperty\" "
+				+ "WHERE \"layer\" = ? LIMIT 1";
+		
+		int idx = 1;
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(idx++, legendLayer.getLayerType().getId());
+		ResultSet rs = stmt.executeQuery();
+		
+		if (rs.next()) {
+			LegendPositionType legendPositionType = LegendPositionType.getEnumByValue(rs.getInt("type"));
+			if (legendPositionType == null)
+				return;
+
+			legendLayer.setLegendPositionType(legendPositionType);
 		}
 	}
 	
