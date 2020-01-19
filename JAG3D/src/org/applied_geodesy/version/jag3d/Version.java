@@ -25,9 +25,9 @@ import java.util.Map;
 
 public class Version {
 	private final static Map<VersionType, Integer> versions = Map.of(
-			VersionType.ADJUSTMENT_CORE,   20190109,
-			VersionType.DATABASE,          20190309,
-			VersionType.USER_INTERFACE,    20191223
+			VersionType.ADJUSTMENT_CORE,   20200108,
+			VersionType.DATABASE,          20200119,
+			VersionType.USER_INTERFACE,    20200119
 	);
 	
 	private Version() {}
@@ -44,6 +44,6 @@ public class Version {
 	}
 	
 	public static boolean isReleaseCandidate() {
-		return Boolean.TRUE;
+		return Boolean.FALSE;
 	}
 }
