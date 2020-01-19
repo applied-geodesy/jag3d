@@ -22,8 +22,10 @@
 package org.applied_geodesy.jag3d.ui.graphic.layer;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationSymbolProperties.ObservationType;
@@ -49,6 +51,8 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 
 	private ObjectProperty<Color> highlightColor = new SimpleObjectProperty<Color>(Color.ORANGERED); //#FF4500
 	private DoubleProperty highlightLineWidth    = new SimpleDoubleProperty(2.5);
+	
+	private Set<ObservationType> projectObservationTypes = new LinkedHashSet<ObservationType>(10); // Store all given ObservationType of the project
 	
 	ObservationLayer(LayerType layerType) {
 		super(layerType);
@@ -226,9 +230,8 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 		if (!this.isVisible() || this.observableMeasurements.isEmpty())
 			return;
 
-		graphicsContext.setLineCap(StrokeLineCap.BUTT);
-
 		double symbolSize = this.getSymbolSize();
+		graphicsContext.setLineCap(StrokeLineCap.BUTT);
 		graphicsContext.setLineWidth(this.getLineWidth());
 
 		final double maxLength = 125;
@@ -246,7 +249,10 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 
 			PixelCoordinate pixelCoordinateStartPoint = GraphicExtent.toPixelCoordinate(startPoint.getCoordinate(), graphicExtent);
 			PixelCoordinate pixelCoordinateEndPoint   = GraphicExtent.toPixelCoordinate(endPoint.getCoordinate(), graphicExtent);
-
+			
+			if (!this.contains(graphicExtent, pixelCoordinateStartPoint) && !this.contains(graphicExtent, pixelCoordinateEndPoint))
+				continue;
+			
 			if (!this.contains(graphicExtent, pixelCoordinateStartPoint) && !this.contains(graphicExtent, pixelCoordinateEndPoint))
 				continue;
 
@@ -261,7 +267,7 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 			double dx = (xe-xs)/distance;
 			double dy = (ye-ys)/distance;
 			
-			Color color      = observableLink.isSignificant() ? this.getHighlightColor() : this.getColor();
+			Color color      = observableLink.isSignificant() ? this.getHighlightColor()     : this.getColor();
 			double lineWidth = observableLink.isSignificant() ? this.getHighlightLineWidth() : this.getLineWidth();
 			
 			graphicsContext.setStroke(color);
@@ -328,11 +334,12 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 			}
 		}
 	}
-
+	
 	public void setObservableMeasurements(List<ObservableMeasurement> observableMeasurements) {
 		GraphicExtent graphicExtent = this.getMaximumGraphicExtent();
 		graphicExtent.reset();
 		this.observableMeasurements.clear();
+		this.projectObservationTypes.clear();
 		if (observableMeasurements != null) {
 			for (ObservableMeasurement observableMeasurement : observableMeasurements) {
 				GraphicPoint startPoint = observableMeasurement.getStartPoint();
@@ -340,6 +347,10 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 
 				graphicExtent.merge(startPoint.getCoordinate());
 				graphicExtent.merge(endPoint.getCoordinate());
+				
+				this.projectObservationTypes.addAll(observableMeasurement.getStartPointObservationType());
+				this.projectObservationTypes.addAll(observableMeasurement.getEndPointObservationType());
+				
 			}
 			this.observableMeasurements.addAll(observableMeasurements);
 		}
@@ -376,6 +387,7 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 	@Override
 	public void clearLayer() {
 		this.observableMeasurements.clear();
+		this.projectObservationTypes.clear();
 	}
 
 	@Override
@@ -396,27 +408,87 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 		return graphicExtent;
 	}
 
+	@Override
 	public final ObjectProperty<Color> highlightColorProperty() {
 		return this.highlightColor;
 	}
 	
+	@Override
 	public final Color getHighlightColor() {
 		return this.highlightColorProperty().get();
 	}
 	
+	@Override
 	public final void setHighlightColor(final Color highlightColor) {
 		this.highlightColorProperty().set(highlightColor);
 	}
 
+	@Override
 	public final DoubleProperty highlightLineWidthProperty() {
 		return this.highlightLineWidth;
 	}
 
+	@Override
 	public final double getHighlightLineWidth() {
 		return this.highlightLineWidthProperty().get();
 	}
 
+	@Override
 	public final void setHighlightLineWidth(final double highlightLineWidth) {
 		this.highlightLineWidthProperty().set(highlightLineWidth);
+	}
+	
+	@Override
+	public void drawLegendSymbol(GraphicsContext graphicsContext, GraphicExtent graphicExtent, PixelCoordinate pixelCoordinateStartPoint, double symbolHeight, double symbolWidth) {
+		PixelCoordinate pixelCoordinateEndPoint = new PixelCoordinate(pixelCoordinateStartPoint.getX() + 70, pixelCoordinateStartPoint.getY());
+		
+		if (!this.contains(graphicExtent, pixelCoordinateStartPoint) && !this.contains(graphicExtent, pixelCoordinateEndPoint))
+			return;
+		
+		Set<ObservationType> observationTypes = new LinkedHashSet<ObservationType>(10);
+		
+		for (ObservableMeasurement observableLink : this.observableMeasurements) {
+			GraphicPoint startPoint = observableLink.getStartPoint();
+			GraphicPoint endPoint   = observableLink.getEndPoint();
+
+			if (!startPoint.isVisible() || !endPoint.isVisible())
+				continue;
+
+			observationTypes.addAll(observableLink.getStartPointObservationType());
+			observationTypes.addAll(observableLink.getEndPointObservationType());
+
+			if (observationTypes.size() == this.projectObservationTypes.size()) {
+				boolean containsAll = true;
+				for (ObservationType type : observationTypes) {
+					if (!this.projectObservationTypes.contains(type)) {
+						containsAll = false;
+						break;
+					}
+				}
+				if (containsAll)
+					break;
+			}
+		}
+		
+		if (observationTypes.isEmpty())
+			return;
+
+		graphicsContext.setLineWidth(this.getLineWidth());
+		graphicsContext.setStroke(this.getColor());
+		graphicsContext.setLineDashes(null);
+		graphicsContext.strokeLine(
+				pixelCoordinateStartPoint.getX(),
+				pixelCoordinateStartPoint.getY(),
+				pixelCoordinateStartPoint.getX() + symbolWidth,
+				pixelCoordinateStartPoint.getY()
+				);
+
+		PixelCoordinate coordinate = new PixelCoordinate(pixelCoordinateStartPoint.getX() + 0.5*(symbolWidth - symbolHeight), pixelCoordinateStartPoint.getY() - 0.5*symbolHeight);
+		SymbolBuilder.drawSymbol(graphicsContext, coordinate, this.symbolPropertiesMap, observationTypes, symbolHeight);		
+	}
+
+	@Override
+	public boolean hasContent() {
+		return this.observableMeasurements != null && !this.observableMeasurements.isEmpty();
 	}
 }

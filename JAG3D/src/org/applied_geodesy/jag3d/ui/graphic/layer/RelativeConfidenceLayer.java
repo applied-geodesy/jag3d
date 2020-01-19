@@ -116,4 +116,22 @@ public class RelativeConfidenceLayer extends ConfidenceLayer<PointShiftArrowLaye
 	public String toString() {
 		return i18n.getString("RelativeConfidenceLayer.type", "Relative confidences");
 	}
+
+	@Override
+	public boolean hasContent() {
+		List<PointShiftArrowLayer> referenceLayers = this.getReferenceLayers();
+		
+		for (PointShiftArrowLayer layer : referenceLayers) {
+			if (layer.isVisible()) {
+				for (RelativeConfidence relativeConfidence : layer.getRelativeConfidences()) { 
+					GraphicPoint startPoint = relativeConfidence.getStartPoint();
+					GraphicPoint endPoint   = relativeConfidence.getEndPoint();
+					if (startPoint.isVisible() && endPoint.isVisible())
+						return true;
+				}
+			}
+		}
+		
+		return false;
+	}
 }

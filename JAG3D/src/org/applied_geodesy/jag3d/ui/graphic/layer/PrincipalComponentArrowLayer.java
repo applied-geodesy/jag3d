@@ -210,9 +210,9 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 	public String toString() {
 		switch(this.getLayerType()) {
 		case PRINCIPAL_COMPONENT_HORIZONTAL:
-			return i18n.getString("PrincipalComponentArrowLayer.type.horizontal", "1th principal horizontal component");
+			return i18n.getString("PrincipalComponentArrowLayer.type.horizontal", "Horizontal principal component");
 		case PRINCIPAL_COMPONENT_VERTICAL:
-			return i18n.getString("PrincipalComponentArrowLayer.type.vertical", "1th principal vertical component");
+			return i18n.getString("PrincipalComponentArrowLayer.type.vertical", "Vertical principal component");
 		default:
 			return "";
 		}
@@ -227,4 +227,43 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 
 	@Override
 	public void clearLayer() {} // no clearing --> use data from reference layer
+
+	@Override
+	public void drawLegendSymbol(GraphicsContext graphicsContext, GraphicExtent graphicExtent, PixelCoordinate pixelCoordinate, double symbolHeight, double symbolWidth) {
+		ArrowSymbolType arrowSymbolType = this.getSymbolType();
+		double lineWidth  = this.getLineWidth();
+		double symbolSize = symbolHeight;
+		
+		graphicsContext.setStroke(this.getColor());
+		graphicsContext.setFill(this.getColor());
+		graphicsContext.setLineWidth(lineWidth);
+		graphicsContext.setLineDashes(null);
+		
+		graphicsContext.strokeLine(
+				pixelCoordinate.getX(),
+				pixelCoordinate.getY(),
+				pixelCoordinate.getX() + symbolWidth,
+				pixelCoordinate.getY() + 0
+		);
+
+		SymbolBuilder.drawSymbol(graphicsContext, pixelCoordinate, arrowSymbolType, symbolSize, Math.PI);
+	}
+
+	@Override
+	public boolean hasContent() {
+		LayerType layerType = this.getLayerType();
+		
+		for (PointLayer layer : this.referenceLayers) {
+			if (layer.isVisible()) {
+				for (GraphicPoint startPoint : layer.getPoints()) {
+					if (startPoint.isVisible())
+						if ((layerType == LayerType.PRINCIPAL_COMPONENT_HORIZONTAL && startPoint.getDimension() != 1) ||
+								(layerType == LayerType.PRINCIPAL_COMPONENT_VERTICAL && startPoint.getDimension() != 2))
+							return true;
+				}
+			}
+		}
+		
+		return false;
+	}
 }

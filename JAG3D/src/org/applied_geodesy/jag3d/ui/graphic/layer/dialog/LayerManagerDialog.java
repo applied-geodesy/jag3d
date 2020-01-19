@@ -33,6 +33,7 @@ import org.applied_geodesy.jag3d.ui.graphic.layer.ConfidenceLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.Layer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerManager;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerType;
+import org.applied_geodesy.jag3d.ui.graphic.layer.LegendLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.PointLayer;
 import org.applied_geodesy.jag3d.ui.graphic.sql.SQLGraphicManager;
@@ -113,7 +114,10 @@ public class LayerManagerDialog {
 					case PRINCIPAL_COMPONENT_HORIZONTAL:
 					case PRINCIPAL_COMPONENT_VERTICAL:
 						propertiesNode = UIArrowLayerPropertyBuilder.getLayerPropertyPane(layerManager, (ArrowLayer)selectedLayer);
-
+						break;
+						
+					case LEGEND:
+						propertiesNode = UILegendLayerPropertyBuilder.getLayerPropertyPane(layerManager, (LegendLayer)selectedLayer);
 						break;
 					}
 
@@ -268,12 +272,19 @@ public class LayerManagerDialog {
 			
 			ListView<Layer> listView = new ListView<Layer>();
 			int length = this.layers.size();
+			Layer firstLayerNotLegend = null;
 			for (int i = length - 1; i >= 0; i--) {
-				listView.getItems().add(this.layers.get(i));
+				Layer layer = this.layers.get(i);
+				listView.getItems().add(layer);
+				if (firstLayerNotLegend == null && layer.getLayerType() != LayerType.LEGEND)
+					firstLayerNotLegend = layer;
 			}
 			this.layerListView.getSelectionModel().clearSelection();
 			this.layerListView.getItems().setAll(listView.getItems());
-			this.layerListView.getSelectionModel().select(0);
+			if (firstLayerNotLegend != null)
+				this.layerListView.getSelectionModel().select(firstLayerNotLegend);
+			else
+				this.layerListView.getSelectionModel().select(0);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -327,6 +338,10 @@ public class LayerManagerDialog {
 				case PRINCIPAL_COMPONENT_HORIZONTAL:
 				case PRINCIPAL_COMPONENT_VERTICAL:
 					sqlGraphicManager.save((ArrowLayer)layer, order);
+					break;
+					
+				case LEGEND:
+					sqlGraphicManager.save((LegendLayer)layer, order);
 					break;
 				}
 				order++;

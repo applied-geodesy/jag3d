@@ -124,4 +124,18 @@ public class AbsoluteConfidenceLayer extends ConfidenceLayer<PointLayer> {
 	public String toString() {
 		return i18n.getString("AbsoluteConfidenceLayer.type", "Point confidences");
 	}
+	
+	@Override
+	public boolean hasContent() {
+		List<PointLayer> referenceLayers = this.getReferenceLayers();
+		for (PointLayer layer : referenceLayers) {
+			if (layer.isVisible()) {
+				for (GraphicPoint point : layer.getPoints()) {
+					if (point.isVisible())
+						return true;
+				}
+			}
+		}
+		return false;
+	}
 }

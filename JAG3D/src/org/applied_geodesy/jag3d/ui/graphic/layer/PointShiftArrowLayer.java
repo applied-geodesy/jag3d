@@ -238,9 +238,9 @@ public class PointShiftArrowLayer extends ArrowLayer {
 	public String toString() {
 		switch(this.getLayerType()) {
 		case POINT_SHIFT_HORIZONTAL:
-			return i18n.getString("PointShiftArrowLayer.type.horizontal", "Horizontal point shift (Congruence analysis)");
+			return i18n.getString("PointShiftArrowLayer.type.horizontal", "Horizontal point shift");
 		case POINT_SHIFT_VERTICAL:
-			return i18n.getString("PointShiftArrowLayer.type.vertical", "Vertical point shift (Congruence analysis)");
+			return i18n.getString("PointShiftArrowLayer.type.vertical", "Vertical point shift");
 		default:
 			return "";
 		}
@@ -267,5 +267,41 @@ public class PointShiftArrowLayer extends ArrowLayer {
 			}
 		}
 		return graphicExtent;
+	}
+
+	@Override
+	public void drawLegendSymbol(GraphicsContext graphicsContext, GraphicExtent graphicExtent, PixelCoordinate pixelCoordinate, double symbolHeight, double symbolWidth) {
+		ArrowSymbolType arrowSymbolType = this.getSymbolType();
+		double lineWidth  = this.getLineWidth();
+		double symbolSize = symbolHeight;
+		graphicsContext.setStroke(this.getColor());
+		graphicsContext.setFill(this.getColor());
+		graphicsContext.setLineWidth(lineWidth);
+		graphicsContext.setLineDashes(null);
+		
+		graphicsContext.strokeLine(
+				pixelCoordinate.getX(),
+				pixelCoordinate.getY(),
+				pixelCoordinate.getX() + symbolWidth,
+				pixelCoordinate.getY() + 0
+		);
+
+		SymbolBuilder.drawSymbol(graphicsContext, pixelCoordinate, arrowSymbolType, symbolSize, Math.PI);
+	}
+
+	@Override
+	public boolean hasContent() {
+		LayerType layerType = this.getLayerType();
+		for (RelativeConfidence relativeConfidence : this.relativeConfidences) {
+			GraphicPoint startPoint = relativeConfidence.getStartPoint();
+			GraphicPoint endPoint   = relativeConfidence.getEndPoint();
+			
+			if (startPoint.isVisible() && endPoint.isVisible()) {
+				if ((layerType == LayerType.POINT_SHIFT_HORIZONTAL && startPoint.getDimension() != 1 && endPoint.getDimension() != 1) ||
+						(layerType == LayerType.POINT_SHIFT_VERTICAL && startPoint.getDimension() != 2 && endPoint.getDimension() != 2))
+					return true;
+			}
+		}
+		return false;
 	}
 }

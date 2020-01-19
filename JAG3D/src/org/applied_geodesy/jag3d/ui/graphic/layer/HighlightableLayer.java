@@ -25,9 +25,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.paint.Color;
 
-public interface HighlightableLayer {
-	public LayerType getLayerType();
-	
+public interface HighlightableLayer extends IdentifiableLayer {
 	public ObjectProperty<Color> highlightColorProperty();
 	public Color getHighlightColor();
 	public void setHighlightColor(final Color highlightColor);

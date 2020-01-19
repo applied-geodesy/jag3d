@@ -467,6 +467,9 @@ public class SQLManager {
 		sqls.put(20190225.0021, "ALTER TABLE \"CongruenceAnalysisGroup\" ADD \"order\" INTEGER DEFAULT 0 NOT NULL\r\n");
 		sqls.put(20190225.0022, "UPDATE \"CongruenceAnalysisGroup\" SET \"order\" = \"id\";\r\n");
 		
+		// add legend layer
+		sqls.put(20190309.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"LegendLayerProperty\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"type\" SMALLINT NOT NULL, CONSTRAINT \"LegendLayerPropertyOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
+		
 		return sqls;
 	}
 
