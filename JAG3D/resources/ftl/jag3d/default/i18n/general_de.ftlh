@@ -50,15 +50,24 @@
 				</#if>
 			</dd>
 			
-			<#if projection_type?? && projection_type != 'NONE'>
-				<dt>Verwendete Projektion</dt>
+			<#if projection_type??>
+				<dt>Beobachtungsreduktionen</dt>
 				<dd>
-					2D Abbildungsreduktion
+					<!--
 					<ul>
-						<#if projection_direction_reduction?? && projection_direction_reduction><li>Richtungsreduktion</li></#if>
-						<#if projection_height_reduction?? && projection_height_reduction><li>H&ouml;henreduktion (H<sub>ref</sub> = ${projection_reference_height?string[df_length]} ${unit_abbr_length})</li></#if>
-						<#if projection_gauss_krueger_reduction?? && projection_gauss_krueger_reduction><li>Gau&szlig;-Kr&uuml;ger Streckenreduktion</li></#if>
-						<#if projection_utm_reduction?? && projection_utm_reduction><li>UTM Streckenreduktion</li></#if>
+						<#if projection_earth_radius??><li>Erdradius ${projection_earth_radius?string[df_length]} ${unit_abbr_length}</li></#if>
+						<#if projection_reference_height??><li>Referenzh&ouml;he ${projection_reference_height?string[df_length]} ${unit_abbr_length}</li></#if>
+					</ul>
+					-->
+					<ul>
+						<#if reduction_distance?? && reduction_distance && projection_type == 'GAUSS_KRUEGER'><li>Gau&szlig;-Kr&uuml;ger Streckenreduktion</li></#if>
+						<#if reduction_direction?? && reduction_direction && projection_type == 'GAUSS_KRUEGER'><li>Gau&szlig;-Kr&uuml;ger Richtungsreduktion</li></#if>
+						
+						<#if reduction_distance?? && reduction_distance && projection_type == 'UTM'><li>UTM Streckenreduktion</li></#if>
+						<#if reduction_direction?? && reduction_direction && projection_type == 'UTM'><li>UTM Richtungsreduktion</li></#if>
+						
+						<#if reduction_height?? && reduction_height><li>H&ouml;henreduktion</li></#if>
+						<#if reduction_earth_curvature?? && reduction_earth_curvature><li>Erdkr&uuml;mmungsreduktion</li></#if>
 					</ul>
 				</dd>
 			</#if>

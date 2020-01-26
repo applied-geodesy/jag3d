@@ -42,13 +42,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.applied_geodesy.adjustment.network.observation.projection.Projection;
-import org.applied_geodesy.adjustment.network.observation.projection.ProjectionType;
 import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
+import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
+import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.ui.table.CellValueType;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
@@ -128,7 +128,7 @@ public class FTLReport {
 		this.addMetaData();
 		
 		this.addRankDefect();
-		this.addProjection();
+		this.addProjectionAndReductions();
 		
 		this.addPrincipalComponent();
 		this.addTeststatistics();
@@ -303,20 +303,43 @@ public class FTLReport {
 			this.setParam("principal_components",  principalComponents);
 	} 
 
-	private void addProjection() throws SQLException {
-		String sql = "SELECT \"type\",\"reference_height\" FROM \"ProjectionDefinition\" WHERE \"id\" = 1 LIMIT 1";
+	private void addProjectionAndReductions() throws SQLException {
+		String sql = "SELECT "
+				+ "\"projection_type\", \"reference_height\", \"earth_radius\", \"type\" AS \"task_type\" "
+				+ "FROM \"ReductionTask\" "
+				+ "JOIN \"ReductionDefinition\" ON \"ReductionTask\".\"reduction_id\" = \"ReductionDefinition\".\"id\" "
+				+ "WHERE \"ReductionDefinition\".\"id\" = 1";
+		
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		ResultSet rs = stmt.executeQuery();
-		if (rs.next()) {
-			ProjectionType type = ProjectionType.getEnumByValue(rs.getInt("type"));
-			Projection projection = new Projection(type);
 
-			this.setParam("projection_type",                    type.name());
-			this.setParam("projection_direction_reduction",     projection.isDirectionReduction());
-			this.setParam("projection_height_reduction",        projection.isHeightReduction());
-			this.setParam("projection_gauss_krueger_reduction", projection.isGaussKruegerReduction());
-			this.setParam("projection_utm_reduction",           projection.isUTMReduction());
-			this.setParam("projection_reference_height",        options.convertLengthToView(rs.getDouble("reference_height")));	
+		while (rs.next()) {
+			ProjectionType projectionType = ProjectionType.getEnumByValue(rs.getInt("projection_type"));
+			ReductionTaskType taskType    = ReductionTaskType.getEnumByValue(rs.getInt("task_type"));
+			double referenceHeight        = rs.getDouble("reference_height");
+			double earthRadius            = rs.getDouble("earth_radius");
+	
+			if (taskType == null) 
+				continue;
+
+			this.setParam("projection_type",             projectionType.name());
+			this.setParam("projection_reference_height", referenceHeight);
+			this.setParam("projection_earth_radius",     earthRadius);
+			
+			switch(taskType) {
+			case DIRECTION:
+				this.setParam("reduction_direction", projectionType != ProjectionType.NONE);
+				break;
+			case DISTANCE:
+				this.setParam("reduction_distance", projectionType != ProjectionType.NONE);
+				break;
+			case EARTH_CURVATURE:
+				this.setParam("reduction_earth_curvature", Boolean.TRUE);
+				break;
+			case HEIGHT:
+				this.setParam("reduction_height", Boolean.TRUE);
+				break;			
+			}
 		} 
 	}
 

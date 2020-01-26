@@ -39,6 +39,7 @@ import javax.xml.xpath.XPathConstants;
 
 import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.MathExtension;
+import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
@@ -201,7 +202,7 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 		this.reset();
 		this.lastTreeItem = null;
 		this.pointNames.addAll(SQLManager.getInstance().getFullPointNameSet());
-
+		final double earthRadius = this.getEarthRadius(); 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
         DocumentBuilder builder;
@@ -320,7 +321,6 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 				double ppm              = station.getAtmospherePPMValue();
 				double refraction       = station.getAtmosphereRefractionValue();
 				boolean applyEarthCurve = station.applyEarthCurveCorrection();
-				final double R          = Constant.EARTH_RADIUS; 
 				nodeList = (NodeList)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, stationId), namespaceContextJobXML, XPathConstants.NODESET);
 				for (int i=0; i<nodeList.getLength(); i++) {
 					Node stationNode  = nodeList.item(i);
@@ -412,14 +412,14 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 							
 							// Baumann 1993, S.  99 - Strecke 2D 
 							// Baumann 1993, S. 137 - Hoehenunterschied
-							double kDist2DRefra =  refraction*dist3d*dist3d / 2.0 / R * Math.cos(zenith);
-							double kDeltaHRefra = -refraction*dist3d*dist3d / 2.0 / R * Math.sin(zenith);
+							double kDist2DRefra =  refraction*dist3d*dist3d / 2.0 / earthRadius * Math.cos(zenith);
+							double kDeltaHRefra = -refraction*dist3d*dist3d / 2.0 / earthRadius * Math.sin(zenith);
 							double kDist2DEarth = 0.0;
 							double kDeltaHEarth = 0.0;
 
 							if (applyEarthCurve) {
-								kDist2DEarth = -dist3d*dist3d / R * Math.cos(zenith);
-								kDeltaHEarth =  dist3d*dist3d / 2.0 / R * Math.sin(zenith);
+								kDist2DEarth = -dist3d*dist3d / earthRadius * Math.cos(zenith);
+								kDeltaHEarth =  dist3d*dist3d / 2.0 / earthRadius * Math.sin(zenith);
 							}
 
 							double distance2d = dist3d * Math.sin(zenith) + kDist2DRefra + kDist2DEarth;
@@ -595,5 +595,16 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 		}			
 
 		return newTreeItem;
+	}
+	
+	private double getEarthRadius() {
+		double earthRadius = Constant.EARTH_RADIUS;
+		try {
+			Reduction reductions = SQLManager.getInstance().getReductionDefinition();
+			earthRadius = reductions.getEarthRadius();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return earthRadius;
 	}
 }

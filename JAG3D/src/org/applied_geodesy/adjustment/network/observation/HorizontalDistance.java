@@ -21,9 +21,10 @@
 
 package org.applied_geodesy.adjustment.network.observation;
 
-import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.network.ObservationType;
-import org.applied_geodesy.adjustment.network.observation.projection.Projection;
+import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
+import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
+import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.network.parameter.AdditionalUnknownParameter;
 import org.applied_geodesy.adjustment.network.parameter.Scale;
 import org.applied_geodesy.adjustment.network.parameter.ZeroPointOffset;
@@ -339,22 +340,23 @@ public class HorizontalDistance extends Observation {
 		double calDist = this.getValueAposteriori();
 		double obsDist = this.getValueApriori();
 		
-		Projection projection = this.getProjectionScheme();
-		double R = Constant.EARTH_RADIUS;
-		if (projection.isHeightReduction()) {
-	    	double h0 = projection.getReferenceHeight();
-	    	if (this.getStartPoint().getDimension() == 3 && this.getEndPoint().getDimension() == 3) 
-	    		h0 = 0.5*(this.getStartPoint().getZ() + this.getEndPoint().getZ());
-	    	else if (this.getStartPoint().getDimension() == 3) 
-	    		h0 = this.getStartPoint().getZ();
-	    	else if (this.getEndPoint().getDimension() == 3) 
-	    		h0 = this.getEndPoint().getZ();
-
+		Reduction reductions = this.getReductions();
+		double R = reductions.getEarthRadius();
+		
+		// Hoehenreduktion
+		if (reductions.applyReductionTask(ReductionTaskType.HEIGHT)) {
+	    	double h0 = reductions.getReferenceHeight();
 	    	obsDist = obsDist * R/(R+h0);
 	    }
 		
-	    if (projection.isGaussKruegerReduction() || projection.isUTMReduction()) {
-	    	double m0 = projection.isUTMReduction()?0.9996:1.0;
+		// Erdkruemmungsreduktion
+		if (reductions.applyReductionTask(ReductionTaskType.EARTH_CURVATURE)) {
+			obsDist = 2.0 * R * Math.asin(0.5 * obsDist / R);
+		}
+		
+		// Streckenreduktion bzgl. Projektion
+	    if (reductions.getProjectionType() != ProjectionType.NONE && reductions.applyReductionTask(ReductionTaskType.DISTANCE)) {
+	    	double m0 = reductions.getProjectionType() == ProjectionType.UTM ? 0.9996 : 1.0;
 	    	double yS = this.getStartPoint().getY();
 	    	double yE = this.getEndPoint().getY();
 	    	// Prüfe Rechtswert der Koordinaten
