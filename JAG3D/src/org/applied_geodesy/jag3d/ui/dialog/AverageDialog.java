@@ -38,7 +38,6 @@ import org.applied_geodesy.jag3d.ui.table.UIAverageObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.row.AveragedObservationRow;
 import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField;
 import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField.ValueSupport;
-import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.i18.I18N;
 import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
@@ -59,10 +58,8 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Label;
-import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TitledPane;
-import javafx.scene.control.TreeItem;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -408,13 +405,14 @@ public class AverageDialog {
 					});
 				}
 				else {
-					MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
-					TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
-					selectionModel.clearSelection();
-					if (treeItem != null)
-						selectionModel.select(treeItem);
-					else
-						selectionModel.select(0);
+//					MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
+//					TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
+//					selectionModel.clearSelection();
+//					if (treeItem != null)
+//						selectionModel.select(treeItem);
+//					else
+//						selectionModel.select(0);
+					UITreeBuilder.getInstance().handleTreeSelections();
 					dialog.hide();
 				}
 			}

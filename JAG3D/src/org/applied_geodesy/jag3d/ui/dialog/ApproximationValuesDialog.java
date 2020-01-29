@@ -33,7 +33,6 @@ import org.applied_geodesy.adjustment.network.approximation.sql.SQLApproximation
 import org.applied_geodesy.jag3d.sql.PointTypeMismatchException;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.sql.UnderDeterminedPointException;
-import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.i18.I18N;
 
@@ -51,13 +50,11 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Label;
-import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
-import javafx.scene.control.TreeItem;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -399,13 +396,14 @@ public class ApproximationValuesDialog {
 					approximationManager.clearAll();
 				}
 
-				MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
-				TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
-				selectionModel.clearSelection();
-				if (treeItem != null)
-					selectionModel.select(treeItem);
-				else
-					selectionModel.select(0);
+//				MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
+//				TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
+//				selectionModel.clearSelection();
+//				if (treeItem != null)
+//					selectionModel.select(treeItem);
+//				else
+//					selectionModel.select(0);
+				UITreeBuilder.getInstance().handleTreeSelections();
 				dialog.hide();
 			}
 		});
