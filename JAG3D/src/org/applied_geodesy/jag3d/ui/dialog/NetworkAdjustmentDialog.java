@@ -466,36 +466,8 @@ public class NetworkAdjustmentDialog {
 //						System.out.println(NetworkAdjustmentDialog.class.getSimpleName() + " Fishied " + result);
 						break;
 					}
-					
-					UITreeBuilder.getInstance().handleTreeSelections();
-					
-//					MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
-//					List<Integer> treeItemIndices = selectionModel.getSelectedIndices();
-//					
-//					if (treeItemIndices == null || treeItemIndices.size() == 0) {
-//						selectionModel.clearSelection();
-//						selectionModel.select(0);
-//					}
-//					else {
-//						int[] indices = new int[treeItemIndices.size()];
-//						for (int i=0; i<indices.length; i++)
-//							indices[i] = treeItemIndices.get(i);
-//						
-//						try {
-//							selectionModel.clearSelection();
-//							selectionModel.selectIndices(indices[0], indices);
-//						}
-//						catch (Exception e) {
-//							e.printStackTrace();
-//							
-//							TreeItem<TreeItemValue> treeItem = selectionModel.getSelectedItem();
-//							if (treeItem != null)
-//								selectionModel.select(treeItem);
-//							else
-//								selectionModel.select(0);
-//						}
-//					}				
 				}
+				UITreeBuilder.getInstance().handleTreeSelections();
 			}
 		});
 
