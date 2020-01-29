@@ -79,8 +79,9 @@ import org.applied_geodesy.adjustment.network.observation.group.HorizontalDistan
 import org.applied_geodesy.adjustment.network.observation.group.ObservationGroup;
 import org.applied_geodesy.adjustment.network.observation.group.SlopeDistanceGroup;
 import org.applied_geodesy.adjustment.network.observation.group.ZenithAngleGroup;
-import org.applied_geodesy.adjustment.network.observation.projection.Projection;
-import org.applied_geodesy.adjustment.network.observation.projection.ProjectionType;
+import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
+import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
+import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.network.parameter.AdditionalUnknownParameter;
 import org.applied_geodesy.adjustment.network.parameter.Orientation;
 import org.applied_geodesy.adjustment.point.Point;
@@ -109,7 +110,7 @@ public class SQLAdjustmentManager {
 	private List<CongruenceAnalysisGroup> congruenceAnalysisGroups = new ArrayList<CongruenceAnalysisGroup>();
 	private List<ObservationGroup> completeObservationGroups = new ArrayList<ObservationGroup>();
 
-	private Projection projection = new Projection(ProjectionType.NONE);
+	private Reduction reductions = new Reduction();
 
 	private NetworkAdjustment networkAdjustment = null;
 
@@ -151,7 +152,7 @@ public class SQLAdjustmentManager {
 		
 		this.setDataBaseSchema();
 		this.checkDatabaseVersion();
-		this.setProjection();
+		this.setReductionDefinition();
 
 		this.networkAdjustment = new NetworkAdjustment();
 		this.addAdjustmentDefinition(this.networkAdjustment);
@@ -192,11 +193,11 @@ public class SQLAdjustmentManager {
 			this.applyableProjection = false;
 
 		// wenn 2D Projektionen nicht moeglich sind, werden keine Reduktionen durchgefuehrt
-		if (this.projection.getType() != ProjectionType.NONE && !this.applyableProjection) {
+		if (this.reductions.getProjectionType() != ProjectionType.NONE && (this.reductions.applyReductionTask(ReductionTaskType.DIRECTION) || this.reductions.applyReductionTask(ReductionTaskType.DISTANCE)) && !this.applyableProjection) {
 			if (this.pure1DNetwork)
-				throw new IllegalProjectionPropertyException("Projection cannot applied to observations of leveling network! " + this.projection.getType());
+				throw new IllegalProjectionPropertyException("Projection cannot applied to observations of leveling network! " + this.reductions.getProjectionType());
 			else
-				throw new IllegalProjectionPropertyException("Projection cannot applied to observations because the coordinates are invalid, e.g. missing zone number! " + this.projection.getType());
+				throw new IllegalProjectionPropertyException("Projection cannot applied to observations because the coordinates are invalid, e.g. missing zone number! " + this.reductions.getProjectionType());
 		}
 
 		// Fuege Beobachtungen zu den Punkten hinzu
@@ -248,28 +249,45 @@ public class SQLAdjustmentManager {
 		
 		this.congruenceAnalysisGroups.clear();
 		this.completeObservationGroups.clear();
+		
+		this.reductions.setProjectionType(ProjectionType.NONE);
+		this.reductions.setReferenceHeight(0);
+		this.reductions.setEarthRadius(Constant.EARTH_RADIUS);
+		this.reductions.clear();
 
 		if (this.networkAdjustment != null) {
 			this.networkAdjustment.clearMatrices();
 			this.networkAdjustment = null;
 		}
 	}
+	
+	public void setReductionDefinition() throws SQLException {
+		String sql = "SELECT "
+				+ "\"projection_type\", \"reference_height\", \"earth_radius\", \"type\" AS \"task_type\" "
+				+ "FROM \"ReductionTask\" "
+				+ "JOIN \"ReductionDefinition\" "
+				+ "ON \"ReductionTask\".\"reduction_id\" = \"ReductionDefinition\".\"id\" "
+				+ "WHERE \"ReductionDefinition\".\"id\" = 1";
 
-	private void setProjection() throws SQLException {
-		String sql = "SELECT \"type\", \"reference_height\" FROM \"ProjectionDefinition\" WHERE \"id\" = 1 LIMIT 1";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
-
 		ResultSet rs = stmt.executeQuery();
-		if (rs.next()) {
-			ProjectionType type    = ProjectionType.getEnumByValue(rs.getInt("type"));
-			double referenceHeight = rs.getDouble("reference_height");
-			if (type != null) {
-				this.projection.setType(type);
-				this.projection.setReferenceHeight(referenceHeight);
-			}
+		
+		while (rs.next()) {
+			ProjectionType projectionType = ProjectionType.getEnumByValue(rs.getInt("projection_type"));
+			ReductionTaskType taskType    = ReductionTaskType.getEnumByValue(rs.getInt("task_type"));
+			double referenceHeight        = rs.getDouble("reference_height");
+			double earthRadius            = rs.getDouble("earth_radius");
+	
+			if (taskType == null) 
+				continue;
+			
+			this.reductions.setProjectionType(projectionType);
+			this.reductions.setReferenceHeight(referenceHeight);
+			this.reductions.setEarthRadius(earthRadius);
+			this.reductions.addReductionTaskType(taskType);	
 		}
 	}
-
+	
 	private TestStatisticDefinition getTestStatisticDefinition() throws SQLException {
 		String sql = "SELECT \"type\", \"probability_value\", \"power_of_test\", \"familywise_error_rate\" FROM \"TestStatisticDefinition\" WHERE \"id\" = 1 LIMIT 1";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -672,7 +690,7 @@ public class SQLAdjustmentManager {
 				observation.setValueApriori(observation.getValueAposteriori());
 			
 			if (observation != null) {
-				observation.setProjectionScheme(this.projection);
+				observation.setReduction(this.reductions);
 				observationGroup.add(observation);
 			}
 		}
@@ -715,7 +733,7 @@ public class SQLAdjustmentManager {
 			if (observationGroup instanceof GNSSBaseline1DGroup && startPoint.getDimension() != 2 && endPoint.getDimension() != 2) {
 				GNSSBaselineDeltaZ1D gnssZ = new GNSSBaselineDeltaZ1D(id, startPoint, endPoint, z0, sigmaZ0);
 
-				gnssZ.setProjectionScheme(this.projection);
+				gnssZ.setReduction(this.reductions);
 
 				((GNSSBaseline1DGroup)observationGroup).add(gnssZ);
 			}
@@ -723,8 +741,8 @@ public class SQLAdjustmentManager {
 				GNSSBaselineDeltaY2D gnssY = new GNSSBaselineDeltaY2D(id, startPoint, endPoint, y0, sigmaY0);
 				GNSSBaselineDeltaX2D gnssX = new GNSSBaselineDeltaX2D(id, startPoint, endPoint, x0, sigmaX0);
 
-				gnssX.setProjectionScheme(this.projection);
-				gnssY.setProjectionScheme(this.projection);
+				gnssX.setReduction(this.reductions);
+				gnssY.setReduction(this.reductions);
 
 				((GNSSBaseline2DGroup)observationGroup).add(gnssX, gnssY);
 
@@ -734,9 +752,9 @@ public class SQLAdjustmentManager {
 				GNSSBaselineDeltaX3D gnssX = new GNSSBaselineDeltaX3D(id, startPoint, endPoint, x0, sigmaX0);
 				GNSSBaselineDeltaZ3D gnssZ = new GNSSBaselineDeltaZ3D(id, startPoint, endPoint, z0, sigmaZ0);
 
-				gnssX.setProjectionScheme(this.projection);
-				gnssY.setProjectionScheme(this.projection);
-				gnssZ.setProjectionScheme(this.projection);
+				gnssX.setReduction(this.reductions);
+				gnssY.setReduction(this.reductions);
+				gnssZ.setReduction(this.reductions);
 
 				((GNSSBaseline3DGroup)observationGroup).add(gnssX, gnssY, gnssZ);
 			}
@@ -966,7 +984,6 @@ public class SQLAdjustmentManager {
 				this.saveRankDefect(this.networkAdjustment.getRankDefect());
 				this.saveTestStatistic(this.networkAdjustment.getSignificanceTestStatisticParameters());
 				this.saveVarianceComponents(this.networkAdjustment.getVarianceComponents());
-				this.saveProjection();
 				
 				this.saveVersion();
 			}
@@ -1529,14 +1546,6 @@ public class SQLAdjustmentManager {
 		stmt.setBoolean(idx++, rankDefect.estimateScaleXY());
 		stmt.setBoolean(idx++, rankDefect.estimateScaleXYZ());
 		
-		stmt.execute();
-	}
-
-	private void saveProjection() throws SQLException {
-		String sql = "UPDATE \"ProjectionDefinition\" SET \"type\" = ? WHERE \"id\" = 1";
-		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
-		int idx = 1;
-		stmt.setInt(idx++, this.projection.getType().getId());
 		stmt.execute();
 	}
 	

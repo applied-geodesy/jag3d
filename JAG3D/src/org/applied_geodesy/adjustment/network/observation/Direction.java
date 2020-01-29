@@ -21,10 +21,11 @@
 
 package org.applied_geodesy.adjustment.network.observation;
 
-import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.network.ObservationType;
-import org.applied_geodesy.adjustment.network.observation.projection.Projection;
+import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
+import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
+import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.network.parameter.AdditionalUnknownParameter;
 import org.applied_geodesy.adjustment.network.parameter.Orientation;
 import org.applied_geodesy.adjustment.point.Point;
@@ -320,14 +321,15 @@ public class Direction extends Observation {
 
 	@Override
 	public double getCorrection() {
-		Projection projection = this.getProjectionScheme();
-		double R = Constant.EARTH_RADIUS;
+		Reduction reductions = this.getReductions();
 		
 		double calDir = this.getValueAposteriori();
 	    double obsDir = this.getValueApriori();
-		
-	    if (projection.isDirectionReduction()) {
-	    	double scale = projection.isUTMReduction()?0.9996:1.0;
+
+	    // Richtungsreduktion
+		if (reductions.getProjectionType() != ProjectionType.NONE && reductions.applyReductionTask(ReductionTaskType.DIRECTION)) {
+			double R = reductions.getEarthRadius();
+	    	double scale = reductions.getProjectionType() == ProjectionType.UTM ? 0.9996 : 1.0;
 	    	double yS = this.getStartPoint().getY();
 	    	double xS = this.getStartPoint().getX();
 	    	double yE = this.getEndPoint().getY();

@@ -21,9 +21,10 @@
 
 package org.applied_geodesy.adjustment.network.observation;
 
-import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.network.ObservationType;
+import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
+import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.network.parameter.AdditionalUnknownParameter;
 import org.applied_geodesy.adjustment.network.parameter.RefractionCoefficient;
 import org.applied_geodesy.adjustment.point.Point;
@@ -329,6 +330,9 @@ public class ZenithAngle extends Observation {
 
 	@Override
 	public double getValueAposteriori() {
+		Reduction reductions = this.getReductions();
+		double R = reductions.getEarthRadius();
+		
 		double xs = this.getStartPoint().getX();
 		double ys = this.getStartPoint().getY();
 		double zs = this.getStartPoint().getZ();
@@ -361,8 +365,13 @@ public class ZenithAngle extends Observation {
 		double w = th*(srxe*srxs + crxe*crxs*crye*crys + crxe*crxs*srye*srys) - ih + srxs*(ye - ys) + crxs*crys*(ze - zs) - crxs*srys*(xe - xs);
 		
 		double dist2D = Math.hypot(u, v);
+		double corr = dist2D/(2.0 * R);
+		
 		double k = this.refractionCoefficient.getValue();
-	    double geoCorr = -k*dist2D/(2.0*Constant.EARTH_RADIUS);
+	    double geoCorr = -k*corr;
+	    
+	    if (reductions.applyReductionTask(ReductionTaskType.EARTH_CURVATURE)) 
+	    	geoCorr += corr;
 
 	    return MathExtension.MOD( Math.atan2( dist2D, w ) + geoCorr, 2.0*Math.PI);
 	}
@@ -381,8 +390,11 @@ public class ZenithAngle extends Observation {
 	
 	@Override
 	public double diffRefCoeff() {
-		double sH = this.getCalculatedDistance2D();
-		return -sH/(2.0*Constant.EARTH_RADIUS);
+		Reduction reductions = this.getReductions();
+		double R = reductions.getEarthRadius();
+		
+		double dist2D = this.getCalculatedDistance2D();
+		return -dist2D/(2.0 * R);
 	}
 
 	public FaceType getFace() {

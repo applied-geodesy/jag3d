@@ -24,8 +24,7 @@ package org.applied_geodesy.adjustment.network.observation;
 import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.observation.group.ObservationGroup;
-import org.applied_geodesy.adjustment.network.observation.projection.Projection;
-import org.applied_geodesy.adjustment.network.observation.projection.ProjectionType;
+import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
 import org.applied_geodesy.adjustment.point.Point;
 
 public abstract class Observation {
@@ -48,7 +47,7 @@ public abstract class Observation {
 	private ObservationGroup observationGroup = null;
 	
 	// Projektion der Beobachtung
-	private Projection projection = new Projection(ProjectionType.NONE);
+	private Reduction reductions = new Reduction();
 
 	private double redundancy      =  0.0,
     			   sigma           = -1.0,
@@ -468,12 +467,12 @@ public abstract class Observation {
 
 	public abstract ObservationType getObservationType();
 
-	public Projection getProjectionScheme() {
-		return this.projection;
+	public Reduction getReductions() {
+		return this.reductions;
 	}
 
-	public void setProjectionScheme(Projection projection) {
-		this.projection = projection;
+	public void setReduction(Reduction reductions) {
+		this.reductions = reductions;
 	}
 
 	public double getDistanceForUncertaintyModel() {

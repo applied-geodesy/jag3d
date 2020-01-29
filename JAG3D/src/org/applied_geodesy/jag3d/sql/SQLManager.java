@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.DefaultAverageThreshold;
 import org.applied_geodesy.adjustment.DefaultValue;
 import org.applied_geodesy.adjustment.EstimationType;
@@ -50,8 +51,9 @@ import org.applied_geodesy.adjustment.network.RankDefect;
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
 import org.applied_geodesy.adjustment.network.approximation.sql.SQLApproximationManager;
 import org.applied_geodesy.adjustment.network.congruence.strain.RestrictionType;
-import org.applied_geodesy.adjustment.network.observation.projection.Projection;
-import org.applied_geodesy.adjustment.network.observation.projection.ProjectionType;
+import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
+import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
+import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.network.sql.SQLAdjustmentManager;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
@@ -469,6 +471,18 @@ public class SQLManager {
 		
 		// add legend layer
 		sqls.put(20190309.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"LegendLayerProperty\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"type\" SMALLINT NOT NULL, CONSTRAINT \"LegendLayerPropertyOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
+		
+		// change and add projection/reduction tables
+		sqls.put(20200119.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ReductionDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"projection_type\" SMALLINT DEFAULT " + ProjectionType.NONE.getId() + " NOT NULL, \"reference_height\" DOUBLE DEFAULT 0 NOT NULL, \"earth_radius\" DOUBLE DEFAULT " + Constant.EARTH_RADIUS + " NOT NULL);\r\n");
+		sqls.put(20200119.0002, "INSERT INTO \"ReductionDefinition\" (\"id\", \"projection_type\", \"reference_height\", \"earth_radius\") (SELECT \"id\", CASEWHEN(\"type\" IN (4, 24, 34, 234), " + ProjectionType.GAUSS_KRUEGER.getId() + ", CASEWHEN(\"type\" IN (5, 25, 35, 235), " + ProjectionType.UTM.getId() + ", " + ProjectionType.NONE.getId() + ")) AS \"projection_type\", \"reference_height\", " + Constant.EARTH_RADIUS + " AS \"earth_radius\" FROM \"ProjectionDefinition\" WHERE \"id\" = 1 LIMIT 1);\r\n");
+		
+		sqls.put(20200119.0011, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ReductionTask\"(\"reduction_id\" INTEGER NOT NULL, \"type\" SMALLINT NOT NULL, PRIMARY KEY(\"reduction_id\", \"type\"), CONSTRAINT \"ReductionDefinitionOnGroupDelete\" FOREIGN KEY(\"reduction_id\") REFERENCES \"ReductionDefinition\"(\"id\") ON DELETE CASCADE);\r\n");
+		sqls.put(20200119.0012, "INSERT INTO \"ReductionTask\" (\"reduction_id\", \"type\") SELECT \"id\", CASEWHEN(\"type\" IN (4, 24, 34, 234, 5, 25, 35, 235), " + ReductionTaskType.DISTANCE.getId()  + ", -1) FROM \"ProjectionDefinition\" WHERE \"id\" = 1 LIMIT 1;\r\n");
+		sqls.put(20200119.0013, "INSERT INTO \"ReductionTask\" (\"reduction_id\", \"type\") SELECT \"id\", CASEWHEN(\"type\" IN (23, 34, 234, 35, 235),           " + ReductionTaskType.HEIGHT.getId()    + ", -2) FROM \"ProjectionDefinition\" WHERE \"id\" = 1 LIMIT 1;\r\n");
+		sqls.put(20200119.0014, "INSERT INTO \"ReductionTask\" (\"reduction_id\", \"type\") SELECT \"id\", CASEWHEN(\"type\" IN (23, 24, 234, 25, 235),           " + ReductionTaskType.DIRECTION.getId() + ", -3) FROM \"ProjectionDefinition\" WHERE \"id\" = 1 LIMIT 1;\r\n");
+		sqls.put(20200119.0015, "DELETE FROM \"ReductionTask\" WHERE \"type\" < 0;\r\n");
+		
+		sqls.put(20200119.0020, "DROP TABLE \"ProjectionDefinition\"\r\n");
 		
 		return sqls;
 	}
@@ -3163,33 +3177,79 @@ public class SQLManager {
 		return new TestStatisticDefinition();
 	}
 	
-	public void save(Projection projection) throws SQLException {
+	public void save(Reduction reduction) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
-		String sql = "MERGE INTO \"ProjectionDefinition\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE)) "
-				+ ") AS \"vals\" (\"id\", \"type\",\"reference_height\") ON \"ProjectionDefinition\".\"id\" = \"vals\".\"id\" AND \"ProjectionDefinition\".\"id\" = 1 "
+		String sql = "MERGE INTO \"ReductionDefinition\" USING (VALUES "
+				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"id\", \"projection_type\", \"reference_height\", \"earth_radius\") ON \"ReductionDefinition\".\"id\" = \"vals\".\"id\" AND \"ReductionDefinition\".\"id\" = 1 "
 				+ "WHEN MATCHED THEN UPDATE SET "
-				+ "\"ProjectionDefinition\".\"type\"             = \"vals\".\"type\", "
-				+ "\"ProjectionDefinition\".\"reference_height\" = \"vals\".\"reference_height\" "
+				+ "\"ReductionDefinition\".\"projection_type\"  = \"vals\".\"projection_type\", "
+				+ "\"ReductionDefinition\".\"reference_height\" = \"vals\".\"reference_height\", "
+				+ "\"ReductionDefinition\".\"earth_radius\"     = \"vals\".\"earth_radius\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"id\", "
-				+ "\"vals\".\"type\", "
-				+ "\"vals\".\"reference_height\" ";
+				+ "\"vals\".\"projection_type\", "
+				+ "\"vals\".\"reference_height\", "
+				+ "\"vals\".\"earth_radius\" ";
 		
 		
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		stmt.setInt(idx++, 1);
 		
-		if (projection.getType() == null)
-			stmt.setNull(idx++, Types.SMALLINT);
-		else
-			stmt.setInt(idx++, projection.getType().getId());
-		
-		stmt.setDouble(idx++, projection.getReferenceHeight());
+		stmt.setInt(idx++, reduction.getProjectionType().getId());
+		stmt.setDouble(idx++, reduction.getReferenceHeight());
+		stmt.setDouble(idx++, reduction.getEarthRadius());
 		stmt.execute();
+		
+		if (reduction.size() > 0) {
+			this.clearReductionTasks();
+			this.saveReductionTasks(reduction);
+		}
+	}
+	
+	private void clearReductionTasks() throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+
+		PreparedStatement stmt = this.dataBase.getPreparedStatement("DELETE FROM \"ReductionTask\" WHERE \"reduction_id\" = 1");
+		stmt.execute();
+	}
+	
+	private void saveReductionTasks(Reduction reduction) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+
+		boolean hasBatch = false;
+
+		String sql = "INSERT INTO \"ReductionTask\" "
+				+ "(\"reduction_id\", \"type\") "
+				+ "VALUES (?, ?) ";
+		
+		try {
+			this.dataBase.setAutoCommit(false);
+			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+
+			for (ReductionTaskType type : ReductionTaskType.values()) {
+				if (!reduction.applyReductionTask(type))
+					continue;
+
+				int idx = 1;
+				
+				stmt.setInt(idx++, 1);
+				stmt.setInt(idx++, type.getId());
+
+				stmt.addBatch();
+				hasBatch = true;
+			}
+			if (hasBatch)
+				stmt.executeLargeBatch();
+		}
+		finally {
+			this.dataBase.setAutoCommit(true);
+		}
 	}
 	
 	public double getAverageThreshold(ObservationType type) throws SQLException {
@@ -3232,29 +3292,38 @@ public class SQLManager {
 		stmt.execute();
 	}
 	
-	public Projection getProjectionDefinition() throws SQLException {
-		Projection projection = new Projection(ProjectionType.NONE);
+	public Reduction getReductionDefinition() throws SQLException {
+		Reduction reductions = new Reduction();
 
 		if (this.hasDatabase() && this.dataBase.isOpen()) {
-
 			String sql = "SELECT "
-					+ "\"type\",\"reference_height\" "
-					+ "FROM \"ProjectionDefinition\" "
-					+ "WHERE \"id\" = 1 LIMIT 1";
+					+ "\"projection_type\", \"reference_height\", \"earth_radius\", \"type\" AS \"task_type\" "
+					+ "FROM \"ReductionTask\" "
+					+ "JOIN \"ReductionDefinition\" "
+					+ "ON \"ReductionTask\".\"reduction_id\" = \"ReductionDefinition\".\"id\" "
+					+ "WHERE \"ReductionDefinition\".\"id\" = 1";
 
 			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 			ResultSet rs = stmt.executeQuery();
-
-			if (rs.next()) {
-				ProjectionType projectionType = ProjectionType.getEnumByValue(rs.getInt("type"));
-				double referenceHeight = rs.getDouble("reference_height");
-				projection.setType(projectionType);
-				projection.setReferenceHeight(referenceHeight);
+			
+			while (rs.next()) {
+				ProjectionType projectionType = ProjectionType.getEnumByValue(rs.getInt("projection_type"));
+				ReductionTaskType taskType    = ReductionTaskType.getEnumByValue(rs.getInt("task_type"));
+				double referenceHeight        = rs.getDouble("reference_height");
+				double earthRadius            = rs.getDouble("earth_radius");
+		
+				if (taskType == null) 
+					continue;
+				
+				reductions.setProjectionType(projectionType);
+				reductions.setReferenceHeight(referenceHeight);
+				reductions.setEarthRadius(earthRadius);
+				reductions.addReductionTaskType(taskType);	
 			}
 		}
-		return projection;
+		return reductions;
 	}
-	
+		
 	public void save(boolean userDefined, RankDefect rankDefect) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;

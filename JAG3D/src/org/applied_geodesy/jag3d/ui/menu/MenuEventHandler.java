@@ -31,7 +31,7 @@ import org.applied_geodesy.jag3d.ui.dialog.AverageDialog;
 import org.applied_geodesy.jag3d.ui.dialog.CongruentPointDialog;
 import org.applied_geodesy.jag3d.ui.dialog.FormatterOptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.LeastSquaresSettingDialog;
-import org.applied_geodesy.jag3d.ui.dialog.ProjectionDialog;
+import org.applied_geodesy.jag3d.ui.dialog.ProjectionAndReductionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.RankDefectDialog;
 import org.applied_geodesy.jag3d.ui.dialog.TableRowHighlightDialog;
 import org.applied_geodesy.jag3d.ui.dialog.TestStatisticDialog;
@@ -104,8 +104,8 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 			RankDefectDialog.showAndWait();
 			break;
 			
-		case HORIZONTAL_PROJECTION:
-			ProjectionDialog.showAndWait();
+		case PROJECTION_AND_REDUCTION:
+			ProjectionAndReductionDialog.showAndWait();
 			break;
 			
 		case CONGRUENT_POINT:

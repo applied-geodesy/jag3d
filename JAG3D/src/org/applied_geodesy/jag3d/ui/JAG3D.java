@@ -43,7 +43,7 @@ import org.applied_geodesy.jag3d.ui.dialog.FormatterOptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.LeastSquaresSettingDialog;
 import org.applied_geodesy.jag3d.ui.dialog.NetworkAdjustmentDialog;
 import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
-import org.applied_geodesy.jag3d.ui.dialog.ProjectionDialog;
+import org.applied_geodesy.jag3d.ui.dialog.ProjectionAndReductionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.RankDefectDialog;
 import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog;
 import org.applied_geodesy.jag3d.ui.dialog.TableRowHighlightDialog;
@@ -125,7 +125,7 @@ public class JAG3D extends Application {
 		NetworkAdjustmentDialog.setOwner(primaryStage);
 		FormatterOptionDialog.setOwner(primaryStage);
 		TestStatisticDialog.setOwner(primaryStage);
-		ProjectionDialog.setOwner(primaryStage);
+		ProjectionAndReductionDialog.setOwner(primaryStage);
 		RankDefectDialog.setOwner(primaryStage);
 		CongruentPointDialog.setOwner(primaryStage);
 		AverageDialog.setOwner(primaryStage);
