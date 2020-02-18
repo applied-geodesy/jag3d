@@ -424,11 +424,12 @@ public class GNSSObservationRow extends ObservationRow {
 	private static GNSSObservationRow scan1D(String str) {
 		FormatterOptions options = FormatterOptions.getInstance();
 		Scanner scanner = new Scanner( str.trim() );
+
 		try {
 			scanner.useLocale( Locale.ENGLISH );
 			String startPointName = new String(), 
 					endPointName  = new String(); 
-			double z = 0, sigmaZ = 0;
+			double x = 0, y = 0, z = 0, sigmaZ = 0;
 			GNSSObservationRow row = new GNSSObservationRow();
 			
 			// station
@@ -447,21 +448,40 @@ public class GNSSObservationRow extends ObservationRow {
 			row.setStartPointName(startPointName);
 			row.setEndPointName(endPointName);
 
-			// Z 		
+			// Y (or Z) 		
 			if (!scanner.hasNextDouble())
 				return null;
-			z = options.convertLengthToModel(scanner.nextDouble());
+			y = z = options.convertLengthToModel(scanner.nextDouble());
 
-			// sigma Z
+			// X (or sigma Z)
 			if (!scanner.hasNextDouble()) {
 				row.setZApriori(z);
 				return row;
 			}
-			sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+			x = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+			
+			// Z
+			if (!scanner.hasNextDouble()) {
+				row.setZApriori(z);
+				row.setSigmaZapriori(sigmaZ);
+				return row;
+			}
+			z = options.convertLengthToModel(scanner.nextDouble());
+			
+			// sigma Z
+			if (!scanner.hasNextDouble()) {
+				row.setXApriori(x);
+				row.setYApriori(y);
+				row.setZApriori(z);
+				return row;
+			}
 
+			sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+			row.setXApriori(x);
+			row.setYApriori(y);
 			row.setZApriori(z);
 			row.setSigmaZapriori(sigmaZ);
-			
+
 			return row;
 		}
 		finally {
