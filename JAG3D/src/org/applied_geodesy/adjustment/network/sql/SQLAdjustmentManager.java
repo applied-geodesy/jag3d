@@ -471,6 +471,8 @@ public class SQLAdjustmentManager {
 				break;
 			case 2:
 				point = new Point2D(name, x0, y0, z0, sigmaX0, sigmaY0);
+				
+				
 				this.pure1DNetwork = false;
 				if (y0 < 1100000 || y0 > 59800000 )
 					this.applyableProjection = false;
@@ -484,14 +486,17 @@ public class SQLAdjustmentManager {
 					point.getDeflectionY().setValue0(deflectionY0);
 					point.getDeflectionY().setStdApriori(sigmaDeflectionY0);
 				}
-
-
 				this.pure1DNetwork = false;
 				if (y0 < 1100000 || y0 > 59800000 )
 					this.applyableProjection = false;
 				break;
 			}
 			if (point != null && !this.completePoints.containsKey(point.getName())) {
+				if (this.estimationType == EstimationType.SIMULATION) {
+					point.setX(point.getX0());
+					point.setY(point.getY0());
+					point.setZ(point.getZ0());
+				}
 				points.put(point.getName(), point);
 				this.completePoints.put(point.getName(), point);
 			}
@@ -734,6 +739,8 @@ public class SQLAdjustmentManager {
 				GNSSBaselineDeltaZ1D gnssZ = new GNSSBaselineDeltaZ1D(id, startPoint, endPoint, z0, sigmaZ0);
 
 				gnssZ.setReduction(this.reductions);
+				if (this.estimationType == EstimationType.SIMULATION)
+					gnssZ.setValueApriori(gnssZ.getValueAposteriori());
 
 				((GNSSBaseline1DGroup)observationGroup).add(gnssZ);
 			}
@@ -743,6 +750,10 @@ public class SQLAdjustmentManager {
 
 				gnssX.setReduction(this.reductions);
 				gnssY.setReduction(this.reductions);
+				if (this.estimationType == EstimationType.SIMULATION) {
+					gnssX.setValueApriori(gnssX.getValueAposteriori());
+					gnssY.setValueApriori(gnssY.getValueAposteriori());
+				}
 
 				((GNSSBaseline2DGroup)observationGroup).add(gnssX, gnssY);
 
@@ -755,6 +766,11 @@ public class SQLAdjustmentManager {
 				gnssX.setReduction(this.reductions);
 				gnssY.setReduction(this.reductions);
 				gnssZ.setReduction(this.reductions);
+				if (this.estimationType == EstimationType.SIMULATION) {
+					gnssX.setValueApriori(gnssX.getValueAposteriori());
+					gnssY.setValueApriori(gnssY.getValueAposteriori());
+					gnssZ.setValueApriori(gnssZ.getValueAposteriori());
+				}
 
 				((GNSSBaseline3DGroup)observationGroup).add(gnssX, gnssY, gnssZ);
 			}
