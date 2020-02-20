@@ -3203,11 +3203,9 @@ public class SQLManager {
 		stmt.setDouble(idx++, reduction.getReferenceHeight());
 		stmt.setDouble(idx++, reduction.getEarthRadius());
 		stmt.execute();
-		
-		if (reduction.size() > 0) {
-			this.clearReductionTasks();
-			this.saveReductionTasks(reduction);
-		}
+
+		this.clearReductionTasks();
+		this.saveReductionTasks(reduction);
 	}
 	
 	private void clearReductionTasks() throws SQLException {
