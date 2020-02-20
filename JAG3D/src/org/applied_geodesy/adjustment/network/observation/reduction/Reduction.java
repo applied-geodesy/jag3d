@@ -57,7 +57,9 @@ public class Reduction {
 	}
 	
 	public boolean addReductionTaskType(ReductionTaskType type) {
-		return this.reductionTypes.add(type);
+		if (type != null)
+			return this.reductionTypes.add(type);
+		return false;
 	}
 	
 	public boolean removeReductionTaskType(ReductionTaskType type) {
