@@ -3297,7 +3297,7 @@ public class SQLManager {
 			String sql = "SELECT "
 					+ "\"projection_type\", \"reference_height\", \"earth_radius\", \"type\" AS \"task_type\" "
 					+ "FROM \"ReductionTask\" "
-					+ "JOIN \"ReductionDefinition\" "
+					+ "RIGHT JOIN \"ReductionDefinition\" "
 					+ "ON \"ReductionTask\".\"reduction_id\" = \"ReductionDefinition\".\"id\" "
 					+ "WHERE \"ReductionDefinition\".\"id\" = 1";
 
@@ -3305,18 +3305,21 @@ public class SQLManager {
 			ResultSet rs = stmt.executeQuery();
 			
 			while (rs.next()) {
+				int taskTypeId = rs.getInt("task_type");
+				boolean hasTaskType = !rs.wasNull();
+				
 				ProjectionType projectionType = ProjectionType.getEnumByValue(rs.getInt("projection_type"));
-				ReductionTaskType taskType    = ReductionTaskType.getEnumByValue(rs.getInt("task_type"));
 				double referenceHeight        = rs.getDouble("reference_height");
 				double earthRadius            = rs.getDouble("earth_radius");
-		
-				if (taskType == null) 
-					continue;
-				
+
 				reductions.setProjectionType(projectionType);
 				reductions.setReferenceHeight(referenceHeight);
 				reductions.setEarthRadius(earthRadius);
-				reductions.addReductionTaskType(taskType);	
+	
+				if (hasTaskType) {
+					ReductionTaskType taskType = ReductionTaskType.getEnumByValue(taskTypeId);
+					reductions.addReductionTaskType(taskType);	
+				}
 			}
 		}
 		return reductions;
