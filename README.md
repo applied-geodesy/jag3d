@@ -15,4 +15,4 @@ JAG3D is written in the platform-independent programming language Java and, ther
 
 Support and Installation
 ------------------------
-JAG3D is a portable least-squares software package - no need to install or uninstall. Just [download the lates version](https://github.com/loesler/applied-geodesy/releases/latest), unpack and run. The JAG3D manual is organized by a [Wiki](https://software.applied-geodesy.org/wiki/). Moreover, a [support forum](https://software.applied-geodesy.org/forum/) is available for technical support.
+JAG3D is a portable least-squares software package - no need to install or uninstall. Just [download the latest version](https://github.com/loesler/applied-geodesy/releases/latest), unpack and run. The JAG3D manual is organized by a [Wiki](https://software.applied-geodesy.org/wiki/). Moreover, a [support forum](https://software.applied-geodesy.org/forum/) is available for technical support.
