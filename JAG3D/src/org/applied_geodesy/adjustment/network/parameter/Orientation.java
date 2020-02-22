@@ -58,33 +58,35 @@ public class Orientation extends AdditionalUnknownParameter {
 	private void checkFace() {
 		if (this.getObservations().size() <= 0 || !(this.getObservations().get(0) instanceof Direction)) 
 			return;
-		
+
 		// Zuschlag zur ggf. bereits vorgegebenen Orientierung 
 		double deltaOri = 0;
-		
+
 		if (this.isEnable() && this.estimateApproximationValue)
 			deltaOri = this.advancedOrientation();
 
 		int length = this.getObservations().size();
-	    for (int i = 0; i < length; i++) {
-	    	Direction dir = (Direction)this.getObservations().get(i);
-	    	// a-posteriori Wert beruecksichtigt bereits die vorgegebene a-priori Orientierung, 
-	    	// sodass nur das Delta zu beruecksichtigen ist bei der a-priori Beobachtung
-	    	double azimuthMeasuredFace1 = deltaOri + dir.getValueApriori();
-	    	double azimuthCalculated    = dir.getValueAposteriori();
-	    	azimuthMeasuredFace1        = MathExtension.MOD( azimuthMeasuredFace1, 2.0*Math.PI );
-	    	double azimuthMeasuredFace2 = MathExtension.MOD( azimuthMeasuredFace1+Math.PI, 2.0*Math.PI );
-	    	double face1 = Math.min(Math.abs(azimuthCalculated - azimuthMeasuredFace1), Math.abs(Math.abs(azimuthCalculated - azimuthMeasuredFace1) - 2.0*Math.PI) );
-	    	double face2 = Math.min(Math.abs(azimuthCalculated - azimuthMeasuredFace2), Math.abs(Math.abs(azimuthCalculated - azimuthMeasuredFace2) - 2.0*Math.PI) );
-	    	
-	    	if ( face1 > face2 ) {
-	    		dir.setValueApriori( MathExtension.MOD( dir.getValueApriori() + Math.PI, 2.0*Math.PI ) );
-	    		dir.setFace(dir.getFace() == FaceType.ONE ? FaceType.TWO : FaceType.ONE);
-	    	}
-	    }
-	    
-	    if (this.isEnable())
-	    	this.setValue( MathExtension.MOD(this.getValue() + this.advancedOrientation(), 2*Math.PI) );
+		for (int i = 0; i < length; i++) {
+			Direction dir = (Direction)this.getObservations().get(i);
+			// a-posteriori Wert beruecksichtigt bereits die vorgegebene a-priori Orientierung, 
+			// sodass nur das Delta zu beruecksichtigen ist bei der a-priori Beobachtung
+			double azimuthMeasuredFace1 = deltaOri + dir.getValueApriori();
+			double azimuthCalculated    = dir.getValueAposteriori();
+			azimuthMeasuredFace1        = MathExtension.MOD( azimuthMeasuredFace1, 2.0*Math.PI );
+			double azimuthMeasuredFace2 = MathExtension.MOD( azimuthMeasuredFace1+Math.PI, 2.0*Math.PI );
+			double face1 = Math.min(Math.abs(azimuthCalculated - azimuthMeasuredFace1), Math.abs(Math.abs(azimuthCalculated - azimuthMeasuredFace1) - 2.0*Math.PI) );
+			double face2 = Math.min(Math.abs(azimuthCalculated - azimuthMeasuredFace2), Math.abs(Math.abs(azimuthCalculated - azimuthMeasuredFace2) - 2.0*Math.PI) );
+
+			// Reduziere auf einheitliche Lage
+			if ( face1 > face2 ) {
+				dir.setValueApriori( MathExtension.MOD( dir.getValueApriori() + Math.PI, 2.0*Math.PI ) );
+				dir.setFace(dir.getFace() == FaceType.ONE ? FaceType.TWO : FaceType.ONE);
+			}
+		}
+
+		// Ermittle eine a-priori Orieniterung mittels der Lage-koorigierten Richtungen
+		if (this.isEnable() && this.estimateApproximationValue)
+			this.setValue( MathExtension.MOD(this.getValue() + this.advancedOrientation(), 2*Math.PI) );
 	}
 	
 	/**
