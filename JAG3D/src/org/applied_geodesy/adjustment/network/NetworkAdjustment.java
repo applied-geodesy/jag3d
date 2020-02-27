@@ -1409,7 +1409,7 @@ public class NetworkAdjustment implements Runnable {
 			for (int i=0; i<dimAT; i++) {
 				colAT = unknownParameterAT.getColInJacobiMatrix() + i;
 				Vector aTp = new DenseVector(this.numberOfObservations);
-			
+				
 				for (int j=0; j<observationGroupAT.size(); j++) {
 					Observation observationAT = observationGroupAT.get(j);
 					int rowAT = observationAT.getRowInJacobiMatrix();
@@ -1532,6 +1532,10 @@ public class NetworkAdjustment implements Runnable {
 						for (int jj=0; jj<observationGroupA.size(); jj++) {
 							Observation observationA = observationGroupA.get(jj);
 							int rowA = observationA.getRowInJacobiMatrix();
+							// skip zero multiplications
+							if (aTp.get(rowA) == 0)
+								continue;
+							
 							double a = 0.0;
 							// Berechnte Normalgleichung N=AT*P*A
 							if (unknownParameterA.getParameterType() == ParameterType.POINT1D) {
