@@ -90,6 +90,7 @@ import no.uib.cipr.matrix.NotConvergedException;
 import no.uib.cipr.matrix.UpperSymmBandMatrix;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
 import no.uib.cipr.matrix.Vector;
+import no.uib.cipr.matrix.sparse.SparseVector;
 
 public class NetworkAdjustment implements Runnable {
 	private Map<Observation, Double> adaptedObservationUncertainties = new LinkedHashMap<Observation, Double>();
@@ -1393,7 +1394,6 @@ public class NetworkAdjustment implements Runnable {
 			
 			UnknownParameter unknownParameterAT = this.unknownParameters.get(u);
 			ObservationGroup observationGroupAT = unknownParameterAT.getObservations();
-			int colAT = unknownParameterAT.getColInJacobiMatrix();
 			int dimAT = 1;
 			switch (unknownParameterAT.getParameterType()) {
 			case POINT2D:
@@ -1407,9 +1407,8 @@ public class NetworkAdjustment implements Runnable {
 				break;
 			}
 			for (int i=0; i<dimAT; i++) {
-				colAT = unknownParameterAT.getColInJacobiMatrix() + i;
-				Vector aTp = new DenseVector(this.numberOfObservations);
-				
+				int colAT = unknownParameterAT.getColInJacobiMatrix() + i;
+				Vector aTp = new SparseVector(this.numberOfObservations, observationGroupAT.size());
 				for (int j=0; j<observationGroupAT.size(); j++) {
 					Observation observationAT = observationGroupAT.get(j);
 					int rowAT = observationAT.getRowInJacobiMatrix();
@@ -1503,16 +1502,18 @@ public class NetworkAdjustment implements Runnable {
 					}
 
 					// Zeile aT*p bestimmen
-					aTp.set(rowAT, aTp.get(rowAT) + at / (observationAT.getStdApriori() * observationAT.getStdApriori()) );
+					double atp = at / (observationAT.getStdApriori() * observationAT.getStdApriori());
+					aTp.set(rowAT, atp);
 					// Absolutgliedvektor bestimmen
-					n.set(colAT, n.get(colAT) + aTp.get(rowAT)*observationAT.getCorrection());
+					n.set(colAT, n.get(colAT) + atp * observationAT.getCorrection());
+					// Hauptdiagonalelement aT*p*a
+					N.set(colAT, colAT, N.get(colAT, colAT) + atp * at);
 				}
 
 				for (int uu=u; uu<this.unknownParameters.size(); uu++) {
 					UnknownParameter unknownParameterA = this.unknownParameters.get(uu);
 					ObservationGroup observationGroupA = unknownParameterA.getObservations();
-					int colA = unknownParameterA.getColInJacobiMatrix();
-					
+
 					int dimA = 1;
 					switch (unknownParameterA.getParameterType()) {
 					case POINT2D:
@@ -1525,10 +1526,9 @@ public class NetworkAdjustment implements Runnable {
 						dimA = 1;
 						break;
 					}
-					
-					for (int ii=uu==u?i:0; ii<dimA; ii++) {
-//					for (int ii=0; ii<dimA; ii++) {	
-						colA = unknownParameterA.getColInJacobiMatrix() + ii;
+					for (int ii=uu==u?i+1:0; ii<dimA; ii++) {
+						int colA = unknownParameterA.getColInJacobiMatrix() + ii;
+
 						for (int jj=0; jj<observationGroupA.size(); jj++) {
 							Observation observationA = observationGroupA.get(jj);
 							int rowA = observationA.getRowInJacobiMatrix();
@@ -1622,7 +1622,6 @@ public class NetworkAdjustment implements Runnable {
 							else if (unknownParameterA.getParameterType() == ParameterType.ROTATION_Z) {
 								a = observationA.diffRotZ();
 							}
-							
 							// Berechnung von N = ATP*A 
 							N.set(colAT, colA, N.get(colAT, colA) + aTp.get(rowA)*a);
 						}
@@ -1630,7 +1629,7 @@ public class NetworkAdjustment implements Runnable {
 				}
 			}
 		}
-		
+
 		// Fuege stochastische Lotabweichungen und Anschlusspunkte hinzu
 		if (this.stochasticPoints != null && !this.stochasticPoints.isEmpty()) {
 			for (int i=0; i<this.stochasticDeflectionPoints.size(); i++) {
