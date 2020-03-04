@@ -348,9 +348,10 @@ public class LeastSquaresSettingDialog {
 		EstimationType[] estimationTypeArray = EstimationType.values();
 		if (!this.enableUnscentedTransformation) {
 			List<EstimationType> estimationTypeList = new ArrayList<EstimationType>(Arrays.asList(estimationTypeArray));
-			estimationTypeList.remove(EstimationType.UNSCENTED_TRANSFORMATION);
+			estimationTypeList.remove(EstimationType.STANDARD_UNSCENTED_TRANSFORMATION);
+			estimationTypeList.remove(EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION);
 			estimationTypeArray = estimationTypeList.toArray(new EstimationType[estimationTypeList.size()]);
-			if (item == EstimationType.UNSCENTED_TRANSFORMATION)
+			if (item == EstimationType.STANDARD_UNSCENTED_TRANSFORMATION || item == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION)
 				item = EstimationType.L2NORM;
 		}
 		typeComboBox.getItems().setAll(estimationTypeArray);  // EstimationType.values()
@@ -368,8 +369,10 @@ public class LeastSquaresSettingDialog {
 					return i18n.getString("LeastSquaresSettingDialog.estimationtype.l2norm.label", "Least-squares adjustment (L2-Norm)");
 				case SIMULATION:
 					return i18n.getString("LeastSquaresSettingDialog.estimationtype.simulation.label", "Simulation (Pre-analysis)");
-				case UNSCENTED_TRANSFORMATION:
-					return i18n.getString("LeastSquaresSettingDialog.estimationtype.unscentedtransformation.label", "Unscented Transformation (UT)");	
+				case STANDARD_UNSCENTED_TRANSFORMATION:
+					return i18n.getString("LeastSquaresSettingDialog.estimationtype.sut.label", "Standard unscented transformation (SUT)");
+				case MODIFIED_UNSCENTED_TRANSFORMATION:
+					return i18n.getString("LeastSquaresSettingDialog.estimationtype.mut.label", "Modified unscented transformation (MUT)");
 				}
 				return null;
 			}

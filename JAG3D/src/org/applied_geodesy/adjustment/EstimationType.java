@@ -25,7 +25,8 @@ public enum EstimationType {
 	L1NORM(1),
 	L2NORM(2),
 	SIMULATION(3),
-	UNSCENTED_TRANSFORMATION(4);
+	STANDARD_UNSCENTED_TRANSFORMATION(4),
+	MODIFIED_UNSCENTED_TRANSFORMATION(5);
 
 	private int id;
 	private EstimationType(int id) {
