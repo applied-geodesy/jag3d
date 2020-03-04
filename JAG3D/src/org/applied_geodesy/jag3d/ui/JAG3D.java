@@ -22,7 +22,6 @@
 package org.applied_geodesy.jag3d.ui;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
