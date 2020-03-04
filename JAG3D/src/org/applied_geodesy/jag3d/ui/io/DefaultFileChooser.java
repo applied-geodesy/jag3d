@@ -40,7 +40,7 @@ public class DefaultFileChooser {
 	
 	static {
 		BufferedInputStream bis = null;
-		final String path = "/properties/paths.default";
+		final String path = "/properties/application.default";
 		try {
 			if (DefaultFileChooser.class.getResource(path) != null) {
 				Properties PROPERTIES = new Properties();

@@ -1,0 +1,17 @@
+# !!! This is an example file and will not be used by JAG3D. Please !!!
+# !!! create a copy of this file named "application.default",       !!!
+# !!! located in the same directory. Modify the copied file w.r.t.  !!!
+# !!! the desired values.                                           !!!
+#
+# Comments are indicated by # as first character
+#
+# Please note: On windows OS, the file-separator must be masked 
+# by further backslash, i.e.
+# D:\\folder\\subfolder instead of D:\folder\subfolder
+#
+# alternatively, use normal slashs instead of backslashs, i.e.
+# D:/folder/subfolder instead of D:\folder\subfolder
+
+FULL_SCREEN = TRUE
+WORKSPACE = D:\\PROJECTS
+#HISTORY = D:\\Application\JAG3D
