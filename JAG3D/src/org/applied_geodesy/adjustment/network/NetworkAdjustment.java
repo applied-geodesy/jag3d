@@ -2002,6 +2002,7 @@ public class NetworkAdjustment implements Runnable {
 	 * @return estimateStatus
 	 */
 	public EstimationStateType estimateModel() {
+		boolean applyUnscentedTransformation = this.estimationType == EstimationType.STANDARD_UNSCENTED_TRANSFORMATION || this.estimationType == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION;
 		this.maxDx = Double.MIN_VALUE;
 		this.currentMaxAbsDx = this.maxDx;
 		this.numberOfHypotesis = 0;
@@ -2045,14 +2046,25 @@ public class NetworkAdjustment implements Runnable {
 		try {
 			double lastStepSignum = 0.0;
 			int numObs = this.numberOfObservations + this.numberOfStochasticPointRows + this.numberOfStochasticDeflectionRows;
-			int numberOfEstimationSteps = this.estimationType == EstimationType.UNSCENTED_TRANSFORMATION ? 2 * numObs + 1 : 1;
-			double kappa = 3.0 - numObs;
-			double sqrtNumObsKappa = Math.sqrt(numObs + kappa); // == sqrt(3)
-			double weightN  = 1.0 / (2.0 * (numObs + kappa)); // == 1/6
-			double weightC  = kappa / (numObs + kappa);
+			int numberOfEstimationSteps = applyUnscentedTransformation ? 2 * numObs + 1 : 1;
 			
-			Vector xUT = this.estimationType == EstimationType.UNSCENTED_TRANSFORMATION ? new DenseVector(this.numberOfUnknownParameters) : null;
-			Matrix solutionVectors = this.estimationType == EstimationType.UNSCENTED_TRANSFORMATION ? new DenseMatrix(this.numberOfUnknownParameters, numberOfEstimationSteps) : null;
+			double alpha  = 0.001;
+			double beta   = 2.0;
+			double lambda = 0.0;
+			double kappa  = 0;
+			
+			if (this.estimationType == EstimationType.STANDARD_UNSCENTED_TRANSFORMATION)
+				kappa  = 3.0 - numObs;
+			else if (this.estimationType == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION)
+				kappa  = alpha*alpha*(numObs + lambda) - numObs;
+
+			double sqrtNumObsKappa = Math.sqrt(numObs + kappa); // == sqrt(3)
+			double weightN = 1.0 / (2.0 * (numObs + kappa)); // == 1/6
+			double weightC = kappa / (numObs + kappa);
+			double weightA = 1.0 - alpha*alpha + beta;
+			
+			Vector xUT = applyUnscentedTransformation ? new DenseVector(this.numberOfUnknownParameters) : null;
+			Matrix solutionVectors = applyUnscentedTransformation ? new DenseMatrix(this.numberOfUnknownParameters, numberOfEstimationSteps) : null;
 			
 			for (int estimationStep = 0; estimationStep < numberOfEstimationSteps; estimationStep++) {
 				// Reset aller Iterationseinstellungen
@@ -2063,7 +2075,7 @@ public class NetworkAdjustment implements Runnable {
 				estimateCompleteModel = false;
 				isConverge = true;
 				
-				if (this.estimationType == EstimationType.UNSCENTED_TRANSFORMATION) {
+				if (applyUnscentedTransformation) {
 					this.currentEstimationStatus = EstimationStateType.UNSCENTED_TRANSFORMATION_STEP;
 					this.change.firePropertyChange(this.currentEstimationStatus.name(), numberOfEstimationSteps, estimationStep+1);
 					
@@ -2093,7 +2105,7 @@ public class NetworkAdjustment implements Runnable {
 					this.numberOfHypotesis = 0;
 					this.iterationStep = this.maximalNumberOfIterations-runs;
 					this.currentEstimationStatus = EstimationStateType.ITERATE;
-					if (this.estimationType != EstimationType.UNSCENTED_TRANSFORMATION)
+					if (!applyUnscentedTransformation)
 						this.change.firePropertyChange(this.currentEstimationStatus.name(), this.maximalNumberOfIterations, this.iterationStep);
 
 					// erzeuge Normalgleichung		
@@ -2122,7 +2134,7 @@ public class NetworkAdjustment implements Runnable {
 								this.currentEstimationStatus = EstimationStateType.INVERT_NORMAL_EQUATION_MATRIX;
 								this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
 							}
-							this.estimateFactorsForOutherAccracy(N, n, this.estimationType != EstimationType.UNSCENTED_TRANSFORMATION);
+							this.estimateFactorsForOutherAccracy(N, n, !applyUnscentedTransformation);
 
 							if (this.calculateStochasticParameters) {
 								this.currentEstimationStatus = EstimationStateType.ESTIAMTE_STOCHASTIC_PARAMETERS;
@@ -2150,7 +2162,7 @@ public class NetworkAdjustment implements Runnable {
 					}
 					
 
-					if (this.estimationType == EstimationType.UNSCENTED_TRANSFORMATION) {
+					if (applyUnscentedTransformation) {
 						if (estimateCompleteModel) {
 							this.addUnscentedTransformationSolution(dx, xUT, solutionVectors, estimationStep, estimationStep < (numberOfEstimationSteps - 1) ? weightN : weightC);
 						}
@@ -2158,7 +2170,7 @@ public class NetworkAdjustment implements Runnable {
 						// Letzter Durchlauf der UT
 						// Bestimme Parameterupdate dx und Kovarianzmatrix Qxx
 						if (estimateCompleteModel && estimationStep > 0 && estimationStep == (numberOfEstimationSteps - 1)) {
-							this.estimateUnscentedTransformationParameterUpdateAndCovarianceMatrix(dx, xUT, solutionVectors, weightN, weightC);
+							this.estimateUnscentedTransformationParameterUpdateAndCovarianceMatrix(dx, xUT, solutionVectors, weightN, weightC, weightA);
 						}
 					}
 
@@ -2180,7 +2192,7 @@ public class NetworkAdjustment implements Runnable {
 					else if (this.maxDx <= SQRT_EPS && runs > 0) {
 						isEstimated = true;
 						this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
-						if (this.estimationType != EstimationType.UNSCENTED_TRANSFORMATION)
+						if (!applyUnscentedTransformation)
 							this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxDx);
 					}
 					else if (runs-- <= 1) {
@@ -2200,7 +2212,7 @@ public class NetworkAdjustment implements Runnable {
 					}
 					else {
 						this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
-						if (this.estimationType != EstimationType.UNSCENTED_TRANSFORMATION)
+						if (!applyUnscentedTransformation)
 							this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxDx);
 					}
 
@@ -2343,7 +2355,7 @@ public class NetworkAdjustment implements Runnable {
 		}
 	}
 	
-	private void estimateUnscentedTransformationParameterUpdateAndCovarianceMatrix(Vector dx, Vector xUT, Matrix solutionVectors, double weightN, double weightC) {
+	private void estimateUnscentedTransformationParameterUpdateAndCovarianceMatrix(Vector dx, Vector xUT, Matrix solutionVectors, double weightN, double weightC, double weightA) {
 		int numberOfEstimationSteps = solutionVectors.numColumns();
 		this.Qxx.zero();
 		
@@ -2428,7 +2440,12 @@ public class NetworkAdjustment implements Runnable {
 							double valueRow = solutionVectors.get(row + dRow, estimationStep) - xUT.get(row + dRow);
 							
 							double qxx = valueRow * weight * valueCol;
-							this.Qxx.set(col + dCol, row + dRow, this.Qxx.get(col + dCol, row + dRow) + qxx);
+							
+							double dqxx = 0;
+							if (estimationStep == (numberOfEstimationSteps - 1) && weightA != 0)
+								dqxx = valueRow * weightA * valueCol;
+							
+							this.Qxx.set(col + dCol, row + dRow, this.Qxx.get(col + dCol, row + dRow) + qxx + dqxx);
 						}
 					}
 				}
