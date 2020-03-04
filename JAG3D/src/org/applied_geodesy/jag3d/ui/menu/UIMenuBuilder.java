@@ -1052,7 +1052,7 @@ public class UIMenuBuilder {
 
 	private void initHistoryPathFromProperties() {
 		BufferedInputStream bis = null;
-		final String path = "/properties/paths.default";
+		final String path = "/properties/application.default";
 		try {
 			if (this.getClass().getResource(path) != null) {
 				Properties PROPERTIES = new Properties();

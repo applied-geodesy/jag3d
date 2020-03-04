@@ -21,12 +21,15 @@
 
 package org.applied_geodesy.jag3d.ui;
 
+import java.io.BufferedInputStream;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -218,6 +221,7 @@ public class JAG3D extends Application {
 			setTitle(null);
 
 			primaryStage.show();
+			primaryStage.setMaximized(this.isFullScreen());
 			primaryStage.toFront();
 
 			this.setStageToDialogs(primaryStage);
@@ -257,6 +261,31 @@ public class JAG3D extends Application {
 	public void stop() throws Exception {
 		SQLManager.getInstance().closeDataBase();
 		super.stop();
+	}
+	
+	private boolean isFullScreen() {
+		BufferedInputStream bis = null;
+		final String path = "/properties/application.default";
+		try {
+			if (this.getClass().getResource(path) != null) {
+				Properties PROPERTIES = new Properties();
+				bis = new BufferedInputStream(this.getClass().getResourceAsStream(path));
+				PROPERTIES.load(bis);
+				return PROPERTIES.getProperty("FULL_SCREEN", "FALSE").equalsIgnoreCase("TRUE");
+
+			}  
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			try {
+				if (bis != null)
+					bis.close();  
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
 	}
 
 	public static void main(String[] args) {
