@@ -691,10 +691,22 @@ public class UIMenuBuilder {
 			if (selectedFile != null) {
 				Path path = selectedFile.toPath();
 				String regex = "(?i)(.+?)(\\.)(backup$|data$|properties$|script$)";
-				String project = Files.exists(path, LinkOption.NOFOLLOW_LINKS) ? path.toAbsolutePath().toString().replaceFirst(regex, "$1") : null;
+				String dataBaseName = Files.exists(path, LinkOption.NOFOLLOW_LINKS) ? path.toAbsolutePath().toString().replaceFirst(regex, "$1") : null;
 
-				if (project != null) {
-					SQLManager.openExistingProject(new HSQLDB(project));
+				String dataBaseFileExtensions[] = new String[] { "data", "properties", "script" };
+				// check for complete db-files
+				for (int i=0; i<dataBaseFileExtensions.length; i++) {
+					if (dataBaseName != null) {
+						Path p = Paths.get(dataBaseName + "." + dataBaseFileExtensions[i]);
+						if (!Files.exists(p, LinkOption.NOFOLLOW_LINKS)) {
+							dataBaseName = null;
+							throw new FileNotFoundException("Incomplete data base detected. Could not found " + p.toString() + ".");
+						}
+					}
+				}
+				
+				if (dataBaseName != null) {
+					SQLManager.openExistingProject(new HSQLDB(dataBaseName));
 					JAG3D.setTitle(path.getFileName() == null ? null : path.getFileName().toString().replaceFirst(regex, "$1"));
 					this.addHistoryFile(selectedFile);
 					this.historyMenu.getParentMenu().hide();
@@ -705,7 +717,7 @@ public class UIMenuBuilder {
 				}
 			}
 		}
-		catch(DatabaseVersionMismatchException e) {
+		catch (DatabaseVersionMismatchException e) {
 			e.printStackTrace();
 			OptionDialog.showThrowableDialog (
 					i18n.getString("UIMenuBuilder.message.error.version.exception.title", "Version error"),
