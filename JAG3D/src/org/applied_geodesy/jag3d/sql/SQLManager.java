@@ -41,6 +41,7 @@ import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.DefaultAverageThreshold;
 import org.applied_geodesy.adjustment.DefaultValue;
 import org.applied_geodesy.adjustment.EstimationType;
+import org.applied_geodesy.adjustment.UnscentedTransformationParameter;
 import org.applied_geodesy.adjustment.network.DefectType;
 import org.applied_geodesy.adjustment.network.ObservationGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.ObservationType;
@@ -483,6 +484,9 @@ public class SQLManager {
 		sqls.put(20200119.0015, "DELETE FROM \"ReductionTask\" WHERE \"type\" < 0;\r\n");
 		
 		sqls.put(20200119.0020, "DROP TABLE \"ProjectionDefinition\"\r\n");
+		
+		sqls.put(20200124.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"UnscentedTransformation\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"scaling\" DOUBLE DEFAULT " + UnscentedTransformationParameter.getAlpha() + " NOT NULL, \"damping\" DOUBLE DEFAULT " + UnscentedTransformationParameter.getBeta() + " NOT NULL, \"weight_zero\" DOUBLE DEFAULT " + UnscentedTransformationParameter.getWeightZero() + " NOT NULL);\r\n");
+		sqls.put(20200124.0002, "INSERT INTO \"UnscentedTransformation\" (\"id\") VALUES (1);\r\n");
 		
 		return sqls;
 	}
@@ -3464,8 +3468,11 @@ public class SQLManager {
 				+ "\"type\", \"number_of_iterations\", \"robust_estimation_limit\", "
 				+ "\"number_of_principal_components\", \"apply_variance_of_unit_weight\", "
 				+ "\"estimate_direction_set_orientation_approximation\", "
-				+ "\"congruence_analysis\", \"export_covariance_matrix\" "
+				+ "\"congruence_analysis\", \"export_covariance_matrix\", "
+				+ "\"scaling\", \"damping\", \"weight_zero\" "
 				+ "FROM \"AdjustmentDefinition\" "
+				+ "JOIN \"UnscentedTransformation\" "
+				+ "ON \"AdjustmentDefinition\".\"id\" = \"UnscentedTransformation\".\"id\" "
 				+ "WHERE \"id\" = 1 LIMIT 1";
 		
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -3482,6 +3489,10 @@ public class SQLManager {
 				settings.setOrientation(rs.getBoolean("estimate_direction_set_orientation_approximation"));
 				settings.setCongruenceAnalysis(rs.getBoolean("congruence_analysis"));
 				settings.setExportCovarianceMatrix(rs.getBoolean("export_covariance_matrix"));
+				
+				settings.setScalingParameterAlphaUT(rs.getDouble("scaling"));
+				settings.setDampingParameterBetaUT(rs.getDouble("damping"));
+				settings.setWeightZero(rs.getDouble("weight_zero"));
 			}
 		}
 	}
@@ -3528,8 +3539,33 @@ public class SQLManager {
 		stmt.setBoolean(idx++,  settings.isExportCovarianceMatrix());
 
 		stmt.execute();
+		
+
+		sql = "MERGE INTO \"UnscentedTransformation\" USING (VALUES "
+				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"id\", \"scaling\", \"damping\", \"weight_zero\") ON \"UnscentedTransformation\".\"id\" = \"vals\".\"id\" AND \"UnscentedTransformation\".\"id\" = 1 "
+				+ "WHEN MATCHED THEN UPDATE SET "
+				+ "\"UnscentedTransformation\".\"scaling\"     = \"vals\".\"scaling\", "
+				+ "\"UnscentedTransformation\".\"damping\"     = \"vals\".\"damping\", "
+				+ "\"UnscentedTransformation\".\"weight_zero\" = \"vals\".\"weight_zero\" "
+				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "\"vals\".\"id\", "
+				+ "\"vals\".\"scaling\", "
+				+ "\"vals\".\"damping\", "
+				+ "\"vals\".\"weight_zero\" ";
+		
+		
+		idx = 1;
+		stmt = this.dataBase.getPreparedStatement(sql);
+		// Insert new item
+		stmt.setInt(idx++,      1); // default ID
+		stmt.setDouble(idx++,   settings.getScalingParameterAlphaUT());
+		stmt.setDouble(idx++,   settings.getDampingParameterBetaUT());
+		stmt.setDouble(idx++,   settings.getWeightZero());
+
+		stmt.execute();
 	}
-	
+		
 	public void searchAndReplacePointNames(String searchRegex, String replaceRegex, boolean applyToWholeProject, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;

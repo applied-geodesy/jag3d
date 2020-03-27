@@ -44,6 +44,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 	public enum ValueSupport {
 		GREATER_THAN_ZERO,
 		LESS_THAN_ZERO,
+		LESS_THAN_ONE,
 		GREATER_THAN_OR_EQUAL_TO_ZERO,
 		LESS_THAN_OR_EQUAL_TO_ZERO,
 		NULL_VALUE_SUPPORT,
@@ -106,6 +107,8 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 			return value != null && value.doubleValue() <= 0;
 		case LESS_THAN_ZERO:
 			return value != null && value.doubleValue() <  0;
+		case LESS_THAN_ONE:
+			return value != null && value.doubleValue() <  1;
 		case NON_NULL_VALUE_SUPPORT:
 			return value != null;
 		default: // NULL_VALUE_SUPPORT:
@@ -124,8 +127,8 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 		            return change;
 
 				try {
-					String input = change.getControlNewText().trim();
-					if (input == null || input.isEmpty() || decimalPattern.matcher(input).matches())
+					String input = change.getControlNewText();
+					if (input == null || input.trim().isEmpty() || decimalPattern.matcher(input.trim()).matches())
 						return change;
 
 				} catch (Exception e) {

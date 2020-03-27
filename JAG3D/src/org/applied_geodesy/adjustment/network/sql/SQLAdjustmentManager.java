@@ -313,8 +313,11 @@ public class SQLAdjustmentManager {
 				+ "\"type\", \"number_of_iterations\", \"robust_estimation_limit\", "
 				+ "\"number_of_principal_components\", \"apply_variance_of_unit_weight\", "
 				+ "\"estimate_direction_set_orientation_approximation\", "
-				+ "\"congruence_analysis\", \"export_covariance_matrix\" "
+				+ "\"congruence_analysis\", \"export_covariance_matrix\", "
+				+ "\"scaling\", \"damping\", \"weight_zero\" "
 				+ "FROM \"AdjustmentDefinition\" "
+				+ "JOIN \"UnscentedTransformation\" "
+				+ "ON \"AdjustmentDefinition\".\"id\" = \"UnscentedTransformation\".\"id\" "
 				+ "WHERE \"id\" = 1 LIMIT 1";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -329,10 +332,15 @@ public class SQLAdjustmentManager {
 			this.congruenceAnalysis               = rs.getBoolean("congruence_analysis");
 			boolean exportCovarianceMatrix        = rs.getBoolean("export_covariance_matrix");
 			boolean applyVarianceOfUnitWeight     = rs.getBoolean("apply_variance_of_unit_weight");
+			
+			double scalingUT = rs.getDouble("scaling");
+			double dampingUT = rs.getDouble("damping");
+			double weight0UT = rs.getDouble("weight_zero");
 
 			this.estimationType = type == null ? EstimationType.L2NORM : type;
 			// Keine Schaetzung moeglich bei Simulationen 
-			applyVarianceOfUnitWeight = !(this.estimationType == EstimationType.L1NORM || this.estimationType == EstimationType.L2NORM) ? false : applyVarianceOfUnitWeight;
+			//applyVarianceOfUnitWeight = !(this.estimationType == EstimationType.L1NORM || this.estimationType == EstimationType.L2NORM) ? false : applyVarianceOfUnitWeight;
+			applyVarianceOfUnitWeight = this.estimationType == EstimationType.SIMULATION ? false : applyVarianceOfUnitWeight;
 			
 			adjustment.setMaximalNumberOfIterations(maximalNumberOfIterations);
 			adjustment.setRobustEstimationLimit(robustEstimationLimit);
@@ -340,6 +348,11 @@ public class SQLAdjustmentManager {
 			adjustment.setEstimationType(this.estimationType);
 			adjustment.setCongruenceAnalysis(this.congruenceAnalysis);
 			adjustment.setApplyAposterioriVarianceOfUnitWeight(applyVarianceOfUnitWeight);
+			
+			adjustment.setUnscentedTransformationScaling(scalingUT);
+			adjustment.setUnscentedTransformationDamping(dampingUT);
+			adjustment.setUnscentedTransformationWeightZero(weight0UT);
+			
 			// export path of covariance matrix
 			if (exportCovarianceMatrix && this.dataBase instanceof HSQLDB) 
 				this.networkAdjustment.setCovarianceExportPathAndBaseName(((HSQLDB)this.dataBase).getDataBaseFileName());
