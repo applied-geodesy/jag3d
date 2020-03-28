@@ -2072,7 +2072,7 @@ public class NetworkAdjustment implements Runnable {
 				else if (this.estimationType == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION) {
 					SigmaUT = new DenseVector(numObs);
 					if (weight0 < 0 || weight0 >= 1)
-						throw new IllegalArgumentException("Error, zero-weight is out of range. If SUT is applied, valid values for w0 are 0 <= w0 < 1! " + weight0);
+						throw new IllegalArgumentException("Error, zero-weight is out of range. If SUT is applied, valid values are 0 <= w0 < 1! " + weight0);
 				}
 
 				weight0 = weight0 / alpha2 + (1.0 - 1.0 / alpha2);
