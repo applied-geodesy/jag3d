@@ -303,7 +303,7 @@ public class AverageDialog {
 		}
 
 		if (labelText != null && valueType != null && value > 0) {
-			DoubleTextField thresholdField = new DoubleTextField(value, valueType, true, ValueSupport.GREATER_THAN_ZERO);
+			DoubleTextField thresholdField = new DoubleTextField(value, valueType, true, ValueSupport.EXCLUDING_INCLUDING_INTERVAL);
 			thresholdField.setMinWidth(100);
 			thresholdField.setMaxWidth(Double.MAX_VALUE);
 			thresholdField.numberProperty().addListener(new DoubleValueChangeListener(observationType));

@@ -257,7 +257,7 @@ public class UIPointPropertiesPane {
 			if (this.type == TreeItemType.STOCHASTIC_POINT_2D_LEAF || this.type == TreeItemType.STOCHASTIC_POINT_3D_LEAF) {
 				ProgressIndicator databaseTransactionuncertaintyCoordinateYLabelProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.CONSTANT_Y);
 				Label uncertaintyCoordinateYLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.y.label", "\u03C3y"));
-				this.uncertaintyCoordinateYField = new UncertaintyTextField(sigmaY, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
+				this.uncertaintyCoordinateYField = new UncertaintyTextField(sigmaY, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.EXCLUDING_INCLUDING_INTERVAL);
 				this.uncertaintyCoordinateYField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.y.tooltip", "Uncertainty of y-component of stochastic points")));
 				this.uncertaintyCoordinateYField.setUserData(PointGroupUncertaintyType.CONSTANT_Y);
 				this.uncertaintyCoordinateYField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateYField));
@@ -266,7 +266,7 @@ public class UIPointPropertiesPane {
 				
 				ProgressIndicator databaseTransactionuncertaintyCoordinateXLabelProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.CONSTANT_X);
 				Label uncertaintyCoordinateXLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.x.label", "\u03C3x"));
-				this.uncertaintyCoordinateXField = new UncertaintyTextField(sigmaX, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
+				this.uncertaintyCoordinateXField = new UncertaintyTextField(sigmaX, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.EXCLUDING_INCLUDING_INTERVAL);
 				this.uncertaintyCoordinateXField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.x.tooltip", "Uncertainty of x-component of stochastic points")));
 				this.uncertaintyCoordinateXField.setUserData(PointGroupUncertaintyType.CONSTANT_X);
 				this.uncertaintyCoordinateXField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateXField));
@@ -296,7 +296,7 @@ public class UIPointPropertiesPane {
 			if (this.type == TreeItemType.STOCHASTIC_POINT_1D_LEAF || this.type == TreeItemType.STOCHASTIC_POINT_3D_LEAF) {		
 				ProgressIndicator databaseTransactionuncertaintyCoordinateZLabelProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.CONSTANT_Z);
 				Label uncertaintyCoordinateZLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.z.label", "\u03C3z"));
-				this.uncertaintyCoordinateZField = new UncertaintyTextField(sigmaZ, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
+				this.uncertaintyCoordinateZField = new UncertaintyTextField(sigmaZ, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.EXCLUDING_INCLUDING_INTERVAL);
 				this.uncertaintyCoordinateZField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.z.tooltip", "Uncertainty of z-component of stochastic points")));
 				this.uncertaintyCoordinateZField.setUserData(PointGroupUncertaintyType.CONSTANT_Z);
 				this.uncertaintyCoordinateZField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateZField));
@@ -336,14 +336,14 @@ public class UIPointPropertiesPane {
 			uncertaintyDeflectionYLabel.setMinWidth(Control.USE_PREF_SIZE);
 			uncertaintyDeflectionXLabel.setMinWidth(Control.USE_PREF_SIZE);
 			
-			this.uncertaintyDeflectionYField = new UncertaintyTextField(sigmaY, CellValueType.ANGLE_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
+			this.uncertaintyDeflectionYField = new UncertaintyTextField(sigmaY, CellValueType.ANGLE_UNCERTAINTY, true, DoubleTextField.ValueSupport.EXCLUDING_INCLUDING_INTERVAL);
 			this.uncertaintyDeflectionYField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.deflection.y.tooltip", "Uncertainty of y-component of deflections of vertical")));
 			this.uncertaintyDeflectionYField.setUserData(PointGroupUncertaintyType.DEFLECTION_Y);
 			this.uncertaintyDeflectionYField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyDeflectionYField));
 			this.uncertaintyDeflectionYField.setMinWidth(fieldMinWidth);
 			this.uncertaintyDeflectionYField.setMaxWidth(fieldMaxWidth);
 						
-			this.uncertaintyDeflectionXField = new UncertaintyTextField(sigmaX, CellValueType.ANGLE_UNCERTAINTY, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO);
+			this.uncertaintyDeflectionXField = new UncertaintyTextField(sigmaX, CellValueType.ANGLE_UNCERTAINTY, true, DoubleTextField.ValueSupport.EXCLUDING_INCLUDING_INTERVAL);
 			this.uncertaintyDeflectionXField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.deflection.x.tooltip", "Uncertainty of x-component of deflections of vertical")));
 			this.uncertaintyDeflectionXField.setUserData(PointGroupUncertaintyType.DEFLECTION_X);
 			this.uncertaintyDeflectionXField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyDeflectionXField));
