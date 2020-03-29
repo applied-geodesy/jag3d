@@ -26,6 +26,7 @@ import java.beans.PropertyChangeListener;
 import java.util.Locale;
 
 import org.applied_geodesy.adjustment.EstimationStateType;
+import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.network.NetworkAdjustment;
 import org.applied_geodesy.adjustment.network.sql.IllegalProjectionPropertyException;
 import org.applied_geodesy.adjustment.network.sql.SQLAdjustmentManager;
@@ -65,7 +66,7 @@ public class NetworkAdjustmentDialog {
 		private double processState = 0.0;
 		private double finalStepProcesses = 0.0;
 		private SQLAdjustmentManager dataBaseManager;
-
+		private boolean updateProgressOnIterate = true;
 		private AdjustmentTask(SQLAdjustmentManager dataBaseManager) {
 			this.dataBaseManager = dataBaseManager;
 
@@ -87,6 +88,7 @@ public class NetworkAdjustmentDialog {
 				SQLManager.getInstance().checkNumberOfObersvationsPerUnknownParameter();
 
 				this.adjustment = this.dataBaseManager.getNetworkAdjustment();
+				this.updateProgressOnIterate = !(this.adjustment.getEstimationType() == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION || this.adjustment.getEstimationType() == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION);
 				this.finalStepProcesses = 0.25 / (this.adjustment.hasCovarianceExportPathAndBaseName() ? 6.0 : 4.0);
 				this.adjustment.addPropertyChangeListener(this);
 
@@ -240,10 +242,12 @@ public class NetworkAdjustmentDialog {
 				if (oldValue != null && newValue != null && oldValue instanceof Integer && newValue instanceof Integer) {
 					int current = (Integer)newValue;
 					int maximal = (Integer)oldValue;
-					double frac = 0.75 * Math.min((double)current / (double)maximal, 1.0);
-					this.processState = Math.max(this.processState, frac);
+					if (this.updateProgressOnIterate) {
+						double frac = 0.75 * Math.min((double)current / (double)maximal, 1.0);
+						this.processState = Math.max(this.processState, frac);
+						this.updateProgress(this.processState, 1.0);
+					}
 					this.updateIterationProgressMessage(String.format(Locale.ENGLISH, this.iterationTextTemplate, current, maximal));
-					this.updateProgress(this.processState, 1.0);
 				}
 				break;
 				
@@ -253,7 +257,7 @@ public class NetworkAdjustmentDialog {
 					int maximal = (Integer)oldValue;
 					double frac = 0.75 * Math.min((double)current / (double)maximal, 1.0);
 					this.processState = Math.max(this.processState, frac);
-					this.updateIterationProgressMessage(String.format(Locale.ENGLISH, this.unscentedTransformationTextTemplate, current, maximal));
+					this.updateMessage(String.format(Locale.ENGLISH, this.unscentedTransformationTextTemplate, current, maximal));
 					this.updateProgress(this.processState, 1.0);
 				}
 				break;

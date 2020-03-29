@@ -30,8 +30,11 @@ import java.util.Optional;
 
 import org.applied_geodesy.adjustment.DefaultValue;
 import org.applied_geodesy.adjustment.EstimationType;
+import org.applied_geodesy.adjustment.UnscentedTransformationParameter;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.table.CellValueType;
+import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField;
+import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField.ValueSupport;
 import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.util.i18.I18N;
 
@@ -53,10 +56,13 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -74,6 +80,9 @@ public class LeastSquaresSettingDialog {
 		private BooleanProperty applyVarianceOfUnitWeight     = new SimpleBooleanProperty(Boolean.TRUE);
 		private BooleanProperty exportCovarianceMatrix        = new SimpleBooleanProperty(Boolean.FALSE);
 		private ObjectProperty<EstimationType> estimationType = new SimpleObjectProperty<EstimationType>(EstimationType.L2NORM);
+		private ObjectProperty<Double> scalingParameterAlphaUT = new SimpleObjectProperty<Double>(UnscentedTransformationParameter.getAlpha());
+		private ObjectProperty<Double> dampingParameterBetaUT  = new SimpleObjectProperty<Double>(UnscentedTransformationParameter.getBeta());
+		private ObjectProperty<Double> weightZero = new SimpleObjectProperty<Double>(UnscentedTransformationParameter.getWeightZero());
 
 		public ObjectProperty<Integer> iterationProperty() {
 			return this.iteration;
@@ -170,6 +179,42 @@ public class LeastSquaresSettingDialog {
 		public void setExportCovarianceMatrix(final boolean exportCovarianceMatrix) {
 			this.exportCovarianceMatrixProperty().set(exportCovarianceMatrix);
 		}
+		
+		public ObjectProperty<Double> scalingParameterAlphaUTProperty() {
+			return this.scalingParameterAlphaUT;
+		}
+		
+		public double getScalingParameterAlphaUT() {
+			return this.scalingParameterAlphaUTProperty().get();
+		}
+		
+		public void setScalingParameterAlphaUT(final double alpha) {
+			this.scalingParameterAlphaUTProperty().set(alpha);
+		}
+		
+		public ObjectProperty<Double> dampingParameterBetaUTProperty() {
+			return this.dampingParameterBetaUT;
+		}
+		
+		public double getDampingParameterBetaUT() {
+			return this.dampingParameterBetaUTProperty().get();
+		}
+		
+		public void setDampingParameterBetaUT(final double beta) {
+			this.dampingParameterBetaUTProperty().set(beta);
+		}
+		
+		public ObjectProperty<Double> weightZeroProperty() {
+			return this.weightZero;
+		}
+		
+		public double getWeightZero() {
+			return this.weightZeroProperty().get();
+		}
+		
+		public void setWeightZero(final double weight0) {
+			this.weightZeroProperty().set(weight0);
+		}
 	}
 	
 	private class EstimationTypeChangeListener implements ChangeListener<EstimationType> {
@@ -191,6 +236,7 @@ public class LeastSquaresSettingDialog {
 	private Spinner<Integer> iterationSpinner;
 	private Spinner<Integer> principalComponentSpinner;
 	private Spinner<Double> robustSpinner;
+	private DoubleTextField alphaTextField, betaTextField, weight0TextField;
 	private CheckBox orientationApproximationCheckBox, congruenceAnalysisCheckBox, applyVarianceOfUnitWeightCheckBox, exportCovarianceMatrixCheckBox;
 	private LeastSquaresSettingDialog() {}
 
@@ -236,7 +282,8 @@ public class LeastSquaresSettingDialog {
 			@Override
 			public LeastSquaresSettings call(ButtonType buttonType) {
 				if (buttonType == ButtonType.OK) {
-					save();					
+					save();	
+					return settings;
 				}
 				return null;
 			}
@@ -244,8 +291,107 @@ public class LeastSquaresSettingDialog {
 	}
 	
 	private Node createPane() {
-		this.estimationTypeComboBox = this.createEstimationTypeComboBox(EstimationType.L2NORM, i18n.getString("LeastSquaresSettingDialog.estimationtype.tooltip", "Set estimation method")); 
+		VBox contentPane = new VBox();
 		
+		this.estimationTypeComboBox = this.createEstimationTypeComboBox(EstimationType.L2NORM, i18n.getString("LeastSquaresSettingDialog.estimationtype.tooltip", "Set estimation method")); 
+		this.settings.estimationTypeProperty().addListener(new EstimationTypeChangeListener());
+		this.estimationTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new EstimationTypeChangeListener());
+		this.estimationTypeComboBox.setPadding(new Insets(0, 0, 5, 0)); // oben, recht, unten, links
+		
+		contentPane.getChildren().add(this.estimationTypeComboBox);
+		
+		if (this.enableUnscentedTransformation) {
+			TabPane tabPane = new TabPane();
+			Tab tabGen = new Tab(i18n.getString("LeastSquaresSettingDialog.tab.leastsquares.label", "Least-squares"), this.createGeneralSettingPane());
+			tabGen.setTooltip(new Tooltip(i18n.getString("LeastSquaresSettingDialog.tab.leastsquares.tooltip", "Least-squares options")));
+			tabGen.setClosable(false);
+			tabPane.getTabs().add(tabGen);
+		
+			Tab tabUT  = new Tab(i18n.getString("LeastSquaresSettingDialog.tab.unscented_transformation.label", "Unscented transformation"), this.createUnscentedTransformationSettingPane());
+			tabUT.setTooltip(new Tooltip(i18n.getString("LeastSquaresSettingDialog.tab.unscented_transformation.tooltip", "Unscented transformation parameters")));
+			tabUT.setClosable(false);
+			tabPane.getTabs().add(tabUT);
+			
+			tabPane.setPadding(new Insets(5, 0, 0, 0)); // oben, recht, unten, links
+			tabPane.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+			tabPane.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
+			
+			contentPane.getChildren().add(tabPane);
+		}
+		else {
+			contentPane.getChildren().add(this.createGeneralSettingPane());
+		}
+		
+		contentPane.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		contentPane.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
+		
+		Platform.runLater(new Runnable() {
+			@Override public void run() {
+				estimationTypeComboBox.requestFocus();
+			}
+		});
+		
+		return contentPane;
+	}
+	
+	private Node createUnscentedTransformationSettingPane() {
+		Label alphaLabel = new Label(i18n.getString("LeastSquaresSettingDialog.ut.scaling.label", "Scaling \u03B1:"));
+		Label betaLabel  = new Label(i18n.getString("LeastSquaresSettingDialog.ut.damping.label", "Damping \u03B2:"));
+		Label utWeight0Label = new Label(i18n.getString("LeastSquaresSettingDialog.ut.weight0.label", "Weight w0:"));  
+		
+		this.alphaTextField = this.createDoubleTextField(UnscentedTransformationParameter.getAlpha(), ValueSupport.GREATER_THAN_ZERO, i18n.getString("LeastSquaresSettingDialog.ut.scaling.tooltip", "Defines spread of sigma points around the mean value, if \u03B1 \u2260 1"));
+		this.betaTextField  = this.createDoubleTextField(UnscentedTransformationParameter.getBeta(), ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("LeastSquaresSettingDialog.ut.damping.tooltip", "Considers prior knowledge of the distribution, if \u03B2 \u2260 0"));
+		this.weight0TextField = this.createDoubleTextField(UnscentedTransformationParameter.getWeightZero(), ValueSupport.LESS_THAN_ONE, i18n.getString("LeastSquaresSettingDialog.ut.weight0.tooltip", "Set the weight related to the zero sigma point (MUT: w0 \u003c 1, SUT: 0 \u2264 w0 \u003c 1)"));
+		
+		this.alphaTextField.numberProperty().bindBidirectional(this.settings.scalingParameterAlphaUTProperty());
+		this.betaTextField.numberProperty().bindBidirectional(this.settings.dampingParameterBetaUTProperty());
+		this.weight0TextField.numberProperty().bindBidirectional(this.settings.weightZeroProperty());
+		
+		alphaLabel.setLabelFor(this.alphaTextField);
+		betaLabel.setLabelFor(this.betaTextField);
+		utWeight0Label.setLabelFor(this.weight0TextField);
+		
+		GridPane gridPane = new GridPane();
+		gridPane.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
+		gridPane.setAlignment(Pos.TOP_CENTER);
+		gridPane.setPadding(new Insets(5,15,5,15)); // oben, recht, unten, links
+//		gridPane.setGridLinesVisible(true);
+		
+		GridPane.setHgrow(alphaLabel, Priority.NEVER);
+		GridPane.setHgrow(betaLabel, Priority.NEVER);
+		GridPane.setHgrow(utWeight0Label, Priority.NEVER);
+		
+		GridPane.setHgrow(this.alphaTextField, Priority.ALWAYS);
+		GridPane.setHgrow(this.betaTextField, Priority.ALWAYS);
+		GridPane.setHgrow(this.weight0TextField, Priority.ALWAYS);
+		
+		// https://stackoverflow.com/questions/50479384/gridpane-with-gaps-inside-scrollpane-rendering-wrong
+		Insets insetsLeft   = new Insets(5, 7, 5, 2);
+		Insets insetsRight  = new Insets(5, 2, 5, 7);
+
+		GridPane.setMargin(alphaLabel, insetsLeft);
+		GridPane.setMargin(this.alphaTextField, insetsRight);
+		
+		GridPane.setMargin(betaLabel, insetsLeft);
+		GridPane.setMargin(this.betaTextField, insetsRight);
+		
+		GridPane.setMargin(utWeight0Label, insetsLeft);
+		GridPane.setMargin(this.weight0TextField, insetsRight);
+	
+		int row = 0;
+		gridPane.add(utWeight0Label,        0, ++row);
+		gridPane.add(this.weight0TextField, 1,   row);
+		
+		gridPane.add(alphaLabel,          0, ++row);
+		gridPane.add(this.alphaTextField, 1,   row, 2, 1);
+
+		gridPane.add(betaLabel,          0, ++row);
+		gridPane.add(this.betaTextField, 1,   row, 2, 1);
+
+		return gridPane;
+	}
+	
+	private Node createGeneralSettingPane() {
 		Label iterationLabel = new Label(i18n.getString("LeastSquaresSettingDialog.iterations.label", "Maximum number of iterations:"));
 		this.iterationSpinner = this.createIntegerSpinner(0, DefaultValue.getMaximalNumberOfIterations(), 10, i18n.getString("LeastSquaresSettingDialog.iterations.tooltip", "Set maximum permissible iteration value"));
 		iterationLabel.setLabelFor(this.iterationSpinner);
@@ -265,8 +411,7 @@ public class LeastSquaresSettingDialog {
 			i18n.getString("LeastSquaresSettingDialog.orientation.label", "Orientation approximation"),
 			i18n.getString("LeastSquaresSettingDialog.orientation.tooltip", "If checked, orientation approximations of direction sets will be estimated before network adjustment starts")
 		);
-		
-		
+
 		this.congruenceAnalysisCheckBox = this.createCheckBox(
 				i18n.getString("LeastSquaresSettingDialog.congruenceanalysis.label", "Congruence analysis"),
 				i18n.getString("LeastSquaresSettingDialog.congruenceanalysis.tooltip", "If checked, a congruence analysis will be carry out in case of a free network adjustment")
@@ -289,16 +434,13 @@ public class LeastSquaresSettingDialog {
 		this.iterationSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.iterationProperty());
 		this.principalComponentSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.principalComponentsProperty());
 		this.robustSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.robustEstimationLimitProperty());
-		
-		this.settings.estimationTypeProperty().addListener(new EstimationTypeChangeListener());
-		this.estimationTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new EstimationTypeChangeListener());
-		
+
 		GridPane gridPane = new GridPane();
-		gridPane.setMaxWidth(Double.MAX_VALUE);
-		//gridPane.setMinWidth(300);
-		gridPane.setHgap(20);
-		gridPane.setVgap(10);
-		gridPane.setAlignment(Pos.CENTER);
+		gridPane.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
+
+//		gridPane.setHgap(20);
+//		gridPane.setVgap(10);
+		gridPane.setAlignment(Pos.TOP_CENTER);
 		gridPane.setPadding(new Insets(5,15,5,15)); // oben, recht, unten, links
 		//gridPane.setGridLinesVisible(true);
 		
@@ -315,9 +457,28 @@ public class LeastSquaresSettingDialog {
 		GridPane.setHgrow(this.principalComponentSpinner, Priority.ALWAYS);
 		GridPane.setHgrow(this.iterationSpinner, Priority.ALWAYS);
 		
-		int row = 0;
-		gridPane.add(this.estimationTypeComboBox, 0, ++row, 2, 1);
+		// https://stackoverflow.com/questions/50479384/gridpane-with-gaps-inside-scrollpane-rendering-wrong
+		Insets insetsCenter = new Insets(5, 2, 5, 2);
+		Insets insetsTop    = new Insets(10, 2, 5, 2);
+		Insets insetsLeft   = new Insets(5, 7, 5, 2);
+		Insets insetsRight  = new Insets(5, 2, 5, 7);
+		
+		GridPane.setMargin(this.applyVarianceOfUnitWeightCheckBox, insetsTop);
+		GridPane.setMargin(this.orientationApproximationCheckBox, insetsCenter);
+		
+		GridPane.setMargin(this.congruenceAnalysisCheckBox, insetsTop);
+		GridPane.setMargin(this.exportCovarianceMatrixCheckBox, insetsCenter);
 
+		GridPane.setMargin(iterationLabel, insetsLeft);
+		GridPane.setMargin(this.iterationSpinner, insetsRight);
+
+		GridPane.setMargin(robustLabel, insetsLeft);
+		GridPane.setMargin(this.robustSpinner, insetsRight);
+		
+		GridPane.setMargin(principalComponentLabel, insetsLeft);
+		GridPane.setMargin(this.principalComponentSpinner, insetsRight);
+		
+		int row = 0;
 		gridPane.add(this.applyVarianceOfUnitWeightCheckBox, 0, ++row, 2, 1);
 		gridPane.add(this.orientationApproximationCheckBox,  0, ++row, 2, 1);
 
@@ -333,12 +494,6 @@ public class LeastSquaresSettingDialog {
 		gridPane.add(this.congruenceAnalysisCheckBox,     0, ++row, 2, 1);
 		gridPane.add(this.exportCovarianceMatrixCheckBox, 0, ++row, 2, 1);
 
-		Platform.runLater(new Runnable() {
-			@Override public void run() {
-				estimationTypeComboBox.requestFocus();
-			}
-		});
-		
 		return gridPane;
 	}
 	
@@ -348,10 +503,10 @@ public class LeastSquaresSettingDialog {
 		EstimationType[] estimationTypeArray = EstimationType.values();
 		if (!this.enableUnscentedTransformation) {
 			List<EstimationType> estimationTypeList = new ArrayList<EstimationType>(Arrays.asList(estimationTypeArray));
-			estimationTypeList.remove(EstimationType.STANDARD_UNSCENTED_TRANSFORMATION);
+			estimationTypeList.remove(EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION);
 			estimationTypeList.remove(EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION);
 			estimationTypeArray = estimationTypeList.toArray(new EstimationType[estimationTypeList.size()]);
-			if (item == EstimationType.STANDARD_UNSCENTED_TRANSFORMATION || item == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION)
+			if (item == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION || item == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION)
 				item = EstimationType.L2NORM;
 		}
 		typeComboBox.getItems().setAll(estimationTypeArray);  // EstimationType.values()
@@ -369,10 +524,10 @@ public class LeastSquaresSettingDialog {
 					return i18n.getString("LeastSquaresSettingDialog.estimationtype.l2norm.label", "Least-squares adjustment (L2-Norm)");
 				case SIMULATION:
 					return i18n.getString("LeastSquaresSettingDialog.estimationtype.simulation.label", "Simulation (Pre-analysis)");
-				case STANDARD_UNSCENTED_TRANSFORMATION:
-					return i18n.getString("LeastSquaresSettingDialog.estimationtype.sut.label", "Standard unscented transformation (SUT)");
 				case MODIFIED_UNSCENTED_TRANSFORMATION:
 					return i18n.getString("LeastSquaresSettingDialog.estimationtype.mut.label", "Modified unscented transformation (MUT)");
+				case SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION:
+					return i18n.getString("LeastSquaresSettingDialog.estimationtype.sut.label", "Spherical simplex unscented transformation (SUT)");
 				}
 				return null;
 			}
@@ -399,6 +554,15 @@ public class LeastSquaresSettingDialog {
 		checkBox.setMinHeight(Control.USE_PREF_SIZE);
 		checkBox.setMaxHeight(Double.MAX_VALUE);
 		return checkBox;
+	}
+	
+	private DoubleTextField createDoubleTextField(double value, ValueSupport valueSupport, String tooltip) {
+		DoubleTextField field = new DoubleTextField(value, CellValueType.STATISTIC, Boolean.FALSE, valueSupport);
+		field.setTooltip(new Tooltip(tooltip));
+		field.setAlignment(Pos.CENTER_RIGHT);
+		field.setMinHeight(Control.USE_PREF_SIZE);
+		field.setMaxHeight(Double.MAX_VALUE);
+		return field;
 	}
 	
 	private Spinner<Integer> createIntegerSpinner(int min, int max, int amountToStepBy, String tooltip) {
@@ -522,9 +686,9 @@ public class LeastSquaresSettingDialog {
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("FormatterOptionDialog.message.error.save.exception.title", "Unexpected SQL-Error"),
-							i18n.getString("FormatterOptionDialog.message.error.save.exception.header", "Error, could not save least-squares settings to database."),
-							i18n.getString("FormatterOptionDialog.message.error.save.exception.message", "An exception has occurred during database transaction."),
+							i18n.getString("LeastSquaresSettingDialog.message.error.save.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("LeastSquaresSettingDialog.message.error.save.exception.header", "Error, could not save least-squares settings to database."),
+							i18n.getString("LeastSquaresSettingDialog.message.error.save.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}
@@ -540,9 +704,9 @@ public class LeastSquaresSettingDialog {
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("ProjectionDialog.message.error.load.exception.title", "Unexpected SQL-Error"),
-							i18n.getString("ProjectionDialog.message.error.load.exception.header", "Error, could not load least-squares settings from database."),
-							i18n.getString("ProjectionDialog.message.error.load.exception.message", "An exception has occurred during database transaction."),
+							i18n.getString("LeastSquaresSettingDialog.message.error.load.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("LeastSquaresSettingDialog.message.error.load.exception.header", "Error, could not load least-squares settings from database."),
+							i18n.getString("LeastSquaresSettingDialog.message.error.load.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}

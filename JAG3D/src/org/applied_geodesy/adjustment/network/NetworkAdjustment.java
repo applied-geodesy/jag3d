@@ -44,6 +44,7 @@ import org.applied_geodesy.adjustment.EstimationStateType;
 import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.NormalEquationSystem;
+import org.applied_geodesy.adjustment.UnscentedTransformationParameter;
 import org.applied_geodesy.adjustment.network.DefectType;
 import org.applied_geodesy.adjustment.network.congruence.CongruenceAnalysisGroup;
 import org.applied_geodesy.adjustment.network.congruence.CongruenceAnalysisPointPair;
@@ -122,7 +123,10 @@ public class NetworkAdjustment implements Runnable {
 	               omega            = 0.0,
 	               traceCxxPoints   = 0.0,
 	               finalLinearisationError = 0.0,
-	               robustEstimationLimit   = DefaultValue.getRobustEstimationLimit();
+	               robustEstimationLimit   = DefaultValue.getRobustEstimationLimit(),
+	               alphaUT    = UnscentedTransformationParameter.getAlpha(),
+	               betaUT     = UnscentedTransformationParameter.getBeta(),
+	               weightZero = UnscentedTransformationParameter.getWeightZero();
 
 	private EstimationStateType currentEstimationStatus = EstimationStateType.BUSY;
 	private double currentMaxAbsDx = maxDx;
@@ -2002,7 +2006,7 @@ public class NetworkAdjustment implements Runnable {
 	 * @return estimateStatus
 	 */
 	public EstimationStateType estimateModel() {
-		boolean applyUnscentedTransformation = this.estimationType == EstimationType.STANDARD_UNSCENTED_TRANSFORMATION || this.estimationType == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION;
+		boolean applyUnscentedTransformation = this.estimationType == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION || this.estimationType == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION;
 		this.maxDx = Double.MIN_VALUE;
 		this.currentMaxAbsDx = this.maxDx;
 		this.numberOfHypotesis = 0;
@@ -2046,31 +2050,40 @@ public class NetworkAdjustment implements Runnable {
 		try {
 			double lastStepSignum = 0.0;
 			int numObs = this.numberOfObservations + this.numberOfStochasticPointRows + this.numberOfStochasticDeflectionRows;
-			int numberOfEstimationSteps = applyUnscentedTransformation ? 2 * numObs + 1 : 1;
-			
-			double alpha  = 0.001;
-			double beta   = 2.0;
-			double lambda = 0.0;
-			double kappa  = 0;
-			
-			if (this.estimationType == EstimationType.STANDARD_UNSCENTED_TRANSFORMATION)
-				kappa  = 3.0 - numObs;
-			else if (this.estimationType == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION)
-				kappa  = alpha*alpha*(numObs + lambda) - numObs;
+			int numberOfEstimationSteps = this.estimationType == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION ? 2 * numObs + 1 : 
+				this.estimationType == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION ? numObs + 2 : 1;
 
-			double sqrtNumObsKappa = Math.sqrt(numObs + kappa); // == sqrt(3)
-			double weightN = 1.0 / (2.0 * (numObs + kappa)); // == 1/6
-			double weightC = kappa / (numObs + kappa);
-			double weightA = 1.0 - alpha*alpha + beta;
-			
-			Vector xUT = applyUnscentedTransformation ? new DenseVector(this.numberOfUnknownParameters) : null;
-			Matrix solutionVectors = applyUnscentedTransformation ? new DenseMatrix(this.numberOfUnknownParameters, numberOfEstimationSteps) : null;
+			double alpha2  = this.alphaUT * this.alphaUT;
+			double weight0 = this.weightZero;
+			double weighti = (1.0 - weight0) / (double)(numberOfEstimationSteps - 1.0);
+	
+			Vector SigmaUT = null, xUT = null, vUT = null;
+			Matrix solutionVectors = null;
+
+			if (applyUnscentedTransformation) {
+				xUT = new DenseVector(this.numberOfUnknownParameters);
+				vUT = new DenseVector(numObs);
+				solutionVectors = new DenseMatrix(this.numberOfUnknownParameters, numberOfEstimationSteps);
+				
+				if (this.estimationType == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION) {
+					SigmaUT = new DenseVector(1);
+					SigmaUT.set(0, Math.sqrt( 0.5 / weighti ));
+				}
+				else if (this.estimationType == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION) {
+					SigmaUT = new DenseVector(numObs);
+					if (weight0 < 0 || weight0 >= 1)
+						throw new IllegalArgumentException("Error, zero-weight is out of range. If SUT is applied, valid values are 0 <= w0 < 1! " + weight0);
+				}
+
+				weight0 = weight0 / alpha2 + (1.0 - 1.0 / alpha2);
+				weighti = weighti / alpha2;
+			}
 			
 			for (int estimationStep = 0; estimationStep < numberOfEstimationSteps; estimationStep++) {
 				// Reset aller Iterationseinstellungen
 				this.maxDx = Double.MIN_VALUE;
 				this.currentMaxAbsDx = this.maxDx;
-				runs = this.maximalNumberOfIterations-1;
+				runs = this.maximalNumberOfIterations - 1;
 				isEstimated = false;
 				estimateCompleteModel = false;
 				isConverge = true;
@@ -2079,25 +2092,30 @@ public class NetworkAdjustment implements Runnable {
 					this.currentEstimationStatus = EstimationStateType.UNSCENTED_TRANSFORMATION_STEP;
 					this.change.firePropertyChange(this.currentEstimationStatus.name(), numberOfEstimationSteps, estimationStep+1);
 					
-					// Reset der unbekannten Parameter
+					// Reset der unbekannten Datumsparameter
 					if (numberOfEstimationSteps > 1 && estimationStep != (numberOfEstimationSteps - 1))
 						this.resetDatumPoints();
 					
-					double signum = estimationStep == (numberOfEstimationSteps - 1) ? 0.0 : estimationStep < numObs ? +1.0 : -1.0;
-					int currentObsIdx = estimationStep % numObs;
-					
-					// Entferne letzte UT-Modifizierung
-					if (estimationStep > 0) {
-						int lastObsIdx = currentObsIdx - 1;
-						lastObsIdx = lastObsIdx < 0 ? numObs - 1 : lastObsIdx;
-						this.prepareUnscentedTransformationObservation(lastObsIdx, -lastStepSignum * sqrtNumObsKappa);
+					if (this.estimationType == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION) {
+						double signum = estimationStep == (numberOfEstimationSteps - 1) ? 0.0 : estimationStep < numObs ? +1.0 : -1.0;
+						int currentObsIdx = estimationStep % numObs;
+
+						// Entferne letzte UT-Modifizierung
+						if (estimationStep > 0) {
+							int lastObsIdx = currentObsIdx - 1;
+							lastObsIdx = lastObsIdx < 0 ? numObs - 1 : lastObsIdx;
+							this.prepareModifiedUnscentedTransformationObservation(lastObsIdx, -lastStepSignum * SigmaUT.get(0));
+						}
+
+						// UT-Modifizierung des aktuellen Schritts
+						if (estimationStep < numberOfEstimationSteps - 1) {
+							this.prepareModifiedUnscentedTransformationObservation(currentObsIdx, signum * SigmaUT.get(0));
+						}
+						lastStepSignum = signum;	
 					}
-					
-					// UT-Modifizierung des aktuellen Schritts
-					if (estimationStep < numberOfEstimationSteps - 1) {
-						this.prepareUnscentedTransformationObservation(currentObsIdx, signum * sqrtNumObsKappa);
+					else if (this.estimationType == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION) {
+						this.prepareSphericalSimplexUnscentedTransformationObservation(estimationStep, SigmaUT, weighti);
 					}
-					lastStepSignum = signum;			
 				}
 				
 				do {
@@ -2105,7 +2123,7 @@ public class NetworkAdjustment implements Runnable {
 					this.numberOfHypotesis = 0;
 					this.iterationStep = this.maximalNumberOfIterations-runs;
 					this.currentEstimationStatus = EstimationStateType.ITERATE;
-					if (!applyUnscentedTransformation)
+					//if (!applyUnscentedTransformation)
 						this.change.firePropertyChange(this.currentEstimationStatus.name(), this.maximalNumberOfIterations, this.iterationStep);
 
 					// erzeuge Normalgleichung		
@@ -2164,18 +2182,19 @@ public class NetworkAdjustment implements Runnable {
 
 					if (applyUnscentedTransformation) {
 						if (estimateCompleteModel) {
-							this.addUnscentedTransformationSolution(dx, xUT, solutionVectors, estimationStep, estimationStep < (numberOfEstimationSteps - 1) ? weightN : weightC);
+							this.addUnscentedTransformationSolution(dx, xUT, vUT, solutionVectors, estimationStep, estimationStep < (numberOfEstimationSteps - 1) ? weighti : weight0);
 						}
 						
 						// Letzter Durchlauf der UT
 						// Bestimme Parameterupdate dx und Kovarianzmatrix Qxx
 						if (estimateCompleteModel && estimationStep > 0 && estimationStep == (numberOfEstimationSteps - 1)) {
-							this.estimateUnscentedTransformationParameterUpdateAndCovarianceMatrix(dx, xUT, solutionVectors, weightN, weightC, weightA);
+							this.estimateUnscentedTransformationParameterUpdateAndCovarianceMatrix(dx, xUT, solutionVectors, weighti, weight0 + (1.0 - alpha2 + this.betaUT));
 						}
 					}
 
-					this.updateModel(dx, estimateCompleteModel && estimationStep == (numberOfEstimationSteps - 1));
+					this.updateModel(dx, vUT, estimateCompleteModel && estimationStep == (numberOfEstimationSteps - 1));
 					dx = null;
+					vUT = null;
 
 					if (this.interrupt) {
 						this.currentEstimationStatus = EstimationStateType.INTERRUPT;
@@ -2266,7 +2285,163 @@ public class NetworkAdjustment implements Runnable {
 	 * @param signum
 	 * @param scale
 	 */
-	private void prepareUnscentedTransformationObservation(int index, double scale) {
+	private void prepareSphericalSimplexUnscentedTransformationObservation(int estimationStep, Vector SigmaUT, double weight) {
+		int noo = SigmaUT.size();
+		
+		for (int idx=0; idx < this.numberOfObservations; idx++) {
+			Observation observation = this.projectObservations.get(idx);
+			int row      = observation.getRowInJacobiMatrix();
+			double std   = observation.getStdApriori();
+			double value = observation.getValueApriori();
+			double sigmaUT = SigmaUT.get(row);
+			// entferne letzte Modifikation
+			value = value - std * sigmaUT;
+			sigmaUT = 0;
+			
+			if (estimationStep < noo + 2 && row >= 0) {
+//				if (row == 0) {
+//					if (estimationStep == 0)
+//						sigmaUT = -1.0/Math.sqrt(2.0 * weight);
+//					else if (estimationStep == 1)
+//						sigmaUT = +1.0/Math.sqrt(2.0 * weight);
+//				}
+//				if (row >= 0) {
+				if (row == estimationStep - 1)
+					sigmaUT = (1.0 + row) / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight );
+				else if (row > estimationStep - 2)
+					sigmaUT = -1.0 / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight );
+//				}
+			}
+			// modifiziere Beobachtung
+			value = value + std * sigmaUT;
+			observation.setValueApriori(value);
+			SigmaUT.set(row, sigmaUT);
+		}
+
+		for (int idx = 0; idx < this.stochasticDeflectionPoints.size(); idx++) {
+			Point point = this.stochasticDeflectionPoints.get(idx);
+			
+			Deflection deflectionX = point.getDeflectionX();
+			Deflection deflectionY = point.getDeflectionY();
+
+			int rowX = deflectionX.getRowInJacobiMatrix();
+			int rowY = deflectionY.getRowInJacobiMatrix();
+			
+			double stdX   = deflectionX.getStdApriori();
+			double stdY   = deflectionY.getStdApriori();
+			
+			double valueX = deflectionX.getValue0();
+			double valueY = deflectionY.getValue0();
+			
+			double sigmaUTX = SigmaUT.get(rowX);
+			double sigmaUTY = SigmaUT.get(rowY);
+			
+			// entferne letzte Modifikation in X/Y
+			valueX = valueX - stdX * sigmaUTX;
+			valueY = valueY - stdY * sigmaUTY;
+			
+			sigmaUTX = 0;
+			sigmaUTY = 0;
+			
+			if (estimationStep < noo + 2 && rowX >= 0 && rowY >= 0) {
+				if (rowX == estimationStep - 1)
+					sigmaUTX = (1.0 + rowX) / Math.sqrt( ((1.0 + rowX) * (2.0 + rowX)) * weight );
+				else if (rowX > estimationStep - 2)
+					sigmaUTX = -1.0 / Math.sqrt( ((1.0 + rowX) * (2.0 + rowX)) * weight );
+				
+				if (rowY == estimationStep - 1)
+					sigmaUTY = (1.0 + rowY) / Math.sqrt( ((1.0 + rowY) * (2.0 + rowY)) * weight );
+				else if (rowY > estimationStep - 2)
+					sigmaUTY = -1.0 / Math.sqrt( ((1.0 + rowY) * (2.0 + rowY)) * weight );
+			}
+
+			// modifiziere X/Y
+			valueX = valueX + stdX * sigmaUTX;
+			valueY = valueY + stdY * sigmaUTY;
+			
+			deflectionX.setValue0(valueX);
+			deflectionY.setValue0(valueY);
+			
+			SigmaUT.set(rowX, sigmaUTX);
+			SigmaUT.set(rowY, sigmaUTY);
+		}
+		
+		for (int idx = 0; idx < this.stochasticPoints.size(); idx++) {
+			Point point = this.stochasticPoints.get(idx);
+			int row = point.getRowInJacobiMatrix();
+			int dim = point.getDimension();
+			
+			if (row >= 0) {
+				if (dim != 1) {
+					double stdX    = point.getStdXApriori();
+					double valueX  = point.getX0();
+					double sigmaUTX = SigmaUT.get(row);
+					// entferne letzte Modifikation in X
+					valueX = valueX - stdX * sigmaUTX;
+					sigmaUTX = 0;
+
+					if (estimationStep < noo + 2) {
+						if (row == estimationStep - 1)
+							sigmaUTX = (1.0 + row) / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight );
+						else if (row > estimationStep - 2)
+							sigmaUTX = -1.0 / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight );
+					}
+					// modifiziere X
+					valueX = valueX + stdX * sigmaUTX;
+					point.setX0(valueX);
+					SigmaUT.set(row, sigmaUTX);
+					row++;
+
+					double stdY    = point.getStdYApriori();
+					double valueY  = point.getY0();
+					double sigmaUTY = SigmaUT.get(row);
+					// entferne letzte Modifikation in Y
+					valueY = valueY - stdY * sigmaUTY;
+					sigmaUTY = 0;
+
+					if (estimationStep < noo + 2) {
+						if (row == estimationStep - 1)
+							sigmaUTY = (1.0 + row) / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight );
+						else if (row > estimationStep - 2)
+							sigmaUTY = -1.0 / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight );
+					}
+					// modifiziere Y
+					valueY = valueY + stdY * sigmaUTY;
+					point.setY0(valueY);
+					SigmaUT.set(row, sigmaUTY);
+					row++;
+				}
+				if (dim != 2) {
+					double stdZ    = point.getStdZApriori();
+					double valueZ  = point.getZ0();
+					double sigmaUTZ = SigmaUT.get(row);
+					// entferne letzte Modifikation in Z
+					valueZ = valueZ - stdZ * sigmaUTZ;
+					sigmaUTZ = 0;
+
+					if (estimationStep < noo + 2) {
+						if (row == estimationStep - 1)
+							sigmaUTZ = (1.0 + row) / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight );
+						else if (row > estimationStep - 2)
+							sigmaUTZ = -1.0 / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight );
+					}
+					// modifiziere Z
+					valueZ = valueZ + stdZ * sigmaUTZ;
+					point.setZ0(valueZ);
+					SigmaUT.set(row, sigmaUTZ);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Modifiziert die Beobachtung observation(index) fuer die
+	 * Unscented Transformation (bzw. macht die Modifikation rueckgaengig)
+	 * @param index
+	 * @param signum
+	 * @param scale
+	 */
+	private void prepareModifiedUnscentedTransformationObservation(int index, double scale) {
 		if (index < this.numberOfObservations) {
 			Observation observation = this.projectObservations.get(index);
 
@@ -2355,7 +2530,7 @@ public class NetworkAdjustment implements Runnable {
 		}
 	}
 	
-	private void estimateUnscentedTransformationParameterUpdateAndCovarianceMatrix(Vector dx, Vector xUT, Matrix solutionVectors, double weightN, double weightC, double weightA) {
+	private void estimateUnscentedTransformationParameterUpdateAndCovarianceMatrix(Vector dx, Vector xUT, Matrix solutionVectors, double weightN, double weightC) {
 		int numberOfEstimationSteps = solutionVectors.numColumns();
 		this.Qxx.zero();
 		
@@ -2435,17 +2610,11 @@ public class NetworkAdjustment implements Runnable {
 						// Laufindex des jeweiligen Spalten-/Zeilenvektors
 						for (int estimationStep = 0; estimationStep < numberOfEstimationSteps; estimationStep++) {
 							double weight = estimationStep == (numberOfEstimationSteps - 1) ? weightC : weightN;
-						
+
 							double valueCol = solutionVectors.get(col + dCol, estimationStep) - xUT.get(col + dCol);
 							double valueRow = solutionVectors.get(row + dRow, estimationStep) - xUT.get(row + dRow);
-							
-							double qxx = valueRow * weight * valueCol;
-							
-							double dqxx = 0;
-							if (estimationStep == (numberOfEstimationSteps - 1) && weightA != 0)
-								dqxx = valueRow * weightA * valueCol;
-							
-							this.Qxx.set(col + dCol, row + dRow, this.Qxx.get(col + dCol, row + dRow) + qxx + dqxx);
+
+							this.Qxx.set(col + dCol, row + dRow, this.Qxx.get(col + dCol, row + dRow) + valueRow * weight * valueCol);
 						}
 					}
 				}
@@ -2466,7 +2635,7 @@ public class NetworkAdjustment implements Runnable {
 	 * @param solutionNumber Aktuelle UT-Loesungsnummer 
 	 * @param weight UT-Gewicht
 	 */
-	private void addUnscentedTransformationSolution(Vector dX, Vector xUT, Matrix solutionVectors, int solutionNumber, double weight) {
+	private void addUnscentedTransformationSolution(Vector dX, Vector xUT, Vector vUT, Matrix solutionVectors, int solutionNumber, double weight) {
 		for (int i=0; i<this.unknownParameters.size(); i++) {
 			if (this.interrupt)
 				return;
@@ -2513,6 +2682,9 @@ public class NetworkAdjustment implements Runnable {
 				solutionVectors.set(col, solutionNumber, value);
 			}
 		}
+
+		if (vUT != null)
+			vUT.add(weight, this.getResiduals());
 	}
 	
 	/**
@@ -2520,7 +2692,7 @@ public class NetworkAdjustment implements Runnable {
 	 * @param X Updatevektor
 	 * @param updateCompleteModel 
 	 */
-	private void updateModel(Vector dX, boolean updateCompleteModel) {
+	private void updateModel(Vector dX, Vector vUT, boolean updateCompleteModel) {
 		// Bestimme Qll(a-post) fuer alle Beobachtungen, 
 		// da Designamatrix hier noch verfuegbar
 		this.omega = 0.0;
@@ -2604,13 +2776,12 @@ public class NetworkAdjustment implements Runnable {
 				Observation observation = this.projectObservations.get(i); 
 				double qll = observation.getStdApriori()*observation.getStdApriori();
 				double r   = observation.getRedundancy();
-				double v   = this.estimationType == EstimationType.SIMULATION ? 0.0 : observation.getCorrection();
+				double v   = this.estimationType == EstimationType.SIMULATION ? 0.0 : (vUT != null ? vUT.get(observation.getRowInJacobiMatrix()) : observation.getCorrection());
 				double vv  = v*v;
 				double omegaObs = vv/qll;
 				observation.setOmega(omegaObs);
 				this.omega += omegaObs;
-				
-				// Modell muss noch nicht vollstaednig geloest werden, sondern nur der Teil fuer die (automatische) VKS bzw. robuste Schaetzung
+				// Modell muss noch nicht vollstaendig geloest werden, sondern nur der Teil fuer robuste Schaetzung
 				if (!updateCompleteModel)
 					return;
 				
@@ -4571,6 +4742,14 @@ public class NetworkAdjustment implements Runnable {
 	}
 	
 	/**
+	 * Liefert das Schaetzverfahren
+	 * @return estimationType
+	 */
+	public EstimationType getEstimationType() {
+		return this.estimationType;
+	}
+	
+	/**
 	 * Legt die max. Anzahl an Iterationen fest
 	 * @param newMaxIterations Iterationen
 	 */
@@ -4619,6 +4798,70 @@ public class NetworkAdjustment implements Runnable {
 	 */
 	public void setRobustEstimationLimit(double robustEstimationLimit) {
 		this.robustEstimationLimit = robustEstimationLimit > 0  ?  robustEstimationLimit : DefaultValue.getRobustEstimationLimit();
+	}
+	
+	/**
+	 * Liefert den Skalierungsparameter alpha der UT,
+	 * der den Abstand der Sigma-Punkte um den Mittelwert
+	 * steuert. Ueblicherweise ist alpha gering, d.h., 1E-3
+	 * Der Defaultwert ist 1, sodass keine Skalierung
+	 * vorgenommen wird und die Standard-UT resultiert
+	 * @return alphaUT
+	 */
+	public double getUnscentedTransformationScaling() {
+		return this.alphaUT;
+	}
+	
+	/**
+	 * Liefert den Daempfungsparameter beta der UT,
+	 * der a-priori Informatione bzgl. der Verteilung
+	 * der Daten beruecksichtigt. Fuer Gauss-Verteilung
+	 * ist beta = 2 optimal
+	 * @return betaUT
+	 */
+	public double getUnscentedTransformationDamping() {
+		return this.betaUT;
+	}
+	
+	/**
+	 * Liefert die Gewichtung des Sigma-Punktes X0 bzw. Y0 = f(X0)
+	 * @return w0
+	 */
+	public double getUnscentedTransformationWeightZero() {
+		return this.weightZero;
+	}
+	
+	/**
+	 * setzt den Skalierungsparameter alpha der UT,
+	 * der den Abstand der Sigma-Punkte um den Mittelwert
+	 * steuert. Ueblicherweise ist alpha gering, d.h., 1E-3
+	 * Der Defaultwert ist 1, sodass keine Skalierung
+	 * vorgenommen wird und die Standard-UT resultiert
+	 * @param alpha
+	 */
+	public void setUnscentedTransformationScaling(double alpha) {
+		if (alpha > 0)
+			this.alphaUT = alpha;
+	}
+	
+	/**
+	 * Liefert den Daempfungsparameter beta der UT,
+	 * der a-priori Informatione bzgl. der Verteilung
+	 * der Daten beruecksichtigt. Fuer Gauss-Verteilung
+	 * ist beta = 2 optimal
+	 * @param beta
+	 */
+	public void setUnscentedTransformationDamping(double beta) {
+		this.betaUT = beta;
+	}
+	
+	/**
+	 * Setzt die Gewichtung des Sigma-Punktes X0 bzw. Y0 = f(X0)
+	 * @param w0
+	 */
+	public void setUnscentedTransformationWeightZero(double w0) {
+		if (w0 < 1) 
+			this.weightZero = w0;
 	}
 	
 	/**
@@ -4805,9 +5048,8 @@ public class NetworkAdjustment implements Runnable {
 	/**
 	 * Liefert die Verbesserungen nach der Ausgleichung IST - SOLL
 	 * @return e
-	 * @deprecated - Nur fuer DEBUG-Ausgabe
 	 */
-	Vector getResiduals() {
+	private Vector getResiduals() {
 		Vector e = new DenseVector(this.numberOfObservations + this.numberOfStochasticPointRows + this.numberOfStochasticDeflectionRows);
 		for (int i=0; i<this.numberOfObservations; i++) {
 			Observation observation = this.projectObservations.get(i);
