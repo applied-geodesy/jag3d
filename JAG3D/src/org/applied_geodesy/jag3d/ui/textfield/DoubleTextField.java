@@ -42,15 +42,11 @@ import javafx.scene.control.TextFormatter.Change;
 
 public class DoubleTextField extends TextField implements FormatterChangedListener {
 	public enum ValueSupport {
-//		GREATER_THAN_ZERO,
-//		LESS_THAN_ZERO,
-//		LESS_THAN_ONE,
-//		GREATER_THAN_OR_EQUAL_TO_ZERO,
-//		LESS_THAN_OR_EQUAL_TO_ZERO,
 		INCLUDING_INCLUDING_INTERVAL,
 		INCLUDING_EXCLUDING_INTERVAL,
 		EXCLUDING_INCLUDING_INTERVAL,
 		EXCLUDING_EXCLUDING_INTERVAL,
+
 		NULL_VALUE_SUPPORT,
 		NON_NULL_VALUE_SUPPORT;
 	}
@@ -111,16 +107,6 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 	
 	public boolean check(Double value) {
 		switch(this.valueSupport) {
-//		case GREATER_THAN_OR_EQUAL_TO_ZERO:
-//			return value != null && value.doubleValue() >= 0;
-//		case GREATER_THAN_ZERO:
-//			return value != null && value.doubleValue() >  0;
-//		case LESS_THAN_OR_EQUAL_TO_ZERO:
-//			return value != null && value.doubleValue() <= 0;
-//		case LESS_THAN_ZERO:
-//			return value != null && value.doubleValue() <  0;
-//		case LESS_THAN_ONE:
-//			return value != null && value.doubleValue() <  1;
 		case INCLUDING_INCLUDING_INTERVAL:
 			return value != null && this.lowerBoundary <= value.doubleValue() && value.doubleValue() <= this.upperBoundary;
 		case EXCLUDING_EXCLUDING_INTERVAL:

@@ -342,7 +342,7 @@ public class LeastSquaresSettingDialog {
 		this.alphaTextField = this.createDoubleTextField(UnscentedTransformationParameter.getAlpha(), ValueSupport.EXCLUDING_INCLUDING_INTERVAL, 0.0, 1.0, i18n.getString("LeastSquaresSettingDialog.ut.scaling.tooltip", "Defines spread of sigma points around the mean value, if \u03B1 \u2260 1"));
 		this.betaTextField  = this.createDoubleTextField(UnscentedTransformationParameter.getBeta(), ValueSupport.NON_NULL_VALUE_SUPPORT, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, i18n.getString("LeastSquaresSettingDialog.ut.damping.tooltip", "Considers prior knowledge of the distribution, if \u03B2 \u2260 0"));
 		this.weight0TextField = this.createDoubleTextField(UnscentedTransformationParameter.getWeightZero(), ValueSupport.INCLUDING_EXCLUDING_INTERVAL, Double.NEGATIVE_INFINITY, 1.0, i18n.getString("LeastSquaresSettingDialog.ut.weight0.tooltip", "Set the weight related to the zero sigma point (MUT: w0 \u003c 1, SUT: 0 \u2264 w0 \u003c 1)"));
-		
+
 		this.alphaTextField.numberProperty().bindBidirectional(this.settings.scalingParameterAlphaUTProperty());
 		this.betaTextField.numberProperty().bindBidirectional(this.settings.dampingParameterBetaUTProperty());
 		this.weight0TextField.numberProperty().bindBidirectional(this.settings.weightZeroProperty());
@@ -555,7 +555,7 @@ public class LeastSquaresSettingDialog {
 		checkBox.setMaxHeight(Double.MAX_VALUE);
 		return checkBox;
 	}
-	
+  
 	private DoubleTextField createDoubleTextField(double value, ValueSupport valueSupport, double lowerBoundary, double upperBoundary, String tooltip) {
 		DoubleTextField field = new DoubleTextField(value, CellValueType.STATISTIC, Boolean.FALSE, valueSupport, lowerBoundary, upperBoundary);
 		field.setTooltip(new Tooltip(tooltip));
