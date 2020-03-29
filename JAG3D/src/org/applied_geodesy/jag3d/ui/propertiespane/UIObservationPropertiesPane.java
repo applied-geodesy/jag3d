@@ -542,17 +542,17 @@ public class UIObservationPropertiesPane {
 		ProgressIndicator databaseTransactionUncertaintyTypeAProgressIndicator = this.createDatabaseTransactionProgressIndicator(ObservationGroupUncertaintyType.ZERO_POINT_OFFSET);
 		Label uncertaintyTypeALabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.ua.label", "\u03C3a"));
 		uncertaintyTypeALabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.zeroPointOffsetUncertaintyField = this.createUncertaintyTextField(sigmaZeroPointOffset, constantUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_ZERO, i18n.getString("UIObservationPropertiesPane.uncertainty.ua.tooltip", "Set constant part of combined uncertainty"), ObservationGroupUncertaintyType.ZERO_POINT_OFFSET);
+		this.zeroPointOffsetUncertaintyField = this.createUncertaintyTextField(sigmaZeroPointOffset, constantUncertaintyCellValueType, true, DoubleTextField.ValueSupport.EXCLUDING_INCLUDING_INTERVAL, i18n.getString("UIObservationPropertiesPane.uncertainty.ua.tooltip", "Set constant part of combined uncertainty"), ObservationGroupUncertaintyType.ZERO_POINT_OFFSET);
 		
 		ProgressIndicator databaseTransactionUncertaintyTypeBProgressIndicator = this.createDatabaseTransactionProgressIndicator(ObservationGroupUncertaintyType.SQUARE_ROOT_DISTANCE_DEPENDENT);
 		Label uncertaintyTypeBLabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.ub.label", "\u03C3b(\u221Ad)"));
 		uncertaintyTypeBLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.squareRootDistanceDependentUncertaintyField = this.createUncertaintyTextField(sigmaSquareRootDistance, squareRootDistanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO, i18n.getString("UIObservationPropertiesPane.uncertainty.ub.tooltip", "Set square-root distance dependent part of combined uncertainty"), ObservationGroupUncertaintyType.SQUARE_ROOT_DISTANCE_DEPENDENT);  
+		this.squareRootDistanceDependentUncertaintyField = this.createUncertaintyTextField(sigmaSquareRootDistance, squareRootDistanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.INCLUDING_INCLUDING_INTERVAL, i18n.getString("UIObservationPropertiesPane.uncertainty.ub.tooltip", "Set square-root distance dependent part of combined uncertainty"), ObservationGroupUncertaintyType.SQUARE_ROOT_DISTANCE_DEPENDENT);  
 		
 		ProgressIndicator databaseTransactionUncertaintyTypeCProgressIndicator = this.createDatabaseTransactionProgressIndicator(ObservationGroupUncertaintyType.DISTANCE_DEPENDENT);
 		Label uncertaintyTypeCLabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.uc.label", "\u03C3c(d)"));
 		uncertaintyTypeCLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.distanceDependentUncertaintyField = this.createUncertaintyTextField(sigmaDistanceDependent, distanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO, i18n.getString("UIObservationPropertiesPane.uncertainty.uc.tooltip", "Set distance dependent part of combined uncertainty"), ObservationGroupUncertaintyType.DISTANCE_DEPENDENT);
+		this.distanceDependentUncertaintyField = this.createUncertaintyTextField(sigmaDistanceDependent, distanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.INCLUDING_INCLUDING_INTERVAL, i18n.getString("UIObservationPropertiesPane.uncertainty.uc.tooltip", "Set distance dependent part of combined uncertainty"), ObservationGroupUncertaintyType.DISTANCE_DEPENDENT);
 		
 		uncertaintyTypeALabel.setLabelFor(this.zeroPointOffsetUncertaintyField);
 		uncertaintyTypeBLabel.setLabelFor(this.squareRootDistanceDependentUncertaintyField);

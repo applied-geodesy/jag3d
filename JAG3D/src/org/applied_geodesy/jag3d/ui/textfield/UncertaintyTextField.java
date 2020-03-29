@@ -30,14 +30,11 @@ public class UncertaintyTextField extends DoubleTextField {
 	}
 
 	public UncertaintyTextField(Double value, CellValueType type, boolean displayUnit) {
-		this(value, type, displayUnit, ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO);
+		this(value, type, displayUnit, ValueSupport.EXCLUDING_INCLUDING_INTERVAL); // GREATER_THAN_OR_EQUAL_TO_ZERO);
 	}
 	
 	public UncertaintyTextField(Double value, CellValueType type, boolean displayUnit, ValueSupport valueSupport) {
-		super(value, type, displayUnit, valueSupport);
-		
-		if (valueSupport != ValueSupport.GREATER_THAN_OR_EQUAL_TO_ZERO && valueSupport != ValueSupport.GREATER_THAN_ZERO)
-			throw new IllegalArgumentException(this.getClass().getSimpleName() + " Error, uncertainty value must be greater than or equal to zeros, or greater than zero " + valueSupport);
+		super(value, type, displayUnit, valueSupport, 0.0, Double.POSITIVE_INFINITY);
 	}
 }
 

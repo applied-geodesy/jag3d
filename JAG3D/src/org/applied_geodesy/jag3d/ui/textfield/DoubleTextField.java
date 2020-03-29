@@ -42,17 +42,18 @@ import javafx.scene.control.TextFormatter.Change;
 
 public class DoubleTextField extends TextField implements FormatterChangedListener {
 	public enum ValueSupport {
-		GREATER_THAN_ZERO,
-		LESS_THAN_ZERO,
-		LESS_THAN_ONE,
-		GREATER_THAN_OR_EQUAL_TO_ZERO,
-		LESS_THAN_OR_EQUAL_TO_ZERO,
+		INCLUDING_INCLUDING_INTERVAL,
+		INCLUDING_EXCLUDING_INTERVAL,
+		EXCLUDING_INCLUDING_INTERVAL,
+		EXCLUDING_EXCLUDING_INTERVAL,
+
 		NULL_VALUE_SUPPORT,
 		NON_NULL_VALUE_SUPPORT;
 	}
 	
 	private FormatterOptions options = FormatterOptions.getInstance();
 	private final static int EDITOR_ADDITIONAL_DIGITS = 10;
+	private double lowerBoundary = Double.NEGATIVE_INFINITY, upperBoundary = Double.POSITIVE_INFINITY;
 	private NumberFormat editorNumberFormat;
 	private final CellValueType type;
 	private final boolean displayUnit;
@@ -73,14 +74,21 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 	}
 	
 	public DoubleTextField(Double value, CellValueType type, boolean displayUnit, ValueSupport valueSupport) {
+		this(value, type, displayUnit, valueSupport, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+	}
+	
+	public DoubleTextField(Double value, CellValueType type, boolean displayUnit, ValueSupport valueSupport, double lowerBoundary, double upperBoundary) {
 		super();		
-			
+		
 		this.type = type;
 		this.valueSupport = valueSupport;
 		this.displayUnit  = displayUnit;
+		this.lowerBoundary = lowerBoundary;
+		this.upperBoundary = upperBoundary;
 
 		if (this.check(value))
 			this.setNumber(value);
+		
 		this.prepareEditorNumberFormat();
 		this.initHandlers();
 		this.setTextFormatter(this.addTextFormatter());
@@ -99,16 +107,14 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 	
 	public boolean check(Double value) {
 		switch(this.valueSupport) {
-		case GREATER_THAN_OR_EQUAL_TO_ZERO:
-			return value != null && value.doubleValue() >= 0;
-		case GREATER_THAN_ZERO:
-			return value != null && value.doubleValue() >  0;
-		case LESS_THAN_OR_EQUAL_TO_ZERO:
-			return value != null && value.doubleValue() <= 0;
-		case LESS_THAN_ZERO:
-			return value != null && value.doubleValue() <  0;
-		case LESS_THAN_ONE:
-			return value != null && value.doubleValue() <  1;
+		case INCLUDING_INCLUDING_INTERVAL:
+			return value != null && this.lowerBoundary <= value.doubleValue() && value.doubleValue() <= this.upperBoundary;
+		case EXCLUDING_EXCLUDING_INTERVAL:
+			return value != null && this.lowerBoundary <  value.doubleValue() && value.doubleValue() <  this.upperBoundary;
+		case INCLUDING_EXCLUDING_INTERVAL:
+			return value != null && this.lowerBoundary <= value.doubleValue() && value.doubleValue() <  this.upperBoundary;
+		case EXCLUDING_INCLUDING_INTERVAL:
+			return value != null && this.lowerBoundary <  value.doubleValue() && value.doubleValue() <= this.upperBoundary;
 		case NON_NULL_VALUE_SUPPORT:
 			return value != null;
 		default: // NULL_VALUE_SUPPORT:
