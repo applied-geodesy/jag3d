@@ -45,7 +45,6 @@ import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.NormalEquationSystem;
 import org.applied_geodesy.adjustment.UnscentedTransformationParameter;
-import org.applied_geodesy.adjustment.network.DefectType;
 import org.applied_geodesy.adjustment.network.congruence.CongruenceAnalysisGroup;
 import org.applied_geodesy.adjustment.network.congruence.CongruenceAnalysisPointPair;
 import org.applied_geodesy.adjustment.network.congruence.strain.CoordinateComponent;

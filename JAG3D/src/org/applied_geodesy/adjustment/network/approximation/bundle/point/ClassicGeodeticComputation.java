@@ -22,8 +22,6 @@
 package org.applied_geodesy.adjustment.network.approximation.bundle.point;
 
 import org.applied_geodesy.adjustment.MathExtension;
-import org.applied_geodesy.adjustment.network.approximation.bundle.point.Point1D;
-import org.applied_geodesy.adjustment.network.approximation.bundle.point.Point2D;
 
 public abstract class ClassicGeodeticComputation {
 	
