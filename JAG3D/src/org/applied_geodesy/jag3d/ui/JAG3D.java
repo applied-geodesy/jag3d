@@ -89,9 +89,9 @@ public class JAG3D extends Application {
 	private class DatabaseStateChangedListener implements ProjectDatabaseStateChangedListener {
 		@Override
 		public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt) {
-			if (adjusmentButton != null) {
+			if (adjustmentButton != null) {
 				boolean disable = evt.getEventType() != ProjectDatabaseStateType.OPENED;
-				adjusmentButton.setDisable(disable);
+				adjustmentButton.setDisable(disable);
 
 				if (evt.getEventType() == ProjectDatabaseStateType.CLOSING || evt.getEventType() == ProjectDatabaseStateType.CLOSED)
 					JAG3D.setTitle(null);
@@ -101,7 +101,7 @@ public class JAG3D extends Application {
 	
 	private final static String TITLE_TEMPLATE = "%s%sJAG3D%s \u00B7 Least-Squares Adjustment \u0026 Deformation Analysis \u00B7";
 	private static Stage primaryStage;
-	private Button adjusmentButton;
+	private Button adjustmentButton;
 	
 	public static void setTitle(String title) {
 		if (primaryStage != null && title != null && !title.trim().isEmpty())
@@ -175,15 +175,15 @@ public class JAG3D extends Application {
 			UITreeBuilder.getInstance().getTree().getSelectionModel().clearSelection();
 			UITreeBuilder.getInstance().getTree().getSelectionModel().selectFirst();
 
-			this.adjusmentButton = new Button(i18n.getString("JavaGraticule3D.button.adjust.label", "Adjust network"));
-			this.adjusmentButton.setTooltip(new Tooltip(i18n.getString("JavaGraticule3D.button.adjust.tooltip", "Start network adjustment process")));
-			this.adjusmentButton.setOnAction(new EventHandler<ActionEvent>() { 
+			this.adjustmentButton = new Button(i18n.getString("JavaGraticule3D.button.adjust.label", "Adjust network"));
+			this.adjustmentButton.setTooltip(new Tooltip(i18n.getString("JavaGraticule3D.button.adjust.tooltip", "Start network adjustment process")));
+			this.adjustmentButton.setOnAction(new EventHandler<ActionEvent>() { 
 				@Override
 				public void handle(ActionEvent event) {	    	
 					NetworkAdjustmentDialog.show();
 				}
 			});
-			this.adjusmentButton.setDisable(true);
+			this.adjustmentButton.setDisable(true);
 
 			DropShadow ds = new DropShadow();
 			ds.setOffsetY(0.5f);
@@ -200,7 +200,7 @@ public class JAG3D extends Application {
 			HBox hbox = new HBox(10);
 			hbox.setPadding(new Insets(5, 10, 5, 15));
 			HBox.setHgrow(spacer, Priority.ALWAYS);
-			hbox.getChildren().addAll(applicationName, spacer, this.adjusmentButton);
+			hbox.getChildren().addAll(applicationName, spacer, this.adjustmentButton);
 			border.setBottom(hbox);
 
 			Scene scene = new Scene(border);
