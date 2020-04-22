@@ -253,7 +253,7 @@ public class UITreeBuilder {
 			public TreeCell<TreeItemValue> call(TreeView<TreeItemValue> treeView) {
 				EditableMenuCheckBoxTreeCell editableMenuCheckBoxTreeCell = new EditableMenuCheckBoxTreeCell();
 				editableMenuCheckBoxTreeCell.ignoreEventProperty().bindBidirectional(ignoreEvent);
-				return new EditableMenuCheckBoxTreeCell();
+				return editableMenuCheckBoxTreeCell; //new EditableMenuCheckBoxTreeCell();
 			}
 		});
 		this.treeView.getSelectionModel().select(rootItem);
