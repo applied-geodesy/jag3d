@@ -34,6 +34,7 @@ import org.applied_geodesy.jag3d.sql.PointTypeMismatchException;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.sql.UnderDeterminedPointException;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
+import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.util.i18.I18N;
 import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
 
@@ -319,7 +320,7 @@ public class NetworkAdjustmentDialog {
 	private AdjustmentTask adjustmentTask;
 	private boolean preventClosing = false;
 	private I18N i18n = I18N.getInstance();
-	private Dialog<EstimationStateType> dialog = null;
+	private Dialog<Void> dialog = null;
 	private ProgressIndicator progressIndicator = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
 	private Label iterationLabel = new Label();
 	private Label progressLabel = new Label();
@@ -357,7 +358,7 @@ public class NetworkAdjustmentDialog {
 		if (this.dialog != null)
 			return;
 
-		this.dialog = new Dialog<EstimationStateType>();
+		this.dialog = new Dialog<Void>();
 		this.dialog.initOwner(window);
 		this.dialog.setTitle(i18n.getString("NetworkAdjustmentDialog.title", "Network adjustment"));
 		this.dialog.setHeaderText(i18n.getString("NetworkAdjustmentDialog.header", "Network adjustment is processing\u2026"));

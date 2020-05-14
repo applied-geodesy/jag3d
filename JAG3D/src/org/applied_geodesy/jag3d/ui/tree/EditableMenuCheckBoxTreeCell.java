@@ -32,7 +32,6 @@ import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog;
 import org.applied_geodesy.jag3d.ui.dnd.CongruenceAnalysisRowDnD;
 import org.applied_geodesy.jag3d.ui.dnd.GNSSObservationRowDnD;
@@ -50,6 +49,7 @@ import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 import org.applied_geodesy.jag3d.ui.tabpane.UITabPaneBuilder;
+import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.util.i18.I18N;
 
 import javafx.application.Platform;

@@ -27,13 +27,14 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.table.CellValueType;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.DefaultTableRowHighlightValue;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
-import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField;
-import org.applied_geodesy.jag3d.ui.textfield.MinMaxDoubleTextField;
+import org.applied_geodesy.ui.dialog.OptionDialog;
+import org.applied_geodesy.ui.textfield.DoubleTextField;
+import org.applied_geodesy.ui.textfield.MinMaxDoubleTextField;
+import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.FormatterChangedListener;
 import org.applied_geodesy.util.FormatterEvent;
 import org.applied_geodesy.util.FormatterEventType;

@@ -22,6 +22,7 @@
 package org.applied_geodesy.jag3d.ui.table;
 
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
+import org.applied_geodesy.util.CellValueType;
 
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;

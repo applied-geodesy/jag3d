@@ -25,6 +25,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
+import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.FormatterOptions;
 
 public class EditableDoubleCellConverter extends EditableCellConverter<Double> {

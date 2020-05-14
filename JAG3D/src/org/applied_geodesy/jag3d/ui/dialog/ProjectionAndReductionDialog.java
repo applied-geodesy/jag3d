@@ -28,9 +28,10 @@ import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionTy
 import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.table.CellValueType;
-import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField;
-import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField.ValueSupport;
+import org.applied_geodesy.ui.dialog.OptionDialog;
+import org.applied_geodesy.ui.textfield.DoubleTextField;
+import org.applied_geodesy.ui.textfield.DoubleTextField.ValueSupport;
+import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.i18.I18N;
 
 import javafx.application.Platform;

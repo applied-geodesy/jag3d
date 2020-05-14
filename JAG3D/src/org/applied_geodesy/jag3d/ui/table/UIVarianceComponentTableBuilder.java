@@ -23,6 +23,7 @@ package org.applied_geodesy.jag3d.ui.table;
 
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
 import org.applied_geodesy.jag3d.ui.table.row.VarianceComponentRow;
+import org.applied_geodesy.util.CellValueType;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;

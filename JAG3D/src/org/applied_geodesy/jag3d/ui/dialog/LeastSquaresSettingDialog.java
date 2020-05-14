@@ -32,9 +32,10 @@ import org.applied_geodesy.adjustment.DefaultValue;
 import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.UnscentedTransformationParameter;
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.table.CellValueType;
-import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField;
-import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField.ValueSupport;
+import org.applied_geodesy.ui.dialog.OptionDialog;
+import org.applied_geodesy.ui.textfield.DoubleTextField;
+import org.applied_geodesy.ui.textfield.DoubleTextField.ValueSupport;
+import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.util.i18.I18N;
 

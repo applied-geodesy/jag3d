@@ -43,6 +43,7 @@ import org.applied_geodesy.jag3d.ui.tree.EditableMenuCheckBoxTreeCell;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
+import org.applied_geodesy.util.CellValueType;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;

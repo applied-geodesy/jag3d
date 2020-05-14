@@ -26,7 +26,7 @@ import java.util.Locale;
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.WorldCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
-import org.applied_geodesy.jag3d.ui.table.CellValueType;
+import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.FormatterOptions;
 
 import javafx.beans.property.DoubleProperty;

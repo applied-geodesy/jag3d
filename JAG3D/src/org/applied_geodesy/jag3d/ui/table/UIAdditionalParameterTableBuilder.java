@@ -23,6 +23,7 @@ package org.applied_geodesy.jag3d.ui.table;
 
 import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.jag3d.ui.table.row.AdditionalParameterRow;
+import org.applied_geodesy.util.CellValueType;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -142,7 +143,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.teststatistic.aposteriori.tooltip", "A-posteriori test statistic");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, AdditionalParameterRow::testStatisticAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, AdditionalParameterRow::testStatisticAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 		

@@ -25,12 +25,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.table.CellValueType;
 import org.applied_geodesy.jag3d.ui.table.UICongruentPointTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
-import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField;
-import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField.ValueSupport;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
+import org.applied_geodesy.ui.dialog.OptionDialog;
+import org.applied_geodesy.ui.textfield.DoubleTextField;
+import org.applied_geodesy.ui.textfield.DoubleTextField.ValueSupport;
+import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.i18.I18N;
 
 import javafx.application.Platform;

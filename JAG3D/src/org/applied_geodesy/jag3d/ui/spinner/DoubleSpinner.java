@@ -23,7 +23,7 @@ package org.applied_geodesy.jag3d.ui.spinner;
 
 import java.text.NumberFormat;
 
-import org.applied_geodesy.jag3d.ui.table.CellValueType;
+import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.FormatterChangedListener;
 import org.applied_geodesy.util.FormatterEvent;
 import org.applied_geodesy.util.FormatterOptions;

@@ -33,12 +33,13 @@ import org.applied_geodesy.adjustment.network.observation.Observation;
 import org.applied_geodesy.adjustment.network.sql.IllegalProjectionPropertyException;
 import org.applied_geodesy.adjustment.network.sql.SQLAdjustmentManager;
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.table.CellValueType;
 import org.applied_geodesy.jag3d.ui.table.UIAverageObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.row.AveragedObservationRow;
-import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField;
-import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField.ValueSupport;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
+import org.applied_geodesy.ui.dialog.OptionDialog;
+import org.applied_geodesy.ui.textfield.DoubleTextField;
+import org.applied_geodesy.ui.textfield.DoubleTextField.ValueSupport;
+import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.i18.I18N;
 import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
 
