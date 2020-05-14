@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.applied_geodesy.jag3d.ui.table.CellValueType;
 import org.applied_geodesy.util.unit.AngleUnit;
 import org.applied_geodesy.util.unit.LengthUnit;
 import org.applied_geodesy.util.unit.ScaleUnit;
@@ -110,6 +109,7 @@ public class FormatterOptions {
 		LengthUnit LENGTH_RESIDUAL_UNIT = LengthUnit.MILLIMETER;
 		AngleUnit  ANGLE_RESIDUAL_UNIT  = AngleUnit.MILLIGRADIAN;
 		ScaleUnit  SCALE_RESIDUAL_UNIT  = ScaleUnit.PARTS_PER_MILLION_WRT_ZERO;
+		LengthUnit VECTOR_RESIDUAL_UNIT = LengthUnit.MILLIMETER;
 
 		final NumberFormat lengthFormatter = NumberFormat.getInstance(Locale.ENGLISH);
 		final NumberFormat angleFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
@@ -124,14 +124,17 @@ public class FormatterOptions {
 		final NumberFormat lengthResidualFormatter = NumberFormat.getInstance(Locale.ENGLISH);
 		final NumberFormat angleResidualFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
 		final NumberFormat scaleResidualFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat vectorResidualFormatter = NumberFormat.getInstance(Locale.ENGLISH);
 		
-		final NumberFormat statisticFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat statisticFormatter   = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat doubleFormatter      = NumberFormat.getInstance(Locale.ENGLISH);
 		
 		lengthFormatter.setGroupingUsed(false);
 		angleFormatter.setGroupingUsed(false);
 		scaleFormatter.setGroupingUsed(false);
 		vectorFormatter.setGroupingUsed(false);
 		statisticFormatter.setGroupingUsed(false);
+		doubleFormatter.setGroupingUsed(false);
 		
 		lengthUncertaintyFormatter.setGroupingUsed(false);
 		angleUncertaintyFormatter.setGroupingUsed(false);
@@ -141,12 +144,14 @@ public class FormatterOptions {
 		lengthResidualFormatter.setGroupingUsed(false);
 		angleResidualFormatter.setGroupingUsed(false);
 		scaleResidualFormatter.setGroupingUsed(false);
+		vectorResidualFormatter.setGroupingUsed(false);
 		
 		lengthFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 		angleFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 		scaleFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 		vectorFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 		statisticFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		doubleFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 		
 		lengthUncertaintyFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 		angleUncertaintyFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
@@ -156,21 +161,24 @@ public class FormatterOptions {
 		lengthResidualFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 		angleResidualFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 		scaleResidualFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		vectorResidualFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 
-		this.setFractionDigits(lengthFormatter,    4);
-		this.setFractionDigits(angleFormatter,     5);
-		this.setFractionDigits(scaleFormatter,     2);
-		this.setFractionDigits(vectorFormatter,    7);
-		this.setFractionDigits(statisticFormatter, 2);
+		this.setFractionDigits(lengthFormatter,      4);
+		this.setFractionDigits(angleFormatter,       5);
+		this.setFractionDigits(scaleFormatter,       2);
+		this.setFractionDigits(vectorFormatter,      7);
+		this.setFractionDigits(statisticFormatter,   2);
+		this.setFractionDigits(doubleFormatter,      8);
 		
 		this.setFractionDigits(lengthUncertaintyFormatter, 1);
 		this.setFractionDigits(angleUncertaintyFormatter,  2);
 		this.setFractionDigits(scaleUncertaintyFormatter,  1);
 		this.setFractionDigits(vectorUncertaintyFormatter, 1);
 				
-		this.setFractionDigits(lengthResidualFormatter, 1);
-		this.setFractionDigits(angleResidualFormatter,  2);
-		this.setFractionDigits(scaleResidualFormatter,  2);
+		this.setFractionDigits(lengthResidualFormatter,  1);
+		this.setFractionDigits(angleResidualFormatter,   2);
+		this.setFractionDigits(scaleResidualFormatter,   2);
+		this.setFractionDigits(vectorResidualFormatter,  2);
 		
 		this.formatterOptions.put(CellValueType.LENGTH,             new FormatterOption(CellValueType.LENGTH,             lengthFormatter, LENGTH_UNIT));
 		this.formatterOptions.put(CellValueType.LENGTH_UNCERTAINTY, new FormatterOption(CellValueType.LENGTH_UNCERTAINTY, lengthUncertaintyFormatter, LENGTH_UNCERTAINTY_UNIT));
@@ -182,12 +190,14 @@ public class FormatterOptions {
 				
 		this.formatterOptions.put(CellValueType.SCALE,              new FormatterOption(CellValueType.SCALE,              scaleFormatter, SCALE_UNIT));
 		this.formatterOptions.put(CellValueType.SCALE_UNCERTAINTY,  new FormatterOption(CellValueType.SCALE_UNCERTAINTY,  scaleUncertaintyFormatter, SCALE_UNCERTAINTY_UNIT));
-		this.formatterOptions.put(CellValueType.SCALE_RESIDUAL,     new FormatterOption(CellValueType.SCALE_RESIDUAL,     scaleResidualFormatter, SCALE_RESIDUAL_UNIT));
+		this.formatterOptions.put(CellValueType.SCALE_RESIDUAL,     new FormatterOption(CellValueType.SCALE_RESIDUAL,     vectorResidualFormatter, SCALE_RESIDUAL_UNIT));
 		
 		this.formatterOptions.put(CellValueType.VECTOR,             new FormatterOption(CellValueType.VECTOR,             vectorFormatter, VECTOR_UNIT));
 		this.formatterOptions.put(CellValueType.VECTOR_UNCERTAINTY, new FormatterOption(CellValueType.VECTOR_UNCERTAINTY, vectorUncertaintyFormatter, VECTOR_UNCERTAINTY_UNIT));
+		this.formatterOptions.put(CellValueType.VECTOR_RESIDUAL,    new FormatterOption(CellValueType.VECTOR_RESIDUAL,    vectorUncertaintyFormatter, VECTOR_RESIDUAL_UNIT));
 		
 		this.formatterOptions.put(CellValueType.STATISTIC,          new FormatterOption(CellValueType.STATISTIC,          statisticFormatter, null));
+		this.formatterOptions.put(CellValueType.DOUBLE,             new FormatterOption(CellValueType.DOUBLE,             doubleFormatter, null));
 	}
 	
 	private void setFractionDigits(NumberFormat format, int d) {
@@ -284,13 +294,21 @@ public class FormatterOptions {
 	public double convertScaleResidualToModel(double d) {
 		return ((ScaleUnit)this.formatterOptions.get(CellValueType.SCALE_RESIDUAL).getUnit()).toUnitless(d);
 	}
-
+	
 	public double convertVectorUncertaintyToView(double d) {
 		return ((LengthUnit)this.formatterOptions.get(CellValueType.VECTOR_UNCERTAINTY).getUnit()).fromMeter(d);
 	}
 	
 	public double convertVectorUncertaintyToModel(double d) {
 		return ((LengthUnit)this.formatterOptions.get(CellValueType.VECTOR_UNCERTAINTY).getUnit()).toMeter(d);
+	}
+	
+	public double convertVectorResidualToView(double d) {
+		return ((LengthUnit)this.formatterOptions.get(CellValueType.VECTOR_RESIDUAL).getUnit()).fromMeter(d);
+	}
+	
+	public double convertVectorResidualToModel(double d) {
+		return ((LengthUnit)this.formatterOptions.get(CellValueType.VECTOR_RESIDUAL).getUnit()).toMeter(d);
 	}
 	
 	public String toAngleFormat(double d, boolean displayUnit) {
@@ -319,6 +337,10 @@ public class FormatterOptions {
 	
 	public String toStatisticFormat(double d) {
 		return this.formatterOptions.get(CellValueType.STATISTIC).getFormatter().format(d).trim();
+	}
+	
+	public String toDoubleFormat(double d) {
+		return this.formatterOptions.get(CellValueType.DOUBLE).getFormatter().format(d).trim();
 	}
 	
 	public String toLengthUncertaintyFormat(double d, boolean displayUnit) {
@@ -351,6 +373,10 @@ public class FormatterOptions {
 	
 	public String toVectorUncertaintyFormat(double d, boolean displayUnit) {
 		return this.toViewFormat(CellValueType.VECTOR_UNCERTAINTY, this.convertVectorUncertaintyToView(d), displayUnit);
+	}
+	
+	public String toVectorResidualFormat(double d, boolean displayUnit) {
+		return this.toViewFormat(CellValueType.VECTOR_RESIDUAL, this.convertVectorResidualToView(d), displayUnit);
 	}
 	
 	public String toViewFormat(CellValueType type, double d, boolean displayUnit) {
