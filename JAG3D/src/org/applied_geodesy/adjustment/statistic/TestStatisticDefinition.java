@@ -26,7 +26,7 @@ import org.applied_geodesy.adjustment.DefaultValue;
 public class TestStatisticDefinition {
 	private TestStatisticType testStatisticType;
 	private double probabilityValue, powerOfTest;
-	boolean familywiseErrorRate = false;
+	private boolean familywiseErrorRate = false;
 	
 	public TestStatisticDefinition() {
 		this(TestStatisticType.BAARDA_METHOD, DefaultValue.getProbabilityValue(), DefaultValue.getPowerOfTest(), false);
@@ -40,19 +40,35 @@ public class TestStatisticDefinition {
 	}
 
 	public TestStatisticType getTestStatisticType() {
-		return testStatisticType;
+		return this.testStatisticType;
 	}
 
 	public double getProbabilityValue() {
-		return probabilityValue;
+		return this.probabilityValue;
 	}
 
 	public double getPowerOfTest() {
-		return powerOfTest;
+		return this.powerOfTest;
 	}
 
 	public boolean isFamilywiseErrorRate() {
 		return this.familywiseErrorRate;
+	}
+	
+	public void setTestStatisticType(TestStatisticType testStatisticType) {
+		this.testStatisticType = testStatisticType;
+	}
+
+	public void setProbabilityValue(double probabilityValue) {
+		this.probabilityValue = probabilityValue;
+	}
+
+	public void setPowerOfTest(double powerOfTest) {
+		this.powerOfTest = powerOfTest;
+	}
+
+	public void setFamilywiseErrorRate(boolean familywiseErrorRate) {
+		this.familywiseErrorRate = familywiseErrorRate;
 	}
 	
 	@Override
