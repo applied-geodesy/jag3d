@@ -19,13 +19,13 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.textfield;
+package org.applied_geodesy.ui.textfield;
 
 import java.text.NumberFormat;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
-import org.applied_geodesy.jag3d.ui.table.CellValueType;
+import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.FormatterChangedListener;
 import org.applied_geodesy.util.FormatterEvent;
 import org.applied_geodesy.util.FormatterOptions;
@@ -55,7 +55,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 	private final static int EDITOR_ADDITIONAL_DIGITS = 10;
 	private double lowerBoundary = Double.NEGATIVE_INFINITY, upperBoundary = Double.POSITIVE_INFINITY;
 	private NumberFormat editorNumberFormat;
-	private final CellValueType type;
+	private CellValueType type;
 	private final boolean displayUnit;
 	private final ValueSupport valueSupport;
 	private ObjectProperty<Double> number = new SimpleObjectProperty<>();
@@ -97,6 +97,14 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 			this.setText(this.getRendererFormat(value));
 		
 		this.options.addFormatterChangedListener(this);
+	}
+	
+	public void setCellValueType(CellValueType type) {
+		this.type = type;
+		double value = this.getNumber();
+		this.prepareEditorNumberFormat();
+		if (this.check(value))
+			this.setNumber(value);
 	}
 	
 	private void prepareEditorNumberFormat() {
@@ -219,6 +227,9 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 
 		case VECTOR:
 			return this.editorNumberFormat.format(this.options.convertVectorToView(value.doubleValue()));
+			
+		case VECTOR_RESIDUAL:
+			return this.editorNumberFormat.format(this.options.convertVectorResidualToView(value.doubleValue()));
 
 		case VECTOR_UNCERTAINTY:
 			return this.editorNumberFormat.format(this.options.convertVectorUncertaintyToView(value.doubleValue()));
@@ -267,9 +278,15 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 
 		case VECTOR:
 			return this.options.toVectorFormat(value.doubleValue(), this.displayUnit);
+			
+		case VECTOR_RESIDUAL:
+			return this.options.toVectorResidualFormat(value.doubleValue(), this.displayUnit);
 
 		case VECTOR_UNCERTAINTY:
 			return this.options.toVectorUncertaintyFormat(value.doubleValue(), this.displayUnit);
+			
+		case DOUBLE:
+			return this.options.toDoubleFormat(value.doubleValue());
 
 		default:
 			return null;
@@ -316,11 +333,15 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 					case SCALE_UNCERTAINTY:
 						newValue = this.options.convertScaleUncertaintyToModel(newValue.doubleValue());
 						break;
+					case DOUBLE:
 					case STATISTIC:
 						newValue = newValue.doubleValue();
 						break;
 					case VECTOR:
 						newValue = this.options.convertVectorToModel(newValue.doubleValue());
+						break;
+					case VECTOR_RESIDUAL:
+						newValue = this.options.convertVectorResidualToModel(newValue.doubleValue());
 						break;
 					case VECTOR_UNCERTAINTY:
 						newValue = this.options.convertVectorUncertaintyToModel(newValue.doubleValue());

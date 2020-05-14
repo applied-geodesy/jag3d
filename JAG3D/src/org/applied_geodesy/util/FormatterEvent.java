@@ -23,7 +23,6 @@ package org.applied_geodesy.util;
 
 import java.util.EventObject;
 
-import org.applied_geodesy.jag3d.ui.table.CellValueType;
 import org.applied_geodesy.util.unit.Unit;
 
 public class FormatterEvent extends EventObject {
