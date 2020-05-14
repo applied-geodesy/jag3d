@@ -297,7 +297,7 @@ public class LeastSquaresSettingDialog {
 		this.estimationTypeComboBox = this.createEstimationTypeComboBox(EstimationType.L2NORM, i18n.getString("LeastSquaresSettingDialog.estimationtype.tooltip", "Set estimation method")); 
 		this.settings.estimationTypeProperty().addListener(new EstimationTypeChangeListener());
 		this.estimationTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new EstimationTypeChangeListener());
-		this.estimationTypeComboBox.setPadding(new Insets(0, 0, 5, 0)); // oben, recht, unten, links
+		VBox.setMargin(this.estimationTypeComboBox, new Insets(0, 0, 5, 0)); // oben, recht, unten, links
 		
 		contentPane.getChildren().add(this.estimationTypeComboBox);
 		
