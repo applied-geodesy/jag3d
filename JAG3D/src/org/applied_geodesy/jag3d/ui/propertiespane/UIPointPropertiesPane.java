@@ -26,13 +26,13 @@ import java.util.Map;
 
 import org.applied_geodesy.adjustment.network.PointGroupUncertaintyType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
-import org.applied_geodesy.jag3d.ui.table.CellValueType;
-import org.applied_geodesy.jag3d.ui.textfield.DoubleTextField;
-import org.applied_geodesy.jag3d.ui.textfield.UncertaintyTextField;
 import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
+import org.applied_geodesy.ui.dialog.OptionDialog;
+import org.applied_geodesy.ui.textfield.DoubleTextField;
+import org.applied_geodesy.ui.textfield.UncertaintyTextField;
+import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.i18.I18N;
 
 import javafx.animation.FadeTransition;

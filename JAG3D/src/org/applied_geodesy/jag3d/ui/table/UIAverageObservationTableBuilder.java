@@ -23,6 +23,7 @@ package org.applied_geodesy.jag3d.ui.table;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.ui.table.row.AveragedObservationRow;
+import org.applied_geodesy.util.CellValueType;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.TableCell;

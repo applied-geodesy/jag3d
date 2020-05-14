@@ -33,11 +33,11 @@ import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.graphic.layer.dialog.LayerManagerDialog;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 import org.applied_geodesy.jag3d.ui.graphic.sql.SQLGraphicManager;
 import org.applied_geodesy.jag3d.ui.io.DefaultFileChooser;
+import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.util.ImageUtils;
 import org.applied_geodesy.util.i18.I18N;
 

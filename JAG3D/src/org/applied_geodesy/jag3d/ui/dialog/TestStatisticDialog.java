@@ -27,7 +27,8 @@ import java.util.Optional;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.table.CellValueType;
+import org.applied_geodesy.ui.dialog.OptionDialog;
+import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.FormatterChangedListener;
 import org.applied_geodesy.util.FormatterEvent;
 import org.applied_geodesy.util.FormatterOptions;
@@ -123,7 +124,8 @@ public class TestStatisticDialog implements FormatterChangedListener {
 							powerOfTest, 
 							familywiseErrorRate
 							);
-					save(testStatistic);					
+					save(testStatistic);
+					return testStatistic;
 				}
 				return null;
 			}

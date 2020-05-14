@@ -21,7 +21,7 @@
 
 package org.applied_geodesy.jag3d.ui.table;
 
-import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
+import org.applied_geodesy.ui.dialog.OptionDialog;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;

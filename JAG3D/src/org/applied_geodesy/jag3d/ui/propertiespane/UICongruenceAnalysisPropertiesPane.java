@@ -26,10 +26,10 @@ import java.util.Map;
 
 import org.applied_geodesy.adjustment.network.congruence.strain.RestrictionType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.tree.CongruenceAnalysisTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
+import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.util.i18.I18N;
 
 import javafx.animation.FadeTransition;

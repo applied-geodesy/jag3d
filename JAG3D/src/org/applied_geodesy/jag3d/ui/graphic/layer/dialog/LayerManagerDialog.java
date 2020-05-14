@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.dialog.OptionDialog;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ArrowLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ConfidenceLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.Layer;
@@ -37,6 +36,7 @@ import org.applied_geodesy.jag3d.ui.graphic.layer.LegendLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.PointLayer;
 import org.applied_geodesy.jag3d.ui.graphic.sql.SQLGraphicManager;
+import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.util.i18.I18N;
 
 import javafx.application.Platform;
