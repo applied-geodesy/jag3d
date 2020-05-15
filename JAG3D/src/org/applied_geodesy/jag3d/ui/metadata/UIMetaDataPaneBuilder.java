@@ -21,7 +21,7 @@
 
 package org.applied_geodesy.jag3d.ui.metadata;
 
-import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
@@ -48,7 +48,7 @@ import javafx.scene.layout.Region;
 
 public class UIMetaDataPaneBuilder {
 	
-	private class DatabaseStateChangedListener implements ProjectDatabaseStateChangedListener {
+	private class DatabaseStateChangeListener implements ProjectDatabaseStateChangeListener {
 		@Override
 		public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt) {
 			if (metaDataNode != null) {
@@ -99,7 +99,7 @@ public class UIMetaDataPaneBuilder {
 	private void init() {
 		if (this.metaDataNode != null)
 			return;
-		SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
+		SQLManager.getInstance().addProjectDatabaseStateChangeListener(new DatabaseStateChangeListener());
 		GridPane gridPane = this.createGridPane();
 
 		Label nameLabel = new Label(i18n.getString("UIMetaDataPane.name.label", "Project name:"));

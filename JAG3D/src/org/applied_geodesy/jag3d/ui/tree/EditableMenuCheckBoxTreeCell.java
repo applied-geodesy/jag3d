@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.applied_geodesy.adjustment.network.PointType;
-import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
@@ -111,7 +111,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		CHANGE_TO_NEW_POINT_GROUP;
 	}
 	
-	private class DatabaseStateChangedListener implements ProjectDatabaseStateChangedListener {
+	private class DatabaseStateChangeListener implements ProjectDatabaseStateChangeListener {
 		@Override
 		public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt) {
 			if (contextMenu == null || contextMenu.getItems().isEmpty())
@@ -521,7 +521,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 
 	private void initContextMenu(TreeItemType itemType) {
 		boolean disable = !SQLManager.getInstance().hasDatabase();
-		SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
+		SQLManager.getInstance().addProjectDatabaseStateChangeListener(new DatabaseStateChangeListener());
 		ContextMenuEventHandler listener = new ContextMenuEventHandler();
 		MenuItem addItem = new MenuItem(i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.add", "Add item"));
 		addItem.setUserData(ContextMenuType.ADD);

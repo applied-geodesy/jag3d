@@ -21,7 +21,7 @@
 
 package org.applied_geodesy.jag3d.ui.resultpane;
 
-import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
@@ -50,7 +50,7 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
 
 public class UIGlobalResultPaneBuilder {
-	private class DatabaseStateChangedListener implements ProjectDatabaseStateChangedListener {
+	private class DatabaseStateChangeListener implements ProjectDatabaseStateChangeListener {
 
 		@Override
 		public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt) {
@@ -137,6 +137,6 @@ public class UIGlobalResultPaneBuilder {
 		
 		this.resultDataNode = borderPane;
 		
-		SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
+		SQLManager.getInstance().addProjectDatabaseStateChangeListener(new DatabaseStateChangeListener());
 	}
 }

@@ -23,6 +23,6 @@ package org.applied_geodesy.jag3d.sql;
 
 import java.util.EventListener;
 
-public interface ProjectDatabaseStateChangedListener extends EventListener {
+public interface ProjectDatabaseStateChangeListener extends EventListener {
 	public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt);
 }
