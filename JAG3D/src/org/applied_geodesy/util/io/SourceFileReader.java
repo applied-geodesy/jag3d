@@ -24,7 +24,6 @@ package org.applied_geodesy.util.io;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.SQLException;
 
 import org.applied_geodesy.util.i18.I18N;
 
@@ -50,11 +49,16 @@ public abstract class SourceFileReader<T> extends LockFileReader {
 	
 	@Override
 	public void setPath(Path path) {
-		this.reset();
+		this.setPath(path, Boolean.TRUE);
+	}
+	
+	public void setPath(Path path, boolean reset) {
+		if (reset)
+			this.reset();
 		super.setPath(path);
 	}
 	
-	public abstract T readAndImport() throws IOException, SQLException;
+	public abstract T readAndImport() throws IOException;
 
 	public abstract void reset();
 
