@@ -29,7 +29,7 @@ import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
-import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
@@ -79,7 +79,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.StringConverter;
 
 public class LayerManager {
-	private class DatabaseStateChangedListener implements ProjectDatabaseStateChangedListener {
+	private class DatabaseStateChangeListener implements ProjectDatabaseStateChangeListener {
 		@Override
 		public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt) {
 			if (layerToolbar != null) {
@@ -197,7 +197,7 @@ public class LayerManager {
 //		this.currentGraphicExtent.maxYProperty().addListener(graphicExtentChangeListener);
 		this.currentGraphicExtent.extendedProperty().addListener(graphicExtentChangeListener);
 		
-		SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
+		SQLManager.getInstance().addProjectDatabaseStateChangeListener(new DatabaseStateChangeListener());
 	}
 	
 	private void initLayers() {
