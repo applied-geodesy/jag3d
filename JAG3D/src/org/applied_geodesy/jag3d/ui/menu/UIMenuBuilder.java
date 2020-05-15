@@ -48,7 +48,7 @@ import javax.swing.SwingUtilities;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
-import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
@@ -99,7 +99,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser.ExtensionFilter;
 
 public class UIMenuBuilder {
-	private class DatabaseStateChangedListener implements ProjectDatabaseStateChangedListener {
+	private class DatabaseStateChangeListener implements ProjectDatabaseStateChangeListener {
 		final Set<MenuItemType> unDisableItemTypes = new HashSet<MenuItemType>(
 				Arrays.asList(
 						MenuItemType.NEW,
@@ -159,7 +159,7 @@ public class UIMenuBuilder {
 	}
 
 	private void init() {
-		SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
+		SQLManager.getInstance().addProjectDatabaseStateChangeListener(new DatabaseStateChangeListener());
 
 		this.initHistoryPathFromProperties();
 

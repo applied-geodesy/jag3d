@@ -4050,17 +4050,17 @@ public class SQLManager {
 		ProjectDatabaseStateEvent evt = new ProjectDatabaseStateEvent(this, stateType);
 		Object listeners[] = this.listenerList.toArray();
 		for (int i=0; i<listeners.length; i++) {
-			if (listeners[i] instanceof ProjectDatabaseStateChangedListener) {
-				((ProjectDatabaseStateChangedListener)listeners[i]).projectDatabaseStateChanged(evt);
+			if (listeners[i] instanceof ProjectDatabaseStateChangeListener) {
+				((ProjectDatabaseStateChangeListener)listeners[i]).projectDatabaseStateChanged(evt);
 			}
 		}
 	}
 	
-	public void addProjectDatabaseStateChangedListener(ProjectDatabaseStateChangedListener l) {
+	public void addProjectDatabaseStateChangeListener(ProjectDatabaseStateChangeListener l) {
 		this.listenerList.add(l);
 	}
 	
-	public void removeProjectDatabaseStateChangedListener(ProjectDatabaseStateChangedListener l) {
+	public void removeProjectDatabaseStateChangeListener(ProjectDatabaseStateChangeListener l) {
 		this.listenerList.remove(l);
 	}
 }

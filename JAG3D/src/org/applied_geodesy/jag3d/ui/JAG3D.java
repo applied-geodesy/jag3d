@@ -32,7 +32,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangedListener;
+import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
@@ -86,7 +86,7 @@ import javafx.stage.Stage;
 
 public class JAG3D extends Application {
 	
-	private class DatabaseStateChangedListener implements ProjectDatabaseStateChangedListener {
+	private class DatabaseStateChangeListener implements ProjectDatabaseStateChangeListener {
 		@Override
 		public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt) {
 			if (adjustmentButton != null) {
@@ -225,7 +225,7 @@ public class JAG3D extends Application {
 
 			this.setStageToDialogs(primaryStage);
 			this.setHostServices();
-			SQLManager.getInstance().addProjectDatabaseStateChangedListener(new DatabaseStateChangedListener());
+			SQLManager.getInstance().addProjectDatabaseStateChangeListener(new DatabaseStateChangeListener());
 			
 			try {
 				// check for command line arguments
