@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
@@ -305,7 +306,7 @@ public class M5FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(i18n.getString("M5FileReader.extension.m5", "M5 (DiNi)"), "*.m5", "*.rec", "*.dat", "*.din")
+				new ExtensionFilter(I18N.getInstance().getString("M5FileReader.extension.m5", "M5 (DiNi)"), "*.m5", "*.rec", "*.dat", "*.din")
 		};
 	}
 

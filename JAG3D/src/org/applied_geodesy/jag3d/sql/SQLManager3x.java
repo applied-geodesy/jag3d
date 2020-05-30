@@ -34,7 +34,7 @@ import org.applied_geodesy.adjustment.network.PointGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
 import org.applied_geodesy.util.sql.DataBase;
-import org.applied_geodesy.version.jag3d.VersionType;
+import org.applied_geodesy.version.VersionType;
 
 public class SQLManager3x {
 	public final static double DATABASE_VERSION_3x = 1.29;

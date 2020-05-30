@@ -25,7 +25,7 @@ import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.observation.group.ObservationGroup;
 import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
-import org.applied_geodesy.adjustment.point.Point;
+import org.applied_geodesy.adjustment.network.point.Point;
 
 public abstract class Observation {
 	// ID der Beobachtung

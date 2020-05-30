@@ -36,11 +36,10 @@ import org.applied_geodesy.jag3d.ui.tree.CongruenceAnalysisTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
-import org.applied_geodesy.util.io.SourceFileReader;
 
 import javafx.scene.control.TreeItem;
 
-public class CongruenceAnalysisFlatFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
+public class CongruenceAnalysisFlatFileReader extends FlatFileReader<TreeItem<TreeItemValue>> {
 	private class CongruenceAnalysisPointPair {
 		private final String name1, name2;
 		private CongruenceAnalysisPointPair (String name1, String name2) {

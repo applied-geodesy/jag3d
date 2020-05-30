@@ -40,6 +40,7 @@ import javax.xml.xpath.XPathConstants;
 import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.io.DimensionType;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
@@ -633,8 +634,8 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 	
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(i18n.getString("HeXMLReader.extension.hexml", "LandXML/HeXML"), "*.hexml"),
-				new ExtensionFilter(i18n.getString("HeXMLReader.extension.xml", "Extensible Markup Language"), "*.xml")
+				new ExtensionFilter(I18N.getInstance().getString("HeXMLReader.extension.hexml", "LandXML/HeXML"), "*.hexml"),
+				new ExtensionFilter(I18N.getInstance().getString("HeXMLReader.extension.xml", "Extensible Markup Language"), "*.xml")
 		};
 	}
 	

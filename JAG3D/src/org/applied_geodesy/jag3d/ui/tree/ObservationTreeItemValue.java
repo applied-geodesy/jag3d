@@ -21,7 +21,7 @@
 
 package org.applied_geodesy.jag3d.ui.tree;
 
-import org.applied_geodesy.adjustment.DefaultUncertainty;
+import org.applied_geodesy.adjustment.network.DefaultUncertainty;
 import org.applied_geodesy.adjustment.network.ObservationGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.ParameterType;

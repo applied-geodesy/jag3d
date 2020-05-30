@@ -37,6 +37,7 @@ import org.applied_geodesy.adjustment.network.PointGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.adjustment.network.congruence.strain.RestrictionType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.ObservationRow;
@@ -51,7 +52,7 @@ import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.io.SourceFileReader;
 import org.applied_geodesy.util.sql.DataBase;
 import org.applied_geodesy.version.jag3d.Version;
-import org.applied_geodesy.version.jag3d.VersionType;
+import org.applied_geodesy.version.VersionType;
 
 import javafx.scene.control.TreeItem;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -669,7 +670,7 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(i18n.getString("OADBReader.extension.script", "HyperSQL"), "*.script")
+				new ExtensionFilter(I18N.getInstance().getString("OADBReader.extension.script", "HyperSQL"), "*.script")
 		};
 	}
 }

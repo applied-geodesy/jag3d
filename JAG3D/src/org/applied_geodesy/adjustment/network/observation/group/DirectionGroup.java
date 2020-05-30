@@ -22,7 +22,7 @@
 package org.applied_geodesy.adjustment.network.observation.group;
 
 import org.applied_geodesy.adjustment.Constant;
-import org.applied_geodesy.adjustment.DefaultUncertainty;
+import org.applied_geodesy.adjustment.network.DefaultUncertainty;
 import org.applied_geodesy.adjustment.network.Epoch;
 import org.applied_geodesy.adjustment.network.observation.Direction;
 import org.applied_geodesy.adjustment.network.observation.Observation;

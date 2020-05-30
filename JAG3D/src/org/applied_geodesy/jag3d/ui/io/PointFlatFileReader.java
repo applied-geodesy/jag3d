@@ -37,11 +37,10 @@ import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
-import org.applied_geodesy.util.io.SourceFileReader;
 
 import javafx.scene.control.TreeItem;
 
-public class PointFlatFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
+public class PointFlatFileReader extends FlatFileReader<TreeItem<TreeItemValue>> {
 	private final int dimension;
 	private Set<String> reservedNames = null;
 	private final TreeItemType treeItemType;

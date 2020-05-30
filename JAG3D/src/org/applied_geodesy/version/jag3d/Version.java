@@ -23,11 +23,13 @@ package org.applied_geodesy.version.jag3d;
 
 import java.util.Map;
 
+import org.applied_geodesy.version.VersionType;
+
 public class Version {
 	private final static Map<VersionType, Integer> versions = Map.of(
 			VersionType.ADJUSTMENT_CORE,   20200327,
 			VersionType.DATABASE,          20200327,
-			VersionType.USER_INTERFACE,    20200412
+			VersionType.USER_INTERFACE,    20200527
 	);
 	
 	private Version() {}
@@ -40,6 +42,9 @@ public class Version {
 		int max = 0;
 		for (Integer version : versions.values())
 			max = Math.max(max, version);
+		
+		max = Math.max(max, org.applied_geodesy.version.juniform.Version.get());
+		
 		return max;
 	}
 	

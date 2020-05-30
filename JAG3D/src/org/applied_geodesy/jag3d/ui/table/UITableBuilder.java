@@ -27,11 +27,17 @@ import java.util.function.Function;
 
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
+import org.applied_geodesy.ui.table.ColumnTooltipHeader;
+import org.applied_geodesy.ui.table.ColumnType;
+import org.applied_geodesy.ui.table.EditableCell;
+import org.applied_geodesy.ui.table.EditableDoubleCellConverter;
+import org.applied_geodesy.ui.table.EditableIntegerCellConverter;
+import org.applied_geodesy.ui.table.EditableStringCellConverter;
 import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.FormatterChangedListener;
 import org.applied_geodesy.util.FormatterEvent;
 import org.applied_geodesy.util.FormatterOptions;
-import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;

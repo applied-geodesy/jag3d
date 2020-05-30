@@ -50,14 +50,13 @@ import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog;
 import org.applied_geodesy.jag3d.ui.dialog.TableRowHighlightDialog;
 import org.applied_geodesy.jag3d.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.jag3d.ui.graphic.layer.dialog.LayerManagerDialog;
-import org.applied_geodesy.jag3d.ui.io.DefaultFileChooser;
 import org.applied_geodesy.jag3d.ui.menu.UIMenuBuilder;
 import org.applied_geodesy.jag3d.ui.tabpane.UITabPaneBuilder;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.util.ImageUtils;
-import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.util.sql.HSQLDB;
 import org.applied_geodesy.version.jag3d.Version;
 
@@ -114,6 +113,10 @@ public class JAG3D extends Application {
 		primaryStage.close();
 	}
 	
+	public static Stage getStage() {
+		return primaryStage;
+	}
+	
 	private void setHostServices() {
 		HostServices hostServices = this.getHostServices();
 		AboutDialog.setHostServices(hostServices);
@@ -123,7 +126,6 @@ public class JAG3D extends Application {
 	
 	private void setStageToDialogs(Stage primaryStage) {
 		OptionDialog.setOwner(primaryStage);
-		DefaultFileChooser.setStage(primaryStage);
 		NetworkAdjustmentDialog.setOwner(primaryStage);
 		FormatterOptionDialog.setOwner(primaryStage);
 		TestStatisticDialog.setOwner(primaryStage);
@@ -152,7 +154,7 @@ public class JAG3D extends Application {
 			catch(Exception e) {
 				e.printStackTrace();
 			}
-			I18N i18n = I18N.getInstance(Locale.getDefault(), "i18n/jag3d");
+			I18N i18n = I18N.getInstance();
 
 			UIMenuBuilder menuBuilder = UIMenuBuilder.getInstance();
 			UITabPaneBuilder tabPaneBuilder = UITabPaneBuilder.getInstance();

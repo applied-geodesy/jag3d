@@ -28,7 +28,7 @@ import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.ui.textfield.LimitedTextArea;
 import org.applied_geodesy.ui.textfield.LimitedTextField;
-import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;

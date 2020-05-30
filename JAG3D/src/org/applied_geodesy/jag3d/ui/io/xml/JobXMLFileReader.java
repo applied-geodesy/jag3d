@@ -41,6 +41,7 @@ import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.io.DimensionType;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
@@ -527,8 +528,8 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 	
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(i18n.getString("JobXMLFileReader.extension.jxl", "JobXML"), "*.jxl"),
-				new ExtensionFilter(i18n.getString("JobXMLFileReader.extension.xml", "Extensible Markup Language"), "*.xml")
+				new ExtensionFilter(I18N.getInstance().getString("JobXMLFileReader.extension.jxl", "JobXML"), "*.jxl"),
+				new ExtensionFilter(I18N.getInstance().getString("JobXMLFileReader.extension.xml", "Extensible Markup Language"), "*.xml")
 		};
 	}
 	

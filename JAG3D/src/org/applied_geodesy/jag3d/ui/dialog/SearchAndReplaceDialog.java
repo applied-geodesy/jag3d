@@ -27,7 +27,7 @@ import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.util.ObservableLimitedList;
-import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -120,11 +120,11 @@ public class SearchAndReplaceDialog {
 	private Node createPane() {
 
 		this.searchComboBox = this.createComboBox(
-				i18n.getString("SearchAndReplaceDialog.search.promt", "Old point name"),
+				i18n.getString("SearchAndReplaceDialog.search.prompt", "Old point name"),
 				i18n.getString("SearchAndReplaceDialog.search.tooltip", "Enter old point name"));
 		
 		this.replaceComboBox = this.createComboBox(
-				i18n.getString("SearchAndReplaceDialog.replace.promt", "Old point name"),
+				i18n.getString("SearchAndReplaceDialog.replace.prompt", "Old point name"),
 				i18n.getString("SearchAndReplaceDialog.replace.tooltip", "Enter old point name"));
 		
 		this.normalModeRadioButton = this.createRadioButton(
@@ -246,14 +246,14 @@ public class SearchAndReplaceDialog {
 				this.replaceComboBox.getItems().add(replace);
 			this.replaceComboBox.setValue(replace);
 			
-			boolean applayToWholeProject = this.applyToWholeProjectCheckBox.isSelected();
+			boolean applyToWholeProject = this.applyToWholeProjectCheckBox.isSelected();
 			boolean regExp = this.regularExpressionRadioButton.isSelected();
 			
 			// masking values
 			if (!regExp)
 				search = "^\\Q"+search+"\\E";
 
-			SQLManager.getInstance().searchAndReplacePointNames(search, replace, applayToWholeProject, this.itemValue, this.selectedTreeItemValues);
+			SQLManager.getInstance().searchAndReplacePointNames(search, replace, applyToWholeProject, this.itemValue, this.selectedTreeItemValues);
 		}
 		catch (Exception e) {
 			e.printStackTrace();

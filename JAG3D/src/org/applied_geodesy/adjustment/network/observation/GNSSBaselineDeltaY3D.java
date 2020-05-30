@@ -21,7 +21,7 @@
 
 package org.applied_geodesy.adjustment.network.observation;
 
-import org.applied_geodesy.adjustment.point.Point;
+import org.applied_geodesy.adjustment.network.point.Point;
 
 public class GNSSBaselineDeltaY3D extends GNSSBaseline3D {
 

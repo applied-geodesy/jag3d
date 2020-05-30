@@ -22,8 +22,8 @@
 package org.applied_geodesy.adjustment.network.observation.group;
 
 import org.applied_geodesy.adjustment.Constant;
-import org.applied_geodesy.adjustment.DefaultUncertainty;
 import org.applied_geodesy.adjustment.MathExtension;
+import org.applied_geodesy.adjustment.network.DefaultUncertainty;
 import org.applied_geodesy.adjustment.network.Epoch;
 import org.applied_geodesy.adjustment.network.observation.ComponentType;
 import org.applied_geodesy.adjustment.network.observation.GNSSBaseline;
@@ -37,9 +37,9 @@ import org.applied_geodesy.adjustment.network.parameter.RotationX;
 import org.applied_geodesy.adjustment.network.parameter.RotationY;
 import org.applied_geodesy.adjustment.network.parameter.RotationZ;
 import org.applied_geodesy.adjustment.network.parameter.Scale;
-import org.applied_geodesy.adjustment.point.Point;
-import org.applied_geodesy.adjustment.point.Point3D;
-import org.applied_geodesy.adjustment.point.group.PointGroup;
+import org.applied_geodesy.adjustment.network.point.Point;
+import org.applied_geodesy.adjustment.network.point.Point3D;
+import org.applied_geodesy.adjustment.network.point.group.PointGroup;
 
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.EVD;

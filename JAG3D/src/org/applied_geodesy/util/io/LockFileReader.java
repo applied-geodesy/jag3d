@@ -30,16 +30,18 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.EventListener;
+import java.util.List;
 
-import org.applied_geodesy.util.i18.I18N;
-
-import javafx.stage.FileChooser.ExtensionFilter;
+import org.applied_geodesy.util.io.FileProgressEvent.FileProgressEventType;
 
 public abstract class LockFileReader {
 	private Path sourceFilePath = null;
 	private String ignoreStartString = new String();
 	public static final String UTF8_BOM = "\uFEFF";
 	private boolean interrupt = false;
+	private List<EventListener> listenerList = new ArrayList<EventListener>();
 	
 	LockFileReader() {}
 	
@@ -64,12 +66,6 @@ public abstract class LockFileReader {
 	}
 
 	public abstract void parse(String line) throws SQLException; 
-	
-	public static ExtensionFilter[] getExtensionFilters() {
-		return new ExtensionFilter[] {
-				new ExtensionFilter(I18N.getInstance().getString("LockFileReader.extension.description", "All files"),	"*.*")
-		};
-	}
 
 	public void ignoreLinesWhichStartWith(String str) {
 		this.ignoreStartString = str;
@@ -86,9 +82,12 @@ public abstract class LockFileReader {
 		BufferedReader reader = null;
 		boolean isFirstLine = true;
 		try{
-			FileInputStream inputStream = new FileInputStream( this.sourceFilePath.toFile() );
+			long totalBytes = Files.size(this.sourceFilePath);
+			File sourceFile = this.sourceFilePath.toFile();
+			FileInputStream inputStream = new FileInputStream( sourceFile );
+			CountingInputStream countingInputStream = new CountingInputStream(inputStream);
 			inputStream.getChannel().lock(0, Long.MAX_VALUE, true);
-			reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
+			reader = new BufferedReader(new InputStreamReader(countingInputStream, Charset.forName("UTF-8")));
 
 			String currentLine = null;
 			while (!this.interrupt && (currentLine = reader.readLine()) != null) {
@@ -98,10 +97,16 @@ public abstract class LockFileReader {
 				}
 				if (!currentLine.trim().isEmpty() && (this.ignoreStartString.isEmpty() || !currentLine.startsWith( this.ignoreStartString )))
 					this.parse(currentLine);
+				
+				long readedBytes = countingInputStream.getReadedBytes();
+				this.fireFileProgressChanged(sourceFile, FileProgressEventType.READ_LINE, readedBytes, totalBytes);
 			}
+			this.fireFileProgressChanged(sourceFile, FileProgressEventType.READ_LINE, totalBytes, totalBytes);
 		}
 		finally {
 			try {
+				// closed all other streams
+				// https://stackoverflow.com/questions/24362980/when-i-close-a-bufferedinputstream-is-the-underlying-inputstream-also-closed
 				if (reader != null)
 					reader.close();
 			}
@@ -110,12 +115,29 @@ public abstract class LockFileReader {
 			}
 		}
 	}
-	
+
 	public void interrupt() {
 		this.interrupt = true;
 	}
 	
 	public boolean isInterrupted() {
 		return this.interrupt;
+	}
+	
+	public void addFileProgressChangeListener(FileProgressChangeListener l) {
+		this.listenerList.add(l);
+	}
+	
+	public void removeFileProgressChangeListener(FileProgressChangeListener l) {
+		this.listenerList.remove(l);
+	}
+	
+	private void fireFileProgressChanged(File file, FileProgressEventType eventType, long readedBytes, long totalBytes) {
+		FileProgressEvent evt = new FileProgressEvent(file, eventType, Math.min(readedBytes, totalBytes), Math.max(readedBytes, totalBytes));
+		Object listeners[] = this.listenerList.toArray();
+		for (int i = 0; i < listeners.length; i++) {
+			if (listeners[i] instanceof FileProgressChangeListener)
+				((FileProgressChangeListener)listeners[i]).fileProgressChanged(evt);
+		}
 	}
 } 

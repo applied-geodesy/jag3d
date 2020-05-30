@@ -24,7 +24,7 @@ package org.applied_geodesy.jag3d.ui.dialog;
 import java.util.Optional;
 
 import org.applied_geodesy.version.jag3d.Version;
-import org.applied_geodesy.version.jag3d.VersionType;
+import org.applied_geodesy.version.VersionType;
 
 import javafx.application.HostServices;
 import javafx.application.Platform;

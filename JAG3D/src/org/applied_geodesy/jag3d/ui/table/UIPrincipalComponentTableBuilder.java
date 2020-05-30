@@ -22,6 +22,8 @@
 package org.applied_geodesy.jag3d.ui.table;
 
 import org.applied_geodesy.jag3d.ui.table.row.PrincipalComponentRow;
+import org.applied_geodesy.ui.table.ColumnTooltipHeader;
+import org.applied_geodesy.ui.table.ColumnType;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.scene.control.TableColumn;

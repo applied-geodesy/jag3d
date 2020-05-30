@@ -34,7 +34,7 @@ import org.applied_geodesy.adjustment.network.congruence.strain.parameter.Strain
 import org.applied_geodesy.adjustment.network.congruence.strain.parameter.StrainParameterShearZ;
 import org.applied_geodesy.adjustment.network.congruence.strain.parameter.StrainParameterTranslationX;
 import org.applied_geodesy.adjustment.network.congruence.strain.parameter.StrainParameterTranslationY;
-import org.applied_geodesy.adjustment.point.Point;
+import org.applied_geodesy.adjustment.network.point.Point;
 
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.Matrix;

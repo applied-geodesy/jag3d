@@ -23,6 +23,10 @@ package org.applied_geodesy.jag3d.ui.table;
 
 import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.jag3d.ui.table.row.AdditionalParameterRow;
+import org.applied_geodesy.ui.table.AbsoluteValueComparator;
+import org.applied_geodesy.ui.table.ColumnTooltipHeader;
+import org.applied_geodesy.ui.table.ColumnType;
+import org.applied_geodesy.ui.table.DisplayCellFormatType;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.beans.property.BooleanProperty;

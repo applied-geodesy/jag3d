@@ -20,10 +20,13 @@
 ***********************************************************************/
 
 package org.applied_geodesy.util.unit;
-import org.applied_geodesy.util.i18.I18N;
+
+import java.util.Locale;
+
+import org.applied_geodesy.util.i18n.I18N;
 
 public abstract class Unit {
-	final I18N i18n = I18N.getInstance(); 
+	final I18N i18n = new I18N(Locale.getDefault(), "i18n/units");
 	final UnitType type;
 	String abbreviation, name;
 

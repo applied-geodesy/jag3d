@@ -28,7 +28,7 @@ import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTas
 import org.applied_geodesy.adjustment.network.parameter.AdditionalUnknownParameter;
 import org.applied_geodesy.adjustment.network.parameter.Scale;
 import org.applied_geodesy.adjustment.network.parameter.ZeroPointOffset;
-import org.applied_geodesy.adjustment.point.Point;
+import org.applied_geodesy.adjustment.network.point.Point;
 
 public class HorizontalDistance extends Observation {
 	

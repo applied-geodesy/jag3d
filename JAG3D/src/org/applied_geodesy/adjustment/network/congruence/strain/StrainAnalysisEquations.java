@@ -30,7 +30,7 @@ import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.adjustment.network.congruence.strain.parameter.StrainParameter;
-import org.applied_geodesy.adjustment.point.Point;
+import org.applied_geodesy.adjustment.network.point.Point;
 
 import no.uib.cipr.matrix.Matrix;
 

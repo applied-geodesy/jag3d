@@ -36,6 +36,7 @@ import java.util.Set;
 
 import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
@@ -536,7 +537,7 @@ public class ZFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(i18n.getString("ZFileReader.extension.z", "Cremer Caplan"), "*.z")
+				new ExtensionFilter(I18N.getInstance().getString("ZFileReader.extension.z", "Cremer Caplan"), "*.z")
 		};
 	}
 

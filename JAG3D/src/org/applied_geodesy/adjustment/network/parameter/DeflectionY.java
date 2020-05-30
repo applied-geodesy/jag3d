@@ -22,7 +22,7 @@
 package org.applied_geodesy.adjustment.network.parameter;
 
 import org.applied_geodesy.adjustment.network.ParameterType;
-import org.applied_geodesy.adjustment.point.Point;
+import org.applied_geodesy.adjustment.network.point.Point;
 
 /**
  * Klasse ist eine Huelle fuer die Y-Komponente. Die statistischen groessen werden 

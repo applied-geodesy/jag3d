@@ -28,7 +28,7 @@ import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.network.parameter.AdditionalUnknownParameter;
 import org.applied_geodesy.adjustment.network.parameter.Orientation;
-import org.applied_geodesy.adjustment.point.Point;
+import org.applied_geodesy.adjustment.network.point.Point;
 
 public class Direction extends Observation {
 	private FaceType face = FaceType.ONE;

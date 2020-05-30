@@ -46,8 +46,8 @@ import org.applied_geodesy.adjustment.network.observation.group.HorizontalDistan
 import org.applied_geodesy.adjustment.network.observation.group.ObservationGroup;
 import org.applied_geodesy.adjustment.network.observation.group.SlopeDistanceGroup;
 import org.applied_geodesy.adjustment.network.observation.group.ZenithAngleGroup;
-import org.applied_geodesy.adjustment.point.Point;
-import org.applied_geodesy.adjustment.point.Point3D;
+import org.applied_geodesy.adjustment.network.point.Point;
+import org.applied_geodesy.adjustment.network.point.Point3D;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
@@ -60,7 +60,7 @@ import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.FormatterChangedListener;
 import org.applied_geodesy.util.FormatterEvent;
 import org.applied_geodesy.util.FormatterOptions;
-import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.SequentialTransition;

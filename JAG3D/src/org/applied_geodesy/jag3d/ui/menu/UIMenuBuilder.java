@@ -54,11 +54,12 @@ import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.JAG3D;
 import org.applied_geodesy.jag3d.ui.dialog.ColumnImportDialog;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.io.BeoFileReader;
 import org.applied_geodesy.jag3d.ui.io.CongruenceAnalysisFlatFileReader;
 import org.applied_geodesy.jag3d.ui.io.DL100FileReader;
-import org.applied_geodesy.jag3d.ui.io.DefaultFileChooser;
 import org.applied_geodesy.jag3d.ui.io.DimensionType;
+import org.applied_geodesy.jag3d.ui.io.FlatFileReader;
 import org.applied_geodesy.jag3d.ui.io.GSIFileReader;
 import org.applied_geodesy.jag3d.ui.io.M5FileReader;
 import org.applied_geodesy.jag3d.ui.io.ObservationFlatFileReader;
@@ -70,9 +71,9 @@ import org.applied_geodesy.jag3d.ui.io.xml.HeXMLFileReader;
 import org.applied_geodesy.jag3d.ui.io.xml.JobXMLFileReader;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
+import org.applied_geodesy.juniform.ui.JUniForm;
 import org.applied_geodesy.ui.dialog.OptionDialog;
-import org.applied_geodesy.util.i18.I18N;
-import org.applied_geodesy.util.io.LockFileReader;
+import org.applied_geodesy.ui.io.DefaultFileChooser;
 import org.applied_geodesy.util.io.SourceFileReader;
 import org.applied_geodesy.util.io.properties.HTTPPropertiesLoader;
 import org.applied_geodesy.util.io.properties.URLParameter;
@@ -82,10 +83,10 @@ import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
 import org.applied_geodesy.version.jag3d.Version;
 
 import com.derletztekick.geodesy.coordtrans.v2.gui.CoordTrans;
-import com.derletztekick.geodesy.formFittingToolbox.v2.gui.FormFittingToolbox;
 import com.derletztekick.geodesy.geotra.gui.GeoTra;
 
 import javafx.application.HostServices;
+import javafx.application.Platform;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -97,6 +98,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Stage;
 
 public class UIMenuBuilder {
 	private class DatabaseStateChangeListener implements ProjectDatabaseStateChangeListener {
@@ -224,14 +226,15 @@ public class UIMenuBuilder {
 	}
 
 	private void createModuleMenu(Menu parentMenu) {
-		MenuItem moduleGEOTRAItem             = createMenuItem(i18n.getString("UIMenuBuilder.menu.module.geotra.label", "Coordinate converter"), true, MenuItemType.MODULE_GEOTRA, null, this.menuEventHandler, false);
-		MenuItem moduleCOORDTRANSItem         = createMenuItem(i18n.getString("UIMenuBuilder.menu.module.coordtrans.label", "Coordinate transformation"), true, MenuItemType.MODULE_COORDTRANS, null, this.menuEventHandler, false);
-		MenuItem moduleFORMFITTINGTOOLBOXItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.module.formfittingtoolbox.label", "Geometry and form analysis"), true, MenuItemType.MODULE_FORMFITTINGTOOLBOX, null, this.menuEventHandler, false);
-
+		MenuItem moduleGEOTRAItem      = createMenuItem(i18n.getString("UIMenuBuilder.menu.module.geotra.label", "Coordinate converter"), true, MenuItemType.MODULE_GEOTRA, null, this.menuEventHandler, false);
+		MenuItem moduleCOORDTRANSItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.module.coordtrans.label", "Coordinate transformation"), true, MenuItemType.MODULE_COORDTRANS, null, this.menuEventHandler, false);
+		MenuItem moduleJUniFormItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.module.juniform.label", "Curve and surface analysis"), true, MenuItemType.MODULE_JUNIFORM, null, this.menuEventHandler, false);
+		
+		
 		parentMenu.getItems().addAll(
 				moduleGEOTRAItem,
 				moduleCOORDTRANSItem,
-				moduleFORMFITTINGTOOLBOXItem
+				moduleJUniFormItem
 				);
 	}
 
@@ -587,6 +590,7 @@ public class UIMenuBuilder {
 
 	void newProject() {
 		File selectedFile = DefaultFileChooser.showSaveDialog(
+				JAG3D.getStage(),
 				i18n.getString("UIMenuBuilder.filechooser.new.title", "Create new project"),
 				"jag3d_project.script",
 				new ExtensionFilter(i18n.getString("OADBReader.extension.script", "HyperSQL"), "*.script")
@@ -631,6 +635,7 @@ public class UIMenuBuilder {
 				return;
 
 			File selectedFile = DefaultFileChooser.showSaveDialog(
+					JAG3D.getStage(),
 					i18n.getString("UIMenuBuilder.filechooser.copy.title", "Create deep copy of current project"),
 					null,
 					OADBReader.getExtensionFilters()
@@ -677,6 +682,7 @@ public class UIMenuBuilder {
 
 	void openProject() {
 		File selectedFile = DefaultFileChooser.showOpenDialog(
+				JAG3D.getStage(),
 				i18n.getString("UIMenuBuilder.filechooser.open.title", "Open existing project"),
 				null,
 				OADBReader.getExtensionFilters()
@@ -741,6 +747,7 @@ public class UIMenuBuilder {
 	
 	public void migrateProject() {
 		File selectedFile = DefaultFileChooser.showOpenDialog(
+				JAG3D.getStage(),
 				i18n.getString("UIMenuBuilder.filechooser.migrate.title", "Migrate existing JAG3D project"),
 				null,
 				OADBReader.getExtensionFilters()
@@ -787,6 +794,7 @@ public class UIMenuBuilder {
 
 	private void importFile(SourceFileReader<TreeItem<TreeItemValue>> fileReader, ExtensionFilter[] extensionFilters, String title) {
 		List<File> selectedFiles = DefaultFileChooser.showOpenMultipleDialog(
+				JAG3D.getStage(),
 				title,
 				null,
 				extensionFilters
@@ -951,9 +959,10 @@ public class UIMenuBuilder {
 					
 		case IMPORT_COLUMN_BASED_FILES:
 			List<File> selectedFiles = DefaultFileChooser.showOpenMultipleDialog(
+					JAG3D.getStage(),
 					i18n.getString("UIMenuBuilder.filechooser.import.column_based.title", "Import user-defined column-based flat files"),
 					null,
-					LockFileReader.getExtensionFilters()
+					FlatFileReader.getExtensionFilters()
 			);
 
 			if (selectedFiles == null || selectedFiles.isEmpty())
@@ -976,6 +985,7 @@ public class UIMenuBuilder {
 		try {
 			FTLReport ftl = SQLManager.getInstance().getFTLReport();
 			File reportFile = DefaultFileChooser.showSaveDialog(
+					JAG3D.getStage(),
 					i18n.getString("UIMenuBuilder.filechooser.report.title", "Save adjustment report"), 
 					"report.html",
 					new ExtensionFilter(i18n.getString("UIMenuBuilder.extension.html", "Hypertext Markup Language"), "*.html", "*.htm") 
@@ -1040,6 +1050,33 @@ public class UIMenuBuilder {
 					);
 		}
 	}
+	
+	void showModule(MenuItemType menuItemType) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					switch (menuItemType) {
+					case MODULE_JUNIFORM:
+						Stage stage = JUniForm.getStage() == null ? new Stage() : JUniForm.getStage();
+						JUniForm juniform = new JUniForm();
+						juniform.start(stage);
+						break;
+					default:
+						break;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					OptionDialog.showThrowableDialog (
+							i18n.getString("UIMenuBuilder.message.error.module.exception.title", "Application error"),
+							i18n.getString("UIMenuBuilder.message.error.module.exception.header", "Error, could not start application."),
+							i18n.getString("UIMenuBuilder.message.error.module.exception.message", "An exception has occurred during application start."),
+							e
+							);
+				}
+			}
+		});
+	}
 
 	// TODO transfer application to FX
 	void showSwingApplication(MenuItemType menuItemType) {
@@ -1048,9 +1085,6 @@ public class UIMenuBuilder {
 				switch (menuItemType) {
 				case MODULE_COORDTRANS:
 					new CoordTrans(true);
-					break;
-				case MODULE_FORMFITTINGTOOLBOX:
-					new FormFittingToolbox(true);
 					break;
 				case MODULE_GEOTRA:
 					new GeoTra(true);

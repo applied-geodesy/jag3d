@@ -28,7 +28,7 @@ import org.applied_geodesy.jag3d.ui.graphic.layer.LayerManager;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationSymbolProperties;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ObservationSymbolProperties.ObservationType;
-import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;

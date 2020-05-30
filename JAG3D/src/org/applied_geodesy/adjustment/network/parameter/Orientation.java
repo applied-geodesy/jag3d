@@ -21,8 +21,8 @@
 
 package org.applied_geodesy.adjustment.network.parameter;
 
-import org.applied_geodesy.adjustment.DefaultAverageThreshold;
 import org.applied_geodesy.adjustment.MathExtension;
+import org.applied_geodesy.adjustment.network.DefaultAverageThreshold;
 import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.adjustment.network.observation.Direction;
 import org.applied_geodesy.adjustment.network.observation.FaceType;
