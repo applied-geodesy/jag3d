@@ -38,6 +38,7 @@ import org.applied_geodesy.util.io.SourceFileReader;
 import javafx.stage.FileChooser.ExtensionFilter;
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.UpperSymmBandMatrix;
+import no.uib.cipr.matrix.UpperSymmPackMatrix;
 
 public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueList<FeaturePoint>> {
 	private final FeatureType featureType;
@@ -142,11 +143,29 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 			
 			sigmaY = options.convertLengthToModel(scanner.nextDouble());
 			
-			Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
-			dispersion.set(0, 0, sigmaX * sigmaX);
-			dispersion.set(1, 1, sigmaY * sigmaY);
+			// fully populated co-variance: varX covXY varY
+			// correlation: XY
+			if (!scanner.hasNextDouble()) {
+				Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
+				dispersion.set(0, 0, sigmaX * sigmaX);
+				dispersion.set(1, 1, sigmaY * sigmaY);
+				point.setDispersionApriori(dispersion);
+				return point;
+			}
+			
+			// first two values == first row/column
+			double varX  = options.convertLengthToModel(sigmaX);
+			double covXY = options.convertLengthToModel(sigmaY);
+
+			double varY  = options.convertLengthToModel(options.convertLengthToModel(scanner.nextDouble()));
+			
+			Matrix dispersion = new UpperSymmPackMatrix(point.getDimension());
+			dispersion.set(0, 0, varX);
+			dispersion.set(0, 1, covXY);
+			dispersion.set(1, 1, varY);
 			point.setDispersionApriori(dispersion);
 			return point;
+			
 		}
 		finally {
 			scanner.close();
@@ -214,12 +233,37 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 
 			sigmaZ = options.convertLengthToModel(scanner.nextDouble());
 
-			Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
-			dispersion.set(0, 0, sigmaX * sigmaX);
-			dispersion.set(1, 1, sigmaY * sigmaY);
-			dispersion.set(2, 2, sigmaZ * sigmaZ);
+			// fully populated co-variance: varX covXY covXZ varY covYZ varZ
+			// correlation: XYZ
+			if (!scanner.hasNextDouble()) {
+				Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
+				dispersion.set(0, 0, sigmaX * sigmaX);
+				dispersion.set(1, 1, sigmaY * sigmaY);
+				dispersion.set(2, 2, sigmaZ * sigmaZ);
+				point.setDispersionApriori(dispersion);
+				return point;
+			}
+			
+			// first three values == first row/column
+			double varX  = options.convertLengthToModel(sigmaX);
+			double covXY = options.convertLengthToModel(sigmaY);
+			double covXZ = options.convertLengthToModel(sigmaZ);
+			
+			double varY  = options.convertLengthToModel(options.convertLengthToModel(scanner.nextDouble()));
+			double covYZ = options.convertLengthToModel(options.convertLengthToModel(scanner.nextDouble()));
+			
+			double varZ  = options.convertLengthToModel(options.convertLengthToModel(scanner.nextDouble()));
+			
+			Matrix dispersion = new UpperSymmPackMatrix(point.getDimension());
+			dispersion.set(0, 0, varX);
+			dispersion.set(0, 1, covXY);
+			dispersion.set(0, 2, covXZ);
+			dispersion.set(1, 1, varY);
+			dispersion.set(1, 2, covYZ);
+			dispersion.set(2, 2, varZ);
 			point.setDispersionApriori(dispersion);
 			return point;
+
 		}
 		finally {
 			scanner.close();
