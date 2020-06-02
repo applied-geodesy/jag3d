@@ -1318,128 +1318,128 @@ public class FeatureAdjustment {
 		this.estimationType = estimationType;
 	}
 
-	public static void main(String[] args) throws Exception {
-		FeatureAdjustment adjustment = new FeatureAdjustment();
-
-		FeaturePoint point1 = new FeaturePoint("1", 2.986, 2.496, 2.928);
-		FeaturePoint point2 = new FeaturePoint("2", 4.370, 5.276, 3.079);
-		FeaturePoint point3 = new FeaturePoint("3", 4.845, 6.347, 5.817);
-		FeaturePoint point4 = new FeaturePoint("4", 2.375, 1.485, 6.589);
-		FeaturePoint point5 = new FeaturePoint("5", 2.448, 1.462, 4.205);
-		FeaturePoint point6 = new FeaturePoint("6", 3.049, 2.764, 8.050);
-		FeaturePoint point7 = new FeaturePoint("7", 4.012, 4.706, 8.082);
-		FeaturePoint point8 = new FeaturePoint("8", 4.567, 5.054, 7.141);
-
-		point1.setDispersionApriori(
-				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
-					{  16.0839803365062,  4.65534839899422, -4.38460084854308},
-					{  4.65534839899422,  26.3272479942061,  2.47834290278709},
-					{ -4.38460084854308,  2.47834290278709,  29.0815646040579}
-				}))
-				);
-
-		point2.setDispersionApriori(
-				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
-					{  17.8964457912516,  3.09111321599046,  5.64126184131749},
-					{  3.09111321599046,  19.0624298799118,  8.08205153582906},
-					{  5.64126184131749,  8.08205153582906,  26.1468430557483}
-				}))
-				);
-
-		point3.setDispersionApriori(
-				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
-					{  29.0047447515151, 0.403158357030017,  11.1766961352954},
-					{ 0.403158357030017,  22.9345053072238, -7.29211633546859},
-					{  11.1766961352954, -7.29211633546859,  21.2201800630207},
-				}))
-				);
-
-		point4.setDispersionApriori(
-				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
-					{   14.007661244179,  1.79628360816322,  4.13632502272246},
-					{  1.79628360816322,  31.9556797927839, -2.25880229809073},
-					{  4.13632502272246, -2.25880229809073,  27.3871830020619}
-				}))
-				);
-
-		point5.setDispersionApriori(
-				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
-					{  24.2029609740167, -4.29135894085001, -4.78113396533508},
-					{ -4.29135894085001,  21.3674323634287, -1.42807065830297},
-					{ -4.78113396533508, -1.42807065830297,  17.6619349346275}
-				}))
-				);
-
-		point6.setDispersionApriori(
-				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
-					{  20.7448446052198,  7.74193819492723, -3.21311943337311},
-					{  7.74193819492723,  42.3093042517494,  -5.4060692623952},
-					{ -3.21311943337311,  -5.4060692623952,   17.565600995021}
-				}))
-				);
-
-		point7.setDispersionApriori(
-				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
-					{   47.221895847014, 0.692081451296938,  3.57664252908793},
-					{ 0.692081451296938,  15.1198359736348, -3.95299745877936},
-					{  3.57664252908793, -3.95299745877936,  29.0659166670697}
-				}))
-				);
-
-		point8.setDispersionApriori(
-				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
-					{  29.3255840578623,  -7.3780624024934, -7.22152909351128},
-					{  -7.3780624024934,  13.6447146847114, 0.978337662987412},
-					{ -7.22152909351128, 0.978337662987412,  24.3329973857069}
-				}))
-				);
-
-		java.util.Set<FeaturePoint> points = new LinkedHashSet<FeaturePoint>();
-		points.add(point1);
-		points.add(point2);
-		points.add(point3);
-		points.add(point4);
-		points.add(point5);
-		points.add(point6);
-		points.add(point7);
-		points.add(point8);
-
-		org.applied_geodesy.adjustment.geometry.point.Point centerOfMass = Feature.deriveCenterOfMass(points);
-
-		/** Circle fit **/
-		Feature feature = new org.applied_geodesy.adjustment.geometry.surface.SpatialCircleFeature();
-
-		/** Start adjustment **/
-		for (GeometricPrimitive geometricPrimitive : feature)
-			geometricPrimitive.getFeaturePoints().addAll(points);
-
-
-		org.applied_geodesy.adjustment.geometry.restriction.FeaturePointRestriction featurePointPlaneRestriction = 
-				new org.applied_geodesy.adjustment.geometry.restriction.FeaturePointRestriction(
-						false, 
-						((org.applied_geodesy.adjustment.geometry.surface.SpatialCircleFeature)feature).getPlane(), 
-						point5
-		);
-		
-		org.applied_geodesy.adjustment.geometry.restriction.FeaturePointRestriction featurePointCircleRestriction = 
-				new org.applied_geodesy.adjustment.geometry.restriction.FeaturePointRestriction(
-						false, 
-						((org.applied_geodesy.adjustment.geometry.surface.SpatialCircleFeature)feature).getSphere(), 
-						point5
-		);
-		
-		adjustment.setFeature(feature);
-		feature.deriveInitialGuess();
-		feature.applyInitialGuess();
-		feature.setCenterOfMass(centerOfMass);
-		
-		feature.getRestrictions().addAll(featurePointPlaneRestriction, featurePointCircleRestriction);
-
-		adjustment.init();
-		adjustment.estimateModel();
-		
-		System.out.println(point5.getX0()+"  "+point5.getX());
-		System.out.println(point5.getY0()+"  "+point5.getY());
-		System.out.println(point5.getZ0()+"  "+point5.getZ());
-	}
+//	public static void main(String[] args) throws Exception {
+//		FeatureAdjustment adjustment = new FeatureAdjustment();
+//
+//		FeaturePoint point1 = new FeaturePoint("1", 2.986, 2.496, 2.928);
+//		FeaturePoint point2 = new FeaturePoint("2", 4.370, 5.276, 3.079);
+//		FeaturePoint point3 = new FeaturePoint("3", 4.845, 6.347, 5.817);
+//		FeaturePoint point4 = new FeaturePoint("4", 2.375, 1.485, 6.589);
+//		FeaturePoint point5 = new FeaturePoint("5", 2.448, 1.462, 4.205);
+//		FeaturePoint point6 = new FeaturePoint("6", 3.049, 2.764, 8.050);
+//		FeaturePoint point7 = new FeaturePoint("7", 4.012, 4.706, 8.082);
+//		FeaturePoint point8 = new FeaturePoint("8", 4.567, 5.054, 7.141);
+//
+//		point1.setDispersionApriori(
+//				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
+//					{  16.0839803365062,  4.65534839899422, -4.38460084854308},
+//					{  4.65534839899422,  26.3272479942061,  2.47834290278709},
+//					{ -4.38460084854308,  2.47834290278709,  29.0815646040579}
+//				}))
+//				);
+//
+//		point2.setDispersionApriori(
+//				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
+//					{  17.8964457912516,  3.09111321599046,  5.64126184131749},
+//					{  3.09111321599046,  19.0624298799118,  8.08205153582906},
+//					{  5.64126184131749,  8.08205153582906,  26.1468430557483}
+//				}))
+//				);
+//
+//		point3.setDispersionApriori(
+//				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
+//					{  29.0047447515151, 0.403158357030017,  11.1766961352954},
+//					{ 0.403158357030017,  22.9345053072238, -7.29211633546859},
+//					{  11.1766961352954, -7.29211633546859,  21.2201800630207},
+//				}))
+//				);
+//
+//		point4.setDispersionApriori(
+//				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
+//					{   14.007661244179,  1.79628360816322,  4.13632502272246},
+//					{  1.79628360816322,  31.9556797927839, -2.25880229809073},
+//					{  4.13632502272246, -2.25880229809073,  27.3871830020619}
+//				}))
+//				);
+//
+//		point5.setDispersionApriori(
+//				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
+//					{  24.2029609740167, -4.29135894085001, -4.78113396533508},
+//					{ -4.29135894085001,  21.3674323634287, -1.42807065830297},
+//					{ -4.78113396533508, -1.42807065830297,  17.6619349346275}
+//				}))
+//				);
+//
+//		point6.setDispersionApriori(
+//				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
+//					{  20.7448446052198,  7.74193819492723, -3.21311943337311},
+//					{  7.74193819492723,  42.3093042517494,  -5.4060692623952},
+//					{ -3.21311943337311,  -5.4060692623952,   17.565600995021}
+//				}))
+//				);
+//
+//		point7.setDispersionApriori(
+//				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
+//					{   47.221895847014, 0.692081451296938,  3.57664252908793},
+//					{ 0.692081451296938,  15.1198359736348, -3.95299745877936},
+//					{  3.57664252908793, -3.95299745877936,  29.0659166670697}
+//				}))
+//				);
+//
+//		point8.setDispersionApriori(
+//				new UpperSymmPackMatrix(new DenseMatrix(new double[][] {
+//					{  29.3255840578623,  -7.3780624024934, -7.22152909351128},
+//					{  -7.3780624024934,  13.6447146847114, 0.978337662987412},
+//					{ -7.22152909351128, 0.978337662987412,  24.3329973857069}
+//				}))
+//				);
+//
+//		java.util.Set<FeaturePoint> points = new LinkedHashSet<FeaturePoint>();
+//		points.add(point1);
+//		points.add(point2);
+//		points.add(point3);
+//		points.add(point4);
+//		points.add(point5);
+//		points.add(point6);
+//		points.add(point7);
+//		points.add(point8);
+//
+//		org.applied_geodesy.adjustment.geometry.point.Point centerOfMass = Feature.deriveCenterOfMass(points);
+//
+//		/** Circle fit **/
+//		Feature feature = new org.applied_geodesy.adjustment.geometry.surface.SpatialCircleFeature();
+//
+//		/** Start adjustment **/
+//		for (GeometricPrimitive geometricPrimitive : feature)
+//			geometricPrimitive.getFeaturePoints().addAll(points);
+//
+//
+//		org.applied_geodesy.adjustment.geometry.restriction.FeaturePointRestriction featurePointPlaneRestriction = 
+//				new org.applied_geodesy.adjustment.geometry.restriction.FeaturePointRestriction(
+//						false, 
+//						((org.applied_geodesy.adjustment.geometry.surface.SpatialCircleFeature)feature).getPlane(), 
+//						point5
+//		);
+//		
+//		org.applied_geodesy.adjustment.geometry.restriction.FeaturePointRestriction featurePointCircleRestriction = 
+//				new org.applied_geodesy.adjustment.geometry.restriction.FeaturePointRestriction(
+//						false, 
+//						((org.applied_geodesy.adjustment.geometry.surface.SpatialCircleFeature)feature).getSphere(), 
+//						point5
+//		);
+//		
+//		adjustment.setFeature(feature);
+//		feature.deriveInitialGuess();
+//		feature.applyInitialGuess();
+//		feature.setCenterOfMass(centerOfMass);
+//		
+//		feature.getRestrictions().addAll(featurePointPlaneRestriction, featurePointCircleRestriction);
+//
+//		adjustment.init();
+//		adjustment.estimateModel();
+//		
+//		System.out.println(point5.getX0()+"  "+point5.getX());
+//		System.out.println(point5.getY0()+"  "+point5.getY());
+//		System.out.println(point5.getZ0()+"  "+point5.getZ());
+//	}
 }
