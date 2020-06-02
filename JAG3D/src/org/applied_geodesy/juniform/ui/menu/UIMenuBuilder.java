@@ -23,7 +23,10 @@ package org.applied_geodesy.juniform.ui.menu;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.applied_geodesy.adjustment.geometry.FeatureChangeListener;
 import org.applied_geodesy.adjustment.geometry.FeatureEvent;
@@ -515,13 +518,25 @@ public class UIMenuBuilder implements FeatureChangeListener {
 		try {
 			if (UITreeBuilder.getInstance().getFeatureAdjustment().getFeature() == null)
 				return;
+
+			Pattern pattern = Pattern.compile(".*?\\.(\\w+)\\.ftlh$", Pattern.CASE_INSENSITIVE);
+			Matcher matcher = pattern.matcher(templateFile.getName().toLowerCase());
+			String extension = "html";
+			ExtensionFilter extensionFilter = new ExtensionFilter(i18n.getString("UIMenuBuilder.report.extension.html", "Hypertext Markup Language"), "*.html", "*.htm");
+			if (matcher.find() && matcher.groupCount() == 1) {
+				extension = matcher.group(1);
+				extensionFilter = new ExtensionFilter(String.format(Locale.ENGLISH, i18n.getString("UIMenuBuilder.report.extension.template", "%s-File"), extension), "*." + extension); 
+			}
+			
+			String fileNameSuggestion = "report." + extension;
+
 			FTLReport ftl = new FTLReport(UITreeBuilder.getInstance().getFeatureAdjustment());
 			File reportFile = DefaultFileChooser.showSaveDialog(
 					JUniForm.getStage(),
 					i18n.getString("UIMenuBuilder.filechooser.report.title", "Save adjustment report"), 
-					"report.html",
-					new ExtensionFilter(i18n.getString("UIMenuBuilder.extension.html", "Hypertext Markup Language"), "*.html", "*.htm") 
-					);
+					fileNameSuggestion,
+					extensionFilter
+			);
 			if (reportFile != null && ftl != null) {
 				ftl.setTemplate(templateFile.getName());
 				ftl.toFile(reportFile);
