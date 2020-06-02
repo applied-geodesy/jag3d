@@ -34,6 +34,7 @@ import org.applied_geodesy.juniform.ui.dialog.AboutDialog;
 import org.applied_geodesy.juniform.ui.dialog.AverageRestrictionDialog;
 import org.applied_geodesy.juniform.ui.dialog.FeatureAdjustmentDialog;
 import org.applied_geodesy.juniform.ui.dialog.FeatureDialog;
+import org.applied_geodesy.juniform.ui.dialog.FeaturePointRestrictionDialog;
 import org.applied_geodesy.juniform.ui.dialog.FormatterOptionDialog;
 import org.applied_geodesy.juniform.ui.dialog.GeometricPrimitiveDialog;
 import org.applied_geodesy.juniform.ui.dialog.LeastSquaresSettingDialog;
@@ -129,6 +130,7 @@ public class JUniForm extends Application {
 		ReadFileProgressDialog.setOwner(primaryStage);
 		FormatterOptionDialog.setOwner(primaryStage);
 		AboutDialog.setOwner(primaryStage);
+		FeaturePointRestrictionDialog.setOwner(primaryStage);
 	}
 
 	@Override
