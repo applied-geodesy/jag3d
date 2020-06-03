@@ -302,20 +302,20 @@ public class ProductSumRestrictionDialog {
 		RegressorEventHandler regressorEventHandler = new RegressorEventHandler();
 		
 		this.addParameterAButtom = DialogUtil.createButton(
-				i18N.getString("ProductSumRestrictionDialog.parameter.a.add.label", "+"),
-				i18N.getString("ProductSumRestrictionDialog.parameter.a.add.tooltip", "Add parameter to regressor list"));
+				i18N.getString("ProductSumRestrictionDialog.regressor.a.add.label", "+"),
+				i18N.getString("ProductSumRestrictionDialog.regressor.a.add.tooltip", "Add parameter to regressor list"));
 		
 		this.removeParameterAButtom = DialogUtil.createButton(
-				i18N.getString("ProductSumRestrictionDialog.parameter.a.remove.label", "-"),
-				i18N.getString("ProductSumRestrictionDialog.parameter.a.remove.tooltip", "Remove regressor"));
+				i18N.getString("ProductSumRestrictionDialog.regressor.a.remove.label", "-"),
+				i18N.getString("ProductSumRestrictionDialog.regressor.a.remove.tooltip", "Remove regressor"));
 		
 		this.moveUpParameterAButtom = DialogUtil.createButton(
-				i18N.getString("ProductSumRestrictionDialog.parameter.a.up.label", "\u25B2"),
-				i18N.getString("ProductSumRestrictionDialog.parameter.a.up.tooltip", "Move up (change order)"));
+				i18N.getString("ProductSumRestrictionDialog.regressor.a.up.label", "\u25B2"),
+				i18N.getString("ProductSumRestrictionDialog.regressor.a.up.tooltip", "Move up (change order)"));
 		
 		this.moveDownParameterAButtom = DialogUtil.createButton(
-				i18N.getString("ProductSumRestrictionDialog.parameter.a.down.label", "\u25BC"),
-				i18N.getString("ProductSumRestrictionDialog.parameter.a.down.tooltip", "Move down (change order)"));
+				i18N.getString("ProductSumRestrictionDialog.regressor.a.down.label", "\u25BC"),
+				i18N.getString("ProductSumRestrictionDialog.regressor.a.down.tooltip", "Move down (change order)"));
 		
 		this.addParameterAButtom.setOnAction(regressorEventHandler);
 		this.removeParameterAButtom.setOnAction(regressorEventHandler);
@@ -336,20 +336,20 @@ public class ProductSumRestrictionDialog {
 		);
 		
 		this.addParameterBButtom = DialogUtil.createButton(
-				i18N.getString("ProductSumRestrictionDialog.parameter.b.add.label", "+"),
-				i18N.getString("ProductSumRestrictionDialog.parameter.b.add.tooltip", "Add parameter to regressor list"));
+				i18N.getString("ProductSumRestrictionDialog.regressor.b.add.label", "+"),
+				i18N.getString("ProductSumRestrictionDialog.regressor.b.add.tooltip", "Add parameter to regressor list"));
 		
 		this.removeParameterBButtom = DialogUtil.createButton(
-				i18N.getString("ProductSumRestrictionDialog.parameter.b.remove.label", "-"),
-				i18N.getString("ProductSumRestrictionDialog.parameter.b.remove.tooltip", "Remove regressor"));
+				i18N.getString("ProductSumRestrictionDialog.regressor.b.remove.label", "-"),
+				i18N.getString("ProductSumRestrictionDialog.regressor.b.remove.tooltip", "Remove regressor"));
 		
 		this.moveUpParameterBButtom = DialogUtil.createButton(
-				i18N.getString("ProductSumRestrictionDialog.parameter.b.up.label", "\u25B2"),
-				i18N.getString("ProductSumRestrictionDialog.parameter.b.up.tooltip", "Move up (change order)"));
+				i18N.getString("ProductSumRestrictionDialog.regressor.b.up.label", "\u25B2"),
+				i18N.getString("ProductSumRestrictionDialog.regressor.b.up.tooltip", "Move up (change order)"));
 		
 		this.moveDownParameterBButtom = DialogUtil.createButton(
-				i18N.getString("ProductSumRestrictionDialog.parameter.b.down.label", "\u25BC"),
-				i18N.getString("ProductSumRestrictionDialog.parameter.b.down.tooltip", "Move down (change order)"));
+				i18N.getString("ProductSumRestrictionDialog.regressor.b.down.label", "\u25BC"),
+				i18N.getString("ProductSumRestrictionDialog.regressor.b.down.tooltip", "Move down (change order)"));
 		
 		this.addParameterBButtom.setOnAction(regressorEventHandler);
 		this.removeParameterBButtom.setOnAction(regressorEventHandler);

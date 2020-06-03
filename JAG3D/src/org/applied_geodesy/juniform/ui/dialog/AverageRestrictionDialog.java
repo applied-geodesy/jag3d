@@ -202,12 +202,12 @@ public class AverageRestrictionDialog {
 		
 		RegressorEventHandler regressorEventHandler = new RegressorEventHandler();
 		this.addParameterButtom = DialogUtil.createButton(
-				i18N.getString("AverageRestrictionDialog.parameter.a.add.label", "+"),
-				i18N.getString("AverageRestrictionDialog.parameter.a.add.tooltip", "Add parameter to regressor list"));
+				i18N.getString("AverageRestrictionDialog.regressor.a.add.label", "+"),
+				i18N.getString("AverageRestrictionDialog.regressor.a.add.tooltip", "Add parameter to regressor list"));
 		
 		this.removeParameterButtom = DialogUtil.createButton(
-				i18N.getString("AverageRestrictionDialog.parameter.a.remove.label", "-"),
-				i18N.getString("AverageRestrictionDialog.parameter.a.remove.tooltip", "Remove regressor"));
+				i18N.getString("AverageRestrictionDialog.regressor.a.remove.label", "-"),
+				i18N.getString("AverageRestrictionDialog.regressor.a.remove.tooltip", "Remove regressor"));
 			
 		this.addParameterButtom.setOnAction(regressorEventHandler);
 		this.removeParameterButtom.setOnAction(regressorEventHandler);
