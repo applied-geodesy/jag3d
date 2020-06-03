@@ -428,6 +428,9 @@ public class UnknownParameterDialog {
 				case VECTOR_Z:
 					cellValueType = CellValueType.VECTOR;
 					break;
+				case ANGLE:
+					cellValueType = CellValueType.ANGLE;
+					break;
 				case CONSTANT:
 				case MAJOR_AXIS_COEFFICIENT:
 				case MIDDLE_AXIS_COEFFICIENT:

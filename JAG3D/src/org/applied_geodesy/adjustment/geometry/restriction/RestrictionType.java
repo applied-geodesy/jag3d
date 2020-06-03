@@ -25,5 +25,6 @@ public enum RestrictionType {
 	AVERAGE,
 	PRODUCT_SUM,
 	FEATURE_POINT,
+	VECTOR_ANGLE,
 	;
 }	

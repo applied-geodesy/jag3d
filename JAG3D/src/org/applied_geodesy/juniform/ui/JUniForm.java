@@ -46,6 +46,7 @@ import org.applied_geodesy.juniform.ui.dialog.RestrictionTypeDialog;
 import org.applied_geodesy.juniform.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.juniform.ui.dialog.UnknownParameterDialog;
 import org.applied_geodesy.juniform.ui.dialog.UnknownParameterTypeDialog;
+import org.applied_geodesy.juniform.ui.dialog.VectorAngleRestrictionDialog;
 import org.applied_geodesy.juniform.ui.i18n.I18N;
 import org.applied_geodesy.juniform.ui.menu.UIMenuBuilder;
 import org.applied_geodesy.juniform.ui.table.UIParameterTableBuilder;
@@ -131,6 +132,7 @@ public class JUniForm extends Application {
 		FormatterOptionDialog.setOwner(primaryStage);
 		AboutDialog.setOwner(primaryStage);
 		FeaturePointRestrictionDialog.setOwner(primaryStage);
+		VectorAngleRestrictionDialog.setOwner(primaryStage);
 	}
 
 	@Override

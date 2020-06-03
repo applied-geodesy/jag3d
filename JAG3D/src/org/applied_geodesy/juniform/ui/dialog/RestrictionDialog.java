@@ -33,6 +33,7 @@ import org.applied_geodesy.adjustment.geometry.restriction.FeaturePointRestricti
 import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction;
 import org.applied_geodesy.adjustment.geometry.restriction.Restriction;
 import org.applied_geodesy.adjustment.geometry.restriction.RestrictionType;
+import org.applied_geodesy.adjustment.geometry.restriction.VectorAngleRestriction;
 import org.applied_geodesy.ui.tex.LaTexLabel;
 import org.applied_geodesy.juniform.ui.i18n.I18N;
 import org.applied_geodesy.juniform.ui.table.UIPointTableBuilder;
@@ -68,7 +69,7 @@ public class RestrictionDialog {
 	private class PostProcessingPredicate implements Predicate<UnknownParameter> {
 		@Override
 		public boolean test(UnknownParameter unknownParameter) {
-			return enablePostProcessing ? unknownParameter.getProcessingType() == ProcessingType.POSTPROCESSING : unknownParameter.getProcessingType() != ProcessingType.POSTPROCESSING;
+			return enablePostProcessing || unknownParameter.getProcessingType() != ProcessingType.POSTPROCESSING;
 		}
 	}
 	
@@ -404,6 +405,11 @@ public class RestrictionDialog {
 			
 		case FEATURE_POINT:
 			FeaturePointRestrictionDialog.showAndWait(this.feature.getGeometricPrimitives(), UIPointTableBuilder.getInstance().getTable().getItems(), (FeaturePointRestriction)restriction);
+			break;
+			
+		case VECTOR_ANGLE:
+			VectorAngleRestrictionDialog.showAndWait(this.filteredUnknownParameters, (VectorAngleRestriction)restriction);
+			break;
 		}
 	}
 	
@@ -424,6 +430,8 @@ public class RestrictionDialog {
 			return new ProductSumRestriction();
 		case FEATURE_POINT:
 			return new FeaturePointRestriction();
+		case VECTOR_ANGLE:
+			return new VectorAngleRestriction();
 		}
 		return null;
 	}

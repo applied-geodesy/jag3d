@@ -155,6 +155,9 @@ public class RestrictionTypeDialog {
 			
 		case FEATURE_POINT:
 			return i18N.getString("RestrictionTypeDialog.restriction.type.featurepoint", "Feature point");
+			
+		case VECTOR_ANGLE:
+			return i18N.getString("RestrictionTypeDialog.restriction.type.vectorangle", "Vector angle");
 		}
 		throw new IllegalArgumentException("Error, unknown restriction type " + restrictionType + "!");
 	}
