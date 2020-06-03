@@ -80,7 +80,6 @@ import org.applied_geodesy.util.io.properties.URLParameter;
 import org.applied_geodesy.util.sql.DataBase;
 import org.applied_geodesy.util.sql.HSQLDB;
 import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
-import org.applied_geodesy.version.jag3d.Version;
 
 import com.derletztekick.geodesy.coordtrans.v2.gui.CoordTrans;
 import com.derletztekick.geodesy.geotra.gui.GeoTra;
@@ -1016,7 +1015,7 @@ public class UIMenuBuilder {
 
 				if (propVersion > 0) {
 					validProperties = true; 
-					if (propVersion > Version.get()) {
+					if (propVersion > Math.max(org.applied_geodesy.version.jag3d.Version.get(), org.applied_geodesy.version.juniform.Version.get())) {
 						Optional<ButtonType> result = OptionDialog.showConfirmationDialog(
 								i18n.getString("UIMenuBuilder.message.confirmation.outdated_version.title", "New version available"),
 								String.format(Locale.ENGLISH, i18n.getString("UIMenuBuilder.message.confirmation.outdated_version.header", "A new version v%d of JAG3D is available.\r\nDo you want to download the latest release?"), propVersion),
@@ -1025,7 +1024,7 @@ public class UIMenuBuilder {
 
 
 						if (result.get() == ButtonType.OK && this.hostServices != null) 
-							this.hostServices.showDocument(properties.getProperty("DOWNLOAD", "http://software.applied-geodesy.org"));
+							this.hostServices.showDocument(properties.getProperty("DOWNLOAD", "https://software.applied-geodesy.org"));
 
 					} 
 					else {

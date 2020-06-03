@@ -42,9 +42,6 @@ public class Version {
 		int max = 0;
 		for (Integer version : versions.values())
 			max = Math.max(max, version);
-		
-		max = Math.max(max, org.applied_geodesy.version.juniform.Version.get());
-		
 		return max;
 	}
 	

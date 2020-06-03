@@ -139,7 +139,7 @@ public class AboutDialog {
 			@Override
 			public void handle(ActionEvent e) {
 				if (hostServices != null)
-					hostServices.showDocument("http://software.applied-geodesy.org");
+					hostServices.showDocument("https://software.applied-geodesy.org");
 				homePageLink.setVisited(false);
 			}
 		});
