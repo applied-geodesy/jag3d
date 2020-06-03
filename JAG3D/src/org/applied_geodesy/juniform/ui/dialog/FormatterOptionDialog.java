@@ -208,13 +208,13 @@ public class FormatterOptionDialog {
 				gridPane,
 				++row);
 		
-//		this.addRow(
-//				i18n.getString("FormatterOptionDialog.unit.angle.value.label", "Angle:"),
-//    			i18n.getString("FormatterOptionDialog.unit.angle.value.tooltip.digits", "Set number of fraction digits for type angle"),
-//    			i18n.getString("FormatterOptionDialog.unit.angle.value.tooltip.unit", "Set unit for type angle value"),
-//				formatterOptions.get(CellValueType.ANGLE),
-//				gridPane,
-//				++row);
+		this.addRow(
+				i18n.getString("FormatterOptionDialog.unit.angle.value.label", "Angle:"),
+    			i18n.getString("FormatterOptionDialog.unit.angle.value.tooltip.digits", "Set number of fraction digits for type angle"),
+    			i18n.getString("FormatterOptionDialog.unit.angle.value.tooltip.unit", "Set unit for type angle value"),
+				formatterOptions.get(CellValueType.ANGLE),
+				gridPane,
+				++row);
 		
 //		this.addRow(
 //				i18n.getString("FormatterOptionDialog.unit.scale.value.label", "Scale:"),
@@ -254,13 +254,13 @@ public class FormatterOptionDialog {
 				gridPane,
 				++row);
 		
-//		this.addRow(
-//				i18n.getString("FormatterOptionDialog.unit.angle.uncertainty.label", "Angle uncertainty:"),
-//    			i18n.getString("FormatterOptionDialog.unit.angle.uncertainty.tooltip.digits", "Set number of fraction digits for type angle uncertainty"),
-//    			i18n.getString("FormatterOptionDialog.unit.angle.uncertainty.tooltip.unit", "Set unit for type angle uncertainty"),
-//				formatterOptions.get(CellValueType.ANGLE_UNCERTAINTY),
-//				gridPane,
-//				++row);
+		this.addRow(
+				i18n.getString("FormatterOptionDialog.unit.angle.uncertainty.label", "Angle uncertainty:"),
+    			i18n.getString("FormatterOptionDialog.unit.angle.uncertainty.tooltip.digits", "Set number of fraction digits for type angle uncertainty"),
+    			i18n.getString("FormatterOptionDialog.unit.angle.uncertainty.tooltip.unit", "Set unit for type angle uncertainty"),
+				formatterOptions.get(CellValueType.ANGLE_UNCERTAINTY),
+				gridPane,
+				++row);
 		
 //		this.addRow(
 //				i18n.getString("FormatterOptionDialog.unit.scale.uncertainty.label", "Scale uncertainty:"),
@@ -299,13 +299,13 @@ public class FormatterOptionDialog {
 				gridPane,
 				++row);
 		
-//		this.addRow(
-//				i18n.getString("FormatterOptionDialog.unit.angle.residual.label", "Angle residual:"),
-//    			i18n.getString("FormatterOptionDialog.unit.angle.residual.tooltip.digits", "Set number of fraction digits for type angle residual"),
-//    			i18n.getString("FormatterOptionDialog.unit.angle.residual.tooltip.unit", "Set unit for type angle residual"),
-//				formatterOptions.get(CellValueType.ANGLE_RESIDUAL),
-//				gridPane,
-//				++row);
+		this.addRow(
+				i18n.getString("FormatterOptionDialog.unit.angle.residual.label", "Angle residual:"),
+    			i18n.getString("FormatterOptionDialog.unit.angle.residual.tooltip.digits", "Set number of fraction digits for type angle residual"),
+    			i18n.getString("FormatterOptionDialog.unit.angle.residual.tooltip.unit", "Set unit for type angle residual"),
+				formatterOptions.get(CellValueType.ANGLE_RESIDUAL),
+				gridPane,
+				++row);
 		
 //		this.addRow(
 //				i18n.getString("FormatterOptionDialog.unit.scale.residual.label", "Scale residual:"),

@@ -254,6 +254,8 @@ public class UnknownParameterTypeDialog {
 			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.h", "Polynomial coefficient H");
 		case POLYNOMIAL_COEFFICIENT_I:
 			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.i", "Polynomial coefficient I");
+		case ANGLE:
+			return i18N.getString("UnknownParameterTypeDialog.parameter.type.angle", "Angle");
 		}
 		return null;
 	}

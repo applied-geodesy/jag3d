@@ -97,6 +97,16 @@ class ParameterDoubleCell extends EditableCell<UnknownParameter, Double> impleme
 
 				break;
 				
+			case ANGLE:
+				if (this.displayFormatType == DisplayCellFormatType.NORMAL)
+					this.editableDoubleCellConverter.setCellValueType(CellValueType.ANGLE);
+				else if (this.displayFormatType == DisplayCellFormatType.UNCERTAINTY) 
+					this.editableDoubleCellConverter.setCellValueType(CellValueType.ANGLE_UNCERTAINTY);
+				else if (this.displayFormatType == DisplayCellFormatType.RESIDUAL) 
+					this.editableDoubleCellConverter.setCellValueType(CellValueType.ANGLE_RESIDUAL);
+
+				break;
+				
 			case CONSTANT:
 			case MAJOR_AXIS_COEFFICIENT:
 			case MIDDLE_AXIS_COEFFICIENT:
