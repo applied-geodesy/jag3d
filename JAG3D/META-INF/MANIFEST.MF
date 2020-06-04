@@ -9,6 +9,7 @@ Class-Path:
   lib/hsqldb.jar 
   lib/jdistlib-0.4.5-bin.jar 
   lib/tablelayout.jar 
+  lib/jlatexmath-1.0.7.jar 
   
   javafx/lib/javafx.base.jar 
   javafx/lib/javafx.controls.jar 
@@ -17,7 +18,6 @@ Class-Path:
   
   lib/tools.jar 
   lib/CoordTrans.jar 
-  lib/FormFittingToolbox.jar 
   lib/GeoTra.jar  
   
 Main-Class: org.applied_geodesy.jag3d.JAG3DApp

@@ -168,7 +168,7 @@ public class FormatterOptions {
 		this.setFractionDigits(scaleFormatter,       2);
 		this.setFractionDigits(vectorFormatter,      7);
 		this.setFractionDigits(statisticFormatter,   2);
-		this.setFractionDigits(doubleFormatter,      8);
+		this.setFractionDigits(doubleFormatter,      5);
 		
 		this.setFractionDigits(lengthUncertaintyFormatter, 1);
 		this.setFractionDigits(angleUncertaintyFormatter,  2);

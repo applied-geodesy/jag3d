@@ -35,6 +35,7 @@ import java.util.Set;
 import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
@@ -674,7 +675,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(i18n.getString("GSIFileReader.extension.gsi", "Geo Serial Interface (GSI)"), "*.gsi")
+				new ExtensionFilter(I18N.getInstance().getString("GSIFileReader.extension.gsi", "Geo Serial Interface (GSI)"), "*.gsi")
 		};
 	}
 	

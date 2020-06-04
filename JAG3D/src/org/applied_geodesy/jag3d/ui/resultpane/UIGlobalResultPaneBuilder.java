@@ -31,7 +31,7 @@ import org.applied_geodesy.jag3d.ui.table.UIVarianceComponentTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.row.PrincipalComponentRow;
 import org.applied_geodesy.jag3d.ui.table.row.TestStatisticRow;
 import org.applied_geodesy.jag3d.ui.table.row.VarianceComponentRow;
-import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;

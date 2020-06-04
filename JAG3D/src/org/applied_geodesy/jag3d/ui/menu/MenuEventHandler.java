@@ -172,9 +172,12 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 			break;
 			
 		case MODULE_COORDTRANS:
-		case MODULE_FORMFITTINGTOOLBOX:
 		case MODULE_GEOTRA:
 			this.menuBuilder.showSwingApplication(menuItemType);
+			break;
+			
+		case MODULE_JUNIFORM:
+			this.menuBuilder.showModule(menuItemType);
 			break;
 
 		case REPORT:

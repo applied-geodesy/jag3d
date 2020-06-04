@@ -28,7 +28,7 @@ import java.util.Map;
 
 import org.applied_geodesy.adjustment.network.parameter.RotationZ;
 import org.applied_geodesy.adjustment.network.parameter.Scale;
-import org.applied_geodesy.adjustment.point.Point;
+import org.applied_geodesy.adjustment.network.point.Point;
 
 import no.uib.cipr.matrix.Matrix;
 

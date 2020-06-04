@@ -41,7 +41,7 @@ import org.applied_geodesy.jag3d.ui.io.ColumnDefinedObservationFileReader;
 import org.applied_geodesy.jag3d.ui.io.ColumnDefinedPointFileReader;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.ui.textfield.LimitedTextField;
-import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.util.io.PreviewFileReader;
 import org.applied_geodesy.util.io.SourceFileReader;
 import org.applied_geodesy.util.io.csv.CSVColumnType;

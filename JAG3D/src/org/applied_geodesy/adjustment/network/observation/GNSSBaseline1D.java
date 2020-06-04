@@ -22,7 +22,7 @@
 package org.applied_geodesy.adjustment.network.observation;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
-import org.applied_geodesy.adjustment.point.Point;
+import org.applied_geodesy.adjustment.network.point.Point;
 
 public abstract class GNSSBaseline1D extends GNSSBaseline3D {
 

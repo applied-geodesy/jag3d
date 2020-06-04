@@ -22,14 +22,22 @@
 package org.applied_geodesy.adjustment;
 
 import no.uib.cipr.matrix.DenseVector;
+import no.uib.cipr.matrix.UpperSymmBandMatrix;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
 
 public class NormalEquationSystem {
 	private final UpperSymmPackMatrix N;
 	private final DenseVector n;
+	private UpperSymmBandMatrix V;
+	
 	public NormalEquationSystem(UpperSymmPackMatrix N, DenseVector n) {
+		this(N, n, null);
+	}
+	
+	public NormalEquationSystem(UpperSymmPackMatrix N, DenseVector n, UpperSymmBandMatrix V) {
 		this.N = N;
 		this.n = n;
+		this.V = V;
 	}
 	  
 	/**
@@ -53,5 +61,9 @@ public class NormalEquationSystem {
 	 */
 	public DenseVector getVector() {
 		return this.n;
+	}
+	
+	public UpperSymmBandMatrix getPreconditioner() {
+		return this.V;
 	}
 }

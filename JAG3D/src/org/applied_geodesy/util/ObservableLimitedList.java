@@ -31,7 +31,7 @@ public class ObservableLimitedList<T> extends ModifiableObservableListBase<T> {
 
 	public ObservableLimitedList(int maxSize) {
 		this.maxSize = maxSize;
-		this.list = new LinkedList<>();
+		this.list = new LinkedList<T>();
 	}
 
 	@Override

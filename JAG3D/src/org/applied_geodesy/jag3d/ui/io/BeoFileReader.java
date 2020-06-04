@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
@@ -377,7 +378,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(i18n.getString("BeoFileReader.extension.beo", "Beo (Neptan)"), "*.beo")
+				new ExtensionFilter(I18N.getInstance().getString("BeoFileReader.extension.beo", "Beo (Neptan)"), "*.beo")
 		};
 	}
 }

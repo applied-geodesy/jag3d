@@ -26,8 +26,8 @@ import java.util.Properties;
 
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
-import org.applied_geodesy.util.i18.I18N;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;

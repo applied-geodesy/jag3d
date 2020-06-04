@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
@@ -414,7 +415,7 @@ public class DL100FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(i18n.getString("DL100FileReader.extension.dl100", "DL-100 (Topcon)"), "*.l", "*.top")
+				new ExtensionFilter(I18N.getInstance().getString("DL100FileReader.extension.dl100", "DL-100 (Topcon)"), "*.l", "*.top")
 		};
 	}
 

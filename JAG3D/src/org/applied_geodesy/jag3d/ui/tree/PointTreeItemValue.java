@@ -24,7 +24,7 @@ package org.applied_geodesy.jag3d.ui.tree;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.applied_geodesy.adjustment.DefaultUncertainty;
+import org.applied_geodesy.adjustment.network.DefaultUncertainty;
 import org.applied_geodesy.adjustment.network.PointGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.jag3d.ui.tabpane.TabType;

@@ -24,11 +24,7 @@ package org.applied_geodesy.util.io;
 import java.io.File;
 import java.nio.file.Path;
 
-import org.applied_geodesy.util.i18.I18N;
-
 public abstract class SourceFileReader<T> extends LockFileReader {
-	protected static I18N i18n = I18N.getInstance();
-	
 	protected SourceFileReader() {
 		super();
 	}

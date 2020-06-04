@@ -43,6 +43,9 @@ import org.applied_geodesy.jag3d.ui.tree.EditableMenuCheckBoxTreeCell;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
+import org.applied_geodesy.ui.table.AbsoluteValueComparator;
+import org.applied_geodesy.ui.table.ColumnTooltipHeader;
+import org.applied_geodesy.ui.table.ColumnType;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.application.Platform;

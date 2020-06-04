@@ -33,13 +33,14 @@ import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.JAG3D;
 import org.applied_geodesy.jag3d.ui.graphic.layer.dialog.LayerManagerDialog;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 import org.applied_geodesy.jag3d.ui.graphic.sql.SQLGraphicManager;
-import org.applied_geodesy.jag3d.ui.io.DefaultFileChooser;
 import org.applied_geodesy.ui.dialog.OptionDialog;
+import org.applied_geodesy.ui.io.DefaultFileChooser;
 import org.applied_geodesy.util.ImageUtils;
-import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -598,6 +599,7 @@ public class LayerManager {
 					new ExtensionFilter(i18n.getString("LayerManager.extension.transparent.png", "Transparent Portable Network Graphics (PNG)"), "*.png")
 			};
 			File outputFile = DefaultFileChooser.showSaveDialog(
+					JAG3D.getStage(),
 					i18n.getString("LayerManager.export.title", "Save current graphic"), 
 					null, 
 					extensionFilters);

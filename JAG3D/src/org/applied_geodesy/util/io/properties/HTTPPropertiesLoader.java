@@ -33,7 +33,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.Properties;
 
-import org.applied_geodesy.adjustment.DefaultUncertainty;
+import org.applied_geodesy.adjustment.network.DefaultUncertainty;
 
 public class HTTPPropertiesLoader {
 

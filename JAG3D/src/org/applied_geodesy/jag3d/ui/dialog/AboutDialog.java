@@ -24,7 +24,7 @@ package org.applied_geodesy.jag3d.ui.dialog;
 import java.util.Optional;
 
 import org.applied_geodesy.version.jag3d.Version;
-import org.applied_geodesy.version.jag3d.VersionType;
+import org.applied_geodesy.version.VersionType;
 
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -139,7 +139,7 @@ public class AboutDialog {
 			@Override
 			public void handle(ActionEvent e) {
 				if (hostServices != null)
-					hostServices.showDocument("http://software.applied-geodesy.org");
+					hostServices.showDocument("https://software.applied-geodesy.org");
 				homePageLink.setVisited(false);
 			}
 		});

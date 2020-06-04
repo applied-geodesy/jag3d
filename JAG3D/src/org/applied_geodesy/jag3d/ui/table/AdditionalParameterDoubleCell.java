@@ -22,6 +22,7 @@
 package org.applied_geodesy.jag3d.ui.table;
 
 import org.applied_geodesy.jag3d.ui.table.row.AdditionalParameterRow;
+import org.applied_geodesy.ui.table.DisplayCellFormatType;
 import org.applied_geodesy.util.FormatterChangedListener;
 import org.applied_geodesy.util.FormatterEvent;
 import org.applied_geodesy.util.FormatterOptions;

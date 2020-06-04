@@ -27,7 +27,6 @@ import org.applied_geodesy.jag3d.ui.propertiespane.UICongruenceAnalysisPropertie
 import org.applied_geodesy.jag3d.ui.propertiespane.UIObservationPropertiesPaneBuilder;
 import org.applied_geodesy.jag3d.ui.propertiespane.UIPointPropertiesPaneBuilder;
 import org.applied_geodesy.jag3d.ui.resultpane.UIGlobalResultPaneBuilder;
-import org.applied_geodesy.jag3d.ui.table.ColumnType;
 import org.applied_geodesy.jag3d.ui.table.UIAdditionalParameterTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UICongruenceAnalysisTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIGNSSObservationTableBuilder;
@@ -44,7 +43,8 @@ import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
-import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.ui.table.ColumnType;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;

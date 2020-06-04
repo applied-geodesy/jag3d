@@ -32,13 +32,13 @@ import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.JAG3D;
 import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog;
 import org.applied_geodesy.jag3d.ui.dnd.CongruenceAnalysisRowDnD;
 import org.applied_geodesy.jag3d.ui.dnd.GNSSObservationRowDnD;
 import org.applied_geodesy.jag3d.ui.dnd.GroupTreeItemDnD;
 import org.applied_geodesy.jag3d.ui.dnd.PointRowDnD;
 import org.applied_geodesy.jag3d.ui.dnd.TerrestrialObservationRowDnD;
-import org.applied_geodesy.jag3d.ui.io.DefaultFileChooser;
 import org.applied_geodesy.jag3d.ui.table.UICongruenceAnalysisTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIGNSSObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIPointTableBuilder;
@@ -50,7 +50,8 @@ import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 import org.applied_geodesy.jag3d.ui.tabpane.UITabPaneBuilder;
 import org.applied_geodesy.ui.dialog.OptionDialog;
-import org.applied_geodesy.util.i18.I18N;
+import org.applied_geodesy.ui.io.DefaultFileChooser;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -861,6 +862,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 				boolean aprioriValues = tabType == TabType.RAW_DATA;
 
 				File selectedFile = DefaultFileChooser.showSaveDialog(
+						JAG3D.getStage(),
 						i18n.getString("EditableMenuCheckBoxTreeCell.filechooser.save.title", "Export table data"),
 						this.getItem().getName() + (aprioriValues ? "_apriori" : "_aposteriori") +  ".txt"
 						);

@@ -26,7 +26,7 @@ import java.io.InputStream;
 import javafx.scene.image.Image;
 
 public class ImageUtils {
-	private final static String IMGAGE_PATH = "/org/applied_geodesy/jag3d/ui/gfx/";
+	private final static String IMGAGE_PATH = "/org/applied_geodesy/ui/gfx/";
 
 	private ImageUtils() {}
 	

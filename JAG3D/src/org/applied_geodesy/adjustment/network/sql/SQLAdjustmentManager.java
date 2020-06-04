@@ -34,10 +34,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.applied_geodesy.adjustment.Constant;
-import org.applied_geodesy.adjustment.DefaultAverageThreshold;
-import org.applied_geodesy.adjustment.DefaultUncertainty;
 import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.MathExtension;
+import org.applied_geodesy.adjustment.network.DefaultAverageThreshold;
+import org.applied_geodesy.adjustment.network.DefaultUncertainty;
 import org.applied_geodesy.adjustment.network.DefectType;
 import org.applied_geodesy.adjustment.network.Epoch;
 import org.applied_geodesy.adjustment.network.NetworkAdjustment;
@@ -84,10 +84,10 @@ import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.network.parameter.AdditionalUnknownParameter;
 import org.applied_geodesy.adjustment.network.parameter.Orientation;
-import org.applied_geodesy.adjustment.point.Point;
-import org.applied_geodesy.adjustment.point.Point1D;
-import org.applied_geodesy.adjustment.point.Point2D;
-import org.applied_geodesy.adjustment.point.Point3D;
+import org.applied_geodesy.adjustment.network.point.Point;
+import org.applied_geodesy.adjustment.network.point.Point1D;
+import org.applied_geodesy.adjustment.network.point.Point2D;
+import org.applied_geodesy.adjustment.network.point.Point3D;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameters;
@@ -96,7 +96,7 @@ import org.applied_geodesy.util.sql.DataBase;
 import org.applied_geodesy.util.sql.HSQLDB;
 import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
 import org.applied_geodesy.version.jag3d.Version;
-import org.applied_geodesy.version.jag3d.VersionType;
+import org.applied_geodesy.version.VersionType;
 
 public class SQLAdjustmentManager {
 	private final DataBase dataBase;

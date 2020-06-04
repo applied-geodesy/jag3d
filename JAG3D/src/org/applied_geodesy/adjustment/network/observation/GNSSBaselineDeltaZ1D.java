@@ -21,7 +21,7 @@
 
 package org.applied_geodesy.adjustment.network.observation;
 
-import org.applied_geodesy.adjustment.point.Point;
+import org.applied_geodesy.adjustment.network.point.Point;
 
 public class GNSSBaselineDeltaZ1D extends GNSSBaseline1D {
 	public GNSSBaselineDeltaZ1D(int id, Point startPoint, Point endPoint, double observation, double sigma) {
