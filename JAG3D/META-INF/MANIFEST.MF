@@ -17,7 +17,6 @@ Class-Path:
   
   lib/tools.jar 
   lib/CoordTrans.jar 
-  lib/FormFittingToolbox.jar 
   lib/GeoTra.jar  
   
 Main-Class: org.applied_geodesy.jag3d.JAG3DApp
