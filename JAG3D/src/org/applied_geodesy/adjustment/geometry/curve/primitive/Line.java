@@ -124,25 +124,29 @@ public class Line extends Curve {
 
 	@Override
 	public void reverseCenterOfMass(UpperSymmPackMatrix Dp) {
-		int nou = Dp.numColumns();
 		Point centerOfMass = this.getCenterOfMass();
 
 		UnknownParameter nx = this.parameters.get(ParameterType.VECTOR_X);
 		UnknownParameter ny = this.parameters.get(ParameterType.VECTOR_Y);
 		UnknownParameter d  = this.parameters.get(ParameterType.LENGTH);
 		
-		Matrix J = Matrices.identity(nou);
-		if (d.getColumn() >= 0) {
-			if (nx.getColumn() >= 0)
-				J.set(d.getColumn(), nx.getColumn(), centerOfMass.getX0());
-			if (ny.getColumn() >= 0)
-				J.set(d.getColumn(), ny.getColumn(), centerOfMass.getY0());
-			J.set(d.getColumn(), d.getColumn(),  1.0);
+		if (Dp != null) {
+			int nou = Dp.numColumns();
+			Matrix J = Matrices.identity(nou);
+			
+			if (d.getColumn() >= 0) {
+				if (nx.getColumn() >= 0)
+					J.set(d.getColumn(), nx.getColumn(), centerOfMass.getX0());
+				if (ny.getColumn() >= 0)
+					J.set(d.getColumn(), ny.getColumn(), centerOfMass.getY0());
+				J.set(d.getColumn(), d.getColumn(),  1.0);
 
-			Matrix JDp = new DenseMatrix(nou, nou);
-			J.mult(Dp, JDp);
-			JDp.transBmult(J, Dp);
+				Matrix JDp = new DenseMatrix(nou, nou);
+				J.mult(Dp, JDp);
+				JDp.transBmult(J, Dp);
+			}
 		}
+		
 		double dist = d.getValue() + nx.getValue() * centerOfMass.getX0() + ny.getValue() * centerOfMass.getY0(); 
 		d.setValue(dist);
 	}

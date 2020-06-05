@@ -135,11 +135,9 @@ public class Circle extends Curve {
 
 		UnknownParameter x0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_X);
 		UnknownParameter y0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_Y);
-		UnknownParameter r  = this.parameters.get(ParameterType.RADIUS);
 
 		x0.setValue( x0.getValue() + centerOfMass.getX0() );
 		y0.setValue( y0.getValue() + centerOfMass.getY0() );
-		r.setValue( Math.abs(r.getValue()) );
 	}
 	
 	private void init() {

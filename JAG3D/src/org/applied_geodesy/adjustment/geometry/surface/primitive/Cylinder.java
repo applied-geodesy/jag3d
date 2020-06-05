@@ -236,7 +236,6 @@ public class Cylinder extends Surface {
 
 	@Override
 	public void reverseCenterOfMass(UpperSymmPackMatrix Dp) {
-		int nou = Dp.numColumns();
 		Point centerOfMass = this.getCenterOfMass();
 
 		// Bestimme Aufpunkt
@@ -275,107 +274,110 @@ public class Cylinder extends Surface {
 		double s1 = -dotNormalF1 / dotNormalNormal;
 		double s2 = -dotNormalF2 / dotNormalNormal;
 		
-		Matrix J = Matrices.identity(nou);
+		if (Dp != null) {
+			int nou = Dp.numColumns();
+			Matrix J = Matrices.identity(nou);
 
-		if (x1.getColumn() >= 0) {
-			if (x1.getColumn() >= 0)
-				J.set(x1.getColumn(), x1.getColumn(), 1.0 - nx * nx / dotNormalNormal);
-			if (y1.getColumn() >= 0)
-				J.set(x1.getColumn(), y1.getColumn(),     - nx * ny / dotNormalNormal);
-			if (z1.getColumn() >= 0)
-				J.set(x1.getColumn(), z1.getColumn(),     - nx * nz / dotNormalNormal);
+			if (x1.getColumn() >= 0) {
+				if (x1.getColumn() >= 0)
+					J.set(x1.getColumn(), x1.getColumn(), 1.0 - nx * nx / dotNormalNormal);
+				if (y1.getColumn() >= 0)
+					J.set(x1.getColumn(), y1.getColumn(),     - nx * ny / dotNormalNormal);
+				if (z1.getColumn() >= 0)
+					J.set(x1.getColumn(), z1.getColumn(),     - nx * nz / dotNormalNormal);
 
-			if (nX.getColumn() >= 0)
-				J.set(x1.getColumn(), nX.getColumn(), (2.0 * nx * nx * dotNormalF1) / squaredDotNormalNormal - (nx * xf1) / dotNormalNormal + s1);
-			if (nY.getColumn() >= 0)
-				J.set(x1.getColumn(), nY.getColumn(), (2.0 * nx * ny * dotNormalF1) / squaredDotNormalNormal - (nx * yf1) / dotNormalNormal);
-			if (nZ.getColumn() >= 0)
-				J.set(x1.getColumn(), nZ.getColumn(), (2.0 * nx * nz * dotNormalF1) / squaredDotNormalNormal - (nx * zf1) / dotNormalNormal);
+				if (nX.getColumn() >= 0)
+					J.set(x1.getColumn(), nX.getColumn(), (2.0 * nx * nx * dotNormalF1) / squaredDotNormalNormal - (nx * xf1) / dotNormalNormal + s1);
+				if (nY.getColumn() >= 0)
+					J.set(x1.getColumn(), nY.getColumn(), (2.0 * nx * ny * dotNormalF1) / squaredDotNormalNormal - (nx * yf1) / dotNormalNormal);
+				if (nZ.getColumn() >= 0)
+					J.set(x1.getColumn(), nZ.getColumn(), (2.0 * nx * nz * dotNormalF1) / squaredDotNormalNormal - (nx * zf1) / dotNormalNormal);
+			}
+
+			if (y1.getColumn() >= 0) {
+				if (x1.getColumn() >= 0)
+					J.set(y1.getColumn(), x1.getColumn(),     - ny * nx / dotNormalNormal);
+				if (y1.getColumn() >= 0)
+					J.set(y1.getColumn(), y1.getColumn(), 1.0 - ny * ny / dotNormalNormal);
+				if (z1.getColumn() >= 0)
+					J.set(y1.getColumn(), z1.getColumn(),     - ny * nz / dotNormalNormal);
+
+				if (nX.getColumn() >= 0)
+					J.set(y1.getColumn(), nX.getColumn(), (2.0 * ny * nx * dotNormalF1) / squaredDotNormalNormal - (ny * xf1) / dotNormalNormal);
+				if (nY.getColumn() >= 0)
+					J.set(y1.getColumn(), nY.getColumn(), (2.0 * ny * ny * dotNormalF1) / squaredDotNormalNormal - (ny * yf1) / dotNormalNormal + s1);
+				if (nZ.getColumn() >= 0)
+					J.set(y1.getColumn(), nZ.getColumn(), (2.0 * ny * nz * dotNormalF1) / squaredDotNormalNormal - (ny * zf1) / dotNormalNormal);
+			}
+
+			if (z1.getColumn() >= 0) {
+				if (x1.getColumn() >= 0)
+					J.set(z1.getColumn(), x1.getColumn(),     - nz * nx / dotNormalNormal);
+				if (y1.getColumn() >= 0)
+					J.set(z1.getColumn(), y1.getColumn(),     - nz * ny / dotNormalNormal);
+				if (z1.getColumn() >= 0)
+					J.set(z1.getColumn(), z1.getColumn(), 1.0 - nz * nz / dotNormalNormal);
+
+				if (nX.getColumn() >= 0)
+					J.set(z1.getColumn(), nX.getColumn(), (2.0 * nz * nx * dotNormalF1) / squaredDotNormalNormal - (nz * xf1) / dotNormalNormal);
+				if (nY.getColumn() >= 0)
+					J.set(z1.getColumn(), nY.getColumn(), (2.0 * nz * ny * dotNormalF1) / squaredDotNormalNormal - (nz * yf1) / dotNormalNormal);
+				if (nZ.getColumn() >= 0)
+					J.set(z1.getColumn(), nZ.getColumn(), (2.0 * nz * nz * dotNormalF1) / squaredDotNormalNormal - (nz * zf1) / dotNormalNormal + s1);
+			}
+
+			if (x2.getColumn() >= 0) {
+				if (x2.getColumn() >= 0)
+					J.set(x2.getColumn(), x2.getColumn(), 1.0 - nx * nx / dotNormalNormal);
+				if (y2.getColumn() >= 0)
+					J.set(x2.getColumn(), y2.getColumn(),     - nx * ny / dotNormalNormal);
+				if (z2.getColumn() >= 0)
+					J.set(x2.getColumn(), z2.getColumn(),     - nx * nz / dotNormalNormal);
+
+				if (nX.getColumn() >= 0)
+					J.set(x2.getColumn(), nX.getColumn(), (2.0 * nx * nx * dotNormalF2) / squaredDotNormalNormal - (nx * xf2) / dotNormalNormal + s2);
+				if (nY.getColumn() >= 0)
+					J.set(x2.getColumn(), nY.getColumn(), (2.0 * nx * ny * dotNormalF2) / squaredDotNormalNormal - (nx * yf2) / dotNormalNormal);
+				if (nZ.getColumn() >= 0)
+					J.set(x2.getColumn(), nZ.getColumn(), (2.0 * nx * nz * dotNormalF2) / squaredDotNormalNormal - (nx * zf2) / dotNormalNormal);
+			}
+
+			if (y2.getColumn() >= 0) {
+				if (x2.getColumn() >= 0)
+					J.set(y2.getColumn(), x2.getColumn(),     - ny * nx / dotNormalNormal);
+				if (y2.getColumn() >= 0)
+					J.set(y2.getColumn(), y2.getColumn(), 1.0 - ny * ny / dotNormalNormal);
+				if (z2.getColumn() >= 0)
+					J.set(y2.getColumn(), z2.getColumn(),     - ny * nz / dotNormalNormal);
+
+				if (nX.getColumn() >= 0)
+					J.set(y2.getColumn(), nX.getColumn(), (2.0 * ny * nx * dotNormalF2) / squaredDotNormalNormal - (ny * xf2) / dotNormalNormal);
+				if (nY.getColumn() >= 0)
+					J.set(y2.getColumn(), nY.getColumn(), (2.0 * ny * ny * dotNormalF2) / squaredDotNormalNormal - (ny * yf2) / dotNormalNormal + s2);
+				if (nZ.getColumn() >= 0)
+					J.set(y2.getColumn(), nZ.getColumn(), (2.0 * ny * nz * dotNormalF2) / squaredDotNormalNormal - (ny * zf2) / dotNormalNormal);
+			}
+
+			if (z2.getColumn() >= 0) {
+				if (x2.getColumn() >= 0)
+					J.set(z2.getColumn(), x2.getColumn(),     - nz * nx / dotNormalNormal);
+				if (y2.getColumn() >= 0)
+					J.set(z2.getColumn(), y2.getColumn(),     - nz * ny / dotNormalNormal);
+				if (z2.getColumn() >= 0)
+					J.set(z2.getColumn(), z2.getColumn(), 1.0 - nz * nz / dotNormalNormal);
+
+				if (nX.getColumn() >= 0)
+					J.set(z2.getColumn(), nX.getColumn(), (2.0 * nz * nx * dotNormalF2) / squaredDotNormalNormal - (nz * xf2) / dotNormalNormal);
+				if (nY.getColumn() >= 0)
+					J.set(z2.getColumn(), nY.getColumn(), (2.0 * nz * ny * dotNormalF2) / squaredDotNormalNormal - (nz * yf2) / dotNormalNormal);
+				if (nZ.getColumn() >= 0)
+					J.set(z2.getColumn(), nZ.getColumn(), (2.0 * nz * nz * dotNormalF2) / squaredDotNormalNormal - (nz * zf2) / dotNormalNormal + s2);
+			}
+
+			Matrix JDp = new DenseMatrix(nou, nou);
+			J.mult(Dp, JDp);
+			JDp.transBmult(J, Dp);
 		}
-
-		if (y1.getColumn() >= 0) {
-			if (x1.getColumn() >= 0)
-				J.set(y1.getColumn(), x1.getColumn(),     - ny * nx / dotNormalNormal);
-			if (y1.getColumn() >= 0)
-				J.set(y1.getColumn(), y1.getColumn(), 1.0 - ny * ny / dotNormalNormal);
-			if (z1.getColumn() >= 0)
-				J.set(y1.getColumn(), z1.getColumn(),     - ny * nz / dotNormalNormal);
-
-			if (nX.getColumn() >= 0)
-				J.set(y1.getColumn(), nX.getColumn(), (2.0 * ny * nx * dotNormalF1) / squaredDotNormalNormal - (ny * xf1) / dotNormalNormal);
-			if (nY.getColumn() >= 0)
-				J.set(y1.getColumn(), nY.getColumn(), (2.0 * ny * ny * dotNormalF1) / squaredDotNormalNormal - (ny * yf1) / dotNormalNormal + s1);
-			if (nZ.getColumn() >= 0)
-				J.set(y1.getColumn(), nZ.getColumn(), (2.0 * ny * nz * dotNormalF1) / squaredDotNormalNormal - (ny * zf1) / dotNormalNormal);
-		}
-
-		if (z1.getColumn() >= 0) {
-			if (x1.getColumn() >= 0)
-				J.set(z1.getColumn(), x1.getColumn(),     - nz * nx / dotNormalNormal);
-			if (y1.getColumn() >= 0)
-				J.set(z1.getColumn(), y1.getColumn(),     - nz * ny / dotNormalNormal);
-			if (z1.getColumn() >= 0)
-				J.set(z1.getColumn(), z1.getColumn(), 1.0 - nz * nz / dotNormalNormal);
-
-			if (nX.getColumn() >= 0)
-				J.set(z1.getColumn(), nX.getColumn(), (2.0 * nz * nx * dotNormalF1) / squaredDotNormalNormal - (nz * xf1) / dotNormalNormal);
-			if (nY.getColumn() >= 0)
-				J.set(z1.getColumn(), nY.getColumn(), (2.0 * nz * ny * dotNormalF1) / squaredDotNormalNormal - (nz * yf1) / dotNormalNormal);
-			if (nZ.getColumn() >= 0)
-				J.set(z1.getColumn(), nZ.getColumn(), (2.0 * nz * nz * dotNormalF1) / squaredDotNormalNormal - (nz * zf1) / dotNormalNormal + s1);
-		}
-
-		if (x2.getColumn() >= 0) {
-			if (x2.getColumn() >= 0)
-				J.set(x2.getColumn(), x2.getColumn(), 1.0 - nx * nx / dotNormalNormal);
-			if (y2.getColumn() >= 0)
-				J.set(x2.getColumn(), y2.getColumn(),     - nx * ny / dotNormalNormal);
-			if (z2.getColumn() >= 0)
-				J.set(x2.getColumn(), z2.getColumn(),     - nx * nz / dotNormalNormal);
-
-			if (nX.getColumn() >= 0)
-				J.set(x2.getColumn(), nX.getColumn(), (2.0 * nx * nx * dotNormalF2) / squaredDotNormalNormal - (nx * xf2) / dotNormalNormal + s2);
-			if (nY.getColumn() >= 0)
-				J.set(x2.getColumn(), nY.getColumn(), (2.0 * nx * ny * dotNormalF2) / squaredDotNormalNormal - (nx * yf2) / dotNormalNormal);
-			if (nZ.getColumn() >= 0)
-				J.set(x2.getColumn(), nZ.getColumn(), (2.0 * nx * nz * dotNormalF2) / squaredDotNormalNormal - (nx * zf2) / dotNormalNormal);
-		}
-
-		if (y2.getColumn() >= 0) {
-			if (x2.getColumn() >= 0)
-				J.set(y2.getColumn(), x2.getColumn(),     - ny * nx / dotNormalNormal);
-			if (y2.getColumn() >= 0)
-				J.set(y2.getColumn(), y2.getColumn(), 1.0 - ny * ny / dotNormalNormal);
-			if (z2.getColumn() >= 0)
-				J.set(y2.getColumn(), z2.getColumn(),     - ny * nz / dotNormalNormal);
-
-			if (nX.getColumn() >= 0)
-				J.set(y2.getColumn(), nX.getColumn(), (2.0 * ny * nx * dotNormalF2) / squaredDotNormalNormal - (ny * xf2) / dotNormalNormal);
-			if (nY.getColumn() >= 0)
-				J.set(y2.getColumn(), nY.getColumn(), (2.0 * ny * ny * dotNormalF2) / squaredDotNormalNormal - (ny * yf2) / dotNormalNormal + s2);
-			if (nZ.getColumn() >= 0)
-				J.set(y2.getColumn(), nZ.getColumn(), (2.0 * ny * nz * dotNormalF2) / squaredDotNormalNormal - (ny * zf2) / dotNormalNormal);
-		}
-
-		if (z2.getColumn() >= 0) {
-			if (x2.getColumn() >= 0)
-				J.set(z2.getColumn(), x2.getColumn(),     - nz * nx / dotNormalNormal);
-			if (y2.getColumn() >= 0)
-				J.set(z2.getColumn(), y2.getColumn(),     - nz * ny / dotNormalNormal);
-			if (z2.getColumn() >= 0)
-				J.set(z2.getColumn(), z2.getColumn(), 1.0 - nz * nz / dotNormalNormal);
-
-			if (nX.getColumn() >= 0)
-				J.set(z2.getColumn(), nX.getColumn(), (2.0 * nz * nx * dotNormalF2) / squaredDotNormalNormal - (nz * xf2) / dotNormalNormal);
-			if (nY.getColumn() >= 0)
-				J.set(z2.getColumn(), nY.getColumn(), (2.0 * nz * ny * dotNormalF2) / squaredDotNormalNormal - (nz * yf2) / dotNormalNormal);
-			if (nZ.getColumn() >= 0)
-				J.set(z2.getColumn(), nZ.getColumn(), (2.0 * nz * nz * dotNormalF2) / squaredDotNormalNormal - (nz * zf2) / dotNormalNormal + s2);
-		}
-
-		Matrix JDp = new DenseMatrix(nou, nou);
-		J.mult(Dp, JDp);
-		JDp.transBmult(J, Dp);
 
 		xf1 = xf1 + s1 * nx;
 		yf1 = yf1 + s1 * ny;

@@ -165,7 +165,6 @@ public class QuadraticCurve extends Curve {
 	
 	@Override
 	public void reverseCenterOfMass(UpperSymmPackMatrix Dp) {
-		int nou = Dp.numColumns();
 		Point centerOfMass = this.getCenterOfMass();
 		
 		UnknownParameter a = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_A);
@@ -180,39 +179,42 @@ public class QuadraticCurve extends Curve {
 		double x0 = centerOfMass.getX0();
 		double y0 = centerOfMass.getY0();
 		
-		Matrix J = Matrices.identity(nou);
-		if (d.getColumn() >= 0) {
-			if (a.getColumn() >= 0)
-				J.set(d.getColumn(), a.getColumn(), -2.0 * x0);
-			if (c.getColumn() >= 0)
-				J.set(d.getColumn(), c.getColumn(), -2.0 / SQRT2 * y0);
-			J.set(d.getColumn(), d.getColumn(),  1.0);
-		}
-		if (e.getColumn() >= 0) {
-			if (c.getColumn() >= 0)
-				J.set(e.getColumn(), c.getColumn(), -2.0 / SQRT2 * x0);
-			if (b.getColumn() >= 0)
-				J.set(e.getColumn(), b.getColumn(), -2.0 * y0);
-			J.set(e.getColumn(), e.getColumn(),  1.0);
-		} 
-		if (length.getColumn() >= 0) {
-			if (a.getColumn() >= 0)
-				J.set(length.getColumn(), a.getColumn(),  x0*x0);
-			if (b.getColumn() >= 0)
-				J.set(length.getColumn(), b.getColumn(),  y0*y0);
-			if (c.getColumn() >= 0)
-				J.set(length.getColumn(), c.getColumn(),  SQRT2 * x0*y0);
-			if (d.getColumn() >= 0)
-				J.set(length.getColumn(), d.getColumn(), -x0);
-			if (e.getColumn() >= 0)
-				J.set(length.getColumn(), e.getColumn(), -y0);
-			J.set(length.getColumn(), length.getColumn(), 1.0);
-		}
+		if (Dp != null) {
+			int nou = Dp.numColumns();
+			Matrix J = Matrices.identity(nou);
+			if (d.getColumn() >= 0) {
+				if (a.getColumn() >= 0)
+					J.set(d.getColumn(), a.getColumn(), -2.0 * x0);
+				if (c.getColumn() >= 0)
+					J.set(d.getColumn(), c.getColumn(), -2.0 / SQRT2 * y0);
+				J.set(d.getColumn(), d.getColumn(),  1.0);
+			}
+			if (e.getColumn() >= 0) {
+				if (c.getColumn() >= 0)
+					J.set(e.getColumn(), c.getColumn(), -2.0 / SQRT2 * x0);
+				if (b.getColumn() >= 0)
+					J.set(e.getColumn(), b.getColumn(), -2.0 * y0);
+				J.set(e.getColumn(), e.getColumn(),  1.0);
+			} 
+			if (length.getColumn() >= 0) {
+				if (a.getColumn() >= 0)
+					J.set(length.getColumn(), a.getColumn(),  x0*x0);
+				if (b.getColumn() >= 0)
+					J.set(length.getColumn(), b.getColumn(),  y0*y0);
+				if (c.getColumn() >= 0)
+					J.set(length.getColumn(), c.getColumn(),  SQRT2 * x0*y0);
+				if (d.getColumn() >= 0)
+					J.set(length.getColumn(), d.getColumn(), -x0);
+				if (e.getColumn() >= 0)
+					J.set(length.getColumn(), e.getColumn(), -y0);
+				J.set(length.getColumn(), length.getColumn(), 1.0);
+			}
 
-		Matrix JDp = new DenseMatrix(nou, nou);
-		J.mult(Dp, JDp);
-		JDp.transBmult(J, Dp);
-
+			Matrix JDp = new DenseMatrix(nou, nou);
+			J.mult(Dp, JDp);
+			JDp.transBmult(J, Dp);
+		}
+		
 		length.setValue(length.getValue() + a.getValue() * x0*x0 + b.getValue() * y0*y0 + c.getValue() * SQRT2 * x0*y0 - d.getValue() * x0 - e.getValue() * y0);
 		d.setValue(d.getValue() - 2.0 * (a.getValue() * x0 + c.getValue() / SQRT2 * y0));
 		e.setValue(e.getValue() - 2.0 * (c.getValue() / SQRT2 * x0 + b.getValue() * y0));

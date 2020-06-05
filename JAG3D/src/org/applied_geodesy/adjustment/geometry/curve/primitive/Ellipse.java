@@ -163,16 +163,12 @@ public class Ellipse extends Curve {
 		
 		UnknownParameter x2 = this.parameters.get(ParameterType.SECONDARY_FOCAL_COORDINATE_X);
 		UnknownParameter y2 = this.parameters.get(ParameterType.SECONDARY_FOCAL_COORDINATE_Y);
-		
-		UnknownParameter a  = this.parameters.get(ParameterType.MAJOR_AXIS_COEFFICIENT);
-		
+
 		x1.setValue( x1.getValue() + centerOfMass.getX0() );
 		y1.setValue( y1.getValue() + centerOfMass.getY0() );
 		
 		x2.setValue( x2.getValue() + centerOfMass.getX0() );
 		y2.setValue( y2.getValue() + centerOfMass.getY0() );
-		
-		a.setValue( Math.abs(a.getValue()) );
 	}
 
 	private void init() {		
