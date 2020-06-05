@@ -107,16 +107,16 @@ public class FeatureAdjustmentDialog {
 				// transfer inital guess to parameters to be estimated
 				feature.applyInitialGuess();
 				
-				// reset center of mass
-				if (feature.getCenterOfMass() != null) {
-					feature.getCenterOfMass().setX0(0);
-					feature.getCenterOfMass().setY0(0);
-					feature.getCenterOfMass().setZ0(0);
-				}
-				
-				// set center of mass
-				if (feature.isEstimateCenterOfMass()) 
-					feature.setCenterOfMass(Feature.deriveCenterOfMass(feature.getFeaturePoints()));
+//				// reset center of mass
+//				if (feature.getCenterOfMass() != null) {
+//					feature.getCenterOfMass().setX0(0);
+//					feature.getCenterOfMass().setY0(0);
+//					feature.getCenterOfMass().setZ0(0);
+//				}
+//				
+//				// set center of mass
+//				if (feature.isEstimateCenterOfMass()) 
+//					feature.setCenterOfMass(Feature.deriveCenterOfMass(feature.getFeaturePoints()));
 
 				this.adjustment.init();
 				EstimationStateType returnType = this.adjustment.estimateModel();
