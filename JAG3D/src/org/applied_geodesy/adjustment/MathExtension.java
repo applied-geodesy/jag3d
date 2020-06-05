@@ -422,8 +422,8 @@ public final class MathExtension {
 		LAPACK.getInstance().dpptrf(uplo, size, data, info);
 
 		if (info.val > 0)
-            throw new MatrixNotSPDException("Error, matrix must be positive definite!");
-        else if (info.val < 0)
-        	throw new IllegalArgumentException("Error, invalid or wrong argument for function call dpptrf() " + info.val + "!");
+			throw new MatrixNotSPDException("Error, matrix must be positive definite!");
+		else if (info.val < 0)
+			throw new IllegalArgumentException("Error, invalid or wrong argument for function call dpptrf() " + info.val + "!");
 	}
 }
