@@ -41,7 +41,7 @@ public class VarianceComponent {
  
             @Override
             protected Double computeValue() {
-                return omega.get() > 0 && redundancy.get() > 0 ? omega.get() / redundancy.get() : 1.0;
+                return omega.get() > 0 && redundancy.get() > 0 ? omega.get() / redundancy.get() : variance0.get();
             }
         };
 	}
