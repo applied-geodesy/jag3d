@@ -147,10 +147,12 @@ public class QuadraticSurface extends Surface {
 		// get previous center of mass
 		Point prevCenterOfMass = this.getCenterOfMass();
 
-		if (centerOfMass.equalsCoordinateComponents(prevCenterOfMass))
+		// check, if components are equal to previous point to avoid unnecessary operations
+		boolean equalComponents = centerOfMass.equalsCoordinateComponents(prevCenterOfMass);
+		super.setCenterOfMass(centerOfMass);
+		if (equalComponents)
 			return;
 
-		super.setCenterOfMass(centerOfMass);
 		// get current center of mass
 		Point currCenterOfMass = this.getCenterOfMass();
 		
