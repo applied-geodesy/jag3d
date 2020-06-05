@@ -121,6 +121,10 @@ public class Ellipse extends Curve {
 	public void setCenterOfMass(Point centerOfMass) {
 		// get previous center of mass
 		Point prevCenterOfMass = this.getCenterOfMass();
+		
+		if (centerOfMass.equalsCoordinateComponents(prevCenterOfMass))
+			return;
+		
 		super.setCenterOfMass(centerOfMass);
 		// get current center of mass
 		Point currCenterOfMass = this.getCenterOfMass();

@@ -102,8 +102,10 @@ public class Sphere extends Surface {
 	public void setCenterOfMass(Point centerOfMass) {
 		// get previous center of mass
 		Point prevCenterOfMass = this.getCenterOfMass();
+		
 		if (centerOfMass.equalsCoordinateComponents(prevCenterOfMass))
 			return;
+		
 		// Surface checks the point type
 		super.setCenterOfMass(centerOfMass);
 		// get current center of mass
