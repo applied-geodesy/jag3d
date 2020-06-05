@@ -28,12 +28,14 @@ import com.github.fommil.netlib.LAPACK;
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Matrix;
+import no.uib.cipr.matrix.MatrixNotSPDException;
 import no.uib.cipr.matrix.MatrixSingularException;
 import no.uib.cipr.matrix.NotConvergedException;
 import no.uib.cipr.matrix.SVD;
 import no.uib.cipr.matrix.UnitUpperTriangBandMatrix;
 import no.uib.cipr.matrix.UpperSymmBandMatrix;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
+import no.uib.cipr.matrix.UpperTriangPackMatrix;
 import no.uib.cipr.matrix.Vector;
 import no.uib.cipr.matrix.sparse.CompDiagMatrix;
 
@@ -295,9 +297,9 @@ public final class MathExtension {
 	public static Matrix[] eig(UpperSymmPackMatrix N, int n, int il, int iu, boolean vectors) throws NotConvergedException, IllegalArgumentException {
 		n = n < 0 ? N.numRows() : n;
 		if (il < 1)
-			throw new IllegalArgumentException("Fehler, unterer Eigenwertindex muss il >= 1: il = " + il);
+			throw new IllegalArgumentException("Error, lower index of eigenvalue must be il >= 1: il = " + il);
 		if (iu > n)
-			throw new IllegalArgumentException("Fehler, oberer Eigenwertindex muss iu > n: iu = " + iu + ", n = " + n);
+			throw new IllegalArgumentException("Error, upper index of eigenvalue must be iu > n: iu = " + iu + ", n = " + n);
 		
 		final String jobz  = vectors ? "V" : "N";
 		final String range = "I";
@@ -318,7 +320,7 @@ public final class MathExtension {
         intW info = new intW(0);
         
         if (il <= 0 || il > iu && n > 0 || iu > n)
-        	throw new IllegalArgumentException();
+        	throw new IllegalArgumentException("Error, invalid or wrong arguments, i.e., il <= 0 || il > iu && n > 0 || iu > n! il = " + il + ", iu = " + iu + ", n = " + n);
 
 		// http://www.netlib.org/lapack/double/dspevx.f
 		//LAPACK.getInstance().dspevx(jobz, range, uplo, n, ap, vl, vu, il, iu, abstol, m, eval.getData(), evec.getData(), ldz, work, iwork, ifail, info);
@@ -327,7 +329,7 @@ public final class MathExtension {
 		if (info.val > 0)
             throw new NotConvergedException(NotConvergedException.Reason.Breakdown);
         else if (info.val < 0)
-            throw new IllegalArgumentException("Fehler, Eingangsargumente fehlerhaft!");
+            throw new IllegalArgumentException("Error, invalid or wrong argument for function call dspevx() " + info.val + "!");
 		
 		work  = null;
 		iwork = null;
@@ -373,7 +375,7 @@ public final class MathExtension {
 	 */
 	public static DenseVector cross(Vector a, Vector b) throws IllegalArgumentException {
 		if (a.size() != 3 || b.size() != 3)
-			throw new IllegalArgumentException("Fehler, Kreuzprodukt nur fuer 3x1-Vektoren definiert. "+ a.size() +" und " + b.size());
+			throw new IllegalArgumentException("Error, cross-product can only applied to 3 x 1 - vectors, "+ a.size() +" and " + b.size());
 		DenseVector c = new DenseVector(3);
 		c.set(0, a.get(1)*b.get(2) - a.get(2)*b.get(1));
 		c.set(1, a.get(2)*b.get(0) - a.get(0)*b.get(2));
@@ -381,4 +383,47 @@ public final class MathExtension {
 		return c;
 	}
 
+	/**
+	 * In-Place Cholesky-Zerlegung einer (oberen) symmetrischen Matrix.
+	 * 
+	 * @param M
+	 * @throws IllegalArgumentException
+	 * @throws MatrixNotSPDException
+	 */
+	public static void chol(UpperTriangPackMatrix M) throws IllegalArgumentException, MatrixNotSPDException {
+		packChol(M.numRows(), M.getData());
+	}
+	
+	/**
+	 * In-Place Cholesky-Zerlegung einer (oberen) symmetrischen Matrix.
+	 * 
+	 * @param M
+	 * @throws IllegalArgumentException
+	 * @throws MatrixNotSPDException
+	 */
+	public static void chol(UpperSymmPackMatrix M) throws IllegalArgumentException, MatrixNotSPDException {
+		packChol(M.numRows(), M.getData());
+	}	
+	
+	/**
+	 * In-Place Cholesky-Zerlegung einer (oberen) symmetrischen Matrix. 
+	 * Die Symmetrie wird nicht geprueft waerend der Zerlegung. Das Array
+	 * liegt im PACK-Format vor.
+	 * 
+	 * @param size
+	 * @param data
+	 * @throws IllegalArgumentException
+	 * @throws MatrixNotSPDException
+	 */
+	private static void packChol(int size, double data[]) throws IllegalArgumentException, MatrixNotSPDException {
+		final String uplo = "U";
+		intW info = new intW(0);
+
+		LAPACK.getInstance().dpptrf(uplo, size, data, info);
+
+		if (info.val > 0)
+            throw new MatrixNotSPDException("Error, matrix must be positive definite!");
+        else if (info.val < 0)
+        	throw new IllegalArgumentException("Error, invalid or wrong argument for function call dpptrf() " + info.val + "!");
+	}
 }
