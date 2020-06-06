@@ -35,10 +35,12 @@ import org.applied_geodesy.adjustment.EstimationStateType;
 import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.NormalEquationSystem;
+import org.applied_geodesy.adjustment.UnscentedTransformationParameter;
 import org.applied_geodesy.adjustment.geometry.FeatureEvent.FeatureEventType;
 import org.applied_geodesy.adjustment.geometry.parameter.ProcessingType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
+import org.applied_geodesy.adjustment.geometry.point.Point;
 import org.applied_geodesy.adjustment.geometry.restriction.Restriction;
 import org.applied_geodesy.adjustment.statistic.BaardaMethodTestStatistic;
 import org.applied_geodesy.adjustment.statistic.SidakTestStatistic;
@@ -61,6 +63,7 @@ import no.uib.cipr.matrix.NotConvergedException;
 import no.uib.cipr.matrix.NotConvergedException.Reason;
 import no.uib.cipr.matrix.UpperSymmBandMatrix;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
+import no.uib.cipr.matrix.UpperTriangPackMatrix;
 import no.uib.cipr.matrix.Vector;
 
 public class FeatureAdjustment {
@@ -96,7 +99,10 @@ public class FeatureAdjustment {
 			maxAbsRestriction   = 0.0,
 			lastValidmaxAbsDx   = 0.0,
 			dampingValue        = 0.0,
-			adaptedDampingValue = 0.0;
+			adaptedDampingValue = 0.0,
+			alphaUT             = UnscentedTransformationParameter.getAlpha(),
+            betaUT              = UnscentedTransformationParameter.getBeta(),
+            weightZero          = UnscentedTransformationParameter.getWeightZero();
 	
 	private VarianceComponent varianceComponentOfUnitWeight = new VarianceComponent();
 	private UpperSymmPackMatrix Qxx = null;
@@ -141,24 +147,28 @@ public class FeatureAdjustment {
 				featurePoint.getTestStatistic().setVarianceComponent(this.varianceComponentOfUnitWeight);
 			}
 			
-			// set column indices to unknown parameters in normal equation
-			// Please note: the following condition holds this.numberOfUnknownParameters <= this.parameters.size()
-			// because some parameters may be held fixed or will be estimated during post-processing
-			this.numberOfUnknownParameters = 0;
-			int column = 0;
-			for (UnknownParameter unknownParameter : this.parameters) {
-				if (unknownParameter.getProcessingType() == ProcessingType.ADJUSTMENT) { //  && unknownParameter.getColumn() < 0
-					unknownParameter.setColumn(column++);
-					this.numberOfUnknownParameters++;
-				}
-				else {
-					unknownParameter.setColumn(-1);
-				}
-			}
-
-			// set row indices to restrictions, i.e., row/column of Jacobian R in normal equation (behind unknown parameters)
-			for (Restriction restriction : this.restrictions)
-				restriction.setRow(column++);
+//			// set column indices to unknown parameters in normal equation
+//			// Please note: the following condition holds this.numberOfUnknownParameters <= this.parameters.size()
+//			// because some parameters may be held fixed or will be estimated during post-processing
+//			this.numberOfUnknownParameters = 0;
+//			int column = 0;
+//			for (UnknownParameter unknownParameter : this.parameters) {
+//				if (unknownParameter.getProcessingType() == ProcessingType.ADJUSTMENT) { //  && unknownParameter.getColumn() < 0
+//					unknownParameter.setColumn(column++);
+//					this.numberOfUnknownParameters++;
+//				}
+//				else {
+//					unknownParameter.setColumn(-1);
+//				}
+//			}
+//
+//			// set row indices to restrictions, i.e., row/column of Jacobian R in normal equation (behind unknown parameters)
+//			for (Restriction restriction : this.restrictions)
+//				restriction.setRow(column++);
+//			
+//			List<Restriction> calculations = this.feature.getPostProcessingCalculations();
+//			for (Restriction restriction : calculations)
+//				restriction.setRow(-1);
 			
 			this.testStatisticParameters = this.getTestStatisticParameters(this.testStatisticDefinition);
 		}
@@ -194,184 +204,286 @@ public class FeatureAdjustment {
 		this.Qxx = null;
 	}
 	
+	private void prepareIterationProcess(Point centerOfMass) {
+		// set warm start solution x <-- x0
+		this.feature.applyInitialGuess();
+		// reset center of mass
+		this.feature.getCenterOfMass().setX0(0);
+		this.feature.getCenterOfMass().setY0(0);
+		this.feature.getCenterOfMass().setZ0(0);
+
+		// set center of mass
+		if (this.feature.isEstimateCenterOfMass()) 
+			this.feature.setCenterOfMass(centerOfMass);
+
+		// set column indices to unknown parameters in normal equation
+		// Please note: the following condition holds this.numberOfUnknownParameters <= this.parameters.size()
+		// because some parameters may be held fixed or will be estimated during post-processing
+		this.numberOfUnknownParameters = 0;
+		int parColumn = 0;
+		for (UnknownParameter unknownParameter : this.parameters) {
+			if (unknownParameter.getProcessingType() == ProcessingType.ADJUSTMENT) { //  && unknownParameter.getColumn() < 0
+				unknownParameter.setColumn(parColumn++);
+				this.numberOfUnknownParameters++;
+			}
+			else {
+				unknownParameter.setColumn(-1);
+			}
+		}
+
+		// set row indices to restrictions, i.e., row/column of Jacobian R in normal equation (behind unknown parameters)
+		for (Restriction restriction : this.restrictions)
+			restriction.setRow(parColumn++);
+
+		List<Restriction> calculations = this.feature.getPostProcessingCalculations();
+		for (Restriction restriction : calculations)
+			restriction.setRow(-1);
+
+		// reset feature points
+		for (FeaturePoint featurePoint : this.points)
+			featurePoint.reset();
+	}
+	
 	public EstimationStateType estimateModel() throws NotConvergedException, MatrixSingularException, OutOfMemoryError {
+		boolean applyUnscentedTransformation = this.estimationType == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION;
+		
 		this.currentEstimationStatus = EstimationStateType.BUSY;
 		this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-
-		this.adaptedDampingValue = this.dampingValue;
-		int runs = this.maximalNumberOfIterations-1;
-		boolean isEstimated = false, estimateCompleteModel = false, isFirstIteration = true;
-
-		if (this.maximalNumberOfIterations == 0) {
-			estimateCompleteModel = isEstimated = true;
-			isFirstIteration = false;
-			this.adaptedDampingValue = 0;
-		}
 		
-		this.varianceComponentOfUnitWeight.setVariance0(1.0);
-		this.varianceComponentOfUnitWeight.setOmega(0.0);
-		this.varianceComponentOfUnitWeight.setRedundancy(this.numberOfModelEquations - this.numberOfUnknownParameters + this.restrictions.size());
-		
-		try {		
-			// Reset aller Iterationseinstellungen
-			this.maxAbsDx = 0.0;
-			this.lastValidmaxAbsDx = 0.0;
-			runs = this.maximalNumberOfIterations-1;
-			isEstimated = false;
-			estimateCompleteModel = false;
+		try {
+			this.Qxx = null;
+			int dim    = this.feature.getFeatureType() == FeatureType.CURVE ? 2 : 3;
+			int numObs = this.points.size() * dim;
+			int numberOfEstimationSteps = applyUnscentedTransformation ? numObs + 2 : 1;
+
+			double alpha2  = this.alphaUT * this.alphaUT;
+			double weight0 = this.weightZero;
+			double weighti = (1.0 - weight0) / (double)(numberOfEstimationSteps - 1.0);
+
+			double SigmaUT[][] = null;
+			Vector xUT = null, vUT = null;
+			Matrix solutionVectors = null;
 			
-			double sigma2apriori = this.getEstimateVarianceOfUnitWeightApriori();
-			this.varianceComponentOfUnitWeight.setVariance0( sigma2apriori < SQRT_EPS ? SQRT_EPS : sigma2apriori );
-			this.varianceComponentOfUnitWeight.setVariance0(1.0);
-			do {
-				this.maxAbsDx = 0.0;
-				this.maxAbsRestriction = 0.0;
-				this.iterationStep = this.maximalNumberOfIterations-runs;
-				this.currentEstimationStatus = EstimationStateType.ITERATE;
-				this.change.firePropertyChange(this.currentEstimationStatus.name(), this.maximalNumberOfIterations, this.iterationStep);
-				this.feature.prepareIteration();
+			Point centerOfMass = Feature.deriveCenterOfMass(this.feature.getFeaturePoints());
+			
+			if (applyUnscentedTransformation) {
+				int numUnfixedParams = 0;
+				for (UnknownParameter unknownParameter : this.parameters)
+					numUnfixedParams += unknownParameter.getProcessingType() != ProcessingType.FIXED ? 1 : 0;
+					
+				xUT = new DenseVector(numUnfixedParams); // this.numberOfUnknownParameters
+				vUT = new DenseVector(numObs);
+				solutionVectors = new DenseMatrix(numUnfixedParams, numberOfEstimationSteps); // this.numberOfUnknownParameters, numberOfEstimationSteps
+				
+				SigmaUT = new double[numObs][dim];
+				if (weight0 < 0 || weight0 >= 1)
+					throw new IllegalArgumentException("Error, zero-weight is out of range. If SUT is applied, valid values are 0 <= w0 < 1! " + weight0);
 
-				// create the normal system of equations including restrictions
-				NormalEquationSystem neq = this.createNormalEquation();
+				weight0 = weight0 / alpha2 + (1.0 - 1.0 / alpha2);
+				weighti = weighti / alpha2;
+			}
+			
+			for (int estimationStep = 0; estimationStep < numberOfEstimationSteps; estimationStep++) {
+				this.prepareIterationProcess(new Point(centerOfMass));
 
-				if (this.interrupt || neq == null) {
-					this.currentEstimationStatus = EstimationStateType.INTERRUPT;
-					this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-					this.interrupt = false;
-					return this.currentEstimationStatus;
+				this.adaptedDampingValue = this.dampingValue;
+				int runs = this.maximalNumberOfIterations-1;
+				boolean isEstimated = false, estimateCompleteModel = false, isFirstIteration = true;
+
+				if (this.maximalNumberOfIterations == 0) {
+					estimateCompleteModel = isEstimated = true;
+					isFirstIteration = false;
+					this.adaptedDampingValue = 0;
 				}
 
-				// apply pre-conditioning to archive a stable normal equation
-				if (this.preconditioning)
-					this.applyPrecondition(neq);
+				this.maxAbsDx = 0.0;
+				this.maxAbsRestriction = 0.0;
+				this.lastValidmaxAbsDx = 0.0;
+				runs = this.maximalNumberOfIterations-1;
+				isEstimated = false;
+				estimateCompleteModel = false;
 
-				DenseVector n = neq.getVector();
-				UpperSymmPackMatrix N = neq.getMatrix();
+				double sigma2apriori = this.getEstimateVarianceOfUnitWeightApriori();
+				this.varianceComponentOfUnitWeight.setVariance0(1.0);
+				this.varianceComponentOfUnitWeight.setOmega(0.0);
+				this.varianceComponentOfUnitWeight.setRedundancy(this.numberOfModelEquations - this.numberOfUnknownParameters + this.restrictions.size());
+				this.varianceComponentOfUnitWeight.setVariance0( sigma2apriori < SQRT_EPS ? SQRT_EPS : sigma2apriori );
+				
+				if (applyUnscentedTransformation) {
+					this.currentEstimationStatus = EstimationStateType.UNSCENTED_TRANSFORMATION_STEP;
+					this.change.firePropertyChange(this.currentEstimationStatus.name(), numberOfEstimationSteps, estimationStep+1);
+					this.prepareSphericalSimplexUnscentedTransformationObservation(estimationStep, SigmaUT, weighti);
+				}
 
-//								if (isFirstIteration) {
-//									MathExtension.print(n);
-//									MathExtension.print(N);
-//									System.out.println("--");
-//									for (FeaturePoint p : this.points) {
-//										System.out.println(p.getX()+"   "+p.getY()+"   "+p.getZ());
-//									}
-//									System.out.println("--");
-//									for (UnknownParameter p : this.parameters) {
-//										System.out.println(p.getValue());
-//									}
-//								}
+				do {
+					this.maxAbsDx = 0.0;
+					this.maxAbsRestriction = 0.0;
+					this.iterationStep = this.maximalNumberOfIterations-runs;
+					this.currentEstimationStatus = EstimationStateType.ITERATE;
+					this.change.firePropertyChange(this.currentEstimationStatus.name(), this.maximalNumberOfIterations, this.iterationStep);
+					this.feature.prepareIteration();
 
-				if (!isFirstIteration) 
-					estimateCompleteModel = isEstimated;
+					// create the normal system of equations including restrictions
+					NormalEquationSystem neq = this.createNormalEquation();
 
-				try {
-					if (estimateCompleteModel || this.estimationType == EstimationType.L1NORM) {
-						this.calculateStochasticParameters = (this.estimationType != EstimationType.L1NORM && estimateCompleteModel);
+					if (this.interrupt || neq == null) {
+						this.currentEstimationStatus = EstimationStateType.INTERRUPT;
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+						this.interrupt = false;
+						return this.currentEstimationStatus;
+					}
 
-						if (this.estimationType != EstimationType.L1NORM) {
-							this.currentEstimationStatus = EstimationStateType.INVERT_NORMAL_EQUATION_MATRIX;
-							this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-						}
+					// apply pre-conditioning to archive a stable normal equation
+					if (this.preconditioning)
+						this.applyPrecondition(neq);
 
-						// in-place estimation normal system N * x = n: N <-- Qxx, n <-- dx 
-						MathExtension.solve(N, n, true);
-						if (this.preconditioning)
-							this.applyPrecondition(neq.getPreconditioner(), N, n);				
-						// extract part of unknown parameters to Qxx
-						if (this.numberOfUnknownParameters != N.numColumns()) {
-							this.Qxx = new UpperSymmPackMatrix(this.numberOfUnknownParameters);
-							for (int r = 0; r < this.parameters.size(); r++) {
-								UnknownParameter parameterRow = this.parameters.get(r);
-								int row = parameterRow.getColumn();
-								if (row < 0)
-									continue;
-								for (int c = r; c < this.parameters.size(); c++) {
-									UnknownParameter parameterCol = this.parameters.get(c);
-									int column = parameterCol.getColumn();
-									if (column < 0)
-										continue;
-									this.Qxx.set(row, column, N.get(row, column));
+					DenseVector n = neq.getVector();
+					UpperSymmPackMatrix N = neq.getMatrix();
+
+					if (!isFirstIteration) 
+						estimateCompleteModel = isEstimated;
+
+					try {
+						if ((estimateCompleteModel && estimationStep == (numberOfEstimationSteps - 1)) || this.estimationType == EstimationType.L1NORM) {
+							this.calculateStochasticParameters = (this.estimationType != EstimationType.L1NORM && estimateCompleteModel);
+
+							if (this.estimationType != EstimationType.L1NORM) {
+								this.currentEstimationStatus = EstimationStateType.INVERT_NORMAL_EQUATION_MATRIX;
+								this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+							}
+
+							// in-place estimation normal system N * x = n: N <-- Qxx, n <-- dx 
+							MathExtension.solve(N, n, !applyUnscentedTransformation);
+							if (!applyUnscentedTransformation) {
+								if (this.preconditioning)
+									this.applyPrecondition(neq.getPreconditioner(), N, n);	
+								
+								// extract part of unknown parameters to Qxx
+								if (this.numberOfUnknownParameters != N.numColumns()) {
+									this.Qxx = new UpperSymmPackMatrix(this.numberOfUnknownParameters);
+									for (int r = 0; r < this.parameters.size(); r++) {
+										UnknownParameter parameterRow = this.parameters.get(r);
+										int row = parameterRow.getColumn();
+										if (row < 0)
+											continue;
+										for (int c = r; c < this.parameters.size(); c++) {
+											UnknownParameter parameterCol = this.parameters.get(c);
+											int column = parameterCol.getColumn();
+											if (column < 0)
+												continue;
+											this.Qxx.set(row, column, N.get(row, column));
+										}
+									}
 								}
+								else {
+									this.Qxx = N;
+								}
+							}
+							else {
+								if (this.preconditioning)
+									this.applyPrecondition(neq.getPreconditioner(), null, n);
+							}
+
+							if (this.calculateStochasticParameters) {
+								this.currentEstimationStatus = EstimationStateType.ESTIAMTE_STOCHASTIC_PARAMETERS;
+								this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
 							}
 						}
 						else {
-							this.Qxx = N;
+							// in-place estimates of N * x = n, vector n is replaced by the solution vector x
+							MathExtension.solve(N, n, false);
+							if (this.preconditioning)
+								this.applyPrecondition(neq.getPreconditioner(), null, n);
 						}
 
-						if (this.calculateStochasticParameters) {
-							this.currentEstimationStatus = EstimationStateType.ESTIAMTE_STOCHASTIC_PARAMETERS;
-							this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+						N = null;
+						// n == [dx k]' (in-place estimation)
+						this.updateModel(n, estimateCompleteModel);
+
+						n = null;
+						
+						if (applyUnscentedTransformation) {
+							if (estimateCompleteModel) {
+								this.addUnscentedTransformationSolution(xUT, vUT, solutionVectors, estimationStep, estimationStep < (numberOfEstimationSteps - 1) ? weighti : weight0);
+							}
+							
+							// Letzter Durchlauf der UT
+							// Bestimme Parameterupdate dx und Kovarianzmatrix Qxx
+							if (estimateCompleteModel && estimationStep > 0 && estimationStep == (numberOfEstimationSteps - 1)) {
+								this.estimateUnscentedTransformationParameterUpdateAndDispersion(xUT, solutionVectors, vUT, weighti, weight0 + (1.0 - alpha2 + this.betaUT));
+							}
 						}
+					}
+					catch (MatrixSingularException | MatrixNotSPDException | IllegalArgumentException | ArrayIndexOutOfBoundsException | NullPointerException e) {
+						if (applyUnscentedTransformation && SigmaUT != null) 
+							this.prepareSphericalSimplexUnscentedTransformationObservation(-1, SigmaUT, 0);
+						e.printStackTrace();
+						this.currentEstimationStatus = EstimationStateType.SINGULAR_MATRIX;
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+						throw new MatrixSingularException("Error, normal equation matrix is singular!\r\n" + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : "");
+					}
+					catch (Exception e) {
+						if (applyUnscentedTransformation && SigmaUT != null) 
+							this.prepareSphericalSimplexUnscentedTransformationObservation(-1, SigmaUT, 0);
+						e.printStackTrace();
+						this.currentEstimationStatus = EstimationStateType.INTERRUPT;
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+						return this.currentEstimationStatus;
+					}
+
+					if (this.interrupt) {
+						if (applyUnscentedTransformation && SigmaUT != null) 
+							this.prepareSphericalSimplexUnscentedTransformationObservation(-1, SigmaUT, 0);
+						this.currentEstimationStatus = EstimationStateType.INTERRUPT;
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+						this.interrupt = false;
+						return this.currentEstimationStatus;
+					}
+
+					if (Double.isInfinite(this.maxAbsDx) || Double.isNaN(this.maxAbsDx)) {
+						if (applyUnscentedTransformation && SigmaUT != null) 
+							this.prepareSphericalSimplexUnscentedTransformationObservation(-1, SigmaUT, 0);
+						this.currentEstimationStatus = EstimationStateType.NO_CONVERGENCE;
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+						throw new NotConvergedException(Reason.Breakdown, "Error, iteration process breaks down!");
+					}
+					else if (!isFirstIteration && this.maxAbsDx <= SQRT_EPS && this.maxAbsRestriction <= SQRT_EPS && runs > 0 && this.adaptedDampingValue == 0) {
+						isEstimated = true;
+						this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, Math.max(this.maxAbsDx, this.maxAbsRestriction));
+					}
+					else if (runs-- <= 1) {
+						if (estimateCompleteModel) {
+							if (this.estimationType == EstimationType.L1NORM) {
+								if (applyUnscentedTransformation && SigmaUT != null) 
+									this.prepareSphericalSimplexUnscentedTransformationObservation(-1, SigmaUT, 0);
+								this.currentEstimationStatus = EstimationStateType.ROBUST_ESTIMATION_FAILD;
+								this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+								throw new NotConvergedException(Reason.Iterations, "Error, euqation system does not converge! Last iterate max|dx| = " + this.maxAbsDx + " (" + SQRT_EPS + ").");
+							}
+							else {
+								if (applyUnscentedTransformation && SigmaUT != null) 
+									this.prepareSphericalSimplexUnscentedTransformationObservation(-1, SigmaUT, 0);
+								this.currentEstimationStatus = EstimationStateType.NO_CONVERGENCE;
+								this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxAbsDx);
+								throw new NotConvergedException(Reason.Iterations, "Error, euqation system does not converge! Last iterate max|dx| = " + this.maxAbsDx + " (" + SQRT_EPS + ").");
+							}
+						}
+						isEstimated = true;
 					}
 					else {
-						// in-place estimates of N * x = n, vector n is replaced by the solution vector x
-						MathExtension.solve(N, n, false);
-						if (this.preconditioning)
-							this.applyPrecondition(neq.getPreconditioner(), null, n);
+						this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxAbsDx);
 					}
+					isFirstIteration = false;
 
-					N = null;
-					// n == [dx k]' (in-place estimation)
-					this.updateModel(n, estimateCompleteModel);
-					
-					n = null;
+					if (isEstimated || this.adaptedDampingValue <= SQRT_EPS || runs < this.maximalNumberOfIterations * 0.1 + 1)
+						this.adaptedDampingValue = 0.0;
 				}
-				catch (MatrixSingularException | MatrixNotSPDException | IllegalArgumentException | ArrayIndexOutOfBoundsException | NullPointerException e) {
-					e.printStackTrace();
-					this.currentEstimationStatus = EstimationStateType.SINGULAR_MATRIX;
-					this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-					throw new MatrixSingularException("Error, normal equation matrix is singular!\r\n" + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : "");
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-					this.currentEstimationStatus = EstimationStateType.INTERRUPT;
-					this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-					return this.currentEstimationStatus;
-				}
-
-				if (this.interrupt) {
-					this.currentEstimationStatus = EstimationStateType.INTERRUPT;
-					this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-					this.interrupt = false;
-					return this.currentEstimationStatus;
-				}
-
-				if (Double.isInfinite(this.maxAbsDx) || Double.isNaN(this.maxAbsDx)) {
-					this.currentEstimationStatus = EstimationStateType.NO_CONVERGENCE;
-					this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-					throw new NotConvergedException(Reason.Breakdown, "Error, iteration process breaks down!");
-				}
-				else if (!isFirstIteration && this.maxAbsDx <= SQRT_EPS && this.maxAbsRestriction <= SQRT_EPS && runs > 0 && this.adaptedDampingValue == 0) {
-					isEstimated = true;
-					this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
-					this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, Math.max(this.maxAbsDx, this.maxAbsRestriction));
-				}
-				else if (runs-- <= 1) {
-					if (estimateCompleteModel) {
-						if (this.estimationType == EstimationType.L1NORM) {
-							this.currentEstimationStatus = EstimationStateType.ROBUST_ESTIMATION_FAILD;
-							this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-							throw new NotConvergedException(Reason.Iterations, "Error, euqation system does not converge! Last iterate max|dx| = " + this.maxAbsDx + " (" + SQRT_EPS + ").");
-						}
-						else {
-							this.currentEstimationStatus = EstimationStateType.NO_CONVERGENCE;
-							this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxAbsDx);
-							throw new NotConvergedException(Reason.Iterations, "Error, euqation system does not converge! Last iterate max|dx| = " + this.maxAbsDx + " (" + SQRT_EPS + ").");
-						}
-					}
-					isEstimated = true;
-				}
-				else {
-					this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
-					this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxAbsDx);
-				}
-				isFirstIteration = false;
+				while (!estimateCompleteModel);
 				
-				if (isEstimated || this.adaptedDampingValue <= SQRT_EPS || runs < this.maximalNumberOfIterations * 0.1 + 1)
-					this.adaptedDampingValue = 0.0;
+				// System.out.println(estimationStep + ". max(|dx|) = " + this.maxAbsDx + "; omega = " + this.varianceComponentOfUnitWeight.getOmega() + "; itr = " + this.iterationStep);
 			}
-			while (!estimateCompleteModel);
-			
 		}
 		catch (OutOfMemoryError e) {
 			e.printStackTrace();
@@ -381,11 +493,9 @@ public class FeatureAdjustment {
 		}
 		finally {
 			// Reset the center of mass
-			if (this.feature.getCenterOfMass() != null) {
-				this.feature.getCenterOfMass().setX0(0);
-				this.feature.getCenterOfMass().setY0(0);
-				this.feature.getCenterOfMass().setZ0(0);
-			}
+			this.feature.getCenterOfMass().setX0(0);
+			this.feature.getCenterOfMass().setY0(0);
+			this.feature.getCenterOfMass().setZ0(0);
 		}
 
 		if (this.currentEstimationStatus.getId() == EstimationStateType.BUSY.getId() || this.calculateStochasticParameters) {
@@ -396,7 +506,6 @@ public class FeatureAdjustment {
 //		System.out.println("max(|dx|) = " + this.maxAbsDx + "; omega = " + this.varianceComponentOfUnitWeight.getOmega() + "; itr = " + this.iterationStep);
 //		for (UnknownParameter unknownParameter : this.parameters)
 //			System.out.println(unknownParameter);
-
 		return this.currentEstimationStatus;
 	}
 	
@@ -422,45 +531,59 @@ public class FeatureAdjustment {
 	private void reverseCenterOfMass() {
 		for (GeometricPrimitive geometricPrimitive : this.geometricPrimitives) 
 			geometricPrimitive.reverseCenterOfMass(this.Qxx);
+		
+		// Reset the center of mass
+		this.feature.getCenterOfMass().setX0(0);
+		this.feature.getCenterOfMass().setY0(0);
+		this.feature.getCenterOfMass().setZ0(0);
 	}
 
 	private void postProcessing() {
 		List<Restriction> calculations = this.feature.getPostProcessingCalculations();
+		int numberOfUnknownParameters = this.numberOfUnknownParameters; // parameters to be estimated during adjustment 
 		for (Restriction restriction : calculations) {
 			UnknownParameter parameter = restriction.getRegressand();
 			if (parameter.getProcessingType() != ProcessingType.POSTPROCESSING)
 				continue;
 			
-			int rows    = this.Qxx.numRows();
-			int columns = this.Qxx.numColumns();
-			
-			// column of parameter
-			int column = -1;
-			
-			if (parameter.getColumn() < 0) {
-				column = columns;
-				columns++;
+			if (this.Qxx != null) {
+				int rows    = this.Qxx.numRows();
+				int columns = this.Qxx.numColumns();
+
+				// column of parameter
+				int column = -1;
+
+				if (parameter.getColumn() < 0) {
+					column = columns;
+					columns++;
+				}
+				else {
+					column = parameter.getColumn();
+				}
+
+				restriction.setRow(column);
+				Matrix JrT = new DenseMatrix(rows, columns);
+				for (int i = 0; i < rows; i++) {
+					// skip column auf parameter to avoid doubling, because 
+					// transposedJacobianElements() _adds_ elements (instead of sets)
+					if (i != column) 
+						JrT.set(i, i, 1.0);
+				}
+
+				restriction.transposedJacobianElements(JrT);
+				Matrix DpJrT = new DenseMatrix(rows, columns);
+				this.Qxx.mult(JrT, DpJrT);
+				this.Qxx = new UpperSymmPackMatrix(columns);
+				JrT.transAmult(DpJrT, this.Qxx);
+				parameter.setColumn(column);
 			}
 			else {
-				column = parameter.getColumn();
+				if (parameter.getColumn() < 0) {
+					parameter.setColumn(numberOfUnknownParameters++);
+				}
 			}
-
-			restriction.setRow(column);
-			Matrix JrT = new DenseMatrix(rows, columns);
-			for (int i = 0; i < rows; i++) {
-				// skip column auf parameter to avoid doubling, because 
-				// transposedJacobianElements() _adds_ elements (instead of sets)
-				if (i != column) 
-					JrT.set(i, i, 1.0);
-			}
-
-			restriction.transposedJacobianElements(JrT);
+			
 			double estimate = restriction.getMisclosure();
-			Matrix DpJrT = new DenseMatrix(rows, columns);
-			this.Qxx.mult(JrT, DpJrT);
-			this.Qxx = new UpperSymmPackMatrix(columns);
-			JrT.transAmult(DpJrT, this.Qxx);
-			parameter.setColumn(column);
 			parameter.setValue(estimate);
 		}
 	}
@@ -491,7 +614,7 @@ public class FeatureAdjustment {
 				residuals.set(1, point.getResidualY());
 			}
 			if (dim != 2)
-				residuals.set(2, point.getResidualZ());
+				residuals.set(dim - 1, point.getResidualZ());
 			
 			int geoIdx = 0;
 			for (GeometricPrimitive geometricPrimitive : point) {
@@ -542,6 +665,7 @@ public class FeatureAdjustment {
 		for (Restriction restriction : this.restrictions) {
 			if (this.interrupt)
 				return null;
+			
 			// set parameter restrictions behind the model equations
 			restriction.transposedJacobianElements(N);
 			double misclosure = restriction.getMisclosure();
@@ -563,6 +687,7 @@ public class FeatureAdjustment {
 			for (int column = 0; column < N.numColumns(); column++) {
 				if (this.interrupt)
 					return null;
+				
 				double value = N.get(column, column);
 				V.set(column, column, value > Constant.EPS ? 1.0 / Math.sqrt(value) : 1.0);
 				//V.set(column, column, 1.0);
@@ -645,7 +770,7 @@ public class FeatureAdjustment {
 			return;
 		
 		// estimate and update residuals before updating the model parameters --> estimated omega
-		double omega = this.updateResiduals(dx, estimateCompleteModel && !this.adjustModelParametersOnly && this.adaptedDampingValue == 0);
+		double omega = this.updateResiduals(dx, !this.adjustModelParametersOnly && estimateCompleteModel && this.Qxx != null && this.adaptedDampingValue == 0);
 		this.varianceComponentOfUnitWeight.setOmega(omega);
 		
 		// updating model parameters --> estimated maxAbsDx
@@ -654,7 +779,7 @@ public class FeatureAdjustment {
 		if (this.interrupt)
 			return;
 
-		if (estimateCompleteModel && this.Qxx != null) {
+		if (estimateCompleteModel) {
 			// remove reduction to center of mass
 			this.reverseCenterOfMass();
 			// apply post processing of geometric templates
@@ -667,9 +792,12 @@ public class FeatureAdjustment {
 			double quantil = Math.max(globalTestStatistic.getQuantile(), 1.0 + Math.sqrt(Constant.EPS));
 			boolean significant = this.varianceComponentOfUnitWeight.getVariance() / this.varianceComponentOfUnitWeight.getVariance0() > quantil; 
 			this.varianceComponentOfUnitWeight.setSignificant(significant);
-			for (UnknownParameter unknownParameter : this.parameters) {
-				int column = unknownParameter.getColumn();
-				unknownParameter.setUncertainty( column >= 0 ? Math.sqrt(Math.abs(varianceOfUnitWeight * this.Qxx.get(column, column))) : 0.0 );
+			
+			if (this.Qxx != null) {
+				for (UnknownParameter unknownParameter : this.parameters) {
+					int column = unknownParameter.getColumn();
+					unknownParameter.setUncertainty( column >= 0 ? Math.sqrt(Math.abs(varianceOfUnitWeight * this.Qxx.get(column, column))) : 0.0 );
+				}
 			}
 		}
 	}
@@ -731,7 +859,7 @@ public class FeatureAdjustment {
 				residuals.set(1, point.getResidualY());
 			}
 			if (dim != 2)
-				residuals.set(2, point.getResidualZ());
+				residuals.set(dim - 1, point.getResidualZ());
 			
 			int geoIdx = 0;
 			for (GeometricPrimitive geometricPrimitive : point) {
@@ -793,7 +921,7 @@ public class FeatureAdjustment {
 				residuals.set(1, point.getResidualY());
 			}
 			if (dim != 2)
-				residuals.set(2, point.getResidualZ());
+				residuals.set(dim - 1, point.getResidualZ());
 			
 			int geoIdx = 0;
 			for (GeometricPrimitive geometricPrimitive : point) {
@@ -842,7 +970,7 @@ public class FeatureAdjustment {
 			}
 			if (dim != 2)
 				point.setResidualZ(residuals.get(2));
-			
+		
 			// residuals are estimated - needed for deriving nabla
 			if (estimateStochasticParameters) {
 				int dof = (int)this.varianceComponentOfUnitWeight.getRedundancy();
@@ -1004,7 +1132,7 @@ public class FeatureAdjustment {
 				residuals.set(1, point.getResidualY());
 			}
 			if (dim != 2)
-				residuals.set(2, point.getResidualZ());
+				residuals.set(dim - 1, point.getResidualZ());
 			
 			Vector weightedResiduals = new DenseVector(dim);
 			P.mult(residuals,  weightedResiduals);
@@ -1094,157 +1222,187 @@ public class FeatureAdjustment {
 		return new TestStatisticParameters(testStatistic);
 	}
 	
-//	private void resetPoints() {
-//		for (FeaturePoint point : this.points)
-//			point.reset();
-//	}
-//	
-//	private void prepareSphericalSimplexUnscentedTransformationObservation(int estimationStep, double[][] SigmaUT, double weight) {
-//		int dim = this.getFeature().getFeatureType() == FeatureType.CURVE ? 2 : 3;
-//		int noo = this.points.size() * dim;
-//		
-//		int row = 0;
-//		for (FeaturePoint point : this.points) {
-//			// Cholesky factor
-//			UpperTriangPackMatrix G = new UpperTriangPackMatrix(point.getDispersionApriori(), true);
-//			MathExtension.chol(G);
-//			Vector sigmaUT = new DenseVector(SigmaUT[row], false);
-//			Vector delta = new DenseVector(dim);
-//			G.transMult(sigmaUT, delta);
-//			
-//			// Reverse modification of last UT step
-//			if (dim != 1) {
-//				point.setX0( point.getX0() - delta.get(0));
-//				point.setY0( point.getY0() - delta.get(1));
-//			}
-//			if (dim != 2) {
-//				point.setZ0( point.getZ0() - delta.get(dim-1));
-//			}
-//
-//			// derive new Sigma points
-//			sigmaUT.zero();
-//			if (dim != 1) {
-//				if (estimationStep < noo + 2) {
-//					if (row == estimationStep - 1)
-//						sigmaUT.set(0, (1.0 + row) / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight ));
-//					else if (row > estimationStep - 2)
-//						sigmaUT.set(0, -1.0 / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight ));
-//				}
-//				row++;
-//				if (estimationStep < noo + 2) {
-//					if (row == estimationStep - 1)
-//						sigmaUT.set(1, (1.0 + row) / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight ));
-//					else if (row > estimationStep - 2)
-//						sigmaUT.set(1, -1.0 / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight ));
-//				}
-//				row++;
-//			}
-//			if (dim != 2) {
-//				if (estimationStep < noo + 2) {
-//					if (row == estimationStep - 1)
-//						sigmaUT.set(dim-1, (1.0 + row) / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight ));
-//					else if (row > estimationStep - 2)
-//						sigmaUT.set(dim-1, -1.0 / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight ));
-//				}
-//				row++;
-//			}
-//			delta = new DenseVector(dim);
-//			G.transMult(sigmaUT, delta);
-//			// Modify points
-//			if (dim != 1) {
-//				point.setX0( point.getX0() + delta.get(0));
-//				point.setY0( point.getY0() + delta.get(1));
-//			}
-//			if (dim != 2) {
-//				point.setZ0( point.getZ0() + delta.get(dim-1));
-//			}
-//		}
-//	}
-//	
-//	private void addUnscentedTransformationSolution(Vector dx, Vector xUT, Vector vUT, Matrix solutionVectors, int solutionNumber, double weight) {
-//		for (UnknownParameter unknownParameter : this.parameters) {
-//			if (this.interrupt)
-//				return;
-//
-//			int col = unknownParameter.getColumn();
-//			if (col < 0)
-//				continue;
-//				
-//			double value = unknownParameter.getValue() + dx.get(col);
-//			xUT.set(col, xUT.get(col) + weight * value);
-//			solutionVectors.set(col, solutionNumber, value);
-//		}
-//
-//		if (vUT != null) {
-//			int row = 0;
-//			for (FeaturePoint point : this.points) {
-//				int dim = point.getDimension();
-//				
-//				if (dim != 1) {
-//					double vx = point.getResidualX();
-//					double vy = point.getResidualY();
-//					
-//					vUT.set(row, vUT.get(row++) + vx);
-//					vUT.set(row, vUT.get(row++) + vy);
-//				}
-//				
-//				if (dim != 2) {
-//					double vz = point.getResidualZ();
-//					
-//					vUT.set(row, vUT.get(row++) + vz);
-//				}
-//			}
-//		}
-//	}
-//	
-//	private void estimateUnscentedTransformationParameterUpdateAndCovarianceMatrix(Vector dx, Vector xUT, Matrix solutionVectors, double weightN, double weightC) {
-//		int numberOfEstimationSteps = solutionVectors.numColumns();
-//		this.Qxx.zero();
-//		
-//		for (int r = 0; r < this.parameters.size(); r++) {
-//			if (this.interrupt)
-//				return;
-//
-//			UnknownParameter unknownParameterRow = this.parameters.get(r);
-//			int row = unknownParameterRow.getColumn();
-//			if (row < 0)
-//				continue;
-//
-//			// Erzeuge aus der finalen UT-Loesung den Zuschlagsvektor - Zusazuparameter
-//			dx.set(row, xUT.get(row) - unknownParameterRow.getValue());
-//
-//			for (int c = r; c < this.parameters.size(); c++) {
-//				if (this.interrupt)
-//					return;
-//
-//				UnknownParameter unknownParameterCol = this.parameters.get(c);
-//				int col = unknownParameterCol.getColumn();
-//				if (col < 0)
-//					continue;
-//
-//				// Laufindex des jeweiligen Spalten-/Zeilenvektors
-//				for (int estimationStep = 0; estimationStep < numberOfEstimationSteps; estimationStep++) {
-//					double weight = estimationStep == (numberOfEstimationSteps - 1) ? weightC : weightN;
-//
-//					double valueCol = solutionVectors.get(col, estimationStep) - xUT.get(col);
-//					double valueRow = solutionVectors.get(row, estimationStep) - xUT.get(row);
-//
-//					this.Qxx.set(row, col, this.Qxx.get(row, col) + valueRow * weight * valueCol);
-//				}
-//			}
-//		}
-//
-//		solutionVectors = null;
-//		xUT = null;
-//	}
+	private void prepareSphericalSimplexUnscentedTransformationObservation(int estimationStep, double[][] SigmaUT, double weight) throws IllegalArgumentException, MatrixNotSPDException {
+		int dim = this.getFeature().getFeatureType() == FeatureType.CURVE ? 2 : 3;
+		int noo = this.points.size() * dim;
+
+		int row = 0;
+		for (FeaturePoint point : this.points) {
+			// Cholesky factor
+			UpperTriangPackMatrix G = new UpperTriangPackMatrix(point.getDispersionApriori(), true);
+			MathExtension.chol(G);
+			Vector sigmaUT = new DenseVector(SigmaUT[row], false);
+			Vector delta = new DenseVector(dim);
+			G.transMult(sigmaUT, delta);
+
+			// Reverse modification of last UT step
+			if (dim != 1) {
+				point.setX0( point.getX0() - delta.get(0));
+				point.setY0( point.getY0() - delta.get(1));
+			}
+			if (dim != 2) {
+				point.setZ0( point.getZ0() - delta.get(dim-1));
+			}
+
+			// derive new Sigma points, if estimationStep >= 0
+			sigmaUT.zero();
+			
+			if (dim != 1) {
+				if (estimationStep >= 0 && estimationStep < noo + 2) {
+					if (row == estimationStep - 1)
+						sigmaUT.set(0, (1.0 + row) / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight ));
+					else if (row > estimationStep - 2)
+						sigmaUT.set(0, -1.0 / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight ));
+				}
+				row++;
+				if (estimationStep >= 0 && estimationStep < noo + 2) {
+					if (row == estimationStep - 1)
+						sigmaUT.set(1, (1.0 + row) / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight ));
+					else if (row > estimationStep - 2)
+						sigmaUT.set(1, -1.0 / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight ));
+				}
+				row++;
+			}
+			if (dim != 2) {
+				if (estimationStep >= 0 && estimationStep < noo + 2) {
+					if (row == estimationStep - 1)
+						sigmaUT.set(dim-1, (1.0 + row) / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight ));
+					else if (row > estimationStep - 2)
+						sigmaUT.set(dim-1, -1.0 / Math.sqrt( ((1.0 + row) * (2.0 + row)) * weight ));
+				}
+				row++;
+			}
+			if (estimationStep >= 0) {
+				delta = new DenseVector(dim);
+				G.transMult(sigmaUT, delta);
+				// Modify points
+				if (dim != 1) {
+					point.setX0( point.getX0() + delta.get(0));
+					point.setY0( point.getY0() + delta.get(1));
+				}
+				if (dim != 2) {
+					point.setZ0( point.getZ0() + delta.get(dim-1));
+				}
+			}
+		}
+	}
+	
+	private void addUnscentedTransformationSolution(Vector xUT, Vector vUT, Matrix solutionVectors, int solutionNumber, double weight) {
+		for (UnknownParameter unknownParameter : this.parameters) {
+			if (this.interrupt)
+				return;
+
+			int col = unknownParameter.getColumn();
+			if (col < 0)
+				continue;
+	
+			double value = unknownParameter.getValue();
+			xUT.set(col, xUT.get(col) + weight * value);
+			solutionVectors.set(col, solutionNumber, value);
+		}
+
+		if (vUT != null) {
+			int row = 0;
+			for (FeaturePoint point : this.points) {
+				int dim = point.getDimension();
+				
+				if (dim != 1) {
+					double vx = point.getResidualX();
+					double vy = point.getResidualY();
+					
+					vUT.set(row, vUT.get(row++) + weight * vx);
+					vUT.set(row, vUT.get(row++) + weight * vy);
+				}
+				
+				if (dim != 2) {
+					double vz = point.getResidualZ();
+					
+					vUT.set(row, vUT.get(row++) + weight * vz);
+				}
+			}
+		}
+	}
+	
+	private void estimateUnscentedTransformationParameterUpdateAndDispersion(Vector xUT, Matrix solutionVectors, Vector vUT, double weightN, double weightC) {
+		int numberOfEstimationSteps = solutionVectors.numColumns();
+		
+		if (this.Qxx == null)
+			this.Qxx = new UpperSymmPackMatrix(xUT.size());
+		this.Qxx.zero();
+		
+		for (int r = 0; r < this.parameters.size(); r++) {
+			if (this.interrupt)
+				return;
+
+			UnknownParameter unknownParameterRow = this.parameters.get(r);
+			int row = unknownParameterRow.getColumn();
+			if (row < 0)
+				continue;
+
+			unknownParameterRow.setValue(xUT.get(row));
+
+			for (int c = r; c < this.parameters.size(); c++) {
+				if (this.interrupt)
+					return;
+
+				UnknownParameter unknownParameterCol = this.parameters.get(c);
+				int col = unknownParameterCol.getColumn();
+				if (col < 0)
+					continue;
+
+				// Laufindex des jeweiligen Spalten-/Zeilenvektors
+				for (int estimationStep = 0; estimationStep < numberOfEstimationSteps; estimationStep++) {
+					double weight = estimationStep == (numberOfEstimationSteps - 1) ? weightC : weightN;
+
+					double valueCol = solutionVectors.get(col, estimationStep) - xUT.get(col);
+					double valueRow = solutionVectors.get(row, estimationStep) - xUT.get(row);
+
+					this.Qxx.set(row, col, this.Qxx.get(row, col) + valueRow * weight * valueCol);
+				}
+			}
+		}
+
+		solutionVectors = null;
+		xUT = null;
+		
+		int row = 0;
+		for (FeaturePoint point : this.points) {
+			if (this.interrupt)
+				return;
+
+			int dim = point.getDimension();
+
+			if (dim != 1) {
+				double vx = vUT.get(row++);
+				double vy = vUT.get(row++);
+				
+				point.setResidualX(vx);
+				point.setResidualY(vy);
+			}
+			if (dim != 2) {
+				double vz = vUT.get(row++);
+				point.setResidualZ(vz);
+			}
+		}
+		
+		// add uncertainties
+		double varianceOfUnitWeight = this.varianceComponentOfUnitWeight.isApplyAposterioriVarianceOfUnitWeight() ? this.varianceComponentOfUnitWeight.getVariance() : this.varianceComponentOfUnitWeight.getVariance0();
+		varianceOfUnitWeight = varianceOfUnitWeight / this.varianceComponentOfUnitWeight.getVariance0();
+
+		// global test statistic
+		TestStatisticParameterSet globalTestStatistic = this.testStatisticParameters.getTestStatisticParameter(this.varianceComponentOfUnitWeight.getRedundancy(), Double.POSITIVE_INFINITY, Boolean.TRUE);
+		double quantil = Math.max(globalTestStatistic.getQuantile(), 1.0 + Math.sqrt(Constant.EPS));
+		boolean significant = this.varianceComponentOfUnitWeight.getVariance() / this.varianceComponentOfUnitWeight.getVariance0() > quantil; 
+		this.varianceComponentOfUnitWeight.setSignificant(significant);
+		for (UnknownParameter unknownParameter : this.parameters) {
+			int column = unknownParameter.getColumn();
+			unknownParameter.setUncertainty( column >= 0 ? Math.sqrt(Math.abs(varianceOfUnitWeight * this.Qxx.get(column, column))) : 0.0 );
+		}
+	}
 	
 	public VarianceComponent getVarianceComponentOfUnitWeight() {
 		return this.varianceComponentOfUnitWeight;
 	}
-	
-//	public void setCenterOfMass(Point centerOfMass) {
-//		this.centerOfMass = centerOfMass;
-//	}
 	
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
 		this.change.addPropertyChangeListener(listener);
@@ -1263,11 +1421,11 @@ public class FeatureAdjustment {
 		}
 	}
 	
-	public void setDampingValue(double lambda) {
+	public void setLevenbergMarquardtDampingValue(double lambda) {
 		this.dampingValue = Math.abs(lambda);
 	}
 	
-	public double getDampingValue() {
+	public double getLevenbergMarquardtDampingValue() {
 		return this.dampingValue;
 	}
 	
@@ -1303,9 +1461,6 @@ public class FeatureAdjustment {
 		this.listenerList.remove(l);
 	}
 	
-	/**
-	 * Bricht Iteration an der naechst moeglichen Stelle ab
-	 */
 	public void interrupt() {
 		this.interrupt = true;
 	}
@@ -1314,9 +1469,77 @@ public class FeatureAdjustment {
 		return this.estimationType;
 	}
 	
-	public void setEstimationType(EstimationType estimationType) {
-		this.estimationType = estimationType;
+	public void setEstimationType(EstimationType estimationType) throws IllegalArgumentException {
+		if (estimationType == EstimationType.L2NORM || estimationType == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION)
+			this.estimationType = estimationType;
+		else
+			throw new IllegalArgumentException("Error, unsupported estimation type " + estimationType + "!");
 	}
+	
+	/**
+	 * Liefert den Skalierungsparameter alpha der UT,
+	 * der den Abstand der Sigma-Punkte um den Mittelwert
+	 * steuert. Ueblicherweise ist alpha gering, d.h., 1E-3
+	 * Der Defaultwert ist 1, sodass keine Skalierung
+	 * vorgenommen wird und die Standard-UT resultiert
+	 * @return alphaUT
+	 */
+	public double getUnscentedTransformationScaling() {
+		return this.alphaUT;
+	}
+	
+	/**
+	 * Liefert den Daempfungsparameter beta der UT,
+	 * der a-priori Informatione bzgl. der Verteilung
+	 * der Daten beruecksichtigt. Fuer Gauss-Verteilung
+	 * ist beta = 2 optimal
+	 * @return betaUT
+	 */
+	public double getUnscentedTransformationDamping() {
+		return this.betaUT;
+	}
+	
+	/**
+	 * Liefert die Gewichtung des Sigma-Punktes X0 bzw. Y0 = f(X0)
+	 * @return w0
+	 */
+	public double getUnscentedTransformationWeightZero() {
+		return this.weightZero;
+	}
+	
+	/**
+	 * setzt den Skalierungsparameter alpha der UT,
+	 * der den Abstand der Sigma-Punkte um den Mittelwert
+	 * steuert. Ueblicherweise ist alpha gering, d.h., 1E-3
+	 * Der Defaultwert ist 1, sodass keine Skalierung
+	 * vorgenommen wird und die Standard-UT resultiert
+	 * @param alpha
+	 */
+	public void setUnscentedTransformationScaling(double alpha) {
+		if (alpha > 0)
+			this.alphaUT = alpha;
+	}
+	
+	/**
+	 * Liefert den Daempfungsparameter beta der UT,
+	 * der a-priori Informatione bzgl. der Verteilung
+	 * der Daten beruecksichtigt. Fuer Gauss-Verteilung
+	 * ist beta = 2 optimal
+	 * @param beta
+	 */
+	public void setUnscentedTransformationDamping(double beta) {
+		this.betaUT = beta;
+	}
+	
+	/**
+	 * Setzt die Gewichtung des Sigma-Punktes X0 bzw. Y0 = f(X0)
+	 * @param w0
+	 */
+	public void setUnscentedTransformationWeightZero(double w0) {
+		if (w0 < 1) 
+			this.weightZero = w0;
+	}
+	
 
 //	public static void main(String[] args) throws Exception {
 //		FeatureAdjustment adjustment = new FeatureAdjustment();
