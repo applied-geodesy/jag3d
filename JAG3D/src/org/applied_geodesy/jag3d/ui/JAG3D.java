@@ -247,6 +247,7 @@ public class JAG3D extends Application {
 				}
 				if (parameterMap.containsKey("ut") && parameterMap.getOrDefault("ut", "FALSE").equalsIgnoreCase("TRUE")) {
 					LeastSquaresSettingDialog.setEnableUnscentedTransformation(true);
+					org.applied_geodesy.juniform.ui.dialog.LeastSquaresSettingDialog.setEnableUnscentedTransformation(true);
 				}
 			}
 			catch(Exception e) {
