@@ -232,10 +232,12 @@ public class NetworkAdjustmentDialog {
 				if (oldValue != null && newValue != null && oldValue instanceof Double && newValue instanceof Double) {
 					double current = (Double)newValue;
 					double minimal = (Double)oldValue;
-					double frac = 0.75 * Math.min(minimal / current, 1.0);
-					this.processState = Math.max(this.processState, frac);
+					if (this.updateProgressOnIterate) {
+						double frac = 0.75 * Math.min(minimal / current, 1.0);
+						this.processState = Math.max(this.processState, frac);
+						this.updateProgress(this.processState, 1.0);
+					}
 					this.updateConvergenceProgressMessage(String.format(Locale.ENGLISH, this.convergenceTextTemplate, current, minimal));
-					this.updateProgress(this.processState, 1.0);
 				}
 				break;
 
