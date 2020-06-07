@@ -44,6 +44,7 @@ import org.applied_geodesy.juniform.ui.dialog.ReadFileProgressDialog;
 import org.applied_geodesy.juniform.ui.dialog.RestrictionDialog;
 import org.applied_geodesy.juniform.ui.dialog.RestrictionTypeDialog;
 import org.applied_geodesy.juniform.ui.dialog.TestStatisticDialog;
+import org.applied_geodesy.juniform.ui.dialog.TrigonometricRestrictionDialog;
 import org.applied_geodesy.juniform.ui.dialog.UnknownParameterDialog;
 import org.applied_geodesy.juniform.ui.dialog.UnknownParameterTypeDialog;
 import org.applied_geodesy.juniform.ui.dialog.VectorAngleRestrictionDialog;
@@ -133,6 +134,7 @@ public class JUniForm extends Application {
 		AboutDialog.setOwner(primaryStage);
 		FeaturePointRestrictionDialog.setOwner(primaryStage);
 		VectorAngleRestrictionDialog.setOwner(primaryStage);
+		TrigonometricRestrictionDialog.setOwner(primaryStage);
 	}
 
 	@Override

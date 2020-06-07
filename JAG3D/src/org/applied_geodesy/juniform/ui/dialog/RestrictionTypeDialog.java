@@ -152,12 +152,16 @@ public class RestrictionTypeDialog {
 
 		case PRODUCT_SUM:
 			return i18N.getString("RestrictionTypeDialog.restriction.type.productsum", "k-th Power of product sum");
+
+		case TRIGONOMERTIC_FUNCTION:
+			return i18N.getString("RestrictionTypeDialog.restriction.type.trigonometry", "Trigonometric function");
 			
 		case FEATURE_POINT:
 			return i18N.getString("RestrictionTypeDialog.restriction.type.featurepoint", "Feature point");
 			
 		case VECTOR_ANGLE:
 			return i18N.getString("RestrictionTypeDialog.restriction.type.vectorangle", "Vector angle");
+		
 		}
 		throw new IllegalArgumentException("Error, unknown restriction type " + restrictionType + "!");
 	}

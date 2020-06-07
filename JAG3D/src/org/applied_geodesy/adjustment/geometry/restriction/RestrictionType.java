@@ -24,6 +24,7 @@ package org.applied_geodesy.adjustment.geometry.restriction;
 public enum RestrictionType {
 	AVERAGE,
 	PRODUCT_SUM,
+	TRIGONOMERTIC_FUNCTION,
 	FEATURE_POINT,
 	VECTOR_ANGLE,
 	;

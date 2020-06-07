@@ -41,18 +41,6 @@ public abstract class Restriction {
 		this.indispensable = new ReadOnlyObjectWrapper<Boolean>(this, "indispensable", indispensable);
 	}
 	
-	/**
-	 * @deprecated
-	 * @param restrictionType
-	 * @param indispensable
-	 * @param regressand
-	 */
-	Restriction(RestrictionType restrictionType, boolean indispensable, UnknownParameter regressand) {
-		this.setRestrictionType(restrictionType);
-		this.setRegressand(regressand);
-		this.indispensable = new ReadOnlyObjectWrapper<Boolean>(this, "indispensable", indispensable);
-	}
-	
 	public ReadOnlyObjectProperty<Boolean> indispensableProperty() {
 		return this.indispensable;
 	}

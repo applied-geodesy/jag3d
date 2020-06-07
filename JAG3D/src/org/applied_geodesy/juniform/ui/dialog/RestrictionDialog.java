@@ -33,6 +33,7 @@ import org.applied_geodesy.adjustment.geometry.restriction.FeaturePointRestricti
 import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction;
 import org.applied_geodesy.adjustment.geometry.restriction.Restriction;
 import org.applied_geodesy.adjustment.geometry.restriction.RestrictionType;
+import org.applied_geodesy.adjustment.geometry.restriction.TrigonometricRestriction;
 import org.applied_geodesy.adjustment.geometry.restriction.VectorAngleRestriction;
 import org.applied_geodesy.ui.tex.LaTexLabel;
 import org.applied_geodesy.juniform.ui.i18n.I18N;
@@ -122,7 +123,6 @@ public class RestrictionDialog {
 	private Button addRestrictionButton, editRestrictionButton, removeRestrictionButton;
 	private Restriction restriction;
 	private Window window;
-	//private ObservableList<Restriction> equations;
 	private Feature feature;
 	private boolean enablePostProcessing = false;
 	private FilteredList<UnknownParameter> filteredUnknownParameters = null;
@@ -413,6 +413,10 @@ public class RestrictionDialog {
 		case VECTOR_ANGLE:
 			VectorAngleRestrictionDialog.showAndWait(this.filteredUnknownParameters, (VectorAngleRestriction)restriction);
 			break;
+			
+		case TRIGONOMERTIC_FUNCTION:
+			TrigonometricRestrictionDialog.showAndWait(this.filteredUnknownParameters, (TrigonometricRestriction)restriction);
+			break;
 		}
 	}
 	
@@ -420,7 +424,6 @@ public class RestrictionDialog {
 		if (restriction.isIndispensable())
 			return;
 
-		//this.equations.remove(restriction);
 		this.restrictionList.getItems().remove(restriction);
 		this.removeRestrictionButton.setDisable(this.restrictionList.getItems().size() == 0);
 	}
@@ -429,12 +432,18 @@ public class RestrictionDialog {
 		switch(restrictionType) {
 		case AVERAGE:
 			return new AverageRestriction();
+			
 		case PRODUCT_SUM:
 			return new ProductSumRestriction();
+			
 		case FEATURE_POINT:
 			return new FeaturePointRestriction();
+			
 		case VECTOR_ANGLE:
 			return new VectorAngleRestriction();
+			
+		case TRIGONOMERTIC_FUNCTION:
+			return new TrigonometricRestriction();
 		}
 		return null;
 	}
@@ -462,7 +471,6 @@ public class RestrictionDialog {
 	
 	private void setEquations(ObservableList<Restriction> equations) {
 		if (equations != null) {
-			//this.equations = equations;
 			this.editRestrictionButton.setDisable(equations.size() == 0);
 			this.removeRestrictionButton.setDisable(equations.size() == 0);
 			this.restrictionList.setItems(equations);
