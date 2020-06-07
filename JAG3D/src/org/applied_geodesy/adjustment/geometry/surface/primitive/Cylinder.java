@@ -468,4 +468,11 @@ public class Cylinder extends Surface {
 	public PrimitiveType getPrimitiveType() {
 		return PrimitiveType.CYLINDER;
 	}
+
+	@Override
+	public String toLaTex() {
+		return "$\\sum_{j=1}^2 s_j = 2 a"
+				+ " \\\\ "
+				+ "s_j = \\vert \\mathbf{n} \\times \\left( \\mathbf{P}_i - \\mathbf{F}_j \\right) \\vert$";
+	}
 }

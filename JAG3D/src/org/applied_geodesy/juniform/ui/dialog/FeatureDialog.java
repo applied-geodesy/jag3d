@@ -31,6 +31,7 @@ import org.applied_geodesy.adjustment.geometry.PrimitiveType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.restriction.Restriction;
 import org.applied_geodesy.juniform.ui.tree.UITreeBuilder;
+import org.applied_geodesy.ui.tex.LaTexLabel;
 import org.applied_geodesy.juniform.ui.i18n.I18N;
 
 import javafx.application.Platform;
@@ -39,6 +40,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -91,6 +93,7 @@ public class FeatureDialog {
 	private ListView<GeometricPrimitive> geometricPrimitiveList;
 	private Label primitiveTypeLabel;
 	private Button addPrimitiveButton, removePrimitiveButton;
+	private LaTexLabel latexLabel;
 	private Window window;
 	private Feature feature;
 	private GeometricPrimitive geometricPrimitive;
@@ -144,6 +147,7 @@ public class FeatureDialog {
 		
 		this.geometricPrimitive = geometricPrimitive;
 		if (this.geometricPrimitive == null) {
+			this.latexLabel.setTex("");
 			this.nameTextField.setDisable(true);
 			this.primitiveTypeLabel.setText(null);
 			
@@ -152,6 +156,8 @@ public class FeatureDialog {
 		else {
 			this.nameTextField.setDisable(false);
 			this.removePrimitiveButton.setDisable(false);
+			
+			this.latexLabel.setTex(geometricPrimitive.toLaTex());
 			
 			if (this.feature.isImmutable()) {
 				this.removePrimitiveButton.setDisable(true);
@@ -216,6 +222,7 @@ public class FeatureDialog {
 		
 		Label nameLabel = new Label(i18N.getString("FeatureDialog.primitive.name.label", "Name:"));
 		Label typeLabel = new Label(i18N.getString("FeatureDialog.primitive.type.label", "Type:"));
+		Label equationLabel = new Label(i18N.getString("FeatureDialog.equation.label",   "Equation:"));
 		
 		this.nameTextField = DialogUtil.createTextField(i18N.getString("FeatureDialog.primitive.name.tooltip", "Name of geometric primitive"), 
 				i18N.getString("FeatureDialog.primitive.name.prompt", "Geometric primitive name"));
@@ -226,6 +233,10 @@ public class FeatureDialog {
 				UITreeBuilder.getInstance().getTree().refresh();
 			}
 		});
+		
+		this.latexLabel = new LaTexLabel();
+		this.latexLabel.setMinSize(225, Control.USE_PREF_SIZE);
+		this.latexLabel.setMaxSize(Double.MAX_VALUE, Control.USE_PREF_SIZE);
 		
 		this.primitiveTypeLabel = new Label();
 		this.geometricPrimitiveList = DialogUtil.createGeometricPrimitiveListView(createGeometricPrimitiveCellFactory());
@@ -255,19 +266,24 @@ public class FeatureDialog {
 		
 		nameLabel.setLabelFor(this.nameTextField);
 		typeLabel.setLabelFor(this.primitiveTypeLabel);
+		equationLabel.setLabelFor(this.latexLabel);
 		
 		nameLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		typeLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		equationLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
 		nameLabel.setMaxWidth(Double.MAX_VALUE);
 		typeLabel.setMaxWidth(Double.MAX_VALUE);
+		equationLabel.setMaxWidth(Double.MAX_VALUE);
 		
 		GridPane.setHgrow(nameLabel, Priority.NEVER);
 		GridPane.setHgrow(typeLabel, Priority.NEVER);
 		GridPane.setHgrow(buttonBox, Priority.NEVER);
+		GridPane.setHgrow(equationLabel, Priority.NEVER);
 		
 		GridPane.setHgrow(this.nameTextField,          Priority.ALWAYS);
 		GridPane.setHgrow(this.primitiveTypeLabel,     Priority.ALWAYS);
+		GridPane.setHgrow(this.latexLabel,             Priority.ALWAYS);
 		GridPane.setHgrow(this.geometricPrimitiveList, Priority.NEVER);
 		
 		GridPane.setVgrow(this.geometricPrimitiveList, Priority.ALWAYS);
@@ -276,20 +292,22 @@ public class FeatureDialog {
 		GridPane.setHgrow(spacer, Priority.ALWAYS);
 		GridPane.setVgrow(spacer, Priority.ALWAYS);
 		
-		
 		// https://stackoverflow.com/questions/50479384/gridpane-with-gaps-inside-scrollpane-rendering-wrong
 		Insets insetsLeft   = new Insets(5, 7, 5, 5);
 		Insets insetsRight  = new Insets(5, 0, 5, 7);
 
 		GridPane.setMargin(this.geometricPrimitiveList, new Insets(5,10,5,0));
 
-		GridPane.setMargin(nameLabel, insetsLeft);
-		GridPane.setMargin(typeLabel, insetsLeft);
-		GridPane.setMargin(buttonBox, insetsLeft);
+		GridPane.setMargin(nameLabel,     insetsLeft);
+		GridPane.setMargin(typeLabel,     insetsLeft);
+		GridPane.setMargin(equationLabel, insetsLeft);
+		GridPane.setMargin(buttonBox,     insetsLeft);
 
 		GridPane.setMargin(this.nameTextField,      insetsRight);
 		GridPane.setMargin(this.primitiveTypeLabel, insetsRight);
+		GridPane.setMargin(this.latexLabel,         insetsRight);
 
+		GridPane.setValignment(equationLabel, VPos.TOP);
 		
 		int row = 0;
 		
@@ -298,6 +316,9 @@ public class FeatureDialog {
 				
 		gridPane.add(typeLabel,               1, row);
 		gridPane.add(this.primitiveTypeLabel, 2, row++);
+		
+		gridPane.add(equationLabel,           1, row);
+		gridPane.add(this.latexLabel,         2, row++);
 		
 		gridPane.add(spacer,    1, row++, 2, 1);
 		gridPane.add(buttonBox, 1, row++);

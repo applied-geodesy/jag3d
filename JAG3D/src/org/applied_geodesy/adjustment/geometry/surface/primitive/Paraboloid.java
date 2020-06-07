@@ -323,4 +323,13 @@ public class Paraboloid extends Surface {
 	public PrimitiveType getPrimitiveType() {
 		return PrimitiveType.PARABOLOID;
 	}
+
+	@Override
+	public String toLaTex() {
+		return "$a^2 u_i^2 + c^2 v_i^2 = w_i"
+				+ " \\\\ "
+				+ "\\left(\\begin{array}{c} u_i \\\\ v_i \\\\ w_i \\end{array}\\right) = \\mathbf{R} \\left(\\begin{array}{c} x_i-x_0 \\\\ y_i-y_0 \\\\ z_i-z_0 \\end{array}\\right);"
+				+ " \\\\ "
+				+ "\\mathbf{R} = \\left(\\begin{array}{ccc} r_{11} & r_{12} & r_{13} \\\\ r_{21} & r_{22} & r_{23} \\\\ r_{31} & r_{32} & r_{33} \\end{array}\\right)$";
+	}
 }

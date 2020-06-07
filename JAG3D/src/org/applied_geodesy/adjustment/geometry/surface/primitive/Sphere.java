@@ -163,4 +163,9 @@ public class Sphere extends Surface {
 	public PrimitiveType getPrimitiveType() {
 		return PrimitiveType.SPHERE;
 	}
+	
+	@Override
+	public String toLaTex() {
+		return "$\\vert \\mathbf{P}_i - \\mathbf{P}_0 \\vert = r$";
+	}
 }

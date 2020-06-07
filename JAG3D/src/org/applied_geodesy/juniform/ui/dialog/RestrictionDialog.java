@@ -46,6 +46,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -323,6 +324,8 @@ public class RestrictionDialog {
 		
 		GridPane.setHgrow(spacer, Priority.ALWAYS);
 		GridPane.setVgrow(spacer, Priority.ALWAYS);
+		
+		GridPane.setValignment(equationLabel, VPos.TOP);
 		
 		int row = 0;
 		
