@@ -271,4 +271,13 @@ public class QuadraticCurve extends Curve {
 	public PrimitiveType getPrimitiveType() {
 		return PrimitiveType.QUADRATIC_CURVE;
 	}
+
+	@Override
+	public String toLaTex() {
+		return "$\\mathbf{P}^\\mathrm{T}_i \\mathbf{U} \\mathbf{P}_i + \\mathbf{P}^\\mathrm{T}_i \\mathbf{u} + u_0 = 0"
+				+ " \\\\ "
+				+ "\\mathbf{U} = \\left( \\begin{array}{cc} a & \\frac{c}{\\sqrt{2}} \\\\ \\frac{c}{\\sqrt{2}} & b \\end{array} \\right);"
+				+ " \\\\ "
+				+ "\\mathbf{u} = \\left( \\begin{array}{c} d \\\\ e \\end{array} \\right)$";
+	}
 }

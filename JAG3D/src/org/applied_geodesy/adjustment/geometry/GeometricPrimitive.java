@@ -143,6 +143,8 @@ public abstract class GeometricPrimitive implements Iterable<FeaturePoint>, Geom
 		this.nameProperty().set(name);
 	}
 	
+	public abstract String toLaTex();
+	
 	@Override
 	public String toString() {
 		return this.getName();

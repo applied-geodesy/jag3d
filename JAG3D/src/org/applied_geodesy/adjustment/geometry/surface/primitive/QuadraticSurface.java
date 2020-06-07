@@ -339,4 +339,13 @@ public class QuadraticSurface extends Surface {
 	public PrimitiveType getPrimitiveType() {
 		return PrimitiveType.QUADRATIC_SURFACE;
 	}
+	
+	@Override
+	public String toLaTex() {
+		return "$\\mathbf{P}^\\mathrm{T}_i \\mathbf{U} \\mathbf{P}_i + \\mathbf{P}^\\mathrm{T}_i \\mathbf{u} + u_0 = 0"
+				+ " \\\\ "
+				+ "\\mathbf{U} = \\left( \\begin{array}{ccc} a & \\frac{d}{\\sqrt{2}} & \\frac{e}{\\sqrt{2}} \\\\ \\frac{d}{\\sqrt{2}} & b & \\frac{f}{\\sqrt{2}} \\\\  \\frac{e}{\\sqrt{2}} & \\frac{f}{\\sqrt{2}} & c \\end{array} \\right);"
+				+ " \\\\ "
+				+ "\\mathbf{u} = \\left( \\begin{array}{cc} g \\\\ h \\\\ i \\end{array} \\right)$";
+	}
 }

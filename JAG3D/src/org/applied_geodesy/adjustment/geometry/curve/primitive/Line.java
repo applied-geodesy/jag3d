@@ -194,4 +194,9 @@ public class Line extends Curve {
 	public PrimitiveType getPrimitiveType() {
 		return PrimitiveType.LINE;
 	}
+
+	@Override
+	public String toLaTex() {
+		return "$\\mathbf{n^\\mathrm{T}} \\mathbf{P}_i = d$";
+	}
 }

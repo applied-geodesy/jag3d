@@ -202,4 +202,9 @@ public class Plane extends Surface {
 	public PrimitiveType getPrimitiveType() {
 		return PrimitiveType.PLANE;
 	}
+	
+	@Override
+	public String toLaTex() {
+		return "$\\mathbf{n^\\mathrm{T}} \\mathbf{P}_i = d$";
+	}
 }

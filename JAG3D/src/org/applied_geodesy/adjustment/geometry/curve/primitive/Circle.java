@@ -151,4 +151,9 @@ public class Circle extends Curve {
 	public PrimitiveType getPrimitiveType() {
 		return PrimitiveType.CIRCLE;
 	}
+
+	@Override
+	public String toLaTex() {
+		return "$\\vert \\mathbf{P}_i - \\mathbf{P}_0 \\vert = r$";
+	}
 }
