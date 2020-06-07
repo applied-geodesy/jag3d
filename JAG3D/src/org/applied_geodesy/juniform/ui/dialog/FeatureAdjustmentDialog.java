@@ -129,7 +129,9 @@ public class FeatureAdjustmentDialog {
 				this.updateIterationProgressMessage(i18n.getString("FeatureAdjustmentDialog.pleasewait.label", "Please wait\u2026"));
 				this.updateConvergenceProgressMessage(null);
 				UIPointTableBuilder.getInstance().getTable().refresh();
+				UIPointTableBuilder.getInstance().getTable().sort();
 				UIParameterTableBuilder.getInstance().getTable().refresh();
+				UIParameterTableBuilder.getInstance().getTable().sort();
 				return returnType;
 			}
 			finally {
@@ -511,7 +513,9 @@ public class FeatureAdjustmentDialog {
 				}
 				UITreeBuilder.getInstance().getTree().getSelectionModel().select(0);
 				UIPointTableBuilder.getInstance().getTable().refresh();
+				UIPointTableBuilder.getInstance().getTable().sort();
 				UIParameterTableBuilder.getInstance().getTable().refresh();
+				UIParameterTableBuilder.getInstance().getTable().sort();
 			}
 		});
 
