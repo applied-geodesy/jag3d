@@ -106,9 +106,9 @@ public class UIMenuBuilder implements FeatureChangeListener {
 		this.menuBar = new MenuBar();
 		Menu fileMenu       = createMenu(i18n.getString("UIMenuBuilder.menu.file.label", "_File"),  true);
 		Menu curveMenu      = createMenu(i18n.getString("UIMenuBuilder.menu.feature.curve.label", "_Curves"),  true);
-		Menu surfaceMenu    = createMenu(i18n.getString("UIMenuBuilder.menu.feature.surface.label", "S_urfaces"),  true);
+		Menu surfaceMenu    = createMenu(i18n.getString("UIMenuBuilder.menu.feature.surface.label", "_Surfaces"),  true);
 		Menu propertiesMenu = createMenu(i18n.getString("UIMenuBuilder.menu.properties.label", "Propert_ies"), true);
-		Menu adjustmentMenu = createMenu(i18n.getString("UIMenuBuilder.menu.adjustment.label", "Adjustment"), true);
+		Menu adjustmentMenu = createMenu(i18n.getString("UIMenuBuilder.menu.adjustment.label", "Ad_justment"), true);
 		this.reportMenu     = createMenu(i18n.getString("UIMenuBuilder.menu.report.label", "Repor_t"), true);
 		Menu helpMenu       = createMenu(i18n.getString("UIMenuBuilder.menu.help.label", "_?"), true);
 		
@@ -132,7 +132,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 	}
 	
 	private void createFileMenu(Menu parentMenu) {
-		MenuItem importCurvePointsItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.file.import.points.curve.label", "Impo_rt curve points"), true, MenuItemType.IMPORT_CURVE_POINTS, new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
+		MenuItem importCurvePointsItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.file.import.points.curve.label", "Import c_urve points"), true, MenuItemType.IMPORT_CURVE_POINTS, new KeyCodeCombination(KeyCode.U, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 		MenuItem importSurfacePointsItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.file.import.points.surface.label", "Imp_ort surface points"), true, MenuItemType.IMPORT_SURFACE_POINTS, new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 		MenuItem exitItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.file.exit.label", "_Exit"), true, MenuItemType.EXIT, new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 
@@ -150,9 +150,9 @@ public class UIMenuBuilder implements FeatureChangeListener {
 	}
 	
 	private void createAdjustmentMenu(Menu parentMenu) {
-		MenuItem leastSquaresItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.leastsquares.label", "Least-squares"), true, MenuItemType.LEAST_SQUARES, new KeyCodeCombination(KeyCode.Q, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-		MenuItem teststatisticItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.teststatistic.label", "Test statistic"), true, MenuItemType.TEST_STATISTIC, new KeyCodeCombination(KeyCode.T, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-		MenuItem preferencesItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.preferences.label", "Preferences"), true, MenuItemType.PREFERENCES, new KeyCodeCombination(KeyCode.ENTER, KeyCombination.ALT_DOWN), this.menuEventHandler, false);
+		MenuItem leastSquaresItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.leastsquares.label", "_Least-squares"), true, MenuItemType.LEAST_SQUARES, new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem teststatisticItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.teststatistic.label", "_Test statistic"), true, MenuItemType.TEST_STATISTIC, new KeyCodeCombination(KeyCode.T, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem preferencesItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.preferences.label", "Preferen_ces"), true, MenuItemType.PREFERENCES, new KeyCodeCombination(KeyCode.ENTER, KeyCombination.ALT_DOWN), this.menuEventHandler, false);
 		parentMenu.getItems().addAll(
 				leastSquaresItem,
 				teststatisticItem,
@@ -164,9 +164,9 @@ public class UIMenuBuilder implements FeatureChangeListener {
 	private void createPropertiesMenu(Menu parentMenu) {
 
 		MenuItem featurePropertiesItem        = createMenuItem(i18n.getString("UIMenuBuilder.menu.setting.feature.label", "_Feature"), true, MenuItemType.FEATURE_PROPERTIES, new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-		MenuItem paramameterPropertiesItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.setting.parameter.label", "_Parameter"), true, MenuItemType.PARAMETER_PROPERTIES, new KeyCodeCombination(KeyCode.P, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem paramameterPropertiesItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.setting.parameter.label", "P_arameter"), true, MenuItemType.PARAMETER_PROPERTIES, new KeyCodeCombination(KeyCode.P, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 		MenuItem restrictionPropertiesItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.setting.restriction.label", "_Restriction"), true, MenuItemType.RESTRICTION_PROPERTIES, new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-		MenuItem postprocessingPropertiesItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.setting.postprocessing.label", "_Post processing"), true, MenuItemType.POSTPROCESSING_PROPERTIES, new KeyCodeCombination(KeyCode.T, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem postprocessingPropertiesItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.setting.postprocessing.label", "_Post processing"), true, MenuItemType.POSTPROCESSING_PROPERTIES, new KeyCodeCombination(KeyCode.G, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 			
 		parentMenu.getItems().addAll(
 				featurePropertiesItem,
@@ -275,7 +275,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 	}
 	
 	private void createHelpMenu(Menu parentMenu) {
-		MenuItem aboutItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.help.about.label", "_About JAG3D"), true, MenuItemType.ABOUT, new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
+		MenuItem aboutItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.help.about.label", "A_bout JAG3D"), true, MenuItemType.ABOUT, new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 		parentMenu.getItems().addAll(
 				aboutItem
 		);
