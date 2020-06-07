@@ -152,7 +152,7 @@ public class FeaturePointRestrictionDialog {
 			}
 		});
 	}
-	 //TODO i18n
+
 	private Node createPane() {
 		GridPane gridPane = DialogUtil.createGridPane();
 		
