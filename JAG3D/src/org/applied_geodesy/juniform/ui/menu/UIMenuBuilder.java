@@ -151,7 +151,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 	
 	private void createAdjustmentMenu(Menu parentMenu) {
 		MenuItem leastSquaresItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.leastsquares.label", "_Least-squares"), true, MenuItemType.LEAST_SQUARES, new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-		MenuItem teststatisticItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.teststatistic.label", "_Test statistic"), true, MenuItemType.TEST_STATISTIC, new KeyCodeCombination(KeyCode.T, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem teststatisticItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.teststatistic.label", "Test st_atistic"), true, MenuItemType.TEST_STATISTIC, new KeyCodeCombination(KeyCode.T, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 		MenuItem preferencesItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.preferences.label", "Preferen_ces"), true, MenuItemType.PREFERENCES, new KeyCodeCombination(KeyCode.ENTER, KeyCombination.ALT_DOWN), this.menuEventHandler, false);
 		parentMenu.getItems().addAll(
 				leastSquaresItem,
