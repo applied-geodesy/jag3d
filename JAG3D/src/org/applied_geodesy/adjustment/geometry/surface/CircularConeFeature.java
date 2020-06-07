@@ -31,6 +31,9 @@ import org.applied_geodesy.adjustment.geometry.parameter.ProcessingType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
 import org.applied_geodesy.adjustment.geometry.restriction.AverageRestriction;
+import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction;
+import org.applied_geodesy.adjustment.geometry.restriction.TrigonometricRestriction;
+import org.applied_geodesy.adjustment.geometry.restriction.TrigonometricRestriction.TrigonometricFunctionType;
 import org.applied_geodesy.adjustment.geometry.surface.primitive.Cone;
 import org.applied_geodesy.adjustment.geometry.surface.primitive.Plane;
 import org.applied_geodesy.adjustment.geometry.surface.primitive.Sphere;
@@ -59,15 +62,22 @@ public class CircularConeFeature extends SurfaceFeature {
 		C.setVisible(false);
 		R21.setProcessingType(ProcessingType.FIXED);
 
-		UnknownParameter B = new UnknownParameter(ParameterType.MIDDLE_AXIS_COEFFICIENT, true, 0.0, true, ProcessingType.POSTPROCESSING);
-		AverageRestriction AequalsBRestriction = new AverageRestriction(true, List.of(A), C);
-		AverageRestriction radiusRestriction   = new AverageRestriction(true, List.of(A, C), B);
+		UnknownParameter invB    = new UnknownParameter(ParameterType.MIDDLE_AXIS_COEFFICIENT, false, 0.0, false, ProcessingType.POSTPROCESSING);
+		UnknownParameter oneHalf = new UnknownParameter(ParameterType.CONSTANT,                false, 0.5, false, ProcessingType.FIXED);
+		UnknownParameter phi     = new UnknownParameter(ParameterType.ANGLE,                   false, 0.0, true,  ProcessingType.POSTPROCESSING);
+
+		AverageRestriction AequalsCRestriction            = new AverageRestriction(true, List.of(A), C);
+		ProductSumRestriction invertedBRestriction        = new ProductSumRestriction(false, List.of(A, C), List.of(oneHalf, oneHalf), -1.0, Boolean.TRUE, invB);
+		TrigonometricRestriction trigonometricRestriction = new TrigonometricRestriction(false, TrigonometricFunctionType.TANGENT, Boolean.TRUE, invB, phi);
 		
 		this.add(this.cone);
 		
-		this.getUnknownParameters().add(B);
-		this.getRestrictions().add(AequalsBRestriction);
-		this.getPostProcessingCalculations().add(radiusRestriction);
+		this.getUnknownParameters().addAll(phi, invB, oneHalf);
+		this.getRestrictions().add(AequalsCRestriction);
+		this.getPostProcessingCalculations().addAll(
+				invertedBRestriction,
+				trigonometricRestriction
+		);
 	}
 	
 	public Cone getCone() {
