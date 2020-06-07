@@ -426,4 +426,32 @@ public final class MathExtension {
 		else if (info.val < 0)
 			throw new IllegalArgumentException("Error, invalid or wrong argument for function call dpptrf() " + info.val + "!");
 	}
+	
+	/**
+	 * Bestimmt den Kotangens
+	 * @param x
+	 * @return cot(x)
+	 */
+	public static double cot(double x) {
+		return 1.0 / Math.tan(x);
+	}
+
+	/**
+	 * Bestimmt den Arkuskotangens
+	 * @param x
+	 * @return acot(x)
+	 */
+	public static double acot(double x) {
+		return Math.atan(1.0 / x);
+	}
+
+	/**
+	 * Bestimmt den Arkuskotangens mit Quadrantenabfrage, d.h., atan2(y, x) == acot2(x, y)
+	 * @param x
+	 * @param y
+	 * @return acot2(x, y)
+	 */
+	public static double acot2(double x, double y) {
+		return Math.atan2(y, x);
+	}
 }

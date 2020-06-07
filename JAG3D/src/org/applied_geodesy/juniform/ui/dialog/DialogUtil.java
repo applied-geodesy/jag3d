@@ -33,6 +33,7 @@ import org.applied_geodesy.adjustment.geometry.parameter.ProcessingType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
 import org.applied_geodesy.adjustment.geometry.restriction.RestrictionType;
+import org.applied_geodesy.adjustment.geometry.restriction.TrigonometricRestriction.TrigonometricFunctionType;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.ui.textfield.DoubleTextField;
 import org.applied_geodesy.ui.textfield.DoubleTextField.ValueSupport;
@@ -126,6 +127,17 @@ class DialogUtil {
 		comboBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		comboBox.setMaxSize(Double.MAX_VALUE, Control.USE_PREF_SIZE); // width, height
 		return comboBox;
+	}
+	
+	static ComboBox<TrigonometricFunctionType> createTrigonometricFunctionTypeComboBox(StringConverter<TrigonometricFunctionType> trigonometricFunctionTypeStringConverter, String tooltip) {
+		ComboBox<TrigonometricFunctionType> typeComboBox = new ComboBox<TrigonometricFunctionType>();
+		typeComboBox.getItems().setAll(TrigonometricFunctionType.values());
+		typeComboBox.setConverter(trigonometricFunctionTypeStringConverter);
+		typeComboBox.setTooltip(new Tooltip(tooltip));
+		typeComboBox.getSelectionModel().select(TrigonometricFunctionType.TANGENT);
+		typeComboBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		typeComboBox.setMaxSize(Double.MAX_VALUE, Control.USE_PREF_SIZE); // width, height
+		return typeComboBox;
 	}
 	
 	static GridPane createGridPane() {

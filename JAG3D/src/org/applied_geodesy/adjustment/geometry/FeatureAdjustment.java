@@ -564,7 +564,7 @@ public class FeatureAdjustment {
 				restriction.setRow(column);
 				Matrix JrT = new DenseMatrix(rows, columns);
 				for (int i = 0; i < rows; i++) {
-					// skip column auf parameter to avoid doubling, because 
+					// skip column of parameter to avoid doubling, because 
 					// transposedJacobianElements() _adds_ elements (instead of sets)
 					if (i != column) 
 						JrT.set(i, i, 1.0);
