@@ -177,7 +177,7 @@ public class AverageRestrictionDialog {
 		Label equationLabel    = new Label(i18N.getString("AverageRestrictionDialog.equation.label",    "Equation:"));
 		Label descriptionLabel = new Label(i18N.getString("AverageRestrictionDialog.description.label", "Description:"));
 		Label regressandLabel  = new Label(i18N.getString("AverageRestrictionDialog.regressand.label",  "Regressand c:"));
-		Label regressorLabel   = new Label(i18N.getString("AverageRestrictionDialog.regressor.a.label", "Regressor a:"));
+		Label regressorLabel   = new Label(i18N.getString("AverageRestrictionDialog.regressor.label", "Regressor a:"));
 
 		regressorLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		regressorLabel.setMaxWidth(Double.MAX_VALUE);
@@ -202,12 +202,12 @@ public class AverageRestrictionDialog {
 		
 		RegressorEventHandler regressorEventHandler = new RegressorEventHandler();
 		this.addParameterButtom = DialogUtil.createButton(
-				i18N.getString("AverageRestrictionDialog.regressor.a.add.label", "+"),
-				i18N.getString("AverageRestrictionDialog.regressor.a.add.tooltip", "Add parameter to regressor list"));
+				i18N.getString("AverageRestrictionDialog.regressor.add.label", "+"),
+				i18N.getString("AverageRestrictionDialog.regressor.add.tooltip", "Add parameter to regressor list"));
 		
 		this.removeParameterButtom = DialogUtil.createButton(
-				i18N.getString("AverageRestrictionDialog.regressor.a.remove.label", "-"),
-				i18N.getString("AverageRestrictionDialog.regressor.a.remove.tooltip", "Remove regressor"));
+				i18N.getString("AverageRestrictionDialog.regressor.remove.label", "-"),
+				i18N.getString("AverageRestrictionDialog.regressor.remove.tooltip", "Remove regressor"));
 			
 		this.addParameterButtom.setOnAction(regressorEventHandler);
 		this.removeParameterButtom.setOnAction(regressorEventHandler);

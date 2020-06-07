@@ -283,16 +283,16 @@ public class TrigonometricRestrictionDialog {
 
 		switch (functionType) {
 		case SINE:
-			return i18N.getString("TrigonometricRestrictionDialog.trigonometry.type.sine", "Sine");
+			return i18N.getString("TrigonometricRestrictionDialog.trigonometry.type.sine", "Sine sin(a)");
 			
 		case COSINE:
-			return i18N.getString("TrigonometricRestrictionDialog.trigonometry.type.cosine", "Cosine");
+			return i18N.getString("TrigonometricRestrictionDialog.trigonometry.type.cosine", "Cosine cos(a)");
 		
 		case TANGENT:
-			return i18N.getString("TrigonometricRestrictionDialog.trigonometry.type.tangent", "Tangent");
+			return i18N.getString("TrigonometricRestrictionDialog.trigonometry.type.tangent", "Tangent tan(a)");
 			
 		case COTANGENT:
-			return i18N.getString("TrigonometricRestrictionDialog.trigonometry.type.cotangent", "Cotangent");
+			return i18N.getString("TrigonometricRestrictionDialog.trigonometry.type.cotangent", "Cotangent cot(a)");
 		}
 		
 		throw new IllegalArgumentException("Error, unknown trigonometric function type " + functionType + "!");
