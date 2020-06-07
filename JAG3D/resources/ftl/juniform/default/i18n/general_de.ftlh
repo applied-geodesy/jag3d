@@ -41,6 +41,15 @@
 					</#list>
 				</#if>
 			</dd>
+			
+			<dt>Ausgleichungsmodus</dt>
+			<dd>
+				<#if estimation_type == 'L2NORM'>
+					Methode der kleinsten Quadrate (L<sub>2</sub>Norm)
+				<#elseif estimation_type == 'SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION'>
+					Sph&auml;rische Simplex Unscented Transformation
+				</#if>
+			</dd>
 
 			<dt>Irrtumswahrscheinlichkeit &alpha; [%]</dt><dd>${test_statistic_probability_value?string[df_statistic]}</dd>
 			<dt>Macht des Tests (1-&beta;) [%]</dt><dd>${test_statistic_power_of_test?string[df_statistic]}</dd>

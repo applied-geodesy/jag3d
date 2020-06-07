@@ -23,6 +23,7 @@ package org.applied_geodesy.juniform.ui.dialog;
 
 import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.geometry.GeometricPrimitive;
@@ -326,6 +327,64 @@ class DialogUtil {
 		});
 
 		return doubleSpinner;
+	}
+	
+	static Spinner<Integer> createIntegerSpinner(int min, int max, int amountToStepBy, String tooltip) {
+		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
+		numberFormat.setMaximumFractionDigits(0);
+		numberFormat.setMinimumFractionDigits(0);
+		numberFormat.setGroupingUsed(false);
+		
+		StringConverter<Integer> converter = new StringConverter<Integer>() {
+		    @Override
+		    public Integer fromString(String s) {
+		    	if (s == null || s.trim().isEmpty())
+		    		return null;
+		    	else {
+		    		try {
+		    			return numberFormat.parse(s).intValue();
+		    		}
+		    		catch (Exception nfe) {
+						nfe.printStackTrace();
+					}
+		    	}
+		        return null;
+		    }
+
+		    @Override
+		    public String toString(Integer d) {
+		        return d == null ? "" : numberFormat.format(d);
+		    }
+		};
+		
+		SpinnerValueFactory.IntegerSpinnerValueFactory integerFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max);
+		Spinner<Integer> integerSpinner = new Spinner<Integer>();
+		integerSpinner.setEditable(true);
+		integerSpinner.setValueFactory(integerFactory);
+		//integerSpinner.getStyleClass().add(Spinner.STYLE_CLASS_ARROWS_ON_RIGHT_HORIZONTAL);
+		
+		integerFactory.setConverter(converter);
+		integerFactory.setAmountToStepBy(amountToStepBy);
+		
+		TextFormatter<Integer> formatter = new TextFormatter<Integer>(integerFactory.getConverter(), integerFactory.getValue());
+		integerSpinner.getEditor().setTextFormatter(formatter);
+		integerSpinner.getEditor().setAlignment(Pos.BOTTOM_RIGHT);
+		integerFactory.valueProperty().bindBidirectional(formatter.valueProperty());
+
+		integerSpinner.setMinWidth(75);
+		integerSpinner.setPrefWidth(100);
+		integerSpinner.setMaxWidth(Double.MAX_VALUE);
+		integerSpinner.setTooltip(new Tooltip(tooltip));
+		
+		integerFactory.valueProperty().addListener(new ChangeListener<Integer>() {
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				if (newValue == null)
+					integerFactory.setValue(oldValue);
+			}
+		});
+		
+		return integerSpinner;
 	}
 	
 	static ComboBox<ProcessingType> createProcessingTypeComboBox(StringConverter<ProcessingType> processingTypeStringConverter, String tooltip) {

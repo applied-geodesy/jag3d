@@ -41,6 +41,15 @@
 					</#list>
 				</#if>
 			</dd>
+			
+			<dt>Adjustment Type</dt>
+			<dd>
+				<#if estimation_type == 'L2NORM'>
+					Least squares adjustment (L<sub>2</sub>Norm)
+				<#elseif estimation_type == 'SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION'>
+					Spherical Simplex Unscented Transformation
+				</#if>
+			</dd>
 
 			<dt>Probability Value &alpha; [%]</dt><dd>${test_statistic_probability_value?string[df_statistic]}</dd>
 			<dt>Test Power (1-&beta;) [%]</dt><dd>${test_statistic_power_of_test?string[df_statistic]}</dd>

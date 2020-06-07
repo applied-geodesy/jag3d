@@ -63,7 +63,7 @@ public class FeatureAdjustmentDialog {
 	private class AdjustmentTask extends Task<EstimationStateType> implements PropertyChangeListener {
 		private final String iterationTextTemplate;
 		private final String convergenceTextTemplate;
-//		private final String unscentedTransformationTextTemplate;
+		private final String unscentedTransformationTextTemplate;
 		private FeatureAdjustment adjustment;
 		private double processState = 0.0;
 		private double finalStepProcesses = 0.0;
@@ -71,7 +71,7 @@ public class FeatureAdjustmentDialog {
 		private AdjustmentTask(FeatureAdjustment adjustment) {
 			this.adjustment = adjustment;
 
-//			this.unscentedTransformationTextTemplate = i18n.getString("FeatureAdjustmentDialog.unscentedtransformation.label",   "%d. unscented transformation step of %d \u2026");
+			this.unscentedTransformationTextTemplate = i18n.getString("FeatureAdjustmentDialog.unscentedtransformation.label",   "%d. unscented transformation step of %d \u2026");
 			this.iterationTextTemplate   = i18n.getString("FeatureAdjustmentDialog.iteration.label",   "%d. iteration step of maximal %d \u2026");
 			this.convergenceTextTemplate = i18n.getString("FeatureAdjustmentDialog.convergence.label", "Convergence max|dx| = %.2e");
 		}
@@ -252,10 +252,12 @@ public class FeatureAdjustmentDialog {
 				if (oldValue != null && newValue != null && oldValue instanceof Double && newValue instanceof Double) {
 					double current = (Double)newValue;
 					double minimal = (Double)oldValue;
-					double frac = 0.75 * Math.min(minimal / current, 1.0);
-					this.processState = Math.max(this.processState, frac);
+					if (this.updateProgressOnIterate) {
+						double frac = 0.75 * Math.min(minimal / current, 1.0);
+						this.processState = Math.max(this.processState, frac);
+						this.updateProgress(this.processState, 1.0);
+					}
 					this.updateConvergenceProgressMessage(String.format(Locale.ENGLISH, this.convergenceTextTemplate, current, minimal));
-					this.updateProgress(this.processState, 1.0);
 				}
 				break;
 
@@ -269,6 +271,17 @@ public class FeatureAdjustmentDialog {
 						this.updateProgress(this.processState, 1.0);
 					}
 					this.updateIterationProgressMessage(String.format(Locale.ENGLISH, this.iterationTextTemplate, current, maximal));
+				}
+				break;
+				
+			case UNSCENTED_TRANSFORMATION_STEP:
+				if (oldValue != null && newValue != null && oldValue instanceof Integer && newValue instanceof Integer) {
+					int current = (Integer)newValue;
+					int maximal = (Integer)oldValue;
+					double frac = 0.75 * Math.min((double)current / (double)maximal, 1.0);
+					this.processState = Math.max(this.processState, frac);
+					this.updateMessage(String.format(Locale.ENGLISH, this.unscentedTransformationTextTemplate, current, maximal));
+					this.updateProgress(this.processState, 1.0);
 				}
 				break;
 
@@ -299,7 +312,6 @@ public class FeatureAdjustmentDialog {
 			case PRINCIPAL_COMPONENT_ANALYSIS:
 			case EXPORT_COVARIANCE_MATRIX:
 			case EXPORT_COVARIANCE_INFORMATION:
-			case UNSCENTED_TRANSFORMATION_STEP:
 				break;
 				
 			// adjustment failed (exception) 
