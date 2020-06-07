@@ -116,6 +116,8 @@ public class TrigonometricRestrictionDialog {
 
 		this.regressorComboBox.setDisable(restriction.isIndispensable());
 		this.regressandComboBox.setDisable(restriction.isIndispensable());
+		this.trigonometricTypeComboBox.setDisable(restriction.isIndispensable());
+		this.invertCheckbox.setDisable(restriction.isIndispensable());
 				
 		if(!restriction.isIndispensable()) {
 			UnknownParameter regressand    = this.restriction.getRegressand();
