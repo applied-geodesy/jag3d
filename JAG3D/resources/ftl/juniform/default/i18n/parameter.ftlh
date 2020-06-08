@@ -12,6 +12,7 @@
 	"COORDINATE_Y"                 : "Point y",
 	"COORDINATE_Z"                 : "Point z",
 	"RADIUS"                       : "Radius r",
+	"ANGLE"                        : "Angle &phi;",
 	"MAJOR_AXIS_COEFFICIENT"       : "Semi-axis coefficient a",
 	"MIDDLE_AXIS_COEFFICIENT"      : "Semi-axis coefficient b",
 	"MINOR_AXIS_COEFFICIENT"       : "Semi-axis coefficient c",

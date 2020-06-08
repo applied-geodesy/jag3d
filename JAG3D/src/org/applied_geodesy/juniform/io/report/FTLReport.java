@@ -353,10 +353,16 @@ public class FTLReport {
 		case VECTOR_LENGTH:
 		case VECTOR_X:
 		case VECTOR_Y:
-		case VECTOR_Z:		
+		case VECTOR_Z:
 			parameter.put("value", options.convertVectorToView(value));
 			parameter.put("sigma", options.convertVectorUncertaintyToView(sigma));
 			parameter.put("unit_type", "VECTOR");
+			break;
+			
+		case ANGLE:
+			parameter.put("value", options.convertAngleToView(value));
+			parameter.put("sigma", options.convertAngleUncertaintyToView(sigma));
+			parameter.put("unit_type", "ANGLE");
 			break;
 
 		default:
