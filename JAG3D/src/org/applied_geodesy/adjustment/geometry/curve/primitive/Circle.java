@@ -154,6 +154,8 @@ public class Circle extends Curve {
 
 	@Override
 	public String toLaTex() {
-		return "$\\vert \\mathbf{P}_i - \\mathbf{P}_0 \\vert = r$";
+		return "$\\vert \\mathbf{P}_i - \\mathbf{P}_0 \\vert = r"
+				+ " \\\\ "
+				+ "\\mathbf{P}_0 = \\left( \\begin{array}{c} x_0 \\\\ y_0 \\end{array} \\right)$";
 	}
 }
