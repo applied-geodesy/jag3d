@@ -59,6 +59,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -75,7 +76,7 @@ public class RestrictionDialog {
 		}
 	}
 	
-	private class ManageRestrictionEventHandler implements EventHandler<ActionEvent> {
+	private class RestrictionEventHandler implements EventHandler<ActionEvent> {
 		
 		@Override
 		public void handle(ActionEvent event) {
@@ -110,6 +111,33 @@ public class RestrictionDialog {
 				if (restriction != null)
 					removeRestriction(restriction);
 			}
+			else if (event.getSource() == moveUpRestrictionButtom) {
+				int index = restrictionList.getSelectionModel().getSelectedIndex();
+				if (index > 0) {
+					// Collections.swap(restrictionList.getItems(), index, index-1);
+					// A unique list does not support Collection.swap()
+					// thus, just a tmp deep copy is used of the selected element
+					Restriction dummyElement  = createRestriction(restrictionList.getSelectionModel().getSelectedItem().getRestrictionType());
+					Restriction firstElement  = restrictionList.getItems().set(index, dummyElement);
+					Restriction secondElement = restrictionList.getItems().set(index-1, firstElement);
+					restrictionList.getItems().set(index, secondElement);
+					restrictionList.getSelectionModel().clearAndSelect(index-1);
+					
+				}
+			}
+			else if (event.getSource() == moveDownRestrictionButtom) {
+				int index = restrictionList.getSelectionModel().getSelectedIndex();
+				if (index < restrictionList.getItems().size() - 1) {
+					// Collections.swap(restrictionList.getItems(), index, index+1);
+					// A unique list does not support Collection.swap()
+					// thus, just a tmp deep copy is used of the selected element
+					Restriction dummyElement  = createRestriction(restrictionList.getSelectionModel().getSelectedItem().getRestrictionType());
+					Restriction firstElement  = restrictionList.getItems().set(index, dummyElement);
+					Restriction secondElement = restrictionList.getItems().set(index+1, firstElement);
+					restrictionList.getItems().set(index, secondElement);
+					restrictionList.getSelectionModel().clearAndSelect(index+1);
+				}
+			}
 		}
 	}
 	private I18N i18n = I18N.getInstance();
@@ -120,7 +148,7 @@ public class RestrictionDialog {
 	private Label restrictionTypeLabel;
 	private Label parameterOwner;
 	private ListView<Restriction> restrictionList;
-	private Button addRestrictionButton, editRestrictionButton, removeRestrictionButton;
+	private Button addRestrictionButton, editRestrictionButton, removeRestrictionButton, moveUpRestrictionButtom, moveDownRestrictionButtom;
 	private Restriction restriction;
 	private Window window;
 	private Feature feature;
@@ -174,8 +202,7 @@ public class RestrictionDialog {
 			}
 		});
 	}
-	
-	
+
 	private void setRestriction(Restriction restriction) {
 		// property un-binding
 		if (this.restriction != null) {
@@ -192,13 +219,19 @@ public class RestrictionDialog {
 			this.latexLabel.setTex("");
 			this.restrictionTypeLabel.setText("");
 			this.parameterOwner.setText("");
+			
+			this.moveUpRestrictionButtom.setDisable(true);
+			this.moveDownRestrictionButtom.setDisable(true);
 		}
 		else {
 			boolean indispensable = this.restriction.isIndispensable();
-			
+
 			this.descriptionTextField.setDisable(false);
 			this.editRestrictionButton.setDisable(false);
 			this.removeRestrictionButton.setDisable(indispensable);
+			
+			this.moveUpRestrictionButtom.setDisable(indispensable || this.restrictionList.getItems().isEmpty() || !this.restrictionList.getItems().isEmpty() && this.restrictionList.getSelectionModel().getSelectedIndex() == 0);
+			this.moveDownRestrictionButtom.setDisable(indispensable || this.restrictionList.getItems().isEmpty() || !this.restrictionList.getItems().isEmpty() && this.restrictionList.getSelectionModel().getSelectedIndex() == this.restrictionList.getItems().size()-1);
 			
 			this.latexLabel.setTex(restriction.toLaTex());
 			
@@ -222,7 +255,6 @@ public class RestrictionDialog {
 	}
 	
 	private Node createPane() {
-
 		GridPane gridPane = DialogUtil.createGridPane();
 		
 		Label ownerLabel           = new Label(i18n.getString("RestrictionDialog.restriction.owner.label", "Owner:"));
@@ -246,29 +278,45 @@ public class RestrictionDialog {
 		this.latexLabel.setMinSize(225, Control.USE_PREF_SIZE);
 		this.latexLabel.setMaxSize(Double.MAX_VALUE, Control.USE_PREF_SIZE);
 		
-		ManageRestrictionEventHandler manageRestrictionEventHandler = new ManageRestrictionEventHandler();
+		RestrictionEventHandler restrictionEventHandler = new RestrictionEventHandler();
 		VBox buttonBox = new VBox(3);
 		this.addRestrictionButton = DialogUtil.createButton(
-				i18n.getString("RestrictionDialog.button.add.label",   "Add"),
-				i18n.getString("RestrictionDialog.button.add.tooltip", "Add new parameter restriction")); 
+				i18n.getString("RestrictionDialog.restriction.add.label",   "Add"),
+				i18n.getString("RestrictionDialog.restriction.add.tooltip", "Add new parameter restriction")); 
 		
 		this.editRestrictionButton = DialogUtil.createButton(
-				i18n.getString("RestrictionDialog.button.edit.label",   "Edit"),
-				i18n.getString("RestrictionDialog.button.edit.tooltip", "Edit selected restriction")); 
+				i18n.getString("RestrictionDialog.restriction.edit.label",   "Edit"),
+				i18n.getString("RestrictionDialog.restriction.edit.tooltip", "Edit selected restriction")); 
 		
 		this.removeRestrictionButton = DialogUtil.createButton(
-				i18n.getString("RestrictionDialog.button.remove.label",   "Remove"),
-				i18n.getString("RestrictionDialog.button.remove.tooltip", "Remove selected restriction")); 
+				i18n.getString("RestrictionDialog.restriction.remove.label",   "Remove"),
+				i18n.getString("RestrictionDialog.restriction.remove.tooltip", "Remove selected restriction")); 
 		
-		this.addRestrictionButton.setOnAction(manageRestrictionEventHandler);
-		this.editRestrictionButton.setOnAction(manageRestrictionEventHandler);
-		this.removeRestrictionButton.setOnAction(manageRestrictionEventHandler);
+		this.addRestrictionButton.setOnAction(restrictionEventHandler);
+		this.editRestrictionButton.setOnAction(restrictionEventHandler);
+		this.removeRestrictionButton.setOnAction(restrictionEventHandler);
 
 		VBox.setVgrow(this.addRestrictionButton,    Priority.ALWAYS);
 		VBox.setVgrow(this.editRestrictionButton,   Priority.ALWAYS);
 		VBox.setVgrow(this.removeRestrictionButton, Priority.ALWAYS);
 		buttonBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		buttonBox.getChildren().addAll(this.addRestrictionButton, this.editRestrictionButton, this.removeRestrictionButton);
+		
+		HBox orderButtonBox = new HBox(3);
+		this.moveUpRestrictionButtom = DialogUtil.createButton(
+				i18n.getString("RestrictionDialog.restriction.up.label", "\u25B2"),
+				i18n.getString("RestrictionDialog.restriction.up.tooltip", "Move up (change order)"));
+		this.moveDownRestrictionButtom = DialogUtil.createButton(
+				i18n.getString("RestrictionDialog.restriction.down.label", "\u25BC"),
+				i18n.getString("RestrictionDialog.restriction.down.tooltip", "Move down (change order)"));
+		
+		this.moveUpRestrictionButtom.setOnAction(restrictionEventHandler);
+		this.moveDownRestrictionButtom.setOnAction(restrictionEventHandler);
+		
+		HBox.setHgrow(this.moveUpRestrictionButtom, Priority.NEVER);
+		HBox.setHgrow(this.moveDownRestrictionButtom, Priority.NEVER);
+		orderButtonBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		orderButtonBox.getChildren().addAll(this.moveUpRestrictionButtom, this.moveDownRestrictionButtom);
 		
 		ownerLabel.setLabelFor(this.parameterOwner);
 		equationLabel.setLabelFor(this.latexLabel);
@@ -280,6 +328,7 @@ public class RestrictionDialog {
 		Insets insetsRight  = new Insets(5, 0, 5, 7);
 
 		GridPane.setMargin(this.restrictionList, new Insets(5,10,5,0));
+		GridPane.setMargin(orderButtonBox,     new Insets(5,10,5,0));
 
 		GridPane.setMargin(restrictionTypeLabel, insetsLeft);
 		GridPane.setMargin(descriptionLabel,     insetsLeft);
@@ -315,12 +364,14 @@ public class RestrictionDialog {
 		GridPane.setHgrow(this.restrictionTypeLabel, Priority.ALWAYS);
 		GridPane.setHgrow(this.parameterOwner,       Priority.ALWAYS);
 		GridPane.setHgrow(this.restrictionList,      Priority.SOMETIMES);
-		GridPane.setHgrow(buttonBox, Priority.NEVER);
+		GridPane.setHgrow(buttonBox,                 Priority.NEVER);
+		GridPane.setHgrow(orderButtonBox,            Priority.NEVER);
 
-		GridPane.setVgrow(this.restrictionList,  Priority.ALWAYS);
-		GridPane.setVgrow(this.latexLabel,  Priority.NEVER);
-		GridPane.setVgrow(this.restrictionTypeLabel,  Priority.NEVER);
-		GridPane.setVgrow(buttonBox,  Priority.NEVER);
+		GridPane.setVgrow(this.restrictionList,      Priority.ALWAYS);
+		GridPane.setVgrow(this.latexLabel,           Priority.NEVER);
+		GridPane.setVgrow(this.restrictionTypeLabel, Priority.NEVER);
+		GridPane.setVgrow(buttonBox,                 Priority.NEVER);
+		GridPane.setVgrow(orderButtonBox,            Priority.NEVER);
 		
 		GridPane.setHgrow(spacer, Priority.ALWAYS);
 		GridPane.setVgrow(spacer, Priority.ALWAYS);
@@ -341,10 +392,11 @@ public class RestrictionDialog {
 		gridPane.add(descriptionLabel,          1, row);
 		gridPane.add(this.descriptionTextField, 2, row++);
 		
-		gridPane.add(spacer,    1, row++, 2, 1); // column, row, columnspan, rowspan,
-		gridPane.add(buttonBox, 1, row++);
+		gridPane.add(spacer,                    1, row++, 2, 1); // column, row, columnspan, rowspan
+		gridPane.add(buttonBox,                 1, row++);
 		
-		gridPane.add(this.restrictionList, 0, 0, 1, row); // column, row, columnspan, rowspan,
+		gridPane.add(this.restrictionList,      0, 0, 1, row++); // column, row, columnspan, rowspan
+		gridPane.add(orderButtonBox,            0, row);
 		
 		Platform.runLater(new Runnable() {
 			@Override public void run() {

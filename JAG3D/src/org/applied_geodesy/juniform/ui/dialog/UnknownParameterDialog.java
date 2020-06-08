@@ -57,6 +57,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -81,7 +82,7 @@ public class UnknownParameterDialog {
 		}
 	}
 	
-	private class ManageUnknwonParameterEventHandler implements EventHandler<ActionEvent> {
+	private class UnknwonParameterEventHandler implements EventHandler<ActionEvent> {
 		@Override
 		public void handle(ActionEvent event) {
 			if (event.getSource() == addParameterButton) {
@@ -89,6 +90,32 @@ public class UnknownParameterDialog {
 			}
 			else if (event.getSource() == removeParameterButton) {
 				removeParameter();
+			}
+			else if (event.getSource() == moveUpParameterButtom) {
+				int index = parameterList.getSelectionModel().getSelectedIndex();
+				if (index > 0) {
+					// Collections.swap(parameterList.getItems(), index, index-1);
+					// A unique list does not support Collection.swap()
+					// thus, just a tmp deep copy is used of the selected element
+					UnknownParameter dummyElement  = UnknownParameterTypeDialog.getUnknownParameter(parameterList.getSelectionModel().getSelectedItem().getParameterType());
+					UnknownParameter firstElement  = parameterList.getItems().set(index, dummyElement);
+					UnknownParameter secondElement = parameterList.getItems().set(index - 1, firstElement);
+					parameterList.getItems().set(index, secondElement);
+					parameterList.getSelectionModel().clearAndSelect(index - 1);
+				}
+			}
+			else if (event.getSource() == moveDownParameterButtom) {
+				int index = parameterList.getSelectionModel().getSelectedIndex();
+				if (index < parameterList.getItems().size() - 1) {
+					// Collections.swap(parameterList.getItems(), index, index+1);
+					// A unique list does not support Collection.swap()
+					// thus, just a tmp deep copy is used of the selected element
+					UnknownParameter dummyElement  = UnknownParameterTypeDialog.getUnknownParameter(parameterList.getSelectionModel().getSelectedItem().getParameterType());
+					UnknownParameter firstElement  = parameterList.getItems().set(index, dummyElement);
+					UnknownParameter secondElement = parameterList.getItems().set(index + 1, firstElement);
+					parameterList.getItems().set(index, secondElement);
+					parameterList.getSelectionModel().clearAndSelect(index + 1);
+				}
 			}
 		}
 	}
@@ -103,7 +130,7 @@ public class UnknownParameterDialog {
 	private ComboBox<ProcessingType> processingTypeComboBox;
 	private FilteredList<ProcessingType> filteredProcessingTypeList;
 	private ListView<UnknownParameter> parameterList;
-	private Button addParameterButton, removeParameterButton;
+	private Button addParameterButton, removeParameterButton, moveUpParameterButtom, moveDownParameterButtom;
 	private UnknownParameter unknownParameter;
 	private CheckBox visibleCheckBox;
 	private Window window;
@@ -183,6 +210,9 @@ public class UnknownParameterDialog {
 			this.removeParameterButton.setDisable(true);
 			this.parameterOwner.setText("");
 			this.visibleCheckBox.setDisable(true);
+			
+			this.moveUpParameterButtom.setDisable(true);
+			this.moveDownParameterButtom.setDisable(true);
 		}
 		else {
 			boolean indispensable = this.unknownParameter.isIndispensable();
@@ -203,6 +233,9 @@ public class UnknownParameterDialog {
 			this.descriptionTextField.setDisable(false);
 			this.initialGuessTextField.setDisable(false);
 			
+			this.moveUpParameterButtom.setDisable(this.parameterList.getItems().isEmpty() || !this.parameterList.getItems().isEmpty() && this.parameterList.getSelectionModel().getSelectedIndex() == 0);
+			this.moveDownParameterButtom.setDisable(this.parameterList.getItems().isEmpty() || !this.parameterList.getItems().isEmpty() && this.parameterList.getSelectionModel().getSelectedIndex() == this.parameterList.getItems().size()-1);
+
 			// property binding
 			this.processingTypeComboBox.valueProperty().bindBidirectional(this.unknownParameter.processingTypeProperty());
 			this.parameterTypeComboBox.valueProperty().bindBidirectional(this.unknownParameter.parameterTypeProperty());
@@ -284,7 +317,7 @@ public class UnknownParameterDialog {
 		this.parameterList = DialogUtil.createParameterListView(createUnknownParameterCellFactory());
 		this.parameterList.getSelectionModel().selectedItemProperty().addListener(new UnknownParameterSelectionChangeListener());
 		
-		ManageUnknwonParameterEventHandler manageUnknwonParameterEventHandler = new ManageUnknwonParameterEventHandler();
+		UnknwonParameterEventHandler unknwonParameterEventHandler = new UnknwonParameterEventHandler();
 		VBox buttonBox = new VBox(3);
 		this.addParameterButton = DialogUtil.createButton(
 				i18N.getString("UnknownParameterDialog.button.add.label",   "Add"),
@@ -294,13 +327,29 @@ public class UnknownParameterDialog {
 				i18N.getString("UnknownParameterDialog.button.remove.label",   "Remove"),
 				i18N.getString("UnknownParameterDialog.button.remove.tooltip", "Remove selected unknown parameter")); 
 		
-		this.addParameterButton.setOnAction(manageUnknwonParameterEventHandler);
-		this.removeParameterButton.setOnAction(manageUnknwonParameterEventHandler);
-
+		this.addParameterButton.setOnAction(unknwonParameterEventHandler);
+		this.removeParameterButton.setOnAction(unknwonParameterEventHandler);
+		
 		VBox.setVgrow(this.addParameterButton,    Priority.ALWAYS);
 		VBox.setVgrow(this.removeParameterButton, Priority.ALWAYS);
 		buttonBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		buttonBox.getChildren().addAll(this.addParameterButton, this.removeParameterButton);
+		
+		HBox orderButtonBox = new HBox(3);
+		this.moveUpParameterButtom = DialogUtil.createButton(
+				i18N.getString("UnknownParameterDialog.parameter.up.label", "\u25B2"),
+				i18N.getString("UnknownParameterDialog.parameter.up.tooltip", "Move up (change order)"));
+		this.moveDownParameterButtom = DialogUtil.createButton(
+				i18N.getString("UnknownParameterDialog.parameter.down.label", "\u25BC"),
+				i18N.getString("UnknownParameterDialog.parameter.down.tooltip", "Move down (change order)"));
+		
+		this.moveUpParameterButtom.setOnAction(unknwonParameterEventHandler);
+		this.moveDownParameterButtom.setOnAction(unknwonParameterEventHandler);
+		
+		HBox.setHgrow(this.moveUpParameterButtom, Priority.NEVER);
+		HBox.setHgrow(this.moveDownParameterButtom, Priority.NEVER);
+		orderButtonBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		orderButtonBox.getChildren().addAll(this.moveUpParameterButtom, this.moveDownParameterButtom);
 		
 		Region spacer = new Region();
 		
@@ -330,6 +379,7 @@ public class UnknownParameterDialog {
 		Insets insetsRight  = new Insets(5, 0, 5, 7);
 		
 		GridPane.setMargin(this.parameterList, new Insets(5,10,5,0));
+		GridPane.setMargin(orderButtonBox,     new Insets(5,10,5,0));
 		
 		GridPane.setMargin(parameterTypeLabel,  insetsLeft);
 		GridPane.setMargin(processingTypeLabel, insetsLeft);
@@ -354,6 +404,7 @@ public class UnknownParameterDialog {
 		GridPane.setHgrow(nameLabel,           Priority.NEVER);
 		GridPane.setHgrow(ownerLabel,          Priority.NEVER);
 		GridPane.setHgrow(buttonBox,           Priority.NEVER);
+		GridPane.setHgrow(orderButtonBox,      Priority.NEVER);
 		
 		GridPane.setHgrow(this.nameTextField,           Priority.ALWAYS);
 		GridPane.setHgrow(this.parameterTypeComboBox,   Priority.ALWAYS);
@@ -365,6 +416,7 @@ public class UnknownParameterDialog {
 		GridPane.setHgrow(this.visibleCheckBox,         Priority.ALWAYS);
 
 		GridPane.setVgrow(buttonBox,                    Priority.NEVER);
+		GridPane.setVgrow(orderButtonBox,               Priority.NEVER);
 		GridPane.setVgrow(this.parameterList,           Priority.ALWAYS);
 
 		GridPane.setHgrow(spacer, Priority.ALWAYS);
@@ -392,10 +444,11 @@ public class UnknownParameterDialog {
 		
 		gridPane.add(this.visibleCheckBox,        1, row++, 2, 1);
 				
-		gridPane.add(spacer,    1, row++, 2, 1);
-		gridPane.add(buttonBox, 1, row++);
+		gridPane.add(spacer,                      1, row++, 2, 1);
+		gridPane.add(buttonBox,                   1, row++);
 	
-		gridPane.add(this.parameterList, 0, 0, 1, row);
+		gridPane.add(this.parameterList,          0, 0, 1, row++);
+		gridPane.add(orderButtonBox,              0, row);
 
 		this.parameterTypeComboBox.valueProperty().addListener(new ChangeListener<ParameterType>() {
 
