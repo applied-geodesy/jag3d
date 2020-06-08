@@ -107,7 +107,7 @@ public class UnknownParameterTypeDialog {
 		});
 	}
 	
-	private UnknownParameter getUnknownParameter(ParameterType parameterType) {
+	static UnknownParameter getUnknownParameter(ParameterType parameterType) {
 		return new UnknownParameter(parameterType, false, 0.0, true, ProcessingType.POSTPROCESSING);
 	}
 	
