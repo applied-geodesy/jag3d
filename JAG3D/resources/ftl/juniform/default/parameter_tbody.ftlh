@@ -25,13 +25,13 @@
 				
 				<td>
 					<#if parameter.unit_type == "ANGLE">
-						<@printFormattedNumber value=parameter.sigma format=df_angle_uncertainty/> ${unit_abbr_angle}
+						<@printFormattedNumber value=parameter.sigma format=df_angle_uncertainty/> ${unit_abbr_angle_uncertainty}
 					<#elseif parameter.unit_type == "LENGTH">
-						<@printFormattedNumber value=parameter.sigma format=df_length_uncertainty/> ${unit_abbr_length}
+						<@printFormattedNumber value=parameter.sigma format=df_length_uncertainty/> ${unit_abbr_length_uncertainty}
 					<#elseif parameter.unit_type == "SCALE">
-						<@printFormattedNumber value=parameter.sigma format=df_scale_uncertainty/> ${unit_abbr_scale}
+						<@printFormattedNumber value=parameter.sigma format=df_scale_uncertainty/> ${unit_abbr_scale_uncertainty}
 					<#elseif parameter.unit_type == "VECTOR">
-						<@printFormattedNumber value=parameter.sigma format=df_vector_uncertainty/> ${unit_abbr_vector}
+						<@printFormattedNumber value=parameter.sigma format=df_vector_uncertainty/> ${unit_abbr_vector_uncertainty}
 					<#elseif parameter.unit_type == "DOUBLE">
 						<@printFormattedNumber value=parameter.sigma format=df_double/>
 					<#else>

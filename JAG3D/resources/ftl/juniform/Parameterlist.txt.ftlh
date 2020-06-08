@@ -20,23 +20,6 @@
 <#assign df_statistic          = "${digits_statistic???then(digits_statistic, 0.00)};;  roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
 <#assign df_double             = "${digits_double???then(digits_double, 0.00000)};;  roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
 
-<#-- Unit abbr w.r.t. user preferences -->
-<#assign unit_abbr_angle              = "${unit_abbr_angle???then(unit_abbr_angle, '\xfffd')}">
-<#assign unit_abbr_angle_residual     = "${unit_abbr_angle_residual???then(unit_abbr_angle_residual, '\xfffd')}">
-<#assign unit_abbr_angle_uncertainty  = "${unit_abbr_angle_uncertainty???then(unit_abbr_angle_uncertainty, '\xfffd')}">
-
-<#assign unit_abbr_length             = "${unit_abbr_length???then(unit_abbr_length, '\xfffd')}">
-<#assign unit_abbr_length_residual    = "${unit_abbr_length_residual???then(unit_abbr_length_residual, '\xfffd')}">
-<#assign unit_abbr_length_uncertainty = "${unit_abbr_length_uncertainty???then(unit_abbr_length_uncertainty, '\xfffd')}">
-
-<#assign unit_abbr_scale              = "${unit_abbr_scale???then(unit_abbr_scale, '\xfffd')}">
-<#assign unit_abbr_scale_residual     = "${unit_abbr_scale_residual???then(unit_abbr_scale_residual, '\xfffd')}">
-<#assign unit_abbr_scale_uncertainty  = "${unit_abbr_scale_uncertainty???then(unit_abbr_scale_uncertainty, '\xfffd')}">
-
-<#assign unit_abbr_vector              = "${unit_abbr_vector???then(unit_abbr_vector, '\xfffd')}">
-<#assign unit_abbr_vector_residual     = "${unit_abbr_vector_residual???then(unit_abbr_vector_residual, '\xfffd')}">
-<#assign unit_abbr_vector_uncertainty  = "${unit_abbr_vector_uncertainty???then(unit_abbr_vector_uncertainty, '\xfffd')}">
-
 <#macro printFormattedNumber value format>
 	<#if format == df_angle && sexagesimal_angle?? || format == df_angle_residual && sexagesimal_angle_residual?? || format == df_angle_uncertainty && sexagesimal_angle_uncertainty??>
 		<#assign signum  = (value < 0)?then(-1, 1)>

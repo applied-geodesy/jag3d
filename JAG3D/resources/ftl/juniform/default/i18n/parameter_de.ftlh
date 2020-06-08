@@ -12,6 +12,7 @@
 	"COORDINATE_Y"                 : "Point y",
 	"COORDINATE_Z"                 : "Point z",
 	"RADIUS"                       : "Radius r",
+	"ANGLE"                        : "Winkel &phi;",
 	"MAJOR_AXIS_COEFFICIENT"       : "Hauptachsenkoeffizient a",
 	"MIDDLE_AXIS_COEFFICIENT"      : "Hauptachsenkoeffizient b",
 	"MINOR_AXIS_COEFFICIENT"       : "Hauptachsenkoeffizient c",
