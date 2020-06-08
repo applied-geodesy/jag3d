@@ -205,7 +205,6 @@ public class ObservableUniqueList<T> extends ModifiableObservableListBase<T> imp
 
 	@Override
 	public boolean addAll(int index, Collection<? extends T> c) {
-		System.out.println("ADDALL");
 		try {
 			beginChange();
 			boolean modified = false;
@@ -280,6 +279,7 @@ public class ObservableUniqueList<T> extends ModifiableObservableListBase<T> imp
 		try {
 			ListIterator<T> e = this.list.listIterator(index);
 			T oldVal = e.next();
+			this.set.remove(oldVal);
 			e.set(element);
 			this.set.add(element);
 			return oldVal;
