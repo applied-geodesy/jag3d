@@ -104,9 +104,9 @@ public class FeatureAdjustmentDialog {
 				if (feature.isEstimateInitialGuess())
 					feature.deriveInitialGuess();
 				
-				// transfer inital guess to parameters to be estimated
-				feature.applyInitialGuess();
-				
+//				// transfer inital guess to parameters to be estimated
+//				feature.applyInitialGuess();
+//				
 //				// reset center of mass
 //				if (feature.getCenterOfMass() != null) {
 //					feature.getCenterOfMass().setX0(0);
