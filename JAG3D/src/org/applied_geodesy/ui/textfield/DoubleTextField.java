@@ -22,6 +22,7 @@
 package org.applied_geodesy.ui.textfield;
 
 import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
@@ -91,7 +92,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 		
 		this.prepareEditorNumberFormat();
 		this.initHandlers();
-		this.setTextFormatter(this.addTextFormatter());
+		this.setTextFormatter(this.createTextFormatter());
 		
 		if (this.check(value))
 			this.setText(this.getRendererFormat(value));
@@ -102,9 +103,16 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 	public void setCellValueType(CellValueType type) {
 		this.type = type;
 		double value = this.getNumber();
-		this.prepareEditorNumberFormat();
+		
 		if (this.check(value))
 			this.setNumber(value);
+		
+		this.prepareEditorNumberFormat();
+		this.setTextFormatter(this.createTextFormatter());
+		
+		if (this.check(value))
+			this.setText(this.getRendererFormat(value));
+		
 	}
 	
 	private void prepareEditorNumberFormat() {
@@ -130,7 +138,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 		}
 	}
 
-	private TextFormatter<Double> addTextFormatter() {
+	private TextFormatter<Double> createTextFormatter() {
 		//Pattern decimalPattern = Pattern.compile("^[-|+]?\\d*?\\D*\\d{0,"+this.editorNumberFormat.getMaximumFractionDigits()+"}\\s*\\D*$");
 		Pattern decimalPattern = Pattern.compile("^[+|-]?[\\d\\D]*?\\d{0,"+this.editorNumberFormat.getMaximumFractionDigits()+"}\\s*\\D*$");
 		UnaryOperator<TextFormatter.Change> filter = new UnaryOperator<TextFormatter.Change>() {
@@ -299,12 +307,15 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 	 */
 	private void parseAndFormatInput() {
 		try {
-			Double newValue = null;
 			String input = this.getText();
 			if (input != null && !input.trim().isEmpty()) {
 				input = input.replaceAll(",", ".");
-				newValue = this.options.getFormatterOptions().get(this.type).parse(input).doubleValue();
-				if (newValue != null) {
+				ParsePosition parsePosition = new ParsePosition(0);
+				Double newValue = this.options.getFormatterOptions().get(this.type).parse(input, parsePosition).doubleValue();
+				// check if value is not null and if the complete value is error-free parsed 
+				// https://www.ibm.com/developerworks/library/j-numberformat/index.html
+				// https://stackoverflow.com/questions/14194888/validating-decimal-numbers-in-a-locale-sensitive-way-in-java
+				if (newValue != null && parsePosition.getErrorIndex() < 0 && parsePosition.getIndex() == input.length()) {
 					switch(this.type) {
 					case ANGLE:
 						newValue = this.options.convertAngleToModel(newValue.doubleValue());
@@ -350,10 +361,10 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 						newValue = newValue.doubleValue();
 						break;
 					}
+					// set new value, if valid
+					this.setNumber(!this.check(newValue) ? this.getNumber() : newValue);
 				}
 			}
-			
-			this.setNumber(!this.check(newValue) ? this.getNumber() : newValue);
 			this.selectAll();
 			
 		} catch (Exception ex) {

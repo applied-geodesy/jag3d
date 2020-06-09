@@ -242,8 +242,10 @@ public class UnknownParameterDialog {
 			this.nameTextField.textProperty().bindBidirectional(this.unknownParameter.nameProperty());
 			this.visibleCheckBox.selectedProperty().bindBidirectional(this.unknownParameter.visibleProperty());
 			this.descriptionTextField.textProperty().bindBidirectional(this.unknownParameter.descriptionProperty());
+			
 			this.initialGuessTextField.numberProperty().bindBidirectional(this.unknownParameter.value0Property());
-			this.initialGuessTextField.setValue(this.unknownParameter.getValue0());
+			this.initialGuessTextField.setCellValueType(getCorrespondingCellValueType(this.unknownParameter.getParameterType()));
+			
 			this.removeParameterButton.setDisable(indispensable);
 			
 			if (!indispensable && this.feature != null) {
@@ -458,61 +460,9 @@ public class UnknownParameterDialog {
 					return;
 
 				CellValueType cellValueType = initialGuessTextField.getCellValueType();
-				switch (newValue) {
-				case COORDINATE_X:
-				case COORDINATE_Y:
-				case COORDINATE_Z:
-				case ORIGIN_COORDINATE_X:
-				case ORIGIN_COORDINATE_Y:
-				case ORIGIN_COORDINATE_Z:
-				case RADIUS:
-				case LENGTH:
-				case PRIMARY_FOCAL_COORDINATE_X:
-				case PRIMARY_FOCAL_COORDINATE_Y:
-				case PRIMARY_FOCAL_COORDINATE_Z:
-				case SECONDARY_FOCAL_COORDINATE_X:
-				case SECONDARY_FOCAL_COORDINATE_Y:
-				case SECONDARY_FOCAL_COORDINATE_Z:
-					cellValueType = CellValueType.LENGTH;
-					break;
-				case VECTOR_LENGTH:
-				case VECTOR_X:
-				case VECTOR_Y:
-				case VECTOR_Z:
-					cellValueType = CellValueType.VECTOR;
-					break;
-				case ANGLE:
-					cellValueType = CellValueType.ANGLE;
-					break;
-				case CONSTANT:
-				case MAJOR_AXIS_COEFFICIENT:
-				case MIDDLE_AXIS_COEFFICIENT:
-				case MINOR_AXIS_COEFFICIENT:
-				case ROTATION_COMPONENT_R11:
-				case ROTATION_COMPONENT_R12:
-				case ROTATION_COMPONENT_R13:
-				case ROTATION_COMPONENT_R21:
-				case ROTATION_COMPONENT_R22:
-				case ROTATION_COMPONENT_R23:
-				case ROTATION_COMPONENT_R31:
-				case ROTATION_COMPONENT_R32:
-				case ROTATION_COMPONENT_R33:
-				case POLYNOMIAL_COEFFICIENT_A:
-				case POLYNOMIAL_COEFFICIENT_B:
-				case POLYNOMIAL_COEFFICIENT_C:
-				case POLYNOMIAL_COEFFICIENT_D:
-				case POLYNOMIAL_COEFFICIENT_E:
-				case POLYNOMIAL_COEFFICIENT_F:
-				case POLYNOMIAL_COEFFICIENT_G:
-				case POLYNOMIAL_COEFFICIENT_H:
-				case POLYNOMIAL_COEFFICIENT_I:
-					cellValueType = CellValueType.DOUBLE;
-					break;
-				}
-				
-				if (initialGuessTextField.getCellValueType() != cellValueType) {
+				cellValueType = getCorrespondingCellValueType(newValue);
+				if (initialGuessTextField.getCellValueType() != cellValueType) 
 					initialGuessTextField.setCellValueType(cellValueType);
-				}
 			}
 		});
 
@@ -540,6 +490,62 @@ public class UnknownParameterDialog {
 		return gridPane;
 	}
 
+	static CellValueType getCorrespondingCellValueType(ParameterType parameterType) {
+		CellValueType cellValueType = CellValueType.DOUBLE;
+		switch (parameterType) {
+		case COORDINATE_X:
+		case COORDINATE_Y:
+		case COORDINATE_Z:
+		case ORIGIN_COORDINATE_X:
+		case ORIGIN_COORDINATE_Y:
+		case ORIGIN_COORDINATE_Z:
+		case RADIUS:
+		case LENGTH:
+		case PRIMARY_FOCAL_COORDINATE_X:
+		case PRIMARY_FOCAL_COORDINATE_Y:
+		case PRIMARY_FOCAL_COORDINATE_Z:
+		case SECONDARY_FOCAL_COORDINATE_X:
+		case SECONDARY_FOCAL_COORDINATE_Y:
+		case SECONDARY_FOCAL_COORDINATE_Z:
+			cellValueType = CellValueType.LENGTH;
+			break;
+		case VECTOR_LENGTH:
+		case VECTOR_X:
+		case VECTOR_Y:
+		case VECTOR_Z:
+			cellValueType = CellValueType.VECTOR;
+			break;
+		case ANGLE:
+			cellValueType = CellValueType.ANGLE;
+			break;
+		case CONSTANT:
+		case MAJOR_AXIS_COEFFICIENT:
+		case MIDDLE_AXIS_COEFFICIENT:
+		case MINOR_AXIS_COEFFICIENT:
+		case ROTATION_COMPONENT_R11:
+		case ROTATION_COMPONENT_R12:
+		case ROTATION_COMPONENT_R13:
+		case ROTATION_COMPONENT_R21:
+		case ROTATION_COMPONENT_R22:
+		case ROTATION_COMPONENT_R23:
+		case ROTATION_COMPONENT_R31:
+		case ROTATION_COMPONENT_R32:
+		case ROTATION_COMPONENT_R33:
+		case POLYNOMIAL_COEFFICIENT_A:
+		case POLYNOMIAL_COEFFICIENT_B:
+		case POLYNOMIAL_COEFFICIENT_C:
+		case POLYNOMIAL_COEFFICIENT_D:
+		case POLYNOMIAL_COEFFICIENT_E:
+		case POLYNOMIAL_COEFFICIENT_F:
+		case POLYNOMIAL_COEFFICIENT_G:
+		case POLYNOMIAL_COEFFICIENT_H:
+		case POLYNOMIAL_COEFFICIENT_I:
+			cellValueType = CellValueType.DOUBLE;
+			break;
+		}
+		return cellValueType;
+	}
+	
 	static StringConverter<ProcessingType> createProcessingTypeStringConverter() {
 		return new StringConverter<ProcessingType>() {
 
