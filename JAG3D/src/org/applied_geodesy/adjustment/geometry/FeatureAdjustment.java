@@ -732,11 +732,11 @@ public class FeatureAdjustment {
 		Vector dx = (dxk.size() == this.numberOfUnknownParameters) ? dxk : Matrices.getSubVector(dxk, Matrices.index(0, this.numberOfUnknownParameters));
 
 		if (this.adaptedDampingValue > 0) {
-			// reduce the step length, if damping value is <1
-			if (this.adaptedDampingValue < 1) {
-				double alpha = 0.5;// * Math.pow(this.adaptedDampingValue, -0.075);
-				alpha = Math.min(alpha, 1.0);
-				dx.scale(alpha);
+			// reduce the step length
+			if (this.adaptedDampingValue != 0) {
+				double alpha = 0.25 * Math.pow(this.adaptedDampingValue, -0.05);
+				alpha = Math.min(alpha, 0.75);
+				dxk.scale(alpha);
 			}
 			
 			double prevOmega = this.varianceComponentOfUnitWeight.getOmega();
@@ -747,10 +747,10 @@ public class FeatureAdjustment {
 			this.varianceComponentOfUnitWeight.setOmega(curOmega);
 			
 			if (lmaConverge) {
-				this.adaptedDampingValue *= 0.1;
+				this.adaptedDampingValue *= 0.2;
 			}
 			else {
-				this.adaptedDampingValue *= 10.0;
+				this.adaptedDampingValue *= 5.0;
 				
 				// Um unendlich zu vermeiden
 				if (this.adaptedDampingValue > 1.0/SQRT_EPS) {
@@ -762,6 +762,7 @@ public class FeatureAdjustment {
 
 				// Aktuelle Lösung ist schlechter als die letzte --> abbrechen
 				this.maxAbsDx = this.lastValidmaxAbsDx;
+				dxk.zero();
 				return;
 			}
 		}
