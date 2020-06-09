@@ -173,7 +173,7 @@ public abstract class NISTTest {
 				return feature;
 
 		} catch (MatrixSingularException | IllegalArgumentException | UnsupportedOperationException | NotConvergedException e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 
 		return null;
