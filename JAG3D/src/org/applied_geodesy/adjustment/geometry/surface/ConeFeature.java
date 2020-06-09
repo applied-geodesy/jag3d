@@ -214,8 +214,7 @@ public class ConeFeature extends SurfaceFeature {
 		double x0 = -0.5 * u.get(0);
 		double y0 = -0.5 * u.get(1);
 		double z0 = -0.5 * u.get(2);
-		
-		
+
 		// solving eigen-system
 		SymmPackEVD evd = new SymmPackEVD(dim, true, true);
 		evd.factor(H);
@@ -228,41 +227,41 @@ public class ConeFeature extends SurfaceFeature {
 		int order[] = new int[]{0,1,2};
 		if (Math.signum(eval[0]) == Math.signum(eval[1])) {
 			a = Math.sqrt(Math.abs(eval[0]/eval[2]));
-			b = Math.sqrt(Math.abs(eval[1]/eval[2]));
-			if (a > b)
+			c = Math.sqrt(Math.abs(eval[1]/eval[2]));
+			if (a > c)
 				order = new int[]{0,1,2};
 			else {
 				order = new int[]{1,0,2};
 				double tmp = a;
-				a = b;
-				b = tmp;
+				a = c;
+				c = tmp;
 			}
 		}
 		else if (Math.signum(eval[0]) == Math.signum(eval[2])) {
 			a = Math.sqrt(Math.abs(eval[0]/eval[1]));
-			b = Math.sqrt(Math.abs(eval[2]/eval[1]));
-			if (a > b)
+			c = Math.sqrt(Math.abs(eval[2]/eval[1]));
+			if (a > c)
 				order = new int[]{0,2,1};
 			else {
 				order = new int[]{2,0,1};
 				double tmp = a;
-				a = b;
-				b = tmp;
+				a = c;
+				c = tmp;
 			}
 		}
 		else { //if (Math.signum(eigVal[1]) == Math.signum(eigVal[2])) 
 			a = Math.sqrt(Math.abs(eval[1]/eval[0]));
-			b = Math.sqrt(Math.abs(eval[2]/eval[0]));
-			if (a > b)
+			c = Math.sqrt(Math.abs(eval[2]/eval[0]));
+			if (a > c)
 				order = new int[]{1,2,0};
 			else {
 				order = new int[]{2,1,0};
 				double tmp = a;
-				a = b;
-				b = tmp;
+				a = c;
+				c = tmp;
 			}
 		}
-		
+
 		// interchange eigen-vectors depending on the order of the eigen-values 
 		Matrix rotation = new DenseMatrix(dim, dim);
 		for (int row = 0; row < dim; row++) {
@@ -271,7 +270,7 @@ public class ConeFeature extends SurfaceFeature {
 				rotation.set(row, column, evec.get(row, idx));
 			}
 		}
-		
+
 		// transpose of rotation matrix
 		double r11 = rotation.get(0, 0);
 		double r12 = rotation.get(1, 0);
@@ -285,6 +284,6 @@ public class ConeFeature extends SurfaceFeature {
 		double r32 = rotation.get(1, 2);
 		double r33 = rotation.get(2, 2);
 		
-		cone.setInitialGuess(x0, y0, z0, a, b, r11, r12, r13, r21, r22, r23, r31, r32, r33);
+		cone.setInitialGuess(x0, y0, z0, a, c, r11, r12, r13, r21, r22, r23, r31, r32, r33);
 	}
 }
