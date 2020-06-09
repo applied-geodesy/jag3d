@@ -28,10 +28,10 @@ import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.geometry.Feature;
 import org.applied_geodesy.adjustment.geometry.parameter.ParameterType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
-import org.applied_geodesy.adjustment.geometry.surface.CircularConeFeature;
+import org.applied_geodesy.adjustment.geometry.surface.ConeFeature;
 
-public class CircularConeTest extends NISTTest {
-	private CircularConeTest() {}
+public class ConeTest extends NISTTest {
+	private ConeTest() {}
 
 	@Override
 	void compare(List<Double> referenceResults, List<UnknownParameter> unknownParameters) {
@@ -67,10 +67,10 @@ public class CircularConeTest extends NISTTest {
 		z0Ref = z0Ref - dRef * nzRef;
 
 		double references[] = new double[] {
-				x0Ref, y0Ref, z0Ref, xApexRef, yApexRef, zApexRef, nxRef, nyRef, nzRef, phiRef, 1.0/Math.tan(phiRef)	
+				x0Ref, y0Ref, z0Ref, xApexRef, yApexRef, zApexRef, nxRef, nyRef, nzRef, 1.0/Math.tan(phiRef), 1.0/Math.tan(phiRef)	
 		};
 
-		double xApex = 0, yApex = 0, zApex = 0, x0 = 0, y0 = 0, z0 = 0, nx = 0, ny = 0, nz = 0, phi = 0, b = 0;
+		double xApex = 0, yApex = 0, zApex = 0, x0 = 0, y0 = 0, z0 = 0, nx = 0, ny = 0, nz = 0, a = 0, c = 0;
 		for (UnknownParameter unknownParameter : unknownParameters) {
 			if (unknownParameter.getParameterType() == ParameterType.ORIGIN_COORDINATE_X)
 				xApex = unknownParameter.getValue();
@@ -84,10 +84,10 @@ public class CircularConeTest extends NISTTest {
 				ny = unknownParameter.getValue();
 			else if (unknownParameter.getParameterType() == ParameterType.ROTATION_COMPONENT_R33)
 				nz = unknownParameter.getValue();
-			else if (unknownParameter.getParameterType() == ParameterType.ANGLE)
-				phi = unknownParameter.getValue();
 			else if (unknownParameter.getParameterType() == ParameterType.MAJOR_AXIS_COEFFICIENT)
-				b = unknownParameter.getValue();
+				a = unknownParameter.getValue();
+			else if (unknownParameter.getParameterType() == ParameterType.MINOR_AXIS_COEFFICIENT)
+				c = unknownParameter.getValue();
 		}
 
 		double d = nx * xApex + ny * yApex + nz * zApex;
@@ -98,7 +98,7 @@ public class CircularConeTest extends NISTTest {
 		z0 = zApex - d * nz;
 		
 		double solution[] = new double[] {
-				x0, y0, z0, xApex, yApex, zApex, nx, ny, nz, phi, b	
+				x0, y0, z0, xApex, yApex, zApex, nx, ny, nz, a, c	
 		};
 		
 		List<ParameterType> types = List.of(
@@ -111,8 +111,8 @@ public class CircularConeTest extends NISTTest {
 				ParameterType.ROTATION_COMPONENT_R31,
 				ParameterType.ROTATION_COMPONENT_R32,
 				ParameterType.ROTATION_COMPONENT_R33,
-				ParameterType.ANGLE,
-				ParameterType.MAJOR_AXIS_COEFFICIENT
+				ParameterType.MAJOR_AXIS_COEFFICIENT,
+				ParameterType.MINOR_AXIS_COEFFICIENT
 		);
 
 		for (int i = 0; i < types.size(); i++) {
@@ -123,7 +123,7 @@ public class CircularConeTest extends NISTTest {
 	
 	@Override
 	Feature getFeature() {
-		return new CircularConeFeature();
+		return new ConeFeature();
 	}
 	
 	@Override
@@ -133,7 +133,7 @@ public class CircularConeTest extends NISTTest {
 	
 	@Override
 	double getLambda() {
-		return 10.0;
+		return 100.0;
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -141,7 +141,7 @@ public class CircularConeTest extends NISTTest {
 		System.setProperty("com.github.fommil.netlib.LAPACK", "com.github.fommil.netlib.F2jLAPACK");
 		System.setProperty("com.github.fommil.netlib.ARPACK", "com.github.fommil.netlib.F2jARPACK");
 		
-		NISTTest test = new CircularConeTest();
+		NISTTest test = new ConeTest();
 		test.start("./nist/Cone/");
 	}
 }
