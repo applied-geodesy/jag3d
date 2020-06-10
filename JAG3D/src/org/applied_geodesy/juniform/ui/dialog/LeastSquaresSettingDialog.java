@@ -71,7 +71,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 	private FeatureAdjustment adjustment;
 	private LeastSquaresSettingDialog() {}
 	private FormatterOptions options = FormatterOptions.getInstance();
-	private boolean enableUnscentedTransformation = true;
+	private boolean enableUnscentedTransformation = false;
 	
 	public static void setOwner(Window owner) {
 		leastSquaresSettingDialog.window = owner;
