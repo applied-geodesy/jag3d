@@ -96,6 +96,6 @@ public class SpatialCircleTest extends NISTTest {
 		test2d.start("./nist/Circle2d/");
 		
 		NISTTest test3d = new SpatialCircleTest();
-		test3d.start("./nist/Circle3d/");
+		test3d.start("./nist/Circle3d_full/");
 	}
 }
