@@ -188,31 +188,37 @@ public class SpatialLineFeature extends SurfaceFeature {
 		this.zCoordinateInPlaneU.setValue(z0);
 	}
 	
-	public static void deriveInitialGuess(Collection<? extends Point> points, SpatialLineFeature feature) throws IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
+	public static void deriveInitialGuess(Collection<? extends FeaturePoint> points, SpatialLineFeature feature) throws IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
 		deriveInitialGuess(points, feature.planeU, feature.planeV);
 	}
 	
-	public static void deriveInitialGuess(Collection<? extends Point> points, Plane planeU, Plane planeV) throws IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
-		int nop = points.size();
-		
-		if (nop < 2)
-			throw new IllegalArgumentException("Error, the number of points is not sufficient; at least 2 points are needed.");
-		
+	public static void deriveInitialGuess(Collection<? extends FeaturePoint> points, Plane planeU, Plane planeV) throws IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
+		int nop = 0;
 		double x0 = 0, y0 = 0, z0 = 0;
-		for (Point point : points) {
+		for (FeaturePoint point : points) {
+			if (!point.isEnable())
+				continue;
+			
 			x0 += point.getX0();
 			y0 += point.getY0();
 			z0 += point.getZ0();
 			if (planeU.getDimension() > point.getDimension())
 				throw new IllegalArgumentException("Error, could not estimate center of mass because dimension of points is inconsistent, " + planeU.getDimension() + " != " + point.getDimension());
 		}
+		
+		if (nop < 2)
+			throw new IllegalArgumentException("Error, the number of points is not sufficient; at least 2 points are needed.");
+		
 		x0 /= nop;
 		y0 /= nop;
 		z0 /= nop;
 
 		UpperSymmPackMatrix H = new UpperSymmPackMatrix(3);
 
-		for (Point point : points) {
+		for (FeaturePoint point : points) {
+			if (!point.isEnable())
+				continue;
+			
 			double xi = point.getX0() - x0;
 			double yi = point.getY0() - y0;
 			double zi = point.getZ0() - z0;
