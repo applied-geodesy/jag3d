@@ -175,14 +175,14 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 		this.focusedProperty().addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+				setText(getEditorFormat(getNumber()));
 				if (!newValue.booleanValue()) {
 					parseAndFormatInput();
 					setText(getRendererFormat(getNumber()));
 				}
-				else {
-					setText(getEditorFormat(getNumber()));
-				}
-				
+//				else {
+//					setText(getEditorFormat(getNumber()));
+//				}
 			}
 		});
 
