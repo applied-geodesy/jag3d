@@ -128,10 +128,22 @@ public class FeatureAdjustmentDialog {
 				this.updateMessage(i18n.getString("FeatureAdjustmentDialog.save.label", "Save results\u2026"));
 				this.updateIterationProgressMessage(i18n.getString("FeatureAdjustmentDialog.pleasewait.label", "Please wait\u2026"));
 				this.updateConvergenceProgressMessage(null);
-				UIPointTableBuilder.getInstance().getTable().refresh();
-				UIPointTableBuilder.getInstance().getTable().sort();
-				UIParameterTableBuilder.getInstance().getTable().refresh();
-				UIParameterTableBuilder.getInstance().getTable().sort();
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							UIPointTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
+							UIPointTableBuilder.getInstance().getTable().refresh();
+							UIPointTableBuilder.getInstance().getTable().sort();
+							UIParameterTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
+							UIParameterTableBuilder.getInstance().getTable().refresh();
+							UIParameterTableBuilder.getInstance().getTable().sort();
+						}
+						catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
 				return returnType;
 			}
 			finally {
