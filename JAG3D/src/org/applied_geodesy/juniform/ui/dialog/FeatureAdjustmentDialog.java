@@ -523,11 +523,17 @@ public class FeatureAdjustmentDialog {
 					}
 					throwable.printStackTrace();
 				}
-				UITreeBuilder.getInstance().getTree().getSelectionModel().select(0);
-				UIPointTableBuilder.getInstance().getTable().refresh();
-				UIPointTableBuilder.getInstance().getTable().sort();
-				UIParameterTableBuilder.getInstance().getTable().refresh();
-				UIParameterTableBuilder.getInstance().getTable().sort();
+				try {
+					UIPointTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
+					UIPointTableBuilder.getInstance().getTable().refresh();
+					UIPointTableBuilder.getInstance().getTable().sort();
+					UIParameterTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
+					UIParameterTableBuilder.getInstance().getTable().refresh();
+					UIParameterTableBuilder.getInstance().getTable().sort();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		});
 
