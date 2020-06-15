@@ -131,6 +131,9 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 				return point;
 			
 			sigmaY = sigmaX = options.convertLengthToModel(scanner.nextDouble());
+			
+			if (sigmaX <= 0 || sigmaY <= 0)
+				return point;
 
 			// uncertainty: sigma Y
 			if (!scanner.hasNextDouble()) {
@@ -142,6 +145,9 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 			}
 			
 			sigmaY = options.convertLengthToModel(scanner.nextDouble());
+			
+			if (sigmaX <= 0 || sigmaY <= 0)
+				return point;
 			
 			// fully populated co-variance: varX covXY varY
 			// correlation: XY
@@ -158,6 +164,9 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 			double covXY = options.convertLengthToModel(sigmaY);
 
 			double varY  = options.convertLengthToModel(options.convertLengthToModel(scanner.nextDouble()));
+			
+			if (varX <= 0 || varY <= 0)
+				return point;
 			
 			Matrix dispersion = new UpperSymmPackMatrix(point.getDimension());
 			dispersion.set(0, 0, varX);
@@ -208,6 +217,8 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 				return point;
 
 			sigmaX = sigmaY = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+			if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
+				return point;
 
 			// uncertainty: sigma Y (or sigma Z)
 			if (!scanner.hasNextDouble()) {
@@ -220,6 +231,8 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 			}
 
 			sigmaY = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+			if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
+				return point;
 
 			// uncertainty: sigma Z
 			if (!scanner.hasNextDouble()) {
@@ -232,6 +245,8 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 			}
 
 			sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+			if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
+				return point;
 
 			// fully populated co-variance: varX covXY covXZ varY covYZ varZ
 			// correlation: XYZ
@@ -253,6 +268,9 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 			double covYZ = options.convertLengthToModel(options.convertLengthToModel(scanner.nextDouble()));
 			
 			double varZ  = options.convertLengthToModel(options.convertLengthToModel(scanner.nextDouble()));
+			
+			if (varX <= 0 || varY <= 0 || varZ <= 0)
+				return point;
 			
 			Matrix dispersion = new UpperSymmPackMatrix(point.getDimension());
 			dispersion.set(0, 0, varX);

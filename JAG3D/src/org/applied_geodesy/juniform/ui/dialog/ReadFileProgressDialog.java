@@ -93,7 +93,7 @@ public class ReadFileProgressDialog<T> {
 				T result = null;
 				for (int i = 0; i < this.selectedFiles.size(); i++) {
 					File file = this.selectedFiles.get(i);
-					this.updateProgressMessage(String.format(Locale.ENGLISH, i18n.getString("ReadFileProgressDialog.sourcefile.label", "File %d of %d: %s - Please wait\u2026"), (i+1), this.selectedFiles.size(), file.getName()));
+					this.updateProgressMessage(String.format(Locale.ENGLISH, i18n.getString("ReadFileProgressDialog.sourcefile.label", "File %d of %d - Please wait\u2026\r\n%s"), (i+1), this.selectedFiles.size(), file.getName()));
 					this.reader.setPath(file.toPath(), Boolean.FALSE);
 					result = this.reader.readAndImport();
 					this.updateProgressMessage(i18n.getString("ReadFileProgressDialog.pleasewait.label", "Please wait\u2026"));
