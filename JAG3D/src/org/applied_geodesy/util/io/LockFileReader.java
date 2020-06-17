@@ -87,7 +87,7 @@ public abstract class LockFileReader {
 			FileInputStream inputStream = new FileInputStream( sourceFile );
 			CountingInputStream countingInputStream = new CountingInputStream(inputStream);
 			inputStream.getChannel().lock(0, Long.MAX_VALUE, true);
-			reader = new BufferedReader(new InputStreamReader(countingInputStream, Charset.forName("UTF-8")));
+			reader = new BufferedReader(new InputStreamReader(countingInputStream, Charset.forName("UTF-8")), 1024*64);
 
 			String currentLine = null;
 			while (!this.interrupt && (currentLine = reader.readLine()) != null) {
