@@ -79,7 +79,7 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 	@Override
 	public void reset() {
 		if (this.points == null)
-			 this.points = new ObservableUniqueList<FeaturePoint>();
+			 this.points = new ObservableUniqueList<FeaturePoint>(10000);
 		this.points.clear();
 	}
 
