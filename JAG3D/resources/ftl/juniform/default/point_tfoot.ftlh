@@ -55,6 +55,15 @@
 		<#if feature_points.dimension != 2>
 			<td><@printFormattedNumber value=feature_points.max_gross_error_z format=df_length_residual/></td>
 		</#if>
+		
+		<#if feature_points.dimension != 1>
+			<td></td>
+			<td></td>
+		</#if>
+		
+		<#if feature_points.dimension != 2>
+			<td></td>
+		</#if>
 			
 		<td></td>
 		<td></td>
