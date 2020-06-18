@@ -425,6 +425,9 @@ public class FTLReport {
 				h.put("residual_x", options.convertLengthResidualToView(point.getResidualX()));
 				h.put("residual_y", options.convertLengthResidualToView(point.getResidualY()));
 				
+				h.put("minimal_detectable_bias_x", options.convertLengthResidualToView(point.getMinimalDetectableBiasX()));
+				h.put("minimal_detectable_bias_y", options.convertLengthResidualToView(point.getMinimalDetectableBiasY()));
+				
 				double grossErrorX = options.convertLengthResidualToView(point.getGrossErrorX());
 				double grossErrorY = options.convertLengthResidualToView(point.getGrossErrorY());
 				
@@ -453,6 +456,8 @@ public class FTLReport {
 				h.put("sigma_z", options.convertLengthUncertaintyToView(point.getUncertaintyZ()));
 				
 				h.put("residual_z", options.convertLengthResidualToView(point.getResidualZ()));
+				
+				h.put("minimal_detectable_bias_z", options.convertLengthResidualToView(point.getMinimalDetectableBiasZ()));
 				
 				double grossErrorZ = options.convertLengthResidualToView(point.getGrossErrorZ());
 				
