@@ -398,19 +398,19 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 			break;
 		case 2:
 			if (newValue != null && newValue instanceof Double) {
-				featurePoint.setY0((Double)newValue);	
-				valid = true;
-			}
-			else
-				featurePoint.setY0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
-			break;
-		case 3:
-			if (newValue != null && newValue instanceof Double) {
 				featurePoint.setX0((Double)newValue);	
 				valid = true;
 			}
 			else
 				featurePoint.setX0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
+			break;
+		case 3:
+			if (newValue != null && newValue instanceof Double) {
+				featurePoint.setY0((Double)newValue);	
+				valid = true;
+			}
+			else
+				featurePoint.setY0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		case 5:
 			if (newValue != null && newValue instanceof Double) {
