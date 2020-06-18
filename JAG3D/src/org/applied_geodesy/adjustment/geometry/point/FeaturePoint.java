@@ -58,6 +58,10 @@ public class FeaturePoint extends Point implements Iterable<GeometricPrimitive> 
 	private ObjectProperty<Double> grossErrorY = new SimpleObjectProperty<Double>(this, "grossErrorY", 0.0);
 	private ObjectProperty<Double> grossErrorZ = new SimpleObjectProperty<Double>(this, "grossErrorZ", 0.0);
 	
+	private ObjectProperty<Double> minimalDetectableBiasX = new SimpleObjectProperty<Double>(this, "minimalDetectableBiasX", 0.0);
+	private ObjectProperty<Double> minimalDetectableBiasY = new SimpleObjectProperty<Double>(this, "minimalDetectableBiasY", 0.0);
+	private ObjectProperty<Double> minimalDetectableBiasZ = new SimpleObjectProperty<Double>(this, "minimalDetectableBiasZ", 0.0);
+	
 	private ObjectProperty<Double> cofactorX = new SimpleObjectProperty<Double>(this, "cofactorX", 0.0);
 	private ObjectProperty<Double> cofactorY = new SimpleObjectProperty<Double>(this, "cofactorY", 0.0);
 	private ObjectProperty<Double> cofactorZ = new SimpleObjectProperty<Double>(this, "cofactorZ", 0.0);
@@ -309,6 +313,42 @@ public class FeaturePoint extends Point implements Iterable<GeometricPrimitive> 
 		return this.redundancyZ;
 	}
 	
+	public double getMinimalDetectableBiasX() {
+		return this.minimalDetectableBiasX.get();
+	}
+	
+	public void setMinimalDetectableBiasX(double minimalDetectableBiasX) {
+		this.minimalDetectableBiasX.set(minimalDetectableBiasX);
+	}
+	
+	public ObjectProperty<Double> minimalDetectableBiasXProperty() {
+		return this.minimalDetectableBiasX;
+	}
+	
+	public double getMinimalDetectableBiasY() {
+		return this.minimalDetectableBiasY.get();
+	}
+	
+	public void setMinimalDetectableBiasY(double minimalDetectableBiasY) {
+		this.minimalDetectableBiasY.set(minimalDetectableBiasY);
+	}
+	
+	public ObjectProperty<Double> minimalDetectableBiasYProperty() {
+		return this.minimalDetectableBiasY;
+	}
+	
+	public double getMinimalDetectableBiasZ() {
+		return this.minimalDetectableBiasZ.get();
+	}
+	
+	public void setMinimalDetectableBiasZ(double minimalDetectableBiasZ) {
+		this.minimalDetectableBiasZ.set(minimalDetectableBiasZ);
+	}
+	
+	public ObjectProperty<Double> minimalDetectableBiasZProperty() {
+		return this.minimalDetectableBiasZ;
+	}
+	
 	public double getGrossErrorX() {
 		return this.grossErrorX.get();
 	}
@@ -539,6 +579,10 @@ public class FeaturePoint extends Point implements Iterable<GeometricPrimitive> 
 		this.setGrossErrorX(0);
 		this.setGrossErrorY(0);
 		this.setGrossErrorZ(0);
+		
+		this.setMinimalDetectableBiasX(0);
+		this.setMinimalDetectableBiasY(0);
+		this.setMinimalDetectableBiasZ(0);
 		
 		this.setCofactorX(0);
 		this.setCofactorY(0);

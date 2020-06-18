@@ -970,7 +970,7 @@ public class FeatureAdjustment {
 				point.setResidualY(residuals.get(1));
 			}
 			if (dim != 2)
-				point.setResidualZ(residuals.get(2));
+				point.setResidualZ(residuals.get(dim - 1));
 		
 			// residuals are estimated - needed for deriving nabla
 			if (estimateStochasticParameters) {
@@ -978,11 +978,12 @@ public class FeatureAdjustment {
 				// test statistic depends on number of equation (i.e. number of geometries but not on the dimension of the point)
 				TestStatisticParameterSet testStatisticParametersAprio = this.testStatisticParameters.getTestStatisticParameter(nog, Double.POSITIVE_INFINITY);
 				TestStatisticParameterSet testStatisticParametersApost = this.testStatisticParameters.getTestStatisticParameter(nog, dof-nog);
+				double noncentralityParameter = Math.sqrt(Math.abs(testStatisticParametersAprio.getNoncentralityParameter()));
 				
 				point.setFisherQuantileApriori(testStatisticParametersAprio.getQuantile());
 				point.setFisherQuantileAposteriori(testStatisticParametersApost.getQuantile());
 				
-				this.addStochasticParameters(point, Jx, Jv, Ww);
+				this.addStochasticParameters(point, Jx, Jv, Ww, noncentralityParameter);
 			}
 		}
 		return omega;
@@ -1021,7 +1022,7 @@ public class FeatureAdjustment {
 		return this.inv(D, true);
 	}
 	
-	private void addStochasticParameters(FeaturePoint point, Matrix Jx, Matrix Jv, UpperSymmPackMatrix Ww) throws NotConvergedException, MatrixSingularException, IllegalArgumentException {
+	private void addStochasticParameters(FeaturePoint point, Matrix Jx, Matrix Jv, UpperSymmPackMatrix Ww, double nonCentralityParameter) throws NotConvergedException, MatrixSingularException, IllegalArgumentException {
 		int nou = this.numberOfUnknownParameters;
 		int nog = point.getNumberOfGeomtries();
 		int dim = point.getDimension();
@@ -1085,9 +1086,8 @@ public class FeatureAdjustment {
 
 		// estimates redundancies R = P * Qvv
 		Matrix P = point.getInvertedDispersion(false);
-		P.scale(this.varianceComponentOfUnitWeight.getVariance0());
 		Matrix R = new DenseMatrix(dim,dim);
-		P.mult(QllJvTWJxQxxJxTWJvQll, R);
+		P.mult(this.varianceComponentOfUnitWeight.getVariance0(), QllJvTWJxQxxJxTWJvQll, R);
 		
 		double redundancy = 0;
 		for (int row = 0; row < dim; row++) {
@@ -1125,7 +1125,7 @@ public class FeatureAdjustment {
 		if (redundancy > Math.sqrt(Constant.EPS)) {
 			// estimates Qnabla = P * Qvv * P = R * Qvv
 			Matrix PQvvP = new UpperSymmPackMatrix(dim);
-			R.mult(P, PQvvP);
+			R.mult(this.varianceComponentOfUnitWeight.getVariance0(), P, PQvvP);
 
 			Vector residuals = new DenseVector(dim);
 			if (dim != 1) {
@@ -1136,18 +1136,36 @@ public class FeatureAdjustment {
 				residuals.set(dim - 1, point.getResidualZ());
 			
 			Vector weightedResiduals = new DenseVector(dim);
-			P.mult(residuals,  weightedResiduals);
+			P.mult(this.varianceComponentOfUnitWeight.getVariance0(), residuals,  weightedResiduals);
 
 			Vector grossErrors = new DenseVector(dim);
-			PQvvP = MathExtension.pinv(PQvvP, nog);
-			PQvvP.mult(-1.0, weightedResiduals, grossErrors);
+			Matrix invPQvvP = MathExtension.pinv(PQvvP, nog);
+			invPQvvP.mult(-1.0, weightedResiduals, grossErrors);
 			if (dim != 1) {
 				point.setGrossErrorX(grossErrors.get(0));
 				point.setGrossErrorY(grossErrors.get(1));
 			}
 			if (dim != 2)
-				point.setGrossErrorZ(grossErrors.get(2));
+				point.setGrossErrorZ(grossErrors.get(dim - 1));
 
+			// estimate minimal detectable bias, using same orientation as gross error vector
+			// nabla0 * Pnn * nabla0 == 1  or  nabla0 * Pnn * nabla0 == ncp
+			Vector minimalDetectableBias = new DenseVector(grossErrors, true);
+			Vector weightedMinimalDetectableBias = new DenseVector(dim);
+			PQvvP.mult(1.0/this.varianceComponentOfUnitWeight.getVariance0(),minimalDetectableBias, weightedMinimalDetectableBias);
+
+			double nQn0 = minimalDetectableBias.dot(weightedMinimalDetectableBias);
+			for (int j = 0; j < dim; j++)
+				if (nQn0 > 0)
+					minimalDetectableBias.set(j, minimalDetectableBias.get(j) / Math.sqrt(nQn0));
+
+			if (dim != 1) {
+				point.setMinimalDetectableBiasX(nonCentralityParameter * minimalDetectableBias.get(0));
+				point.setMinimalDetectableBiasY(nonCentralityParameter * minimalDetectableBias.get(1));
+			}
+			if (dim != 2)
+				point.setMinimalDetectableBiasZ(nonCentralityParameter * minimalDetectableBias.get(dim - 1));
+			
 			// change sign, i.e. residual vs. error
 			double T = -weightedResiduals.dot(grossErrors);
 			point.getTestStatistic().setFisherTestNumerator(T);
