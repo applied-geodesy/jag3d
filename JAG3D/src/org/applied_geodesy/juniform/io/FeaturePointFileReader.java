@@ -131,12 +131,12 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 				return point;
 			
 			sigmaY = sigmaX = options.convertLengthToModel(scanner.nextDouble());
-			
-			if (sigmaX <= 0 || sigmaY <= 0)
-				return point;
 
 			// uncertainty: sigma Y
 			if (!scanner.hasNextDouble()) {
+				if (sigmaX <= 0 || sigmaY <= 0)
+					return point;
+				
 				Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 				dispersion.set(0, 0, sigmaX * sigmaX);
 				dispersion.set(1, 1, sigmaY * sigmaY);
@@ -146,12 +146,12 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 			
 			sigmaY = options.convertLengthToModel(scanner.nextDouble());
 			
-			if (sigmaX <= 0 || sigmaY <= 0)
-				return point;
-			
 			// fully populated co-variance: varX covXY varY
 			// correlation: XY
 			if (!scanner.hasNextDouble()) {
+				if (sigmaX <= 0 || sigmaY <= 0)
+					return point;
+				
 				Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 				dispersion.set(0, 0, sigmaX * sigmaX);
 				dispersion.set(1, 1, sigmaY * sigmaY);
@@ -217,11 +217,12 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 				return point;
 
 			sigmaX = sigmaY = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
-			if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
-				return point;
-
+			
 			// uncertainty: sigma Y (or sigma Z)
 			if (!scanner.hasNextDouble()) {
+				if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
+					return point;
+
 				Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 				dispersion.set(0, 0, sigmaX * sigmaX);
 				dispersion.set(1, 1, sigmaY * sigmaY);
@@ -231,11 +232,12 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 			}
 
 			sigmaY = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
-			if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
-				return point;
 
 			// uncertainty: sigma Z
 			if (!scanner.hasNextDouble()) {
+				if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
+					return point;
+				
 				Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 				dispersion.set(0, 0, sigmaX * sigmaX);
 				dispersion.set(1, 1, sigmaX * sigmaX);
@@ -245,12 +247,13 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 			}
 
 			sigmaZ = options.convertLengthToModel(scanner.nextDouble());
-			if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
-				return point;
 
 			// fully populated co-variance: varX covXY covXZ varY covYZ varZ
 			// correlation: XYZ
 			if (!scanner.hasNextDouble()) {
+				if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
+					return point;
+				
 				Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 				dispersion.set(0, 0, sigmaX * sigmaX);
 				dispersion.set(1, 1, sigmaY * sigmaY);
@@ -268,7 +271,7 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 			double covYZ = options.convertLengthToModel(options.convertLengthToModel(scanner.nextDouble()));
 			
 			double varZ  = options.convertLengthToModel(options.convertLengthToModel(scanner.nextDouble()));
-			
+
 			if (varX <= 0 || varY <= 0 || varZ <= 0)
 				return point;
 			
