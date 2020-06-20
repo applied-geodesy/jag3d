@@ -60,8 +60,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 	private final boolean displayUnit;
 	private final ValueSupport valueSupport;
 	private ObjectProperty<Double> number = new SimpleObjectProperty<>();
-
-	
+	private boolean typeChanged = false;
 	public DoubleTextField(CellValueType type) {
 		this(null, type, false);
 	}
@@ -102,6 +101,8 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 	
 	public void setCellValueType(CellValueType type) {
 		this.type = type;
+		this.typeChanged = true;
+		
 		double value = this.getNumber();
 		
 		if (this.check(value))
@@ -112,7 +113,6 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 		
 		if (this.check(value))
 			this.setText(this.getRendererFormat(value));
-		
 	}
 	
 	private void prepareEditorNumberFormat() {
@@ -175,14 +175,17 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 		this.focusedProperty().addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-				setText(getEditorFormat(getNumber()));
+				if (typeChanged) {
+					typeChanged = false;
+					setText(getEditorFormat(getNumber()));
+				}
 				if (!newValue.booleanValue()) {
 					parseAndFormatInput();
 					setText(getRendererFormat(getNumber()));
 				}
-//				else {
-//					setText(getEditorFormat(getNumber()));
-//				}
+				else {
+					setText(getEditorFormat(getNumber()));
+				}
 			}
 		});
 
