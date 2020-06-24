@@ -207,6 +207,6 @@ public class Plane extends Surface {
 	public String toLaTex() {
 		return "$\\mathbf{n^\\mathrm{T}} \\mathbf{P}_i = d"
 				+ " \\\\ "
-				+ "\\mathbf{u} = \\left( \\begin{array}{c} n_x \\\\ n_y \\\\ n_z \\end{array} \\right)$";
+				+ "\\mathbf{n} = \\left( \\begin{array}{c} n_x \\\\ n_y \\\\ n_z \\end{array} \\right)$";
 	}
 }
