@@ -64,7 +64,9 @@ public class ReadFileProgressDialog<T> {
 		private SourceFileReader<T> reader;
 		private double processState = 0.0;
 		private List<File> selectedFiles;
-		private long totalBytes = 0L, readedBytes = 0L;
+		private final static long DEFAULT_PARTICLE_SIZE = 1024*64;
+		private long totalBytes = 0L, readedBytes = 0L, particleSize = DEFAULT_PARTICLE_SIZE;
+		private int cnt = 1;
 		public ReadFileTask(SourceFileReader<T> reader, List<File> selectedFiles) {
 			this.reader = reader;
 			this.selectedFiles = selectedFiles;
@@ -88,6 +90,17 @@ public class ReadFileProgressDialog<T> {
 				
 				for (File file : this.selectedFiles)
 					this.totalBytes += Files.size(file.toPath());
+				
+				// estimate particle size of file size
+				this.particleSize = DEFAULT_PARTICLE_SIZE;
+				this.cnt = 1;
+				
+				int ratio = (int)Math.ceil(this.totalBytes / this.particleSize);
+				if (ratio < 15)
+					ratio = 15;
+				if (ratio > 30)
+					ratio = 30;
+				this.particleSize = (long)(this.totalBytes / ratio);
 
 				this.reader.reset();
 				T result = null;
@@ -185,21 +198,28 @@ public class ReadFileProgressDialog<T> {
 			this.selectedFiles = null;
 			this.totalBytes = 0;
 			this.readedBytes = 0;
+			this.particleSize = DEFAULT_PARTICLE_SIZE;
+			this.cnt = 1;
 			result = null;
 		}
 
 		@Override
 		public void fileProgressChanged(FileProgressEvent evt) {
+
 			if (evt.getEventType() == FileProgressEventType.READ_LINE) {
 				long readedBytes = evt.getReadedBytes();
 //				long totalBytes  = evt.getTotalBytes();
 				
 				readedBytes += this.readedBytes;
+				
+				if (readedBytes > this.cnt * this.particleSize) {
+					this.cnt++;
+					
+					double frac = Math.min((double)readedBytes / this.totalBytes, 1.0);
+					this.processState = Math.max(this.processState, frac);
 
-				double frac = Math.min((double)readedBytes / this.totalBytes, 1.0);
-				this.processState = Math.max(this.processState, frac);
-
-				this.updateProgress(this.processState, 1.0);
+					this.updateProgress(this.processState, 1.0);
+				}
 			}
 		}
 	}

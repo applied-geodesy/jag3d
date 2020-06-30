@@ -85,20 +85,22 @@ public abstract class LockFileReader {
 			long totalBytes = Files.size(this.sourceFilePath);
 			File sourceFile = this.sourceFilePath.toFile();
 			FileInputStream inputStream = new FileInputStream( sourceFile );
-			CountingInputStream countingInputStream = new CountingInputStream(inputStream);
 			inputStream.getChannel().lock(0, Long.MAX_VALUE, true);
-			reader = new BufferedReader(new InputStreamReader(countingInputStream, Charset.forName("UTF-8")), 1024*64);
+			reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")), 1024*64);
 
+			long readedBytes = 0L;
 			String currentLine = null;
 			while (!this.interrupt && (currentLine = reader.readLine()) != null) {
+				readedBytes += currentLine.length();
+
 				if (isFirstLine && currentLine.startsWith(UTF8_BOM)) {
 					currentLine = currentLine.substring(1); 
 					isFirstLine = false;
 				}
+
 				if (!currentLine.trim().isEmpty() && (this.ignoreStartString.isEmpty() || !currentLine.startsWith( this.ignoreStartString )))
 					this.parse(currentLine);
-				
-				long readedBytes = countingInputStream.getReadedBytes();
+
 				this.fireFileProgressChanged(sourceFile, FileProgressEventType.READ_LINE, readedBytes, totalBytes);
 			}
 			this.fireFileProgressChanged(sourceFile, FileProgressEventType.READ_LINE, totalBytes, totalBytes);
