@@ -21,9 +21,6 @@
 
 package org.applied_geodesy.jag3d.ui.table.row;
 
-import java.util.Locale;
-import java.util.Scanner;
-
 import org.applied_geodesy.util.FormatterOptions;
 
 import javafx.beans.property.BooleanProperty;
@@ -1003,52 +1000,48 @@ public class PointRow extends GroupRow {
 	
 	private static PointRow scan1D(String str) {
 		FormatterOptions options = FormatterOptions.getInstance();
-		Scanner scanner = new Scanner( str.trim() );
 		try {
-			scanner.useLocale( Locale.ENGLISH );
-			String name; 
-			double x = 0.0, y = 0.0, z = 0.0;
-			double sigmaZ = 0.0;
-
+			String data[] = str.trim().split("[\\s;]+");
+			
+			if (data.length < 2)
+				return null;
+			
 			PointRow row = new PointRow();
 			
-			// Name of point
-			if (!scanner.hasNext())
-				return null;
-			name = scanner.next();
+			String name = data[0];
+			double x = 0.0, y = 0.0, z = 0.0;
+			double sigmaZ = 0.0;
+			
 			row.setName(name);
 			
-			// Y or Z 		
-			if (!scanner.hasNextDouble())
-				return null;
-			y = z = options.convertLengthToModel(scanner.nextDouble());
+			// Y or Z
+			y = z = options.convertLengthToModel(Double.parseDouble(data[1].replace(',', '.')));
 
-			// X or Sigma
-			if (!scanner.hasNextDouble()) {
+			if (data.length < 3) {
 				row.setZApriori(z);	
 				return row;
 			}
 			
-			x = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+			x = sigmaZ = options.convertLengthToModel(Double.parseDouble(data[2].replace(',', '.')));
 
 			// Z
-			if (!scanner.hasNextDouble()) {
+			if (data.length < 4) {
 				row.setZApriori(z);	
 				row.setSigmaZapriori(sigmaZ);	
 				return row;
 			}
 			
-			z = options.convertLengthToModel(scanner.nextDouble());
+			z = options.convertLengthToModel(Double.parseDouble(data[3].replace(',', '.')));
 
 			// Sigma
-			if (!scanner.hasNextDouble()) {
+			if (data.length < 5) {
 				row.setYApriori(y);	
 				row.setXApriori(x);	
 				row.setZApriori(z);	
 				return row;
 			}
 			
-			sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+			sigmaZ = options.convertLengthToModel(Double.parseDouble(data[4].replace(',', '.')));
 			
 			row.setYApriori(y);	
 			row.setXApriori(x);	
@@ -1057,48 +1050,47 @@ public class PointRow extends GroupRow {
 			
 			return row;
 		}
-		finally {
-			scanner.close();
+		catch (Exception e) {
+			// e.printStackTrace();
 		}
+		return null;
 	}
 	
 	private static PointRow scan2D(String str) {
 		FormatterOptions options = FormatterOptions.getInstance();
-		Scanner scanner = new Scanner( str.trim() );
-		try {
-			scanner.useLocale( Locale.ENGLISH );
-			String name; 
-			double y = 0.0, x = 0.0;
-			double sigmaY = 0.0, sigmaX = 0.0;
 
-			PointRow row = new PointRow();
-			// Name of point
-			if (!scanner.hasNext())
+		try {
+			String data[] = str.trim().split("[\\s;]+");
+			
+			if (data.length < 3)
 				return null;
-			name = scanner.next();
+			
+			PointRow row = new PointRow();
+			
+			// Name of point
+			String name = data[0];
+			double x = 0.0, y = 0.0;
+			double sigmaY = 0.0, sigmaX = 0.0;
+			
 			row.setName(name);
 			
 			// Y 		
-			if (!scanner.hasNextDouble())
-				return null;
-			y = options.convertLengthToModel(scanner.nextDouble());
+			y = options.convertLengthToModel(Double.parseDouble(data[1].replace(',', '.')));
 
 			// X 		
-			if (!scanner.hasNextDouble())
-				return null;
-			x = options.convertLengthToModel(scanner.nextDouble());
+			x = options.convertLengthToModel(Double.parseDouble(data[2].replace(',', '.')));
 
 			// sigma X (or sigmaX/Y)
-			if (!scanner.hasNextDouble()) {
+			if (data.length < 4) {
 				row.setYApriori(y);
 				row.setXApriori(x);
 				return row;
 			}
 			
-			sigmaY = sigmaX = options.convertLengthToModel(scanner.nextDouble());
+			sigmaY = sigmaX = options.convertLengthToModel(Double.parseDouble(data[3].replace(',', '.')));
 
 			// sigma Y
-			if (!scanner.hasNextDouble()) {
+			if (data.length < 5) {
 				row.setYApriori(y);
 				row.setXApriori(x);
 				row.setSigmaYapriori(sigmaY);
@@ -1106,7 +1098,7 @@ public class PointRow extends GroupRow {
 				return row;
 			}
 			
-			sigmaX = options.convertLengthToModel(scanner.nextDouble());
+			sigmaX = options.convertLengthToModel(Double.parseDouble(data[4].replace(',', '.')));
 			
 			row.setYApriori(y);
 			row.setXApriori(x);
@@ -1115,54 +1107,51 @@ public class PointRow extends GroupRow {
 			
 			return row;
 		}
-		finally {
-			scanner.close();
+		catch (Exception e) {
+			// e.printStackTrace();
 		}
+		return null;
 	}
 	
 	private static PointRow scan3D(String str) {
 		FormatterOptions options = FormatterOptions.getInstance();
-		Scanner scanner = new Scanner( str.trim() );
+
 		try {
-			scanner.useLocale( Locale.ENGLISH );
-			String name; 
+			String data[] = str.trim().split("[\\s;]+");
+			
+			if (data.length < 4)
+				return null;
+			
+			PointRow row = new PointRow();
+			
+			// Name of point
+			String name = data[0];
 			double y = 0.0, x = 0.0, z = 0.0;
 			double sigmaY = 0.0, sigmaX = 0.0, sigmaZ = 0.0;
-
-			PointRow row = new PointRow();
-			// Name of point
-			if (!scanner.hasNext())
-				return null;
-			name = scanner.next();
+			
 			row.setName(name);
 			
 			// Y 		
-			if (!scanner.hasNextDouble())
-				return null;
-			y = options.convertLengthToModel(scanner.nextDouble());
+			y = options.convertLengthToModel(Double.parseDouble(data[1].replace(',', '.')));
 
 			// X 		
-			if (!scanner.hasNextDouble())
-				return null;
-			x = options.convertLengthToModel(scanner.nextDouble());
+			x = options.convertLengthToModel(Double.parseDouble(data[2].replace(',', '.')));
 
 			// Z 		
-			if (!scanner.hasNextDouble())
-				return null;
-			z = options.convertLengthToModel(scanner.nextDouble());
+			z = options.convertLengthToModel(Double.parseDouble(data[3].replace(',', '.')));
 
 			// sigma X (or sigma x/y/z)
-			if (!scanner.hasNextDouble()) {
+			if (data.length < 5) {
 				row.setYApriori(y);
 				row.setXApriori(x);
 				row.setZApriori(z);
 				return row;
 			}
 
-			sigmaY = sigmaX = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+			sigmaY = sigmaX = sigmaZ = options.convertLengthToModel(Double.parseDouble(data[4].replace(',', '.')));
 
 			// sigma Y (or sigma Z)
-			if (!scanner.hasNextDouble()) {
+			if (data.length < 6) {
 				row.setYApriori(y);
 				row.setXApriori(x);
 				row.setZApriori(z);
@@ -1174,10 +1163,10 @@ public class PointRow extends GroupRow {
 				return row;
 			}
 
-			sigmaX = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+			sigmaX = sigmaZ = options.convertLengthToModel(Double.parseDouble(data[5].replace(',', '.')));
 
 			// sigma Z
-			if (!scanner.hasNextDouble()) {
+			if (data.length < 7) {
 				row.setYApriori(y);
 				row.setXApriori(x);
 				row.setZApriori(z);
@@ -1189,7 +1178,7 @@ public class PointRow extends GroupRow {
 				return row;
 			}
 
-			sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+			sigmaZ = options.convertLengthToModel(Double.parseDouble(data[6].replace(',', '.')));
 
 			row.setYApriori(y);
 			row.setXApriori(x);
@@ -1201,10 +1190,217 @@ public class PointRow extends GroupRow {
 			
 			return row;
 		}
-		finally {
-			scanner.close();
+		catch (Exception e) {
+			// e.printStackTrace();
 		}
+		return null;
 	}
+
+	
+//	private static PointRow scan1D(String str) {
+//		FormatterOptions options = FormatterOptions.getInstance();
+//		Scanner scanner = new Scanner( str.trim() );
+//		try {
+//			scanner.useLocale( Locale.ENGLISH );
+//			String name; 
+//			double x = 0.0, y = 0.0, z = 0.0;
+//			double sigmaZ = 0.0;
+//
+//			PointRow row = new PointRow();
+//			
+//			// Name of point
+//			if (!scanner.hasNext())
+//				return null;
+//			name = scanner.next();
+//			row.setName(name);
+//			
+//			// Y or Z 		
+//			if (!scanner.hasNextDouble())
+//				return null;
+//			y = z = options.convertLengthToModel(scanner.nextDouble());
+//
+//			// X or Sigma
+//			if (!scanner.hasNextDouble()) {
+//				row.setZApriori(z);	
+//				return row;
+//			}
+//			
+//			x = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+//
+//			// Z
+//			if (!scanner.hasNextDouble()) {
+//				row.setZApriori(z);	
+//				row.setSigmaZapriori(sigmaZ);	
+//				return row;
+//			}
+//			
+//			z = options.convertLengthToModel(scanner.nextDouble());
+//
+//			// Sigma
+//			if (!scanner.hasNextDouble()) {
+//				row.setYApriori(y);	
+//				row.setXApriori(x);	
+//				row.setZApriori(z);	
+//				return row;
+//			}
+//			
+//			sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+//			
+//			row.setYApriori(y);	
+//			row.setXApriori(x);	
+//			row.setZApriori(z);	
+//			row.setSigmaZapriori(sigmaZ);
+//			
+//			return row;
+//		}
+//		finally {
+//			scanner.close();
+//		}
+//	}
+//	
+//	private static PointRow scan2D(String str) {
+//		FormatterOptions options = FormatterOptions.getInstance();
+//		Scanner scanner = new Scanner( str.trim() );
+//		try {
+//			scanner.useLocale( Locale.ENGLISH );
+//			String name; 
+//			double y = 0.0, x = 0.0;
+//			double sigmaY = 0.0, sigmaX = 0.0;
+//
+//			PointRow row = new PointRow();
+//			// Name of point
+//			if (!scanner.hasNext())
+//				return null;
+//			name = scanner.next();
+//			row.setName(name);
+//			
+//			// Y 		
+//			if (!scanner.hasNextDouble())
+//				return null;
+//			y = options.convertLengthToModel(scanner.nextDouble());
+//
+//			// X 		
+//			if (!scanner.hasNextDouble())
+//				return null;
+//			x = options.convertLengthToModel(scanner.nextDouble());
+//
+//			// sigma X (or sigmaX/Y)
+//			if (!scanner.hasNextDouble()) {
+//				row.setYApriori(y);
+//				row.setXApriori(x);
+//				return row;
+//			}
+//			
+//			sigmaY = sigmaX = options.convertLengthToModel(scanner.nextDouble());
+//
+//			// sigma Y
+//			if (!scanner.hasNextDouble()) {
+//				row.setYApriori(y);
+//				row.setXApriori(x);
+//				row.setSigmaYapriori(sigmaY);
+//				row.setSigmaXapriori(sigmaX);
+//				return row;
+//			}
+//			
+//			sigmaX = options.convertLengthToModel(scanner.nextDouble());
+//			
+//			row.setYApriori(y);
+//			row.setXApriori(x);
+//			row.setSigmaYapriori(sigmaY);
+//			row.setSigmaXapriori(sigmaX);
+//			
+//			return row;
+//		}
+//		finally {
+//			scanner.close();
+//		}
+//	}
+//	
+//	private static PointRow scan3D(String str) {
+//		FormatterOptions options = FormatterOptions.getInstance();
+//		Scanner scanner = new Scanner( str.trim() );
+//		try {
+//			scanner.useLocale( Locale.ENGLISH );
+//			String name; 
+//			double y = 0.0, x = 0.0, z = 0.0;
+//			double sigmaY = 0.0, sigmaX = 0.0, sigmaZ = 0.0;
+//
+//			PointRow row = new PointRow();
+//			// Name of point
+//			if (!scanner.hasNext())
+//				return null;
+//			name = scanner.next();
+//			row.setName(name);
+//			
+//			// Y 		
+//			if (!scanner.hasNextDouble())
+//				return null;
+//			y = options.convertLengthToModel(scanner.nextDouble());
+//
+//			// X 		
+//			if (!scanner.hasNextDouble())
+//				return null;
+//			x = options.convertLengthToModel(scanner.nextDouble());
+//
+//			// Z 		
+//			if (!scanner.hasNextDouble())
+//				return null;
+//			z = options.convertLengthToModel(scanner.nextDouble());
+//
+//			// sigma X (or sigma x/y/z)
+//			if (!scanner.hasNextDouble()) {
+//				row.setYApriori(y);
+//				row.setXApriori(x);
+//				row.setZApriori(z);
+//				return row;
+//			}
+//
+//			sigmaY = sigmaX = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+//
+//			// sigma Y (or sigma Z)
+//			if (!scanner.hasNextDouble()) {
+//				row.setYApriori(y);
+//				row.setXApriori(x);
+//				row.setZApriori(z);
+//				
+//				row.setSigmaYapriori(sigmaY);
+//				row.setSigmaXapriori(sigmaX);
+//				row.setSigmaZapriori(sigmaZ);
+//				
+//				return row;
+//			}
+//
+//			sigmaX = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+//
+//			// sigma Z
+//			if (!scanner.hasNextDouble()) {
+//				row.setYApriori(y);
+//				row.setXApriori(x);
+//				row.setZApriori(z);
+//				
+//				row.setSigmaYapriori(sigmaY);
+//				row.setSigmaXapriori(sigmaY);
+//				row.setSigmaZapriori(sigmaZ);
+//				
+//				return row;
+//			}
+//
+//			sigmaZ = options.convertLengthToModel(scanner.nextDouble());
+//
+//			row.setYApriori(y);
+//			row.setXApriori(x);
+//			row.setZApriori(z);
+//			
+//			row.setSigmaYapriori(sigmaY);
+//			row.setSigmaXapriori(sigmaX);
+//			row.setSigmaZapriori(sigmaZ);
+//			
+//			return row;
+//		}
+//		finally {
+//			scanner.close();
+//		}
+//	}
 	
 	public static PointRow scan(String str, int dimension) {
 		if (dimension == 1)
