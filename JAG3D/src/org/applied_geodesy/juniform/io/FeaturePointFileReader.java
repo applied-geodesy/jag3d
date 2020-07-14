@@ -101,8 +101,8 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 	private static FeaturePoint scanCurvePoint(String str) {
 		FormatterOptions options = FormatterOptions.getInstance();
 		String columns[] = str.trim().split("[\\s;]+");
-		
-		if (columns.length < 4)
+
+		if (columns.length < 3)
 			return null;
 		
 		String name = columns[0]; 
