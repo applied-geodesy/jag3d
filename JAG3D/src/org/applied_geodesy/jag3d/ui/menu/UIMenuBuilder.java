@@ -64,6 +64,7 @@ import org.applied_geodesy.jag3d.ui.io.GSIFileReader;
 import org.applied_geodesy.jag3d.ui.io.M5FileReader;
 import org.applied_geodesy.jag3d.ui.io.ObservationFlatFileReader;
 import org.applied_geodesy.jag3d.ui.io.PointFlatFileReader;
+import org.applied_geodesy.jag3d.ui.io.SQLScriptFileReader;
 import org.applied_geodesy.jag3d.ui.io.ZFileReader;
 import org.applied_geodesy.jag3d.ui.io.report.FTLReport;
 import org.applied_geodesy.jag3d.ui.io.sql.OADBReader;
@@ -277,9 +278,12 @@ public class UIMenuBuilder {
 		MenuItem openItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.open.label", "_Open existing project"), true, MenuItemType.OPEN, new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 		MenuItem migrateItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.migrate.label", "Migrate exi_sting project"), true, MenuItemType.MIGRATE, new KeyCodeCombination(KeyCode.M, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
 		MenuItem copyItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.copy.label", "_Copy current project and open"), true, MenuItemType.COPY, new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
+		MenuItem sqlItem     = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.sql.label", "E_xecute SQL script"), true, MenuItemType.SQL_SCRIPT, new KeyCodeCombination(KeyCode.X, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
 		MenuItem closeItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.close.label", "C_lose current project"), true, MenuItemType.CLOSE, new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 		MenuItem exitItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.exit.label", "_Exit"), true, MenuItemType.EXIT, new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 		Menu historyMenu     = this.createHistoryMenu();
+		
+		sqlItem.setVisible(false);
 		
 		parentMenu.getItems().addAll(
 				newItem, 
@@ -287,6 +291,7 @@ public class UIMenuBuilder {
 				migrateItem,
 				closeItem,
 				copyItem,
+				sqlItem,
 				new SeparatorMenuItem(),
 				historyMenu,
 				new SeparatorMenuItem(),
@@ -980,6 +985,38 @@ public class UIMenuBuilder {
 		}
 	}
 
+	void embedSQLSripts() {
+		List<File> selectedFiles = DefaultFileChooser.showOpenMultipleDialog(
+				JAG3D.getStage(),
+				i18n.getString("UIMenuBuilder.filechooser.sql_script.title", "SQL script files"),
+				null,
+				SQLScriptFileReader.getExtensionFilters()
+				);
+		
+		if (selectedFiles == null || selectedFiles.isEmpty())
+			return;
+		
+		SQLScriptFileReader fileReader = new SQLScriptFileReader();
+		for (File file : selectedFiles) {
+			fileReader.setPath(file.toPath());
+			try {
+				fileReader.readAndImport();
+			} catch (Exception e) { //IOException | SQLException
+				e.printStackTrace();
+				OptionDialog.showThrowableDialog (
+						i18n.getString("UIMenuBuilder.message.error.sql.exception.title", "I/O Error"),
+						i18n.getString("UIMenuBuilder.message.error.sql.exception.header", "Error, could not embed SQL script."),
+						i18n.getString("UIMenuBuilder.message.error.sql.exception.message", "An exception has occurred during SQL embedding."),
+						e
+						);
+			}
+		}
+		
+		TreeView<TreeItemValue> treeView = UITreeBuilder.getInstance().getTree();
+		treeView.getSelectionModel().clearSelection();
+		treeView.getSelectionModel().select(0);
+	}
+	
 	void createReport(File templateFile) {
 		try {
 			FTLReport ftl = SQLManager.getInstance().getFTLReport();
