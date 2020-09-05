@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public abstract class DataBase {
 	private final String dbDriver, username, password;
@@ -85,7 +86,14 @@ public abstract class DataBase {
 		}
 		return null;
 	}
-
+	
+	public Statement getStatement() throws SQLException {
+		if (this.isOpen()) {
+			return this.conn.createStatement();
+		}
+		return null;
+	}
+	
 	public void commit() throws SQLException {
 		if (this.isOpen()) {
 			this.conn.commit();
