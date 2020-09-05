@@ -26,6 +26,7 @@ enum MenuItemType {
 	OPEN,
 	MIGRATE,
 	COPY,
+	SQL_SCRIPT,
 	CLOSE,
 	EXIT,
 	

@@ -88,6 +88,10 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 			this.menuBuilder.copyProject();
 			break;
 			
+		case SQL_SCRIPT:
+			this.menuBuilder.embedSQLSripts();
+			break;
+			
 		case PREFERENCES:
 			FormatterOptionDialog.showAndWait();
 			break;
