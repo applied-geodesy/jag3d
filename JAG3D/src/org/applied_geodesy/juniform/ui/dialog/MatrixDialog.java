@@ -262,12 +262,17 @@ public class MatrixDialog {
 			break;
 		}
 		
-		if (matrix != null && this.matrixType != MatrixType.IDENTITY) {
+		if (matrix == null)
+			return;
+		
+		// copy elements
+		if (this.matrixType != MatrixType.IDENTITY) {
 			for (MatrixEntry entry : matrix) {
 				double value = this.elements[entry.row()][entry.column()].getNumber().doubleValue();
 				entry.set(value);
 			}
-			this.featurePoint.setDispersionApriori(matrix);
 		}
+		
+		this.featurePoint.setDispersionApriori(matrix);
 	}
 }
