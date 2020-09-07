@@ -199,6 +199,7 @@ public class SpatialLineFeature extends SurfaceFeature {
 			if (!point.isEnable())
 				continue;
 			
+			nop++;
 			x0 += point.getX0();
 			y0 += point.getY0();
 			z0 += point.getZ0();
