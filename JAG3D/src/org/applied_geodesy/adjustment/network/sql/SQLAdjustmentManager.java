@@ -144,7 +144,7 @@ public class SQLAdjustmentManager {
 			databaseVersion = rs.getInt("version");
 		
 		if (databaseVersion != Version.get(VersionType.DATABASE))
-			throw new DatabaseVersionMismatchException("Error, database version of the stored project is greater than accepted database version of the application: " + databaseVersion + " > " +  Version.get(VersionType.DATABASE));
+			throw new DatabaseVersionMismatchException("Error, database version of the stored project is unequal to the accepted database version of the application: " + databaseVersion + " != " +  Version.get(VersionType.DATABASE));
 	}
 
 	public NetworkAdjustment getNetworkAdjustment() throws SQLException, DatabaseVersionMismatchException, IllegalProjectionPropertyException {
