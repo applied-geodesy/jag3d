@@ -32,11 +32,6 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/hsqldb.jar">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/tablelayout.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
@@ -73,6 +68,11 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jlatexmath-1.0.7.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/hsqldb.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
