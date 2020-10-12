@@ -113,6 +113,12 @@ public abstract class DataBase {
 			this.conn.setAutoCommit(autoCommit);
 		}
 	}
+	
+	public boolean isAutoCommit() throws SQLException {
+		if (this.isOpen())
+			return this.conn.getAutoCommit();
+		return false;
+	}
 
 	public void rollback() throws SQLException {
 		if (this.isOpen()) {
@@ -135,8 +141,10 @@ public abstract class DataBase {
 	}
 	
 	// http://hsqldb.org/doc/2.0/verbatim/src/org/hsqldb/sample/SqlFileEmbedder.java
-	public void executeFiles(List<File> files) throws SQLException, IOException, SqlToolError {
+	public void executeFiles(List<File> files) throws SQLException, IOException {
+		boolean autoCommit = true; // default value
 		try {
+			autoCommit = this.isAutoCommit();
 			this.setAutoCommit(false);
 			Map<String, String> sqlVarMap = new HashMap<String, String>();
 			for (File file : files) {
@@ -151,9 +159,13 @@ public abstract class DataBase {
 	            this.conn = sqlFile.getConnection();
 	            sqlVarMap = sqlFile.getUserVars();
 			}
-		}
+		} catch (SQLException | SqlToolError e) {
+			e.printStackTrace();
+			this.rollback();
+			throw new SQLException(e);
+		} 
 		finally {
-			this.setAutoCommit(true);
+			this.setAutoCommit(autoCommit);
 		}
 	}
 }

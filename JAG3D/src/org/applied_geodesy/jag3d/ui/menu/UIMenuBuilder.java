@@ -996,10 +996,15 @@ public class UIMenuBuilder {
 		try {
 			DataBase dataBase = SQLManager.getInstance().getDataBase();
 			dataBase.executeFiles(selectedFiles);
+			OptionDialog.showInformationDialog(
+					i18n.getString("UIMenuBuilder.message.information.sql.title", "SQL Script executed"), 
+					i18n.getString("UIMenuBuilder.message.information.sql.header", "SQL script successfully executed."), 
+					i18n.getString("UIMenuBuilder.message.information.sql.message", "The selected SQL script was executed without errors.")
+					);
 		} catch (Exception e) { //IOException | SQLException
 			e.printStackTrace();
 			OptionDialog.showThrowableDialog (
-					i18n.getString("UIMenuBuilder.message.error.sql.exception.title", "I/O Error"),
+					i18n.getString("UIMenuBuilder.message.error.sql.exception.title", "SQL Error"),
 					i18n.getString("UIMenuBuilder.message.error.sql.exception.header", "Error, could not embed SQL script."),
 					i18n.getString("UIMenuBuilder.message.error.sql.exception.message", "An exception has occurred during SQL embedding."),
 					e

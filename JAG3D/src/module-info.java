@@ -38,7 +38,8 @@ module org.applied_geodesy.jag3d {
 	requires CoordTrans;
 	requires GeoTra;
 
-	requires hsqldb;
+	requires org.hsqldb;
+	requires org.hsqldb.cmdline;
 	
 	requires java.desktop;
 	requires java.logging;
