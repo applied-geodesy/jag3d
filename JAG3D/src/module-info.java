@@ -30,11 +30,11 @@ module org.applied_geodesy.jag3d {
 		
 	requires arpack.combined.all;
 	requires core;
-	requires freemarker;
 	requires jdistlib;
 	requires jlatexmath;
 	requires mtj;
-		
+
+	requires freemarker;
 	requires CoordTrans;
 	requires GeoTra;
 
