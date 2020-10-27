@@ -21,10 +21,19 @@
 
 package org.applied_geodesy.util.sql;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.hsqldb.cmdline.SqlFile;
+import org.hsqldb.cmdline.SqlToolError;
 
 public abstract class DataBase {
 	private final String dbDriver, username, password;
@@ -45,7 +54,7 @@ public abstract class DataBase {
 
 	public void open() throws ClassNotFoundException, SQLException {
 		if (this.conn == null || this.conn.isClosed()) {
-			this.conn = this.getConnection();
+			this.conn = this.createConnection();
 			this.isOpen = true;
 		}
 	}
@@ -85,7 +94,14 @@ public abstract class DataBase {
 		}
 		return null;
 	}
-
+	
+	public Statement getStatement() throws SQLException {
+		if (this.isOpen()) {
+			return this.conn.createStatement();
+		}
+		return null;
+	}
+	
 	public void commit() throws SQLException {
 		if (this.isOpen()) {
 			this.conn.commit();
@@ -97,6 +113,12 @@ public abstract class DataBase {
 			this.conn.setAutoCommit(autoCommit);
 		}
 	}
+	
+	public boolean isAutoCommit() throws SQLException {
+		if (this.isOpen())
+			return this.conn.getAutoCommit();
+		return false;
+	}
 
 	public void rollback() throws SQLException {
 		if (this.isOpen()) {
@@ -104,7 +126,7 @@ public abstract class DataBase {
 		}
 	}
 	    
-	private Connection getConnection() throws ClassNotFoundException, SQLException {
+	private Connection createConnection() throws ClassNotFoundException, SQLException {
 		Class.forName( this.getDBDriver() );
 		Connection con = DriverManager.getConnection(
 				this.getURI(),
@@ -112,5 +134,38 @@ public abstract class DataBase {
 				this.password
 		);
 		return con;
+	}
+	
+	Connection getConnection() {
+		return this.conn;
+	}
+	
+	// http://hsqldb.org/doc/2.0/verbatim/src/org/hsqldb/sample/SqlFileEmbedder.java
+	public void executeFiles(List<File> files) throws SQLException, IOException {
+		boolean autoCommit = true; // default value
+		try {
+			autoCommit = this.isAutoCommit();
+			this.setAutoCommit(false);
+			Map<String, String> sqlVarMap = new HashMap<String, String>();
+			for (File file : files) {
+				if (!file.isFile())
+	                throw new IOException("Error, selected SQL file is not present, " + file.getAbsolutePath() + "!");
+				
+				SqlFile sqlFile = new SqlFile(file);
+	            sqlFile.setConnection(this.conn);
+	            sqlFile.addUserVars(sqlVarMap);
+	            sqlFile.execute();
+	            
+	            this.conn = sqlFile.getConnection();
+	            sqlVarMap = sqlFile.getUserVars();
+			}
+		} catch (SQLException | SqlToolError e) {
+			e.printStackTrace();
+			this.rollback();
+			throw new SQLException(e);
+		} 
+		finally {
+			this.setAutoCommit(autoCommit);
+		}
 	}
 }

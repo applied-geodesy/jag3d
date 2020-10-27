@@ -34,10 +34,13 @@ module org.applied_geodesy.jag3d {
 	requires jdistlib;
 	requires jlatexmath;
 	requires mtj;
-	
+		
 	requires CoordTrans;
 	requires GeoTra;
 
+	requires org.hsqldb;
+	requires org.hsqldb.cmdline;
+	
 	requires java.desktop;
 	requires java.logging;
 	requires java.sql;

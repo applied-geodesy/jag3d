@@ -24,6 +24,7 @@ package org.applied_geodesy.jag3d.sql;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -4042,6 +4043,20 @@ public class SQLManager {
 		stmt.execute();
 	}
 	
+	public void executeStatement(String sql) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen() || sql == null || sql.isBlank() || sql.isEmpty())
+			return;
+		
+		try {
+			this.dataBase.setAutoCommit(false);
+			Statement stmt = this.dataBase.getStatement();
+			stmt.execute(sql);
+		}
+		finally {
+			this.dataBase.setAutoCommit(true);
+		}
+	}
+	
 	public DataBase getDataBase() {
 		return this.dataBase;
 	}
@@ -4055,7 +4070,7 @@ public class SQLManager {
 			}
 		}
 	}
-	
+		
 	public void addProjectDatabaseStateChangeListener(ProjectDatabaseStateChangeListener l) {
 		this.listenerList.add(l);
 	}

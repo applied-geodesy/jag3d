@@ -277,6 +277,7 @@ public class UIMenuBuilder {
 		MenuItem openItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.open.label", "_Open existing project"), true, MenuItemType.OPEN, new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 		MenuItem migrateItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.migrate.label", "Migrate exi_sting project"), true, MenuItemType.MIGRATE, new KeyCodeCombination(KeyCode.M, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
 		MenuItem copyItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.copy.label", "_Copy current project and open"), true, MenuItemType.COPY, new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
+		MenuItem sqlItem     = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.sql.label", "Execute S_QL script"), true, MenuItemType.SQL_SCRIPT, new KeyCodeCombination(KeyCode.X, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
 		MenuItem closeItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.close.label", "C_lose current project"), true, MenuItemType.CLOSE, new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 		MenuItem exitItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.project.exit.label", "_Exit"), true, MenuItemType.EXIT, new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 		Menu historyMenu     = this.createHistoryMenu();
@@ -287,6 +288,7 @@ public class UIMenuBuilder {
 				migrateItem,
 				closeItem,
 				copyItem,
+				sqlItem,
 				new SeparatorMenuItem(),
 				historyMenu,
 				new SeparatorMenuItem(),
@@ -980,6 +982,40 @@ public class UIMenuBuilder {
 		}
 	}
 
+	void embedSQLSripts() {
+		List<File> selectedFiles = DefaultFileChooser.showOpenMultipleDialog(
+				JAG3D.getStage(),
+				i18n.getString("UIMenuBuilder.filechooser.sql.title", "Execute SQL script"),
+				null,
+				new ExtensionFilter(I18N.getInstance().getString("UIMenuBuilder.extension.sql", "Structured Query Language"), "*.sql")
+				);
+		
+		if (selectedFiles == null || selectedFiles.isEmpty())
+			return;
+		
+		try {
+			DataBase dataBase = SQLManager.getInstance().getDataBase();
+			dataBase.executeFiles(selectedFiles);
+			OptionDialog.showInformationDialog(
+					i18n.getString("UIMenuBuilder.message.information.sql.title", "SQL Script executed"), 
+					i18n.getString("UIMenuBuilder.message.information.sql.header", "SQL script successfully executed."), 
+					i18n.getString("UIMenuBuilder.message.information.sql.message", "The selected SQL script was executed without errors.")
+					);
+		} catch (Exception e) { //IOException | SQLException
+			e.printStackTrace();
+			OptionDialog.showThrowableDialog (
+					i18n.getString("UIMenuBuilder.message.error.sql.exception.title", "SQL Error"),
+					i18n.getString("UIMenuBuilder.message.error.sql.exception.header", "Error, could not embed SQL script."),
+					i18n.getString("UIMenuBuilder.message.error.sql.exception.message", "An exception has occurred during SQL embedding."),
+					e
+					);
+		}
+		
+		TreeView<TreeItemValue> treeView = UITreeBuilder.getInstance().getTree();
+		treeView.getSelectionModel().clearSelection();
+		treeView.getSelectionModel().select(0);
+	}
+	
 	void createReport(File templateFile) {
 		try {
 			FTLReport ftl = SQLManager.getInstance().getFTLReport();
