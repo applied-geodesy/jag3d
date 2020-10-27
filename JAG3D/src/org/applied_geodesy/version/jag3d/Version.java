@@ -29,7 +29,7 @@ public class Version {
 	private final static Map<VersionType, Integer> versions = Map.of(
 			VersionType.ADJUSTMENT_CORE,   20200927,
 			VersionType.DATABASE,          20200327,
-			VersionType.USER_INTERFACE,    20201002
+			VersionType.USER_INTERFACE,    20201027
 	);
 	
 	private Version() {}
@@ -46,6 +46,6 @@ public class Version {
 	}
 	
 	public static boolean isReleaseCandidate() {
-		return Boolean.TRUE;
+		return Boolean.FALSE;
 	}
 }
