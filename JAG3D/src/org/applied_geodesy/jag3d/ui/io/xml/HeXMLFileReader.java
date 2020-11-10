@@ -634,8 +634,8 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 	
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(I18N.getInstance().getString("HeXMLReader.extension.hexml", "LandXML/HeXML"), "*.hexml"),
-				new ExtensionFilter(I18N.getInstance().getString("HeXMLReader.extension.xml", "Extensible Markup Language"), "*.xml")
+				new ExtensionFilter(I18N.getInstance().getString("HeXMLReader.extension.hexml", "LandXML/HeXML"), "*.hexml", "*.HEXML"),
+				new ExtensionFilter(I18N.getInstance().getString("HeXMLReader.extension.xml", "Extensible Markup Language"), "*.xml", "*.XML")
 		};
 	}
 	

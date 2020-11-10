@@ -675,7 +675,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(I18N.getInstance().getString("GSIFileReader.extension.gsi", "Geo Serial Interface (GSI)"), "*.gsi")
+				new ExtensionFilter(I18N.getInstance().getString("GSIFileReader.extension.gsi", "Geo Serial Interface (GSI)"), "*.gsi", "*.GSI")
 		};
 	}
 	
