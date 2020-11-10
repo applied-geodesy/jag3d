@@ -378,7 +378,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(I18N.getInstance().getString("BeoFileReader.extension.beo", "Beo (Neptan)"), "*.beo")
+				new ExtensionFilter(I18N.getInstance().getString("BeoFileReader.extension.beo", "Beo (Neptan)"), "*.beo", "*.BEO")
 		};
 	}
 }

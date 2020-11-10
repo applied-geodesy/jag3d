@@ -987,7 +987,7 @@ public class UIMenuBuilder {
 				JAG3D.getStage(),
 				i18n.getString("UIMenuBuilder.filechooser.sql.title", "Execute SQL script"),
 				null,
-				new ExtensionFilter(I18N.getInstance().getString("UIMenuBuilder.extension.sql", "Structured Query Language"), "*.sql")
+				new ExtensionFilter(I18N.getInstance().getString("UIMenuBuilder.extension.sql", "Structured Query Language"), "*.sql", "*.SQL")
 				);
 		
 		if (selectedFiles == null || selectedFiles.isEmpty())
@@ -1023,7 +1023,7 @@ public class UIMenuBuilder {
 					JAG3D.getStage(),
 					i18n.getString("UIMenuBuilder.filechooser.report.title", "Save adjustment report"), 
 					"report.html",
-					new ExtensionFilter(i18n.getString("UIMenuBuilder.extension.html", "Hypertext Markup Language"), "*.html", "*.htm") 
+					new ExtensionFilter(i18n.getString("UIMenuBuilder.extension.html", "Hypertext Markup Language"), "*.html", "*.htm", "*.HTML", "*.HTM") 
 					);
 			if (reportFile != null && ftl != null) {
 				ftl.setTemplate(templateFile.getName());

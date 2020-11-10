@@ -415,7 +415,7 @@ public class DL100FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(I18N.getInstance().getString("DL100FileReader.extension.dl100", "DL-100 (Topcon)"), "*.l", "*.top")
+				new ExtensionFilter(I18N.getInstance().getString("DL100FileReader.extension.dl100", "DL-100 (Topcon)"), "*.l", "*.top", "*.L", "*.TOP")
 		};
 	}
 

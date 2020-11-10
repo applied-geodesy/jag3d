@@ -528,8 +528,8 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 	
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(I18N.getInstance().getString("JobXMLFileReader.extension.jxl", "JobXML"), "*.jxl"),
-				new ExtensionFilter(I18N.getInstance().getString("JobXMLFileReader.extension.xml", "Extensible Markup Language"), "*.xml")
+				new ExtensionFilter(I18N.getInstance().getString("JobXMLFileReader.extension.jxl", "JobXML"), "*.jxl", "*.JXL"),
+				new ExtensionFilter(I18N.getInstance().getString("JobXMLFileReader.extension.xml", "Extensible Markup Language"), "*.xml", "*.XML")
 		};
 	}
 	
