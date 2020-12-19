@@ -433,8 +433,22 @@ public abstract class Point extends UnknownParameter {
 	public boolean considerDeflection() {
 		return this.considerDeflection;
 	}
-
+	
+	/**
+	 * Returns <code>true</code>, if the deflections of the points are unknown parameters
+	 * @return unknown
+	 */
 	public boolean hasUnknownDeflectionParameters() {
-		return this.considerDeflection && (this.deflectionX.getColInJacobiMatrix() >= 0 && this.deflectionY.getColInJacobiMatrix() >= 0);
+		return this.considerDeflection && 
+				(this.deflectionX.getColInJacobiMatrix() >= 0 && this.deflectionY.getColInJacobiMatrix() >= 0);
+	}
+	
+	/**
+	 * Returns <code>true</code>, if the deflections of the points are observed parameters
+	 * @return observed
+	 */
+	public boolean hasObservedDeflectionParameters() {
+		return this.considerDeflection && 
+				(this.deflectionX.getRowInJacobiMatrix() >= 0 && this.deflectionY.getRowInJacobiMatrix() >= 0);
 	}
 }
