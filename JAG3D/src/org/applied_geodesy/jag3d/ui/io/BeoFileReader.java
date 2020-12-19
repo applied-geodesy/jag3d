@@ -157,19 +157,19 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		else if (this.startPointName != null && !this.startPointName.isEmpty() && (key.equalsIgnoreCase("20.") || key.equalsIgnoreCase("21.") || key.equalsIgnoreCase("24.") || key.equalsIgnoreCase("31."))) {
 			if (this.isNewStation) {
 				if (!this.leveling.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.LEVELING)) 
-					this.saveGroup(TreeItemType.LEVELING_LEAF, this.leveling);
+					this.lastTreeItem = this.saveGroup(TreeItemType.LEVELING_LEAF, this.leveling);
 				
 				if (!this.directions.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.DIRECTION))
-					this.saveGroup(TreeItemType.DIRECTION_LEAF, this.directions);
+					this.lastTreeItem = this.saveGroup(TreeItemType.DIRECTION_LEAF, this.directions);
 				
 				if (!this.horizontalDistances.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.HORIZONTAL_DISTANCE))
-					this.saveGroup(TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
+					this.lastTreeItem = this.saveGroup(TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
 				
 				if (!this.slopeDistances.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.SLOPE_DISTANCE)) 
-					this.saveGroup(TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
+					this.lastTreeItem = this.saveGroup(TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
 
 				if (!this.zenithAngles.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.ZENITH_ANGLE)) 
-					this.saveGroup(TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
+					this.lastTreeItem = this.saveGroup(TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
 
 				this.lastStartPointName = null;
 			}
@@ -331,19 +331,19 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		else if (this.startPointName != null && !this.startPointName.isEmpty() && key.equalsIgnoreCase("70.")) {
 			if (this.isNewStation) {
 				if (!this.leveling.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.LEVELING)) 
-					this.saveGroup(TreeItemType.LEVELING_LEAF, this.leveling);
+					this.lastTreeItem = this.saveGroup(TreeItemType.LEVELING_LEAF, this.leveling);
 				
 				if (!this.directions.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.DIRECTION))
-					this.saveGroup(TreeItemType.DIRECTION_LEAF, this.directions);
+					this.lastTreeItem = this.saveGroup(TreeItemType.DIRECTION_LEAF, this.directions);
 				
 				if (!this.horizontalDistances.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.HORIZONTAL_DISTANCE))
-					this.saveGroup(TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
+					this.lastTreeItem = this.saveGroup(TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
 				
 				if (!this.slopeDistances.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.SLOPE_DISTANCE)) 
-					this.saveGroup(TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
+					this.lastTreeItem = this.saveGroup(TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
 
 				if (!this.zenithAngles.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.ZENITH_ANGLE)) 
-					this.saveGroup(TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
+					this.lastTreeItem = this.saveGroup(TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
 				
 				this.lastStartPointName = null;
 			}
