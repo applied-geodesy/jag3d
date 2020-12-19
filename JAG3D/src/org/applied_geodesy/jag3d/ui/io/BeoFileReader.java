@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.applied_geodesy.adjustment.Constant;
+import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
@@ -43,8 +44,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 
 public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	private boolean isNewStation = false;
-	private String startPointName = null, directionStartPointName = null;
-	private boolean isDirectionGroupWithEqualStation = true;
+	private String startPointName = null, lastStartPointName = null;
 	private double ih = 0.0;
 	private TreeItem<TreeItemValue> lastTreeItem = null;
 
@@ -76,7 +76,10 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	@Override
 	public void reset() {
 		this.isNewStation = false;
-		this.startPointName = null;
+		
+		this.startPointName     = null;
+		this.lastStartPointName = null;
+		
 		this.ih = 0.0;
 		
 		if (this.leveling == null)
@@ -107,24 +110,21 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		
 		super.read();
 
-		String itemName = this.createItemName(null, null);
-
 		// Speichere Daten
 		if (!this.leveling.isEmpty())
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.LEVELING_LEAF, this.leveling);
+			this.lastTreeItem = this.saveGroup(TreeItemType.LEVELING_LEAF, this.leveling);
 		
-		if (!this.directions.isEmpty()) {
-			this.saveDirectionGroup();
-		}
-		
+		if (!this.directions.isEmpty())
+			this.lastTreeItem = this.saveGroup(TreeItemType.DIRECTION_LEAF, this.directions);
+
 		if (!this.horizontalDistances.isEmpty())
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
+			this.lastTreeItem = this.saveGroup(TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
 		
 		if (!this.slopeDistances.isEmpty()) 
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
+			this.lastTreeItem = this.saveGroup(TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
 		
 		if (!this.zenithAngles.isEmpty())
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
+			this.lastTreeItem = this.saveGroup(TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
 		
 		// Clear all lists
 		this.reset();
@@ -156,8 +156,22 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		
 		else if (this.startPointName != null && !this.startPointName.isEmpty() && (key.equalsIgnoreCase("20.") || key.equalsIgnoreCase("21.") || key.equalsIgnoreCase("24.") || key.equalsIgnoreCase("31."))) {
 			if (this.isNewStation) {
-				//Zwischenspeichern der Richtungen, da diese eine Orientierungsunbekannte haben
-				this.saveDirectionGroup();
+				if (!this.leveling.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.LEVELING)) 
+					this.saveGroup(TreeItemType.LEVELING_LEAF, this.leveling);
+				
+				if (!this.directions.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.DIRECTION))
+					this.saveGroup(TreeItemType.DIRECTION_LEAF, this.directions);
+				
+				if (!this.horizontalDistances.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.HORIZONTAL_DISTANCE))
+					this.saveGroup(TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
+				
+				if (!this.slopeDistances.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.SLOPE_DISTANCE)) 
+					this.saveGroup(TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
+
+				if (!this.zenithAngles.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.ZENITH_ANGLE)) 
+					this.saveGroup(TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
+
+				this.lastStartPointName = null;
 			}
 			this.isNewStation = false;
 
@@ -169,6 +183,9 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			try { 
 				th = Double.parseDouble(line.substring(79, line.length()).trim().replaceAll("\\s+.*", "")); 
 			} catch(NumberFormatException e) { };
+			
+			if (this.lastStartPointName == null)
+				this.lastStartPointName = this.startPointName;
 
 			// Strecke3D
 			String value = line.substring(33, 49).trim();
@@ -193,8 +210,6 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			value = line.substring(49, 64).trim();
 			if (!value.isEmpty()) {
 				try {
-					if (this.directionStartPointName == null)
-						this.directionStartPointName = this.startPointName;
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
 					obs.setEndPointName(endPointName);
@@ -205,7 +220,6 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					if (distance > 0)
 						obs.setDistanceApriori(distance);
 					this.directions.add(obs);
-					this.isDirectionGroupWithEqualStation = this.isDirectionGroupWithEqualStation && this.directionStartPointName.equals(this.startPointName);
 				} 
 				catch(NumberFormatException e) { };
 			}
@@ -229,8 +243,22 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		}
 		else if (this.startPointName != null && !this.startPointName.isEmpty() && key.equalsIgnoreCase("50.")) {
 			if (this.isNewStation) {
-				//Zwischenspeichern der Richtungen, da diese eine Orientierungsunbekannte haben
-				this.saveDirectionGroup();
+				if (!this.leveling.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.LEVELING)) 
+					this.saveGroup(TreeItemType.LEVELING_LEAF, this.leveling);
+				
+				if (!this.directions.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.DIRECTION))
+					this.saveGroup(TreeItemType.DIRECTION_LEAF, this.directions);
+				
+				if (!this.horizontalDistances.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.HORIZONTAL_DISTANCE))
+					this.saveGroup(TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
+				
+				if (!this.slopeDistances.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.SLOPE_DISTANCE)) 
+					this.saveGroup(TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
+
+				if (!this.zenithAngles.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.ZENITH_ANGLE)) 
+					this.saveGroup(TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
+				
+				this.lastStartPointName = null;
 			}
 			this.isNewStation = false;
 
@@ -242,6 +270,9 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			try { 
 				th = Double.parseDouble(line.substring(79, line.length()).trim().replaceAll("\\s+.*", "")); 
 			} catch(NumberFormatException e) { };
+			
+			if (this.lastStartPointName == null)
+				this.lastStartPointName = this.startPointName;
 
 			// Strecke2D
 			double distance = 0.0; // Wird ggf. fuer delta-H mitverwendet
@@ -266,8 +297,6 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			value = line.substring(49, 64).trim();
 			if (!value.isEmpty()) {
 				try {
-					if (this.directionStartPointName == null)
-						this.directionStartPointName = this.startPointName;
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
 					obs.setEndPointName(endPointName);
@@ -278,7 +307,6 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					if (distance > 0)
 						obs.setDistanceApriori(distance);
 					this.directions.add(obs);
-					this.isDirectionGroupWithEqualStation = this.isDirectionGroupWithEqualStation && this.directionStartPointName.equals(this.startPointName);
 				} 
 				catch(NumberFormatException e) { };
 			}
@@ -302,8 +330,22 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		}
 		else if (this.startPointName != null && !this.startPointName.isEmpty() && key.equalsIgnoreCase("70.")) {
 			if (this.isNewStation) {
-				//Zwischenspeichern der Richtungen, da diese eine Orientierungsunbekannte haben
-				this.saveDirectionGroup();
+				if (!this.leveling.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.LEVELING)) 
+					this.saveGroup(TreeItemType.LEVELING_LEAF, this.leveling);
+				
+				if (!this.directions.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.DIRECTION))
+					this.saveGroup(TreeItemType.DIRECTION_LEAF, this.directions);
+				
+				if (!this.horizontalDistances.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.HORIZONTAL_DISTANCE))
+					this.saveGroup(TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
+				
+				if (!this.slopeDistances.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.SLOPE_DISTANCE)) 
+					this.saveGroup(TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
+
+				if (!this.zenithAngles.isEmpty() && ImportOption.getInstance().isGroupSeparation(ObservationType.ZENITH_ANGLE)) 
+					this.saveGroup(TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
+				
+				this.lastStartPointName = null;
 			}
 			this.isNewStation = false;
 
@@ -337,14 +379,15 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		}
 	}
 	
-	private void saveDirectionGroup() throws SQLException {
-		if (!this.directions.isEmpty()) {
-			String itemName = this.createItemName(null, this.isDirectionGroupWithEqualStation ? " (" + this.directionStartPointName + ")" : null); 
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.DIRECTION_LEAF, this.directions);
+	private TreeItem<TreeItemValue> saveGroup(TreeItemType itemType, List<TerrestrialObservationRow> observations) throws SQLException {
+		TreeItem<TreeItemValue> treeItem = null;
+		if (!observations.isEmpty()) {
+			boolean isGroupWithEqualStation = ImportOption.getInstance().isGroupSeparation(TreeItemType.getObservationTypeByTreeItemType(itemType));
+			String itemName = this.createItemName(null, isGroupWithEqualStation && this.lastStartPointName != null ? " (" + this.lastStartPointName + ")" : null); 
+			treeItem = this.saveTerrestrialObservations(itemName, itemType, observations);
 		}
-		this.directions.clear();
-		this.directionStartPointName = null;
-		this.isDirectionGroupWithEqualStation = true;
+		observations.clear();
+		return treeItem;
 	}
 
 	private TreeItem<TreeItemValue> saveTerrestrialObservations(String itemName, TreeItemType treeItemType, List<TerrestrialObservationRow> observations) throws SQLException {
@@ -364,7 +407,6 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		try {
 			int groupId = ((ObservationTreeItemValue)newTreeItem.getValue()).getGroupId();
 			for (TerrestrialObservationRow row : observations) {
-				//SQLManager.getInstance().saveItem(groupId, row);
 				row.setGroupId(groupId);
 				SQLManager.getInstance().saveItem(row);
 			}
