@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.applied_geodesy.adjustment.Constant;
+import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
@@ -169,7 +170,7 @@ public class ZFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		this.ignoreLinesWhichStartWith("!");
 
 		// Speichere Daten
-		this.saveObservationGroups();
+		this.saveObservationGroups(true);
 
 		// Normalisiere Punkte
 		this.normalizePointNames();
@@ -246,7 +247,7 @@ public class ZFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			String key2 = line.substring(16, 32).trim();
 
 			if (c1 < 1)
-				this.saveObservationGroups();
+				this.saveObservationGroups(false);
 
 			if (c1 == 0 && c2 == 4) {
 				this.project = line.substring(16, 32).trim();
@@ -254,8 +255,8 @@ public class ZFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 			// 10 --> Standpunkt
 			if (c1 == 1 && c2 == 0) {
-				//Zwischenspeichern der Richtungen, da diese eine Orientierungsunbekannte haben
-				this.saveDirectionGroup();
+				//Zwischenspeichern der Gruppen bspw. der Richtungen, da diese eine Orientierungsunbekannte haben
+				this.saveObservationGroups(false);
 
 				// Neuer Standpunkt
 				this.startPointName = key2;
@@ -488,31 +489,22 @@ public class ZFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		return obs;
 	}
 
-	private void saveObservationGroups() throws SQLException {
-		String prefix = this.project == null ? "" : this.project + " ";
-		String itemName = this.createItemName(null, prefix);
-
+	private void saveObservationGroups(boolean forceSaving) throws SQLException {
 		// Speichere Daten
-		if (!this.leveling.isEmpty())
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.LEVELING_LEAF, this.leveling);
+		if (!this.leveling.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.LEVELING))) 
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.LEVELING_LEAF, this.leveling);
 
-		if (!this.directions.isEmpty())
-			this.saveDirectionGroup();
+		if (!this.directions.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.DIRECTION)))
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.DIRECTION_LEAF, this.directions);
 
-		if (!this.horizontalDistances.isEmpty())
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
+		if (!this.horizontalDistances.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.HORIZONTAL_DISTANCE)))
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
 
-		if (!this.slopeDistances.isEmpty()) 
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
+		if (!this.slopeDistances.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.SLOPE_DISTANCE)))
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
 
-		if (!this.zenithAngles.isEmpty())
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
-
-		this.leveling.clear();
-		this.directions.clear();
-		this.horizontalDistances.clear();
-		this.slopeDistances.clear();
-		this.zenithAngles.clear();
+		if (!this.zenithAngles.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.ZENITH_ANGLE)))
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
 	}
 
 	private void addLevelingData(LevelingData levelingData) {
@@ -540,13 +532,17 @@ public class ZFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				new ExtensionFilter(I18N.getInstance().getString("ZFileReader.extension.z", "Cremer Caplan"), "*.z", "*.Z")
 		};
 	}
-
-	private void saveDirectionGroup() throws SQLException {
-		if (this.startPointName != null && !this.directions.isEmpty()) {
-			String itemName = this.createItemName(null, " (" + this.startPointName + ")"); 
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.DIRECTION_LEAF, this.directions);
+	
+	private TreeItem<TreeItemValue> saveObservationGroup(TreeItemType itemType, List<TerrestrialObservationRow> observations) throws SQLException {
+		String suffix = this.project == null ? "" : "  " + this.project;
+		TreeItem<TreeItemValue> treeItem = null;
+		if (!observations.isEmpty()) {
+			boolean isGroupWithEqualStation = ImportOption.getInstance().isGroupSeparation(TreeItemType.getObservationTypeByTreeItemType(itemType));
+			String itemName = this.createItemName(null, isGroupWithEqualStation && this.startPointName != null ? " (" + this.startPointName + ")" : null) + suffix; 
+			treeItem = this.saveTerrestrialObservations(itemName, itemType, observations);
 		}
-		this.directions.clear();
+		observations.clear();
+		return treeItem;
 	}
 
 	private TreeItem<TreeItemValue> saveTerrestrialObservations(String itemName, TreeItemType treeItemType, List<TerrestrialObservationRow> observations) throws SQLException {
