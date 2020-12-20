@@ -34,6 +34,7 @@ import java.util.Set;
 
 import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.MathExtension;
+import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
@@ -82,8 +83,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	private boolean isNewStation = false;
 	private Set<String> reservedNames = null;
 	private Map<String, PointRow> pointMap = new HashMap<String, PointRow>();
-	private String startPointName = null, endPointName = null, directionStartPointName = null;
-	private boolean isDirectionGroupWithEqualStation = true;
+	private String startPointName = null, endPointName = null, lastStartPointName = null;
 	private LevelingData levelingData = null;
 	
 	private double ih = 0.0, th = 0.0;
@@ -203,21 +203,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			this.lastTreeItem = this.savePoints(itemName, TreeItemType.DATUM_POINT_3D_LEAF, this.points3d);
 
 		// Speichere Daten
-		if ((this.dim == DimensionType.HEIGHT || this.dim == DimensionType.PLAN_AND_HEIGHT) && !this.leveling.isEmpty()) {
-			this.addLevelingData(this.levelingData);
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.LEVELING_LEAF, this.leveling);
-		}
-		if (this.dim != DimensionType.HEIGHT && !this.directions.isEmpty())
-			this.saveDirectionGroup();
-
-		if ((this.dim == DimensionType.PLAN || this.dim == DimensionType.PLAN_AND_HEIGHT) && !this.horizontalDistances.isEmpty()) 
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
-
-		if (this.dim == DimensionType.SPATIAL && !this.slopeDistances.isEmpty()) 
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
-
-		if (this.dim == DimensionType.SPATIAL && !this.zenithAngles.isEmpty()) 
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
+		this.saveObservationGroups(true);
 
 		this.reset();
 		
@@ -375,11 +361,9 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			this.distRb2 = null;
 			this.distLastRb4Zb = null;
 			
-			// Speichere Richtungen, da diese Satzweise zu halten sind
-			if (this.dim != DimensionType.HEIGHT && !this.directions.isEmpty()) {
-				this.saveDirectionGroup();
-			}
-			this.directions.clear();
+			// Speichere Daten bspw. Richtungen, da diese Satzweise zu halten sind
+			this.saveObservationGroups(false);
+			this.lastStartPointName = null;
 		}
 		else if (pointName != null && !pointName.trim().isEmpty()) {
 			this.endPointName = pointName;
@@ -461,6 +445,9 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 			// Fuege Beobachtungen hinzu
 			if (this.startPointName != null && this.endPointName != null) {
+				if (this.lastStartPointName == null)
+					this.lastStartPointName = this.startPointName;
+				
 				/** Nivellement **/
 				// ermittle Hoehenunterschied aus 0.5 * (RI+RII) und ZB
 				if (this.lastRb4Zb != null && this.zb != null) {
@@ -531,9 +518,6 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				}
 
 				if (dir != null) {
-					if (this.directionStartPointName == null)
-						this.directionStartPointName = this.startPointName;
-
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
 					obs.setEndPointName(this.endPointName);
@@ -545,7 +529,6 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					else if ((this.dim == DimensionType.PLAN || this.dim == DimensionType.PLAN_AND_HEIGHT) && dist2d != null && dist2d > 0)
 						obs.setDistanceApriori(dist2d);
 					this.directions.add(obs);
-					this.isDirectionGroupWithEqualStation = this.isDirectionGroupWithEqualStation && this.directionStartPointName.equals(this.startPointName);
 				}
 
 				if (dist2d != null) {
@@ -679,14 +662,35 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		};
 	}
 	
-	private void saveDirectionGroup() throws SQLException {
-		if (!this.directions.isEmpty()) {
-			String itemName = this.createItemName(null, this.isDirectionGroupWithEqualStation ? " (" + this.directionStartPointName + ")" : null); 
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.DIRECTION_LEAF, this.directions);
+	private void saveObservationGroups(boolean forceSaving) throws SQLException {
+		// Speichere Daten bspw. Richtungen, da diese Satzweise zu halten sind
+		if ((this.dim == DimensionType.HEIGHT || this.dim == DimensionType.PLAN_AND_HEIGHT) && !this.leveling.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.LEVELING))) {
+			this.addLevelingData(this.levelingData);
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.LEVELING_LEAF, this.leveling);
 		}
-		this.directions.clear();
-		this.directionStartPointName = null;
-		this.isDirectionGroupWithEqualStation = true;
+
+		if (this.dim != DimensionType.HEIGHT && !this.directions.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.DIRECTION)))
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.DIRECTION_LEAF, this.directions);
+
+		if ((this.dim == DimensionType.PLAN || this.dim == DimensionType.PLAN_AND_HEIGHT) && !this.horizontalDistances.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.HORIZONTAL_DISTANCE))) 
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
+
+		if (this.dim == DimensionType.SPATIAL && !this.slopeDistances.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.SLOPE_DISTANCE)))
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
+
+		if (this.dim == DimensionType.SPATIAL && !this.zenithAngles.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.ZENITH_ANGLE))) 
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
+	}
+
+	private TreeItem<TreeItemValue> saveObservationGroup(TreeItemType itemType, List<TerrestrialObservationRow> observations) throws SQLException {
+		TreeItem<TreeItemValue> treeItem = null;
+		if (!observations.isEmpty()) {
+			boolean isGroupWithEqualStation = ImportOption.getInstance().isGroupSeparation(TreeItemType.getObservationTypeByTreeItemType(itemType));
+			String itemName = this.createItemName(null, isGroupWithEqualStation && this.lastStartPointName != null ? " (" + this.lastStartPointName + ")" : null); 
+			treeItem = this.saveTerrestrialObservations(itemName, itemType, observations);
+		}
+		observations.clear();
+		return treeItem;
 	}
 
 	private TreeItem<TreeItemValue> saveTerrestrialObservations(String itemName, TreeItemType treeItemType, List<TerrestrialObservationRow> observations) throws SQLException {
@@ -706,7 +710,6 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		try {
 			int groupId = ((ObservationTreeItemValue)newTreeItem.getValue()).getGroupId();
 			for (TerrestrialObservationRow row : observations) {
-				//SQLManager.getInstance().saveItem(groupId, row);
 				row.setGroupId(groupId);
 				SQLManager.getInstance().saveItem(row);
 			}

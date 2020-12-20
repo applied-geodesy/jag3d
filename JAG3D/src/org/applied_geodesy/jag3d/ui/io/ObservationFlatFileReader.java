@@ -31,6 +31,7 @@ import java.util.List;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
+import org.applied_geodesy.jag3d.ui.table.row.ObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
@@ -43,15 +44,18 @@ public class ObservationFlatFileReader extends FlatFileReader<TreeItem<TreeItemV
 	private final ObservationType observationType;
 	private final TreeItemType treeItemType;
 	
+	private boolean separateGroup = true;
+	
 	private List<TerrestrialObservationRow> observations = null;
 	private List<GNSSObservationRow> gnss = null;
 	
-	private boolean isDirectionGroupWithEqualStation = true;
-	private String directionStartPointName = null;
+	private boolean isGroupWithEqualStation = true;
+	private String startPointName = null;
 	
 	public ObservationFlatFileReader(ObservationType observationType) {
 		this.observationType = observationType;
-		this.treeItemType = TreeItemType.getTreeItemTypeByObservationType(observationType);
+		this.separateGroup   = ImportOption.getInstance().isGroupSeparation(observationType);
+		this.treeItemType    = TreeItemType.getTreeItemTypeByObservationType(observationType);
 		if (this.treeItemType == null)
 			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, observation type could not be transformed to tree item type. " + observationType);
 		this.reset();
@@ -84,8 +88,8 @@ public class ObservationFlatFileReader extends FlatFileReader<TreeItem<TreeItemV
 		this.observations.clear();
 		this.gnss.clear();
 		
-		this.isDirectionGroupWithEqualStation = true;
-		this.directionStartPointName = null;
+		this.isGroupWithEqualStation = true;
+		this.startPointName = null;
 	}
 	
 	@Override
@@ -94,41 +98,15 @@ public class ObservationFlatFileReader extends FlatFileReader<TreeItem<TreeItemV
 		this.ignoreLinesWhichStartWith("#");
 		TreeItem<TreeItemValue> newTreeItem = null;
 		if (this.observationType != ObservationType.DIRECTION)
-			this.isDirectionGroupWithEqualStation = false;
+			this.isGroupWithEqualStation = false;
 		
 		super.read();
 		 
 		if (!this.observations.isEmpty() || !this.gnss.isEmpty()) {
-			String itemName = this.createItemName(null, this.isDirectionGroupWithEqualStation && this.directionStartPointName != null ? " (" + this.directionStartPointName + ")" : null);
-			TreeItemType parentType = TreeItemType.getDirectoryByLeafType(this.treeItemType);
-			newTreeItem = UITreeBuilder.getInstance().addItem(parentType, -1, itemName, true, false);
-			try {
-				SQLManager.getInstance().saveGroup((ObservationTreeItemValue)newTreeItem.getValue());
-			} catch (SQLException e) {
-				UITreeBuilder.getInstance().removeItem(newTreeItem);
-				e.printStackTrace();
-				throw new SQLException(e);
-			}
-			
-			try {
-				int groupId = ((ObservationTreeItemValue)newTreeItem.getValue()).getGroupId();
-				if (!this.observations.isEmpty()) {
-					for (TerrestrialObservationRow row : this.observations) {
-						row.setGroupId(groupId);
-						SQLManager.getInstance().saveItem(row);
-					}
-				}
-				else if (!this.gnss.isEmpty()) {
-					for (GNSSObservationRow row : this.gnss) {
-						row.setGroupId(groupId);
-						SQLManager.getInstance().saveItem(row);
-					}
-				}
-
-			} catch (SQLException e) {
-				e.printStackTrace();
-				throw new SQLException(e);
-			}			
+			if (!this.observations.isEmpty())
+				newTreeItem = this.saveGroup(this.treeItemType, this.observations);
+			else if (!this.gnss.isEmpty())
+				newTreeItem = this.saveGroup(this.treeItemType, this.gnss);
 		}
 		this.reset();
 		return newTreeItem;
@@ -164,26 +142,80 @@ public class ObservationFlatFileReader extends FlatFileReader<TreeItem<TreeItemV
 				break;
 			}
 			
-			if (terrestrialObservationRow != null) {
-				if (this.observationType == ObservationType.DIRECTION) {
-					if (this.directionStartPointName == null)
-						this.directionStartPointName = terrestrialObservationRow.getStartPointName();
-					this.isDirectionGroupWithEqualStation = this.isDirectionGroupWithEqualStation && this.directionStartPointName.equals(terrestrialObservationRow.getStartPointName());
+			String startPointName = null;
+			if (terrestrialObservationRow != null)
+				startPointName = terrestrialObservationRow.getStartPointName();
+			else if (gnssObservationRow != null)
+				startPointName = gnssObservationRow.getStartPointName();
+			
+			if (startPointName != null) {
+				if (this.startPointName == null)
+					this.startPointName = startPointName;
+				this.isGroupWithEqualStation = this.isGroupWithEqualStation && this.startPointName.equals(startPointName);
+				
+				if (this.separateGroup && !this.startPointName.equals(startPointName)) {
+					this.isGroupWithEqualStation = true;
+					this.saveGroup(this.treeItemType, this.observations);
 				}
-				else
-					this.directionStartPointName = null;
 
-				this.observations.add(terrestrialObservationRow);
+				if (terrestrialObservationRow != null)
+					this.observations.add(terrestrialObservationRow);
+				else if (gnssObservationRow != null)
+					this.gnss.add(gnssObservationRow);
 			}
-			
-			if (gnssObservationRow != null)
-				this.gnss.add(gnssObservationRow);
-			
 		}
 		catch (Exception err) {
 			return;
 			// err.printStackTrace();
 			// nichts, Beobachtung unbrauchbar...
 		}	
+	}
+	
+	private TreeItem<TreeItemValue> saveGroup(TreeItemType itemType, List<? extends ObservationRow> observations) throws SQLException {
+		TreeItem<TreeItemValue> treeItem = null;
+		if (!observations.isEmpty()) {
+			String itemName = this.createItemName(null, this.isGroupWithEqualStation ? " (" + this.startPointName + ")" : null); 
+			treeItem = this.saveObservations(itemName, itemType);
+		}
+		observations.clear();
+		this.startPointName = null;
+		this.isGroupWithEqualStation = true;
+		return treeItem;
+	}
+	
+	private TreeItem<TreeItemValue> saveObservations(String itemName, TreeItemType treeItemType) throws SQLException {
+		if ((this.observations == null || this.observations.isEmpty()) && (this.gnss == null || this.gnss.isEmpty()))
+			return null;
+
+		TreeItemType parentType = TreeItemType.getDirectoryByLeafType(treeItemType);
+		TreeItem<TreeItemValue> newTreeItem = UITreeBuilder.getInstance().addItem(parentType, -1, itemName, true, false);
+		try {
+			SQLManager.getInstance().saveGroup((ObservationTreeItemValue)newTreeItem.getValue());
+		} catch (SQLException e) {
+			UITreeBuilder.getInstance().removeItem(newTreeItem);
+			e.printStackTrace();
+			throw new SQLException(e);
+		}
+
+		try {
+			int groupId = ((ObservationTreeItemValue)newTreeItem.getValue()).getGroupId();
+			if (!this.observations.isEmpty()) {
+				for (TerrestrialObservationRow row : this.observations) {
+					row.setGroupId(groupId);
+					SQLManager.getInstance().saveItem(row);
+				}
+			}
+			else if (!this.gnss.isEmpty()) {
+				for (GNSSObservationRow row : this.gnss) {
+					row.setGroupId(groupId);
+					SQLManager.getInstance().saveItem(row);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new SQLException(e);
+		}			
+
+		return newTreeItem;
 	}
 }

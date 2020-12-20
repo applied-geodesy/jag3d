@@ -39,9 +39,11 @@ import javax.xml.xpath.XPathConstants;
 
 import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.MathExtension;
+import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.io.DimensionType;
+import org.applied_geodesy.jag3d.ui.io.ImportOption;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
@@ -501,7 +503,7 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 					}
 				}
 				// Speichere Richtungen, da diese Satzweise zu halten sind
-				this.saveDirectionGroup();
+				this.saveObservationGroups(false);
 			}
 
 			// GNSS-Vector
@@ -579,38 +581,9 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 				this.lastTreeItem = this.savePoints(itemName, TreeItemType.DATUM_POINT_3D_LEAF, this.points3d);
 
 			// Speichere Beobachtungen
-			if (!this.directions.isEmpty())
-				this.saveDirectionGroup();
-
-			if (!this.horizontalDistances.isEmpty()) 
-				this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
-
-			if (this.dim == DimensionType.SPATIAL && !this.slopeDistances.isEmpty()) 
-				this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
-
-			if (this.dim == DimensionType.SPATIAL && !this.zenithAngles.isEmpty()) 
-				this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
-
-			// Import von (relativen) GNSS-Messungen
-			if (!this.gnss2D.isEmpty())
-				this.lastTreeItem = this.saveGNSSObservations(itemName, TreeItemType.GNSS_2D_LEAF, this.gnss2D);
-
-			if (this.dim == DimensionType.SPATIAL && !this.gnss3D.isEmpty())
-				this.lastTreeItem = this.saveGNSSObservations(itemName, TreeItemType.GNSS_3D_LEAF, this.gnss3D);
+			this.saveObservationGroups(true);
 
 		} 
-//		catch (ParserConfigurationException e) {
-//			e.printStackTrace();
-//			this.isValidDocument = false;
-//		} 
-//		catch (SAXException e) {
-//			this.isValidDocument = false;
-//			e.printStackTrace();
-//		} 
-//		catch (IOException e) {
-//			this.isValidDocument = false;
-//			e.printStackTrace();
-//		}
 		catch (IOException e) {
 			e.printStackTrace();
 			this.isValidDocument = false;
@@ -639,12 +612,48 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 		};
 	}
 	
-	private void saveDirectionGroup() throws SQLException {
-		if (!this.directions.isEmpty()) {
-			String itemName = this.createItemName(null, " (" + this.directions.get(0).getStartPointName() + ")"); 
-			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.DIRECTION_LEAF, this.directions);
+	private void saveObservationGroups(boolean forceSaving) throws SQLException {
+		// Import von terrestrischen Beobachtungen
+		if (!this.directions.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.DIRECTION)))
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.DIRECTION_LEAF, this.directions);
+		
+		if (!this.horizontalDistances.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.HORIZONTAL_DISTANCE)))
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.HORIZONTAL_DISTANCE_LEAF, this.horizontalDistances);
+		
+		if (this.dim == DimensionType.SPATIAL && !this.slopeDistances.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.SLOPE_DISTANCE)))
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.SLOPE_DISTANCE_LEAF, this.slopeDistances);
+
+		if (this.dim == DimensionType.SPATIAL && !this.zenithAngles.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.ZENITH_ANGLE)))
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.ZENITH_ANGLE_LEAF, this.zenithAngles);
+		
+		// Import von (relativen) GNSS-Messungen
+		if (!this.gnss2D.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.GNSS2D)))
+			this.lastTreeItem = this.saveGNSSGroup(TreeItemType.GNSS_2D_LEAF, this.gnss2D);
+
+		if (this.dim == DimensionType.SPATIAL && !this.gnss3D.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.GNSS3D)))
+			this.lastTreeItem = this.saveGNSSGroup(TreeItemType.GNSS_3D_LEAF, this.gnss3D);
+	}
+	
+	private TreeItem<TreeItemValue> saveObservationGroup(TreeItemType itemType, List<TerrestrialObservationRow> observations) throws SQLException {
+		TreeItem<TreeItemValue> treeItem = null;
+		if (!observations.isEmpty()) {
+			boolean isGroupWithEqualStation = ImportOption.getInstance().isGroupSeparation(TreeItemType.getObservationTypeByTreeItemType(itemType));
+			String itemName = this.createItemName(null, isGroupWithEqualStation && observations.get(0).getStartPointName() != null ? " (" + observations.get(0).getStartPointName() + ")" : null); 
+			treeItem = this.saveTerrestrialObservations(itemName, itemType, observations);
 		}
-		this.directions.clear();
+		observations.clear();
+		return treeItem;
+	}
+	
+	private TreeItem<TreeItemValue> saveGNSSGroup(TreeItemType itemType, List<GNSSObservationRow> observations) throws SQLException {
+		TreeItem<TreeItemValue> treeItem = null;
+		if (!observations.isEmpty()) {
+			boolean isGroupWithEqualStation = ImportOption.getInstance().isGroupSeparation(TreeItemType.getObservationTypeByTreeItemType(itemType));
+			String itemName = this.createItemName(null, isGroupWithEqualStation && observations.get(0).getStartPointName() != null ? " (" + observations.get(0).getStartPointName() + ")" : null); 
+			treeItem = this.saveGNSSObservations(itemName, itemType, observations);
+		}
+		observations.clear();
+		return treeItem;
 	}
 
 	private TreeItem<TreeItemValue> saveTerrestrialObservations(String itemName, TreeItemType treeItemType, List<TerrestrialObservationRow> observations) throws SQLException {
@@ -664,7 +673,6 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 		try {
 			int groupId = ((ObservationTreeItemValue)newTreeItem.getValue()).getGroupId();
 			for (TerrestrialObservationRow row : observations) {
-				//SQLManager.getInstance().saveItem(groupId, row);
 				row.setGroupId(groupId);
 				SQLManager.getInstance().saveItem(row);
 			}

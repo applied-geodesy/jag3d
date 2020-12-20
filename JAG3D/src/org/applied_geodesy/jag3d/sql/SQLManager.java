@@ -63,6 +63,7 @@ import org.applied_geodesy.jag3d.ui.dialog.LeastSquaresSettingDialog.LeastSquare
 import org.applied_geodesy.jag3d.ui.graphic.UIGraphicPaneBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.sql.SQLGraphicManager;
+import org.applied_geodesy.jag3d.ui.io.ImportOption;
 import org.applied_geodesy.jag3d.ui.io.report.FTLReport;
 import org.applied_geodesy.jag3d.ui.metadata.MetaData;
 import org.applied_geodesy.jag3d.ui.metadata.UIMetaDataPaneBuilder;
@@ -207,6 +208,8 @@ public class SQLManager {
 
 	private void loadExistingDataBase() throws SQLException {
 		this.loadTableRowHighlight();
+		this.loadImportPreferences();
+		
 		this.loadPointGroups();
 		this.loadObservationGroups();
 		this.loadGNSSObservationGroups();
@@ -489,6 +492,16 @@ public class SQLManager {
 		sqls.put(20200124.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"UnscentedTransformation\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"scaling\" DOUBLE DEFAULT " + UnscentedTransformationParameter.getAlpha() + " NOT NULL, \"damping\" DOUBLE DEFAULT " + UnscentedTransformationParameter.getBeta() + " NOT NULL, \"weight_zero\" DOUBLE DEFAULT " + UnscentedTransformationParameter.getWeightZero() + " NOT NULL);\r\n");
 		sqls.put(20200124.0002, "INSERT INTO \"UnscentedTransformation\" (\"id\") VALUES (1);\r\n");
 		
+		sqls.put(20200327.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ImportSeparation\" (\"id\" INTEGER NOT NULL PRIMARY KEY, \"separate\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
+		sqls.put(20200327.0002, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.LEVELING.getId() + ", "            + ImportOption.getInstance().isGroupSeparation(ObservationType.LEVELING)+ ");\r\n");
+		sqls.put(20200327.0003, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.DIRECTION.getId() + ", "           + ImportOption.getInstance().isGroupSeparation(ObservationType.DIRECTION)+ ");\r\n");
+		sqls.put(20200327.0004, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.HORIZONTAL_DISTANCE.getId() + ", " + ImportOption.getInstance().isGroupSeparation(ObservationType.HORIZONTAL_DISTANCE)+ ");\r\n");
+		sqls.put(20200327.0005, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.SLOPE_DISTANCE.getId() + ", "      + ImportOption.getInstance().isGroupSeparation(ObservationType.SLOPE_DISTANCE)+ ");\r\n");
+		sqls.put(20200327.0006, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.ZENITH_ANGLE.getId() + ", "        + ImportOption.getInstance().isGroupSeparation(ObservationType.ZENITH_ANGLE)+ ");\r\n");
+		sqls.put(20200327.0007, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.GNSS1D.getId() + ", "              + ImportOption.getInstance().isGroupSeparation(ObservationType.GNSS1D)+ ");\r\n");
+		sqls.put(20200327.0008, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.GNSS2D.getId() + ", "              + ImportOption.getInstance().isGroupSeparation(ObservationType.GNSS2D)+ ");\r\n");
+		sqls.put(20200327.0009, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.GNSS3D.getId() + ", "              + ImportOption.getInstance().isGroupSeparation(ObservationType.GNSS3D)+ ");\r\n");
+
 		return sqls;
 	}
 
@@ -4043,6 +4056,58 @@ public class SQLManager {
 		stmt.execute();
 	}
 	
+	public void loadImportPreferences() throws SQLException {
+		ImportOption importOption = ImportOption.getInstance();
+		String sql = "SELECT "
+				+ "\"id\", \"separate\" "
+				+ "FROM \"ImportSeparation\"";
+
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			int id = rs.getInt("id");
+			ObservationType observationType = ObservationType.getEnumByValue(id);
+			if (observationType == null)
+				continue;
+			
+			boolean separate = rs.getBoolean("separate");
+			importOption.setGroupSeparation(observationType, separate);
+		}
+	}
+	
+	public void saveImportPreferences() throws SQLException {
+		String sql = "MERGE INTO \"ImportSeparation\" USING (VALUES "
+				+ "(CAST(? AS INT), CAST(? AS BOOLEAN)) "
+				+ ") AS \"vals\" (\"id\", \"separate\") ON \"ImportSeparation\".\"id\" = \"vals\".\"id\" "
+				+ "WHEN MATCHED THEN UPDATE SET "
+				+ "\"ImportSeparation\".\"separate\" = \"vals\".\"separate\" "
+				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "\"vals\".\"id\", "
+				+ "\"vals\".\"separate\"";
+		
+		ImportOption importOption = ImportOption.getInstance();
+		boolean hasBatch = false;
+		
+		try {
+			this.dataBase.setAutoCommit(false);
+			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+			
+			for (ObservationType observationType : ObservationType.values()) {
+				int idx = 1;
+				stmt.setInt(idx++, observationType.getId());
+				stmt.setBoolean(idx++, importOption.isGroupSeparation(observationType));
+				stmt.addBatch();
+				hasBatch = true;
+			}
+			if (hasBatch)
+				stmt.executeLargeBatch();
+		}
+		finally {
+			this.dataBase.setAutoCommit(true);
+		}
+	}
+
 	public void executeStatement(String sql) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen() || sql == null || sql.isBlank() || sql.isEmpty())
 			return;

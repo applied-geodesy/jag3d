@@ -30,6 +30,7 @@ import org.applied_geodesy.jag3d.ui.dialog.ApproximationValuesDialog;
 import org.applied_geodesy.jag3d.ui.dialog.AverageDialog;
 import org.applied_geodesy.jag3d.ui.dialog.CongruentPointDialog;
 import org.applied_geodesy.jag3d.ui.dialog.FormatterOptionDialog;
+import org.applied_geodesy.jag3d.ui.dialog.ImportOptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.LeastSquaresSettingDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ProjectionAndReductionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.RankDefectDialog;
@@ -92,8 +93,12 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 			this.menuBuilder.embedSQLSripts();
 			break;
 			
-		case PREFERENCES:
+		case FORMATTER_PREFERENCES:
 			FormatterOptionDialog.showAndWait();
+			break;
+			
+		case IMPORT_PREFERENCES:
+			ImportOptionDialog.showAndWait();
 			break;
 			
 		case LEAST_SQUARES:
