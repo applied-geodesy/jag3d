@@ -6,7 +6,7 @@
 # Comments are indicated by # as first character
 # Valid units are Meter and Per Cent w.r.t. the highlight type
 #
-# The followind values are the default values of JAG3D
+# The following values are the default values of JAG3D
 #
 # For valid color specifications, see JAVA-API: 
 # https://docs.oracle.com/javafx/2/api/javafx/scene/paint/Color.html
