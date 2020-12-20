@@ -6,7 +6,7 @@
 # Comments are indicated by # as first character
 # Valid units are Radiant, Meter, PPM (e.g. mm/km) w.r.t. the observation type
 #
-# The followind values are the default values of JAG3D
+# The following values are the default values of JAG3D
 #
 ANGLE_ZERO_POINT_OFFSET                 = 4.71238898038469e-06
 ANGLE_SQUARE_ROOT_DISTANCE_DEPENDENT    = 0.0

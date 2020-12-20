@@ -6,7 +6,7 @@
 # Comments are indicated by # as first character
 # Valid units are Radiant and Meter w.r.t. the observation type
 #
-# The followind values are the default values of JAG3D and are ten-times 
+# The following values are the default values of JAG3D and are ten-times 
 # larger than the uncertainties of the zero point offsets
 #
 LEVELING            = 0.0015
