@@ -42,6 +42,7 @@ import org.applied_geodesy.jag3d.ui.dialog.AverageDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ColumnImportDialog;
 import org.applied_geodesy.jag3d.ui.dialog.CongruentPointDialog;
 import org.applied_geodesy.jag3d.ui.dialog.FormatterOptionDialog;
+import org.applied_geodesy.jag3d.ui.dialog.ImportOptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.LeastSquaresSettingDialog;
 import org.applied_geodesy.jag3d.ui.dialog.NetworkAdjustmentDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ProjectionAndReductionDialog;
@@ -140,6 +141,7 @@ public class JAG3D extends Application {
 		AboutDialog.setOwner(primaryStage);
 		ColumnImportDialog.setOwner(primaryStage);
 		TableRowHighlightDialog.setOwner(primaryStage);
+		ImportOptionDialog.setOwner(primaryStage);
 	}
 
 	@Override
