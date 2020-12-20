@@ -1,0 +1,20 @@
+# !!! This is an example file and will not be used by JAG3D. Please !!!
+# !!! create a copy of this file named "import.default",            !!!
+# !!! located in the same directory. Modify the copied file w.r.t.  !!!
+# !!! the desired values.                                           !!!
+#
+# Comments are indicated by # as first character
+#
+# The followind values are the default values of JAG3D
+#
+LEVELING = FALSE
+#
+DIRECTION           = TRUE
+HORIZONTAL_DISTANCE = FALSE
+#
+SLOPE_DISTANCE = FALSE
+ZENITH_ANGLE   = FALSE
+#
+GNSS1D = FALSE
+GNSS2D = FALSE
+GNSS3D = FALSE
