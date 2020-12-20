@@ -44,7 +44,7 @@ public class ImportOption {
 		return DefaultImportOption.isGroupSeparation(observationType);
 	}
 	
-	public void setGroupSeparation(ObservationType observationType, boolean seperate) {
-		this.separateStation.put(observationType, seperate);
+	public void setGroupSeparation(ObservationType observationType, boolean separate) {
+		this.separateStation.put(observationType, separate);
 	}
 }
