@@ -156,6 +156,7 @@ public class ObservationFlatFileReader extends FlatFileReader<TreeItem<TreeItemV
 				if (this.separateGroup && !this.startPointName.equals(startPointName)) {
 					this.isGroupWithEqualStation = true;
 					this.saveGroup(this.treeItemType, this.observations);
+					this.startPointName = startPointName;
 				}
 
 				if (terrestrialObservationRow != null)
