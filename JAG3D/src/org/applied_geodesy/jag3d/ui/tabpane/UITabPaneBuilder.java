@@ -418,7 +418,7 @@ public class UITabPaneBuilder {
 				}
 				else {
 					tabPane.getTabs().clear();
-					System.out.println(this.getClass().getSimpleName() + " : No known tab types " + newTabTypes + " for " + treeItemValue);
+					//System.out.println(this.getClass().getSimpleName() + " : No known tab types " + newTabTypes + " for " + treeItemValue);
 				}
 			}
 		}
