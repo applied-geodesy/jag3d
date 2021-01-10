@@ -3191,86 +3191,139 @@ public class SQLManager {
 			return;
 		
 		String sqlCountPointGroups  = "SELECT COUNT(\"PointApriori\".\"id\") AS \"number_of_points\", \"PointGroup\".\"type\" FROM \"PointApriori\" JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" WHERE \"PointApriori\".\"enable\" = TRUE AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"type\" IN (?,?,?) GROUP BY \"PointGroup\".\"type\" ORDER BY  \"PointGroup\".\"type\" ASC";
-		String sqlCountObservations = "SELECT \"UnionTable\".\"name\", SUM(\"UnionTable\".\"number_of_observations\") AS \"number_of_observations\", \"UnionTable\".\"dimension\" FROM ( " +
+		
+		String sqlCountObservations = "SELECT "
+				// Tmp Tabelle aufbauen
+				+ "\"UnionTable\".\"name\", SUM(\"UnionTable\".\"number_of_observations\") AS \"number_of_observations\", \"UnionTable\".\"dimension\" FROM ( "
 
-										// Alle Punkte abfragen, die bestimmt werden muessen
-										"SELECT \"name\", 0 AS \"number_of_observations\", \"dimension\" FROM \"PointApriori\" " +
-										"JOIN \"PointGroup\" ON \"PointGroup\".\"id\" = \"PointApriori\".\"group_id\" " +
-										"WHERE \"PointGroup\".\"enable\" = TRUE AND \"PointApriori\".\"enable\" = TRUE " +
-										"AND \"PointGroup\".\"type\" IN (?, ?) " +
+				// Alle Punkte abfragen, die bestimmt werden muessen
+				+ "SELECT"
+				
+				+ "\"name\", 0 AS \"number_of_observations\", "
+				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? THEN \"PointGroup\".\"dimension\" + 2 ELSE \"PointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
+				
+				+ "FROM \"PointApriori\" "
+				
+				+ "JOIN \"PointGroup\" ON \"PointGroup\".\"id\" = \"PointApriori\".\"group_id\" "
+				
+				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"PointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
+				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
+				
+				+ "WHERE \"PointGroup\".\"enable\" = TRUE AND \"PointApriori\".\"enable\" = TRUE "
+				+ "AND \"PointGroup\".\"type\" IN (?, ?) "
 
-										"UNION ALL " +
+				
+				+ "UNION ALL "
 
-										// Alle Standpunkte abfragen und terr. Beobachtungen zaehlen
-										"SELECT \"start_point_name\" AS \"name\", COUNT(\"start_point_name\") AS \"number_of_observations\", \"StartPointGroup\".\"dimension\" FROM \"ObservationApriori\" " +
-										"JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" " +
+				// Alle Standpunkte abfragen und terr. Beobachtungen zaehlen
+				+ "SELECT "
+				
+				+ "\"start_point_name\" AS \"name\", COUNT(\"start_point_name\") AS \"number_of_observations\", "
+				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? THEN \"StartPointGroup\".\"dimension\" + 2 ELSE \"StartPointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
+				
+				+ "FROM \"ObservationApriori\" "
+				
+				+ "JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				
+				+ "JOIN \"PointApriori\" AS \"StartPointApriori\" ON \"ObservationApriori\".\"start_point_name\" = \"StartPointApriori\".\"name\" "
+				+ "JOIN \"PointApriori\" AS \"EndPointApriori\" ON \"ObservationApriori\".\"end_point_name\" = \"EndPointApriori\".\"name\" "
+				
+				+ "JOIN \"PointGroup\" AS \"StartPointGroup\" ON \"StartPointGroup\".\"id\" = \"StartPointApriori\".\"group_id\" "
+				+ "JOIN \"PointGroup\" AS \"EndPointGroup\" ON \"EndPointGroup\".\"id\" = \"EndPointApriori\".\"group_id\" "
+				
+				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"StartPointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
+				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
+				
+				+ "WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE "
+				+ "AND \"StartPointGroup\".\"type\" IN (?, ?) "
+				
+				+ "GROUP BY \"start_point_name\", \"StartPointGroup\".\"dimension\", \"VerticalDeflectionGroup\".\"type\" "
+				
+				
+				+ "UNION ALL "
+				
+				// Alle Zielpunkte abfragen und terr. Beobachtungen zaehlen
+				+ "SELECT "
+				
+				+ "\"end_point_name\" AS \"name\", COUNT(\"end_point_name\") AS \"number_of_observations\", "
+				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? THEN \"EndPointGroup\".\"dimension\" + 2 ELSE \"EndPointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
+				
+				+ "FROM \"ObservationApriori\" "
+				
+				+ "JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				
+				+ "JOIN \"PointApriori\" AS \"StartPointApriori\" ON \"ObservationApriori\".\"start_point_name\" = \"StartPointApriori\".\"name\" "
+				+ "JOIN \"PointApriori\" AS \"EndPointApriori\" ON \"ObservationApriori\".\"end_point_name\" = \"EndPointApriori\".\"name\" "
+				
+				+ "JOIN \"PointGroup\" AS \"StartPointGroup\" ON \"StartPointGroup\".\"id\" = \"StartPointApriori\".\"group_id\" "
+				+ "JOIN \"PointGroup\" AS \"EndPointGroup\" ON \"EndPointGroup\".\"id\" = \"EndPointApriori\".\"group_id\" "
+				
+				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"EndPointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
+				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
+				
+				+ "WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE "
+				+ "AND \"EndPointGroup\".\"type\" IN (?, ?) "
+				
+				+ "GROUP BY \"end_point_name\", \"EndPointGroup\".\"dimension\", \"VerticalDeflectionGroup\".\"type\" "
+				
+				
+				+ "UNION ALL "
 
-										"JOIN \"PointApriori\" AS \"StartPointApriori\" ON \"ObservationApriori\".\"start_point_name\" = \"StartPointApriori\".\"name\" " +
-										"JOIN \"PointApriori\" AS \"EndPointApriori\" ON \"ObservationApriori\".\"end_point_name\" = \"EndPointApriori\".\"name\" " +
-
-										"JOIN \"PointGroup\" AS \"StartPointGroup\" ON \"StartPointGroup\".\"id\" = \"StartPointApriori\".\"group_id\" " +
-										"JOIN \"PointGroup\" AS \"EndPointGroup\" ON \"EndPointGroup\".\"id\" = \"EndPointApriori\".\"group_id\" " +
-
-										"WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE " +
-										"AND \"StartPointGroup\".\"type\" IN (?, ?) " +
-
-										"GROUP BY \"start_point_name\", \"StartPointGroup\".\"dimension\" " +
-
-										"UNION ALL " +
-
-										// Alle Zielpunkte abfragen und terr. Beobachtungen zaehlen
-										"SELECT \"end_point_name\" AS \"name\", COUNT(\"end_point_name\") AS \"number_of_observations\", \"EndPointGroup\".\"dimension\" FROM \"ObservationApriori\" " +
-										"JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" " +
-
-										"JOIN \"PointApriori\" AS \"StartPointApriori\" ON \"ObservationApriori\".\"start_point_name\" = \"StartPointApriori\".\"name\" " +
-										"JOIN \"PointApriori\" AS \"EndPointApriori\" ON \"ObservationApriori\".\"end_point_name\" = \"EndPointApriori\".\"name\" " +
-
-										"JOIN \"PointGroup\" AS \"StartPointGroup\" ON \"StartPointGroup\".\"id\" = \"StartPointApriori\".\"group_id\" " +
-										"JOIN \"PointGroup\" AS \"EndPointGroup\" ON \"EndPointGroup\".\"id\" = \"EndPointApriori\".\"group_id\" " +
-
-										"WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE " +
-										"AND \"EndPointGroup\".\"type\" IN (?, ?) " +
-
-										"GROUP BY \"end_point_name\", \"EndPointGroup\".\"dimension\" " +
-
-										"UNION ALL " +
-
-										// Alle Standpunkte abfragen und GNSS-Beobachtungen zaehlen
-										"SELECT \"start_point_name\" AS \"name\", CAST(CASE WHEN \"ObservationGroup\".\"type\" = ? THEN 3*COUNT(\"start_point_name\") WHEN \"ObservationGroup\".\"type\" = ? THEN 2*COUNT(\"start_point_name\") ELSE COUNT(\"start_point_name\") END AS INTEGER) AS \"number_of_observations\", \"StartPointGroup\".\"dimension\" FROM \"GNSSObservationApriori\" " +
-										"JOIN \"ObservationGroup\" ON \"GNSSObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" " +
-
-										"JOIN \"PointApriori\" AS \"StartPointApriori\" ON \"GNSSObservationApriori\".\"start_point_name\" = \"StartPointApriori\".\"name\" " +
-										"JOIN \"PointApriori\" AS \"EndPointApriori\" ON \"GNSSObservationApriori\".\"end_point_name\" = \"EndPointApriori\".\"name\" " +
-
-										"JOIN \"PointGroup\" AS \"StartPointGroup\" ON \"StartPointGroup\".\"id\" = \"StartPointApriori\".\"group_id\" " +
-										"JOIN \"PointGroup\" AS \"EndPointGroup\" ON \"EndPointGroup\".\"id\" = \"EndPointApriori\".\"group_id\" " +
-
-										"WHERE \"GNSSObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE " +
-										"AND \"StartPointGroup\".\"type\" IN (?, ?) " +
-
-										"GROUP BY \"start_point_name\", \"StartPointGroup\".\"dimension\", \"ObservationGroup\".\"type\" " +
-
-										"UNION ALL " +
-
-										// Alle Zielpunkte abfragen und GNSS-Beobachtungen zaehlen										
-										"SELECT \"end_point_name\" AS \"name\", CAST(CASE WHEN \"ObservationGroup\".\"type\" = ? THEN 3*COUNT(\"end_point_name\") WHEN \"ObservationGroup\".\"type\" = ? THEN 2*COUNT(\"end_point_name\") ELSE COUNT(\"end_point_name\") END AS INTEGER) AS \"number_of_observations\", \"EndPointGroup\".\"dimension\" FROM \"GNSSObservationApriori\" " +
-										"JOIN \"ObservationGroup\" ON \"GNSSObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" " +
-
-										"JOIN \"PointApriori\" AS \"StartPointApriori\" ON \"GNSSObservationApriori\".\"start_point_name\" = \"StartPointApriori\".\"name\" " +
-										"JOIN \"PointApriori\" AS \"EndPointApriori\" ON \"GNSSObservationApriori\".\"end_point_name\" = \"EndPointApriori\".\"name\" " +
-
-										"JOIN \"PointGroup\" AS \"StartPointGroup\" ON \"StartPointGroup\".\"id\" = \"StartPointApriori\".\"group_id\" " +
-										"JOIN \"PointGroup\" AS \"EndPointGroup\" ON \"EndPointGroup\".\"id\" = \"EndPointApriori\".\"group_id\" " +
-
-										"WHERE \"GNSSObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE " +
-										"AND \"EndPointGroup\".\"type\" IN (?, ?) " +
-
-										"GROUP BY \"end_point_name\", \"EndPointGroup\".\"dimension\", \"ObservationGroup\".\"type\" " +
-
-										") AS \"UnionTable\" " +
-
-										"GROUP BY \"UnionTable\".\"name\", \"UnionTable\".\"dimension\" HAVING SUM(\"UnionTable\".\"number_of_observations\") < \"UnionTable\".\"dimension\" ORDER BY \"number_of_observations\", \"UnionTable\".\"name\" ASC LIMIT 1";
-
+				// Alle Standpunkte abfragen und GNSS-Beobachtungen zaehlen
+				+ "SELECT "
+				
+				+ "\"start_point_name\" AS \"name\", CAST(CASE WHEN \"ObservationGroup\".\"type\" = ? THEN 3*COUNT(\"start_point_name\") WHEN \"ObservationGroup\".\"type\" = ? THEN 2*COUNT(\"start_point_name\") ELSE COUNT(\"start_point_name\") END AS INTEGER) AS \"number_of_observations\", "
+				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? THEN \"StartPointGroup\".\"dimension\" + 2 ELSE \"StartPointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
+				
+				+ "FROM \"GNSSObservationApriori\" "
+				
+				+ "JOIN \"ObservationGroup\" ON \"GNSSObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				
+				+ "JOIN \"PointApriori\" AS \"StartPointApriori\" ON \"GNSSObservationApriori\".\"start_point_name\" = \"StartPointApriori\".\"name\" "
+				+ "JOIN \"PointApriori\" AS \"EndPointApriori\" ON \"GNSSObservationApriori\".\"end_point_name\" = \"EndPointApriori\".\"name\" "
+				
+				+ "JOIN \"PointGroup\" AS \"StartPointGroup\" ON \"StartPointGroup\".\"id\" = \"StartPointApriori\".\"group_id\" "
+				+ "JOIN \"PointGroup\" AS \"EndPointGroup\" ON \"EndPointGroup\".\"id\" = \"EndPointApriori\".\"group_id\" "
+				
+				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"StartPointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
+				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
+				
+				+ "WHERE \"GNSSObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE "
+				+ "AND \"StartPointGroup\".\"type\" IN (?, ?) "
+				
+				+ "GROUP BY \"start_point_name\", \"StartPointGroup\".\"dimension\", \"ObservationGroup\".\"type\", \"VerticalDeflectionGroup\".\"type\" "
+				
+				
+				+ "UNION ALL "
+		
+				// Alle Zielpunkte abfragen und GNSS-Beobachtungen zaehlen		
+				+ "SELECT "
+				
+				+ "\"end_point_name\" AS \"name\", CAST(CASE WHEN \"ObservationGroup\".\"type\" = ? THEN 3*COUNT(\"end_point_name\") WHEN \"ObservationGroup\".\"type\" = ? THEN 2*COUNT(\"end_point_name\") ELSE COUNT(\"end_point_name\") END AS INTEGER) AS \"number_of_observations\", "
+				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? THEN \"EndPointGroup\".\"dimension\" + 2 ELSE \"EndPointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
+				
+				+ "FROM \"GNSSObservationApriori\" "
+				
+				+ "JOIN \"ObservationGroup\" ON \"GNSSObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				
+				+ "JOIN \"PointApriori\" AS \"StartPointApriori\" ON \"GNSSObservationApriori\".\"start_point_name\" = \"StartPointApriori\".\"name\" "
+				+ "JOIN \"PointApriori\" AS \"EndPointApriori\" ON \"GNSSObservationApriori\".\"end_point_name\" = \"EndPointApriori\".\"name\" "
+				
+				+ "JOIN \"PointGroup\" AS \"StartPointGroup\" ON \"StartPointGroup\".\"id\" = \"StartPointApriori\".\"group_id\" "
+				+ "JOIN \"PointGroup\" AS \"EndPointGroup\" ON \"EndPointGroup\".\"id\" = \"EndPointApriori\".\"group_id\" "
+				
+				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"EndPointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
+				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
+				
+				+ "WHERE \"GNSSObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE "
+				+ "AND \"EndPointGroup\".\"type\" IN (?, ?) "
+				
+				+ "GROUP BY \"end_point_name\", \"EndPointGroup\".\"dimension\", \"ObservationGroup\".\"type\", \"VerticalDeflectionGroup\".\"type\" "
+				
+				
+				+ ") AS \"UnionTable\" "
+				+ "GROUP BY \"UnionTable\".\"name\", \"UnionTable\".\"dimension\" HAVING SUM(\"UnionTable\".\"number_of_observations\") < \"UnionTable\".\"dimension\" ORDER BY \"number_of_observations\", \"UnionTable\".\"name\" ASC LIMIT 1";
+		
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sqlCountPointGroups);
 		stmt.setInt(1, PointType.DATUM_POINT.getId());
 		stmt.setInt(2, PointType.REFERENCE_POINT.getId());
@@ -3299,26 +3352,31 @@ public class SQLManager {
 		stmt = this.dataBase.getPreparedStatement(sqlCountObservations);
 		int idx = 1;
 		// Alle Punkte abfragen, die bestimmt werden muessen
+		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
 		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
 		stmt.setInt(idx++, PointType.NEW_POINT.getId());
 
 		// Alle Standpunkte abfragen und terr. Beobachtungen zaehlen
+		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
 		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
 		stmt.setInt(idx++, PointType.NEW_POINT.getId());
 
 		// Alle Zielpunkte abfragen und terr. Beobachtungen zaehlen
+		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
 		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
 		stmt.setInt(idx++, PointType.NEW_POINT.getId());
 
 		// Alle Standpunkte abfragen und GNSS-Beobachtungen zaehlen
 		stmt.setInt(idx++, ObservationType.GNSS3D.getId());
 		stmt.setInt(idx++, ObservationType.GNSS2D.getId());
+		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
 		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
 		stmt.setInt(idx++, PointType.NEW_POINT.getId());
 
 		// Alle Zielpunkte abfragen und GNSS-Beobachtungen zaehlen
 		stmt.setInt(idx++, ObservationType.GNSS3D.getId());
 		stmt.setInt(idx++, ObservationType.GNSS2D.getId());
+		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
 		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
 		stmt.setInt(idx++, PointType.NEW_POINT.getId());
 
