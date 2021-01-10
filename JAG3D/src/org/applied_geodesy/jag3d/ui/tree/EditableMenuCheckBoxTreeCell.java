@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
@@ -39,14 +40,17 @@ import org.applied_geodesy.jag3d.ui.dnd.GNSSObservationRowDnD;
 import org.applied_geodesy.jag3d.ui.dnd.GroupTreeItemDnD;
 import org.applied_geodesy.jag3d.ui.dnd.PointRowDnD;
 import org.applied_geodesy.jag3d.ui.dnd.TerrestrialObservationRowDnD;
+import org.applied_geodesy.jag3d.ui.dnd.VerticalDeflectionRowDnD;
 import org.applied_geodesy.jag3d.ui.table.UICongruenceAnalysisTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIGNSSObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIPointTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITerrestrialObservationTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.UIVerticalDeflectionTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
+import org.applied_geodesy.jag3d.ui.table.row.VerticalDeflectionRow;
 import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 import org.applied_geodesy.jag3d.ui.tabpane.UITabPaneBuilder;
 import org.applied_geodesy.ui.dialog.OptionDialog;
@@ -91,6 +95,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 	public static final DataFormat DIMENSION_DATA_FORMAT = new DataFormat(Integer.class.toString());
 	public static final DataFormat TERRESTRIAL_OBSERVATION_ROWS_DATA_FORMAT = new DataFormat(TerrestrialObservationRowDnD.class.toString());
 	public static final DataFormat GNSS_OBSERVATION_ROWS_DATA_FORMAT = new DataFormat(GNSSObservationRowDnD.class.toString());
+	public static final DataFormat VERTICAL_DEFLECTION_ROWS_DATA_FORMAT = new DataFormat(VerticalDeflectionRowDnD.class.toString());
 	public static final DataFormat POINT_ROWS_DATA_FORMAT = new DataFormat(PointRowDnD.class.toString());
 	public static final DataFormat CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT = new DataFormat(CongruenceAnalysisRowDnD.class.toString());
 	private static final DataFormat TREE_ITEMS_DATA_FORMAT = new DataFormat(GroupTreeItemDnD.class.toString());
@@ -109,7 +114,11 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		CHANGE_TO_REFERENCE_POINT_GROUP,
 		CHANGE_TO_STOCHASTIC_POINT_GROUP,
 		CHANGE_TO_DATUM_POINT_GROUP,
-		CHANGE_TO_NEW_POINT_GROUP;
+		CHANGE_TO_NEW_POINT_GROUP,
+		CHANGE_TO_REFERENCE_DEFLECTION_GROUP,
+		CHANGE_TO_STOCHASTIC_DEFLECTION_GROUP,
+		CHANGE_TO_UNKNOWN_DEFLECTION_GROUP,		
+		;
 	}
 	
 	private class DatabaseStateChangeListener implements ProjectDatabaseStateChangeListener {
@@ -234,6 +243,9 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 
 									else if (TreeItemType.isCongruenceAnalysisTypeLeaf(itemValue.getItemType())) 
 										SQLManager.getInstance().saveGroup((CongruenceAnalysisTreeItemValue)itemValue);
+									
+									else if (TreeItemType.isVerticalDeflectionTypeLeaf(itemValue.getItemType())) 
+										SQLManager.getInstance().saveGroup((VerticalDeflectionTreeItemValue)itemValue);
 
 								} catch (Exception e) {
 									e.printStackTrace();
@@ -277,6 +289,10 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 							targetGroupId = ((CongruenceAnalysisTreeItemValue)getItem()).getGroupId();
 							droppedRows = (List<?>)db.getContent(CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT);
 						}
+						else if (TreeItemType.isVerticalDeflectionTypeLeaf(getItem().getItemType()) && db.hasContent(VERTICAL_DEFLECTION_ROWS_DATA_FORMAT)) {
+							targetGroupId = ((VerticalDeflectionTreeItemValue)getItem()).getGroupId();
+							droppedRows = (List<?>)db.getContent(VERTICAL_DEFLECTION_ROWS_DATA_FORMAT);
+						}
 
 						if (droppedRows != null && targetGroupId >= 0) {
 							for (int i=0; i<droppedRows.size(); i++) {
@@ -304,6 +320,12 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 									else if (droppedRows.get(i) instanceof CongruenceAnalysisRowDnD) {
 										CongruenceAnalysisRowDnD rowDnD = (CongruenceAnalysisRowDnD)droppedRows.get(i);
 										CongruenceAnalysisRow row = rowDnD.toCongruenceAnalysisRow();
+										row.setGroupId(targetGroupId);
+										SQLManager.getInstance().saveItem(row);
+									}
+									else if (droppedRows.get(i) instanceof VerticalDeflectionRowDnD) {
+										VerticalDeflectionRowDnD rowDnD = (VerticalDeflectionRowDnD)droppedRows.get(i);
+										VerticalDeflectionRow row = rowDnD.toVerticalDeflectionRow();
 										row.setGroupId(targetGroupId);
 										SQLManager.getInstance().saveItem(row);
 									}
@@ -393,6 +415,16 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 									((PointTreeItemValue)itemValue).getDimension() == (Integer)db.getContent(DIMENSION_DATA_FORMAT) &&
 									((PointTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT)) &&
 									!groupItemIdsDnD.contains(((PointTreeItemValue)itemValue).getGroupId())
+									
+							||
+
+							// deflection
+							((db.hasContent(VERTICAL_DEFLECTION_ROWS_DATA_FORMAT) || db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
+									TreeItemType.isVerticalDeflectionTypeLeaf(itemType) && 
+									itemType == db.getContent(TREE_ITEM_TYPE_DATA_FORMAT) &&
+									itemValue instanceof VerticalDeflectionTreeItemValue &&
+									((VerticalDeflectionTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT)) &&
+									!groupItemIdsDnD.contains(((VerticalDeflectionTreeItemValue)itemValue).getGroupId())
 					
 							||
 
@@ -430,44 +462,44 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 						return;
 
 					if (dimension == 1)
-						changePointGroupType(TreeItemType.REFERENCE_POINT_1D_LEAF);
+						changeGroupType(TreeItemType.REFERENCE_POINT_1D_LEAF);
 					else if (dimension == 2)
-						changePointGroupType(TreeItemType.REFERENCE_POINT_2D_LEAF);
+						changeGroupType(TreeItemType.REFERENCE_POINT_2D_LEAF);
 					else if (dimension == 3)
-						changePointGroupType(TreeItemType.REFERENCE_POINT_3D_LEAF);
+						changeGroupType(TreeItemType.REFERENCE_POINT_3D_LEAF);
 					break;
 				case CHANGE_TO_STOCHASTIC_POINT_GROUP:
 					if (pointType == PointType.STOCHASTIC_POINT)
 						return;
 
 					if (dimension == 1)
-						changePointGroupType(TreeItemType.STOCHASTIC_POINT_1D_LEAF);
+						changeGroupType(TreeItemType.STOCHASTIC_POINT_1D_LEAF);
 					else if (dimension == 2)
-						changePointGroupType(TreeItemType.STOCHASTIC_POINT_2D_LEAF);
+						changeGroupType(TreeItemType.STOCHASTIC_POINT_2D_LEAF);
 					else if (dimension == 3)
-						changePointGroupType(TreeItemType.STOCHASTIC_POINT_3D_LEAF);
+						changeGroupType(TreeItemType.STOCHASTIC_POINT_3D_LEAF);
 					break;
 				case CHANGE_TO_DATUM_POINT_GROUP:
 					if (pointType == PointType.DATUM_POINT)
 						return;
 
 					if (dimension == 1)
-						changePointGroupType(TreeItemType.DATUM_POINT_1D_LEAF);
+						changeGroupType(TreeItemType.DATUM_POINT_1D_LEAF);
 					else if (dimension == 2)
-						changePointGroupType(TreeItemType.DATUM_POINT_2D_LEAF);
+						changeGroupType(TreeItemType.DATUM_POINT_2D_LEAF);
 					else if (dimension == 3)
-						changePointGroupType(TreeItemType.DATUM_POINT_3D_LEAF);
+						changeGroupType(TreeItemType.DATUM_POINT_3D_LEAF);
 					break;
 				case CHANGE_TO_NEW_POINT_GROUP:
 					if (pointType == PointType.NEW_POINT)
 						return;
 
 					if (dimension == 1)
-						changePointGroupType(TreeItemType.NEW_POINT_1D_LEAF);
+						changeGroupType(TreeItemType.NEW_POINT_1D_LEAF);
 					else if (dimension == 2)
-						changePointGroupType(TreeItemType.NEW_POINT_2D_LEAF);
+						changeGroupType(TreeItemType.NEW_POINT_2D_LEAF);
 					else if (dimension == 3)
-						changePointGroupType(TreeItemType.NEW_POINT_3D_LEAF);
+						changeGroupType(TreeItemType.NEW_POINT_3D_LEAF);
 					break;
 
 				default:
@@ -477,6 +509,48 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 			}
 		}
 	}
+	
+	
+	private class VerticalDeflectionGroupChangeListener implements ChangeListener<Toggle> {
+
+		@Override
+		public void changed(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
+
+			if (!isIgnoreEvent() && newValue != null 
+					&& newValue.getUserData() instanceof ContextMenuType
+					&& getTreeItem() != null && getTreeItem().getValue() != null 
+					&& getTreeItem().getValue() instanceof VerticalDeflectionTreeItemValue) {// newValue instanceof RadioMenuItem &&
+				ContextMenuType menuItemType = (ContextMenuType)newValue.getUserData();
+				VerticalDeflectionTreeItemValue itemValue = (VerticalDeflectionTreeItemValue)getTreeItem().getValue();
+
+				VerticalDeflectionType verticalDeflectionType = itemValue.getVerticalDeflectionType();
+
+				switch(menuItemType) {
+				case CHANGE_TO_REFERENCE_DEFLECTION_GROUP:
+					if (verticalDeflectionType == VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION)
+						return;
+					changeGroupType(TreeItemType.REFERENCE_VERTICAL_DEFLECTION_LEAF);
+					break;
+				case CHANGE_TO_STOCHASTIC_DEFLECTION_GROUP:
+					if (verticalDeflectionType == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION)
+						return;
+					changeGroupType(TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_LEAF);
+					break;
+				case CHANGE_TO_UNKNOWN_DEFLECTION_GROUP:
+					if (verticalDeflectionType == VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION)
+						return;
+					changeGroupType(TreeItemType.UNKNOWN_VERTICAL_DEFLECTION_LEAF);
+					break;
+
+				default:
+					System.err.println(EditableMenuCheckBoxTreeCell.class.getSimpleName() + " : Error, unsupported context menu item type " + menuItemType);
+					break;
+				}
+			}
+		}
+	}
+	
+	
 
 	private class ContextMenuEventHandler implements EventHandler<ActionEvent> {
 
@@ -532,6 +606,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		if (TreeItemType.isPointTypeDirectory(itemType) || 
 				TreeItemType.isObservationTypeDirectory(itemType) || 
 				TreeItemType.isGNSSObservationTypeDirectory(itemType) ||
+				TreeItemType.isVerticalDeflectionTypeDirectory(itemType) ||
 				TreeItemType.isCongruenceAnalysisTypeDirectory(itemType)) {
 			this.contextMenu = new ContextMenu(addItem);
 			return;
@@ -592,6 +667,40 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 					);
 		}
 		
+		else if (TreeItemType.isVerticalDeflectionTypeLeaf(itemType)) {
+			ToggleGroup deflectionTypeToogleGroup = new ToggleGroup();
+
+			RadioMenuItem referenceDeflectionMenuItem = createRadioMenuItem(
+					i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.deflectiongroup.reference", "Reference deflection group"),
+					itemType == TreeItemType.REFERENCE_VERTICAL_DEFLECTION_LEAF,
+					deflectionTypeToogleGroup,
+					ContextMenuType.CHANGE_TO_REFERENCE_DEFLECTION_GROUP
+					);
+
+			RadioMenuItem stochasticDeflectionMenuItem = createRadioMenuItem(
+					i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.deflectiongroup.stochastic", "Stochastic deflection group"),
+					itemType == TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_LEAF,
+					deflectionTypeToogleGroup,
+					ContextMenuType.CHANGE_TO_STOCHASTIC_DEFLECTION_GROUP
+					);
+
+			RadioMenuItem datumDeflectionMenuItem = createRadioMenuItem(
+					i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.deflectiongroup.unknown", "Unknown deflection group"),
+					itemType == TreeItemType.UNKNOWN_VERTICAL_DEFLECTION_LEAF,
+					deflectionTypeToogleGroup,
+					ContextMenuType.CHANGE_TO_UNKNOWN_DEFLECTION_GROUP
+					);
+
+
+			deflectionTypeToogleGroup.selectedToggleProperty().addListener(new VerticalDeflectionGroupChangeListener());
+			this.contextMenu.getItems().addAll(
+					new SeparatorMenuItem(),
+					referenceDeflectionMenuItem,
+					stochasticDeflectionMenuItem,
+					datumDeflectionMenuItem
+					);
+		}
+
 		// disable all items (until a database is selected)
 		for (MenuItem item : this.contextMenu.getItems())
 			item.setDisable(disable);
@@ -655,6 +764,9 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 			case CONGRUENCE_ANALYSIS_1D_LEAF:
 			case CONGRUENCE_ANALYSIS_2D_LEAF:
 			case CONGRUENCE_ANALYSIS_3D_LEAF:
+			case REFERENCE_VERTICAL_DEFLECTION_LEAF:
+			case STOCHASTIC_VERTICAL_DEFLECTION_LEAF:
+			case UNKNOWN_VERTICAL_DEFLECTION_LEAF:
 				this.setText(null);
 				this.setGraphic(this.textField);
 				this.textField.setText(this.getString());
@@ -666,6 +778,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		        });
 				break;
 			default:
+				System.err.println(this.getClass().getSimpleName() + " Error, changing node name is not supported for " + this.getItem().getItemType());
 				break;
 			}
 		}
@@ -708,6 +821,9 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 			case CONGRUENCE_ANALYSIS_1D_LEAF:
 			case CONGRUENCE_ANALYSIS_2D_LEAF:
 			case CONGRUENCE_ANALYSIS_3D_LEAF:
+			case REFERENCE_VERTICAL_DEFLECTION_LEAF:
+			case STOCHASTIC_VERTICAL_DEFLECTION_LEAF:
+			case UNKNOWN_VERTICAL_DEFLECTION_LEAF:
 				this.initContextMenu(item.getItemType());
 				this.setContextMenu(this.contextMenu);
 				break;
@@ -734,6 +850,9 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 			case CONGRUENCE_ANALYSIS_1D_DIRECTORY:
 			case CONGRUENCE_ANALYSIS_2D_DIRECTORY:
 			case CONGRUENCE_ANALYSIS_3D_DIRECTORY:
+			case REFERENCE_VERTICAL_DEFLECTION_DIRECTORY:
+			case STOCHASTIC_VERTICAL_DEFLECTION_DIRECTORY:
+			case UNKNOWN_VERTICAL_DEFLECTION_DIRECTORY:
 				if (getTreeItem() != null && getTreeItem().isLeaf()) {
 					this.initContextMenu(item.getItemType());
 					this.setContextMenu(this.contextMenu);
@@ -812,7 +931,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		return this.getItem() == null ? "" : this.getItem().toString();
 	}
 
-	private void changePointGroupType(TreeItemType newItemType) {
+	private void changeGroupType(TreeItemType newItemType) {
 		List<TreeItem<TreeItemValue>> selectedItems = this.getTreeView().getSelectionModel().getSelectedItems();
 		if (newItemType != null && selectedItems != null && !selectedItems.isEmpty())
 			UITreeBuilder.getInstance().moveItems(newItemType, new ArrayList<TreeItem<TreeItemValue>>(selectedItems));
@@ -879,6 +998,9 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 					
 					else if (TreeItemType.isCongruenceAnalysisTypeLeaf(itemType))
 						UICongruenceAnalysisTableBuilder.getInstance().export(selectedFile, aprioriValues);
+					
+					else if (TreeItemType.isVerticalDeflectionTypeLeaf(itemType))
+						UIVerticalDeflectionTableBuilder.getInstance().export(selectedFile, aprioriValues);
 				}
 			}
 

@@ -220,15 +220,6 @@ public class ColumnDefinedPointFileReader extends SourceFileReader<TreeItem<Tree
 					row.setSigmaZapriori(options.convertLengthToModel(value));
 					break;
 					
-				case DEFLECTION_X:
-					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
-					row.setXAprioriDeflection(options.convertAngleToModel(value));
-					break;
-				case DEFLECTION_Y:
-					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
-					row.setYAprioriDeflection(options.convertAngleToModel(value));
-					break;
-					
 				default:
 					System.err.println(this.getClass().getSimpleName() + " Error, unsupported column type! " + type);
 					break;

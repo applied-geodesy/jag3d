@@ -23,6 +23,7 @@ package org.applied_geodesy.jag3d.ui.tree;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 
 public enum TreeItemType {
 	ROOT,
@@ -90,6 +91,15 @@ public enum TreeItemType {
 	CONGRUENCE_ANALYSIS_1D_LEAF,
 	CONGRUENCE_ANALYSIS_2D_LEAF,
 	CONGRUENCE_ANALYSIS_3D_LEAF,
+	
+	/** Deflection of vertical **/
+	REFERENCE_VERTICAL_DEFLECTION_DIRECTORY,
+	STOCHASTIC_VERTICAL_DEFLECTION_DIRECTORY,
+	UNKNOWN_VERTICAL_DEFLECTION_DIRECTORY,
+	
+	REFERENCE_VERTICAL_DEFLECTION_LEAF,
+	STOCHASTIC_VERTICAL_DEFLECTION_LEAF,
+	UNKNOWN_VERTICAL_DEFLECTION_LEAF,
 	;
 	
 	public static TreeItemType getLeafByDirectoryType(TreeItemType type) {
@@ -146,6 +156,13 @@ public enum TreeItemType {
 			return TreeItemType.CONGRUENCE_ANALYSIS_2D_LEAF;
 		case CONGRUENCE_ANALYSIS_3D_DIRECTORY:
 			return TreeItemType.CONGRUENCE_ANALYSIS_3D_LEAF;
+			
+		case REFERENCE_VERTICAL_DEFLECTION_DIRECTORY:
+			return TreeItemType.REFERENCE_VERTICAL_DEFLECTION_LEAF;
+		case STOCHASTIC_VERTICAL_DEFLECTION_DIRECTORY:
+			return TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_LEAF;
+		case UNKNOWN_VERTICAL_DEFLECTION_DIRECTORY:
+			return TreeItemType.UNKNOWN_VERTICAL_DEFLECTION_LEAF;
 			
 		default:
 			return null;
@@ -207,6 +224,13 @@ public enum TreeItemType {
 		case CONGRUENCE_ANALYSIS_3D_LEAF:
 			return TreeItemType.CONGRUENCE_ANALYSIS_3D_DIRECTORY;
 			
+		case REFERENCE_VERTICAL_DEFLECTION_LEAF:
+			return TreeItemType.REFERENCE_VERTICAL_DEFLECTION_DIRECTORY;
+		case STOCHASTIC_VERTICAL_DEFLECTION_LEAF:
+			return TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_DIRECTORY;
+		case UNKNOWN_VERTICAL_DEFLECTION_LEAF:
+			return TreeItemType.UNKNOWN_VERTICAL_DEFLECTION_DIRECTORY;
+			
 		default:
 			return null;
 		}
@@ -248,6 +272,25 @@ public enum TreeItemType {
 			
 		default:
 			return null;		
+		}
+	}
+	
+	public static VerticalDeflectionType getVerticalDeflectionTypeByTreeItemType(TreeItemType type) {
+		switch (type) {
+		case REFERENCE_VERTICAL_DEFLECTION_DIRECTORY:
+		case REFERENCE_VERTICAL_DEFLECTION_LEAF:
+			return VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION;
+			
+		case STOCHASTIC_VERTICAL_DEFLECTION_DIRECTORY:
+		case STOCHASTIC_VERTICAL_DEFLECTION_LEAF:
+			return VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION;
+			
+		case UNKNOWN_VERTICAL_DEFLECTION_DIRECTORY:
+		case UNKNOWN_VERTICAL_DEFLECTION_LEAF:
+			return VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION;
+			
+		default:
+			return null;
 		}
 	}
 	
@@ -309,6 +352,19 @@ public enum TreeItemType {
 			return TreeItemType.GNSS_2D_LEAF;
 		case GNSS3D:
 			return TreeItemType.GNSS_3D_LEAF;
+		default:
+			return null;
+		}
+	}
+	
+	public static TreeItemType getTreeItemTypeByVerticalDeflectionType(VerticalDeflectionType type) {
+		switch (type) {
+		case REFERENCE_VERTICAL_DEFLECTION:
+			return TreeItemType.REFERENCE_VERTICAL_DEFLECTION_LEAF;
+		case STOCHASTIC_VERTICAL_DEFLECTION:
+			return TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_LEAF;
+		case UNKNOWN_VERTICAL_DEFLECTION:
+			return TreeItemType.UNKNOWN_VERTICAL_DEFLECTION_LEAF;
 		default:
 			return null;
 		}
@@ -438,5 +494,21 @@ public enum TreeItemType {
 	public static boolean isCongruenceAnalysisTypeDirectory(TreeItemType type) {
 		TreeItemType child = getLeafByDirectoryType(type);
 		return child != null && isCongruenceAnalysisTypeLeaf(child);
+	}
+	
+	public static boolean isVerticalDeflectionTypeLeaf(TreeItemType type) {
+		switch (type) {
+		case REFERENCE_VERTICAL_DEFLECTION_LEAF:
+		case STOCHASTIC_VERTICAL_DEFLECTION_LEAF:
+		case UNKNOWN_VERTICAL_DEFLECTION_LEAF:
+			return true;
+		default:
+			return false;		
+		}
+	}
+	
+	public static boolean isVerticalDeflectionTypeDirectory(TreeItemType type) {
+		TreeItemType child = getLeafByDirectoryType(type);
+		return child != null && isVerticalDeflectionTypeLeaf(child);
 	}
 }

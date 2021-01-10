@@ -19,25 +19,27 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.ui.table;
+package org.applied_geodesy.adjustment.network;
 
-public enum ColumnType {
-	APRIORI_TERRESTRIAL_OBSERVATION,
-	APOSTERIORI_TERRESTRIAL_OBSERVATION,
-	
-	APRIORI_GNSS_OBSERVATION,
-	APOSTERIORI_GNSS_OBSERVATION,
-	
-	APRIORI_POINT,
-	APOSTERIORI_POINT,
-	
-	APRIORI_DEFLECTION,
-	APOSTERIORI_DEFLECTION,
-	
-	APRIORI_POINT_CONGRUENCE,
-	APOSTERIORI_POINT_CONGRUENCE,
-	
-	VISIBLE,
-	HIDDEN
-	;
+public enum VerticalDeflectionGroupUncertaintyType {
+
+	DEFLECTION_X(31),
+	DEFLECTION_Y(32);
+
+	private int id;
+	private VerticalDeflectionGroupUncertaintyType(int id) {
+		this.id = id;
+	}
+
+	public final int getId() {
+		return id;
+	}
+
+	public static VerticalDeflectionGroupUncertaintyType getEnumByValue(int value) {
+		for(VerticalDeflectionGroupUncertaintyType element : VerticalDeflectionGroupUncertaintyType.values()) {
+			if(element.id == value)
+				return element;
+		}
+		return null;
+	}  
 }

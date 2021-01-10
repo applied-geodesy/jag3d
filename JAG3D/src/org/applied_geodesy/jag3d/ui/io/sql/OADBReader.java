@@ -35,6 +35,8 @@ import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.adjustment.network.PointGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionGroupUncertaintyType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.adjustment.network.congruence.strain.RestrictionType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
@@ -43,12 +45,14 @@ import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.ObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
+import org.applied_geodesy.jag3d.ui.table.row.VerticalDeflectionRow;
 import org.applied_geodesy.jag3d.ui.tree.CongruenceAnalysisTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
+import org.applied_geodesy.jag3d.ui.tree.VerticalDeflectionTreeItemValue;
 import org.applied_geodesy.util.io.SourceFileReader;
 import org.applied_geodesy.util.sql.DataBase;
 import org.applied_geodesy.version.jag3d.Version;
@@ -58,7 +62,8 @@ import javafx.scene.control.TreeItem;
 import javafx.stage.FileChooser.ExtensionFilter;
 
 public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
-	private Set<String> reservedNames = null;
+	private Set<String> reservedPointNames = null;
+	private Set<String> reservedVerticalDeflectionNames = null;
 	private DataBase dataBase = null;
 	
 	public OADBReader() {
@@ -75,10 +80,14 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		if (this.dataBase != null)
 			this.dataBase.close();
 		
-		if (this.reservedNames == null)
-			this.reservedNames = new HashSet<String>();
+		if (this.reservedPointNames == null)
+			this.reservedPointNames = new HashSet<String>();
 		
-		this.reservedNames.clear();
+		if (this.reservedVerticalDeflectionNames == null)
+			this.reservedVerticalDeflectionNames = new HashSet<String>();
+		
+		this.reservedPointNames.clear();
+		this.reservedVerticalDeflectionNames.clear();
 	}
 
 	@Override
@@ -93,11 +102,13 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			
 			this.dataBase.open();
 			if (OADBReader.isCurrentOADBVersion(this.dataBase)) {
-				this.reservedNames = SQLManager.getInstance().getFullPointNameSet();
+				this.reservedPointNames              = SQLManager.getInstance().getFullPointNameSet();
+				this.reservedVerticalDeflectionNames = SQLManager.getInstance().getFullVerticalDeflectionNameSet();
 				
 				TreeItem<TreeItemValue> lastPointTreeItem              = this.transferPointGroups();
 				TreeItem<TreeItemValue> lastObservationTreeItem        = this.transferObservationGroups();
 				TreeItem<TreeItemValue> lastCongruenceAnalysisTreeItem = this.transferCongruenceAnalysisGroups();
+				TreeItem<TreeItemValue> lastVerticalDeflectionTreeItem = this.transferVerticalDeflectionGroups();
 				
 				if (lastPointTreeItem != null)
 					lastTreeItem = lastPointTreeItem;
@@ -105,6 +116,8 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					lastTreeItem = lastObservationTreeItem;
 				else if (lastCongruenceAnalysisTreeItem != null)
 					lastTreeItem = lastCongruenceAnalysisTreeItem;
+				else if (lastVerticalDeflectionTreeItem != null)
+					lastTreeItem = lastVerticalDeflectionTreeItem;
 			}
 		}
 		catch (SQLException e) {
@@ -128,6 +141,45 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	@Override
 	public void parse(String line) throws SQLException {
 		throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, database content cannot be parsed!");
+	}
+	
+	private TreeItem<TreeItemValue> transferVerticalDeflectionGroups() throws SQLException {
+		TreeItem<TreeItemValue> lastValidTreeItem = null;
+		
+		String sql = "SELECT " + 
+				"\"id\", \"name\", \"type\", \"enable\" " + 
+				"FROM \"VerticalDeflectionGroup\" " + 
+				"ORDER BY \"order\" ASC, \"id\" ASC";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			VerticalDeflectionType verticalDeflectionType = VerticalDeflectionType.getEnumByValue(rs.getInt("type"));
+			if (verticalDeflectionType == null)
+				continue;
+			
+			int groupId       = rs.getInt("id");
+			String groupName  = rs.getString("name");
+			boolean enable    = rs.getBoolean("enable");
+			
+			TreeItemType treeItemType = TreeItemType.getTreeItemTypeByVerticalDeflectionType(verticalDeflectionType);
+			
+			List<VerticalDeflectionRow> verticalDeflections = null;
+			
+			if (TreeItemType.isVerticalDeflectionTypeLeaf(treeItemType)) 
+				verticalDeflections = this.getVerticalDeflections(groupId);
+				
+			if (verticalDeflections == null)
+				continue;
+
+			TreeItem<TreeItemValue> treeItem = this.saveVerticalDeflections(treeItemType, groupName, enable, verticalDeflections);
+			if (treeItem != null) {
+				this.transferUncertainties(groupId, (VerticalDeflectionTreeItemValue)treeItem.getValue());
+				
+				lastValidTreeItem = treeItem;
+			}
+		}
+		return lastValidTreeItem;
 	}
 	
 	private TreeItem<TreeItemValue> transferPointGroups() throws SQLException {
@@ -163,8 +215,7 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			TreeItem<TreeItemValue> treeItem = this.savePoints(treeItemType, groupName, enable, points);
 			if (treeItem != null) {
 				this.transferUncertainties(groupId, (PointTreeItemValue)treeItem.getValue());
-				this.transferDeflection(groupId, (PointTreeItemValue)treeItem.getValue());
-				
+	
 				lastValidTreeItem = treeItem;
 			}
 		}
@@ -255,9 +306,8 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		
 		String sql = "SELECT " + 
 				"\"name\", \"code\", \"enable\"," + 
-				"\"x0\", \"y0\", \"z0\", \"dy0\", \"dx0\", " +
-				"\"sigma_y0\", \"sigma_x0\", \"sigma_z0\", " + 
-				"\"sigma_dy0\", \"sigma_dx0\" " + 
+				"\"x0\", \"y0\", \"z0\", " +
+				"\"sigma_y0\", \"sigma_x0\", \"sigma_z0\" " + 
 				"FROM \"PointApriori\" " + 
 				"WHERE \"group_id\" = ? " +
 				"ORDER BY \"id\" ASC";
@@ -270,7 +320,7 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			PointRow point = new PointRow();
 
 			String name = rs.getString("name");
-			if (this.reservedNames.contains(name))
+			if (this.reservedPointNames.contains(name))
 				continue;
 			
 			point.setName(name);
@@ -296,22 +346,52 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			value = rs.getDouble("sigma_z0");
 			point.setSigmaZapriori(rs.wasNull() || value <= 0 ? null : value);
 
-
-			value = rs.getDouble("dx0");
-			point.setXAprioriDeflection(rs.wasNull() ? 0 : value);
-
-			value = rs.getDouble("dy0");
-			point.setYAprioriDeflection(rs.wasNull() ? 0 : value);
-
-			value = rs.getDouble("sigma_dx0");
-			point.setSigmaXaprioriDeflection(rs.wasNull() || value <= 0 ? null : value);
-
-			value = rs.getDouble("sigma_dy0");
-			point.setSigmaYaprioriDeflection(rs.wasNull() || value <= 0 ? null : value);
-
 			points.add(point);
 		}
 		return points;
+	}
+	
+	private List<VerticalDeflectionRow> getVerticalDeflections(int groupId) throws SQLException {
+		List<VerticalDeflectionRow> verticalDeflections = new ArrayList<VerticalDeflectionRow>();
+		
+		String sql = "SELECT " + 
+				"\"name\", \"enable\"," + 
+				"\"x0\", \"y0\", " +
+				"\"sigma_y0\", \"sigma_x0\" " + 
+				"FROM \"VerticalDeflectionApriori\" " + 
+				"WHERE \"group_id\" = ? " +
+				"ORDER BY \"id\" ASC";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(1, groupId);
+		ResultSet rs = stmt.executeQuery();
+		
+		while (rs.next()) {
+			VerticalDeflectionRow verticalDeflection = new VerticalDeflectionRow();
+
+			String name = rs.getString("name");
+			if (this.reservedVerticalDeflectionNames.contains(name))
+				continue;
+			
+			verticalDeflection.setName(name);
+			verticalDeflection.setEnable(rs.getBoolean("enable"));
+
+			double value;
+			value = rs.getDouble("x0");
+			verticalDeflection.setXApriori(rs.wasNull() ? 0 : value);
+
+			value = rs.getDouble("y0");
+			verticalDeflection.setYApriori(rs.wasNull() ? 0 : value);
+
+			value = rs.getDouble("sigma_x0");
+			verticalDeflection.setSigmaXapriori(rs.wasNull() || value <= 0 ? null : value);
+
+			value = rs.getDouble("sigma_y0");
+			verticalDeflection.setSigmaYapriori(rs.wasNull() || value <= 0 ? null : value);
+
+			verticalDeflections.add(verticalDeflection);
+		}
+		return verticalDeflections;
 	}
 	
 	private List<ObservationRow> getTerrestrialObservations(int groupId) throws SQLException {
@@ -443,6 +523,25 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		}
 	}
 	
+	private void transferUncertainties(int srcGroupId, VerticalDeflectionTreeItemValue destVerticalDeflectionItemValue) throws SQLException {
+		String sql = "SELECT \"type\", \"value\" "
+				+ "FROM \"VerticalDeflectionGroupUncertainty\" "
+				+ "WHERE \"group_id\" = ?";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		stmt.setInt(1, srcGroupId);
+		
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			VerticalDeflectionGroupUncertaintyType uncertaintyType = VerticalDeflectionGroupUncertaintyType.getEnumByValue(rs.getInt("type"));
+			if (uncertaintyType == null)
+				continue;
+			
+			double value = rs.getDouble("value");
+			SQLManager.getInstance().saveUncertainty(uncertaintyType, value, destVerticalDeflectionItemValue);
+		}
+	}
+	
 	private void transferUncertainties(int srcGroupId, ObservationTreeItemValue destObservationItemValue) throws SQLException {
 		String sql = "SELECT \"type\", \"value\" "
 				+ "FROM \"ObservationGroupUncertainty\" "
@@ -459,21 +558,6 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 			double value = rs.getDouble("value");
 			SQLManager.getInstance().saveUncertainty(uncertaintyType, value, destObservationItemValue);
-		}
-	}
-	
-	private void transferDeflection(int srcGroupId, PointTreeItemValue destPointItemValue) throws SQLException {
-		String sql = "SELECT \"consider_deflection\" "
-				+ "FROM \"PointGroup\" "
-				+ "WHERE \"id\" = ?";
-		
-		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
-		stmt.setInt(1, srcGroupId);
-
-		ResultSet rs = stmt.executeQuery();
-		if (rs.next()) {
-			boolean referenceEpoch = rs.getBoolean("consider_deflection");
-			SQLManager.getInstance().saveDeflection(referenceEpoch, destPointItemValue);
 		}
 	}
 	
@@ -578,6 +662,35 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	}
 
 	
+	private TreeItem<TreeItemValue> saveVerticalDeflections(TreeItemType treeItemType, String itemName, boolean enable, List<VerticalDeflectionRow> verticalDeflections) throws SQLException {
+		if (verticalDeflections == null || verticalDeflections.isEmpty())
+			return null;
+
+		TreeItemType parentType = TreeItemType.getDirectoryByLeafType(treeItemType);
+		TreeItem<TreeItemValue> newTreeItem = UITreeBuilder.getInstance().addItem(parentType, -1, itemName, enable, false);
+		try {
+			SQLManager.getInstance().saveGroup((VerticalDeflectionTreeItemValue)newTreeItem.getValue());
+		} catch (SQLException e) {
+			UITreeBuilder.getInstance().removeItem(newTreeItem);
+			e.printStackTrace();
+			throw new SQLException(e);
+		}
+
+		try {
+			int groupId = ((VerticalDeflectionTreeItemValue)newTreeItem.getValue()).getGroupId();
+			for (VerticalDeflectionRow row : verticalDeflections) {
+				row.setGroupId(groupId);
+				SQLManager.getInstance().saveItem(row);
+				this.reservedVerticalDeflectionNames.add(row.getName());
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new SQLException(e);
+		}			
+
+		return newTreeItem;
+	}
+	
 	private TreeItem<TreeItemValue> savePoints(TreeItemType treeItemType, String itemName, boolean enable, List<PointRow> points) throws SQLException {
 		if (points == null || points.isEmpty())
 			return null;
@@ -597,7 +710,7 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			for (PointRow row : points) {
 				row.setGroupId(groupId);
 				SQLManager.getInstance().saveItem(row);
-				this.reservedNames.add(row.getName());
+				this.reservedPointNames.add(row.getName());
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

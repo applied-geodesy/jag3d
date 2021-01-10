@@ -64,11 +64,11 @@ import org.applied_geodesy.adjustment.network.observation.SlopeDistance;
 import org.applied_geodesy.adjustment.network.observation.ZenithAngle;
 import org.applied_geodesy.adjustment.network.observation.group.ObservationGroup;
 import org.applied_geodesy.adjustment.network.parameter.AdditionalUnknownParameter;
-import org.applied_geodesy.adjustment.network.parameter.Deflection;
-import org.applied_geodesy.adjustment.network.parameter.DeflectionX;
-import org.applied_geodesy.adjustment.network.parameter.DeflectionY;
 import org.applied_geodesy.adjustment.network.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.network.parameter.UnknownParameters;
+import org.applied_geodesy.adjustment.network.parameter.VerticalDeflection;
+import org.applied_geodesy.adjustment.network.parameter.VerticalDeflectionX;
+import org.applied_geodesy.adjustment.network.parameter.VerticalDeflectionY;
 import org.applied_geodesy.adjustment.network.point.Point;
 import org.applied_geodesy.adjustment.network.point.Point3D;
 import org.applied_geodesy.adjustment.statistic.BaardaMethodTestStatistic;
@@ -95,7 +95,7 @@ import no.uib.cipr.matrix.sparse.SparseVector;
 public class NetworkAdjustment implements Runnable {
 	private Map<Observation, Double> adaptedObservationUncertainties = new LinkedHashMap<Observation, Double>();
 	private Map<Point, Double[]> adaptedPointUncertainties = new LinkedHashMap<Point, Double[]>();
-	private Map<Deflection, Double> adaptedDeflectionUncertainties = new LinkedHashMap<Deflection, Double>();
+	private Map<VerticalDeflection, Double> adaptedVerticalDeflectionUncertainties = new LinkedHashMap<VerticalDeflection, Double>();
 	private final PropertyChangeSupport change = new PropertyChangeSupport(this);
 	private boolean calculateStochasticParameters = false;
 	private static double SQRT_EPS = Math.sqrt(Constant.EPS);
@@ -136,7 +136,11 @@ public class NetworkAdjustment implements Runnable {
 	private Map<String,Point> allPoints = new LinkedHashMap<String,Point>();
 	private List<Point> datumPoints = new ArrayList<Point>();
 	private List<Point> stochasticPoints = new ArrayList<Point>();
-	private List<Point> stochasticDeflectionPoints = new ArrayList<Point>();
+	
+	private List<Point> pointsWithUnknownDeflection = new ArrayList<Point>();
+	private List<Point> pointsWithStochasticDeflection = new ArrayList<Point>();
+	private List<Point> pointsWithReferenceDeflection = new ArrayList<Point>();
+	
 	private List<Point> referencePoints = new ArrayList<Point>();
 	private PrincipalComponent principalComponents[] = new PrincipalComponent[0];
 	private List<CongruenceAnalysisGroup> congruenceAnalysisGroup = new ArrayList<CongruenceAnalysisGroup>();
@@ -266,28 +270,28 @@ public class NetworkAdjustment implements Runnable {
 					aQxx.set(d, column, this.getAQxxElement(observation, idxPointLocal2GlobalInQxx.get(column), true));
 
 				// X-Lotabweichung des Standpunktes
-				int col = observation.getStartPoint().getDeflectionX().getColInJacobiMatrix();
+				int col = observation.getStartPoint().getVerticalDeflectionX().getColInJacobiMatrix();
 				if (col >= 0 && idxAddParamGlobal2LocalInQxx.containsKey(col)) {
 					col = idxAddParamGlobal2LocalInQxx.get(col);
-					aAdd.set(d, col, observation.diffDeflectionXs());
+					aAdd.set(d, col, observation.diffVerticalDeflectionXs());
 				}
 				// Y-Lotabweichung des Standpunktes
-				col = observation.getStartPoint().getDeflectionY().getColInJacobiMatrix();
+				col = observation.getStartPoint().getVerticalDeflectionY().getColInJacobiMatrix();
 				if (col >= 0 && idxAddParamGlobal2LocalInQxx.containsKey(col)) {
 					col = idxAddParamGlobal2LocalInQxx.get(col);
-					aAdd.set(d, col, observation.diffDeflectionYs());
+					aAdd.set(d, col, observation.diffVerticalDeflectionYs());
 				}
 				// X-Lotabweichung des Zielpunktes
-				col = observation.getEndPoint().getDeflectionX().getColInJacobiMatrix();
+				col = observation.getEndPoint().getVerticalDeflectionX().getColInJacobiMatrix();
 				if (col >= 0 && idxAddParamGlobal2LocalInQxx.containsKey(col)) {
 					col = idxAddParamGlobal2LocalInQxx.get(col);
-					aAdd.set(d, col, observation.diffDeflectionXe());
+					aAdd.set(d, col, observation.diffVerticalDeflectionXe());
 				}
 				// Y-Lotabweichung des Zielpunktes
-				col = observation.getEndPoint().getDeflectionY().getColInJacobiMatrix();
+				col = observation.getEndPoint().getVerticalDeflectionY().getColInJacobiMatrix();
 				if (col >= 0 && idxAddParamGlobal2LocalInQxx.containsKey(col)) {
 					col = idxAddParamGlobal2LocalInQxx.get(col);
-					aAdd.set(d, col, observation.diffDeflectionYe());
+					aAdd.set(d, col, observation.diffVerticalDeflectionYe());
 				}
 				
 				// Orientierung					
@@ -461,21 +465,21 @@ public class NetworkAdjustment implements Runnable {
 		if (!withoutAdditionalParameters) {
 			// Zusatzparameter
 			// X-Lotabweichung des Standpunktes
-			row = observation.getStartPoint().getDeflectionX().getColInJacobiMatrix();
+			row = observation.getStartPoint().getVerticalDeflectionX().getColInJacobiMatrix();
 			if (row >= 0)
-				aqxx += observation.diffDeflectionXs()*this.Qxx.get(row, column);
+				aqxx += observation.diffVerticalDeflectionXs()*this.Qxx.get(row, column);
 			// Y-Lotabweichung des Standpunktes
-			row = observation.getStartPoint().getDeflectionY().getColInJacobiMatrix();
+			row = observation.getStartPoint().getVerticalDeflectionY().getColInJacobiMatrix();
 			if (row >= 0)
-				aqxx += observation.diffDeflectionYs()*this.Qxx.get(row, column);
+				aqxx += observation.diffVerticalDeflectionYs()*this.Qxx.get(row, column);
 			// X-Lotabweichung des Zielpunktes
-			row = observation.getEndPoint().getDeflectionX().getColInJacobiMatrix();
+			row = observation.getEndPoint().getVerticalDeflectionX().getColInJacobiMatrix();
 			if (row >= 0)
-				aqxx += observation.diffDeflectionXe()*this.Qxx.get(row, column);
+				aqxx += observation.diffVerticalDeflectionXe()*this.Qxx.get(row, column);
 			// Y-Lotabweichung des Zielpunktes
-			row = observation.getEndPoint().getDeflectionY().getColInJacobiMatrix();
+			row = observation.getEndPoint().getVerticalDeflectionY().getColInJacobiMatrix();
 			if (row >= 0)
-				aqxx += observation.diffDeflectionYe()*this.Qxx.get(row, column);
+				aqxx += observation.diffVerticalDeflectionYe()*this.Qxx.get(row, column);
 			// Orientierung
 			row = observation.getColInJacobiMatrixFromOrientation();
 			if (row >= 0)
@@ -549,21 +553,21 @@ public class NetworkAdjustment implements Runnable {
 		
 		// Zusatzparameter
 		// X-Lotabweichung des Standpunktes
-		col = observationTwo.getStartPoint().getDeflectionX().getColInJacobiMatrix();
+		col = observationTwo.getStartPoint().getVerticalDeflectionX().getColInJacobiMatrix();
 		if (col >= 0)
-			qll += observationTwo.diffDeflectionXs()*this.getAQxxElement(observationOne, col);
+			qll += observationTwo.diffVerticalDeflectionXs()*this.getAQxxElement(observationOne, col);
 		// Y-Lotabweichung des Standpunktes
-		col = observationTwo.getStartPoint().getDeflectionY().getColInJacobiMatrix();
+		col = observationTwo.getStartPoint().getVerticalDeflectionY().getColInJacobiMatrix();
 		if (col >= 0)
-			qll += observationTwo.diffDeflectionYs()*this.getAQxxElement(observationOne, col);
+			qll += observationTwo.diffVerticalDeflectionYs()*this.getAQxxElement(observationOne, col);
 		// X-Lotabweichung des Zielpunktes
-		col = observationTwo.getEndPoint().getDeflectionX().getColInJacobiMatrix();
+		col = observationTwo.getEndPoint().getVerticalDeflectionX().getColInJacobiMatrix();
 		if (col >= 0)
-			qll += observationTwo.diffDeflectionXe()*this.getAQxxElement(observationOne, col);
+			qll += observationTwo.diffVerticalDeflectionXe()*this.getAQxxElement(observationOne, col);
 		// Y-Lotabweichung des Zielpunktes
-		col = observationTwo.getEndPoint().getDeflectionY().getColInJacobiMatrix();
+		col = observationTwo.getEndPoint().getVerticalDeflectionY().getColInJacobiMatrix();
 		if (col >= 0)
-			qll += observationTwo.diffDeflectionYe()*this.getAQxxElement(observationOne, col);
+			qll += observationTwo.diffVerticalDeflectionYe()*this.getAQxxElement(observationOne, col);
 		// Orientierung
 		col = observationTwo.getColInJacobiMatrixFromOrientation();
 		if (col >= 0)
@@ -598,8 +602,8 @@ public class NetworkAdjustment implements Runnable {
 	
 	public void addSubRedundanceAndCofactor2Deflection(Point deflectionPoint, boolean restoreUncertainties) {
 		
-		Deflection deflectionX = deflectionPoint.getDeflectionX();
-		Deflection deflectionY = deflectionPoint.getDeflectionY();
+		VerticalDeflection deflectionX = deflectionPoint.getVerticalDeflectionX();
+		VerticalDeflection deflectionY = deflectionPoint.getVerticalDeflectionY();
 		
 		int colX = deflectionX.getColInJacobiMatrix();
 		int colY = deflectionY.getColInJacobiMatrix();
@@ -625,10 +629,10 @@ public class NetworkAdjustment implements Runnable {
 		
 		Double u[] = new Double[dim];
 		if (this.estimationType == EstimationType.L1NORM && restoreUncertainties) {
-			if (this.adaptedDeflectionUncertainties.containsKey(deflectionX))
-				u[0] = this.adaptedDeflectionUncertainties.get(deflectionX);
-			if (this.adaptedDeflectionUncertainties.containsKey(deflectionY))
-				u[1] = this.adaptedDeflectionUncertainties.get(deflectionY);
+			if (this.adaptedVerticalDeflectionUncertainties.containsKey(deflectionX))
+				u[0] = this.adaptedVerticalDeflectionUncertainties.get(deflectionX);
+			if (this.adaptedVerticalDeflectionUncertainties.containsKey(deflectionY))
+				u[1] = this.adaptedVerticalDeflectionUncertainties.get(deflectionY);
 		}
 		
 		int diag = 0;
@@ -703,7 +707,7 @@ public class NetworkAdjustment implements Runnable {
 		this.degreeOfFreedom += sumDiagR;
 		this.omega += deflectionX.getOmega() + deflectionY.getOmega();
 		
-		VarianceComponentType vcType = VarianceComponentType.STOCHASTIC_POINT_DEFLECTION_COMPONENT;
+		VarianceComponentType vcType = VarianceComponentType.STOCHASTIC_DEFLECTION_COMPONENT;
 		if (vcType != null && this.varianceComponents.containsKey(vcType)) {
 			VarianceComponent vc = this.varianceComponents.get(vcType);
 			vc.setOmega(vc.getOmega() + deflectionX.getOmega() + deflectionY.getOmega());
@@ -744,7 +748,7 @@ public class NetworkAdjustment implements Runnable {
 			    else {
 			    	Qnn.mult(Pv, nabla);
 			    	double nablaCoVarNable = Math.abs(nabla.dot(Pv0));
-			    	((DeflectionX)deflectionX).setNablaCoVarNabla( nablaCoVarNable );
+			    	((VerticalDeflectionX)deflectionX).setNablaCoVarNabla( nablaCoVarNable );
 			    	
 					nabla = nabla.scale(-1.0);
 					deflectionX.setGrossError(nabla.get(0));
@@ -1044,21 +1048,21 @@ public class NetworkAdjustment implements Runnable {
 				}
 			}			
 			// mgl. Zusatzparameter
-			if (obs.getStartPoint().getDeflectionX().getColInJacobiMatrix() >= 0) {
-				colums.add(obs.getStartPoint().getDeflectionX().getColInJacobiMatrix());
-				aRows.set(row, obs.getStartPoint().getDeflectionX().getColInJacobiMatrix(), obs.diffDeflectionXs());
+			if (obs.getStartPoint().getVerticalDeflectionX().getColInJacobiMatrix() >= 0) {
+				colums.add(obs.getStartPoint().getVerticalDeflectionX().getColInJacobiMatrix());
+				aRows.set(row, obs.getStartPoint().getVerticalDeflectionX().getColInJacobiMatrix(), obs.diffVerticalDeflectionXs());
 			}
-			if (obs.getStartPoint().getDeflectionY().getColInJacobiMatrix() >= 0) {
-				colums.add(obs.getStartPoint().getDeflectionY().getColInJacobiMatrix());
-				aRows.set(row, obs.getStartPoint().getDeflectionY().getColInJacobiMatrix(), obs.diffDeflectionYs());
+			if (obs.getStartPoint().getVerticalDeflectionY().getColInJacobiMatrix() >= 0) {
+				colums.add(obs.getStartPoint().getVerticalDeflectionY().getColInJacobiMatrix());
+				aRows.set(row, obs.getStartPoint().getVerticalDeflectionY().getColInJacobiMatrix(), obs.diffVerticalDeflectionYs());
 			}
-			if (obs.getEndPoint().getDeflectionX().getColInJacobiMatrix() >= 0) {
-				colums.add(obs.getEndPoint().getDeflectionX().getColInJacobiMatrix());
-				aRows.set(row, obs.getEndPoint().getDeflectionX().getColInJacobiMatrix(), obs.diffDeflectionXe());
+			if (obs.getEndPoint().getVerticalDeflectionX().getColInJacobiMatrix() >= 0) {
+				colums.add(obs.getEndPoint().getVerticalDeflectionX().getColInJacobiMatrix());
+				aRows.set(row, obs.getEndPoint().getVerticalDeflectionX().getColInJacobiMatrix(), obs.diffVerticalDeflectionXe());
 			}
-			if (obs.getEndPoint().getDeflectionY().getColInJacobiMatrix() >= 0) {
-				colums.add(obs.getEndPoint().getDeflectionY().getColInJacobiMatrix());
-				aRows.set(row, obs.getEndPoint().getDeflectionY().getColInJacobiMatrix(), obs.diffDeflectionYe());
+			if (obs.getEndPoint().getVerticalDeflectionY().getColInJacobiMatrix() >= 0) {
+				colums.add(obs.getEndPoint().getVerticalDeflectionY().getColInJacobiMatrix());
+				aRows.set(row, obs.getEndPoint().getVerticalDeflectionY().getColInJacobiMatrix(), obs.diffVerticalDeflectionYe());
 			}
 			
 			if (obs.getColInJacobiMatrixFromOrientation() >= 0) {
@@ -1173,9 +1177,9 @@ public class NetworkAdjustment implements Runnable {
 		double maxNV2 = Double.MIN_VALUE;
 		Observation maxNVObs = null;
 		Point maxNVPoint = null;
-		Deflection maxNVDeflection = null;
+		VerticalDeflection maxNVVerticalDeflection = null;
 		int maxNVPointComp = -1;
-		int maxNVDeflectionComp = -1;
+		int maxNVVerticalDeflectionComp = -1;
 		int counter = 0;
 		// Bestimme Beobachtung mit groesster NV
 		for (int i=0; i<this.numberOfObservations; i++) {
@@ -1199,10 +1203,9 @@ public class NetworkAdjustment implements Runnable {
 		}
 
 		// Bestimme stochastischen Punkt mit groesster NV
-		for (int i=0; i<this.stochasticDeflectionPoints.size(); i++) {
-			Point point = this.stochasticPoints.get(i);
-			Deflection deflectionX = point.getDeflectionX();
-			Deflection deflectionY = point.getDeflectionY();
+		for (Point point : this.pointsWithStochasticDeflection) {
+			VerticalDeflection deflectionX = point.getVerticalDeflectionX();
+			VerticalDeflection deflectionY = point.getVerticalDeflectionY();
 			
 			double vx = deflectionX.getValue0() - deflectionX.getValue();
 			double vy = deflectionY.getValue0() - deflectionY.getValue();
@@ -1220,8 +1223,8 @@ public class NetworkAdjustment implements Runnable {
 				double nv2 = vx*vx/qx/rx;
 				if (nv2 > maxNV2) {
 					maxNV2 = nv2;
-					maxNVDeflection = deflectionX;
-					maxNVDeflectionComp = 1;
+					maxNVVerticalDeflection = deflectionX;
+					maxNVVerticalDeflectionComp = 1;
 				}	
 			}
 			
@@ -1229,8 +1232,8 @@ public class NetworkAdjustment implements Runnable {
 				double nv2 = vy*vy/qy/ry;
 				if (nv2 > maxNV2) {
 					maxNV2 = nv2;
-					maxNVDeflection = deflectionY;
-					maxNVDeflectionComp = 2;
+					maxNVVerticalDeflection = deflectionY;
+					maxNVVerticalDeflectionComp = 2;
 				}	
 			}
 			
@@ -1241,8 +1244,7 @@ public class NetworkAdjustment implements Runnable {
 				counter++;
 			
 		}
-		for (int i=0; i<this.stochasticPoints.size(); i++) {
-			Point point = this.stochasticPoints.get(i);
+		for (Point point : this.stochasticPoints) {
 			int dim = point.getDimension();
 			for (int d=0; d<dim; d++) {
 				double v = 0, qll = 0, r = 0, u = 0;
@@ -1274,8 +1276,8 @@ public class NetworkAdjustment implements Runnable {
 						maxNVPoint = point;
 						maxNVPointComp = d;
 						
-						maxNVDeflection = null;
-						maxNVDeflectionComp = -1;
+						maxNVVerticalDeflection = null;
+						maxNVVerticalDeflectionComp = -1;
 					}	
 				}
 				
@@ -1287,7 +1289,7 @@ public class NetworkAdjustment implements Runnable {
 		double c = adapteRobustBoundary ? this.robustEstimationLimit + (Math.sqrt(maxNV2) - this.robustEstimationLimit) * 0.9 : this.robustEstimationLimit;
 		
 		// Wenn maxNVPoint == null und maxNVDeflection == null, dann wurde eine Beobachtung mit max(NV) gefunden
-		if (maxNVObs != null && maxNVPoint == null && maxNVDeflection == null) {
+		if (maxNVObs != null && maxNVPoint == null && maxNVVerticalDeflection == null) {
 			double u = maxNVObs.getStdApriori();
 			double r = maxNVObs.getRedundancy();
 			double k = c*u*Math.sqrt(r);
@@ -1299,17 +1301,17 @@ public class NetworkAdjustment implements Runnable {
 					this.adaptedObservationUncertainties.put(maxNVObs, u);
 			}
 		}
-		// Wenn maxNVDeflectionComp != -1, dann wurde eine Lotabweichungskomponente mit max(NV) gefunden
-		else if (maxNVDeflection != null && maxNVDeflectionComp >= 0) {
+		// Wenn maxNVVerticalDeflectionComp != -1, dann wurde eine Lotabweichungskomponente mit max(NV) gefunden
+		else if (maxNVVerticalDeflection != null && maxNVVerticalDeflectionComp >= 0) {
 			// X-Wert
-			double u = maxNVDeflection.getStdApriori();
-			double r = maxNVDeflection.getRedundancy();
+			double u = maxNVVerticalDeflection.getStdApriori();
+			double r = maxNVVerticalDeflection.getRedundancy();
 			double k = c*u*Math.sqrt(r);
-			double v = this.estimationType == EstimationType.SIMULATION ? 0.0 : Math.abs(maxNVDeflection.getValue0() - maxNVDeflection.getValue());
+			double v = this.estimationType == EstimationType.SIMULATION ? 0.0 : Math.abs(maxNVVerticalDeflection.getValue0() - maxNVVerticalDeflection.getValue());
 			if (v >= k && k > SQRT_EPS) {
-				maxNVDeflection.setStdApriori(u * Math.sqrt(v/k));
-				if (!this.adaptedDeflectionUncertainties.containsKey(maxNVDeflection))
-					this.adaptedDeflectionUncertainties.put(maxNVDeflection, u);
+				maxNVVerticalDeflection.setStdApriori(u * Math.sqrt(v/k));
+				if (!this.adaptedVerticalDeflectionUncertainties.containsKey(maxNVVerticalDeflection))
+					this.adaptedVerticalDeflectionUncertainties.put(maxNVVerticalDeflection, u);
 			}
 		}
 		// Wenn maxNVPointComp != -1, dann wurde eine Koordinatenkomponente mit max(NV) gefunden
@@ -1466,21 +1468,21 @@ public class NetworkAdjustment implements Runnable {
 						}
 					}
 
-					else if (unknownParameterAT.getParameterType() == ParameterType.DEFLECTION_X) {
-						DeflectionX deflection = (DeflectionX)unknownParameterAT;
+					else if (unknownParameterAT.getParameterType() == ParameterType.VERTICAL_DEFLECTION_X) {
+						VerticalDeflectionX deflection = (VerticalDeflectionX)unknownParameterAT;
 						Point p = deflection.getPoint();
 						if (p.equals(observationAT.getStartPoint()))
-							at = observationAT.diffDeflectionXs();
+							at = observationAT.diffVerticalDeflectionXs();
 						else if (p.equals(observationAT.getEndPoint()))
-							at = observationAT.diffDeflectionXe();
+							at = observationAT.diffVerticalDeflectionXe();
 					}
-					else if (unknownParameterAT.getParameterType() == ParameterType.DEFLECTION_Y) {
-						DeflectionY deflection = (DeflectionY)unknownParameterAT;
+					else if (unknownParameterAT.getParameterType() == ParameterType.VERTICAL_DEFLECTION_Y) {
+						VerticalDeflectionY deflection = (VerticalDeflectionY)unknownParameterAT;
 						Point p = deflection.getPoint();
 						if (p.equals(observationAT.getStartPoint()))
-							at = observationAT.diffDeflectionYs();
+							at = observationAT.diffVerticalDeflectionYs();
 						else if (p.equals(observationAT.getEndPoint()))
-							at = observationAT.diffDeflectionYe();
+							at = observationAT.diffVerticalDeflectionYe();
 					}
 					else if (unknownParameterAT.getParameterType() == ParameterType.ORIENTATION) {
 						at = observationAT.diffOri();
@@ -1588,21 +1590,21 @@ public class NetworkAdjustment implements Runnable {
 								}
 							}
 
-							else if (unknownParameterA.getParameterType() == ParameterType.DEFLECTION_X) {
-								DeflectionX deflection = (DeflectionX)unknownParameterA;
+							else if (unknownParameterA.getParameterType() == ParameterType.VERTICAL_DEFLECTION_X) {
+								VerticalDeflectionX deflection = (VerticalDeflectionX)unknownParameterA;
 								Point p = deflection.getPoint();
 								if (p.equals(observationA.getStartPoint()))
-									a = observationA.diffDeflectionXs();
+									a = observationA.diffVerticalDeflectionXs();
 								else if (p.equals(observationA.getEndPoint()))
-									a = observationA.diffDeflectionXe();
+									a = observationA.diffVerticalDeflectionXe();
 							}
-							else if (unknownParameterA.getParameterType() == ParameterType.DEFLECTION_Y) {
-								DeflectionY deflection = (DeflectionY)unknownParameterA;
+							else if (unknownParameterA.getParameterType() == ParameterType.VERTICAL_DEFLECTION_Y) {
+								VerticalDeflectionY deflection = (VerticalDeflectionY)unknownParameterA;
 								Point p = deflection.getPoint();
 								if (p.equals(observationA.getStartPoint()))
-									a = observationA.diffDeflectionYs();
+									a = observationA.diffVerticalDeflectionYs();
 								else if (p.equals(observationA.getEndPoint()))
-									a = observationA.diffDeflectionYe();
+									a = observationA.diffVerticalDeflectionYe();
 							}
 							else if (unknownParameterA.getParameterType() == ParameterType.ORIENTATION) {
 								a = observationA.diffOri();
@@ -1633,27 +1635,26 @@ public class NetworkAdjustment implements Runnable {
 			}
 		}
 
-		// Fuege stochastische Lotabweichungen und Anschlusspunkte hinzu
-		if (this.stochasticPoints != null && !this.stochasticPoints.isEmpty()) {
-			for (int i=0; i<this.stochasticDeflectionPoints.size(); i++) {
-				Point point = this.stochasticDeflectionPoints.get(i);
-				
-				Deflection deflectionX = point.getDeflectionX();
+		// Fuege stochastische Lotabweichungen hinzu
+		if (this.pointsWithStochasticDeflection != null && !this.pointsWithStochasticDeflection.isEmpty()) {
+			for (Point point : this.pointsWithStochasticDeflection) {		
+				VerticalDeflection deflectionX = point.getVerticalDeflectionX();
 				int col = deflectionX.getColInJacobiMatrix();
 				double qll = deflectionX.getStdApriori() * deflectionX.getStdApriori();
 				n.set(col, n.get(col) + (deflectionX.getValue0()-deflectionX.getValue())/qll);
 				N.set(col, col, N.get(col, col++) + 1.0/qll);
 				
-				Deflection deflectionY = point.getDeflectionY();
+				VerticalDeflection deflectionY = point.getVerticalDeflectionY();
 				col = deflectionY.getColInJacobiMatrix();
 				qll = deflectionY.getStdApriori() * deflectionY.getStdApriori();
 				n.set(col, n.get(col) + (deflectionY.getValue0()-deflectionY.getValue())/qll);
 				N.set(col, col, N.get(col, col++) + 1.0/qll);
 			}
-			
-			for (int i=0; i<this.stochasticPoints.size(); i++) {
-				Point point = this.stochasticPoints.get(i);
-
+		}
+		
+		// Fuege stochastische Anschlusspunkte hinzu
+		if (this.stochasticPoints != null && !this.stochasticPoints.isEmpty()) {
+			for (Point point : this.stochasticPoints) {
 				int col = point.getColInJacobiMatrix();
 				if (point.getDimension() != 1) {
 					double qll = point.getStdXApriori()*point.getStdXApriori();
@@ -2023,8 +2024,10 @@ public class NetworkAdjustment implements Runnable {
 			estimateCompleteModel = isEstimated = true;
 		}
 		
-		//Fuehre stochastische Anschlusspunkte ins Modell ein
-		this.addStochasticPointsToModel();
+		// Fuege Lotabweichungen als Unbekannte zum Modell hinzu
+		this.addVerticalDeflectionToModel();
+		//Fuehre stochastische Anschlusspunkte und stochastische Lotparameter ins Modell ein
+		this.addStochasticPointsAndStochasticDeflectionToModel();
 
 		// ermittle Rank-Defekt anhand der Beobachtungen
 		this.freeNetwork = this.freeNetwork || (this.referencePoints == null || this.referencePoints.isEmpty()) && (this.stochasticPoints == null || this.stochasticPoints.isEmpty());
@@ -2317,11 +2320,9 @@ public class NetworkAdjustment implements Runnable {
 			SigmaUT.set(row, sigmaUT);
 		}
 
-		for (int idx = 0; idx < this.stochasticDeflectionPoints.size(); idx++) {
-			Point point = this.stochasticDeflectionPoints.get(idx);
-			
-			Deflection deflectionX = point.getDeflectionX();
-			Deflection deflectionY = point.getDeflectionY();
+		for (Point point : this.pointsWithStochasticDeflection) {
+			VerticalDeflection deflectionX = point.getVerticalDeflectionX();
+			VerticalDeflection deflectionY = point.getVerticalDeflectionY();
 
 			int rowX = deflectionX.getRowInJacobiMatrix();
 			int rowY = deflectionY.getRowInJacobiMatrix();
@@ -2365,8 +2366,7 @@ public class NetworkAdjustment implements Runnable {
 			SigmaUT.set(rowY, sigmaUTY);
 		}
 		
-		for (int idx = 0; idx < this.stochasticPoints.size(); idx++) {
-			Point point = this.stochasticPoints.get(idx);
+		for (Point point : this.stochasticPoints) {
 			int row = point.getRowInJacobiMatrix();
 			int dim = point.getDimension();
 			
@@ -2455,10 +2455,10 @@ public class NetworkAdjustment implements Runnable {
 			int deflectionType = deflectionIdx % 2; // 0 == x oder 1 == y
 			deflectionIdx = deflectionIdx / 2;
 
-			Point point = this.stochasticDeflectionPoints.get(deflectionIdx);
+			Point point = this.pointsWithStochasticDeflection.get(deflectionIdx);
 			
 			if (deflectionType == 0) {
-				Deflection deflectionX = point.getDeflectionX();
+				VerticalDeflection deflectionX = point.getVerticalDeflectionX();
 
 				double std   = deflectionX.getStdApriori();
 				double value = deflectionX.getValue0();
@@ -2467,7 +2467,7 @@ public class NetworkAdjustment implements Runnable {
 				deflectionX.setValue0(value);
 			}
 			else {
-				Deflection deflectionY = point.getDeflectionY();
+				VerticalDeflection deflectionY = point.getVerticalDeflectionY();
 
 				double std   = deflectionY.getStdApriori();
 				double value = deflectionY.getValue0();
@@ -2566,8 +2566,8 @@ public class NetworkAdjustment implements Runnable {
 					dx.set(col+dimCol-1, xUT.get(col+dimCol-1) - point.getZ());
 			}
 			// Erzeuge aus der finalen UT-Loesung den Zuschlagsvektor - Zusazuparameter
-			else if (unknownParameterCol instanceof Deflection){
-				Deflection deflectionParameter = (Deflection) unknownParameterCol;
+			else if (unknownParameterCol instanceof VerticalDeflection){
+				VerticalDeflection deflectionParameter = (VerticalDeflection) unknownParameterCol;
 				dx.set(col, xUT.get(col) - deflectionParameter.getValue());
 			}
 			else if (unknownParameterCol instanceof AdditionalUnknownParameter){
@@ -2662,8 +2662,8 @@ public class NetworkAdjustment implements Runnable {
 					col++;
 				}
 			}
-			else if (unknownParameter instanceof Deflection){
-				Deflection deflectionParameter = (Deflection) unknownParameter;
+			else if (unknownParameter instanceof VerticalDeflection){
+				VerticalDeflection deflectionParameter = (VerticalDeflection) unknownParameter;
 				double value = deflectionParameter.getValue() + dX.get(col);
 				xUT.set(col, xUT.get(col) + weight * value);
 				solutionVectors.set(col, solutionNumber, value);
@@ -2745,10 +2745,7 @@ public class NetworkAdjustment implements Runnable {
 				// Hinzufuegen der stochastischen Groessen
 				if ((updateCompleteModel || this.estimationType == EstimationType.L1NORM) && point.getRowInJacobiMatrix() >= 0){
 					this.addSubRedundanceAndCofactor2Point(point, updateCompleteModel);
-					if (point.hasUnknownDeflectionParameters())
-						this.addSubRedundanceAndCofactor2Deflection(point, updateCompleteModel);
 				}
-				
 			}
 			else if (unknownParameter instanceof AdditionalUnknownParameter){
 				this.maxDx = Math.max(Math.abs(dX.get(col)), this.maxDx);
@@ -2760,9 +2757,17 @@ public class NetworkAdjustment implements Runnable {
 				StrainParameter strainParameter = (StrainParameter) unknownParameter;
 				strainParameter.setValue( strainParameter.getValue() + dX.get(col) );
 			}
-			else if (unknownParameter instanceof Deflection){
+			else if (unknownParameter instanceof VerticalDeflection){
+				// Hinzufuegen der stochastischen Groessen
+				if (unknownParameter instanceof VerticalDeflectionX) {
+					if ((updateCompleteModel || this.estimationType == EstimationType.L1NORM) && ((VerticalDeflectionX)unknownParameter).getRowInJacobiMatrix() >= 0) {
+						Point point = ((VerticalDeflectionX)unknownParameter).getPoint();
+						this.addSubRedundanceAndCofactor2Deflection(point, updateCompleteModel);
+					}
+				}
+				
 				this.maxDx = Math.max(Math.abs(dX.get(col)), this.maxDx);
-				Deflection deflectionParameter = (Deflection) unknownParameter;
+				VerticalDeflection deflectionParameter = (VerticalDeflection) unknownParameter;
 				deflectionParameter.setValue( deflectionParameter.getValue() + dX.get(col) );
 			}
 		}
@@ -2868,16 +2873,8 @@ public class NetworkAdjustment implements Runnable {
 			double sigma2apost = this.getVarianceFactorAposteriori();
 			
 			if (this.estimationType != EstimationType.SIMULATION && this.significanceTestStatisticDefinition.getTestStatisticType() == TestStatisticType.SIDAK) {
-				for (int i = 0; i < this.referencePoints.size(); i++) {
-					if (this.interrupt)
-						return;
-					
-					Point point = this.referencePoints.get(i);
-					this.numberOfHypotesis++;
-										
-					if (point.considerDeflection())
-						this.numberOfHypotesis++;
-				}
+				this.numberOfHypotesis += this.referencePoints.size();
+				this.numberOfHypotesis += this.pointsWithReferenceDeflection.size();
 				
 				for (VarianceComponent varianceEstimation : this.varianceComponents.values()) {
 					double r = Math.round(varianceEstimation.getRedundancy() * 1.0E5) / 1.0E5;
@@ -2912,6 +2909,12 @@ public class NetworkAdjustment implements Runnable {
 			vc.setOmega(this.omega);
 			this.varianceComponents.put(vc.getVarianceComponentType(), vc);
 	
+			List<Point> pointsWithTestableDeflection = new ArrayList<Point>(this.pointsWithReferenceDeflection.size() + this.pointsWithUnknownDeflection.size());
+			if (!this.pointsWithReferenceDeflection.isEmpty()) 
+				pointsWithTestableDeflection.addAll(this.pointsWithReferenceDeflection);
+			if (!this.pointsWithUnknownDeflection.isEmpty()) 
+				pointsWithTestableDeflection.addAll(this.pointsWithUnknownDeflection);
+			
 			List<Point> points = null;
 			if (this.congruenceAnalysis && this.freeNetwork) {
 				// Pruefung der Stabilpunkte
@@ -3058,129 +3061,133 @@ public class NetworkAdjustment implements Runnable {
 						point.setMinimalDetectableBiases(Matrices.getArray(nabla0));
 					}
 			    }
-			    
-			    if (point.considerDeflection()) {
-					DeflectionX deflectionX = point.getDeflectionX();
-					DeflectionY deflectionY = point.getDeflectionY();
+			}
+			
+			for (int i=0; i<pointsWithTestableDeflection.size(); i++) {
+				if (this.interrupt)
+					return;
+				Point point = pointsWithTestableDeflection.get(i);
+				
+				VerticalDeflectionX deflectionX = point.getVerticalDeflectionX();
+				VerticalDeflectionY deflectionY = point.getVerticalDeflectionY();
 
-					observations = point.getObservations();
-					dim = 2;
-					if (!this.freeNetwork) {
-						deflectionX.setStd(-1.0);
-						deflectionY.setStd(-1.0);
+				ObservationGroup observations = point.getObservations();
+				int dim = 2;
+				if (!this.freeNetwork) {
+					deflectionX.setStd(-1.0);
+					deflectionY.setStd(-1.0);
+				}
+				
+				Matrix BTPQvvPB = new DenseMatrix(dim,dim);
+				Vector BTPv     = new DenseVector(dim);
+
+				// Flag zur Pruefung, ob Datumspunkt in Referenzepoche ueberhaut Beobachtungen besitzt.
+				// Wenn Datumspunkt nur in Folgeepoche vorhanden, kann kein Stabilpunkttest durchgefuehrt werden.
+				boolean hasObservationInReferenceEpoch = !(this.congruenceAnalysis && this.freeNetwork);
+				for (int k=0; k<observations.size(); k++) {
+					Observation observationB = observations.get(k);
+					if (this.congruenceAnalysis && this.freeNetwork && observationB.getObservationGroup().getEpoch() == Epoch.REFERENCE) {
+						hasObservationInReferenceEpoch = true;
+						continue;
 					}
-					
-					BTPQvvPB = new DenseMatrix(dim,dim);
-					BTPv     = new DenseVector(dim);
+					double qB = observationB.getStdApriori()*observationB.getStdApriori();
+					double vB = this.estimationType == EstimationType.SIMULATION ? 0.0 : -observationB.getCorrection();
+					double b  = 0.0;
+					vB = Math.abs(vB) < SQRT_EPS ? 0.0 : vB;
 
-					// Flag zur Pruefung, ob Datumspunkt in Referenzepoche ueberhaut Beobachtungen besitzt.
-					// Wenn Datumspunkt nur in Folgeepoche vorhanden, kann kein Stabilpunkttest durchgefuehrt werden.
-					hasObservationInReferenceEpoch = !(this.congruenceAnalysis && this.freeNetwork);
-					for (int k=0; k<observations.size(); k++) {
-						Observation observationB = observations.get(k);
-						if (this.congruenceAnalysis && this.freeNetwork && observationB.getObservationGroup().getEpoch() == Epoch.REFERENCE) {
-							hasObservationInReferenceEpoch = true;
-							continue;
+					for (int c=0; c<dim; c++) {
+						if (observationB.getStartPoint().equals(point)) {
+							if (c==0)
+								b = observationB.diffVerticalDeflectionXs();
+							else if (c==1)
+								b = observationB.diffVerticalDeflectionYs();
 						}
-						double qB = observationB.getStdApriori()*observationB.getStdApriori();
-						double vB = this.estimationType == EstimationType.SIMULATION ? 0.0 : -observationB.getCorrection();
-						double b  = 0.0;
-						vB = Math.abs(vB) < SQRT_EPS ? 0.0 : vB;
+						else if (observationB.getEndPoint().equals(point)) {
+							if (c==0)
+								b = observationB.diffVerticalDeflectionXe();
+							else if (c==1)
+								b = observationB.diffVerticalDeflectionYe();
+						}
+						BTPv.set(c, BTPv.get(c) + b*vB/qB);
 
-						for (int c=0; c<dim; c++) {
-							if (observationB.getStartPoint().equals(point)) {
-								if (c==0)
-									b = observationB.diffDeflectionXs();
-								else if (c==1)
-									b = observationB.diffDeflectionYs();
-							}
-							else if (observationB.getEndPoint().equals(point)) {
-								if (c==0)
-									b = observationB.diffDeflectionXe();
-								else if (c==1)
-									b = observationB.diffDeflectionYe();
-							}
-							BTPv.set(c, BTPv.get(c) + b*vB/qB);
-
-							for (int j=0; j<observations.size(); j++) {
-								Observation observationBT = observations.get(j);
-								if (this.congruenceAnalysis && this.freeNetwork && observationBT.getObservationGroup().getEpoch() == Epoch.REFERENCE)
-									continue;
-								double qll = this.getQllElement(observationBT, observationB);
-								double qBT = observationBT.getStdApriori()*observationBT.getStdApriori();
-								// P*Qvv*P
-								// P*(Qll - Q_ll)*P
-								// (P*Qll - P*Q_ll)*P
-								// (I - P*Q_ll)*P
-								// (P - P*Q_ll*P)
-								
-								// Numerische Null wird auf Hauptdiagonale zu Null gesetzt, um Summation von "Fragmenten" zu unterbinden
-								double pqvvp = k==j ? Math.max(1.0/qBT - qll/qBT/qB, 0.0) : -qll/qBT/qB; 
-								
-								for (int r=0; r<dim; r++) {
-									double bT = 0.0;
-									if (observationBT.getStartPoint().equals(point)) {
-										if (r==0)
-											bT = observationBT.diffDeflectionXs();
-										else if (r==1)
-											bT = observationBT.diffDeflectionYs();
-									}
-									else if (observationBT.getEndPoint().equals(point)) {
-										if (r==0)
-											bT = observationBT.diffDeflectionXe();
-										else if (r==1)
-											bT = observationBT.diffDeflectionYe();
-									}								
-									BTPQvvPB.set(r,c, BTPQvvPB.get(r,c) + bT*pqvvp*b);
+						for (int j=0; j<observations.size(); j++) {
+							Observation observationBT = observations.get(j);
+							if (this.congruenceAnalysis && this.freeNetwork && observationBT.getObservationGroup().getEpoch() == Epoch.REFERENCE)
+								continue;
+							double qll = this.getQllElement(observationBT, observationB);
+							double qBT = observationBT.getStdApriori()*observationBT.getStdApriori();
+							// P*Qvv*P
+							// P*(Qll - Q_ll)*P
+							// (P*Qll - P*Q_ll)*P
+							// (I - P*Q_ll)*P
+							// (P - P*Q_ll*P)
+							
+							// Numerische Null wird auf Hauptdiagonale zu Null gesetzt, um Summation von "Fragmenten" zu unterbinden
+							double pqvvp = k==j ? Math.max(1.0/qBT - qll/qBT/qB, 0.0) : -qll/qBT/qB; 
+							
+							for (int r=0; r<dim; r++) {
+								double bT = 0.0;
+								if (observationBT.getStartPoint().equals(point)) {
+									if (r==0)
+										bT = observationBT.diffVerticalDeflectionXs();
+									else if (r==1)
+										bT = observationBT.diffVerticalDeflectionYs();
 								}
+								else if (observationBT.getEndPoint().equals(point)) {
+									if (r==0)
+										bT = observationBT.diffVerticalDeflectionXe();
+									else if (r==1)
+										bT = observationBT.diffVerticalDeflectionYe();
+								}								
+								BTPQvvPB.set(r,c, BTPQvvPB.get(r,c) + bT*pqvvp*b);
 							}
-						}					
-					}
-					Qnn = new DenseMatrix(dim, dim);
-					nabla = new DenseVector(dim);
-					isCalculated = false;
-					confidenceRegion = null;
-
-					if (hasObservationInReferenceEpoch && observations.size() >= dim) {
-						try {
-							Qnn = MathExtension.pinv(BTPQvvPB, -1);
-							confidenceRegion = new ConfidenceRegion(Qnn);
-							isCalculated = true;
-						} 
-						catch (NotConvergedException nce) {
-							nce.printStackTrace();
-							isCalculated = false;
 						}
-					}
+					}					
+				}
+				Matrix Qnn = new DenseMatrix(dim, dim);
+				Vector nabla = new DenseVector(dim);
+				boolean isCalculated = false;
+				ConfidenceRegion confidenceRegion = null;
 
-				    if (!isCalculated) {
-				    	continue;
-				    }
-			    
-				    if (this.estimationType == EstimationType.SIMULATION) {
-				    	// Nichtzentralitaetsparameter ist noch nicht bestimmt, 
-						// sodass GRZW ein vorlaeufiger Wert ist, 
-					    // der nabla*Pnn*nabla == 1 erfuellt.
-						deflectionX.setMinimalDetectableBias(confidenceRegion.getMinimalDetectableBias(0));
-						deflectionY.setMinimalDetectableBias(confidenceRegion.getMinimalDetectableBias(1));
-				    }
-				    else {
-				    	Qnn.mult(BTPv, nabla);
-					    deflectionX.setNablaCoVarNabla( Math.abs(nabla.dot(BTPv)) );
-						nabla = nabla.scale(-1.0);
-						deflectionX.setGrossError(nabla.get(0));
-						deflectionY.setGrossError(nabla.get(1));
-					    
-					    // Bestimme Nabla auf der Grenzwertellipse mit nabla0*Pnn*nabla0 == 1
-					    Vector nabla0 = new DenseVector(nabla, true);
-					    Vector PQvvPnabla0 = new DenseVector(nabla0);
-						BTPQvvPB.mult(nabla0, PQvvPnabla0);
-						double nQn0 = nabla0.dot(PQvvPnabla0);
-						if (nQn0 > 0) {
-							deflectionX.setMinimalDetectableBias(nabla0.get(0)/Math.sqrt(nQn0));
-							deflectionY.setMinimalDetectableBias(nabla0.get(1)/Math.sqrt(nQn0));
-						}
-				    }
+				if (hasObservationInReferenceEpoch && observations.size() >= dim) {
+					try {
+						Qnn = MathExtension.pinv(BTPQvvPB, -1);
+						confidenceRegion = new ConfidenceRegion(Qnn);
+						isCalculated = true;
+					} 
+					catch (NotConvergedException nce) {
+						nce.printStackTrace();
+						isCalculated = false;
+					}
+				}
+
+			    if (!isCalculated) {
+			    	continue;
+			    }
+		    
+			    if (this.estimationType == EstimationType.SIMULATION) {
+			    	// Nichtzentralitaetsparameter ist noch nicht bestimmt, 
+					// sodass GRZW ein vorlaeufiger Wert ist, 
+				    // der nabla*Pnn*nabla == 1 erfuellt.
+					deflectionX.setMinimalDetectableBias(confidenceRegion.getMinimalDetectableBias(0));
+					deflectionY.setMinimalDetectableBias(confidenceRegion.getMinimalDetectableBias(1));
+			    }
+			    else {
+			    	Qnn.mult(BTPv, nabla);
+				    deflectionX.setNablaCoVarNabla( Math.abs(nabla.dot(BTPv)) );
+					nabla = nabla.scale(-1.0);
+					deflectionX.setGrossError(nabla.get(0));
+					deflectionY.setGrossError(nabla.get(1));
+				    
+				    // Bestimme Nabla auf der Grenzwertellipse mit nabla0*Pnn*nabla0 == 1
+				    Vector nabla0 = new DenseVector(nabla, true);
+				    Vector PQvvPnabla0 = new DenseVector(nabla0);
+					BTPQvvPB.mult(nabla0, PQvvPnabla0);
+					double nQn0 = nabla0.dot(PQvvPnabla0);
+					if (nQn0 > 0) {
+						deflectionX.setMinimalDetectableBias(nabla0.get(0)/Math.sqrt(nQn0));
+						deflectionY.setMinimalDetectableBias(nabla0.get(1)/Math.sqrt(nQn0));
+					}
 			    }
 			}
 
@@ -3218,46 +3225,46 @@ public class NetworkAdjustment implements Runnable {
 					point.setProbabilityValues(pPrio, pPost);
 					point.setSignificant(tPrio > kPrio || tPost > kPost);
 				}
-				
-				if (point.considerDeflection()) {
-					if (this.interrupt)
-						return;
-					
-					DeflectionX deflectionX = point.getDeflectionX();
-					DeflectionY deflectionY = point.getDeflectionY();
-					
-					dim = 2;
-					deflectionX.calcStochasticParameters(sigma2apost, dof);
-
-					tsPrio = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, Double.POSITIVE_INFINITY);
-					tsPost = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, dof-dim);
-					
-					lamda = Math.sqrt(Math.abs(tsPrio.getNoncentralityParameter()));
-					kPrio = tsPrio.getQuantile();
-					kPost = tsPost.getQuantile();
-					
-					deflectionX.setMinimalDetectableBias(lamda * deflectionX.getMinimalDetectableBias());
-					deflectionY.setMinimalDetectableBias(lamda * deflectionY.getMinimalDetectableBias());
-					
-					// Bei Simulation ist Nabla == GRZW, da keine Fehler bestimmbar sind
-					if (this.estimationType == EstimationType.SIMULATION) {
-						point.setGrossErrors(grzw);
-						deflectionX.setGrossError(deflectionX.getMinimalDetectableBias());
-						deflectionY.setGrossError(deflectionY.getMinimalDetectableBias());
-					}
-					else {
-						double tPrio = deflectionX.getTprio();
-						double tPost = deflectionX.getTpost();
-						double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, dim);
-						double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim) : 0.0;
-						// deflectionX strellt stoch. Parameter fuer beide Lotparameter bereit
-						deflectionX.setPprio(pPrio);
-						deflectionX.setPpost(pPost);
-						deflectionX.setSignificant(tPrio > kPrio || tPost > kPost);
-					}
-				}
 			}
 			
+			for (int i=0; i<pointsWithTestableDeflection.size(); i++) {
+				if (this.interrupt)
+					return;
+				Point point = pointsWithTestableDeflection.get(i);
+				
+				VerticalDeflectionX deflectionX = point.getVerticalDeflectionX();
+				VerticalDeflectionY deflectionY = point.getVerticalDeflectionY();
+				
+				int dim = 2;
+				deflectionX.calcStochasticParameters(sigma2apost, dof);
+
+				TestStatisticParameterSet tsPrio = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, Double.POSITIVE_INFINITY);
+				TestStatisticParameterSet tsPost = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, dof-dim);
+				
+				double lamda = Math.sqrt(Math.abs(tsPrio.getNoncentralityParameter()));
+				double kPrio = tsPrio.getQuantile();
+				double kPost = tsPost.getQuantile();
+				
+				deflectionX.setMinimalDetectableBias(lamda * deflectionX.getMinimalDetectableBias());
+				deflectionY.setMinimalDetectableBias(lamda * deflectionY.getMinimalDetectableBias());
+				
+				// Bei Simulation ist Nabla == GRZW, da keine Fehler bestimmbar sind
+				if (this.estimationType == EstimationType.SIMULATION) {
+					deflectionX.setGrossError(deflectionX.getMinimalDetectableBias());
+					deflectionY.setGrossError(deflectionY.getMinimalDetectableBias());
+				}
+				else {
+					double tPrio = deflectionX.getTprio();
+					double tPost = deflectionX.getTpost();
+					double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, dim);
+					double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim) : 0.0;
+					// deflectionX strellt stoch. Parameter fuer beide Lotparameter bereit
+					deflectionX.setPprio(pPrio);
+					deflectionX.setPpost(pPost);
+					deflectionX.setSignificant(tPrio > kPrio || tPost > kPost);
+				}
+			}
+
 			this.addStochasticParameters2Observations(sigma2apost, dof, sigma2PointMax);
 			this.traceCxxPoints = 0;
 			
@@ -3342,15 +3349,18 @@ public class NetworkAdjustment implements Runnable {
 						double stdZ = Math.sqrt(sigma2apost * subQxx.get(subCol, subCol++));
 						point.setStdZ(stdZ);
 					}
-
-					// Lotabweichung des Punktes
-					if (point.hasUnknownDeflectionParameters()) {
-						DeflectionX deflectionX = point.getDeflectionX();
-						DeflectionY deflectionY = point.getDeflectionY();
+				}
+				else if (unknownParameter instanceof VerticalDeflection) { 
+					// VerticalDeflectionY is taken from the VerticalDeflectionX Component
+					// --> No need to modify again
+					// Stochastic deflection check for outliers
+					if (unknownParameter instanceof VerticalDeflectionX) {
+						VerticalDeflectionX deflectionX = (VerticalDeflectionX)unknownParameter;
+						VerticalDeflectionY deflectionY = deflectionX.getPoint().getVerticalDeflectionY();
 
 						int cols[] = new int[] {deflectionX.getColInJacobiMatrix(), deflectionY.getColInJacobiMatrix()};
 						// Hole Submatrix aus Qxx zur Bestimmung der Konfidenzbereiche
-						subQxx = new UpperSymmPackMatrix( 2 );
+						Matrix subQxx = new UpperSymmPackMatrix( 2 );
 						for (int r=0; r<cols.length; r++) {
 							for (int c=r; c<cols.length; c++) {
 								double qxx = this.Qxx.get(cols[r], cols[c]);
@@ -3367,7 +3377,7 @@ public class NetworkAdjustment implements Runnable {
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
-						
+
 						deflectionX.setStd(Math.sqrt(sigma2apost * subQxx.get(0, 0)));
 						deflectionY.setStd(Math.sqrt(sigma2apost * subQxx.get(1, 1)));
 
@@ -3376,14 +3386,14 @@ public class NetworkAdjustment implements Runnable {
 
 							TestStatisticParameterSet tsPrio = this.significanceTestStatisticParameters.getTestStatisticParameter(2, Double.POSITIVE_INFINITY);
 							TestStatisticParameterSet tsPost = this.significanceTestStatisticParameters.getTestStatisticParameter(2, dof-2);
-							
+
 							double lamda = Math.sqrt(Math.abs(tsPrio.getNoncentralityParameter()));
 							double Kprio = tsPrio.getQuantile();
 							double Kpost = tsPost.getQuantile();
 
 							deflectionX.setMinimalDetectableBias( deflectionX.getMinimalDetectableBias() * lamda );
 							deflectionY.setMinimalDetectableBias( deflectionY.getMinimalDetectableBias() * lamda );
-							
+
 							// Bei Simulation ist Nabla == GRZW, da keine Fehler bestimmbar sind
 							if (this.estimationType == EstimationType.SIMULATION) {
 								deflectionX.setGrossError(deflectionX.getMinimalDetectableBias());
@@ -3396,7 +3406,7 @@ public class NetworkAdjustment implements Runnable {
 								double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, 2, dof-2) : 0.0;
 								deflectionX.setPprio(pPrio);
 								deflectionX.setPpost(pPost);
-								deflectionX.setSignificant(tPrio > Kprio || tPost > Kpost || this.adaptedDeflectionUncertainties.containsKey(deflectionX) || this.adaptedDeflectionUncertainties.containsKey(deflectionY));
+								deflectionX.setSignificant(tPrio > Kprio || tPost > Kpost || this.adaptedVerticalDeflectionUncertainties.containsKey(deflectionX) || this.adaptedVerticalDeflectionUncertainties.containsKey(deflectionY));
 							}
 						}
 					}
@@ -3417,9 +3427,7 @@ public class NetworkAdjustment implements Runnable {
 					if (additionalUnknownParameter.getParameterType() == ParameterType.ORIENTATION ||
 							additionalUnknownParameter.getParameterType() == ParameterType.ROTATION_X ||
 							additionalUnknownParameter.getParameterType() == ParameterType.ROTATION_Y ||
-							additionalUnknownParameter.getParameterType() == ParameterType.ROTATION_Z ||
-							additionalUnknownParameter.getParameterType() == ParameterType.DEFLECTION_X ||
-							additionalUnknownParameter.getParameterType() == ParameterType.DEFLECTION_Y) {
+							additionalUnknownParameter.getParameterType() == ParameterType.ROTATION_Z) {
 						value = MathExtension.MOD(value, 2.0*Math.PI);
 						if (Math.abs(2.0*Math.PI - value) < Math.abs(value))
 							value = value - 2.0*Math.PI;
@@ -3444,7 +3452,6 @@ public class NetworkAdjustment implements Runnable {
 				}
 				// Strain-Parameter und Lotabweichungen werden gesondert bearbeitet, da teilw. Hilfsparameter bestimmt werden, die keine Interpretation zulassen
 				else if (unknownParameter instanceof StrainParameter){}
-				else if (unknownParameter instanceof Deflection){}
 				else {
 					System.err.println(this.getClass() + " Fehler, unbekannter Parametertyp! " + unknownParameter);
 				}
@@ -4031,27 +4038,47 @@ public class NetworkAdjustment implements Runnable {
 	}
 	
 	/**
-	 * Fuegt die stochastischen Punkte als Unbekannte ein,
-	 * dieser Schritt erfolgt am Ende, da somit die Punkte
-	 * in der N-Matrix zusammenhaengend stehen. 
+	 * Fuegt die unbekannten Lotabweichungen zum Modell
+	 * hinzu.
 	 */
-	private void addStochasticPointsToModel() {
-		int row = this.numberOfObservations;
-		
-		for (int i=0; i<this.stochasticDeflectionPoints.size(); i++) {
-			Point point = this.stochasticDeflectionPoints.get(i);
-			point.getDeflectionX().setRowInJacobiMatrix(row++);
-			point.getDeflectionY().setRowInJacobiMatrix(row++);
-
-			this.addUnknownParameter(point.getDeflectionX());
-			this.addUnknownParameter(point.getDeflectionY());
+	private void addVerticalDeflectionToModel() {
+		for (Point point : this.pointsWithUnknownDeflection) {
+			this.addUnknownParameter(point.getVerticalDeflectionX());
+			this.addUnknownParameter(point.getVerticalDeflectionY());
 		}
 		
-		for (int i=0; i<this.stochasticPoints.size(); i++) {
-			Point point = this.stochasticPoints.get(i);
+		for (Point point : this.pointsWithStochasticDeflection) {
+			this.addUnknownParameter(point.getVerticalDeflectionX());
+			this.addUnknownParameter(point.getVerticalDeflectionY());
+		}
+	}
+	
+	/**
+	 * Fuegt die stochastischen Punkte und Lotabweichungen 
+	 * als Pseudo-Beobachtungen ein, dieser Schritt muss 
+	 * am Ende erfolgen, damit die Punkte in der N-Matrix 
+	 * zusammenhaengend stehen. 
+	 */
+	private void addStochasticPointsAndStochasticDeflectionToModel() {
+		int row = this.numberOfObservations;
+		
+		for (Point point : this.pointsWithStochasticDeflection) {
+			point.getVerticalDeflectionX().setRowInJacobiMatrix(row++);
+			point.getVerticalDeflectionY().setRowInJacobiMatrix(row++);
+
+			this.numberOfStochasticDeflectionRows += 2;
+		}
+		
+		for (Point point : this.stochasticPoints) {
 			point.setRowInJacobiMatrix(row);
 			row += point.getDimension();
 			this.addUnknownParameter( point );
+		}
+		
+		if (this.numberOfStochasticDeflectionRows > 0) {
+			VarianceComponentType vcType = VarianceComponentType.STOCHASTIC_DEFLECTION_COMPONENT;
+			if (vcType != null && !this.varianceComponents.containsKey(vcType))
+				this.varianceComponents.put(vcType, new VarianceComponent(vcType));
 		}
 	}
 	
@@ -4080,12 +4107,12 @@ public class NetworkAdjustment implements Runnable {
 	/**
 	 * Fuegt einen Datumspunkt dem Projekt hinzu
 	 * @param point
-	 * @param fixedDeflection
+	 * @param verticalDeflectionType
 	 * @return isAdded
 	 */
-	public boolean addDatumPoint(Point point, boolean fixedDeflection) {
+	public boolean addDatumPoint(Point point, VerticalDeflectionType verticalDeflectionType) {
 		if ((this.stochasticPoints == null || this.stochasticPoints.isEmpty()) &&
-				(this.referencePoints == null || this.referencePoints.isEmpty()) && this.addNewPoint(point, fixedDeflection)) {
+				(this.referencePoints == null || this.referencePoints.isEmpty()) && this.addNewPoint(point, verticalDeflectionType)) {
 			this.datumPoints.add(point);
 			this.freeNetwork = true;
 			return true;
@@ -4095,23 +4122,33 @@ public class NetworkAdjustment implements Runnable {
 	
 	
 	/**
-	 * Fuegt einen stochastischen Punkt dem Projekt hinzu
+	 * Fuegt einen varianzfreien Punkt dem Projekt hinzu
 	 * @param point
-	 * @param fixedDeflection
+	 * @param verticalDeflectionType
 	 * @return isAdded
 	 */
-	public boolean addFixPoint(Point point, boolean fixedDeflection) {
+	public boolean addReferencePoint(Point point, VerticalDeflectionType verticalDeflectionType) {
 		if (this.freeNetwork || this.allPoints.containsKey(point.getName())) {
 			System.err.println(this.getClass() + " Fehler, ein Punkt mit der " +
 					"ID " + point.getName() + " existiert bereits!");
 			return false;
 		}
-		point.considerDeflection(!fixedDeflection);
+
 		point.setColInDesignmatrixOfModelErros(this.numberOfFixPointRows);
 		this.numberOfFixPointRows += point.getDimension();
 		this.referencePoints.add(point);
 		this.addObservations( point );
 		this.allPoints.put(point.getName(), point);
+		
+		// Deflection werden nachtraeglich hinzugefuegt via addUnknownParameter()
+		if (verticalDeflectionType != null) {
+			if (verticalDeflectionType == VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION)
+				this.pointsWithReferenceDeflection.add(point);
+			else if (verticalDeflectionType == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION)
+				this.pointsWithStochasticDeflection.add(point);
+			else if (verticalDeflectionType == VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION)
+				this.pointsWithUnknownDeflection.add(point);
+		}
 
 		return true;
 	}	
@@ -4119,29 +4156,29 @@ public class NetworkAdjustment implements Runnable {
 	/**
 	 * Fuegt einen stochastischen Punkt dem Projekt hinzu
 	 * @param point
-	 * @param fixedDeflection
+	 * @param verticalDeflectionType
 	 * @return isAdd
 	 */
-	public boolean addStochasticPoint(Point point, boolean fixedDeflection) {
+	public boolean addStochasticPoint(Point point, VerticalDeflectionType verticalDeflectionType) {
 		if (this.freeNetwork || this.allPoints.containsKey(point.getName())) {
 			System.err.println(this.getClass() + " Fehler, ein Punkt mit der " +
 					"ID " + point.getName() + " existiert bereits!");
 			return false;
 		}
-		
-		if (!fixedDeflection) {
-			point.considerDeflection(true);
-			this.stochasticDeflectionPoints.add(point);
-			this.numberOfStochasticDeflectionRows += 2;
 			
-			VarianceComponentType vcType = VarianceComponentType.STOCHASTIC_POINT_DEFLECTION_COMPONENT;
-			if (vcType != null && !this.varianceComponents.containsKey(vcType))
-				this.varianceComponents.put(vcType, new VarianceComponent(vcType));	
-		}
-		
 		this.stochasticPoints.add(point);
 		this.allPoints.put(point.getName(), point);
 		this.numberOfStochasticPointRows += point.getDimension();
+		
+		// Deflection werden nachtraeglich hinzugefuegt via addUnknownParameter()
+		if (verticalDeflectionType != null) {
+			if (verticalDeflectionType == VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION)
+				this.pointsWithReferenceDeflection.add(point);
+			else if (verticalDeflectionType == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION)
+				this.pointsWithStochasticDeflection.add(point);
+			else if (verticalDeflectionType == VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION)
+				this.pointsWithUnknownDeflection.add(point);
+		}
 		
 		VarianceComponentType vcType = VarianceComponentType.getComponentTypeByPointDimension(point.getDimension());
 		if (vcType != null && !this.varianceComponents.containsKey(vcType))
@@ -4152,12 +4189,14 @@ public class NetworkAdjustment implements Runnable {
 	/**
 	 * Fuegt einen Neupunkt hinzu.
 	 * @param point
-	 * @param fixedDeflection
+	 * @param verticalDeflectionType
 	 * @return isAdd
 	 */
-	public boolean addNewPoint(Point point, boolean fixedDeflection) {
+	public boolean addNewPoint(Point point, VerticalDeflectionType verticalDeflectionType) {
 		int dim = point.getDimension();
-		dim += fixedDeflection ? 0 : 2;
+		
+		if (verticalDeflectionType != null && verticalDeflectionType != VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION)
+			dim += 2;
 		
 		if (this.allPoints.containsKey(point.getName())) {
 			System.err.println(this.getClass() + "\nFehler, ein Punkt mit der " +
@@ -4171,11 +4210,17 @@ public class NetworkAdjustment implements Runnable {
 		}
 		this.addUnknownParameter( point );
 		this.allPoints.put(point.getName(), point);
-		if (!fixedDeflection) {
-			this.addUnknownParameter(point.getDeflectionX());
-			this.addUnknownParameter(point.getDeflectionY());
-			point.considerDeflection(true);
+		
+		// Deflection werden nachtraeglich hinzugefuegt via addUnknownParameter()
+		if (verticalDeflectionType != null) {
+			if (verticalDeflectionType == VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION)
+				this.pointsWithReferenceDeflection.add(point);
+			else if (verticalDeflectionType == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION)
+				this.pointsWithStochasticDeflection.add(point);
+			else if (verticalDeflectionType == VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION)
+				this.pointsWithUnknownDeflection.add(point);
 		}
+		
 		return true;
 	}
 	
@@ -4316,7 +4361,12 @@ public class NetworkAdjustment implements Runnable {
 				continue;
 			
 			if (observation instanceof DeltaZ) {
-				if ((observation.getStartPoint().getDimension() == 3 && observation.getEndPoint().getDimension() == 3) && (!observation.getStartPoint().hasUnknownDeflectionParameters() || !observation.getEndPoint().hasUnknownDeflectionParameters())) {
+				// muss dim == 3 sein, darf keine Lotabweichungen haben oder aber besitzt Lotabweichungen die gleichzeitig aber auch Beobachtungen sind
+				if ((observation.getStartPoint().getDimension() == 3 && observation.getEndPoint().getDimension() == 3) && 
+						(!observation.getStartPoint().hasUnknownDeflectionParameters() || 
+								!observation.getEndPoint().hasUnknownDeflectionParameters() ||
+								observation.getStartPoint().hasUnknownDeflectionParameters() && observation.getStartPoint().hasObservedDeflectionParameters() ||
+								observation.getEndPoint().hasUnknownDeflectionParameters() && observation.getEndPoint().hasObservedDeflectionParameters() )) {
 					deltaH2Points3D++;
 					if (!observation.getStartPoint().hasUnknownDeflectionParameters())
 						deltaH2Points3DIds.add(observation.getStartPoint().getName());
@@ -4372,7 +4422,10 @@ public class NetworkAdjustment implements Runnable {
 			}
 			else if (observation instanceof ZenithAngle) {
 				this.rankDefect.setRotationZ(DefectType.FREE);
-				zenithangle3DOFStation += (observation.getStartPoint().getDimension() == 3 && !observation.getStartPoint().hasUnknownDeflectionParameters()) ? 1 : 0;
+				// muss dim == 3 sein, darf keine Lotabweichungen haben oder aber besitzt Lotabweichungen die gleichzeitig aber auch Beobachtungen sind
+				zenithangle3DOFStation += (observation.getStartPoint().getDimension() == 3 && 
+						(!observation.getStartPoint().hasUnknownDeflectionParameters() || 
+								observation.getStartPoint().hasUnknownDeflectionParameters() && observation.getStartPoint().hasObservedDeflectionParameters())) ? 1 : 0;
 			}
 			else if (observation instanceof GNSSBaseline1D) {
 				if (((GNSSBaseline1D)observation).getDimension() >= 1) {
@@ -4546,17 +4599,19 @@ public class NetworkAdjustment implements Runnable {
 			}
 			// Lotabweichung des Standpunktes
 			if (startPoint.hasUnknownDeflectionParameters()) {
-				Deflection deflX = startPoint.getDeflectionX();
-				aDx += dx.get(deflX.getColInJacobiMatrix())*observation.diffDeflectionXs();
-				Deflection deflY = startPoint.getDeflectionY();
-				aDx += dx.get(deflY.getColInJacobiMatrix())*observation.diffDeflectionYs();
+				VerticalDeflection deflX = startPoint.getVerticalDeflectionX();
+				VerticalDeflection deflY = startPoint.getVerticalDeflectionY();
+				
+				aDx += dx.get(deflX.getColInJacobiMatrix())*observation.diffVerticalDeflectionXs();
+				aDx += dx.get(deflY.getColInJacobiMatrix())*observation.diffVerticalDeflectionYs();
 			}
 			// Lotabweichung des Zielpunktes
 			if (endPoint.hasUnknownDeflectionParameters()) {
-				Deflection deflX = endPoint.getDeflectionX();
-				aDx += dx.get(deflX.getColInJacobiMatrix())*observation.diffDeflectionXe();
-				Deflection deflY = endPoint.getDeflectionY();
-				aDx += dx.get(deflY.getColInJacobiMatrix())*observation.diffDeflectionYe();
+				VerticalDeflection deflX = endPoint.getVerticalDeflectionX();
+				VerticalDeflection deflY = endPoint.getVerticalDeflectionY();
+				
+				aDx += dx.get(deflX.getColInJacobiMatrix())*observation.diffVerticalDeflectionXe();
+				aDx += dx.get(deflY.getColInJacobiMatrix())*observation.diffVerticalDeflectionYe();
 			}
 			// Zusatzparameter
 			if (observationGroup.numberOfAdditionalUnknownParameter() > 0) {
@@ -4604,19 +4659,17 @@ public class NetworkAdjustment implements Runnable {
 			v.set(row, aDx - observation.getCorrection());
 		}
 		
-		for (int i=0; i<this.stochasticDeflectionPoints.size(); i++) {
-			Point point = this.stochasticDeflectionPoints.get(i);
-			int col = point.getDeflectionX().getColInJacobiMatrix();
-			int row = point.getDeflectionX().getRowInJacobiMatrix();
+		for (Point point : this.pointsWithStochasticDeflection) {
+			int col = point.getVerticalDeflectionX().getColInJacobiMatrix();
+			int row = point.getVerticalDeflectionX().getRowInJacobiMatrix();
 			v.set(row, dx.get(col));
 			
-			col = point.getDeflectionY().getColInJacobiMatrix();
-			row = point.getDeflectionY().getRowInJacobiMatrix();
+			col = point.getVerticalDeflectionY().getColInJacobiMatrix();
+			row = point.getVerticalDeflectionY().getRowInJacobiMatrix();
 			v.set(row, dx.get(col));
 		}
 		
-		for (int i=0; i<this.stochasticPoints.size(); i++) {
-			Point point = this.stochasticPoints.get(i);
+		for (Point point : this.stochasticPoints) {
 			int row = point.getRowInJacobiMatrix();
 			int col = point.getColInJacobiMatrix();
 			int dim = point.getDimension();
@@ -4940,21 +4993,21 @@ public class NetworkAdjustment implements Runnable {
 								a = observationA.diffZe();
 						}
 					}
-					else if (unknownParameterA.getParameterType() == ParameterType.DEFLECTION_X) {
-						DeflectionX deflection = (DeflectionX)unknownParameterA;
+					else if (unknownParameterA.getParameterType() == ParameterType.VERTICAL_DEFLECTION_X) {
+						VerticalDeflectionX deflection = (VerticalDeflectionX)unknownParameterA;
 						Point p = deflection.getPoint();
 						if (p.equals(observationA.getStartPoint()))
-							a = observationA.diffDeflectionXs();
+							a = observationA.diffVerticalDeflectionXs();
 						else if (p.equals(observationA.getEndPoint()))
-							a = observationA.diffDeflectionXe();
+							a = observationA.diffVerticalDeflectionXe();
 					}
-					else if (unknownParameterA.getParameterType() == ParameterType.DEFLECTION_Y) {
-						DeflectionY deflection = (DeflectionY)unknownParameterA;
+					else if (unknownParameterA.getParameterType() == ParameterType.VERTICAL_DEFLECTION_Y) {
+						VerticalDeflectionY deflection = (VerticalDeflectionY)unknownParameterA;
 						Point p = deflection.getPoint();
 						if (p.equals(observationA.getStartPoint()))
-							a = observationA.diffDeflectionYs();
+							a = observationA.diffVerticalDeflectionYs();
 						else if (p.equals(observationA.getEndPoint()))
-							a = observationA.diffDeflectionYe();
+							a = observationA.diffVerticalDeflectionYe();
 					}
 					else if (unknownParameterA.getParameterType() == ParameterType.ORIENTATION) {
 						a = observationA.diffOri();
@@ -4983,19 +5036,16 @@ public class NetworkAdjustment implements Runnable {
 		}
 		
 		// Stochastische Punkte hinzufuegen
-		for (int i=0; i<this.stochasticDeflectionPoints.size(); i++) {
-			Point point = this.stochasticDeflectionPoints.get(i);
-			Deflection deflectionX = point.getDeflectionX();
+		for (Point point : this.pointsWithStochasticDeflection) {
+			VerticalDeflection deflectionX = point.getVerticalDeflectionX();
+			VerticalDeflection deflectionY = point.getVerticalDeflectionY();
+			
 			A.set(deflectionX.getRowInJacobiMatrix(), deflectionX.getColInJacobiMatrix(), 1.0);
-
-			Deflection deflectionY = point.getDeflectionY();
 			A.set(deflectionY.getRowInJacobiMatrix(), deflectionY.getColInJacobiMatrix(), 1.0);
 		}
 
 		// Stochastische Punkte hinzufuegen
-		for (int i=0; i<this.stochasticPoints.size(); i++) {
-			Point point = this.stochasticPoints.get(i);
-
+		for (Point point : this.stochasticPoints) {
 			int col = point.getColInJacobiMatrix();
 			int row = point.getRowInJacobiMatrix();
 
@@ -5022,11 +5072,11 @@ public class NetworkAdjustment implements Runnable {
 			W.set(observation.getRowInJacobiMatrix(), 1.0/observation.getStdApriori()/observation.getStdApriori());
 		}
 		
-		for (Point point : this.stochasticDeflectionPoints) {
-			Deflection deflectionX = point.getDeflectionX();
+		for (Point point : this.pointsWithStochasticDeflection) {
+			VerticalDeflection deflectionX = point.getVerticalDeflectionX();
+			VerticalDeflection deflectionY = point.getVerticalDeflectionY();
+
 			W.set(deflectionX.getRowInJacobiMatrix(), 1.0/deflectionX.getStdApriori()/deflectionX.getStdApriori());
-			
-			Deflection deflectionY = point.getDeflectionY();
 			W.set(deflectionY.getRowInJacobiMatrix(), 1.0/deflectionY.getStdApriori()/deflectionY.getStdApriori());
 		}
 		
@@ -5055,11 +5105,14 @@ public class NetworkAdjustment implements Runnable {
 			e.set(observation.getRowInJacobiMatrix(), observation.getCorrection());
 		}
 		
-		for (Point point : this.stochasticDeflectionPoints) {
-			Deflection deflectionX = point.getDeflectionX();
-			e.set(deflectionX.getRowInJacobiMatrix(), deflectionX.getValue0() - deflectionX.getValue());
+		for (Point point : this.pointsWithStochasticDeflection) {
+			VerticalDeflection deflectionX = point.getVerticalDeflectionX();
+			VerticalDeflection deflectionY = point.getVerticalDeflectionY();
 			
-			Deflection deflectionY = point.getDeflectionY();
+			if (deflectionX.getRowInJacobiMatrix() < 0 || deflectionY.getRowInJacobiMatrix() < 0)
+				continue;
+			
+			e.set(deflectionX.getRowInJacobiMatrix(), deflectionX.getValue0() - deflectionX.getValue());
 			e.set(deflectionY.getRowInJacobiMatrix(), deflectionY.getValue0() - deflectionY.getValue());
 		}
 

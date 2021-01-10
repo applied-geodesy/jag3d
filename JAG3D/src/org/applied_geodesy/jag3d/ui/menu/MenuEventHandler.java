@@ -172,6 +172,10 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 		case IMPORT_FLAT_CONGRUENCE_ANALYSIS_PAIR_2D:
 		case IMPORT_FLAT_CONGRUENCE_ANALYSIS_PAIR_3D:
 			
+		case IMPORT_FLAT_REFERENCE_VERTICAL_DEFLECTION:
+		case IMPORT_FLAT_STOCASTIC_VERTICAL_DEFLECTION:
+		case IMPORT_FLAT_UNKNOWN_VERTICAL_DEFLECTION:
+			
 		case IMPORT_COLUMN_BASED_FILES:
 			this.menuBuilder.importFile(menuItemType);
 			break;

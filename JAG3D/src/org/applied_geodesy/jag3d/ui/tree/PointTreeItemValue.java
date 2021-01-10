@@ -124,9 +124,6 @@ public class PointTreeItemValue extends TreeItemValue implements Sortable {
 		case STOCHASTIC_POINT_1D_LEAF:
 		case STOCHASTIC_POINT_2D_LEAF:	
 		case STOCHASTIC_POINT_3D_LEAF:
-		case REFERENCE_POINT_3D_LEAF:
-		case DATUM_POINT_3D_LEAF:
-		case NEW_POINT_3D_LEAF:
 			tabTyps.add(TabType.PROPERTIES);
 			break;
 		default:
@@ -136,33 +133,12 @@ public class PointTreeItemValue extends TreeItemValue implements Sortable {
 		// Results Point
 		tabTyps.add(TabType.RESULT_DATA);
 		
-		// Result Deflections
-		switch (type) {
-		//case REFERENCE_POINT_3D_LEAF:
-		case STOCHASTIC_POINT_3D_LEAF:
-		case DATUM_POINT_3D_LEAF:
-		case NEW_POINT_3D_LEAF:
-			tabTyps.add(TabType.RESULT_DEFLECTION);
-			break;
-		default:
-			break;
-		}
-		
 		// Congruence points
 		switch (type) {
 		case DATUM_POINT_1D_LEAF:
 		case DATUM_POINT_2D_LEAF:
 		case DATUM_POINT_3D_LEAF:
-			tabTyps.add(TabType.RESULT_CONGRUENCE_ANALYSIS_POINT);
-			break;
-		default:
-			break;
-		}
-		
-		// Congruence deflection
-		switch (type) {
-		case DATUM_POINT_3D_LEAF:
-			tabTyps.add(TabType.RESULT_CONGRUENCE_ANALYSIS_DEFLECTION);
+			tabTyps.add(TabType.RESULT_CONGRUENCE_ANALYSIS);
 			break;
 		default:
 			break;
@@ -179,10 +155,6 @@ public class PointTreeItemValue extends TreeItemValue implements Sortable {
 			return DefaultUncertainty.getUncertaintyY();
 		case CONSTANT_Z:
 			return DefaultUncertainty.getUncertaintyZ();
-		case DEFLECTION_X:
-			return DefaultUncertainty.getUncertaintyDeflectionX();
-		case DEFLECTION_Y:
-			return DefaultUncertainty.getUncertaintyDeflectionY();
 		default:
 			return 0;
 		}

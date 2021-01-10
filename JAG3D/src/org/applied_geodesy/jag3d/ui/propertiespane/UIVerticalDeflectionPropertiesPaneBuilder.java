@@ -19,25 +19,28 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.ui.table;
+package org.applied_geodesy.jag3d.ui.propertiespane;
 
-public enum ColumnType {
-	APRIORI_TERRESTRIAL_OBSERVATION,
-	APOSTERIORI_TERRESTRIAL_OBSERVATION,
-	
-	APRIORI_GNSS_OBSERVATION,
-	APOSTERIORI_GNSS_OBSERVATION,
-	
-	APRIORI_POINT,
-	APOSTERIORI_POINT,
-	
-	APRIORI_DEFLECTION,
-	APOSTERIORI_DEFLECTION,
-	
-	APRIORI_POINT_CONGRUENCE,
-	APOSTERIORI_POINT_CONGRUENCE,
-	
-	VISIBLE,
-	HIDDEN
-	;
+import java.util.Map;
+
+import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
+
+import javafx.collections.FXCollections;
+
+public class UIVerticalDeflectionPropertiesPaneBuilder {
+	private static UIVerticalDeflectionPropertiesPaneBuilder propertyPaneBuilder = new UIVerticalDeflectionPropertiesPaneBuilder();
+	private Map<TreeItemType, UIVerticalDeflectionPropertiesPane> propertiesPanes = FXCollections.observableHashMap();
+
+	private UIVerticalDeflectionPropertiesPaneBuilder() { }
+
+	public static UIVerticalDeflectionPropertiesPaneBuilder getInstance() {
+		return propertyPaneBuilder;
+	}
+
+	public UIVerticalDeflectionPropertiesPane getVerticalDeflectionPropertiesPane(TreeItemType type) {
+		if (!this.propertiesPanes.containsKey(type))
+			this.propertiesPanes.put(type, new UIVerticalDeflectionPropertiesPane(type));
+		UIVerticalDeflectionPropertiesPane propertiesPane = this.propertiesPanes.get(type);
+		return propertiesPane;
+	}
 }

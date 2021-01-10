@@ -67,9 +67,11 @@ public class PointGroup {
 			point.setStdZ( point.getStdZ() > 0 ? point.getStdZ() : DefaultUncertainty.getUncertaintyZ() );
 		}
 
-		point.getDeflectionX().setStd( point.getDeflectionX().getStd() > 0 ? point.getDeflectionX().getStd() : DefaultUncertainty.getUncertaintyDeflectionX() );
-		point.getDeflectionY().setStd( point.getDeflectionY().getStd() > 0 ? point.getDeflectionY().getStd() : DefaultUncertainty.getUncertaintyDeflectionY() );
-
+		if (this.dimension == 3) {
+			point.getVerticalDeflectionX().setStd( point.getVerticalDeflectionX().getStd() > 0 ? point.getVerticalDeflectionX().getStd() : DefaultUncertainty.getUncertaintyDeflectionX() );
+			point.getVerticalDeflectionY().setStd( point.getVerticalDeflectionY().getStd() > 0 ? point.getVerticalDeflectionY().getStd() : DefaultUncertainty.getUncertaintyDeflectionY() );
+		}
+		
 		this.pointHashMap.put( name, point );
 		this.pointArrayList.add( point );
 

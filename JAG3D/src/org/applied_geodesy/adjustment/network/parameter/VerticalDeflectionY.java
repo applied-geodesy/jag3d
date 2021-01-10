@@ -19,25 +19,37 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.ui.table;
+package org.applied_geodesy.adjustment.network.parameter;
 
-public enum ColumnType {
-	APRIORI_TERRESTRIAL_OBSERVATION,
-	APOSTERIORI_TERRESTRIAL_OBSERVATION,
+import org.applied_geodesy.adjustment.network.ParameterType;
+import org.applied_geodesy.adjustment.network.point.Point;
+
+/**
+ * Klasse ist eine Huelle fuer die Y-Komponente. Die statistischen groessen werden 
+ * in der X-Komponente abgespeichert, da beide (X und Y) als ein Objekt zu interpretieren sind.
+ *
+ */
+public class VerticalDeflectionY extends VerticalDeflection {
 	
-	APRIORI_GNSS_OBSERVATION,
-	APOSTERIORI_GNSS_OBSERVATION,
+	public VerticalDeflectionY(Point point) {
+		super(point);
+	}
 	
-	APRIORI_POINT,
-	APOSTERIORI_POINT,
+	public VerticalDeflectionY(Point point, double value) {
+		super(point, value);
+	}
 	
-	APRIORI_DEFLECTION,
-	APOSTERIORI_DEFLECTION,
+	public VerticalDeflectionY(Point point, double value, double std) {
+		super(point, value, std);
+	}
 	
-	APRIORI_POINT_CONGRUENCE,
-	APOSTERIORI_POINT_CONGRUENCE,
+	@Override
+	public ParameterType getParameterType() {
+		return ParameterType.VERTICAL_DEFLECTION_Y;
+	}
 	
-	VISIBLE,
-	HIDDEN
-	;
+	@Override
+	public String toString() {
+		return "VerticalDeflectionY [point=" + this.getPoint() + ", value0=" + this.getValue0() + ", value=" + this.getValue() + "]";
+	}
 }

@@ -50,6 +50,8 @@ import org.applied_geodesy.adjustment.network.PrincipalComponent;
 import org.applied_geodesy.adjustment.network.RankDefect;
 import org.applied_geodesy.adjustment.network.VarianceComponent;
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionGroupUncertaintyType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.adjustment.network.congruence.CongruenceAnalysisGroup;
 import org.applied_geodesy.adjustment.network.congruence.CongruenceAnalysisPointPair;
 import org.applied_geodesy.adjustment.network.congruence.strain.RestrictionType;
@@ -102,8 +104,12 @@ public class SQLAdjustmentManager {
 	private final DataBase dataBase;
 
 	private Map<String, Point> completePoints    = new LinkedHashMap<String, Point>();
-	private Map<String, Point> completePointsWithDeflections = new LinkedHashMap<String, Point>();
+//	private Map<String, Point> completePointsWithDeflections = new LinkedHashMap<String, Point>();
 	private Map<String, Point> completeNewPoints = new LinkedHashMap<String, Point>();
+	
+	private Map<String, Point> completePointsWithReferenceDeflections  = new LinkedHashMap<String, Point>();
+	private Map<String, Point> completePointsWithStochasticDeflections = new LinkedHashMap<String, Point>();
+	private Map<String, Point> completePointsWithUnknownDeflections    = new LinkedHashMap<String, Point>();
 
 	private Map<Integer, AdditionalUnknownParameter> additionalParametersToBeEstimated = new LinkedHashMap<Integer, AdditionalUnknownParameter>();
 
@@ -162,32 +168,21 @@ public class SQLAdjustmentManager {
 		if (testStatisticDefinition != null)
 			this.networkAdjustment.setSignificanceTestStatisticDefinition(testStatisticDefinition);
 
-		Map<String,Point> newPointsWithDeflection           = this.getPointsByType( PointType.NEW_POINT,   true );
-		Map<String,Point> datumPointsWithDeflection         = this.getPointsByType( PointType.DATUM_POINT, true );
-		Map<String,Point> stochasticPointsWithDeflection    = new LinkedHashMap<String,Point>();
-		Map<String,Point> fixPointsWithDeflection           = new LinkedHashMap<String,Point>();
+		Map<String,Point> newPoints   = this.getPointsByType( PointType.NEW_POINT );
+		Map<String,Point> datumPoints = this.getPointsByType( PointType.DATUM_POINT );
 
-		Map<String,Point> newPointsWithoutDeflection        = this.getPointsByType( PointType.NEW_POINT,   false );
-		Map<String,Point> datumPointsWithoutDeflection      = this.getPointsByType( PointType.DATUM_POINT, false );
-		Map<String,Point> stochasticPointsWithoutDeflection = new LinkedHashMap<String,Point>();
-		Map<String,Point> fixPointsWithoutDeflection        = new LinkedHashMap<String,Point>();
+		Map<String,Point> stochasticPoints = new LinkedHashMap<String,Point>(0);
+		Map<String,Point> referencePoints  = new LinkedHashMap<String,Point>(0);
+		this.completeNewPoints.putAll(newPoints);
 
-		this.completeNewPoints.putAll(newPointsWithDeflection);
-		this.completeNewPoints.putAll(newPointsWithoutDeflection);
-
-		this.completePointsWithDeflections.putAll(newPointsWithDeflection);
-		this.completePointsWithDeflections.putAll(datumPointsWithDeflection);
-
-		this.freeNetwork = datumPointsWithDeflection != null && !datumPointsWithDeflection.isEmpty() || datumPointsWithoutDeflection != null && !datumPointsWithoutDeflection.isEmpty();
+		this.freeNetwork = datumPoints != null && !datumPoints.isEmpty();
 		if (!this.freeNetwork) {
-			stochasticPointsWithDeflection    = this.getPointsByType( PointType.STOCHASTIC_POINT, true );
-			fixPointsWithDeflection           = this.getPointsByType( PointType.REFERENCE_POINT,  true );
-
-			stochasticPointsWithoutDeflection = this.getPointsByType( PointType.STOCHASTIC_POINT, false );
-			fixPointsWithoutDeflection        = this.getPointsByType( PointType.REFERENCE_POINT,  false );
-
-			this.completePointsWithDeflections.putAll(stochasticPointsWithDeflection);
+			stochasticPoints = this.getPointsByType( PointType.STOCHASTIC_POINT );
+			referencePoints  = this.getPointsByType( PointType.REFERENCE_POINT );
 		}
+		
+		// add vertical deflection to points (if any)
+		this.addVerticalDeflections();
 
 		if (this.pure1DNetwork)
 			this.applyableProjection = false;
@@ -204,10 +199,20 @@ public class SQLAdjustmentManager {
 		this.completeObservationGroups.addAll(this.getObservationGroups());
 
 		// Fuege Punkt der Netzausgleichung zu
-		for ( Point point : newPointsWithDeflection.values() ) 
-			this.networkAdjustment.addNewPoint( point, false );
-		for ( Point point : newPointsWithoutDeflection.values() ) 
-			this.networkAdjustment.addNewPoint( point, true );
+		for ( Point point : newPoints.values() ) {
+			String name = point.getName();
+			int dimension = point.getDimension();
+			VerticalDeflectionType type = null;
+			if (dimension == 3) {
+				if (this.completePointsWithReferenceDeflections.containsKey(name))
+					type = VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION;
+				else if (this.completePointsWithStochasticDeflections.containsKey(name))
+					type = VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION;
+				else if (this.completePointsWithUnknownDeflections.containsKey(name))
+					type = VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION;
+			}
+			this.networkAdjustment.addNewPoint( point, type );
+		}
 
 		// Nutze Deformationsvektoren zur Bildung von relativen Konfidenzbereichen (nicht nur bei freier AGL/Defo.-Analyse)
 		this.congruenceAnalysisGroups.addAll(this.getCongruenceAnalysisGroups());
@@ -217,21 +222,54 @@ public class SQLAdjustmentManager {
 
 		if (this.freeNetwork) {
 			this.addUserDefinedRankDefect(this.networkAdjustment.getRankDefect());
-			for ( Point point : datumPointsWithDeflection.values() ) 
-				this.networkAdjustment.addDatumPoint( point, false );
-			for ( Point point : datumPointsWithoutDeflection.values() ) 
-				this.networkAdjustment.addDatumPoint( point, true );
+			
+			for ( Point point : datumPoints.values() ) {
+				String name = point.getName();
+				int dimension = point.getDimension();
+				VerticalDeflectionType type = null;
+				if (dimension == 3) {
+					if (this.completePointsWithReferenceDeflections.containsKey(name))
+						type = VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION;
+					else if (this.completePointsWithStochasticDeflections.containsKey(name))
+						type = VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION;
+					else if (this.completePointsWithUnknownDeflections.containsKey(name))
+						type = VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION;
+				}
+				this.networkAdjustment.addDatumPoint( point, type );
+			}
+			
 		}
 		else {
-			for ( Point point : fixPointsWithDeflection.values() ) 
-				this.networkAdjustment.addFixPoint( point, false );
-			for ( Point point : fixPointsWithoutDeflection.values() ) 
-				this.networkAdjustment.addFixPoint( point, true );
-
-			for ( Point point : stochasticPointsWithDeflection.values() ) 
-				this.networkAdjustment.addStochasticPoint( point, false );
-			for ( Point point : stochasticPointsWithoutDeflection.values() ) 
-				this.networkAdjustment.addStochasticPoint( point, true );
+			
+			for ( Point point : referencePoints.values() ) {
+				String name = point.getName();
+				int dimension = point.getDimension();
+				VerticalDeflectionType type = null;
+				if (dimension == 3) {
+					if (this.completePointsWithReferenceDeflections.containsKey(name))
+						type = VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION;
+					else if (this.completePointsWithStochasticDeflections.containsKey(name))
+						type = VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION;
+					else if (this.completePointsWithUnknownDeflections.containsKey(name))
+						type = VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION;
+				}
+				this.networkAdjustment.addReferencePoint( point, type );
+			}
+			
+			for ( Point point : stochasticPoints.values() ) {
+				String name = point.getName();
+				int dimension = point.getDimension();
+				VerticalDeflectionType type = null;
+				if (dimension == 3) {
+					if (this.completePointsWithReferenceDeflections.containsKey(name))
+						type = VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION;
+					else if (this.completePointsWithStochasticDeflections.containsKey(name))
+						type = VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION;
+					else if (this.completePointsWithUnknownDeflections.containsKey(name))
+						type = VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION;
+				}
+				this.networkAdjustment.addStochasticPoint( point, type );
+			}
 		}
 		// Auszugleichende Zusatzparameter
 		for ( AdditionalUnknownParameter parameter : this.additionalParametersToBeEstimated.values() ) 
@@ -243,7 +281,9 @@ public class SQLAdjustmentManager {
 	public void clear() {
 		this.completePoints.clear();
 		this.completeNewPoints.clear();
-		this.completePointsWithDeflections.clear();
+		this.completePointsWithReferenceDeflections.clear();
+		this.completePointsWithStochasticDeflections.clear();
+		this.completePointsWithUnknownDeflections.clear();
 		
 		this.additionalParametersToBeEstimated.clear();
 		
@@ -414,17 +454,15 @@ public class SQLAdjustmentManager {
 		}
 	}
 
-	private Map<String, Point> getPointsByType (PointType type, boolean enabledDeflection) throws SQLException {
+	private Map<String, Point> getPointsByType(PointType type) throws SQLException {
 
-		String sql = "SELECT \"name\", \"y0\", \"x0\", \"z0\", \"dy0\", \"dx0\", \"dimension\", "
-				+ "IFNULL(CASEWHEN( \"sigma_y0\"  > 0,  \"sigma_y0\" ,  (SELECT \"value\" FROM \"PointGroupUncertainty\" WHERE \"group_id\" = \"PointApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_y0\", "
-				+ "IFNULL(CASEWHEN( \"sigma_x0\"  > 0,  \"sigma_x0\" ,  (SELECT \"value\" FROM \"PointGroupUncertainty\" WHERE \"group_id\" = \"PointApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_x0\", "
-				+ "IFNULL(CASEWHEN( \"sigma_z0\"  > 0,  \"sigma_z0\" ,  (SELECT \"value\" FROM \"PointGroupUncertainty\" WHERE \"group_id\" = \"PointApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_z0\", "
-				+ "IFNULL(CASEWHEN( \"sigma_dy0\" > 0,  \"sigma_dy0\" , (SELECT \"value\" FROM \"PointGroupUncertainty\" WHERE \"group_id\" = \"PointApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_dy0\", "
-				+ "IFNULL(CASEWHEN( \"sigma_dx0\" > 0,  \"sigma_dx0\" , (SELECT \"value\" FROM \"PointGroupUncertainty\" WHERE \"group_id\" = \"PointApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_dx0\"  "
+		String sql = "SELECT \"name\", \"y0\", \"x0\", \"z0\", \"dimension\", "
+				+ "IFNULL(CASEWHEN( \"sigma_y0\" > 0, \"sigma_y0\", (SELECT \"value\" FROM \"PointGroupUncertainty\" WHERE \"group_id\" = \"PointApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_y0\", "
+				+ "IFNULL(CASEWHEN( \"sigma_x0\" > 0, \"sigma_x0\", (SELECT \"value\" FROM \"PointGroupUncertainty\" WHERE \"group_id\" = \"PointApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_x0\", "
+				+ "IFNULL(CASEWHEN( \"sigma_z0\" > 0, \"sigma_z0\", (SELECT \"value\" FROM \"PointGroupUncertainty\" WHERE \"group_id\" = \"PointApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_z0\"  "
 				+ "FROM \"PointApriori\" "
 				+ "JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" "
-				+ "WHERE \"type\" = ? AND \"consider_deflection\" = ? AND \"PointGroup\".\"enable\" = TRUE AND \"PointApriori\".\"enable\" = TRUE "
+				+ "WHERE \"type\" = ? AND \"PointGroup\".\"enable\" = TRUE AND \"PointApriori\".\"enable\" = TRUE "
 				+ "ORDER BY \"dimension\" ASC, \"PointGroup\".\"id\" ASC, \"PointApriori\".\"id\" ASC";
 
 		Map<String, Point> points = new LinkedHashMap<String,Point>();
@@ -441,14 +479,7 @@ public class SQLAdjustmentManager {
 		stmt.setInt(idx++, PointGroupUncertaintyType.CONSTANT_Z.getId());
 		stmt.setDouble(idx++, DefaultUncertainty.getUncertaintyZ());
 
-		stmt.setInt(idx++, PointGroupUncertaintyType.DEFLECTION_Y.getId());
-		stmt.setDouble(idx++, DefaultUncertainty.getUncertaintyDeflectionY());
-
-		stmt.setInt(idx++, PointGroupUncertaintyType.DEFLECTION_X.getId());
-		stmt.setDouble(idx++, DefaultUncertainty.getUncertaintyDeflectionX());
-
 		stmt.setInt(idx++, type.getId());
-		stmt.setBoolean(idx++, enabledDeflection);
 
 		ResultSet rs = stmt.executeQuery();
 		while (rs.next()) {
@@ -462,22 +493,6 @@ public class SQLAdjustmentManager {
 			double sigmaY0 = rs.getDouble("sigma_y0");	
 			double sigmaX0 = rs.getDouble("sigma_x0");		
 			double sigmaZ0 = rs.getDouble("sigma_z0");
-
-			double sigmaDeflectionY0 = rs.getDouble("sigma_dy0");
-			double sigmaDeflectionX0 = rs.getDouble("sigma_dx0");
-
-			double deflectionY0 = 0;
-			double deflectionX0 = 0;
-
-			if (enabledDeflection && dimension == 3) {
-				deflectionY0 = rs.getDouble("dy0");
-				if (rs.wasNull())
-					continue;
-
-				deflectionX0 = rs.getDouble("dx0");
-				if (rs.wasNull())
-					continue;
-			}
 
 			Point point = null;
 
@@ -496,12 +511,6 @@ public class SQLAdjustmentManager {
 			case 3:
 				point = new Point3D(name, x0, y0, z0, sigmaX0, sigmaY0, sigmaZ0);
 
-				if (enabledDeflection) {
-					point.getDeflectionX().setValue0(deflectionX0);
-					point.getDeflectionX().setStdApriori(sigmaDeflectionX0);
-					point.getDeflectionY().setValue0(deflectionY0);
-					point.getDeflectionY().setStdApriori(sigmaDeflectionY0);
-				}
 				this.pure1DNetwork = false;
 				if (y0 < 1100000 || y0 > 59800000 )
 					this.applyableProjection = false;
@@ -518,6 +527,65 @@ public class SQLAdjustmentManager {
 			}
 		}
 		return points;
+	}
+	
+	private void addVerticalDeflections() throws SQLException {
+		String sql = "SELECT \"name\", \"y0\", \"x0\", \"VerticalDeflectionGroup\".\"type\" AS \"vertical_deflection_type\", "
+				+ "IFNULL(CASEWHEN( \"sigma_y0\" > 0, \"sigma_y0\", (SELECT \"value\" FROM \"VerticalDeflectionGroupUncertainty\" WHERE \"group_id\" = \"VerticalDeflectionApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_y0\", "
+				+ "IFNULL(CASEWHEN( \"sigma_x0\" > 0, \"sigma_x0\", (SELECT \"value\" FROM \"VerticalDeflectionGroupUncertainty\" WHERE \"group_id\" = \"VerticalDeflectionApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_x0\"  "
+				+ "FROM \"VerticalDeflectionApriori\" "
+				+ "JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" "
+				+ "JOIN \"PointApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"VerticalDeflectionApriori\".\"name\" "
+				+ "JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" "
+				+ "WHERE \"VerticalDeflectionGroup\".\"enable\" = TRUE AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
+				+ "AND \"PointGroup\".\"enable\" = TRUE AND \"PointApriori\".\"enable\" = TRUE AND \"PointGroup\".\"dimension\" = 3 "
+				+ "ORDER BY \"VerticalDeflectionGroup\".\"id\" ASC, \"VerticalDeflectionApriori\".\"id\" ASC";
+		
+		int idx = 1;
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+
+		stmt.setInt(idx++, VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y.getId());
+		stmt.setDouble(idx++, DefaultUncertainty.getUncertaintyDeflectionY());
+
+		stmt.setInt(idx++, VerticalDeflectionGroupUncertaintyType.DEFLECTION_X.getId());
+		stmt.setDouble(idx++, DefaultUncertainty.getUncertaintyDeflectionX());
+		
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			VerticalDeflectionType type = VerticalDeflectionType.getEnumByValue(rs.getInt("vertical_deflection_type"));
+			if (type == null)
+				continue;
+			
+			String name = rs.getString("name");
+
+			Point point = this.completePoints.get(name);
+			if (point == null || point.getDimension() != 3)
+				continue;
+
+			double y0 = rs.getDouble("y0");
+			double x0 = rs.getDouble("x0");
+
+			double sigmaY0 = rs.getDouble("sigma_y0");	
+			double sigmaX0 = rs.getDouble("sigma_x0");
+
+			point.getVerticalDeflectionY().setValue0(y0);
+			point.getVerticalDeflectionX().setValue0(x0);
+			
+			point.getVerticalDeflectionY().setStdApriori(sigmaY0);
+			point.getVerticalDeflectionX().setStdApriori(sigmaX0);
+			
+			switch (type) {
+			case UNKNOWN_VERTICAL_DEFLECTION:
+				this.completePointsWithUnknownDeflections.put(name, point);
+				break;
+			case REFERENCE_VERTICAL_DEFLECTION:
+				this.completePointsWithReferenceDeflections.put(name, point);
+				break;
+			case STOCHASTIC_VERTICAL_DEFLECTION:
+				this.completePointsWithStochasticDeflections.put(name, point);
+				break;
+			}
+		}
 	}
 
 
@@ -1004,7 +1072,7 @@ public class SQLAdjustmentManager {
 				this.clearAposterioriTables();
 
 				this.savePoints();
-				this.saveDeflections();
+				this.saveVerticalDeflections();
 
 				this.saveObservations();
 				this.saveAdditionalParameters();
@@ -1036,7 +1104,7 @@ public class SQLAdjustmentManager {
 
 	private void clearAposterioriTables() throws SQLException {
 		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"PointAposteriori\"").execute();
-		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"DeflectionAposteriori\"").execute();
+		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"VerticalDeflectionAposteriori\"").execute();
 		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"ObservationAposteriori\"").execute();
 		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"GNSSObservationAposteriori\"").execute();
 		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"AdditionalParameterAposteriori\"").execute();
@@ -1151,67 +1219,72 @@ public class SQLAdjustmentManager {
 		}
 	}
 
-	private void saveDeflections() throws SQLException {
+	private void saveVerticalDeflections() throws SQLException {
 		boolean hasBatch = false;
-		String sql = "INSERT INTO \"DeflectionAposteriori\" (" +
-				"\"id\",\"dy\",\"dx\"," +
-				"\"sigma_dy0\",\"sigma_dx0\"," +
-				"\"sigma_dy\",\"sigma_dx\"," +
+		String sql = "INSERT INTO \"VerticalDeflectionAposteriori\" (" +
+				"\"id\",\"y\",\"x\"," +
+				"\"sigma_y0\",\"sigma_x0\"," +
+				"\"sigma_y\",\"sigma_x\"," +
 				"\"confidence_major_axis\",\"confidence_minor_axis\"," +
-				"\"residual_dy\",\"residual_dx\"," +
-				"\"redundancy_dy\",\"redundancy_dx\"," +
-				"\"gross_error_dy\",\"gross_error_dx\"," +
-				"\"minimal_detectable_bias_dy\",\"minimal_detectable_bias_dx\"," +
+				"\"residual_y\",\"residual_x\"," +
+				"\"redundancy_y\",\"redundancy_x\"," +
+				"\"gross_error_y\",\"gross_error_x\"," +
+				"\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\"," +
 				"\"omega\",\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\",\"covar_index\") VALUES (" +
-				"(SELECT \"id\" FROM \"PointApriori\" WHERE \"name\" = ?), " +
+				"(SELECT \"id\" FROM \"VerticalDeflectionApriori\" WHERE \"name\" = ?), " +
 				"?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		try {
 			this.dataBase.setAutoCommit(false);
 			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
-			for (Point point : this.completePointsWithDeflections.values() ) {
+			Map<String,Point> completePointsWithDeflections = new HashMap<String,Point>();
+			completePointsWithDeflections.putAll(this.completePointsWithReferenceDeflections);
+			completePointsWithDeflections.putAll(this.completePointsWithStochasticDeflections);
+			completePointsWithDeflections.putAll(this.completePointsWithUnknownDeflections);
+			
+			for (Point point : completePointsWithDeflections.values() ) {
 				int idx = 1;
 				int dimension = point.getDimension();
 
-				if (dimension == 3 && point.considerDeflection()) {
+				if (dimension == 3) {
 					stmt.setString(idx++, point.getName());
 
-					stmt.setDouble(idx++, point.getDeflectionY().getValue());
-					stmt.setDouble(idx++, point.getDeflectionX().getValue());
+					stmt.setDouble(idx++, point.getVerticalDeflectionY().getValue());
+					stmt.setDouble(idx++, point.getVerticalDeflectionX().getValue());
 
-					stmt.setDouble(idx++, (point.getDeflectionY().getStdApriori() > 0 ? point.getDeflectionY().getStdApriori() : 0.0));
-					stmt.setDouble(idx++, (point.getDeflectionX().getStdApriori() > 0 ? point.getDeflectionX().getStdApriori() : 0.0));
+					stmt.setDouble(idx++, (point.getVerticalDeflectionY().getStdApriori() > 0 ? point.getVerticalDeflectionY().getStdApriori() : 0.0));
+					stmt.setDouble(idx++, (point.getVerticalDeflectionX().getStdApriori() > 0 ? point.getVerticalDeflectionX().getStdApriori() : 0.0));
 
-					stmt.setDouble(idx++, point.getDeflectionY().getStd() > 0 ? point.getDeflectionY().getStd() : 0.0);
-					stmt.setDouble(idx++, point.getDeflectionX().getStd() > 0 ? point.getDeflectionX().getStd() : 0.0);
+					stmt.setDouble(idx++, point.getVerticalDeflectionY().getStd() > 0 ? point.getVerticalDeflectionY().getStd() : 0.0);
+					stmt.setDouble(idx++, point.getVerticalDeflectionX().getStd() > 0 ? point.getVerticalDeflectionX().getStd() : 0.0);
 
-					stmt.setDouble(idx++, Math.max(point.getDeflectionX().getConfidence(), point.getDeflectionY().getConfidence()));
-					stmt.setDouble(idx++, Math.min(point.getDeflectionX().getConfidence(), point.getDeflectionY().getConfidence()));
+					stmt.setDouble(idx++, Math.max(point.getVerticalDeflectionX().getConfidence(), point.getVerticalDeflectionY().getConfidence()));
+					stmt.setDouble(idx++, Math.min(point.getVerticalDeflectionX().getConfidence(), point.getVerticalDeflectionY().getConfidence()));
 
-					stmt.setDouble(idx++, point.getDeflectionY().getValue0() - point.getDeflectionY().getValue());
-					stmt.setDouble(idx++, point.getDeflectionX().getValue0() - point.getDeflectionX().getValue());
+					stmt.setDouble(idx++, point.getVerticalDeflectionY().getValue0() - point.getVerticalDeflectionY().getValue());
+					stmt.setDouble(idx++, point.getVerticalDeflectionX().getValue0() - point.getVerticalDeflectionX().getValue());
 					
-					stmt.setDouble(idx++, point.getDeflectionY().getRedundancy());
-					stmt.setDouble(idx++, point.getDeflectionX().getRedundancy());
+					stmt.setDouble(idx++, point.getVerticalDeflectionY().getRedundancy());
+					stmt.setDouble(idx++, point.getVerticalDeflectionX().getRedundancy());
 
-					stmt.setDouble(idx++, point.getDeflectionY().getGrossError());
-					stmt.setDouble(idx++, point.getDeflectionX().getGrossError());
+					stmt.setDouble(idx++, point.getVerticalDeflectionY().getGrossError());
+					stmt.setDouble(idx++, point.getVerticalDeflectionX().getGrossError());
 
-					stmt.setDouble(idx++, point.getDeflectionY().getMinimalDetectableBias());
-					stmt.setDouble(idx++, point.getDeflectionX().getMinimalDetectableBias());
+					stmt.setDouble(idx++, point.getVerticalDeflectionY().getMinimalDetectableBias());
+					stmt.setDouble(idx++, point.getVerticalDeflectionX().getMinimalDetectableBias());
 
-					stmt.setDouble(idx++, point.getDeflectionX().getOmega() + point.getDeflectionY().getOmega());
+					stmt.setDouble(idx++, point.getVerticalDeflectionX().getOmega() + point.getVerticalDeflectionY().getOmega());
 
 					// Statistische Groessen in X abgelegt
-					stmt.setDouble(idx++, point.getDeflectionX().getPprio());
-					stmt.setDouble(idx++, point.getDeflectionX().getPpost());
+					stmt.setDouble(idx++, point.getVerticalDeflectionX().getPprio());
+					stmt.setDouble(idx++, point.getVerticalDeflectionX().getPpost());
 
-					stmt.setDouble(idx++, point.getDeflectionX().getTprio()); 
-					stmt.setDouble(idx++, point.getDeflectionX().getTpost());
+					stmt.setDouble(idx++, point.getVerticalDeflectionX().getTprio()); 
+					stmt.setDouble(idx++, point.getVerticalDeflectionX().getTpost());
 
-					stmt.setBoolean(idx++, point.getDeflectionX().isSignificant());
+					stmt.setBoolean(idx++, point.getVerticalDeflectionX().isSignificant());
 
-					stmt.setInt(idx++, Math.min(point.getDeflectionX().getColInJacobiMatrix(), point.getDeflectionY().getColInJacobiMatrix()));
+					stmt.setInt(idx++, Math.min(point.getVerticalDeflectionX().getColInJacobiMatrix(), point.getVerticalDeflectionY().getColInJacobiMatrix()));
 
 					stmt.addBatch();
 

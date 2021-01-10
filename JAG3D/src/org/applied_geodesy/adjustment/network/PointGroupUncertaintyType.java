@@ -24,10 +24,7 @@ package org.applied_geodesy.adjustment.network;
 public enum PointGroupUncertaintyType {
 	CONSTANT_X(20),
 	CONSTANT_Y(21),
-	CONSTANT_Z(22),
-	
-	DEFLECTION_X(31),
-	DEFLECTION_Y(32);
+	CONSTANT_Z(22);
 
 	private int id;
 	private PointGroupUncertaintyType(int id) {

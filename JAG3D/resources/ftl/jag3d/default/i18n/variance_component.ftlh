@@ -52,5 +52,5 @@
 		"STOCHASTIC_POINT_2D_COMPONENT" :                                "Stochastic Points 2D",
 		"STOCHASTIC_POINT_3D_COMPONENT" :                                "Stochastic Points 3D",
 		
-		"STOCHASTIC_POINT_DEFLECTION_COMPONENT" :                        "Deflection of the Verticals"
+		"STOCHASTIC_DEFLECTION_COMPONENT" :                              "Deflection of the Vertical"
 }>

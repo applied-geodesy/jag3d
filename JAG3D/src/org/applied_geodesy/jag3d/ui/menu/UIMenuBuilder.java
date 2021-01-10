@@ -48,6 +48,7 @@ import javax.swing.SwingUtilities;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
@@ -64,6 +65,7 @@ import org.applied_geodesy.jag3d.ui.io.GSIFileReader;
 import org.applied_geodesy.jag3d.ui.io.M5FileReader;
 import org.applied_geodesy.jag3d.ui.io.ObservationFlatFileReader;
 import org.applied_geodesy.jag3d.ui.io.PointFlatFileReader;
+import org.applied_geodesy.jag3d.ui.io.VerticalDeflectionFlatFileReader;
 import org.applied_geodesy.jag3d.ui.io.ZFileReader;
 import org.applied_geodesy.jag3d.ui.io.report.FTLReport;
 import org.applied_geodesy.jag3d.ui.io.sql.OADBReader;
@@ -428,6 +430,11 @@ public class UIMenuBuilder {
 		MenuItem importNewPoint2DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.new.2d.label", "New points 2D"), true, MenuItemType.IMPORT_FLAT_NEW_POINT_2D, null, this.menuEventHandler, true);
 		MenuItem importNewPoint3DFlatItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.point.new.3d.label", "New points 3D"), true, MenuItemType.IMPORT_FLAT_NEW_POINT_3D, null, this.menuEventHandler, true);
 
+		Menu importVerticalDeflectionFlatMenu       = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.deflection.label", "Vertical deflection"), true);
+		MenuItem importReferenceDeflectionFlatMenu  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.deflection.reference.label",  "Reference deflection"),  true, MenuItemType.IMPORT_FLAT_REFERENCE_VERTICAL_DEFLECTION, null, this.menuEventHandler, true);
+		MenuItem importStochasticDeflectionFlatMenu = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.deflection.stochastic.label", "Stochastic deflection"), true, MenuItemType.IMPORT_FLAT_STOCASTIC_VERTICAL_DEFLECTION, null, this.menuEventHandler, true);
+		MenuItem importUnknownDeflectionFlatMenu    = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.deflection.unknown.label",    "Approximated deflection"),    true, MenuItemType.IMPORT_FLAT_UNKNOWN_VERTICAL_DEFLECTION,   null, this.menuEventHandler, true);
+		
 		Menu importTerrestrialFlatMenu            = createMenu(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.label", "Terrestrial observations"), true);
 		MenuItem importLevelingFlatItem           = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.leveling.label", "Leveling data"), true, MenuItemType.IMPORT_FLAT_LEVELING, null, this.menuEventHandler, true);
 		MenuItem importDirectionFlatItem          = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.flat.terrestrial.direction.label", "Direction sets"), true, MenuItemType.IMPORT_FLAT_DIRECTION, null, this.menuEventHandler, true);
@@ -518,6 +525,12 @@ public class UIMenuBuilder {
 				importNewPoint2DFlatItem,
 				importNewPoint3DFlatItem
 				);
+		
+		importVerticalDeflectionFlatMenu.getItems().addAll(
+				importReferenceDeflectionFlatMenu,
+				importStochasticDeflectionFlatMenu,
+				importUnknownDeflectionFlatMenu
+				);
 
 		importCongruenceAnalysisPairFlatMenu.getItems().addAll(
 				importCongruenceAnalysisPair1DFlatMenu,
@@ -536,6 +549,8 @@ public class UIMenuBuilder {
 				importStochasticPointFlatMenu,
 				importDatumPointFlatMenu,
 				importNewPointFlatMenu,
+				new SeparatorMenuItem(),
+				importVerticalDeflectionFlatMenu,
 				new SeparatorMenuItem(),
 				importTerrestrialFlatMenu,
 				importGNSSFlatMenu,
@@ -880,7 +895,17 @@ public class UIMenuBuilder {
 		case IMPORT_FLAT_NEW_POINT_3D:
 			this.importFile(new PointFlatFileReader(PointType.NEW_POINT, 3), PointFlatFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.flat.point.new.3d.title", "Import 3D new point data from flat files"));
 			break;
-
+			
+		case IMPORT_FLAT_REFERENCE_VERTICAL_DEFLECTION:
+			this.importFile(new VerticalDeflectionFlatFileReader(VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION), VerticalDeflectionFlatFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.flat.deflection.reference.title", "Import reference vertical deflection data from flat files"));
+			break;
+		case IMPORT_FLAT_STOCASTIC_VERTICAL_DEFLECTION:
+			this.importFile(new VerticalDeflectionFlatFileReader(VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION), VerticalDeflectionFlatFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.flat.deflection.stochastic.title", "Import stochastic vertical deflection data from flat files"));
+			break;
+		case IMPORT_FLAT_UNKNOWN_VERTICAL_DEFLECTION:
+			this.importFile(new VerticalDeflectionFlatFileReader(VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION), VerticalDeflectionFlatFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.flat.deflection.unknown.title", "Import approximated vertical deflection data from flat files"));
+			break;
+			
 		case IMPORT_FLAT_LEVELING:
 			this.importFile(new ObservationFlatFileReader(ObservationType.LEVELING), ObservationFlatFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.flat.leveling.title", "Import leveling data from flat files"));
 			break;

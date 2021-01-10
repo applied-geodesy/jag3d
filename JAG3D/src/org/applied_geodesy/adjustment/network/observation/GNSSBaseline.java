@@ -153,22 +153,22 @@ public abstract class GNSSBaseline extends Observation {
 	public abstract ComponentType getComponent();
 
 	@Override
-	public double diffDeflectionXs() {
+	public double diffVerticalDeflectionXs() {
 		return 0;
 	}
 	
 	@Override
-	public double diffDeflectionYs() {
+	public double diffVerticalDeflectionYs() {
 		return 0;
 	}
 	
 	@Override
-	public double diffDeflectionXe() {
+	public double diffVerticalDeflectionXe() {
 		return 0;
 	}
 	
 	@Override
-	public double diffDeflectionYe() {
+	public double diffVerticalDeflectionYe() {
 		return 0;
 	}
 }

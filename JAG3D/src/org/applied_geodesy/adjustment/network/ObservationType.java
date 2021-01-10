@@ -29,7 +29,8 @@ public enum ObservationType {
 	ZENITH_ANGLE(5),
 	GNSS1D(6), // 50
 	GNSS2D(7), // 60
-	GNSS3D(8); // 70
+	GNSS3D(8), // 70
+	;
 
 	private int id;
 	private ObservationType(int id) {

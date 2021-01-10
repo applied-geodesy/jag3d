@@ -35,10 +35,13 @@ import java.util.regex.Pattern;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.jag3d.ui.io.CSVObservationFileReader;
 import org.applied_geodesy.jag3d.ui.io.CSVPointFileReader;
+import org.applied_geodesy.jag3d.ui.io.CSVVerticalDeflectionFileReader;
 import org.applied_geodesy.jag3d.ui.io.ColumnDefinedObservationFileReader;
 import org.applied_geodesy.jag3d.ui.io.ColumnDefinedPointFileReader;
+import org.applied_geodesy.jag3d.ui.io.ColumnDefinedVerticalDeflectionFileReader;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.ui.textfield.LimitedTextField;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
@@ -50,7 +53,6 @@ import org.applied_geodesy.util.io.csv.CSVParser;
 import org.applied_geodesy.util.io.csv.ColumnRange;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -260,6 +262,7 @@ public class ColumnImportDialog {
 	
 	private Node csvOptionPane;
 	private Node pointColumnPickerPane;
+	private Node deflectionColumnPickerPane;
 	private Node terrestrialObservationColumnPickerPane;
 	private Node gnssObservationColumnPickerPane;
 	
@@ -335,34 +338,41 @@ public class ColumnImportDialog {
 
 	private Node createMainPane() {
 		VBox vBox = new VBox();
-		vBox.setSpacing(15);
-		vBox.setPadding(new Insets(5,5,5,5));
+		vBox.setSpacing(10);
+		vBox.setPadding(new Insets(3,3,3,3));
 		
-		Node editorPane            = this.initEditor();
-		this.importCSVFileCheckBox = this.createCSVCheckbox();
-		this.pointColumnPickerPane = this.createPointColumnPickerPane();
+		Node editorPane                 = this.initEditor();
+		this.importCSVFileCheckBox      = this.createCSVCheckbox();
+		this.pointColumnPickerPane      = this.createPointColumnPickerPane();
+		this.deflectionColumnPickerPane = this.createVerticalDeflectionColumnPickerPane();
 		this.terrestrialObservationColumnPickerPane = this.createTerrestrialObservationColumnPickerPane();
 		this.gnssObservationColumnPickerPane        = this.createGNSSObservationColumnPickerPane();
 		this.importTypes           = this.createImportTypeComboBox();
 		this.csvOptionPane         = this.createCSVOptionPane();
 		Node globalImportOptions   = createImportOptionPane();
 
-		((TitledPane)editorPane).prefWidthProperty().bind(
-				Bindings.max(
-						((TitledPane)this.gnssObservationColumnPickerPane).widthProperty(), 
-						Bindings.max(
-								((TitledPane)this.pointColumnPickerPane).widthProperty(), 
-								((TitledPane)this.terrestrialObservationColumnPickerPane).widthProperty()
-								)
-						)
-				);
+//		((TitledPane)editorPane).prefWidthProperty().bind(
+//				Bindings.max(((TitledPane)this.deflectionColumnPickerPane).widthProperty(), 
+//						Bindings.max(
+//								((TitledPane)this.gnssObservationColumnPickerPane).widthProperty(), 
+//								Bindings.max(
+//										((TitledPane)this.pointColumnPickerPane).widthProperty(), 
+//										((TitledPane)this.terrestrialObservationColumnPickerPane).widthProperty()
+//										)
+//								)
+//						)
+//				);
 		
 		vBox.getChildren().addAll(
 				globalImportOptions,
 				this.csvOptionPane,
+
 				this.pointColumnPickerPane,
+				this.deflectionColumnPickerPane,
+				
 				this.terrestrialObservationColumnPickerPane,
 				this.gnssObservationColumnPickerPane,
+				
 				editorPane
 				);
 		
@@ -546,6 +556,53 @@ public class ColumnImportDialog {
 		
 	}
 	
+	private Node createVerticalDeflectionColumnPickerPane() {
+		GridPane gridPane = this.createGridPane();
+
+		int columnIndex = 0;
+		int rowIndex    = 0;
+		
+		String buttonLabel      = i18n.getString("ColumnImportDialog.column.deflection.name.label",        "Point-id \u25B6");
+		String buttonTooltip    = i18n.getString("ColumnImportDialog.column.deflection.name.tooltip",      "Add selected range for point-id");
+		String textFieldTooltip = i18n.getString("ColumnImportDialog.column.deflection.name.text.tooltip", "Range for point-id column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.POINT_ID, buttonLabel, buttonTooltip, textFieldTooltip);
+
+		// a-priori y-component
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.deflection.y0.label",        "\u03B6y0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.deflection.y0.tooltip",      "Add selected range for a-priori deflection of y-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.deflection.y0.text.tooltip", "Range for a-priori deflection of y-component column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.Y, buttonLabel, buttonTooltip, textFieldTooltip);
+		
+		// a-priori x-component
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.deflection.x0.label",        "\u03B6x0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.deflection.x0.tooltip",      "Add selected range for a-priori deflection of x-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.deflection.x0.text.tooltip", "Range for a-priori udeflection of x-component column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.X, buttonLabel, buttonTooltip, textFieldTooltip);
+		
+		rowIndex++;
+		columnIndex = 2;
+
+		// Uncertainty in y
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.deflection.sigma.y0.label",        "\u03C3y0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.deflection.sigma.y0.tooltip",      "Add selected range for a-priori uncertainty of y-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.deflection.sigma.y0.text.tooltip", "Range for a-priori uncertainty of y-component column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.UNCERTAINTY_Y, buttonLabel, buttonTooltip, textFieldTooltip);
+
+		// Uncertainty in x
+		buttonLabel      = i18n.getString("ColumnImportDialog.column.deflection.sigma.x0.label",        "\u03C3x0 \u25B6");
+		buttonTooltip    = i18n.getString("ColumnImportDialog.column.deflection.sigma.x0.tooltip",      "Add selected range for a-priori uncertainty of x-component");
+		textFieldTooltip = i18n.getString("ColumnImportDialog.column.deflection.sigma.x0.text.tooltip", "Range for a-priori uncertainty of x-component column");
+		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.UNCERTAINTY_X, buttonLabel, buttonTooltip, textFieldTooltip);
+		
+		TitledPane titledPane = this.createTitledPane(
+				i18n.getString("ColumnImportDialog.column.deflection.label",   "Column defintions for vertical deflection"),
+				i18n.getString("ColumnImportDialog.column.deflection.tooltip", "Specify column range of file for vertical deflection import"),
+				gridPane);
+		
+		
+		return titledPane;
+	}
+	
 	private Node createPointColumnPickerPane() {
 		GridPane gridPane = this.createGridPane();
 
@@ -601,22 +658,7 @@ public class ColumnImportDialog {
 		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.sigma.z0.tooltip",      "Add selected range for a-priori uncertainty of z-component");
 		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.sigma.z0.text.tooltip", "Range for a-priori uncertainty of z-component column");
 		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.UNCERTAINTY_Z, buttonLabel, buttonTooltip, textFieldTooltip);
-		
-		rowIndex++;
-		columnIndex = 2;
-
-		// Deflection in y
-		buttonLabel      = i18n.getString("ColumnImportDialog.column.point.deflection.y0.label",        "\u03B6y0 \u25B6");
-		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.deflection.y0.tooltip",      "Add selected range for a-priori deflection of y-component");
-		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.deflection.y0.text.tooltip", "Range for a-priori deflection of y-component column");
-		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.DEFLECTION_Y, buttonLabel, buttonTooltip, textFieldTooltip);
-
-		// Deflection in x
-		buttonLabel      = i18n.getString("ColumnImportDialog.column.point.deflection.x0.label",        "\u03B6x0 \u25B6");
-		buttonTooltip    = i18n.getString("ColumnImportDialog.column.point.deflection.x0.tooltip",      "Add selected range for a-priori deflection of x-component");
-		textFieldTooltip = i18n.getString("ColumnImportDialog.column.point.deflection.x0.text.tooltip", "Range for a-priori udeflection of x-component column");
-		columnIndex = this.addPickerElement(gridPane, rowIndex, columnIndex, CSVColumnType.DEFLECTION_X, buttonLabel, buttonTooltip, textFieldTooltip);
-		
+	
 		TitledPane titledPane = this.createTitledPane(
 				i18n.getString("ColumnImportDialog.column.point.label",   "Column defintions for points"),
 				i18n.getString("ColumnImportDialog.column.point.tooltip", "Specify column range of file for points import"),
@@ -756,8 +798,8 @@ public class ColumnImportDialog {
 		String promptText = i18n.getString("ColumnImportDialog.column.range.prompt", "from - to");
 		TextField textField = new TextField();
 		textField.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		textField.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		textField.setPrefWidth(100);
+		textField.setMaxSize(Double.MAX_VALUE, Control.USE_PREF_SIZE); // maxWidth, double maxHeight
+		textField.setPrefWidth(Control.USE_PREF_SIZE); // 100 besser 75
 		textField.setTooltip(new Tooltip(textFieldTooltip));
 		textField.setPromptText(promptText);
 		textField.setUserData(type);
@@ -788,7 +830,7 @@ public class ColumnImportDialog {
 		Button button = new Button(buttonLabel);
 		button.setTooltip(new Tooltip(buttonTooltip));
 		button.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		button.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		button.setMaxSize(Double.MAX_VALUE, Control.USE_PREF_SIZE); // maxWidth, double maxHeight
 		button.setUserData(textField);
 
 		button.setOnAction(new EventHandler<ActionEvent>() {
@@ -1087,6 +1129,9 @@ public class ColumnImportDialog {
 		
 		for (ObservationType type : ObservationType.values())
 			model.add(type);
+		
+		for (VerticalDeflectionType type : VerticalDeflectionType.values())
+			model.add(type);
 
 		typeComboBox.setConverter(new StringConverter<Enum<?>>() {
 
@@ -1102,16 +1147,16 @@ public class ColumnImportDialog {
 					PointType type = (PointType)item;
 					switch(type) {
 					case DATUM_POINT:
-						return i18n.getString("UITreeBuiler.directory.datumpoints", "Datum points");
+						return i18n.getString("UITreeBuiler.directory.points.datum", "Datum points");
 						
 					case NEW_POINT:
-						return i18n.getString("UITreeBuiler.directory.newpoints", "New points");
+						return i18n.getString("UITreeBuiler.directory.points.new", "New points");
 						
 					case REFERENCE_POINT:
-						return i18n.getString("UITreeBuiler.directory.referencepoints", "Reference points");
+						return i18n.getString("UITreeBuiler.directory.points.reference", "Reference points");
 						
 					case STOCHASTIC_POINT:
-						return i18n.getString("UITreeBuiler.directory.stochasticpoints", "Stochastic points");
+						return i18n.getString("UITreeBuiler.directory.points.stochastic", "Stochastic points");
 					}
 				}
 				
@@ -1119,28 +1164,43 @@ public class ColumnImportDialog {
 					ObservationType type = (ObservationType)item;
 					switch(type) {
 					case LEVELING:
-						return i18n.getString("UITreeBuiler.directory.terrestrialobservations.leveling", "Leveling data");
+						return i18n.getString("UITreeBuiler.directory.observations.leveling", "Leveling data");
 						
 					case DIRECTION:
-						return i18n.getString("UITreeBuiler.directory.terrestrialobservations.direction", "Direction sets");
+						return i18n.getString("UITreeBuiler.directory.observations.direction", "Direction sets");
 						
 					case HORIZONTAL_DISTANCE:
-						return i18n.getString("UITreeBuiler.directory.terrestrialobservations.horizontal_distance", "Horizontal distances");
+						return i18n.getString("UITreeBuiler.directory.observations.horizontal_distance", "Horizontal distances");
 					
 					case SLOPE_DISTANCE:
-						return i18n.getString("UITreeBuiler.directory.terrestrialobservations.slope_distance", "Slope distances");
+						return i18n.getString("UITreeBuiler.directory.observations.slope_distance", "Slope distances");
 						
 					case ZENITH_ANGLE:
-						return i18n.getString("UITreeBuiler.directory.terrestrialobservations.zenith_angle", "Zenith angles");
+						return i18n.getString("UITreeBuiler.directory.observations.zenith_angle", "Zenith angles");
 						
 					case GNSS1D:
-						return i18n.getString("UITreeBuiler.directory.gnssobservations.1d", "GNSS baselines 1D");
+						return i18n.getString("UITreeBuiler.directory.gnss.1d", "GNSS baselines 1D");
 						
 					case GNSS2D:
-						return i18n.getString("UITreeBuiler.directory.gnssobservations.2d", "GNSS baselines 2D");
+						return i18n.getString("UITreeBuiler.directory.gnss.2d", "GNSS baselines 2D");
 						
 					case GNSS3D:
-						return i18n.getString("UITreeBuiler.directory.gnssobservations.3d", "GNSS baselines 3D");
+						return i18n.getString("UITreeBuiler.directory.gnss.3d", "GNSS baselines 3D");
+					}
+				}
+				
+				else if (item instanceof VerticalDeflectionType) {
+					VerticalDeflectionType type = (VerticalDeflectionType)item;
+					switch(type) {
+					case UNKNOWN_VERTICAL_DEFLECTION:
+						return i18n.getString("UITreeBuiler.directory.vertical_deflection.unknown", "Unknown deflection");
+
+					case STOCHASTIC_VERTICAL_DEFLECTION:
+						return i18n.getString("UITreeBuiler.directory.vertical_deflection.stochastic", "Stochastic deflection");
+					
+					case REFERENCE_VERTICAL_DEFLECTION:
+						return i18n.getString("UITreeBuiler.directory.vertical_deflection.reference", "Reference deflection");
+						
 					}
 				}
 				
@@ -1162,6 +1222,9 @@ public class ColumnImportDialog {
 					gnssObservationColumnPickerPane.setVisible(false);
 					gnssObservationColumnPickerPane.setManaged(false);
 					
+					deflectionColumnPickerPane.setVisible(false);
+					deflectionColumnPickerPane.setManaged(false);
+					
 					pointColumnPickerPane.setVisible(true);
 					pointColumnPickerPane.setManaged(true);
 				}
@@ -1182,6 +1245,23 @@ public class ColumnImportDialog {
 						gnssObservationColumnPickerPane.setVisible(false);
 						gnssObservationColumnPickerPane.setManaged(false);
 					}
+					
+					deflectionColumnPickerPane.setVisible(false);
+					deflectionColumnPickerPane.setManaged(false);
+					
+					pointColumnPickerPane.setVisible(false);
+					pointColumnPickerPane.setManaged(false);
+				}
+				
+				else if (newValue instanceof VerticalDeflectionType) {
+					terrestrialObservationColumnPickerPane.setVisible(false);
+					terrestrialObservationColumnPickerPane.setManaged(false);
+					
+					gnssObservationColumnPickerPane.setVisible(false);
+					gnssObservationColumnPickerPane.setManaged(false);
+					
+					deflectionColumnPickerPane.setVisible(true);
+					deflectionColumnPickerPane.setManaged(true);
 					
 					pointColumnPickerPane.setVisible(false);
 					pointColumnPickerPane.setManaged(false);
@@ -1331,6 +1411,13 @@ public class ColumnImportDialog {
     			reader.setFileLocale(this.fileLocale);
     			return reader;
     		}
+    		else if (this.importTypes.getValue() instanceof VerticalDeflectionType) {
+    			VerticalDeflectionType verticalDeflectionType = (VerticalDeflectionType)this.importTypes.getValue();
+    			CSVVerticalDeflectionFileReader reader = new CSVVerticalDeflectionFileReader(verticalDeflectionType, csvParser);
+    			reader.setColumnRanges(columnRanges);
+    			reader.setFileLocale(this.fileLocale);
+    			return reader;
+    		}
     	}
     	else {
     		if (this.importTypes.getValue() instanceof ObservationType) {
@@ -1346,7 +1433,14 @@ public class ColumnImportDialog {
     			reader.setColumnRanges(columnRanges);
     			reader.setFileLocale(this.fileLocale);
     			return reader;
-    		}				
+    		}
+    		else if (this.importTypes.getValue() instanceof VerticalDeflectionType) {
+    			VerticalDeflectionType verticalDeflectionType = (VerticalDeflectionType)this.importTypes.getValue();
+    			ColumnDefinedVerticalDeflectionFileReader reader = new ColumnDefinedVerticalDeflectionFileReader(verticalDeflectionType, TABULATOR);
+    			reader.setColumnRanges(columnRanges);
+    			reader.setFileLocale(this.fileLocale);
+    			return reader;
+    		}	
     	}
     	return null;	
 	}

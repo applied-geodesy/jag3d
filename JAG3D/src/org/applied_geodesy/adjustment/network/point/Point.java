@@ -23,9 +23,9 @@ package org.applied_geodesy.adjustment.network.point;
 
 import org.applied_geodesy.adjustment.ConfidenceRegion;
 import org.applied_geodesy.adjustment.Constant;
-import org.applied_geodesy.adjustment.network.parameter.DeflectionX;
-import org.applied_geodesy.adjustment.network.parameter.DeflectionY;
 import org.applied_geodesy.adjustment.network.parameter.UnknownParameter;
+import org.applied_geodesy.adjustment.network.parameter.VerticalDeflectionX;
+import org.applied_geodesy.adjustment.network.parameter.VerticalDeflectionY;
 
 public abstract class Point extends UnknownParameter {
     // Punktnummer
@@ -36,8 +36,8 @@ public abstract class Point extends UnknownParameter {
 	private int colInDesignmatrixOfModelErros = -1;
 
 	// Lotabweichungsparameter fuer den Punkt in X/Y-Richtung
-	private DeflectionX deflectionX = new DeflectionX(this);
-	private DeflectionY deflectionY = new DeflectionY(this);
+	private VerticalDeflectionX verticalDeflectionX = new VerticalDeflectionX(this);
+	private VerticalDeflectionY verticalDeflectionY = new VerticalDeflectionY(this);
     // Grenzwert fuer Null
 	private final static double ZERO = Math.sqrt(Constant.EPS);
 	protected final double coordinates0[] = new double[3]; //coordinates0[] = new double[this.getDimension()];
@@ -60,7 +60,7 @@ public abstract class Point extends UnknownParameter {
     			   Pprio =  0.0,
     			   Ppost =  0.0,
     			   omega =  0.0;
-	private boolean significant = false, considerDeflection = false;
+	private boolean significant = false;
 
 	public Point(String name) throws IllegalArgumentException {
 		if (name == null || name.trim().isEmpty())
@@ -418,20 +418,12 @@ public abstract class Point extends UnknownParameter {
 		return this.significant;
 	}
 
-	public DeflectionX getDeflectionX() {
-		return this.deflectionX;
+	public VerticalDeflectionX getVerticalDeflectionX() {
+		return this.verticalDeflectionX;
 	}
 
-	public DeflectionY getDeflectionY() {
-		return this.deflectionY;
-	}
-
-	public void considerDeflection(boolean considerDeflection) {
-		this.considerDeflection = considerDeflection;
-	}
-
-	public boolean considerDeflection() {
-		return this.considerDeflection;
+	public VerticalDeflectionY getVerticalDeflectionY() {
+		return this.verticalDeflectionY;
 	}
 	
 	/**
@@ -439,16 +431,16 @@ public abstract class Point extends UnknownParameter {
 	 * @return unknown
 	 */
 	public boolean hasUnknownDeflectionParameters() {
-		return this.considerDeflection && 
-				(this.deflectionX.getColInJacobiMatrix() >= 0 && this.deflectionY.getColInJacobiMatrix() >= 0);
+		return this.getDimension() == 3 && 
+				(this.verticalDeflectionX.getColInJacobiMatrix() >= 0 && this.verticalDeflectionY.getColInJacobiMatrix() >= 0);
 	}
-	
+
 	/**
 	 * Returns <code>true</code>, if the deflections of the points are observed parameters
 	 * @return observed
 	 */
 	public boolean hasObservedDeflectionParameters() {
-		return this.considerDeflection && 
-				(this.deflectionX.getRowInJacobiMatrix() >= 0 && this.deflectionY.getRowInJacobiMatrix() >= 0);
+		return this.getDimension() == 3 && 
+				(this.verticalDeflectionX.getRowInJacobiMatrix() >= 0 && this.verticalDeflectionY.getRowInJacobiMatrix() >= 0);
 	}
 }

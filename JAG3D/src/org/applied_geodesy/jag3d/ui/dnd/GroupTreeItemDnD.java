@@ -26,6 +26,7 @@ import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
+import org.applied_geodesy.jag3d.ui.tree.VerticalDeflectionTreeItemValue;
 
 import javafx.scene.control.TreeItem;
 
@@ -88,6 +89,10 @@ public class GroupTreeItemDnD extends DnD {
 		else if (TreeItemType.isCongruenceAnalysisTypeLeaf(itemType)) {
 			groupId = ((CongruenceAnalysisTreeItemValue)itemValue).getGroupId();
 			dimension = ((CongruenceAnalysisTreeItemValue)itemValue).getDimension();
+		}
+		else if (TreeItemType.isVerticalDeflectionTypeLeaf(itemType)) {
+			groupId = ((VerticalDeflectionTreeItemValue)itemValue).getGroupId();
+			dimension = ((VerticalDeflectionTreeItemValue)itemValue).getDimension();
 		}
 		else
 			return null;
