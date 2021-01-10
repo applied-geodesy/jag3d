@@ -294,6 +294,9 @@ public class UITreeBuilder {
 
 	public TreeItem<TreeItemValue> addItem(TreeItemType parentType, int id, String name, boolean enable, boolean select) {
 		TreeItemType itemType = null;
+		if (parentType == null || parentType == TreeItemType.UNSPECIFIC)
+			return null;
+		
 		if (!this.directoryItemMap.containsKey(parentType) || (itemType = TreeItemType.getLeafByDirectoryType(parentType)) == null) {
 			System.err.println(this.getClass().getSimpleName() + " : Error, unsupported parent tree node type " + parentType);
 			return null;
