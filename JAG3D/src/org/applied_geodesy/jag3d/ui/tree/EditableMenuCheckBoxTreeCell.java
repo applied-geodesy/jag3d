@@ -420,8 +420,9 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 
 							// deflection
 							((db.hasContent(VERTICAL_DEFLECTION_ROWS_DATA_FORMAT) || db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
-									TreeItemType.isVerticalDeflectionTypeLeaf(itemType) && 
-									itemType == db.getContent(TREE_ITEM_TYPE_DATA_FORMAT) &&
+									TreeItemType.isVerticalDeflectionTypeLeaf(itemType) &&
+									TreeItemType.isVerticalDeflectionTypeLeaf((TreeItemType)db.getContent(TREE_ITEM_TYPE_DATA_FORMAT)) && 
+									//itemType == db.getContent(TREE_ITEM_TYPE_DATA_FORMAT) && // if enabled, dnd is restricted to identical type
 									itemValue instanceof VerticalDeflectionTreeItemValue &&
 									((VerticalDeflectionTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT)) &&
 									!groupItemIdsDnD.contains(((VerticalDeflectionTreeItemValue)itemValue).getGroupId())
