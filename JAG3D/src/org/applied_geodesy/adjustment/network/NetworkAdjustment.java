@@ -2909,12 +2909,6 @@ public class NetworkAdjustment implements Runnable {
 			vc.setOmega(this.omega);
 			this.varianceComponents.put(vc.getVarianceComponentType(), vc);
 	
-			List<Point> pointsWithTestableDeflection = new ArrayList<Point>(this.pointsWithReferenceDeflection.size() + this.pointsWithUnknownDeflection.size());
-			if (!this.pointsWithReferenceDeflection.isEmpty()) 
-				pointsWithTestableDeflection.addAll(this.pointsWithReferenceDeflection);
-			if (!this.pointsWithUnknownDeflection.isEmpty()) 
-				pointsWithTestableDeflection.addAll(this.pointsWithUnknownDeflection);
-			
 			List<Point> points = null;
 			if (this.congruenceAnalysis && this.freeNetwork) {
 				// Pruefung der Stabilpunkte
@@ -3063,33 +3057,23 @@ public class NetworkAdjustment implements Runnable {
 			    }
 			}
 			
-			for (int i=0; i<pointsWithTestableDeflection.size(); i++) {
+			for (int i=0; i<this.pointsWithReferenceDeflection.size(); i++) {
 				if (this.interrupt)
 					return;
-				Point point = pointsWithTestableDeflection.get(i);
+				Point point = this.pointsWithReferenceDeflection.get(i);
 				
 				VerticalDeflectionX deflectionX = point.getVerticalDeflectionX();
 				VerticalDeflectionY deflectionY = point.getVerticalDeflectionY();
 
 				ObservationGroup observations = point.getObservations();
 				int dim = 2;
-				if (!this.freeNetwork) {
-					deflectionX.setStd(-1.0);
-					deflectionY.setStd(-1.0);
-				}
 				
 				Matrix BTPQvvPB = new DenseMatrix(dim,dim);
 				Vector BTPv     = new DenseVector(dim);
 
-				// Flag zur Pruefung, ob Datumspunkt in Referenzepoche ueberhaut Beobachtungen besitzt.
-				// Wenn Datumspunkt nur in Folgeepoche vorhanden, kann kein Stabilpunkttest durchgefuehrt werden.
-				boolean hasObservationInReferenceEpoch = !(this.congruenceAnalysis && this.freeNetwork);
 				for (int k=0; k<observations.size(); k++) {
 					Observation observationB = observations.get(k);
-					if (this.congruenceAnalysis && this.freeNetwork && observationB.getObservationGroup().getEpoch() == Epoch.REFERENCE) {
-						hasObservationInReferenceEpoch = true;
-						continue;
-					}
+
 					double qB = observationB.getStdApriori()*observationB.getStdApriori();
 					double vB = this.estimationType == EstimationType.SIMULATION ? 0.0 : -observationB.getCorrection();
 					double b  = 0.0;
@@ -3112,8 +3096,7 @@ public class NetworkAdjustment implements Runnable {
 
 						for (int j=0; j<observations.size(); j++) {
 							Observation observationBT = observations.get(j);
-							if (this.congruenceAnalysis && this.freeNetwork && observationBT.getObservationGroup().getEpoch() == Epoch.REFERENCE)
-								continue;
+
 							double qll = this.getQllElement(observationBT, observationB);
 							double qBT = observationBT.getStdApriori()*observationBT.getStdApriori();
 							// P*Qvv*P
@@ -3149,7 +3132,7 @@ public class NetworkAdjustment implements Runnable {
 				boolean isCalculated = false;
 				ConfidenceRegion confidenceRegion = null;
 
-				if (hasObservationInReferenceEpoch && observations.size() >= dim) {
+				if (observations.size() >= dim) {
 					try {
 						Qnn = MathExtension.pinv(BTPQvvPB, -1);
 						confidenceRegion = new ConfidenceRegion(Qnn);
@@ -3227,10 +3210,10 @@ public class NetworkAdjustment implements Runnable {
 				}
 			}
 			
-			for (int i=0; i<pointsWithTestableDeflection.size(); i++) {
+			for (int i=0; i<this.pointsWithReferenceDeflection.size(); i++) {
 				if (this.interrupt)
 					return;
-				Point point = pointsWithTestableDeflection.get(i);
+				Point point = this.pointsWithReferenceDeflection.get(i);
 				
 				VerticalDeflectionX deflectionX = point.getVerticalDeflectionX();
 				VerticalDeflectionY deflectionY = point.getVerticalDeflectionY();
