@@ -294,6 +294,7 @@ public class JAG3D extends Application {
 
 	public static void main(String[] args) {
 		//Locale.setDefault(Locale.GERMAN);
+		//Locale.setDefault(new Locale("sr", "BA"));
 		try {
 			Logger[] loggers = new Logger[] {
 					Logger.getLogger("hsqldb.db"),
