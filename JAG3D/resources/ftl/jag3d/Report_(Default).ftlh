@@ -74,7 +74,7 @@
 		
 			<article>
 				<#include "default/point_table.ftlh" parse=true>
-				<#include "default/deflection_table.ftlh" parse=true>
+				<#include "default/vertical_deflection_table.ftlh" parse=true>
 			</article>
 			
 			<article>

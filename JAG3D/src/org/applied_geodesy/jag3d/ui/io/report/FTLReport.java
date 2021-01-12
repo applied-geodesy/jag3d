@@ -47,6 +47,7 @@ import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
@@ -137,6 +138,7 @@ public class FTLReport {
 		this.addPointGroups();
 		this.addObservations();
 		this.addCongruenceAnalysis();
+		this.addVerticalDefelctionGroups();
 		
 		this.addChartAndStatisticValues();
 	}
@@ -466,15 +468,16 @@ public class FTLReport {
 		groups.addAll(this.getPointGroups(3, PointType.NEW_POINT));
 
 		this.setParam("point_groups", groups);
-
-		groups = new ArrayList<HashMap<String, Object>>();
-
-		groups.addAll(this.getDeflectionPointGroups(PointType.REFERENCE_POINT));
-		groups.addAll(this.getDeflectionPointGroups(PointType.STOCHASTIC_POINT));
-		groups.addAll(this.getDeflectionPointGroups(PointType.DATUM_POINT));
-		groups.addAll(this.getDeflectionPointGroups(PointType.NEW_POINT));
-
-		this.setParam("deflection_groups", groups);
+	}
+	
+	private void addVerticalDefelctionGroups() throws SQLException {
+		List<HashMap<String, Object>> groups = new ArrayList<HashMap<String, Object>>();
+		
+		groups.addAll(this.getVerticalDeflectionGroups(VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION));
+		groups.addAll(this.getVerticalDeflectionGroups(VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION));
+		groups.addAll(this.getVerticalDeflectionGroups(VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION));
+		
+		this.setParam("vertical_deflection_groups", groups);
 	}
 
 	private void addObservations() throws SQLException {
@@ -903,37 +906,41 @@ public class FTLReport {
 		return groups;
 	}
 
-	private List<HashMap<String, Object>> getDeflectionPointGroups(PointType pointType) throws SQLException {
+	private List<HashMap<String, Object>> getVerticalDeflectionGroups(VerticalDeflectionType verticalDeflectionType) throws SQLException {
 		List<HashMap<String, Object>> groups = new ArrayList<HashMap<String, Object>>();
-		String sqlGroup = "SELECT \"id\", \"name\" FROM \"PointGroup\" WHERE \"dimension\" = 3 AND \"type\" = ? AND \"enable\" = TRUE AND \"consider_deflection\" = TRUE";
-
-		String sqlDeflection = "SELECT "
+		String sqlGroup = "SELECT \"id\", \"name\" FROM \"VerticalDeflectionGroup\" WHERE \"type\" = ? AND \"enable\" = TRUE";
+		
+		String sqlDeflection = "SELECT"
 				+ "\"name\", "
-				+ "\"dx0\", \"dy0\", "
-				+ "\"dx\", \"dy\", "
+				
+				+ "\"x0\", \"y0\", "
+				+ "\"x\",  \"y\", "
+				
+				+ "\"VerticalDeflectionAposteriori\".\"sigma_x0\" AS \"sigma_x0\", "
+				+ "\"VerticalDeflectionAposteriori\".\"sigma_y0\" AS \"sigma_y0\", "
 
-				+ "\"DeflectionAposteriori\".\"sigma_dx0\" AS \"sigma_dx0\", "
-				+ "\"DeflectionAposteriori\".\"sigma_dy0\" AS \"sigma_dy0\", "
+				+ "\"redundancy_x\", \"redundancy_y\", "
+				+ "\"gross_error_x\", \"gross_error_y\", "
 
-				+ "\"redundancy_dx\", \"redundancy_dy\", "
-				+ "\"gross_error_dx\", \"gross_error_dy\", "
+				+ "\"residual_x\", \"residual_y\", "
+				+ "\"minimal_detectable_bias_x\", \"minimal_detectable_bias_y\", "
 
-				+ "\"residual_dx\", \"residual_dy\", "
-				+ "\"minimal_detectable_bias_dx\", \"minimal_detectable_bias_dy\", "
-
-				+ "CASEWHEN(\"sigma_dx\" < 0, 0.0, \"sigma_dx\") AS \"sigma_dx\", "
-				+ "CASEWHEN(\"sigma_dy\" < 0, 0.0, \"sigma_dy\") AS \"sigma_dy\", "
+				+ "CASEWHEN(\"sigma_x\" < 0, 0.0, \"sigma_x\") AS \"sigma_x\", "
+				+ "CASEWHEN(\"sigma_y\" < 0, 0.0, \"sigma_y\") AS \"sigma_y\", "
 
 				+ "\"confidence_major_axis\", \"confidence_minor_axis\", "
 				+ "\"omega\", \"t_prio\", \"t_post\", \"p_prio\", \"p_post\", \"significant\" "
-
-				+ "FROM \"DeflectionAposteriori\" "
-				+ "JOIN \"PointApriori\" ON \"PointApriori\".\"id\" = \"DeflectionAposteriori\".\"id\" "
-				+ "WHERE \"PointApriori\".\"enable\" = TRUE AND \"group_id\" = ? "
-				+ "ORDER BY \"id\" ASC";
+				
+				+ "FROM \"VerticalDeflectionApriori\" "
+				
+				+ "JOIN \"VerticalDeflectionAposteriori\" ON \"VerticalDeflectionApriori\".\"id\" = \"VerticalDeflectionAposteriori\".\"id\" "
+				
+				+ "WHERE \"VerticalDeflectionApriori\".\"enable\" = TRUE AND \"VerticalDeflectionApriori\".\"group_id\" = ? "
+				+ "ORDER BY \"id\" ASC"; 
+		
 
 		PreparedStatement stmtGroup = this.dataBase.getPreparedStatement(sqlGroup);
-		stmtGroup.setInt(1, pointType.getId());
+		stmtGroup.setInt(1, verticalDeflectionType.getId());
 
 		ResultSet groupSet = stmtGroup.executeQuery();
 		while (groupSet.next()) {
@@ -947,61 +954,61 @@ public class FTLReport {
 			PreparedStatement stmtDeflection = this.dataBase.getPreparedStatement(sqlDeflection);
 			stmtDeflection.setInt(1, groupId);
 
-			ResultSet deflectionSet = stmtDeflection.executeQuery();
-			ResultSetMetaData rsmd = deflectionSet.getMetaData();
+			ResultSet verticalDeflectionSet = stmtDeflection.executeQuery();
+			ResultSetMetaData rsmd = verticalDeflectionSet.getMetaData();
 
 			int cnt = rsmd.getColumnCount();
-			while (deflectionSet.next()) {
+			while (verticalDeflectionSet.next()) {
 				HashMap<String, Object> h = new HashMap<String, Object>();
 				for(int i = 1; i <= cnt; i++) {
 					String key = rsmd.getColumnLabel(i);
 					switch(key) {
-					case "sigma_dx0":
-					case "sigma_dy0":
-					case "sigma_dx":
-					case "sigma_dy":
+					case "sigma_x0":
+					case "sigma_y0":
+					case "sigma_x":
+					case "sigma_y":
 					case "confidence_major_axis":
 					case "confidence_minor_axis":
-						h.put(key, options.convertAngleUncertaintyToView(deflectionSet.getDouble(i)));
+						h.put(key, options.convertAngleUncertaintyToView(verticalDeflectionSet.getDouble(i)));
 						break;
 
-					case "dx0":
-					case "dy0":
-					case "dx":
-					case "dy":
-					case "residual_dy":
-					case "residual_dx":
-					case "gross_error_dx":
-					case "gross_error_dy":
-					case "minimal_detectable_bias_dx":
-					case "minimal_detectable_bias_dy":
-						h.put(key, options.convertAngleResidualToView(deflectionSet.getDouble(i)));
+					case "x0":
+					case "y0":
+					case "x":
+					case "y":
+					case "residual_y":
+					case "residual_x":
+					case "gross_error_x":
+					case "gross_error_y":
+					case "minimal_detectable_bias_x":
+					case "minimal_detectable_bias_y":
+						h.put(key, options.convertAngleResidualToView(verticalDeflectionSet.getDouble(i)));
 						break;
 
 					default: // Statistics
 						int type = rsmd.getColumnType(i);
 						if(type == Types.CHAR || type==Types.VARCHAR)
-							h.put(key, deflectionSet.getString(i));
+							h.put(key, verticalDeflectionSet.getString(i));
 						else if(type == Types.INTEGER)
-							h.put(key, deflectionSet.getInt(i));
+							h.put(key, verticalDeflectionSet.getInt(i));
 						else if(type == Types.DOUBLE)
-							h.put(key, deflectionSet.getDouble(i));
+							h.put(key, verticalDeflectionSet.getDouble(i));
 						else if(type == Types.BOOLEAN)
-							h.put(key, deflectionSet.getBoolean(i));
+							h.put(key, verticalDeflectionSet.getBoolean(i));
 						break;
 					}
 				}
 
-				boolean significant = deflectionSet.getBoolean("significant");
+				boolean significant = verticalDeflectionSet.getBoolean("significant");
 
-				double redundancyX = deflectionSet.getDouble("redundancy_dx");
-				double redundancyY = deflectionSet.getDouble("redundancy_dy");
+				double redundancyX = verticalDeflectionSet.getDouble("redundancy_x");
+				double redundancyY = verticalDeflectionSet.getDouble("redundancy_y");
 
-				double grossErrorX = deflectionSet.getDouble("gross_error_dx");
-				double grossErrorY = deflectionSet.getDouble("gross_error_dy");
+				double grossErrorX = verticalDeflectionSet.getDouble("gross_error_x");
+				double grossErrorY = verticalDeflectionSet.getDouble("gross_error_y");
 
 
-				omegaGroup += deflectionSet.getDouble("omega");
+				omegaGroup += verticalDeflectionSet.getDouble("omega");
 				redundancyGroupX += redundancyX;
 				redundancyGroupY += redundancyY;
 
@@ -1018,17 +1025,16 @@ public class FTLReport {
 				groupParam.put("id",           groupId);
 				groupParam.put("name",         groupSet.getString("name"));
 				groupParam.put("deflections",  deflections);
-				groupParam.put("dimension",    3);
 				groupParam.put("omega",        omegaGroup);
 				groupParam.put("significant",  significantGroup);
-				groupParam.put("type",         pointType.name());
+				groupParam.put("type",         verticalDeflectionType.name());
 
-				groupParam.put("redundancy_dx", redundancyGroupX);
-				groupParam.put("redundancy_dy", redundancyGroupY);
+				groupParam.put("redundancy_x", redundancyGroupX);
+				groupParam.put("redundancy_y", redundancyGroupY);
 				groupParam.put("redundancy",   redundancyGroupX+redundancyGroupY);
 
-				groupParam.put("max_gross_error_dx", options.convertAngleResidualToView(maxGrossErrorGroupX));
-				groupParam.put("max_gross_error_dy", options.convertAngleResidualToView(maxGrossErrorGroupY));
+				groupParam.put("max_gross_error_x", options.convertAngleResidualToView(maxGrossErrorGroupX));
+				groupParam.put("max_gross_error_y", options.convertAngleResidualToView(maxGrossErrorGroupY));
 
 				groups.add(groupParam);					
 			}

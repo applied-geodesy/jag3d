@@ -596,10 +596,10 @@ public class UIObservationPropertiesPane {
 		ToggleGroup group = new ToggleGroup();
 
 		this.referenceEpochRadioButton = this.createRadioButton(i18n.getString("UIObservationPropertiesPane.congruenceanalysis.referenceepoch.label", "Reference epoch"), 
-				i18n.getString("UIObservationPropertiesPane.congruenceanalysis.referenceepoch.tooltip", "Selected, if group is refer to reference epoch"), group, true, Epoch.REFERENCE);
+				i18n.getString("UIObservationPropertiesPane.congruenceanalysis.referenceepoch.tooltip", "Selected, if group is referred to reference epoch"), group, true, Epoch.REFERENCE);
 
 		this.controlEpochRadioButton = this.createRadioButton(i18n.getString("UIObservationPropertiesPane.congruenceanalysis.controlepoch.label", "Control epoch"), 
-				i18n.getString("UIObservationPropertiesPane.congruenceanalysis.controlepoch.tooltip", "Selected, if group is refer to control epoch"), group, false, Epoch.CONTROL);
+				i18n.getString("UIObservationPropertiesPane.congruenceanalysis.controlepoch.tooltip", "Selected, if group is referred to control epoch"), group, false, Epoch.CONTROL);
 
 		gridPane.add(this.referenceEpochRadioButton, 0, 0);
 		gridPane.add(databaseTransactionReferenceEpochProgressIndicator, 1, 0);

@@ -33,6 +33,7 @@ import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.adjustment.network.PointGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionGroupUncertaintyType;
 import org.applied_geodesy.util.sql.DataBase;
 import org.applied_geodesy.version.VersionType;
 
@@ -160,9 +161,9 @@ public class SQLManager3x {
 				+ "UNION ALL "
 				+ "SELECT \"id\", " + PointGroupUncertaintyType.CONSTANT_Z.getId() + " AS \"type\", \"sigma_z0\" FROM \"PUBLIC\".\"PointGroup\" WHERE \"PUBLIC\".\"PointGroup\".\"dimension\" <> 2"
 				+ "UNION ALL "
-				+ "SELECT \"id\", " + PointGroupUncertaintyType.DEFLECTION_X.getId() + " AS \"type\", \"sigma_dx0\" * PI() / 200 AS \"sigma_dx0\" FROM \"PUBLIC\".\"PointGroup\" WHERE \"PUBLIC\".\"PointGroup\".\"dimension\" = 3 AND \"PUBLIC\".\"PointGroup\".\"type\" = " + PointType.STOCHASTIC_POINT.getId() 
+				+ "SELECT \"id\", " + VerticalDeflectionGroupUncertaintyType.DEFLECTION_X.getId() + " AS \"type\", \"sigma_dx0\" * PI() / 200 AS \"sigma_dx0\" FROM \"PUBLIC\".\"PointGroup\" WHERE \"PUBLIC\".\"PointGroup\".\"dimension\" = 3 AND \"PUBLIC\".\"PointGroup\".\"type\" = " + PointType.STOCHASTIC_POINT.getId() 
 				+ "UNION ALL "
-				+ "SELECT \"id\", " + PointGroupUncertaintyType.DEFLECTION_Y.getId() + " AS \"type\", \"sigma_dy0\" * PI() / 200 AS \"sigma_dy0\" FROM \"PUBLIC\".\"PointGroup\" WHERE \"PUBLIC\".\"PointGroup\".\"dimension\" = 3 AND \"PUBLIC\".\"PointGroup\".\"type\" = " + PointType.STOCHASTIC_POINT.getId(),
+				+ "SELECT \"id\", " + VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y.getId() + " AS \"type\", \"sigma_dy0\" * PI() / 200 AS \"sigma_dy0\" FROM \"PUBLIC\".\"PointGroup\" WHERE \"PUBLIC\".\"PointGroup\".\"dimension\" = 3 AND \"PUBLIC\".\"PointGroup\".\"type\" = " + PointType.STOCHASTIC_POINT.getId(),
 
 				// store points (a-priori)
 				"INSERT INTO \"PointApriori\" (\"id\",\"group_id\",\"name\",\"code\",\"y0\",\"x0\",\"z0\", \"dy0\", \"dx0\",\"sigma_y0\",\"sigma_x0\",\"sigma_z0\",\"sigma_dy0\",\"sigma_dx0\",\"enable\") "
@@ -438,7 +439,7 @@ public class SQLManager3x {
 				+ "WHEN 100001 THEN " + VarianceComponentType.STOCHASTIC_POINT_1D_COMPONENT.getId() + " "
 				+ "WHEN 100002 THEN " + VarianceComponentType.STOCHASTIC_POINT_2D_COMPONENT.getId() + " "
 				+ "WHEN 100003 THEN " + VarianceComponentType.STOCHASTIC_POINT_3D_COMPONENT.getId() + " "
-				+ "WHEN 101112 THEN " + VarianceComponentType.STOCHASTIC_POINT_DEFLECTION_COMPONENT.getId() + " "
+				+ "WHEN 101112 THEN " + VarianceComponentType.STOCHASTIC_DEFLECTION_COMPONENT.getId() + " "
 				
 				+ "ELSE -999999 - \"id\" " // Unknown/unsupported component id; create dummy id
 				+ "END CASE) AS \"id\", "

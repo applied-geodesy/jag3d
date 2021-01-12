@@ -49,11 +49,11 @@ public class SlopeDistance extends Observation {
 		double ih = this.getStartPointHeight();
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -90,11 +90,11 @@ public class SlopeDistance extends Observation {
 		double ih = this.getStartPointHeight();
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -131,11 +131,11 @@ public class SlopeDistance extends Observation {
 		double ih = this.getStartPointHeight();
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -159,7 +159,7 @@ public class SlopeDistance extends Observation {
 		return -(ze - zs - ih*crxs*crys + th*crxe*crye) / dist3D;
 	}
 	
-	public double diffDeflectionXs() {
+	public double diffVerticalDeflectionXs() {
 		double xs = this.getStartPoint().getX();
 		double ys = this.getStartPoint().getY();
 		double zs = this.getStartPoint().getZ();
@@ -171,11 +171,11 @@ public class SlopeDistance extends Observation {
 		double ih = this.getStartPointHeight();
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -199,7 +199,7 @@ public class SlopeDistance extends Observation {
 		return -ih*(crxs*(ye - ys) - th*(crxe*crye*crys*srxs - crxs*srxe + crxe*srxs*srye*srys) - crys*srxs*(ze - zs) + srxs*srys*(xe - xs)) / dist3D;
 	}
 	
-	public double diffDeflectionYs() {
+	public double diffVerticalDeflectionYs() {
 		double xs = this.getStartPoint().getX();
 		double ys = this.getStartPoint().getY();
 		double zs = this.getStartPoint().getZ();
@@ -211,11 +211,11 @@ public class SlopeDistance extends Observation {
 		double ih = this.getStartPointHeight();
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -239,7 +239,7 @@ public class SlopeDistance extends Observation {
 		return ih*crxs*(crys*(xe - xs) + srys*(ze - zs) - th*Math.sin(rye - rys)*crxe) / dist3D;
 	}
 	
-	public double diffDeflectionXe() {
+	public double diffVerticalDeflectionXe() {
 		double xs = this.getStartPoint().getX();
 		double ys = this.getStartPoint().getY();
 		double zs = this.getStartPoint().getZ();
@@ -251,11 +251,11 @@ public class SlopeDistance extends Observation {
 		double ih = this.getStartPointHeight();
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -279,7 +279,7 @@ public class SlopeDistance extends Observation {
 		return th*(crxe*(ye - ys) + ih*(crxs*crye*crys*srxe - crxe*srxs + crxs*srxe*srye*srys) - crye*srxe*(ze - zs) + srxe*srye*(xe - xs)) / dist3D;
 	}
 	
-	public double diffDeflectionYe() {
+	public double diffVerticalDeflectionYe() {
 		double xs = this.getStartPoint().getX();
 		double ys = this.getStartPoint().getY();
 		double zs = this.getStartPoint().getZ();
@@ -291,11 +291,11 @@ public class SlopeDistance extends Observation {
 		double ih = this.getStartPointHeight();
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);

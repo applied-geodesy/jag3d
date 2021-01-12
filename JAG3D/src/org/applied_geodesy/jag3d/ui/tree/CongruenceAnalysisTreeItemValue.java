@@ -159,7 +159,7 @@ public class CongruenceAnalysisTreeItemValue extends TreeItemValue implements So
 		return new TabType[] {
 				TabType.RAW_DATA,
 				TabType.PROPERTIES,
-				TabType.RESULT_CONGRUENCE_ANALYSIS_POINT,
+				TabType.RESULT_CONGRUENCE_ANALYSIS,
 				TabType.ADDITIONAL_PARAMETER
 		};
 	}

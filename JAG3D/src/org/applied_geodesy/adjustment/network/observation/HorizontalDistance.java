@@ -51,11 +51,11 @@ public class HorizontalDistance extends Observation {
 
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -90,11 +90,11 @@ public class HorizontalDistance extends Observation {
 		
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -129,11 +129,11 @@ public class HorizontalDistance extends Observation {
 		
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -157,7 +157,7 @@ public class HorizontalDistance extends Observation {
 	}
 	
 	@Override
-	public double diffDeflectionXs() {
+	public double diffVerticalDeflectionXs() {
 		double xs = this.getStartPoint().getX();
 		double ys = this.getStartPoint().getY();
 		double zs = this.getStartPoint().getZ();
@@ -169,11 +169,11 @@ public class HorizontalDistance extends Observation {
 		double ih = this.getStartPointHeight();
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -198,7 +198,7 @@ public class HorizontalDistance extends Observation {
 	}
 	
 	@Override
-	public double diffDeflectionYs() {
+	public double diffVerticalDeflectionYs() {
 		double xs = this.getStartPoint().getX();
 		double ys = this.getStartPoint().getY();
 		double zs = this.getStartPoint().getZ();
@@ -209,11 +209,11 @@ public class HorizontalDistance extends Observation {
 		
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -237,7 +237,7 @@ public class HorizontalDistance extends Observation {
 	}
 	
 	@Override
-	public double diffDeflectionXe() {
+	public double diffVerticalDeflectionXe() {
 		double xs = this.getStartPoint().getX();
 		double ys = this.getStartPoint().getY();
 		double zs = this.getStartPoint().getZ();
@@ -248,11 +248,11 @@ public class HorizontalDistance extends Observation {
 		
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -276,7 +276,7 @@ public class HorizontalDistance extends Observation {
 	}
 	
 	@Override
-	public double diffDeflectionYe() {
+	public double diffVerticalDeflectionYe() {
 		double xs = this.getStartPoint().getX();
 		double ys = this.getStartPoint().getY();
 		double zs = this.getStartPoint().getZ();
@@ -287,11 +287,11 @@ public class HorizontalDistance extends Observation {
 		
 		double th = this.getEndPointHeight();
 		
-		double rxs = this.getStartPoint().getDeflectionX().getValue();
-		double rys = this.getStartPoint().getDeflectionY().getValue();
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
-		double rxe = this.getEndPoint().getDeflectionX().getValue();
-		double rye = this.getEndPoint().getDeflectionY().getValue();
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);

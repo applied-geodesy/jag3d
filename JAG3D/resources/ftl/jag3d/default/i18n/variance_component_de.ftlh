@@ -52,5 +52,5 @@
 		"STOCHASTIC_POINT_2D_COMPONENT" :                                "Lageanschlu&szlig;punkte",
 		"STOCHASTIC_POINT_3D_COMPONENT" :                                "Raumanschlu&szlig;punkte",
 		
-		"STOCHASTIC_POINT_DEFLECTION_COMPONENT" :                        "Lotabweichungen"
+		"STOCHASTIC_DEFLECTION_COMPONENT" :                              "Lotabweichungen"
 }>

@@ -167,29 +167,35 @@ public class UITreeBuilder {
 		// TreeItemType.ROOT
 		TreeItem<TreeItemValue> rootItem = new TreeItem<TreeItemValue> (new RootTreeItemValue(i18n.getString("UITreeBuiler.root", "JAG3D-Project")));
 
-		TreeItem<TreeItemValue> referencePointItem           = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.referencepoints", "Reference points")));
-		CheckBoxTreeItem<TreeItemValue> referencePoint1DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.REFERENCE_POINT_1D_DIRECTORY, i18n.getString("UITreeBuiler.directory.referencepoints.1d", "Reference points 1D")));
-		CheckBoxTreeItem<TreeItemValue> referencePoint2DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.REFERENCE_POINT_2D_DIRECTORY, i18n.getString("UITreeBuiler.directory.referencepoints.2d", "Reference points 2D")));
-		CheckBoxTreeItem<TreeItemValue> referencePoint3DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.REFERENCE_POINT_3D_DIRECTORY, i18n.getString("UITreeBuiler.directory.referencepoints.3d", "Reference points 3D")));
+		TreeItem<TreeItemValue> referencePointItem           = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.points.reference", "Reference points")));
+		CheckBoxTreeItem<TreeItemValue> referencePoint1DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.REFERENCE_POINT_1D_DIRECTORY, i18n.getString("UITreeBuiler.directory.points.reference.1d", "Reference points 1D")));
+		CheckBoxTreeItem<TreeItemValue> referencePoint2DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.REFERENCE_POINT_2D_DIRECTORY, i18n.getString("UITreeBuiler.directory.points.reference.2d", "Reference points 2D")));
+		CheckBoxTreeItem<TreeItemValue> referencePoint3DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.REFERENCE_POINT_3D_DIRECTORY, i18n.getString("UITreeBuiler.directory.points.reference.3d", "Reference points 3D")));
 		referencePointItem.getChildren().addAll(Arrays.asList(referencePoint1DItem, referencePoint2DItem, referencePoint3DItem));
 
-		TreeItem<TreeItemValue> stochasticPointItem           = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.stochasticpoints", "Stochastic points")));
-		CheckBoxTreeItem<TreeItemValue> stochasticPoint1DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.STOCHASTIC_POINT_1D_DIRECTORY, i18n.getString("UITreeBuiler.directory.stochasticpoints.1d", "Stochastic points 1D")));
-		CheckBoxTreeItem<TreeItemValue> stochasticPoint2DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.STOCHASTIC_POINT_2D_DIRECTORY, i18n.getString("UITreeBuiler.directory.stochasticpoints.2d", "Stochastic points 2D")));
-		CheckBoxTreeItem<TreeItemValue> stochasticPoint3DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.STOCHASTIC_POINT_3D_DIRECTORY, i18n.getString("UITreeBuiler.directory.stochasticpoints.3d", "Stochastic points 3D")));
+		TreeItem<TreeItemValue> stochasticPointItem           = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.points.stochastic", "Stochastic points")));
+		CheckBoxTreeItem<TreeItemValue> stochasticPoint1DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.STOCHASTIC_POINT_1D_DIRECTORY, i18n.getString("UITreeBuiler.directory.points.stochastic.1d", "Stochastic points 1D")));
+		CheckBoxTreeItem<TreeItemValue> stochasticPoint2DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.STOCHASTIC_POINT_2D_DIRECTORY, i18n.getString("UITreeBuiler.directory.points.stochastic.2d", "Stochastic points 2D")));
+		CheckBoxTreeItem<TreeItemValue> stochasticPoint3DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.STOCHASTIC_POINT_3D_DIRECTORY, i18n.getString("UITreeBuiler.directory.points.stochastic.3d", "Stochastic points 3D")));
 		stochasticPointItem.getChildren().addAll(Arrays.asList(stochasticPoint1DItem, stochasticPoint2DItem, stochasticPoint3DItem));
 
-		TreeItem<TreeItemValue> datumPointItem           = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.datumpoints", "Datum points")));
-		CheckBoxTreeItem<TreeItemValue> datumPoint1DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.DATUM_POINT_1D_DIRECTORY, i18n.getString("UITreeBuiler.directory.datumpoints.1d", "Datum points 1D")));
-		CheckBoxTreeItem<TreeItemValue> datumPoint2DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.DATUM_POINT_2D_DIRECTORY, i18n.getString("UITreeBuiler.directory.datumpoints.2d", "Datum points 2D")));
-		CheckBoxTreeItem<TreeItemValue> datumPoint3DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.DATUM_POINT_3D_DIRECTORY, i18n.getString("UITreeBuiler.directory.datumpoints.3d", "Datum points 3D")));
+		TreeItem<TreeItemValue> datumPointItem           = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.points.datum", "Datum points")));
+		CheckBoxTreeItem<TreeItemValue> datumPoint1DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.DATUM_POINT_1D_DIRECTORY, i18n.getString("UITreeBuiler.directory.points.datum.1d", "Datum points 1D")));
+		CheckBoxTreeItem<TreeItemValue> datumPoint2DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.DATUM_POINT_2D_DIRECTORY, i18n.getString("UITreeBuiler.directory.points.datum.2d", "Datum points 2D")));
+		CheckBoxTreeItem<TreeItemValue> datumPoint3DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.DATUM_POINT_3D_DIRECTORY, i18n.getString("UITreeBuiler.directory.points.datum.3d", "Datum points 3D")));
 		datumPointItem.getChildren().addAll(Arrays.asList(datumPoint1DItem, datumPoint2DItem, datumPoint3DItem));
 
-		TreeItem<TreeItemValue> newPointItem           = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.newpoints", "New points")));
-		CheckBoxTreeItem<TreeItemValue> newPoint1DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.NEW_POINT_1D_DIRECTORY, i18n.getString("UITreeBuiler.directory.newpoints.1d", "New points 1D")));
-		CheckBoxTreeItem<TreeItemValue> newPoint2DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.NEW_POINT_2D_DIRECTORY, i18n.getString("UITreeBuiler.directory.newpoints.2d", "New points 2D")));
-		CheckBoxTreeItem<TreeItemValue> newPoint3DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.NEW_POINT_3D_DIRECTORY, i18n.getString("UITreeBuiler.directory.newpoints.3d", "New points 3D")));
+		TreeItem<TreeItemValue> newPointItem           = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.points.new", "New points")));
+		CheckBoxTreeItem<TreeItemValue> newPoint1DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.NEW_POINT_1D_DIRECTORY, i18n.getString("UITreeBuiler.directory.points.new.1d", "New points 1D")));
+		CheckBoxTreeItem<TreeItemValue> newPoint2DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.NEW_POINT_2D_DIRECTORY, i18n.getString("UITreeBuiler.directory.points.new.2d", "New points 2D")));
+		CheckBoxTreeItem<TreeItemValue> newPoint3DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.NEW_POINT_3D_DIRECTORY, i18n.getString("UITreeBuiler.directory.points.new.3d", "New points 3D")));
 		newPointItem.getChildren().addAll(Arrays.asList(newPoint1DItem, newPoint2DItem, newPoint3DItem));
+		
+		TreeItem<TreeItemValue> verticalDeflectionItem                   = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.vertical_deflection", "Vertical deflection")));
+		CheckBoxTreeItem<TreeItemValue> referenceVerticalDeflectionItem  = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.REFERENCE_VERTICAL_DEFLECTION_DIRECTORY,  i18n.getString("UITreeBuiler.directory.vertical_deflection.reference",  "Reference deflection")));
+		CheckBoxTreeItem<TreeItemValue> stochasticVerticalDeflectionItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_DIRECTORY, i18n.getString("UITreeBuiler.directory.vertical_deflection.stochastic", "Stochastic deflection")));
+		CheckBoxTreeItem<TreeItemValue> newVerticalDeflectionItem        = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.UNKNOWN_VERTICAL_DEFLECTION_DIRECTORY,    i18n.getString("UITreeBuiler.directory.vertical_deflection.unknown",    "Unknown deflection")));
+		verticalDeflectionItem.getChildren().addAll(Arrays.asList(referenceVerticalDeflectionItem, stochasticVerticalDeflectionItem, newVerticalDeflectionItem));
 
 		
 		TreeItem<TreeItemValue> congruenceAnalysisItem           = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.congruenceanalysis", "Congruence analysis")));
@@ -199,18 +205,18 @@ public class UITreeBuilder {
 		congruenceAnalysisItem.getChildren().addAll(Arrays.asList(congruenceAnalysis1DItem, congruenceAnalysis2DItem, congruenceAnalysis3DItem));
 		
 
-		TreeItem<TreeItemValue> terrestrialObservationItem = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.terrestrialobservations", "Terrestrial Observations")));
-		TreeItem<TreeItemValue> levelingObservationItem    = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.LEVELING_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.leveling", "Leveling data")));
-		TreeItem<TreeItemValue> directionObservationItem   = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.DIRECTION_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.direction", "Direction sets")));
-		TreeItem<TreeItemValue> distance2dObservationItem  = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.HORIZONTAL_DISTANCE_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.horizontal_distance", "Horizontal distances")));
-		TreeItem<TreeItemValue> distance3dObservationItem  = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.SLOPE_DISTANCE_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.slope_distance", "Slope distances")));
-		TreeItem<TreeItemValue> zenithObservationItem      = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.ZENITH_ANGLE_DIRECTORY, i18n.getString("UITreeBuiler.directory.terrestrialobservations.zenith_angle", "Zenith angles")));
+		TreeItem<TreeItemValue> terrestrialObservationItem = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.observations", "Terrestrial Observations")));
+		TreeItem<TreeItemValue> levelingObservationItem    = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.LEVELING_DIRECTORY, i18n.getString("UITreeBuiler.directory.observations.leveling", "Leveling data")));
+		TreeItem<TreeItemValue> directionObservationItem   = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.DIRECTION_DIRECTORY, i18n.getString("UITreeBuiler.directory.observations.direction", "Direction sets")));
+		TreeItem<TreeItemValue> distance2dObservationItem  = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.HORIZONTAL_DISTANCE_DIRECTORY, i18n.getString("UITreeBuiler.directory.observations.horizontal_distance", "Horizontal distances")));
+		TreeItem<TreeItemValue> distance3dObservationItem  = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.SLOPE_DISTANCE_DIRECTORY, i18n.getString("UITreeBuiler.directory.observations.slope_distance", "Slope distances")));
+		TreeItem<TreeItemValue> zenithObservationItem      = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.ZENITH_ANGLE_DIRECTORY, i18n.getString("UITreeBuiler.directory.observations.zenith_angle", "Zenith angles")));
 		terrestrialObservationItem.getChildren().addAll(Arrays.asList(levelingObservationItem, directionObservationItem, distance2dObservationItem, distance3dObservationItem, zenithObservationItem));
 
-		TreeItem<TreeItemValue> gnssBaselineItem   = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.gnssobservations", "GNSS baselines")));
-		CheckBoxTreeItem<TreeItemValue> gnssBaseline1DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.GNSS_1D_DIRECTORY, i18n.getString("UITreeBuiler.directory.gnssobservations.1d", "GNSS baselines 1D")));
-		CheckBoxTreeItem<TreeItemValue> gnssBaseline2DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.GNSS_2D_DIRECTORY, i18n.getString("UITreeBuiler.directory.gnssobservations.2d", "GNSS baselines 2D")));
-		CheckBoxTreeItem<TreeItemValue> gnssBaseline3DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.GNSS_3D_DIRECTORY, i18n.getString("UITreeBuiler.directory.gnssobservations.3d", "GNSS baselines 3D")));
+		TreeItem<TreeItemValue> gnssBaselineItem   = new TreeItem<TreeItemValue> (new TreeItemValue(i18n.getString("UITreeBuiler.directory.gnss", "GNSS baselines")));
+		CheckBoxTreeItem<TreeItemValue> gnssBaseline1DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.GNSS_1D_DIRECTORY, i18n.getString("UITreeBuiler.directory.gnss.1d", "GNSS baselines 1D")));
+		CheckBoxTreeItem<TreeItemValue> gnssBaseline2DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.GNSS_2D_DIRECTORY, i18n.getString("UITreeBuiler.directory.gnss.2d", "GNSS baselines 2D")));
+		CheckBoxTreeItem<TreeItemValue> gnssBaseline3DItem = new CheckBoxTreeItem<TreeItemValue> (new TreeItemValue(TreeItemType.GNSS_3D_DIRECTORY, i18n.getString("UITreeBuiler.directory.gnss.3d", "GNSS baselines 3D")));
 		gnssBaselineItem.getChildren().addAll(Arrays.asList(gnssBaseline1DItem, gnssBaseline2DItem, gnssBaseline3DItem));
 
 		for (TreeItem<TreeItemValue> item : referencePointItem.getChildren()) {
@@ -229,6 +235,10 @@ public class UITreeBuilder {
 			item.expandedProperty().addListener(new TreeItemExpandingChangeListener(item));
 			this.directoryItemMap.put(item.getValue().getItemType(), (CheckBoxTreeItem<TreeItemValue>)item);
 		}
+		for (TreeItem<TreeItemValue> item : verticalDeflectionItem.getChildren()) {
+			item.expandedProperty().addListener(new TreeItemExpandingChangeListener(item));
+			this.directoryItemMap.put(item.getValue().getItemType(), (CheckBoxTreeItem<TreeItemValue>)item);
+		}		
 		for (TreeItem<TreeItemValue> item : congruenceAnalysisItem.getChildren()) {
 			item.expandedProperty().addListener(new TreeItemExpandingChangeListener(item));
 			this.directoryItemMap.put(item.getValue().getItemType(), (CheckBoxTreeItem<TreeItemValue>)item);
@@ -243,7 +253,7 @@ public class UITreeBuilder {
 		}
 
 		// Add first Level to root item
-		rootItem.getChildren().addAll(Arrays.asList(referencePointItem, stochasticPointItem, datumPointItem, newPointItem, congruenceAnalysisItem, terrestrialObservationItem, gnssBaselineItem)); 
+		rootItem.getChildren().addAll(Arrays.asList(referencePointItem, stochasticPointItem, datumPointItem, newPointItem, verticalDeflectionItem, congruenceAnalysisItem, terrestrialObservationItem, gnssBaselineItem)); 
 		rootItem.setExpanded(true);
 
 		this.treeView = new TreeView<TreeItemValue>(rootItem);
@@ -284,6 +294,9 @@ public class UITreeBuilder {
 
 	public TreeItem<TreeItemValue> addItem(TreeItemType parentType, int id, String name, boolean enable, boolean select) {
 		TreeItemType itemType = null;
+		if (parentType == null || parentType == TreeItemType.UNSPECIFIC)
+			return null;
+		
 		if (!this.directoryItemMap.containsKey(parentType) || (itemType = TreeItemType.getLeafByDirectoryType(parentType)) == null) {
 			System.err.println(this.getClass().getSimpleName() + " : Error, unsupported parent tree node type " + parentType);
 			return null;
@@ -299,6 +312,9 @@ public class UITreeBuilder {
 		else if (TreeItemType.isObservationTypeLeaf(itemType) || TreeItemType.isGNSSObservationTypeLeaf(itemType))
 			itemValue = new ObservationTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.observations", "Observations") : name, orderId);
 
+		else if (TreeItemType.isVerticalDeflectionTypeLeaf(itemType))
+			itemValue = new VerticalDeflectionTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.vertical_deflection", "Vertical deflection") : name, orderId);
+		
 		else if (TreeItemType.isCongruenceAnalysisTypeLeaf(itemType))
 			itemValue = new CongruenceAnalysisTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.congruenceanalysis", "Point nexus") : name, orderId);
 			
@@ -344,6 +360,7 @@ public class UITreeBuilder {
 		if (!TreeItemType.isPointTypeLeaf(itemType) && 
 				!TreeItemType.isObservationTypeLeaf(itemType) && 
 				!TreeItemType.isGNSSObservationTypeLeaf(itemType) &&
+				!TreeItemType.isVerticalDeflectionTypeLeaf(itemType) &&
 				!TreeItemType.isCongruenceAnalysisTypeLeaf(itemType))
 			return;
 
@@ -363,15 +380,24 @@ public class UITreeBuilder {
 
 	public void moveItems(TreeItemType newItemType, List<TreeItem<TreeItemValue>> selectedItems) {
 		TreeItemType newParentType = TreeItemType.getDirectoryByLeafType(newItemType);
-		if (TreeItemType.isPointTypeLeaf(newItemType) && this.directoryItemMap.containsKey(newParentType) && selectedItems != null && selectedItems.size() > 0) {
+		if (this.directoryItemMap.containsKey(newParentType) && selectedItems != null && selectedItems.size() > 0 &&
+				(TreeItemType.isPointTypeLeaf(newItemType) || TreeItemType.isVerticalDeflectionTypeLeaf(newItemType))) {
 			CheckBoxTreeItem<TreeItemValue> newParent = this.directoryItemMap.get(newParentType);
 			TreeItem<TreeItemValue> lastItem = null;
 			this.setIgnoreEvent(true);
 			for (TreeItem<TreeItemValue> selectedItem : selectedItems) {
-				if (selectedItem != null && selectedItem.isLeaf() && selectedItem.getValue() != null && selectedItem.getValue() instanceof PointTreeItemValue) {
-					PointTreeItemValue itemValue = (PointTreeItemValue)selectedItem.getValue();
-					TreeItemType oldItemType     = itemValue.getItemType();
-					TreeItemType oldParentType   = TreeItemType.getDirectoryByLeafType(oldItemType);
+				if (selectedItem != null && selectedItem.isLeaf() && selectedItem.getValue() != null) {
+
+					TreeItemValue itemValue;
+					if (selectedItem.getValue() instanceof PointTreeItemValue)
+						itemValue = (PointTreeItemValue)selectedItem.getValue();
+					else if (selectedItem.getValue() instanceof VerticalDeflectionTreeItemValue)
+						itemValue = (VerticalDeflectionTreeItemValue)selectedItem.getValue();
+					else
+						continue;
+
+					TreeItemType oldItemType   = itemValue.getItemType();
+					TreeItemType oldParentType = TreeItemType.getDirectoryByLeafType(oldItemType);
 					if (this.directoryItemMap.containsKey(oldParentType)) {
 						itemValue.setItemType(newItemType);
 						if (!this.save(itemValue)) {
@@ -399,6 +425,7 @@ public class UITreeBuilder {
 			}
 		}
 	}
+	
 	
 	public void addEmptyGroup(TreeItemType parentType) {
 		if (this.directoryItemMap.containsKey(parentType)) {
@@ -508,6 +535,10 @@ public class UITreeBuilder {
 					case CONGRUENCE_ANALYSIS_1D_DIRECTORY:
 					case CONGRUENCE_ANALYSIS_2D_DIRECTORY:
 					case CONGRUENCE_ANALYSIS_3D_DIRECTORY:
+						
+					case REFERENCE_VERTICAL_DEFLECTION_DIRECTORY:
+					case STOCHASTIC_VERTICAL_DEFLECTION_DIRECTORY:
+					case UNKNOWN_VERTICAL_DEFLECTION_DIRECTORY:
 
 						this.selectChildren(currentTreeItem);
 						break;
@@ -541,6 +572,9 @@ public class UITreeBuilder {
 
 			else if ((TreeItemType.isCongruenceAnalysisTypeLeaf(type)) && treeItemValue instanceof CongruenceAnalysisTreeItemValue) 
 				SQLManager.getInstance().saveGroup((CongruenceAnalysisTreeItemValue)treeItemValue);
+			
+			else if ((TreeItemType.isVerticalDeflectionTypeLeaf(type)) && treeItemValue instanceof VerticalDeflectionTreeItemValue) 
+				SQLManager.getInstance().saveGroup((VerticalDeflectionTreeItemValue)treeItemValue);
 
 			else {
 				System.err.println(this.getClass().getSimpleName() + " : Error, item has no saveable properties " + treeItemValue);
@@ -562,7 +596,11 @@ public class UITreeBuilder {
 	private boolean remove(TreeItemValue treeItemValue) {
 		try {
 			TreeItemType type = treeItemValue.getItemType();
-			if (TreeItemType.isPointTypeLeaf(type) || TreeItemType.isGNSSObservationTypeLeaf(type) || TreeItemType.isObservationTypeLeaf(type) || TreeItemType.isCongruenceAnalysisTypeLeaf(type)) {
+			if (TreeItemType.isPointTypeLeaf(type) || 
+					TreeItemType.isGNSSObservationTypeLeaf(type) || 
+					TreeItemType.isObservationTypeLeaf(type) || 
+					TreeItemType.isVerticalDeflectionTypeLeaf(type) || 
+					TreeItemType.isCongruenceAnalysisTypeLeaf(type)) {
 				SQLManager.getInstance().removeGroup(treeItemValue);
 				return true;
 			}

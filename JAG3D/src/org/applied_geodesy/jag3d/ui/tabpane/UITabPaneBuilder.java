@@ -26,23 +26,27 @@ import org.applied_geodesy.jag3d.ui.metadata.UIMetaDataPaneBuilder;
 import org.applied_geodesy.jag3d.ui.propertiespane.UICongruenceAnalysisPropertiesPaneBuilder;
 import org.applied_geodesy.jag3d.ui.propertiespane.UIObservationPropertiesPaneBuilder;
 import org.applied_geodesy.jag3d.ui.propertiespane.UIPointPropertiesPaneBuilder;
+import org.applied_geodesy.jag3d.ui.propertiespane.UIVerticalDeflectionPropertiesPaneBuilder;
 import org.applied_geodesy.jag3d.ui.resultpane.UIGlobalResultPaneBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIAdditionalParameterTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UICongruenceAnalysisTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIGNSSObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIPointTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITerrestrialObservationTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.UIVerticalDeflectionTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.row.AdditionalParameterRow;
 import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.Row;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
+import org.applied_geodesy.jag3d.ui.table.row.VerticalDeflectionRow;
 import org.applied_geodesy.jag3d.ui.tree.CongruenceAnalysisTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
+import org.applied_geodesy.jag3d.ui.tree.VerticalDeflectionTreeItemValue;
 import org.applied_geodesy.ui.table.ColumnType;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
@@ -92,6 +96,7 @@ public class UITabPaneBuilder {
 	private UITerrestrialObservationTableBuilder observationTableBuilder    = UITerrestrialObservationTableBuilder.getInstance();
 	private UIGNSSObservationTableBuilder gnssObservationTableBuilder       = UIGNSSObservationTableBuilder.getInstance();
 	private UICongruenceAnalysisTableBuilder congruenceAnalysisTableBuilder = UICongruenceAnalysisTableBuilder.getInstance();
+	private UIVerticalDeflectionTableBuilder verticalDeflectionTableBuilder = UIVerticalDeflectionTableBuilder.getInstance();
 
 	private ObservableMap<TabType, Tab> tapMap = FXCollections.observableHashMap();
 	private TreeItemValue lastTreeItemValue = null;
@@ -146,21 +151,9 @@ public class UITabPaneBuilder {
 				);
 
 		this.createTab(
-				i18n.getString("UITabPaneBuilder.tab.deflection.label", "Deflections"), 
-				i18n.getString("UITabPaneBuilder.tab.deflection.title", "Table of estimated deflections of the vertical"), 
-				TabType.RESULT_DEFLECTION, null
-				);
-
-		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.congruence.point.label", "Congruence of points"), 
 				i18n.getString("UITabPaneBuilder.tab.congruence.point.title", "Result of congruence analysis of point"), 
-				TabType.RESULT_CONGRUENCE_ANALYSIS_POINT, null
-				);
-
-		this.createTab(
-				i18n.getString("UITabPaneBuilder.tab.congruence.deflection.label", "Congruence of deflections"), 
-				i18n.getString("UITabPaneBuilder.tab.congruence.deflection.title", "Result of congruence analysis of deflections of the vertical"), 
-				TabType.RESULT_CONGRUENCE_ANALYSIS_DEFLECTION, null
+				TabType.RESULT_CONGRUENCE_ANALYSIS, null
 				);
 
 		this.tabPane = new TabPane();
@@ -178,6 +171,7 @@ public class UITabPaneBuilder {
 		return tab;
 	}
 
+	// show tabs defined in TreeItemValue
 	private Node getNode(TabType tabType) {
 		if (this.lastTreeItemValue == null || tabType == null)
 			return null;
@@ -216,7 +210,7 @@ public class UITabPaneBuilder {
 		case DATUM_POINT_3D_LEAF:
 		case NEW_POINT_3D_LEAF:
 			PointTreeItemValue pointItemValue = (PointTreeItemValue)this.lastTreeItemValue;
-			if (tabType == TabType.RAW_DATA || tabType == TabType.RESULT_DATA || tabType == TabType.RESULT_DEFLECTION || tabType == TabType.RESULT_CONGRUENCE_ANALYSIS_POINT || tabType == TabType.RESULT_CONGRUENCE_ANALYSIS_DEFLECTION) {
+			if (tabType == TabType.RAW_DATA || tabType == TabType.RESULT_DATA || tabType == TabType.RESULT_CONGRUENCE_ANALYSIS) {
 				TableView<PointRow> pointTableView = this.pointTableBuilder.getTable(pointItemValue);
 				this.setTableColumnView(tabType, pointTableView);
 				node = pointTableView;
@@ -274,7 +268,7 @@ public class UITabPaneBuilder {
 		case CONGRUENCE_ANALYSIS_2D_LEAF:
 		case CONGRUENCE_ANALYSIS_3D_LEAF:
 			CongruenceAnalysisTreeItemValue congruenceAnalysisItemValue = (CongruenceAnalysisTreeItemValue)this.lastTreeItemValue;
-			if (tabType == TabType.RAW_DATA || tabType == TabType.RESULT_CONGRUENCE_ANALYSIS_POINT) {
+			if (tabType == TabType.RAW_DATA || tabType == TabType.RESULT_CONGRUENCE_ANALYSIS) {
 				TableView<CongruenceAnalysisRow> congruenceAnalysisTableView = this.congruenceAnalysisTableBuilder.getTable(congruenceAnalysisItemValue);
 				this.setTableColumnView(tabType, congruenceAnalysisTableView);
 				node = congruenceAnalysisTableView;
@@ -289,7 +283,23 @@ public class UITabPaneBuilder {
 				node = table;
 			}
 			break;
-
+			
+		case REFERENCE_VERTICAL_DEFLECTION_LEAF:
+		case STOCHASTIC_VERTICAL_DEFLECTION_LEAF:
+		case UNKNOWN_VERTICAL_DEFLECTION_LEAF:
+			VerticalDeflectionTreeItemValue verticalDeflectionTreeItemValue = (VerticalDeflectionTreeItemValue)this.lastTreeItemValue;
+			if (tabType == TabType.RAW_DATA || tabType == TabType.RESULT_DATA) {
+				TableView<VerticalDeflectionRow> verticalDeflectionTableView = this.verticalDeflectionTableBuilder.getTable(verticalDeflectionTreeItemValue);
+				this.setTableColumnView(tabType, verticalDeflectionTableView);
+				node = verticalDeflectionTableView;
+			}
+			else if (tabType == TabType.PROPERTIES) {
+				UIVerticalDeflectionPropertiesPaneBuilder verticalDeflectionPropertiesPaneBuilder = UIVerticalDeflectionPropertiesPaneBuilder.getInstance();
+				node = verticalDeflectionPropertiesPaneBuilder.getVerticalDeflectionPropertiesPane(verticalDeflectionTreeItemValue.getItemType()).getNode();
+			}
+			
+			break;
+			
 		default:
 			node = null;
 			break;
@@ -326,22 +336,13 @@ public class UITabPaneBuilder {
 				case APOSTERIORI_TERRESTRIAL_OBSERVATION:
 				case APOSTERIORI_GNSS_OBSERVATION:
 				case APOSTERIORI_POINT:
+				case APOSTERIORI_DEFLECTION:
 					column.setVisible(tabType == TabType.RESULT_DATA);
 
 					break;
 
-				case APOSTERIORI_DEFLECTION:
-					column.setVisible(tabType == TabType.RESULT_DEFLECTION);
-
-					break;
-
 				case APOSTERIORI_POINT_CONGRUENCE:
-					column.setVisible(tabType == TabType.RESULT_CONGRUENCE_ANALYSIS_POINT);
-
-					break;
-
-				case APOSTERIORI_DEFLECTION_CONGRUENCE:
-					column.setVisible(tabType == TabType.RESULT_CONGRUENCE_ANALYSIS_DEFLECTION);
+					column.setVisible(tabType == TabType.RESULT_CONGRUENCE_ANALYSIS);
 
 					break;
 
@@ -417,7 +418,7 @@ public class UITabPaneBuilder {
 				}
 				else {
 					tabPane.getTabs().clear();
-					System.out.println(this.getClass().getSimpleName() + " : No known tab types " + newTabTypes + " for " + treeItemValue);
+					//System.out.println(this.getClass().getSimpleName() + " : No known tab types " + newTabTypes + " for " + treeItemValue);
 				}
 			}
 		}

@@ -152,11 +152,11 @@ public abstract class Observation {
 		
 		double th = this.endPointHeight;
 		
-		double rxs = this.startPoint.getDeflectionX().getValue();
-		double rys = this.startPoint.getDeflectionY().getValue();
+		double rxs = this.startPoint.getVerticalDeflectionX().getValue();
+		double rys = this.startPoint.getVerticalDeflectionY().getValue();
 		
-		double rxe = this.endPoint.getDeflectionX().getValue();
-		double rye = this.endPoint.getDeflectionY().getValue();
+		double rxe = this.endPoint.getVerticalDeflectionX().getValue();
+		double rye = this.endPoint.getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -185,11 +185,11 @@ public abstract class Observation {
 		
 		double th = this.endPointHeight;
 		
-		double rxs = this.startPoint.getDeflectionX().getValue0();
-		double rys = this.startPoint.getDeflectionY().getValue0();
+		double rxs = this.startPoint.getVerticalDeflectionX().getValue0();
+		double rys = this.startPoint.getVerticalDeflectionY().getValue0();
 		
-		double rxe = this.endPoint.getDeflectionX().getValue0();
-		double rye = this.endPoint.getDeflectionY().getValue0();
+		double rxe = this.endPoint.getVerticalDeflectionX().getValue0();
+		double rye = this.endPoint.getVerticalDeflectionY().getValue0();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -219,11 +219,11 @@ public abstract class Observation {
 		double ih = this.startPointHeight;
 		double th = this.endPointHeight;
 		
-		double rxs = this.startPoint.getDeflectionX().getValue();
-		double rys = this.startPoint.getDeflectionY().getValue();
+		double rxs = this.startPoint.getVerticalDeflectionX().getValue();
+		double rys = this.startPoint.getVerticalDeflectionY().getValue();
 		
-		double rxe = this.endPoint.getDeflectionX().getValue();
-		double rye = this.endPoint.getDeflectionY().getValue();
+		double rxe = this.endPoint.getVerticalDeflectionX().getValue();
+		double rye = this.endPoint.getVerticalDeflectionY().getValue();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -254,11 +254,11 @@ public abstract class Observation {
 		double ih = this.startPointHeight;
 		double th = this.endPointHeight;
 		
-		double rxs = this.startPoint.getDeflectionX().getValue0();
-		double rys = this.startPoint.getDeflectionY().getValue0();
+		double rxs = this.startPoint.getVerticalDeflectionX().getValue0();
+		double rys = this.startPoint.getVerticalDeflectionY().getValue0();
 		
-		double rxe = this.endPoint.getDeflectionX().getValue0();
-		double rye = this.endPoint.getDeflectionY().getValue0();
+		double rxe = this.endPoint.getVerticalDeflectionX().getValue0();
+		double rye = this.endPoint.getVerticalDeflectionY().getValue0();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -292,13 +292,13 @@ public abstract class Observation {
 
 	public abstract double diffZs();
 
-	public abstract double diffDeflectionXs();
+	public abstract double diffVerticalDeflectionXs();
 
-	public abstract double diffDeflectionYs();
+	public abstract double diffVerticalDeflectionYs();
 
-	public abstract double diffDeflectionXe();
+	public abstract double diffVerticalDeflectionXe();
 
-	public abstract double diffDeflectionYe();
+	public abstract double diffVerticalDeflectionYe();
 
 	public double diffXe() {
 		return -this.diffXs();
