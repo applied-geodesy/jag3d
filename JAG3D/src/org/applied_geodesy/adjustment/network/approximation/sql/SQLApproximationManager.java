@@ -40,6 +40,7 @@ import org.applied_geodesy.adjustment.EstimationStateType;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.adjustment.network.approximation.AutomatedApproximationAdjustment;
 import org.applied_geodesy.adjustment.network.approximation.bundle.PointBundle;
 import org.applied_geodesy.adjustment.network.approximation.bundle.intersection.ForwardIntersectionEntry;
@@ -1377,6 +1378,7 @@ public class SQLApproximationManager implements PropertyChangeListener {
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		stmt.execute();
 
+		int pointDimension = 3;
 		sql = "UPDATE \"PointApriori\" SET "
 				+ "\"x0\" = IFNULL("
 				+ "(SELECT \"x\" FROM \"PointAposteriori\" JOIN \"PointGroup\" ON \"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"PointAposteriori\".\"id\" AND \"enable\" = TRUE), "
@@ -1386,23 +1388,33 @@ public class SQLApproximationManager implements PropertyChangeListener {
 				+ "\"y0\"), "
 				+ "\"z0\" = IFNULL("
 				+ "(SELECT \"z\" FROM \"PointAposteriori\" JOIN \"PointGroup\" ON \"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"PointApriori\".\"id\" = \"PointAposteriori\".\"id\" AND \"enable\" = TRUE), "
-				+ "\"z0\"), "
-				+ "\"dy0\" = IFNULL("
-				+ "(SELECT \"dy\" FROM \"DeflectionAposteriori\" JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE  AND \"PointGroup\".\"dimension\" = 3 AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"DeflectionAposteriori\".\"id\" = \"PointApriori\".\"id\"), "
-				+ "\"dy0\"), "
-				+ "\"dx0\" = IFNULL("
-				+ "(SELECT \"dx\" FROM \"DeflectionAposteriori\" JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" AND \"PointGroup\".\"enable\" = TRUE  AND \"PointGroup\".\"dimension\" = 3 AND \"PointGroup\".\"type\" IN (?, ?) WHERE \"DeflectionAposteriori\".\"id\" = \"PointApriori\".\"id\"), "
-				+ "\"dx0\") "
+				+ "\"z0\") "
 				+ "WHERE \"enable\" = TRUE";
 
 		stmt = this.dataBase.getPreparedStatement(sql);
-		for (int i=1, j=1; i <= 5; i++) {
+		for (int i = 0, j = 1; i < pointDimension; i++) {
 			stmt.setInt(j++, PointType.NEW_POINT.getId());
 			stmt.setInt(j++, transferDatumPoints ? PointType.DATUM_POINT.getId() : PointType.NEW_POINT.getId());
 		}
-
 		stmt.execute();
-
+		
+		int deflectionDimension = 2;
+		sql = "UPDATE \"VerticalDeflectionApriori\" SET "
+				+ "\"x0\" = IFNULL("
+				+ "(SELECT \"x\" FROM \"VerticalDeflectionAposteriori\" JOIN \"VerticalDeflectionGroup\" ON \"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"VerticalDeflectionGroup\".\"enable\" = TRUE AND \"VerticalDeflectionGroup\".\"type\" IN (?, ?) WHERE \"VerticalDeflectionApriori\".\"id\" = \"VerticalDeflectionAposteriori\".\"id\" AND \"enable\" = TRUE), "
+				+ "\"x0\"), "
+				+ "\"y0\" = IFNULL("
+				+ "(SELECT \"y\" FROM \"VerticalDeflectionAposteriori\" JOIN \"VerticalDeflectionGroup\" ON \"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"VerticalDeflectionGroup\".\"enable\" = TRUE AND \"VerticalDeflectionGroup\".\"type\" IN (?, ?) WHERE \"VerticalDeflectionApriori\".\"id\" = \"VerticalDeflectionAposteriori\".\"id\" AND \"enable\" = TRUE), "
+				+ "\"y0\") "
+				+ "WHERE \"enable\" = TRUE";
+		
+		stmt = this.dataBase.getPreparedStatement(sql);
+		for (int i = 0, j = 1; i < deflectionDimension; i++) {
+			stmt.setInt(j++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
+			stmt.setInt(j++, VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION.getId());
+		}
+		stmt.execute();
+		
 		this.estimationStatus1D = EstimationStateType.ERROR_FREE_ESTIMATION;
 		this.estimationStatus2D = EstimationStateType.ERROR_FREE_ESTIMATION;
 	}
