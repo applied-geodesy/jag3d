@@ -30,6 +30,7 @@ import javafx.beans.property.SimpleObjectProperty;
 
 public class VarianceComponentRow extends Row {
 	private ObjectProperty<VarianceComponentType> varianceComponentType = new SimpleObjectProperty<VarianceComponentType>(this, "varianceComponentType");
+	private ObjectProperty<String> name = new SimpleObjectProperty<String>(this, "name");
 	private ObjectProperty<Integer> numberOfObservations = new SimpleObjectProperty<Integer>(this, "numberOfObservations");
 	private ObjectProperty<Double> redundancy = new SimpleObjectProperty<Double>(this, "redundancy");
 	private ObjectProperty<Double> omega = new SimpleObjectProperty<Double>(this, "omega");
@@ -46,6 +47,18 @@ public class VarianceComponentRow extends Row {
 	
 	public final void setVarianceComponentType(final VarianceComponentType varianceComponentType) {
 		this.varianceComponentTypeProperty().set(varianceComponentType);
+	}
+	
+	public final ObjectProperty<String> nameProperty() {
+		return this.name;
+	}
+	
+	public final String getName() {
+		return this.nameProperty().get();
+	}
+	
+	public final void setName(final String name) {
+		this.nameProperty().set(name);
 	}
 	
 	public final ObjectProperty<Integer> numberOfObservationsProperty() {

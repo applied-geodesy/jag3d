@@ -82,7 +82,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 
 	public TableView<VerticalDeflectionRow> getTable(VerticalDeflectionTreeItemValue verticalDeflectionItemValue) {
 		this.verticalDeflectionItemValue = verticalDeflectionItemValue;
-		this.type = verticalDeflectionItemValue.getVerticalDeflectionType();
+		this.type = TreeItemType.getVerticalDeflectionTypeByTreeItemType(verticalDeflectionItemValue.getItemType());
 		switch(this.type) {
 		case REFERENCE_VERTICAL_DEFLECTION:
 		case STOCHASTIC_VERTICAL_DEFLECTION:

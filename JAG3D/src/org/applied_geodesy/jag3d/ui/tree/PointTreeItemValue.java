@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.applied_geodesy.adjustment.network.DefaultUncertainty;
 import org.applied_geodesy.adjustment.network.PointGroupUncertaintyType;
-import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 
 import javafx.beans.property.IntegerProperty;
@@ -46,34 +45,7 @@ public class PointTreeItemValue extends TreeItemValue implements Sortable {
 		this.setEnable(enable);
 		this.setOrderId(orderId);
 	}
-	
-	public final PointType getPointType() {
-		switch (this.getItemType()) {
-		case REFERENCE_POINT_1D_LEAF:
-		case REFERENCE_POINT_2D_LEAF:
-		case REFERENCE_POINT_3D_LEAF:
-			return PointType.REFERENCE_POINT;
-			
-		case STOCHASTIC_POINT_1D_LEAF:
-		case STOCHASTIC_POINT_2D_LEAF:
-		case STOCHASTIC_POINT_3D_LEAF:
-			return PointType.STOCHASTIC_POINT;
-			
-		case DATUM_POINT_1D_LEAF:
-		case DATUM_POINT_2D_LEAF:
-		case DATUM_POINT_3D_LEAF:
-			return PointType.DATUM_POINT;
-			
-		case NEW_POINT_1D_LEAF:
-		case NEW_POINT_2D_LEAF:
-		case NEW_POINT_3D_LEAF:
-			return PointType.NEW_POINT;
-
-		default:
-			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, TreeItemType does not refer to a PointType " + this.getItemType());
-		}
-	}
-	
+		
 	public IntegerProperty groupIdProperty() {
 		return this.groupId;
 	}
@@ -139,6 +111,17 @@ public class PointTreeItemValue extends TreeItemValue implements Sortable {
 		case DATUM_POINT_2D_LEAF:
 		case DATUM_POINT_3D_LEAF:
 			tabTyps.add(TabType.RESULT_CONGRUENCE_ANALYSIS);
+			break;
+		default:
+			break;
+		}
+		
+		// Variance components estimation 
+		switch (type) {
+		case STOCHASTIC_POINT_1D_LEAF:
+		case STOCHASTIC_POINT_2D_LEAF:	
+		case STOCHASTIC_POINT_3D_LEAF:
+			tabTyps.add(TabType.VARIANCE_COMPONENT);
 			break;
 		default:
 			break;

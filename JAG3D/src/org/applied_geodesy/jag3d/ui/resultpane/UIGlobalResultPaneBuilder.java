@@ -29,8 +29,10 @@ import org.applied_geodesy.jag3d.ui.table.UIPrincipalComponentTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITestStatisticTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIVarianceComponentTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.row.PrincipalComponentRow;
+import org.applied_geodesy.jag3d.ui.table.row.Row;
 import org.applied_geodesy.jag3d.ui.table.row.TestStatisticRow;
 import org.applied_geodesy.jag3d.ui.table.row.VarianceComponentRow;
+import org.applied_geodesy.ui.table.ColumnType;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.beans.value.ChangeListener;
@@ -40,6 +42,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
@@ -57,7 +60,7 @@ public class UIGlobalResultPaneBuilder {
 			if (evt.getEventType() == ProjectDatabaseStateType.CLOSED) {
 				// clear all global result tables
 				UITestStatisticTableBuilder.getInstance().getTable().getItems().setAll(UITestStatisticTableBuilder.getInstance().getEmptyRow());
-				UIVarianceComponentTableBuilder.getInstance().getTable().getItems().setAll(UIVarianceComponentTableBuilder.getInstance().getEmptyRow());
+				UIVarianceComponentTableBuilder.getInstance().getTable(UIVarianceComponentTableBuilder.VarianceComponentDisplayType.OVERALL_COMPONENTS).getItems().setAll(UIVarianceComponentTableBuilder.getInstance().getEmptyRow());
 				UIPrincipalComponentTableBuilder.getInstance().getTable().getItems().setAll(UIPrincipalComponentTableBuilder.getInstance().getEmptyRow());
 			}
 		}
@@ -89,7 +92,8 @@ public class UIGlobalResultPaneBuilder {
 		testStatisticTable.setUserData(GlobalResultType.TEST_STATISTIC);
 		testStatisticTable.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-		TableView<VarianceComponentRow> varianceComponentTable = UIVarianceComponentTableBuilder.getInstance().getTable();
+		TableView<VarianceComponentRow> varianceComponentTable = UIVarianceComponentTableBuilder.getInstance().getTable(UIVarianceComponentTableBuilder.VarianceComponentDisplayType.OVERALL_COMPONENTS);
+		this.setTableColumnView(varianceComponentTable);
 		varianceComponentTable.setUserData(GlobalResultType.VARIANCE_COMPONENT);
 		varianceComponentTable.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		
@@ -138,5 +142,26 @@ public class UIGlobalResultPaneBuilder {
 		this.resultDataNode = borderPane;
 		
 		SQLManager.getInstance().addProjectDatabaseStateChangeListener(new DatabaseStateChangeListener());
+	}
+	
+	private void setTableColumnView(TableView<? extends Row> tableView) {
+		int columnCount = tableView.getColumns().size();
+
+		for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+			TableColumn<? extends Row, ?> column = tableView.getColumns().get(columnIndex);
+			if (column.getUserData() instanceof ColumnType) {
+				ColumnType columnType = (ColumnType)column.getUserData();
+				switch(columnType) {
+				case VISIBLE:
+					column.setVisible(true);
+
+					break;
+				default:
+					column.setVisible(false);
+
+					break;
+				}
+			}
+		}
 	}
 }

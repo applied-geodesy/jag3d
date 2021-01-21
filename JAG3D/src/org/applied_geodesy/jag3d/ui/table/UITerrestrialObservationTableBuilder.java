@@ -81,8 +81,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 	public TableView<TerrestrialObservationRow> getTable(ObservationTreeItemValue observationItemValue) {
 		this.observationItemValue = observationItemValue;
-		this.type = observationItemValue.getObservationType();
-		switch(type) {
+		this.type = TreeItemType.getObservationTypeByTreeItemType(observationItemValue.getItemType());
+		switch(this.type) {
 		case LEVELING:
 		case DIRECTION:
 		case HORIZONTAL_DISTANCE:
