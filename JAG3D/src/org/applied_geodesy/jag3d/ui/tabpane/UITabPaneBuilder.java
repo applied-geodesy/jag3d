@@ -33,6 +33,7 @@ import org.applied_geodesy.jag3d.ui.table.UICongruenceAnalysisTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIGNSSObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIPointTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITerrestrialObservationTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.UIVarianceComponentTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIVerticalDeflectionTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.row.AdditionalParameterRow;
 import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
@@ -40,6 +41,7 @@ import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.Row;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
+import org.applied_geodesy.jag3d.ui.table.row.VarianceComponentRow;
 import org.applied_geodesy.jag3d.ui.table.row.VerticalDeflectionRow;
 import org.applied_geodesy.jag3d.ui.tree.CongruenceAnalysisTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
@@ -116,44 +118,50 @@ public class UITabPaneBuilder {
 
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.metadata.label", "Metadata"), 
-				i18n.getString("UITabPaneBuilder.tab.metadata.title", "Project-specific metadata"), 
+				i18n.getString("UITabPaneBuilder.tab.metadata.tooltip", "Project-specific metadata"), 
 				TabType.META_DATA, null
 				);
 
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.graphic.label", "Graphic"), 
-				i18n.getString("UITabPaneBuilder.tab.graphic.title", "Graphical visualisation of the network"), 
+				i18n.getString("UITabPaneBuilder.tab.graphic.tooltip", "Graphical visualisation of the network"), 
 				TabType.GRAPHIC, null
 				);
 
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.raw.label", "Raw data"), 
-				i18n.getString("UITabPaneBuilder.tab.raw.title", "Table of raw data"), 
+				i18n.getString("UITabPaneBuilder.tab.raw.tooltip", "Table of raw data"), 
 				TabType.RAW_DATA, null
 				);
 
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.properties.label", "Properties"), 
-				i18n.getString("UITabPaneBuilder.tab.properties.title", "Properties of group"), 
+				i18n.getString("UITabPaneBuilder.tab.properties.tooltip", "Properties of group"), 
 				TabType.PROPERTIES, null
 				);
 
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.result.label", "Result data"), 
-				i18n.getString("UITabPaneBuilder.tab.result.title", "Table of estimated data"), 
+				i18n.getString("UITabPaneBuilder.tab.result.tooltip", "Table of estimated data"), 
 				TabType.RESULT_DATA, null
 				);
 
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.param.label", "Additional parameters"), 
-				i18n.getString("UITabPaneBuilder.tab.param.title", "Table of additional parameters"), 
+				i18n.getString("UITabPaneBuilder.tab.param.tooltip", "Table of additional parameters"), 
 				TabType.ADDITIONAL_PARAMETER, null
 				);
 
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.congruence.point.label", "Congruence of points"), 
-				i18n.getString("UITabPaneBuilder.tab.congruence.point.title", "Result of congruence analysis of point"), 
+				i18n.getString("UITabPaneBuilder.tab.congruence.point.tooltip", "Result of congruence analysis of point"), 
 				TabType.RESULT_CONGRUENCE_ANALYSIS, null
+				);
+		
+		this.createTab(
+				i18n.getString("UITabPaneBuilder.tab.variance_component.label", "Variance components"), 
+				i18n.getString("UITabPaneBuilder.tab.variance_component.tooltip", "Table of variance components estimation"), 
+				TabType.VARIANCE_COMPONENT, null
 				);
 
 		this.tabPane = new TabPane();
@@ -219,6 +227,12 @@ public class UITabPaneBuilder {
 				UIPointPropertiesPaneBuilder pointPropertiesBuilder = UIPointPropertiesPaneBuilder.getInstance();
 				node = pointPropertiesBuilder.getPointPropertiesPane(pointItemValue.getItemType()).getNode();
 			}
+			else if (tabType == TabType.VARIANCE_COMPONENT) {
+				UIVarianceComponentTableBuilder tableBuilder = UIVarianceComponentTableBuilder.getInstance();
+				TableView<VarianceComponentRow> table = tableBuilder.getTable(UIVarianceComponentTableBuilder.VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS);
+				this.setTableColumnView(tabType, table);
+				node = table;
+			}
 
 			break;
 		case LEVELING_LEAF:
@@ -262,6 +276,12 @@ public class UITabPaneBuilder {
 				TableView<AdditionalParameterRow> table = tableBuilder.getTable();
 				node = table;
 			}
+			else if (tabType == TabType.VARIANCE_COMPONENT) {
+				UIVarianceComponentTableBuilder tableBuilder = UIVarianceComponentTableBuilder.getInstance();
+				TableView<VarianceComponentRow> table = tableBuilder.getTable(UIVarianceComponentTableBuilder.VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS);
+				this.setTableColumnView(tabType, table);
+				node = table;
+			}
 			break;
 
 		case CONGRUENCE_ANALYSIS_1D_LEAF:
@@ -296,6 +316,12 @@ public class UITabPaneBuilder {
 			else if (tabType == TabType.PROPERTIES) {
 				UIVerticalDeflectionPropertiesPaneBuilder verticalDeflectionPropertiesPaneBuilder = UIVerticalDeflectionPropertiesPaneBuilder.getInstance();
 				node = verticalDeflectionPropertiesPaneBuilder.getVerticalDeflectionPropertiesPane(verticalDeflectionTreeItemValue.getItemType()).getNode();
+			}
+			else if (tabType == TabType.VARIANCE_COMPONENT) {
+				UIVarianceComponentTableBuilder tableBuilder = UIVarianceComponentTableBuilder.getInstance();
+				TableView<VarianceComponentRow> table = tableBuilder.getTable(UIVarianceComponentTableBuilder.VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS);
+				this.setTableColumnView(tabType, table);
+				node = table;
 			}
 			
 			break;

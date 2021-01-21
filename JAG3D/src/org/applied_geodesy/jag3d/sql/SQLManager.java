@@ -529,13 +529,12 @@ public class SQLManager {
 
 		// remove old tables and entries
 		sqls.put(20201220.0020, "DELETE FROM \"PointGroupUncertainty\" WHERE \"type\" IN (" + VerticalDeflectionGroupUncertaintyType.DEFLECTION_X.getId() + ", " + VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y.getId() + ")\r\n");
-		sqls.put(20200119.0021, "DROP TABLE \"DeflectionAposteriori\"\r\n");
+		sqls.put(20201220.0021, "DROP TABLE \"DeflectionAposteriori\"\r\n");
 		sqls.put(20201220.0022, "ALTER TABLE \"PointApriori\" DROP COLUMN \"dy0\"\r\n");
 		sqls.put(20201220.0023, "ALTER TABLE \"PointApriori\" DROP COLUMN \"dx0\"\r\n");
 		sqls.put(20201220.0024, "ALTER TABLE \"PointApriori\" DROP COLUMN \"sigma_dy0\"\r\n");
 		sqls.put(20201220.0025, "ALTER TABLE \"PointApriori\" DROP COLUMN \"sigma_dx0\"\r\n");
 		sqls.put(20201220.0026, "ALTER TABLE \"PointGroup\" DROP COLUMN \"consider_deflection\"\r\n");
-		
 		
 		return sqls;
 	}
@@ -915,15 +914,13 @@ public class SQLManager {
 				//UIPointPropertiesPaneBuilder.getInstance().getPointPropertiesPane(pointItemValue.getItemType()).reset();
 
 				switch(treeItemType) {
-				case REFERENCE_POINT_3D_LEAF:
 				case STOCHASTIC_POINT_1D_LEAF:
 				case STOCHASTIC_POINT_2D_LEAF:
 				case STOCHASTIC_POINT_3D_LEAF:
-				case DATUM_POINT_3D_LEAF:
-				case NEW_POINT_3D_LEAF:
 
 					this.loadUncertainties(pointItemValue, selectedPointItemValuesArray);
-
+					this.loadVarianceComponents(pointItemValue, selectedPointItemValuesArray);
+					
 					break;
 				default:
 					break;
@@ -974,10 +971,10 @@ public class SQLManager {
 				}
 
 				//UIObservationPropertiesPaneBuilder.getInstance().getObservationPropertiesPane(observationItemValue.getItemType()).reset();
-
 				this.loadUncertainties(observationItemValue, selectedObservationItemValuesArray);
 				this.loadEpoch(observationItemValue, selectedObservationItemValuesArray);
 				this.loadAdditionalParameters(observationItemValue, selectedObservationItemValuesArray);
+				this.loadVarianceComponents(observationItemValue, selectedObservationItemValuesArray);
 			}
 
 			break;
@@ -1000,7 +997,11 @@ public class SQLManager {
 				selectedVerticalDeflectionItemValuesArray = selectedVerticalDeflectionTreeItemValues.toArray(new VerticalDeflectionTreeItemValue[selectedVerticalDeflectionTreeItemValues.size()]);
 				
 				this.loadVerticalDeflections(verticalDeflectionTreeItemValue, selectedVerticalDeflectionItemValuesArray);
-				this.loadUncertainties(verticalDeflectionTreeItemValue, selectedVerticalDeflectionItemValuesArray);
+				
+				if (treeItemType == TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_LEAF) {
+					this.loadUncertainties(verticalDeflectionTreeItemValue, selectedVerticalDeflectionItemValuesArray);
+					this.loadVarianceComponents(verticalDeflectionTreeItemValue, selectedVerticalDeflectionItemValuesArray);
+				}
 			}
 		break;
 
@@ -1010,12 +1011,383 @@ public class SQLManager {
 		}
 	}
 
+	private void loadVarianceComponents(PointTreeItemValue pointItemValue, PointTreeItemValue... selectedPointItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
+		PointType pointType = TreeItemType.getPointTypeByTreeItemType(pointItemValue.getItemType());
+		int dimension = pointItemValue.getDimension();
+		
+		if (pointType != PointType.STOCHASTIC_POINT)
+			return;
+		
+		StringBuilder inArrayValues = new StringBuilder("?");
+		for (int i=1; i<selectedPointItemValues.length; i++)
+			inArrayValues.append(",?");
+		
+		UIVarianceComponentTableBuilder tableBuilder = UIVarianceComponentTableBuilder.getInstance();
+		TableView<VarianceComponentRow> table = tableBuilder.getTable(UIVarianceComponentTableBuilder.VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS);
+		List<VarianceComponentRow> tableModel = FXCollections.observableArrayList();
+
+		String sumRedundancy;
+		VarianceComponentType varianceComponentType = null;
+		switch(dimension) {
+		case 2:
+			varianceComponentType = VarianceComponentType.STOCHASTIC_POINT_2D_COMPONENT;
+			sumRedundancy    = "SUM(\"redundancy_x\" + \"redundancy_y\")";
+			break;
+		case 3:
+			varianceComponentType = VarianceComponentType.STOCHASTIC_POINT_3D_COMPONENT;
+			sumRedundancy    = "SUM(\"redundancy_x\" + \"redundancy_y\" + \"redundancy_z\")";
+			break;
+		default:
+			varianceComponentType = VarianceComponentType.STOCHASTIC_POINT_1D_COMPONENT;
+			sumRedundancy    = "SUM(\"redundancy_z\")";
+			break;
+		}
+
+		String sql = "SELECT "
+				+ "\"name\", \"number_of_observations\", \"omega\", \"redundancy\", \"sigma2apost\", \"order\" FROM ( "
+				
+				+ "SELECT "
+				+ "NULL AS \"name\", COUNT(\"id\") * ? AS \"number_of_observations\", "
+				+ "SUM(\"omega\") AS \"omega\", " + sumRedundancy + " AS \"redundancy\", "
+				+ "CASEWHEN(" + sumRedundancy + " > 0, SUM(\"omega\")/" + sumRedundancy + ", 0) AS \"sigma2apost\", "
+				+ "-1 AS \"order\" "
+				+ "FROM \"PointAposteriori\" "
+				+ "JOIN \"PointApriori\" ON \"PointAposteriori\".\"id\" = \"PointApriori\".\"id\" "
+				+ "JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" "
+				+ "WHERE \"PointGroup\".\"type\" = ? AND "
+				+ "\"PointApriori\".\"enable\" = TRUE AND "
+				+ "\"PointGroup\".\"enable\" = TRUE AND "
+				+ "\"group_id\" IN (" + inArrayValues + ") "
+				
+				+ "UNION ALL "
+
+				+ "SELECT "
+				+ "\"PointGroup\".\"name\" AS \"name\", COUNT(\"id\") * ? AS \"number_of_observations\", "
+				+ "SUM(\"omega\") AS \"omega\", " + sumRedundancy + " AS \"redundancy\", "
+				+ "CASEWHEN(" + sumRedundancy + " > 0, SUM(\"omega\")/" + sumRedundancy + ", 0) AS \"sigma2apost\", "
+				+ "\"order\" "
+				+ "FROM \"PointAposteriori\" "
+				+ "JOIN \"PointApriori\" ON \"PointAposteriori\".\"id\" = \"PointApriori\".\"id\" "
+				+ "JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" "
+				+ "WHERE \"PointGroup\".\"type\" = ? AND "
+				+ "\"PointApriori\".\"enable\" = TRUE AND "
+				+ "\"PointGroup\".\"enable\" = TRUE AND "
+				+ "\"group_id\" IN (" + inArrayValues + ") "
+				+ "GROUP BY \"group_id\", \"PointGroup\".\"name\", \"order\" "
+				
+				+ ") AS \"UnionTable\" "
+				+ "ORDER BY \"order\" ASC";
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+
+		int idx = 1;
+		stmt.setInt(idx++, dimension);
+		stmt.setInt(idx++, pointType.getId());
+		for (int i=0; i<selectedPointItemValues.length; i++)
+			stmt.setInt(idx++, selectedPointItemValues[i].getGroupId());
+		
+		stmt.setInt(idx++, dimension);
+		stmt.setInt(idx++, pointType.getId());
+		for (int i=0; i<selectedPointItemValues.length; i++)
+			stmt.setInt(idx++, selectedPointItemValues[i].getGroupId());
+
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			String name = rs.getString("name");
+			if (rs.wasNull()) 
+				name = UIVarianceComponentTableBuilder.getVarianceComponentTypeLabel(varianceComponentType);
+			
+			int numberOfObservations = rs.getInt("number_of_observations");
+			double redundancy        = rs.getDouble("redundancy");
+			
+			if (numberOfObservations == 0 || redundancy == 0)
+				continue;
+			
+			double omega       = rs.getDouble("omega");
+			double sigma2apost = rs.getDouble("sigma2apost");
+			
+			VarianceComponentRow row = new VarianceComponentRow();
+
+			row.setId(varianceComponentType.getId());
+			row.setName(name);
+			row.setVarianceComponentType(varianceComponentType);
+			row.setNumberOfObservations(numberOfObservations);
+			row.setRedundancy(redundancy);
+			row.setOmega(omega);
+			row.setSigma2aposteriori(sigma2apost);
+			
+			tableModel.add(row);
+		}
+		
+		if (tableModel.size() == 2) // the group and the total vce are identical
+			tableModel.remove(0);
+
+		if (!tableModel.isEmpty())
+			table.getItems().setAll(tableModel);
+		else
+			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
+	}
+	
+	private void loadVarianceComponents(VerticalDeflectionTreeItemValue verticalDeflectionItemValue, VerticalDeflectionTreeItemValue... selectedVerticalDeflectionItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
+		VerticalDeflectionType verticalDeflectionType = TreeItemType.getVerticalDeflectionTypeByTreeItemType(verticalDeflectionItemValue.getItemType());
+		if (verticalDeflectionType != VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION)
+			return;
+		
+		StringBuilder inArrayValues = new StringBuilder("?");
+		for (int i=1; i<selectedVerticalDeflectionItemValues.length; i++)
+			inArrayValues.append(",?");
+		
+		UIVarianceComponentTableBuilder tableBuilder = UIVarianceComponentTableBuilder.getInstance();
+		TableView<VarianceComponentRow> table = tableBuilder.getTable(UIVarianceComponentTableBuilder.VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS);
+		List<VarianceComponentRow> tableModel = FXCollections.observableArrayList();
+		
+		VarianceComponentType varianceComponentType = VarianceComponentType.STOCHASTIC_DEFLECTION_COMPONENT;
+		int dimension = verticalDeflectionItemValue.getDimension();
+		
+		String sql = "SELECT "
+				+ "\"name\", \"number_of_observations\", \"omega\", \"redundancy\", \"sigma2apost\", \"order\" FROM ( "
+				
+				+ "SELECT "
+				+ "NULL AS \"name\", COUNT(\"id\") * ? AS \"number_of_observations\", "
+				+ "SUM(\"omega\") AS \"omega\", SUM(\"redundancy_x\" + \"redundancy_y\") AS \"redundancy\", "
+				+ "CASEWHEN(SUM(\"redundancy_x\" + \"redundancy_y\") > 0, SUM(\"omega\")/SUM(\"redundancy_x\" + \"redundancy_y\"), 0) AS \"sigma2apost\", "
+				+ "-1 AS \"order\" "
+				+ "FROM \"VerticalDeflectionAposteriori\" "
+				+ "JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionAposteriori\".\"id\" = \"VerticalDeflectionApriori\".\"id\" "
+				+ "JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" "
+				+ "WHERE \"VerticalDeflectionGroup\".\"type\" = ? AND "
+				+ "\"VerticalDeflectionApriori\".\"enable\" = TRUE AND "
+				+ "\"VerticalDeflectionGroup\".\"enable\" = TRUE AND "
+				+ "\"group_id\" IN (" + inArrayValues + ") "
+				
+				+ "UNION ALL "
+
+				+ "SELECT "
+				+ "\"VerticalDeflectionGroup\".\"name\" AS \"name\", COUNT(\"id\") * ? AS \"number_of_observations\", "
+				+ "SUM(\"omega\") AS \"omega\", SUM(\"redundancy_x\" + \"redundancy_y\") AS \"redundancy\", "
+				+ "CASEWHEN(SUM(\"redundancy_x\" + \"redundancy_y\") > 0, SUM(\"omega\")/SUM(\"redundancy_x\" + \"redundancy_y\"), 0) AS \"sigma2apost\", "
+				+ "\"order\" "
+				+ "FROM \"VerticalDeflectionAposteriori\" "
+				+ "JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionAposteriori\".\"id\" = \"VerticalDeflectionApriori\".\"id\" "
+				+ "JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" "
+				+ "WHERE \"VerticalDeflectionGroup\".\"type\" = ? AND "
+				+ "\"VerticalDeflectionApriori\".\"enable\" = TRUE AND "
+				+ "\"VerticalDeflectionGroup\".\"enable\" = TRUE AND "
+				+ "\"group_id\" IN (" + inArrayValues + ") "
+				+ "GROUP BY \"group_id\", \"VerticalDeflectionGroup\".\"name\", \"order\" "
+				
+				+ ") AS \"UnionTable\" "
+				+ "ORDER BY \"order\" ASC";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+
+		int idx = 1;
+		stmt.setInt(idx++, dimension);
+		stmt.setInt(idx++, verticalDeflectionType.getId());
+		for (int i=0; i<selectedVerticalDeflectionItemValues.length; i++)
+			stmt.setInt(idx++, selectedVerticalDeflectionItemValues[i].getGroupId());
+		
+		stmt.setInt(idx++, dimension);
+		stmt.setInt(idx++, verticalDeflectionType.getId());
+		for (int i=0; i<selectedVerticalDeflectionItemValues.length; i++)
+			stmt.setInt(idx++, selectedVerticalDeflectionItemValues[i].getGroupId());
+
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			String name = rs.getString("name");
+			if (rs.wasNull()) 
+				name = UIVarianceComponentTableBuilder.getVarianceComponentTypeLabel(varianceComponentType);
+			
+			int numberOfObservations = rs.getInt("number_of_observations");
+			double redundancy        = rs.getDouble("redundancy");
+			
+			if (numberOfObservations == 0 || redundancy == 0)
+				continue;
+			
+			double omega       = rs.getDouble("omega");
+			double sigma2apost = rs.getDouble("sigma2apost");
+			
+			VarianceComponentRow row = new VarianceComponentRow();
+			row.setId(varianceComponentType.getId());
+			row.setName(name);
+			row.setVarianceComponentType(varianceComponentType);
+			row.setNumberOfObservations(numberOfObservations);
+			row.setRedundancy(redundancy);
+			row.setOmega(omega);
+			row.setSigma2aposteriori(sigma2apost);
+			
+			tableModel.add(row);
+		}
+		
+		if (tableModel.size() == 2) // the group and the total vce are identical
+			tableModel.remove(0);
+
+		if (!tableModel.isEmpty())
+			table.getItems().setAll(tableModel);
+		else
+			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
+	}
+	
+	private void loadVarianceComponents(ObservationTreeItemValue observationItemValue, ObservationTreeItemValue... selectedObservationItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
+		ObservationType observationType = TreeItemType.getObservationTypeByTreeItemType(observationItemValue.getItemType());
+		int dimension = observationItemValue.getDimension();
+		if (observationType == null)
+			return;
+		
+		StringBuilder inArrayValues = new StringBuilder("?");
+		for (int i=1; i<selectedObservationItemValues.length; i++)
+			inArrayValues.append(",?");
+		
+		UIVarianceComponentTableBuilder tableBuilder = UIVarianceComponentTableBuilder.getInstance();
+		TableView<VarianceComponentRow> table = tableBuilder.getTable(UIVarianceComponentTableBuilder.VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS);
+		List<VarianceComponentRow> tableModel = FXCollections.observableArrayList();
+				
+		String tableApriori     = "ObservationApriori";
+		String tableAposteriori = "ObservationAposteriori";
+		String sumRedundancy    = "SUM(\"redundancy\")";
+		
+		VarianceComponentType varianceComponentType = null;
+		switch(observationType) {
+		case LEVELING:
+			varianceComponentType = VarianceComponentType.LEVELING_COMPONENT;
+			break;
+		case DIRECTION:
+			varianceComponentType = VarianceComponentType.DIRECTION_COMPONENT;
+			break;
+		case HORIZONTAL_DISTANCE:
+			varianceComponentType = VarianceComponentType.HORIZONTAL_DISTANCE_COMPONENT;
+			break;
+		case SLOPE_DISTANCE:
+			varianceComponentType = VarianceComponentType.SLOPE_DISTANCE_COMPONENT;
+			break;
+		case ZENITH_ANGLE:
+			varianceComponentType = VarianceComponentType.ZENITH_ANGLE_COMPONENT;
+			break;
+		case GNSS1D:
+			varianceComponentType = VarianceComponentType.GNSS1D_COMPONENT;
+			tableApriori     = "GNSSObservationApriori";
+			tableAposteriori = "GNSSObservationAposteriori";
+			sumRedundancy    = "SUM(\"redundancy_z\")";
+			break;
+		case GNSS2D:
+			varianceComponentType = VarianceComponentType.GNSS2D_COMPONENT;
+			tableApriori     = "GNSSObservationApriori";
+			tableAposteriori = "GNSSObservationAposteriori";
+			sumRedundancy    = "SUM(\"redundancy_x\" + \"redundancy_y\")";
+			break;
+		case GNSS3D:
+			varianceComponentType = VarianceComponentType.GNSS3D_COMPONENT;
+			tableApriori     = "GNSSObservationApriori";
+			tableAposteriori = "GNSSObservationAposteriori";
+			sumRedundancy    = "SUM(\"redundancy_x\" + \"redundancy_y\" + \"redundancy_z\")";
+			break;
+		}
+		
+		if (varianceComponentType == null)
+			return;
+		
+		String sql = "SELECT "
+				+ "\"name\", \"number_of_observations\", \"omega\", \"redundancy\", \"sigma2apost\", \"order\" FROM ( "
+				
+				+ "SELECT "
+				+ "NULL AS \"name\", COUNT(\"id\") * ? AS \"number_of_observations\", "
+				+ "SUM(\"omega\") AS \"omega\", " + sumRedundancy + " AS \"redundancy\", "
+				+ "CASEWHEN(" + sumRedundancy + " > 0, SUM(\"omega\")/" + sumRedundancy + ", 0) AS \"sigma2apost\", "
+				+ "-1 AS \"order\" "
+				+ "FROM \"" + tableAposteriori + "\" "
+				+ "JOIN \"" + tableApriori + "\" ON \"" + tableAposteriori + "\".\"id\" = \"" + tableApriori + "\".\"id\" "
+				+ "JOIN \"ObservationGroup\" ON \"" + tableApriori + "\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				+ "WHERE \"ObservationGroup\".\"type\" = ? AND "
+				+ "\"" + tableApriori + "\".\"enable\" = TRUE AND "
+				+ "\"ObservationGroup\".\"enable\" = TRUE AND "
+				+ "\"group_id\" IN (" + inArrayValues + ") "
+				
+				+ "UNION ALL "
+
+				+ "SELECT "
+				+ "\"name\", COUNT(\"id\") * ? AS \"number_of_observations\", "
+				+ "SUM(\"omega\") AS \"omega\", " + sumRedundancy + " AS \"redundancy\", "
+				+ "CASEWHEN(" + sumRedundancy + " > 0, SUM(\"omega\")/" + sumRedundancy + ", 0) AS \"sigma2apost\", "
+				+ "\"order\" "
+				+ "FROM \"" + tableAposteriori + "\" "
+				+ "JOIN \"" + tableApriori + "\" ON \"" + tableAposteriori + "\".\"id\" = \"" + tableApriori + "\".\"id\" "
+				+ "JOIN \"ObservationGroup\" ON \"" + tableApriori + "\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				+ "WHERE \"ObservationGroup\".\"type\" = ? AND "
+				+ "\"" + tableApriori + "\".\"enable\" = TRUE AND "
+				+ "\"ObservationGroup\".\"enable\" = TRUE AND "
+				+ "\"group_id\" IN (" + inArrayValues + ") "
+				+ "GROUP BY \"group_id\", \"name\", \"order\" "
+				
+				+ ") AS \"UnionTable\" "
+				+ "ORDER BY \"order\" ASC";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+
+		int idx = 1;
+		stmt.setInt(idx++, dimension);
+		stmt.setInt(idx++, observationType.getId());
+		for (int i=0; i<selectedObservationItemValues.length; i++)
+			stmt.setInt(idx++, selectedObservationItemValues[i].getGroupId());
+		
+		stmt.setInt(idx++, dimension);
+		stmt.setInt(idx++, observationType.getId());
+		for (int i=0; i<selectedObservationItemValues.length; i++)
+			stmt.setInt(idx++, selectedObservationItemValues[i].getGroupId());
+
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			String name = rs.getString("name");
+			if (rs.wasNull()) 
+				name = UIVarianceComponentTableBuilder.getVarianceComponentTypeLabel(varianceComponentType);
+			
+			int numberOfObservations = rs.getInt("number_of_observations");
+			double redundancy        = rs.getDouble("redundancy");
+			
+			if (numberOfObservations == 0 || redundancy == 0)
+				continue;
+			
+			double omega       = rs.getDouble("omega");
+			double sigma2apost = rs.getDouble("sigma2apost");
+			
+			VarianceComponentRow row = new VarianceComponentRow();
+
+			row.setId(varianceComponentType.getId());
+			row.setName(name);
+			row.setVarianceComponentType(varianceComponentType);
+			row.setNumberOfObservations(numberOfObservations);
+			row.setRedundancy(redundancy);
+			row.setOmega(omega);
+			row.setSigma2aposteriori(sigma2apost);
+			
+			tableModel.add(row);
+		}
+		
+		if (tableModel.size() == 2) // the group and the total vce are identical
+			tableModel.remove(0);
+
+		if (!tableModel.isEmpty())
+			table.getItems().setAll(tableModel);
+		else
+			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
+	}
+
 	private void loadVarianceComponents() throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
 		UIVarianceComponentTableBuilder tableBuilder = UIVarianceComponentTableBuilder.getInstance();
-		TableView<VarianceComponentRow> table = tableBuilder.getTable();
+		TableView<VarianceComponentRow> table = tableBuilder.getTable(UIVarianceComponentTableBuilder.VarianceComponentDisplayType.OVERALL_COMPONENTS);
 		List<VarianceComponentRow> tableModel = FXCollections.observableArrayList();
 		
 		String sql = "SELECT "
@@ -1496,7 +1868,7 @@ public class SQLManager {
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		
-		stmt.setInt(1, verticalDeflectionItemValue.getVerticalDeflectionType().getId());
+		stmt.setInt(1, TreeItemType.getVerticalDeflectionTypeByTreeItemType(verticalDeflectionItemValue.getItemType()).getId());
 
 		for (int i=0; i<selectedVerticalDeflectionItemValues.length; i++)
 			stmt.setInt(i+2, selectedVerticalDeflectionItemValues[i].getGroupId());
@@ -1652,7 +2024,7 @@ public class SQLManager {
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
-		stmt.setInt(1, observationItemValue.getObservationType().getId());
+		stmt.setInt(1, TreeItemType.getObservationTypeByTreeItemType(observationItemValue.getItemType()).getId());
 		for (int i=0; i<selectedObservationItemValues.length; i++)
 			stmt.setInt(i+2, selectedObservationItemValues[i].getGroupId());
 
@@ -1782,7 +2154,7 @@ public class SQLManager {
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
-		stmt.setInt(1, observationGNSSItemValue.getObservationType().getId());
+		stmt.setInt(1, TreeItemType.getObservationTypeByTreeItemType(observationGNSSItemValue.getItemType()).getId());
 		for (int i = 0; i < selectedGNSSObservationItemValues.length; i++)
 			stmt.setInt(i+2, selectedGNSSObservationItemValues[i].getGroupId());
 
@@ -1981,7 +2353,7 @@ public class SQLManager {
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
-		stmt.setInt(1, pointItemValue.getPointType().getId());
+		stmt.setInt(1, TreeItemType.getPointTypeByTreeItemType(pointItemValue.getItemType()).getId());
 		stmt.setInt(2, pointItemValue.getDimension());
 
 		for (int i=0; i<selectedPointItemValues.length; i++)
@@ -2665,7 +3037,7 @@ public class SQLManager {
 		int groupId        = pointTreeItemValue.getGroupId();
 		String name        = pointTreeItemValue.getName().trim();
 		int dimension      = pointTreeItemValue.getDimension();
-		PointType type     = pointTreeItemValue.getPointType();
+		PointType type     = TreeItemType.getPointTypeByTreeItemType(pointTreeItemValue.getItemType());
 		boolean enable     = pointTreeItemValue.isEnable();
 		int orderId        = pointTreeItemValue.getOrderId();
 		
@@ -2728,7 +3100,7 @@ public class SQLManager {
 
 		int groupId           = observationTreeItemValue.getGroupId();
 		String name           = observationTreeItemValue.getName().trim();
-		ObservationType type  = observationTreeItemValue.getObservationType();
+		ObservationType type  = TreeItemType.getObservationTypeByTreeItemType(observationTreeItemValue.getItemType());
 		boolean enable        = observationTreeItemValue.isEnable();
 		int orderId           = observationTreeItemValue.getOrderId();
 
@@ -2800,7 +3172,7 @@ public class SQLManager {
 		
 		int groupId                 = verticalDeflectionTreeItemValue.getGroupId();
 		String name                 = verticalDeflectionTreeItemValue.getName().trim();
-		VerticalDeflectionType type = verticalDeflectionTreeItemValue.getVerticalDeflectionType();
+		VerticalDeflectionType type = TreeItemType.getVerticalDeflectionTypeByTreeItemType(verticalDeflectionTreeItemValue.getItemType());
 		boolean enable              = verticalDeflectionTreeItemValue.isEnable();
 		int orderId                 = verticalDeflectionTreeItemValue.getOrderId();
 		

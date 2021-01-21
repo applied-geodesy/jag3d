@@ -81,8 +81,8 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 
 	public TableView<GNSSObservationRow> getTable(ObservationTreeItemValue observationItemValue) {
 		this.observationItemValue = observationItemValue;
-		this.type = observationItemValue.getObservationType();
-		switch(type) {
+		this.type = TreeItemType.getObservationTypeByTreeItemType(observationItemValue.getItemType());
+		switch(this.type) {
 		case GNSS1D:
 		case GNSS2D:
 		case GNSS3D:

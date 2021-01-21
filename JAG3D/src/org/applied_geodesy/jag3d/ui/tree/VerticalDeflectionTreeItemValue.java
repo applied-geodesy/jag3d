@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.applied_geodesy.adjustment.network.DefaultUncertainty;
 import org.applied_geodesy.adjustment.network.VerticalDeflectionGroupUncertaintyType;
-import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 
 import javafx.beans.property.IntegerProperty;
@@ -59,19 +58,6 @@ public class VerticalDeflectionTreeItemValue extends TreeItemValue implements So
 		this.groupIdProperty().set(groupId);
 	}
 	
-	public final VerticalDeflectionType getVerticalDeflectionType() {
-		switch (this.getItemType()) {
-		case REFERENCE_VERTICAL_DEFLECTION_LEAF:
-			return VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION;
-		case STOCHASTIC_VERTICAL_DEFLECTION_LEAF:
-			return VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION;
-		case UNKNOWN_VERTICAL_DEFLECTION_LEAF:
-			return VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION;
-		default:
-			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, TreeItemType does not refer to a VerticalDeflectionType " + this.getItemType());
-		}
-	}
-	
 	public final int getDimension() {
 		return 2;
 	}
@@ -90,6 +76,10 @@ public class VerticalDeflectionTreeItemValue extends TreeItemValue implements So
 		
 		// Results Point
 		tabTyps.add(TabType.RESULT_DATA);
+		
+		// Variance components estimation 
+		if (type == TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_LEAF)
+			tabTyps.add(TabType.VARIANCE_COMPONENT);
 		
 		return tabTyps.toArray(new TabType[tabTyps.size()]);
 	}

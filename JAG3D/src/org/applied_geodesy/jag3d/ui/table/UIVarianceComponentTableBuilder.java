@@ -21,6 +21,9 @@
 
 package org.applied_geodesy.jag3d.ui.table;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
 import org.applied_geodesy.jag3d.ui.table.row.VarianceComponentRow;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
@@ -40,26 +43,39 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 
 public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComponentRow> {
+	public enum VarianceComponentDisplayType {
+		OVERALL_COMPONENTS,
+		SELECTED_GROUP_COMPONENTS
+	}
 
 	private static UIVarianceComponentTableBuilder tableBuilder = new UIVarianceComponentTableBuilder();
-	private boolean isInitialize = false;
+	private VarianceComponentDisplayType type;
+	private Map<VarianceComponentDisplayType, TableView<VarianceComponentRow>> tables = new HashMap<VarianceComponentDisplayType, TableView<VarianceComponentRow>>();
 	private UIVarianceComponentTableBuilder() {
 		super();
 	}
 
 	public static UIVarianceComponentTableBuilder getInstance() {
-		tableBuilder.init();
 		return tableBuilder;
+	}
+	
+	public TableView<VarianceComponentRow> getTable(VarianceComponentDisplayType varianceComponentDisplayType) {
+		this.type = varianceComponentDisplayType;
+		this.init();
+		return this.table;
 	}
 
 	private void init() {
-		if (this.isInitialize)
+		if (this.tables.containsKey(this.type)) {
+			this.table = this.tables.get(this.type);
 			return;
+		}
 		
 		double minColumnWidth = 50;
 		double prefColumnWidth = 100;
 
 		TableColumn<VarianceComponentRow, VarianceComponentType> varianceComponentTypeColumn = null;
+		TableColumn<VarianceComponentRow, String> stringColumn   = null;
 		TableColumn<VarianceComponentRow, Boolean> booleanColumn = null;
 		TableColumn<VarianceComponentRow, Double> doubleColumn   = null;
 		TableColumn<VarianceComponentRow, Integer> integerColumn = null; 
@@ -70,13 +86,28 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		CellValueType cellValueType = CellValueType.STRING;
 		int columnIndex = table.getColumns().size(); 
 		String labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.label", "Component");
-		String tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.tooltip", "Type of the variance component estimation");
+		String tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.tooltip", "Type of estimated variance component");
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		varianceComponentTypeColumn = this.<VarianceComponentType>getColumn(header, VarianceComponentRow::varianceComponentTypeProperty, getVarianceComponentTypeCallback(), ColumnType.VISIBLE, columnIndex, false); 
-		varianceComponentTypeColumn.setPrefWidth(175);
-		varianceComponentTypeColumn.setMinWidth(150);
-		varianceComponentTypeColumn.setMaxWidth(250);
+		varianceComponentTypeColumn = this.<VarianceComponentType>getColumn(header, VarianceComponentRow::varianceComponentTypeProperty, getVarianceComponentTypeCallback(), this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false); 
+		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
+			varianceComponentTypeColumn.setPrefWidth(175);
+			varianceComponentTypeColumn.setMinWidth(150);
+//			varianceComponentTypeColumn.setMaxWidth(250);
+		}
 		table.getColumns().add(varianceComponentTypeColumn);
+		
+		// Station-ID
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.name.label", "Name");
+		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.name.tooltip", "Name of variance component");
+		cellValueType = CellValueType.STRING;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		stringColumn = this.<String>getColumn(header, VarianceComponentRow::nameProperty, getStringCallback(), this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, true); 
+		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
+			stringColumn.setPrefWidth(175);
+			stringColumn.setMinWidth(150);
+		}
+		table.getColumns().add(stringColumn);
 
 		// number of observations
 		cellValueType = CellValueType.INTEGER;
@@ -85,8 +116,10 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.number_of_observations.tooltip", "Number of observations");
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		integerColumn = this.<Integer>getColumn(header, VarianceComponentRow::numberOfObservationsProperty, getIntegerCallback(), ColumnType.VISIBLE, columnIndex, false); 
-		integerColumn.setMinWidth(minColumnWidth);
-		integerColumn.setPrefWidth(prefColumnWidth);
+		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
+			integerColumn.setMinWidth(minColumnWidth);
+			integerColumn.setPrefWidth(prefColumnWidth);
+		}
 		table.getColumns().add(integerColumn);
 
 		// redundnacy
@@ -96,8 +129,10 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.redundancy.tooltip", "Redundancy");
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, VarianceComponentRow::redundancyProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
-		doubleColumn.setMinWidth(minColumnWidth);
-		doubleColumn.setPrefWidth(prefColumnWidth);
+		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
+			doubleColumn.setMinWidth(minColumnWidth);
+			doubleColumn.setPrefWidth(prefColumnWidth);
+		}
 		table.getColumns().add(doubleColumn);
 
 		// Omega
@@ -107,8 +142,10 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.omega.tooltip", "Squared weigthed residuals");
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, VarianceComponentRow::omegaProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
-		doubleColumn.setMinWidth(minColumnWidth);
-		doubleColumn.setPrefWidth(prefColumnWidth);
+		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
+			doubleColumn.setMinWidth(minColumnWidth);
+			doubleColumn.setPrefWidth(prefColumnWidth);
+		}
 		table.getColumns().add(doubleColumn);
 
 		// Sigma a-posteriori
@@ -118,8 +155,10 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.variance.tooltip", "A-posteriori variance factor w.r.t. a-priori variance");
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, VarianceComponentRow::sigma2aposterioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
-		doubleColumn.setMinWidth(minColumnWidth);
-		doubleColumn.setPrefWidth(prefColumnWidth);
+		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
+			doubleColumn.setMinWidth(minColumnWidth);
+			doubleColumn.setPrefWidth(prefColumnWidth);
+		}
 		table.getColumns().add(doubleColumn);
 
 		// Decision of test statistic
@@ -129,7 +168,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.significant.tooltip", "Checked, if a-posteriori variance is significant w.r.t. a-priori variance");
 		cellValueType = CellValueType.BOOLEAN;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		booleanColumn = this.<Boolean>getColumn(header, VarianceComponentRow::significantProperty, getBooleanCallback(), ColumnType.VISIBLE, columnIndex, false);
+		booleanColumn = this.<Boolean>getColumn(header, VarianceComponentRow::significantProperty, getBooleanCallback(), this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false);
 		booleanColumn.setCellValueFactory(new Callback<CellDataFeatures<VarianceComponentRow, Boolean>, ObservableValue<Boolean>>() {
 			@Override
 			public ObservableValue<Boolean> call(CellDataFeatures<VarianceComponentRow, Boolean> param) {
@@ -139,11 +178,16 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 				return booleanProp;
 			}
 		});
+		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
+			booleanColumn.setPrefWidth(prefColumnWidth);
+			booleanColumn.setMinWidth(minColumnWidth);
+		}
 		table.getColumns().add(booleanColumn);
-		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS)
+			table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		
+		this.tables.put(this.type, table);
 		this.table = table;
-		this.isInitialize = true;
 	}
 
 	private static Callback<TableColumn<VarianceComponentRow, VarianceComponentType>, TableCell<VarianceComponentRow, VarianceComponentType>> getVarianceComponentTypeCallback() {
@@ -158,93 +202,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 								if (type == null)
 									return null;
 
-								switch (type) {
-								case GLOBAL:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.global.label", "Global adjustment");
-									
-								case LEVELING_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.leveling.label", "Leveling");
-								case LEVELING_ZERO_POINT_OFFSET_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.leveling.zero_point_offset.label", "Leveling \u03C3a");
-								case LEVELING_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.leveling.square_root_distance_dependent.label", "Leveling \u03C3b");
-								case LEVELING_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.leveling.distance_dependent.label", "Leveling \u03C3c");						
-									
-								case DIRECTION_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.direction.label", "Direction");
-								case DIRECTION_ZERO_POINT_OFFSET_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.direction.zero_point_offset.label", "Direction \u03C3a");
-								case DIRECTION_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.direction.square_root_distance_dependent.label", "Direction \u03C3b");
-								case DIRECTION_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.direction.distance_dependent.label", "Direction \u03C3c");
-								
-								case HORIZONTAL_DISTANCE_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.horizontal_distance.label", "Horizontal distance");
-								case HORIZONTAL_DISTANCE_ZERO_POINT_OFFSET_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.horizontal_distance.zero_point_offset.label", "Horizontal distance \u03C3a");
-								case HORIZONTAL_DISTANCE_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.horizontal_distance.square_root_distance_dependent.label", "Horizontal distance \u03C3b");
-								case HORIZONTAL_DISTANCE_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.horizontal_distance.distance_dependent.label", "Horizontal distance \u03C3c");
-								
-								case SLOPE_DISTANCE_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.slope_distance.label", "Slope distance");
-								case SLOPE_DISTANCE_ZERO_POINT_OFFSET_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.slope_distance.zero_point_offset.label", "Slope distance \u03C3a");
-								case SLOPE_DISTANCE_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.slope_distance.square_root_distance_dependent.label", "Slope distance \u03C3b");
-								case SLOPE_DISTANCE_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.slope_distance.distance_dependent.label", "Slope distance \u03C3c");
-									
-								case ZENITH_ANGLE_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.zenith_angle.label", "Zenith angle");
-								case ZENITH_ANGLE_ZERO_POINT_OFFSET_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.zenith_angle.zero_point_offset.label", "Zenith angle \u03C3a");
-								case ZENITH_ANGLE_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.zenith_angle.square_root_distance_dependent.label", "Zenith angle \u03C3b");
-								case ZENITH_ANGLE_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.zenith_angle.distance_dependent.label", "Zenith angle \u03C3c");
-									
-								case GNSS1D_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.label", "GNSS baseline 1D");
-								case GNSS1D_ZERO_POINT_OFFSET_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.zero_point_offset.label", "GNSS baseline 1D \u03C3a");
-								case GNSS1D_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.square_root_distance_dependent.label", "GNSS baseline 1D \u03C3b");
-								case GNSS1D_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.distance_dependent.label", "GNSS baseline 1D \u03C3c");
-
-								case GNSS2D_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.label", "GNSS baseline 2D");
-								case GNSS2D_ZERO_POINT_OFFSET_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.zero_point_offset.label", "GNSS baseline 2D \u03C3a");
-								case GNSS2D_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.square_root_distance_dependent.label", "GNSS baseline 2D \u03C3b");
-								case GNSS2D_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.distance_dependent.label", "GNSS baseline 2D \u03C3c");
-									
-								case GNSS3D_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.label", "GNSS baseline 3D");
-								case GNSS3D_ZERO_POINT_OFFSET_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.zero_point_offset.label", "GNSS baseline 3D \u03C3a");
-								case GNSS3D_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.square_root_distance_dependent.label", "GNSS baseline 3D \u03C3b");
-								case GNSS3D_DISTANCE_DEPENDENT_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.distance_dependent.label", "GNSS baseline 3D \u03C3c");
-
-								case STOCHASTIC_POINT_1D_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.point.1d.label", "Stochastic point 1D");
-								case STOCHASTIC_POINT_2D_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.point.2d.label", "Stochastic point 2D");
-								case STOCHASTIC_POINT_3D_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.point.3d.label", "Stochastic point 3D");
-									
-								case STOCHASTIC_DEFLECTION_COMPONENT:
-									return i18n.getString("UIVarianceComponentTableBuilder.type.deflection.label", "Deflection of the vertical");
-								}
-								return null;
+								return getVarianceComponentTypeLabel(type);
 							}
 
 							@Override
@@ -256,6 +214,96 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 				return tableCell;	
 			}
 		};
+	}
+	
+	public static final String getVarianceComponentTypeLabel(VarianceComponentType type) {
+		switch (type) {
+		case GLOBAL:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.global.label", "Global adjustment");
+			
+		case LEVELING_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.leveling.label", "Leveling");
+		case LEVELING_ZERO_POINT_OFFSET_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.leveling.zero_point_offset.label", "Leveling \u03C3a");
+		case LEVELING_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.leveling.square_root_distance_dependent.label", "Leveling \u03C3b");
+		case LEVELING_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.leveling.distance_dependent.label", "Leveling \u03C3c");						
+			
+		case DIRECTION_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.direction.label", "Direction");
+		case DIRECTION_ZERO_POINT_OFFSET_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.direction.zero_point_offset.label", "Direction \u03C3a");
+		case DIRECTION_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.direction.square_root_distance_dependent.label", "Direction \u03C3b");
+		case DIRECTION_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.direction.distance_dependent.label", "Direction \u03C3c");
+		
+		case HORIZONTAL_DISTANCE_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.horizontal_distance.label", "Horizontal distance");
+		case HORIZONTAL_DISTANCE_ZERO_POINT_OFFSET_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.horizontal_distance.zero_point_offset.label", "Horizontal distance \u03C3a");
+		case HORIZONTAL_DISTANCE_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.horizontal_distance.square_root_distance_dependent.label", "Horizontal distance \u03C3b");
+		case HORIZONTAL_DISTANCE_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.horizontal_distance.distance_dependent.label", "Horizontal distance \u03C3c");
+		
+		case SLOPE_DISTANCE_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.slope_distance.label", "Slope distance");
+		case SLOPE_DISTANCE_ZERO_POINT_OFFSET_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.slope_distance.zero_point_offset.label", "Slope distance \u03C3a");
+		case SLOPE_DISTANCE_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.slope_distance.square_root_distance_dependent.label", "Slope distance \u03C3b");
+		case SLOPE_DISTANCE_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.slope_distance.distance_dependent.label", "Slope distance \u03C3c");
+			
+		case ZENITH_ANGLE_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.zenith_angle.label", "Zenith angle");
+		case ZENITH_ANGLE_ZERO_POINT_OFFSET_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.zenith_angle.zero_point_offset.label", "Zenith angle \u03C3a");
+		case ZENITH_ANGLE_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.zenith_angle.square_root_distance_dependent.label", "Zenith angle \u03C3b");
+		case ZENITH_ANGLE_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.zenith_angle.distance_dependent.label", "Zenith angle \u03C3c");
+			
+		case GNSS1D_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.label", "GNSS baseline 1D");
+		case GNSS1D_ZERO_POINT_OFFSET_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.zero_point_offset.label", "GNSS baseline 1D \u03C3a");
+		case GNSS1D_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.square_root_distance_dependent.label", "GNSS baseline 1D \u03C3b");
+		case GNSS1D_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.1d.distance_dependent.label", "GNSS baseline 1D \u03C3c");
+
+		case GNSS2D_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.label", "GNSS baseline 2D");
+		case GNSS2D_ZERO_POINT_OFFSET_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.zero_point_offset.label", "GNSS baseline 2D \u03C3a");
+		case GNSS2D_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.square_root_distance_dependent.label", "GNSS baseline 2D \u03C3b");
+		case GNSS2D_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.2d.distance_dependent.label", "GNSS baseline 2D \u03C3c");
+			
+		case GNSS3D_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.label", "GNSS baseline 3D");
+		case GNSS3D_ZERO_POINT_OFFSET_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.zero_point_offset.label", "GNSS baseline 3D \u03C3a");
+		case GNSS3D_SQUARE_ROOT_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.square_root_distance_dependent.label", "GNSS baseline 3D \u03C3b");
+		case GNSS3D_DISTANCE_DEPENDENT_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.gnss.3d.distance_dependent.label", "GNSS baseline 3D \u03C3c");
+
+		case STOCHASTIC_POINT_1D_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.point.1d.label", "Stochastic point 1D");
+		case STOCHASTIC_POINT_2D_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.point.2d.label", "Stochastic point 2D");
+		case STOCHASTIC_POINT_3D_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.point.3d.label", "Stochastic point 3D");
+			
+		case STOCHASTIC_DEFLECTION_COMPONENT:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.deflection.label", "Deflection of the vertical");
+		}
+		return null;
 	}
 
 	@Override

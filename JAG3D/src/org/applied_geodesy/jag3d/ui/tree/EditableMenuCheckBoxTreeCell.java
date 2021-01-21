@@ -455,7 +455,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 				PointTreeItemValue itemValue = (PointTreeItemValue)getTreeItem().getValue();
 
 				int dimension = itemValue.getDimension();
-				PointType pointType = itemValue.getPointType();
+				PointType pointType = TreeItemType.getPointTypeByTreeItemType(itemValue.getItemType());
 
 				switch(menuItemType) {
 				case CHANGE_TO_REFERENCE_POINT_GROUP:
@@ -524,7 +524,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 				ContextMenuType menuItemType = (ContextMenuType)newValue.getUserData();
 				VerticalDeflectionTreeItemValue itemValue = (VerticalDeflectionTreeItemValue)getTreeItem().getValue();
 
-				VerticalDeflectionType verticalDeflectionType = itemValue.getVerticalDeflectionType();
+				VerticalDeflectionType verticalDeflectionType = TreeItemType.getVerticalDeflectionTypeByTreeItemType(itemValue.getItemType());
 
 				switch(menuItemType) {
 				case CHANGE_TO_REFERENCE_DEFLECTION_GROUP:

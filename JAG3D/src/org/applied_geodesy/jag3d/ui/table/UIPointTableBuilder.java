@@ -118,7 +118,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 
 	public TableView<PointRow> getTable(PointTreeItemValue pointItemValue) {
 		this.pointItemValue = pointItemValue;
-		this.type      = pointItemValue.getPointType();
+		this.type      = TreeItemType.getPointTypeByTreeItemType(pointItemValue.getItemType());
 		this.dimension = pointItemValue.getDimension();
 		this.init();
 		return this.table;

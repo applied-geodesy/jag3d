@@ -23,7 +23,6 @@ package org.applied_geodesy.jag3d.ui.tree;
 
 import org.applied_geodesy.adjustment.network.DefaultUncertainty;
 import org.applied_geodesy.adjustment.network.ObservationGroupUncertaintyType;
-import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 
@@ -43,37 +42,6 @@ public class ObservationTreeItemValue extends TreeItemValue implements Sortable 
 		this.setGroupId(groupId);
 		this.setEnable(enable);
 		this.setOrderId(orderId);
-	}
-	
-	public final ObservationType getObservationType() {
-		switch (this.getItemType()) {
-		case LEVELING_LEAF:
-			return ObservationType.LEVELING;
-
-		case DIRECTION_LEAF:
-			return ObservationType.DIRECTION;
-
-		case HORIZONTAL_DISTANCE_LEAF:
-			return ObservationType.HORIZONTAL_DISTANCE;
-
-		case SLOPE_DISTANCE_LEAF:
-			return ObservationType.SLOPE_DISTANCE;
-
-		case ZENITH_ANGLE_LEAF:
-			return ObservationType.ZENITH_ANGLE;
-
-		case GNSS_1D_LEAF:
-			return ObservationType.GNSS1D;
-
-		case GNSS_2D_LEAF:
-			return ObservationType.GNSS2D;
-
-		case GNSS_3D_LEAF:
-			return ObservationType.GNSS3D;
-
-		default:
-			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, TreeItemType does not refer to a terrestrial ObservationType " + this.getItemType());
-		}
 	}
 	
 	public IntegerProperty groupIdProperty() {
@@ -105,7 +73,8 @@ public class ObservationTreeItemValue extends TreeItemValue implements Sortable 
 				TabType.RAW_DATA,
 				TabType.PROPERTIES,
 				TabType.RESULT_DATA,
-				TabType.ADDITIONAL_PARAMETER
+				TabType.ADDITIONAL_PARAMETER,
+				TabType.VARIANCE_COMPONENT
 		};
 	}
 	
