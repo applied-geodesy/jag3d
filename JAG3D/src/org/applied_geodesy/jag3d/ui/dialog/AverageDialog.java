@@ -60,6 +60,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.GridPane;
@@ -392,16 +393,18 @@ public class AverageDialog {
 					for (Observation observation : observations)
 						averagedObservationRows.add(new AveragedObservationRow(observation));
 
-					tableBuilder.getTable().getItems().setAll(averagedObservationRows);
-					tableBuilder.getTable().setPrefHeight(200);
-					tableBuilder.getTable().setPrefWidth(250);
+					TableView<AveragedObservationRow> table = tableBuilder.getTable();
+					table.getItems().setAll(averagedObservationRows);
+					table.setPrefHeight(200);
+					table.setPrefWidth(250);
+					table.sort();
 					String title   = i18n.getString("AverageDialog.message.error.threshold.title", "Exceeding thresholds");
 					String header  = i18n.getString("AverageDialog.message.error.threshold.header", "Error, averaging could not be finished due to exceeded threshold values.\r\nPlease correct the listed observations or increase the threshold value");
 					String message = i18n.getString("AverageDialog.message.error.threshold.message","List of exceeded observations");
 
 					Platform.runLater(new Runnable() {
 						@Override public void run() {
-							OptionDialog.showContentDialog(AlertType.ERROR, title, header, message, tableBuilder.getTable());
+							OptionDialog.showContentDialog(AlertType.ERROR, title, header, message, table);
 						}
 					});
 				}
