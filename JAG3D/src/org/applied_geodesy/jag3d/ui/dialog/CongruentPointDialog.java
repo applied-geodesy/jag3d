@@ -137,8 +137,9 @@ public class CongruentPointDialog {
 	public static Optional<Void> showAndWait() {
 		congruentPointDialog.init();
 		congruentPointDialog.reset();
-		tableBuilder.getTable().getItems().clear();
-		tableBuilder.getTable().getItems().add(tableBuilder.getEmptyRow());
+		TableView<TerrestrialObservationRow> table = tableBuilder.getTable();
+		table.getItems().clear();
+		table.getItems().add(tableBuilder.getEmptyRow());
 		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
 		Platform.runLater(new Runnable() {
 			@Override
@@ -284,11 +285,13 @@ public class CongruentPointDialog {
 			public void handle(WorkerStateEvent event) {
 				preventClosing = false;
 				List<TerrestrialObservationRow> rows = processSQLTask.getValue();
+				TableView<TerrestrialObservationRow> table = tableBuilder.getTable();
 				if (rows != null && !rows.isEmpty()) {
-					tableBuilder.getTable().getItems().setAll(rows);
+					table.getItems().setAll(rows);
+					table.sort();
 				}
 				else {
-					tableBuilder.getTable().getItems().setAll(tableBuilder.getEmptyRow());
+					table.getItems().setAll(tableBuilder.getEmptyRow());
 				}
 			}
 		});
