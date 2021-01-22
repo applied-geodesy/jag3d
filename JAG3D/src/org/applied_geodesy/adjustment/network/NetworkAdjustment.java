@@ -163,7 +163,7 @@ public class NetworkAdjustment implements Runnable {
 	 * @param N NEG-Matrix
 	 * @param n neg-Vektor
 	 */
-	private void estimateFactorsForOutherAccracy(UpperSymmPackMatrix N, DenseVector n, boolean invert) {
+	private void estimateFactorsForOutherAccracy(UpperSymmPackMatrix N, DenseVector n) {
 		// Indexzuordnung Submatrix vs. Gesamtmatrix
 		Map<Integer, Integer> idxAddParamGlobal2LocalInQxx = new LinkedHashMap<Integer, Integer>();
 		Map<Integer, Integer> idxPointGlobal2LocalInQxx = new LinkedHashMap<Integer, Integer>();
@@ -231,8 +231,7 @@ public class NetworkAdjustment implements Runnable {
 		}
 
 		// In-Situ Invertierung der NGL: N <-- Qxx, n <-- dx 
-		//MathExtension.solve(N, n, true);
-		MathExtension.solve(N, n, invert);
+		MathExtension.solve(N, n, true);
 		this.Qxx = N;
 	
 		Set<Integer> gnssObsIds = new LinkedHashSet<Integer>();
@@ -2154,7 +2153,7 @@ public class NetworkAdjustment implements Runnable {
 								this.currentEstimationStatus = EstimationStateType.INVERT_NORMAL_EQUATION_MATRIX;
 								this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
 							}
-							this.estimateFactorsForOutherAccracy(N, n, !applyUnscentedTransformation);
+							this.estimateFactorsForOutherAccracy(N, n);
 
 							if (this.calculateStochasticParameters) {
 								this.currentEstimationStatus = EstimationStateType.ESTIAMTE_STOCHASTIC_PARAMETERS;
