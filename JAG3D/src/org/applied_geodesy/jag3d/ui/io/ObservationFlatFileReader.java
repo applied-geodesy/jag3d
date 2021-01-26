@@ -97,8 +97,6 @@ public class ObservationFlatFileReader extends FlatFileReader<TreeItem<TreeItemV
 		this.reset();
 		this.ignoreLinesWhichStartWith("#");
 		TreeItem<TreeItemValue> newTreeItem = null;
-		if (this.observationType != ObservationType.DIRECTION)
-			this.isGroupWithEqualStation = false;
 		
 		super.read();
 		 
