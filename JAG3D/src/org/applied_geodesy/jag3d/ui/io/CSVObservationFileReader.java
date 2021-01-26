@@ -34,6 +34,7 @@ import java.util.Locale;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
+import org.applied_geodesy.jag3d.ui.table.row.ObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
@@ -59,13 +60,15 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 	private List<TerrestrialObservationRow> observations = null;
 	private List<GNSSObservationRow> gnss = null;
 
-	private boolean isDirectionGroupWithEqualStation = true;
-	private String directionStartPointName = null;
+	private boolean separateGroup = true;
+	private boolean isGroupWithEqualStation = true;
+	private String startPointName = null;
 
 	private List<String> parsedLine = null;
 	
 	public CSVObservationFileReader(ObservationType observationType, CSVParser parser) {
 		this.observationType = observationType;
+		this.separateGroup   = ImportOption.getInstance().isGroupSeparation(observationType);
 		this.parser = parser;
 		this.treeItemType = TreeItemType.getTreeItemTypeByObservationType(observationType);
 		if (this.treeItemType == null)
@@ -106,44 +109,16 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 		this.reset();
 		this.ignoreLinesWhichStartWith("#");
 		TreeItem<TreeItemValue> newTreeItem = null;
-		
-		if (this.observationType != ObservationType.DIRECTION)
-			this.isDirectionGroupWithEqualStation = false;
 
 		super.read();
 
 		if (!this.observations.isEmpty() || !this.gnss.isEmpty()) {
-			String itemName = this.createItemName(null, this.isDirectionGroupWithEqualStation && this.directionStartPointName != null ? " (" + this.directionStartPointName + ")" : null);
-			TreeItemType parentType = TreeItemType.getDirectoryByLeafType(this.treeItemType);
-			newTreeItem = UITreeBuilder.getInstance().addItem(parentType, -1, itemName, true, false);
-			try {
-				SQLManager.getInstance().saveGroup((ObservationTreeItemValue)newTreeItem.getValue());
-			} catch (SQLException e) {
-				UITreeBuilder.getInstance().removeItem(newTreeItem);
-				e.printStackTrace();
-				throw new SQLException(e);
-			}
-
-			try {
-				int groupId = ((ObservationTreeItemValue)newTreeItem.getValue()).getGroupId();
-				if (!this.observations.isEmpty()) {
-					for (TerrestrialObservationRow row : this.observations) {
-						row.setGroupId(groupId);
-						SQLManager.getInstance().saveItem(row);
-					}
-				}
-				else if (!this.gnss.isEmpty()) {
-					for (GNSSObservationRow row : this.gnss) {
-						row.setGroupId(groupId);
-						SQLManager.getInstance().saveItem(row);
-					}
-				}
-
-			} catch (SQLException e) {
-				e.printStackTrace();
-				throw new SQLException(e);
-			}			
+			if (!this.observations.isEmpty())
+				newTreeItem = this.saveGroup(this.treeItemType, this.observations);
+			else if (!this.gnss.isEmpty())
+				newTreeItem = this.saveGroup(this.treeItemType, this.gnss);
 		}
+		
 		this.reset();
 		return newTreeItem;
 	}
@@ -161,8 +136,8 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 		this.gnss.clear();
 		this.parsedLine.clear();
 		
-		this.isDirectionGroupWithEqualStation = true;
-		this.directionStartPointName = null;
+		this.isGroupWithEqualStation = true;
+		this.startPointName = null;
 	}
 
 	@Override
@@ -185,6 +160,54 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 			e.printStackTrace();
 		}
 	}
+	
+	private TreeItem<TreeItemValue> saveGroup(TreeItemType itemType, List<? extends ObservationRow> observations) throws SQLException {
+		TreeItem<TreeItemValue> treeItem = null;
+		if (!observations.isEmpty()) {
+			String itemName = this.createItemName(null, this.isGroupWithEqualStation ? " (" + this.startPointName + ")" : null); 
+			treeItem = this.saveObservations(itemName, itemType);
+		}
+		observations.clear();
+		this.startPointName = null;
+		this.isGroupWithEqualStation = true;
+		return treeItem;
+	}
+	
+	private TreeItem<TreeItemValue> saveObservations(String itemName, TreeItemType treeItemType) throws SQLException {
+		if ((this.observations == null || this.observations.isEmpty()) && (this.gnss == null || this.gnss.isEmpty()))
+			return null;
+
+		TreeItemType parentType = TreeItemType.getDirectoryByLeafType(treeItemType);
+		TreeItem<TreeItemValue> newTreeItem = UITreeBuilder.getInstance().addItem(parentType, -1, itemName, true, false);
+		try {
+			SQLManager.getInstance().saveGroup((ObservationTreeItemValue)newTreeItem.getValue());
+		} catch (SQLException e) {
+			UITreeBuilder.getInstance().removeItem(newTreeItem);
+			e.printStackTrace();
+			throw new SQLException(e);
+		}
+
+		try {
+			int groupId = ((ObservationTreeItemValue)newTreeItem.getValue()).getGroupId();
+			if (!this.observations.isEmpty()) {
+				for (TerrestrialObservationRow row : this.observations) {
+					row.setGroupId(groupId);
+					SQLManager.getInstance().saveItem(row);
+				}
+			}
+			else if (!this.gnss.isEmpty()) {
+				for (GNSSObservationRow row : this.gnss) {
+					row.setGroupId(groupId);
+					SQLManager.getInstance().saveItem(row);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new SQLException(e);
+		}			
+
+		return newTreeItem;
+	}
 
 	private void parseTerrestrialObservation(List<String> parsedLine) {
 		TerrestrialObservationRow row = new TerrestrialObservationRow();
@@ -199,16 +222,26 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 				double value;
 				switch(type) {
 				case STATION:
-					String station = parsedLine.get(pos).trim();
-					if (station != null && !station.isEmpty())
-						row.setStartPointName(station);
+					String startPointName = parsedLine.get(pos).trim();
+					if (startPointName != null && !startPointName.isEmpty()) {
+						if (this.startPointName == null)
+							this.startPointName = startPointName;
+						this.isGroupWithEqualStation = this.isGroupWithEqualStation && this.startPointName.equals(startPointName);
+						
+						if (this.separateGroup && !this.startPointName.equals(startPointName)) {
+							this.isGroupWithEqualStation = true;
+							this.saveGroup(this.treeItemType, this.observations);
+							this.startPointName = startPointName;
+						}
+						row.setStartPointName(startPointName);
+					}
 					else
 						continue;
 					break;
 				case TARGET:
-					String target = parsedLine.get(pos).trim();
-					if (target != null && !target.isEmpty())
-						row.setEndPointName(target);
+					String endPointName = parsedLine.get(pos).trim();
+					if (endPointName != null && !endPointName.isEmpty())
+						row.setEndPointName(endPointName);
 					else
 						continue;
 					break;
@@ -278,16 +311,26 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 				double value;
 				switch(type) {
 				case STATION:
-					String station = parsedLine.get(pos).trim();
-					if (station != null && !station.isEmpty())
-						row.setStartPointName(station);
+					String startPointName = parsedLine.get(pos).trim();
+					if (startPointName != null && !startPointName.isEmpty()) {
+						if (this.startPointName == null)
+							this.startPointName = startPointName;
+						this.isGroupWithEqualStation = this.isGroupWithEqualStation && this.startPointName.equals(startPointName);
+						
+						if (this.separateGroup && !this.startPointName.equals(startPointName)) {
+							this.isGroupWithEqualStation = true;
+							this.saveGroup(this.treeItemType, this.observations);
+							this.startPointName = startPointName;
+						}
+						row.setStartPointName(startPointName);
+					}
 					else
 						continue;
 					break;
 				case TARGET:
-					String target = parsedLine.get(pos).trim();
-					if (target != null && !target.isEmpty())
-						row.setEndPointName(target);
+					String endPointName = parsedLine.get(pos).trim();
+					if (endPointName != null && !endPointName.isEmpty())
+						row.setEndPointName(endPointName);
 					else
 						continue;
 					break;
