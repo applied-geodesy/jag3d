@@ -137,6 +137,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			this.isNewStation = this.startPointName != null;
 			try { 
 				this.ih = Double.parseDouble(line.substring(79, line.length()).trim().replaceAll("\\s+.*", ""));
+				this.ih = this.ih == -1000.0 ? 0 : this.ih;
 			} 
 			catch(NumberFormatException e) { };
 		}
@@ -154,7 +155,8 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 			double th = 0.0;
 			try { 
-				th = Double.parseDouble(line.substring(79, line.length()).trim().replaceAll("\\s+.*", "")); 
+				th = Double.parseDouble(line.substring(79, line.length()).trim().replaceAll("\\s+.*", ""));
+				th = th == -1000.0 ? 0 : th;
 			} catch(NumberFormatException e) { };
 			
 			if (this.lastStartPointName == null)
@@ -163,7 +165,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			// Strecke3D
 			String value = line.substring(33, 49).trim();
 			double distance = 0;
-			if (!value.isEmpty()) {
+			if (!value.isEmpty() && !value.startsWith("-1000.")) {
 				try { 
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
@@ -181,7 +183,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			}
 			// Richtung
 			value = line.substring(49, 64).trim();
-			if (!value.isEmpty()) {
+			if (!value.isEmpty() && !value.startsWith("-1000.")) {
 				try {
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
@@ -198,7 +200,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			}
 			// Zenitwinkel
 			value = line.substring(64, 79).trim();
-			if (!value.isEmpty()) {
+			if (!value.isEmpty() && !value.startsWith("-1000.")) {
 				try { 
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
@@ -228,15 +230,16 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			double th = 0.0;
 			try { 
 				th = Double.parseDouble(line.substring(79, line.length()).trim().replaceAll("\\s+.*", "")); 
+				th = th == -1000.0 ? 0 : th;
 			} catch(NumberFormatException e) { };
-			
+			 	
 			if (this.lastStartPointName == null)
 				this.lastStartPointName = this.startPointName;
 
 			// Strecke2D
 			double distance = 0.0; // Wird ggf. fuer delta-H mitverwendet
 			String value = line.substring(33, 49).trim();
-			if (!value.isEmpty()) {
+			if (!value.isEmpty() && !value.startsWith("-1000.")) {
 				try { 
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
@@ -254,7 +257,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			}
 			// Richtung
 			value = line.substring(49, 64).trim();
-			if (!value.isEmpty()) {
+			if (!value.isEmpty() && !value.startsWith("-1000.")) {
 				try {
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
@@ -271,7 +274,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			}
 			// Hoehenunterschied
 			value = line.substring(64, 79).trim();
-			if (!value.isEmpty()) {
+			if (!value.isEmpty() && !value.startsWith("-1000.")) {
 				try { 
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
@@ -301,11 +304,12 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			double th = 0.0;
 			try { 
 				th = Double.parseDouble(line.substring(79, line.length()).trim().replaceAll("\\s+.*", "")); 
+				th = th == -1000.0 ? 0 : th;
 			} catch(NumberFormatException e) { };
 
 			// Hoehenunterschied
 			String value = line.substring(64, 79).trim();
-			if (!value.isEmpty()) {
+			if (!value.isEmpty() && !value.startsWith("-1000.")) {
 				try { 
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
