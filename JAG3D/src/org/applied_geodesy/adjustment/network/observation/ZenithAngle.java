@@ -364,6 +364,9 @@ public class ZenithAngle extends Observation {
 		double v = crxs*(ye - ys) - th*(crxe*crye*crys*srxs - crxs*srxe + crxe*srxs*srye*srys) - crys*srxs*(ze - zs) + srxs*srys*(xe - xs);
 		double w = th*(srxe*srxs + crxe*crxs*crye*crys + crxe*crxs*srye*srys) - ih + srxs*(ye - ys) + crxs*crys*(ze - zs) - crxs*srys*(xe - xs);
 		
+		// Rueger 1996, S. 109, Gl. 8.26
+		// kDeltaH = (1-k) * dist2D * dist2D / (2*R)
+		// Bogenformel: (1-k) * dist2D / (2*R)
 		double dist2D = Math.hypot(u, v);
 		double corr = dist2D/(2.0 * R);
 		

@@ -343,13 +343,13 @@ public class HorizontalDistance extends Observation {
 		Reduction reductions = this.getReductions();
 		double R = reductions.getEarthRadius();
 		
-		// Hoehenreduktion
+		// Hoehenreduktion - Rueeger 1996, S. 99, Gl. 7.56
 		if (reductions.applyReductionTask(ReductionTaskType.HEIGHT)) {
 	    	double h0 = reductions.getReferenceHeight();
 	    	obsDist = obsDist * R/(R+h0);
 	    }
 		
-		// Erdkruemmungsreduktion
+		// Erdkruemmungsreduktion - Rueeger 1996, S. 90, Gl. 7.29
 		if (reductions.applyReductionTask(ReductionTaskType.EARTH_CURVATURE)) {
 			obsDist = 2.0 * R * Math.asin(0.5 * obsDist / R);
 		}

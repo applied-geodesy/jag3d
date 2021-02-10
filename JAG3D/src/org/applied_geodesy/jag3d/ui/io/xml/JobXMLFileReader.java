@@ -413,20 +413,34 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 //							if (zenith > Math.PI)
 //								zenith = 2.0*Math.PI - zenith;
 							
-							// Baumann 1993, S.  99 - Strecke 2D 
-							// Baumann 1993, S. 137 - Hoehenunterschied
-							double kDist2DRefra =  refraction*dist3d*dist3d / 2.0 / earthRadius * Math.cos(zenith);
-							double kDeltaHRefra = -refraction*dist3d*dist3d / 2.0 / earthRadius * Math.sin(zenith);
+//							// Baumann 1993, S.  99 - Strecke 2D 
+//							// Baumann 1993, S. 137 - Hoehenunterschied
+//							double kDist2DRefra =  refraction*dist3d*dist3d / 2.0 / earthRadius * Math.cos(zenith);
+//							double kDeltaHRefra = -refraction*dist3d*dist3d / 2.0 / earthRadius * Math.sin(zenith);
+							
+							double dist2d = dist3d * Math.sin(zenith);
+							// Rueger (1996), S. 98, Gl (7.53)
+							double kDist2DRefra =  refraction*dist3d*dist3d / 4.0 / earthRadius * Math.sin(2.0 * zenith);
+							// Rueger (1996), S.109, Gl (8.26)
+							double kDeltaHRefra = -refraction / 2.0 / earthRadius * dist2d * dist2d;
+							
 							double kDist2DEarth = 0.0;
 							double kDeltaHEarth = 0.0;
 
 							if (applyEarthCurve) {
-								kDist2DEarth = -dist3d*dist3d / earthRadius * Math.cos(zenith);
-								kDeltaHEarth =  dist3d*dist3d / 2.0 / earthRadius * Math.sin(zenith);
+//								// Baumann 1993, S.  99 - Strecke 2D 
+//								// Baumann 1993, S. 137 - Hoehenunterschied
+//								kDist2DEarth = -dist3d*dist3d / earthRadius * Math.cos(zenith);
+//								kDeltaHEarth =  dist3d*dist3d / 2.0 / earthRadius * Math.sin(zenith);
+								
+								// Rueger (1996), S. 98, Gl (7.53)
+								kDist2DEarth = -dist3d*dist3d / 2.0 / earthRadius * Math.sin(2.0 * zenith);
+								// Rueger (1996), S.109, Gl (8.26)
+								kDeltaHEarth = 0.5 * dist2d * dist2d / earthRadius;
 							}
 
-							double distance2d = dist3d * Math.sin(zenith) + kDist2DRefra + kDist2DEarth;
-							double leveling = dist3d * Math.cos(zenith)   + kDeltaHRefra + kDeltaHEarth;
+							double distance2d = dist2d + kDist2DRefra + kDist2DEarth;
+							double leveling   = dist3d * Math.cos(zenith) + kDeltaHRefra + kDeltaHEarth;
 
 							distanceForUncertaintyModel = distance2d;
 							
