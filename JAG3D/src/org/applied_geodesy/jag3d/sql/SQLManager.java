@@ -86,6 +86,10 @@ import org.applied_geodesy.jag3d.ui.table.UITerrestrialObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITestStatisticTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIVarianceComponentTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIVerticalDeflectionTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.column.ColumnContentType;
+import org.applied_geodesy.jag3d.ui.table.column.ColumnPropertiesManager;
+import org.applied_geodesy.jag3d.ui.table.column.ColumnProperty;
+import org.applied_geodesy.jag3d.ui.table.column.TableContentType;
 import org.applied_geodesy.jag3d.ui.table.row.AdditionalParameterRow;
 import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
@@ -128,6 +132,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.paint.Color;
+import javafx.util.Pair;
 
 public class SQLManager {
 	private I18N i18n = I18N.getInstance();
@@ -215,6 +220,7 @@ public class SQLManager {
 
 	private void loadExistingDataBase() throws SQLException {
 		this.loadTableRowHighlight();
+		this.loadTableColumnProperties();
 		this.loadImportPreferences();
 		
 		this.loadPointGroups();
@@ -536,6 +542,9 @@ public class SQLManager {
 		sqls.put(20201220.0025, "ALTER TABLE \"PointApriori\" DROP COLUMN \"sigma_dx0\"\r\n");
 		sqls.put(20201220.0026, "ALTER TABLE \"PointGroup\" DROP COLUMN \"consider_deflection\"\r\n");
 		
+		// add columns properties 
+		sqls.put(20210112.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TableColumnProperty\" (\"table_type\" SMALLINT NOT NULL, \"column_type\" SMALLINT NOT NULL, \"width\" DOUBLE DEFAULT 125 NOT NULL, PRIMARY KEY(\"table_type\",\"column_type\"));\r\n");
+
 		return sqls;
 	}
 
@@ -546,6 +555,14 @@ public class SQLManager {
 	public void closeDataBase() {
 		if (this.dataBase != null && this.dataBase.isOpen()) {
 			this.fireDatabaseStateChanged(ProjectDatabaseStateType.CLOSING);
+			
+			// save user-defined settings
+			try {
+				this.saveTableColumnProperties();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			
 			this.dataBase.close();
 			this.dataBase = null;
 			this.fireDatabaseStateChanged(ProjectDatabaseStateType.CLOSED);
@@ -4701,6 +4718,69 @@ public class SQLManager {
 		}
 
 		return names;
+	}
+	
+	private void loadTableColumnProperties() throws SQLException {
+		ColumnPropertiesManager columnPropertiesManager = ColumnPropertiesManager.getInstance();
+
+		String sql = "SELECT "
+				+ "\"table_type\", \"column_type\", \"width\" "
+				+ "FROM \"TableColumnProperty\"";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+
+		while (rs.next()) {
+			TableContentType tableType   = TableContentType.getEnumByValue(rs.getInt("table_type"));
+			ColumnContentType columnType = ColumnContentType.getEnumByValue(rs.getInt("column_type"));
+			double width = rs.getDouble("width");
+			
+			if (tableType == null || tableType == TableContentType.UNSPECIFIC || columnType == null || columnType == ColumnContentType.DEFAULT || width <= 0)
+				continue;
+			
+			ColumnProperty columnProperty = columnPropertiesManager.getProperty(tableType, columnType);
+			columnProperty.setPrefWidth(width);
+		}
+	}
+	
+	public void saveTableColumnProperties() throws SQLException {
+		String sql = "MERGE INTO \"TableColumnProperty\" USING (VALUES "
+				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"table_type\", \"column_type\", \"width\") ON \"TableColumnProperty\".\"table_type\" = \"vals\".\"table_type\" AND \"TableColumnProperty\".\"column_type\" = \"vals\".\"column_type\" "
+				+ "WHEN MATCHED THEN UPDATE SET "
+				+ "\"TableColumnProperty\".\"width\" = \"vals\".\"width\" "
+				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "\"vals\".\"table_type\", "
+				+ "\"vals\".\"column_type\", "
+				+ "\"vals\".\"width\"";
+
+		boolean hasBatch = false;
+		
+		try {
+			ColumnPropertiesManager columnPropertiesManager = ColumnPropertiesManager.getInstance();
+			
+			this.dataBase.setAutoCommit(false);
+			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+			
+			for (Map.Entry<Pair<TableContentType, ColumnContentType>, ColumnProperty> entry : columnPropertiesManager) {
+				TableContentType tableType   = entry.getKey().getKey();
+				ColumnContentType columnType = entry.getKey().getValue();
+				double width = entry.getValue().getPrefWidth();
+
+				int idx = 1;
+				stmt.setInt(idx++, tableType.getId());
+				stmt.setInt(idx++, columnType.getId());
+				stmt.setDouble(idx++, width);
+				stmt.addBatch();
+				hasBatch = true;
+			}
+			
+			if (hasBatch)
+				stmt.executeLargeBatch();
+		}
+		finally {
+			this.dataBase.setAutoCommit(true);
+		}
 	}
 
 	public void loadTableRowHighlight() throws SQLException {
