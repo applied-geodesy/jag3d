@@ -49,10 +49,7 @@ public class UIPrincipalComponentTableBuilder extends UITableBuilder<PrincipalCo
 		
 		TableColumn<PrincipalComponentRow, Integer> integerColumn = null; 
 		TableColumn<PrincipalComponentRow, Double>  doubleColumn  = null; 
-		
-		double minColumnWidth  =  50;
-		double prefColumnWidth = 100;
-		
+				
 		// Index of eigenvalue
 		CellValueType cellValueType = CellValueType.INTEGER;
 		int columnIndex = table.getColumns().size(); 
@@ -60,8 +57,6 @@ public class UIPrincipalComponentTableBuilder extends UITableBuilder<PrincipalCo
 		String tooltipText = i18n.getString("UIPrincipalComponentTableBuilder.tableheader.index.tooltip", "k-te index of eigenvalue");
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		integerColumn = this.<Integer>getColumn(header, PrincipalComponentRow::indexProperty, getIntegerCallback(), ColumnType.VISIBLE, columnIndex, false); 
-		integerColumn.setMinWidth(minColumnWidth);
-		integerColumn.setPrefWidth(prefColumnWidth);
 		table.getColumns().add(integerColumn);
 
 		// Eigenvalue
@@ -71,8 +66,6 @@ public class UIPrincipalComponentTableBuilder extends UITableBuilder<PrincipalCo
 		tooltipText = i18n.getString("UIPrincipalComponentTableBuilder.tableheader.square_root_eigenvalue.tooltip", "Square-root eigenvalue of covariance matrix");
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, PrincipalComponentRow::valueProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false);
-		doubleColumn.setMinWidth(minColumnWidth);
-		doubleColumn.setPrefWidth(prefColumnWidth);
 		table.getColumns().add(doubleColumn);
 	
 		// ratio eigenvalue vs. trace(Cxx)
@@ -82,8 +75,6 @@ public class UIPrincipalComponentTableBuilder extends UITableBuilder<PrincipalCo
 		tooltipText = i18n.getString("UIPrincipalComponentTableBuilder.tableheader.ratio.tooltip", "Ratio of eigenvalue \u03BB(k) w.r.t. trace of variance-covariance-matrix");
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, PrincipalComponentRow::ratioProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false);
-		doubleColumn.setMinWidth(minColumnWidth);
-		doubleColumn.setPrefWidth(prefColumnWidth);
 		table.getColumns().add(doubleColumn);
 		
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);

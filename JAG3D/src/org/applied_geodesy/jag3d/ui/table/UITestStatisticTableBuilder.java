@@ -51,17 +51,12 @@ public class UITestStatisticTableBuilder extends UITableBuilder<TestStatisticRow
 		TableColumn<TestStatisticRow, Double> doubleColumn = null; 
 		CellValueType cellValueTypeStatistic = CellValueType.STATISTIC;
 		
-		double minColumnWidth = 50;
-		double prefColumnWidth = 100;
-		
 		// Degree of freedom numerator
 		int columnIndex = table.getColumns().size(); 
 		String labelText   = i18n.getString("UITestStatisticTableBuilder.tableheader.degree_of_freedom_numerator.label", "d1");
 		String tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.degree_of_freedom_numerator.tooltip", "Numerator degree of freedom");
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueTypeStatistic, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::numeratorDegreeOfFreedomProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
-		doubleColumn.setMinWidth(minColumnWidth);
-		doubleColumn.setPrefWidth(prefColumnWidth);
 		table.getColumns().add(doubleColumn);
 
 		// Degree of freedom denominator
@@ -70,8 +65,6 @@ public class UITestStatisticTableBuilder extends UITableBuilder<TestStatisticRow
 		tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.degree_of_freedom_denominator.tooltip", "Denominator degree of freedom");
 		header = new ColumnTooltipHeader(cellValueTypeStatistic, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::denominatorDegreeOfFreedomProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
-		doubleColumn.setMinWidth(minColumnWidth);
-		doubleColumn.setPrefWidth(prefColumnWidth);
 		table.getColumns().add(doubleColumn);
 	
 		// Probability value
@@ -80,8 +73,6 @@ public class UITestStatisticTableBuilder extends UITableBuilder<TestStatisticRow
 		tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.probability_value.tooltip", "Probability value (type I-error)");
 		header = new ColumnTooltipHeader(cellValueTypeStatistic, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::probabilityValueProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
-		doubleColumn.setMinWidth(minColumnWidth);
-		doubleColumn.setPrefWidth(prefColumnWidth);
 		table.getColumns().add(doubleColumn);
 
 		// test power
@@ -90,8 +81,6 @@ public class UITestStatisticTableBuilder extends UITableBuilder<TestStatisticRow
 		tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.power_of_test.tooltip", "Power of test (type II-error)");
 		header = new ColumnTooltipHeader(cellValueTypeStatistic, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::powerOfTestProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
-		doubleColumn.setMinWidth(minColumnWidth);
-		doubleColumn.setPrefWidth(prefColumnWidth);
 		table.getColumns().add(doubleColumn);
 
 		// noncentrality parameter
@@ -100,8 +89,6 @@ public class UITestStatisticTableBuilder extends UITableBuilder<TestStatisticRow
 		tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.noncentrality_parameter.tooltip", "Noncentrality Parameter");
 		header = new ColumnTooltipHeader(cellValueTypeStatistic, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::noncentralityParameterProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
-		doubleColumn.setMinWidth(minColumnWidth);
-		doubleColumn.setPrefWidth(prefColumnWidth);
 		table.getColumns().add(doubleColumn);
 
 		// p-Value
@@ -110,8 +97,6 @@ public class UITestStatisticTableBuilder extends UITableBuilder<TestStatisticRow
 		tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.p_value.tooltip", "p-value (logarithmic representation)");
 		header = new ColumnTooltipHeader(cellValueTypeStatistic, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::pValueProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
-		doubleColumn.setMinWidth(minColumnWidth);
-		doubleColumn.setPrefWidth(prefColumnWidth);
 		table.getColumns().add(doubleColumn);
 
 		// Quantile
@@ -120,8 +105,6 @@ public class UITestStatisticTableBuilder extends UITableBuilder<TestStatisticRow
 		tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.quantile.tooltip", "Quantile of F-distribution");
 		header = new ColumnTooltipHeader(cellValueTypeStatistic, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::quantileProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
-		doubleColumn.setMinWidth(minColumnWidth);
-		doubleColumn.setPrefWidth(prefColumnWidth);
 		table.getColumns().add(doubleColumn);
 		
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);

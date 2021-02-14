@@ -58,7 +58,7 @@ public class UICongruentPointTableBuilder extends UITableBuilder<TerrestrialObse
 		String tooltipText = i18n.getString("UICongruentPointTableBuilder.tableheader.point1.name.tooltip", "Id of first point A");
 		CellValueType cellValueType = CellValueType.STRING;
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		stringColumn = this.<String>getColumn(header, TerrestrialObservationRow::startPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
+		stringColumn = this.<String>getColumn(header, TerrestrialObservationRow::startPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, false); 
 		table.getColumns().add(stringColumn);
 
 		// Point B
@@ -67,7 +67,7 @@ public class UICongruentPointTableBuilder extends UITableBuilder<TerrestrialObse
 		tooltipText = i18n.getString("UICongruentPointTableBuilder.tableheader.point2.name.tooltip", "Id of second point B");
 		cellValueType = CellValueType.STRING;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		stringColumn = this.<String>getColumn(header, TerrestrialObservationRow::endPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true);
+		stringColumn = this.<String>getColumn(header, TerrestrialObservationRow::endPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(stringColumn);
 
 		// Distance between A-B
@@ -76,9 +76,10 @@ public class UICongruentPointTableBuilder extends UITableBuilder<TerrestrialObse
 		tooltipText = i18n.getString("UICongruentPointTableBuilder.tableheader.distance.tooltip", "Estimated distance between point A and B");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::distanceAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+		doubleColumn = this.<Double>getColumn(header, TerrestrialObservationRow::distanceAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
+		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		this.table = table;
 		this.isInitialize = true;
 	}
