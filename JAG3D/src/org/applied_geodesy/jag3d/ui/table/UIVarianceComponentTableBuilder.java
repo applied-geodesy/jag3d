@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
+import org.applied_geodesy.jag3d.ui.table.column.ColumnContentType;
+import org.applied_geodesy.jag3d.ui.table.column.TableContentType;
 import org.applied_geodesy.jag3d.ui.table.row.VarianceComponentRow;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
@@ -64,101 +66,93 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		this.init();
 		return this.table;
 	}
+	
+	private TableContentType getTableContentType() {
+		switch(this.type) {
+		case SELECTED_GROUP_COMPONENTS:
+			return TableContentType.SELECTED_GROUP_VARIANCE_COMPONENTS;
+		default:
+			return TableContentType.UNSPECIFIC;
+		}
+	}
 
 	private void init() {
 		if (this.tables.containsKey(this.type)) {
 			this.table = this.tables.get(this.type);
 			return;
 		}
-		
-		double minColumnWidth = 50;
-		double prefColumnWidth = 100;
 
 		TableColumn<VarianceComponentRow, VarianceComponentType> varianceComponentTypeColumn = null;
 		TableColumn<VarianceComponentRow, String> stringColumn   = null;
 		TableColumn<VarianceComponentRow, Boolean> booleanColumn = null;
 		TableColumn<VarianceComponentRow, Double> doubleColumn   = null;
 		TableColumn<VarianceComponentRow, Integer> integerColumn = null; 
+		
+		TableContentType tableContentType = this.getTableContentType();
 
 		TableView<VarianceComponentRow> table = this.createTable();
 
-		// Component type
-		CellValueType cellValueType = CellValueType.STRING;
+		// Overall component type
 		int columnIndex = table.getColumns().size(); 
 		String labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.label", "Component");
 		String tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.tooltip", "Type of estimated variance component");
+		CellValueType cellValueType = CellValueType.STRING;
+		ColumnContentType columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.VARIANCE_COMPONENT_NAME;
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		varianceComponentTypeColumn = this.<VarianceComponentType>getColumn(header, VarianceComponentRow::varianceComponentTypeProperty, getVarianceComponentTypeCallback(), this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false); 
+		varianceComponentTypeColumn = this.<VarianceComponentType>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::varianceComponentTypeProperty, getVarianceComponentTypeCallback(), this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false); 
 		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
-			varianceComponentTypeColumn.setPrefWidth(175);
 			varianceComponentTypeColumn.setMinWidth(150);
-//			varianceComponentTypeColumn.setMaxWidth(250);
 		}
 		table.getColumns().add(varianceComponentTypeColumn);
 		
-		// Station-ID
+		// Selected component type
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.name.label", "Name");
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.name.tooltip", "Name of variance component");
 		cellValueType = CellValueType.STRING;
+		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.VARIANCE_COMPONENT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		stringColumn = this.<String>getColumn(header, VarianceComponentRow::nameProperty, getStringCallback(), this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, true); 
-		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
-			stringColumn.setPrefWidth(175);
-			stringColumn.setMinWidth(150);
-		}
+		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::nameProperty, getStringCallback(), this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false); 
 		table.getColumns().add(stringColumn);
 
 		// number of observations
-		cellValueType = CellValueType.INTEGER;
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.number_of_observations.label", "n");
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.number_of_observations.tooltip", "Number of observations");
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		integerColumn = this.<Integer>getColumn(header, VarianceComponentRow::numberOfObservationsProperty, getIntegerCallback(), ColumnType.VISIBLE, columnIndex, false); 
-		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
-			integerColumn.setMinWidth(minColumnWidth);
-			integerColumn.setPrefWidth(prefColumnWidth);
-		}
+		cellValueType = CellValueType.INTEGER;
+		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.REDUNDANCY;
+		integerColumn = this.<Integer>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::numberOfObservationsProperty, getIntegerCallback(), ColumnType.VISIBLE, columnIndex, false); 
 		table.getColumns().add(integerColumn);
 
 		// redundnacy
-		cellValueType = CellValueType.STATISTIC;
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.redundancy.label", "r");
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.redundancy.tooltip", "Redundancy");
+		cellValueType = CellValueType.STATISTIC;
+		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.REDUNDANCY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, VarianceComponentRow::redundancyProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
-		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
-			doubleColumn.setMinWidth(minColumnWidth);
-			doubleColumn.setPrefWidth(prefColumnWidth);
-		}
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::redundancyProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
 		table.getColumns().add(doubleColumn);
 
 		// Omega
-		cellValueType = CellValueType.STATISTIC;
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.omega.label", "\u03A9");
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.omega.tooltip", "Squared weigthed residuals");
+		cellValueType = CellValueType.STATISTIC;
+		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.OMEGA;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, VarianceComponentRow::omegaProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
-		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
-			doubleColumn.setMinWidth(minColumnWidth);
-			doubleColumn.setPrefWidth(prefColumnWidth);
-		}
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::omegaProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
 		table.getColumns().add(doubleColumn);
 
 		// Sigma a-posteriori
-		cellValueType = CellValueType.STATISTIC;
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.variance.label", "1 : \u03C3\u00B2");
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.variance.tooltip", "A-posteriori variance factor w.r.t. a-priori variance");
+		cellValueType = CellValueType.STATISTIC;
+		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.VARIANCE;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, VarianceComponentRow::sigma2aposterioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
-		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
-			doubleColumn.setMinWidth(minColumnWidth);
-			doubleColumn.setPrefWidth(prefColumnWidth);
-		}
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::sigma2aposterioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
 		table.getColumns().add(doubleColumn);
 
 		// Decision of test statistic
@@ -167,8 +161,9 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.significant.label", "Significant");
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.significant.tooltip", "Checked, if a-posteriori variance is significant w.r.t. a-priori variance");
 		cellValueType = CellValueType.BOOLEAN;
+		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.SIGNIFICANT;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		booleanColumn = this.<Boolean>getColumn(header, VarianceComponentRow::significantProperty, getBooleanCallback(), this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false);
+		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::significantProperty, getBooleanCallback(), this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false);
 		booleanColumn.setCellValueFactory(new Callback<CellDataFeatures<VarianceComponentRow, Boolean>, ObservableValue<Boolean>>() {
 			@Override
 			public ObservableValue<Boolean> call(CellDataFeatures<VarianceComponentRow, Boolean> param) {
@@ -178,10 +173,6 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 				return booleanProp;
 			}
 		});
-		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
-			booleanColumn.setPrefWidth(prefColumnWidth);
-			booleanColumn.setMinWidth(minColumnWidth);
-		}
 		table.getColumns().add(booleanColumn);
 		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS)
 			table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);

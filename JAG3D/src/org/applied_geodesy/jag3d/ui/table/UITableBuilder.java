@@ -25,6 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.applied_geodesy.jag3d.ui.table.column.ColumnContentType;
+import org.applied_geodesy.jag3d.ui.table.column.ColumnPropertiesManager;
+import org.applied_geodesy.jag3d.ui.table.column.ColumnProperty;
+import org.applied_geodesy.jag3d.ui.table.column.ContentColumn;
+import org.applied_geodesy.jag3d.ui.table.column.TableContentType;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
@@ -256,18 +261,27 @@ public abstract class UITableBuilder<T> {
 	}
 
 	<S>TableColumn<T, S> getColumn(ColumnTooltipHeader header, Function<T, ObservableValue<S>> property, Callback<TableColumn<T, S>, TableCell<T, S>> callback, ColumnType type, int columnIndex, boolean editable) {
+		return getColumn(TableContentType.UNSPECIFIC, ColumnContentType.DEFAULT, header, property, callback, type, columnIndex, editable);
+	}
+	
+	<S>TableColumn<T, S> getColumn(TableContentType tableType, ColumnContentType columnType, ColumnTooltipHeader header, Function<T, ObservableValue<S>> property, Callback<TableColumn<T, S>, TableCell<T, S>> callback, ColumnType type, int columnIndex, boolean editable) {
+		ColumnPropertiesManager columnPropertiesManager = ColumnPropertiesManager.getInstance();
+		ColumnProperty columnProperty = columnPropertiesManager.getProperty(tableType, columnType);
+		
+		//TableColumn<T, S> column = new TableColumn<T, S>();
+		// Sets width properties within columnProperty
+		ContentColumn<T, S> column = new ContentColumn<T, S>(columnProperty);
+		
 		final TableCellEvent<S> tableCellEvent = new TableCellEvent<S>(columnIndex);
-		TableColumn<T, S> column = new TableColumn<T, S>();
+		
 		Label columnLabel = header.getLabel();
 		columnLabel.getStyleClass().add("column-header-label");
 		columnLabel.setMaxWidth(Double.MAX_VALUE);
 		columnLabel.setTooltip(header.getTooltip());
-
 		column.setUserData(type);
 		column.setEditable(editable);
 		column.setGraphic(columnLabel);
-		column.setMinWidth(25);
-		column.setPrefWidth(125);
+		
 		column.setCellValueFactory(new Callback<CellDataFeatures<T, S>, ObservableValue<S>>() {
 			@Override
 			public ObservableValue<S> call(CellDataFeatures<T, S> param) {
