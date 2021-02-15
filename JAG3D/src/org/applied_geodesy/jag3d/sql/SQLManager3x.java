@@ -59,7 +59,7 @@ public class SQLManager3x {
 				throw new SQLException(SQLManager3x.class.getSimpleName() + " : Error, could not detect database version. Database update failed!");
 			}
 			
-			Map<Double, String> querys = SQLManager.dataBase();
+			Map<Double, String> querys = SQLDatabase.dataBase();
 
 			for ( Map.Entry<Double, String> query : querys.entrySet() ) {
 				double subDBVersion = query.getKey();
