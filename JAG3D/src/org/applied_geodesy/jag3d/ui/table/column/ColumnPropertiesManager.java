@@ -25,11 +25,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 public class ColumnPropertiesManager implements Iterable<Map.Entry<Pair<TableContentType, ColumnContentType>, ColumnProperty>>  {
 	private static ColumnPropertiesManager columnPropertiesManager = new ColumnPropertiesManager();
 	private Map<Pair<TableContentType, ColumnContentType>, ColumnProperty> properties = new HashMap<Pair<TableContentType, ColumnContentType>, ColumnProperty>();
+	private Map<TableContentType, ObservableList<ColumnContentType>> tableSortOrder = new HashMap<TableContentType, ObservableList<ColumnContentType>>();
+	private Map<TableContentType, ObservableList<ColumnContentType>> tableColumnsOrder = new HashMap<TableContentType, ObservableList<ColumnContentType>>();
 	
 	private ColumnPropertiesManager() {}
 	
@@ -49,7 +53,30 @@ public class ColumnPropertiesManager implements Iterable<Map.Entry<Pair<TableCon
 	}
 
 	@Override
-	public Iterator<Map.Entry<Pair<TableContentType, ColumnContentType>, ColumnProperty>>  iterator() {
+	public Iterator<Map.Entry<Pair<TableContentType, ColumnContentType>, ColumnProperty>> iterator() {
 		return this.properties.entrySet().iterator();
-	}	
+	}
+	
+	public void clearOrder() {
+		for (ObservableList<ColumnContentType> columnTypes : this.tableSortOrder.values())
+			columnTypes.clear();
+		for (ObservableList<ColumnContentType> columnTypes : this.tableColumnsOrder.values())
+			columnTypes.clear();
+	}
+	
+	public ObservableList<ColumnContentType> getSortOrder(TableContentType tableType) {
+		if (!this.tableSortOrder.containsKey(tableType)) {
+			ObservableList<ColumnContentType> columnTypes = FXCollections.observableArrayList();
+			this.tableSortOrder.put(tableType, columnTypes);
+		}
+		return this.tableSortOrder.get(tableType);
+	}
+	
+	public ObservableList<ColumnContentType> getColumnsOrder(TableContentType tableType) {
+		if (!this.tableColumnsOrder.containsKey(tableType)) {
+			ObservableList<ColumnContentType> columnTypes = FXCollections.observableArrayList();
+			this.tableColumnsOrder.put(tableType, columnTypes);
+		}
+		return this.tableColumnsOrder.get(tableType);
+	}
 }

@@ -45,7 +45,9 @@ public class ContentColumn<S, T> extends TableColumn<S, T> {
 		if (columnProperty.getColumnContentType() != ColumnContentType.DEFAULT) {
 			this.prefWidthProperty().bindBidirectional(columnProperty.prefWidthProperty());
 			this.widthProperty().addListener(new WidthChangListener());
+			this.sortTypeProperty().bindBidirectional(columnProperty.sortTypeProperty());	
 		}
+		
 	}
 
 	public ColumnProperty getColumnProperty() {
