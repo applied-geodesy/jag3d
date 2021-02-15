@@ -22,7 +22,9 @@
 package org.applied_geodesy.jag3d.ui.table;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.function.Function;
 
 import org.applied_geodesy.jag3d.ui.table.column.ColumnContentType;
@@ -48,6 +50,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -138,6 +141,65 @@ public abstract class UITableBuilder<T> {
 			if (event.getTableColumn().isEditable()) {
 				setValue(event.getRowValue(), this.columnIndex, event.getOldValue(), event.getNewValue());
 			}
+		}
+	}
+	
+	private class SortOrderChangeListener implements ListChangeListener<TableColumn<T, ?>> {
+		@Override
+		public void onChanged(Change<? extends TableColumn<T, ?>> change) {
+			while (change.next()) {
+				if (change.wasRemoved()) {
+					for (TableColumn<T, ?> removedColumnItem : change.getRemoved()) {
+						if (removedColumnItem instanceof ContentColumn) {
+							((ContentColumn<T,?>)removedColumnItem).getColumnProperty().setSortOrder(-1);
+						}	
+					}
+				}
+			}
+			
+			int idx = 0;
+			for (TableColumn<T, ?> addedColumnItem : change.getList()) {
+				if (addedColumnItem instanceof ContentColumn) {
+					((ContentColumn<T,?>)addedColumnItem).getColumnProperty().setSortOrder(idx++);
+				}
+			}
+		}
+	}
+	
+	private class ColumnsOrderChangeListener implements ListChangeListener<TableColumn<T, ?>> {
+		@Override
+		public void onChanged(Change<? extends TableColumn<T, ?>> change) {	
+			int idx = 0;
+			for (TableColumn<T, ?> addedColumnItem : change.getList()) {
+				if (addedColumnItem instanceof ContentColumn) {
+					((ContentColumn<T,?>)addedColumnItem).getColumnProperty().setColumnOrder(idx++);
+				}
+			}
+		}
+	}
+	
+	private class SortOrderSequenceChangeListener implements ListChangeListener<ColumnContentType> {
+		
+		private final TableView<T> tableView;
+		public SortOrderSequenceChangeListener(TableView<T> tableView) {
+			this.tableView = tableView;
+		}
+		
+		@Override
+		public void onChanged(Change<? extends ColumnContentType> change) {
+			setSortOrderSequence(this.tableView, change.getList());
+		}
+	}
+	
+	private class ColumnsOrderSequenceChangeListener implements ListChangeListener<ColumnContentType> {
+		private final TableView<T> tableView;
+		public ColumnsOrderSequenceChangeListener(TableView<T> tableView) {
+			this.tableView = tableView;
+		}
+		
+		@Override
+		public void onChanged(Change<? extends ColumnContentType> change) {
+			setColumnsOrderSequence(this.tableView, change.getList());
 		}
 	}
 
@@ -259,27 +321,39 @@ public abstract class UITableBuilder<T> {
 			}
 		});
 	}
+	
+	void addColumnOrderSequenceListeners(TableContentType tableContentType, TableView<T> table) {
+		if (tableContentType != TableContentType.UNSPECIFIC) {
+			ObservableList<ColumnContentType>  sortOrder    = ColumnPropertiesManager.getInstance().getSortOrder(tableContentType);
+			ObservableList<ColumnContentType>  columnsOrder = ColumnPropertiesManager.getInstance().getColumnsOrder(tableContentType);
+			this.setSortOrderSequence(table, sortOrder);
+			this.setColumnsOrderSequence(table, columnsOrder);
+			table.getSortOrder().addListener(new SortOrderChangeListener());
+			table.getColumns().addListener(new ColumnsOrderChangeListener());
+			sortOrder.addListener(new SortOrderSequenceChangeListener(table));
+			columnsOrder.addListener(new ColumnsOrderSequenceChangeListener(table));
+		}
+	}
 
 	<S>TableColumn<T, S> getColumn(ColumnTooltipHeader header, Function<T, ObservableValue<S>> property, Callback<TableColumn<T, S>, TableCell<T, S>> callback, ColumnType type, int columnIndex, boolean editable) {
-		return getColumn(TableContentType.UNSPECIFIC, ColumnContentType.DEFAULT, header, property, callback, type, columnIndex, editable);
+		return getColumn(TableContentType.UNSPECIFIC, ColumnContentType.DEFAULT, header, property, callback, type, columnIndex, editable, Boolean.FALSE);
 	}
 	
-	<S>TableColumn<T, S> getColumn(TableContentType tableType, ColumnContentType columnType, ColumnTooltipHeader header, Function<T, ObservableValue<S>> property, Callback<TableColumn<T, S>, TableCell<T, S>> callback, ColumnType type, int columnIndex, boolean editable) {
+	<S>TableColumn<T, S> getColumn(TableContentType tableType, ColumnContentType columnType, ColumnTooltipHeader header, Function<T, ObservableValue<S>> property, Callback<TableColumn<T, S>, TableCell<T, S>> callback, ColumnType type, int columnIndex, boolean editable, boolean reorderable) {
 		ColumnPropertiesManager columnPropertiesManager = ColumnPropertiesManager.getInstance();
 		ColumnProperty columnProperty = columnPropertiesManager.getProperty(tableType, columnType);
-		
-		//TableColumn<T, S> column = new TableColumn<T, S>();
+		columnProperty.setColumnOrder(columnIndex);
+		columnProperty.setDefaultColumnOrder(columnIndex);
 		// Sets width properties within columnProperty
 		ContentColumn<T, S> column = new ContentColumn<T, S>(columnProperty);
-		
 		final TableCellEvent<S> tableCellEvent = new TableCellEvent<S>(columnIndex);
-		
 		Label columnLabel = header.getLabel();
 		columnLabel.getStyleClass().add("column-header-label");
 		columnLabel.setMaxWidth(Double.MAX_VALUE);
 		columnLabel.setTooltip(header.getTooltip());
 		column.setUserData(type);
 		column.setEditable(editable);
+		column.setReorderable(reorderable);
 		column.setGraphic(columnLabel);
 		
 		column.setCellValueFactory(new Callback<CellDataFeatures<T, S>, ObservableValue<S>>() {
@@ -344,5 +418,86 @@ public abstract class UITableBuilder<T> {
 
 	public static Object getValueAt(TableView<?> table, int columnIndex, int rowIndex) {
 		return table.getColumns().get(columnIndex).getCellObservableValue(rowIndex).getValue();
+	}
+	
+	private void setSortOrderSequence(TableView<T> table, List<? extends ColumnContentType> columnTypes) {
+		List<TableColumn<T, ?>> sortedColumns = new ArrayList<TableColumn<T, ?>>();
+		List<TableColumn<T, ?>> columns = new ArrayList<TableColumn<T, ?>>(table.getColumns());
+		
+		// Reset sort order
+		if (columnTypes.isEmpty()) {
+			for (TableColumn<T, ?> column : columns) {
+				if (column != null && (column instanceof ContentColumn)) 
+					((ContentColumn<T, ?>)column).getColumnProperty().setSortOrder(-1);
+			}
+		}
+				
+		int idx = 0;
+		for (ColumnContentType columnType : columnTypes) {
+			ListIterator<TableColumn<T, ?>> columnIterator = columns.listIterator();
+			while (columnIterator.hasNext()) {
+				TableColumn<T, ?> column = columnIterator.next();
+				if (column instanceof ContentColumn) {
+					ColumnContentType currentColumnType = ((ContentColumn<T,?>)column).getColumnProperty().getColumnContentType();
+					if (currentColumnType == columnType) {
+						sortedColumns.add(column);
+						((ContentColumn<T,?>)column).getColumnProperty().setSortOrder(idx++);
+						columnIterator.remove();
+						break;
+					}
+				}
+			}
+		}
+		
+		table.getSortOrder().setAll(sortedColumns);
+	}
+	
+	private void setColumnsOrderSequence(TableView<T> table, List<? extends ColumnContentType> columnTypes) {
+		List<TableColumn<T, ?>> orderedColumns = new ArrayList<TableColumn<T, ?>>();
+		List<TableColumn<T, ?>> columns = new ArrayList<TableColumn<T, ?>>(table.getColumns());
+
+		// Reset column order
+		if (columnTypes.isEmpty()) {
+			for (TableColumn<T, ?> column : columns) {
+				if (column != null && (column instanceof ContentColumn)) {
+					int defaultValue = ((ContentColumn<T, ?>)column).getColumnProperty().getDefaultColumnOrder();
+					((ContentColumn<T, ?>)column).getColumnProperty().setColumnOrder(defaultValue);
+				}
+			}
+			columns.sort(new Comparator<TableColumn<T, ?>>() {
+				@Override
+				public int compare(TableColumn<T, ?> column1, TableColumn<T, ?> column2) {
+					if (column1 == null || !(column1 instanceof ContentColumn))
+						return -1;
+					if (column2 == null || !(column2 instanceof ContentColumn))
+						return +1;
+
+					int defaultValue1 = ((ContentColumn<T, ?>)column1).getColumnProperty().getDefaultColumnOrder();
+					int defaultValue2 = ((ContentColumn<T, ?>)column2).getColumnProperty().getDefaultColumnOrder();
+					return defaultValue1 - defaultValue2;
+				}
+			});
+		}
+		
+		int idx = 0;
+		for (ColumnContentType columnType : columnTypes) {
+			ListIterator<TableColumn<T, ?>> columnIterator = columns.listIterator();
+			while (columnIterator.hasNext()) {
+				TableColumn<T, ?> column = columnIterator.next();
+				if (column instanceof ContentColumn) {
+					ColumnContentType currentColumnType = ((ContentColumn<T,?>)column).getColumnProperty().getColumnContentType();
+					if (currentColumnType == columnType) {
+						orderedColumns.add(column);
+						((ContentColumn<T,?>)column).getColumnProperty().setColumnOrder(idx++);
+						columnIterator.remove();
+						break;
+					}
+				}
+			}
+		}
+		// Add columns, which are not part of columnTypes list, i.e. if meanwhile,
+		// a new column is defined to the table not stored to the database)
+		orderedColumns.addAll(columns);
+		table.getColumns().setAll(orderedColumns);
 	}
 }
