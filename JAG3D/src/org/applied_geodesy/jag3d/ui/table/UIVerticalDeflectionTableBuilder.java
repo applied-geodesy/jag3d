@@ -130,7 +130,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		CellValueType cellValueType = CellValueType.BOOLEAN;
 		ColumnContentType columnContentType = ColumnContentType.ENABLE;
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::enableProperty, getBooleanCallback(), ColumnType.VISIBLE, columnIndex, true);
+		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::enableProperty, getBooleanCallback(), ColumnType.VISIBLE, columnIndex, true, true);
 		booleanColumn.setCellValueFactory(new Callback<CellDataFeatures<VerticalDeflectionRow, Boolean>, ObservableValue<Boolean>>() {
 			@Override
 			public ObservableValue<Boolean> call(CellDataFeatures<VerticalDeflectionRow, Boolean> param) {
@@ -149,7 +149,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.STRING;
 		columnContentType = ColumnContentType.POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
+		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true); 
 		table.getColumns().add(stringColumn);
 		
 		// A-priori Deflection params
@@ -160,7 +160,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.VALUE_Y_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::yAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_DEFLECTION, columnIndex, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::yAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_DEFLECTION, columnIndex, true, true);
 		table.getColumns().add(doubleColumn);
 
 		// X0-Comp.
@@ -170,7 +170,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.VALUE_X_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::xAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_DEFLECTION, columnIndex, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::xAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_DEFLECTION, columnIndex, true, true);
 		table.getColumns().add(doubleColumn);
 		
 		// A-priori Deflection uncertainties
@@ -181,7 +181,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.UNCERTAINTY_Y_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::sigmaYaprioriProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APRIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::sigmaYaprioriProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APRIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, true, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -192,7 +192,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.UNCERTAINTY_X_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::sigmaXaprioriProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APRIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::sigmaXaprioriProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APRIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, true, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 		
@@ -206,7 +206,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.VALUE_Y_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::yAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_DEFLECTION, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::yAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_DEFLECTION, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// x-comp.
@@ -216,7 +216,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.VALUE_X_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::xAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_DEFLECTION, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::xAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_DEFLECTION, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// Uncertainty
@@ -227,7 +227,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 		columnContentType = ColumnContentType.UNCERTAINTY_Y_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::sigmaYaposterioriProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::sigmaYaposterioriProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// x-comp.
@@ -237,7 +237,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 		columnContentType = ColumnContentType.UNCERTAINTY_X_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::sigmaXaposterioriProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::sigmaXaposterioriProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// Confidence
@@ -248,7 +248,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 		columnContentType = ColumnContentType.CONFIDENCE_A;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::confidenceAProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::confidenceAProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// C
@@ -258,7 +258,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 		columnContentType = ColumnContentType.CONFIDENCE_C;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::confidenceCProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::confidenceCProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// Redundancy
@@ -269,7 +269,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.REDUNDANCY_Y;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::redundancyYProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::redundancyYProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// rx
@@ -279,7 +279,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.REDUNDANCY_X;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::redundancyXProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::redundancyXProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// Residual
@@ -290,7 +290,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_Y;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::residualYProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::residualYProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// x-epsilon
@@ -300,7 +300,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_X;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::residualXProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::residualXProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// Gross-error
@@ -311,7 +311,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.GROSS_ERROR_Y;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::grossErrorYProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::grossErrorYProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// x-Nabla
@@ -321,7 +321,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.GROSS_ERROR_X;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::grossErrorXProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::grossErrorXProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// MDB
@@ -332,7 +332,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_Y;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::minimalDetectableBiasYProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::minimalDetectableBiasYProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// x-MDB
@@ -342,7 +342,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_X;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::minimalDetectableBiasXProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::minimalDetectableBiasXProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// vTPv
@@ -352,7 +352,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.OMEGA;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::omegaProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::omegaProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// p-Value
@@ -362,7 +362,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.P_VALUE_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::pValueAprioriProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::pValueAprioriProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// p-Value
@@ -372,7 +372,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.P_VALUE_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::pValueAposterioriProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::pValueAposterioriProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// Tprio
@@ -382,7 +382,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.TEST_STATISTIC_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::testStatisticAprioriProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::testStatisticAprioriProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// Tpost
@@ -392,7 +392,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.TEST_STATISTIC_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::testStatisticAposterioriProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::testStatisticAposterioriProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// Decision of test statistic
@@ -403,7 +403,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		cellValueType = CellValueType.BOOLEAN;
 		columnContentType = ColumnContentType.SIGNIFICANT;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::significantProperty, getBooleanCallback(), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false);
+		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::significantProperty, getBooleanCallback(), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		booleanColumn.setCellValueFactory(new Callback<CellDataFeatures<VerticalDeflectionRow, Boolean>, ObservableValue<Boolean>>() {
 			@Override
 			public ObservableValue<Boolean> call(CellDataFeatures<VerticalDeflectionRow, Boolean> param) {
@@ -417,6 +417,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 
 		this.addContextMenu(table, this.createContextMenu(false));
 		this.addDynamicRowAdder(table);
+		this.addColumnOrderSequenceListeners(tableContentType, table);
 
 		this.tables.put(this.type, table);
 		this.table = table;

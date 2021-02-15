@@ -136,7 +136,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		CellValueType cellValueType = CellValueType.BOOLEAN;
 		ColumnContentType columnContentType = ColumnContentType.ENABLE;
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::enableProperty, getBooleanCallback(), ColumnType.VISIBLE, columnIndex, true);
+		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::enableProperty, getBooleanCallback(), ColumnType.VISIBLE, columnIndex, true, true);
 		booleanColumn.setCellValueFactory(new Callback<CellDataFeatures<TerrestrialObservationRow, Boolean>, ObservableValue<Boolean>>() {
 			@Override
 			public ObservableValue<Boolean> call(CellDataFeatures<TerrestrialObservationRow, Boolean> param) {
@@ -155,7 +155,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.STRING;
 		columnContentType = ColumnContentType.START_POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::startPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
+		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::startPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true); 
 		table.getColumns().add(stringColumn);
 
 		// Target-ID
@@ -165,7 +165,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.STRING;
 		columnContentType = ColumnContentType.END_POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::endPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true);
+		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::endPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true);
 		table.getColumns().add(stringColumn);
 
 		// Station height
@@ -175,7 +175,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.LENGTH;
 		columnContentType = ColumnContentType.INSTRUMENT_HEIGHT;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::instrumentHeightProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::instrumentHeightProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true, true);
 		table.getColumns().add(doubleColumn);
 
 		// Target height
@@ -185,7 +185,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.LENGTH;
 		columnContentType = ColumnContentType.REFLECTOR_HEIGHT;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::reflectorHeightProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::reflectorHeightProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true, true);
 		table.getColumns().add(doubleColumn);
 
 		// Terrestrial Observation a-priori and uncertainties
@@ -198,7 +198,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH;
 			columnContentType = ColumnContentType.VALUE_APRIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true, true);
 			table.getColumns().add(doubleColumn);
 
 			// Uncertainty
@@ -208,7 +208,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 			columnContentType = ColumnContentType.UNCERTAINTY_APRIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -221,7 +221,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.ANGLE;
 			columnContentType = ColumnContentType.VALUE_APRIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true, true);
 			table.getColumns().add(doubleColumn);
 
 			// Uncertainty
@@ -231,7 +231,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 			columnContentType = ColumnContentType.UNCERTAINTY_APRIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -244,7 +244,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH;
 			columnContentType = ColumnContentType.VALUE_APRIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true, true);
 			table.getColumns().add(doubleColumn);
 
 			// Uncertainty
@@ -254,7 +254,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 			columnContentType = ColumnContentType.UNCERTAINTY_APRIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -267,7 +267,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH;
 			columnContentType = ColumnContentType.VALUE_APRIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true, true);
 			table.getColumns().add(doubleColumn);
 
 			// Uncertainty
@@ -277,7 +277,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 			columnContentType = ColumnContentType.UNCERTAINTY_APRIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -290,7 +290,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.ANGLE;
 			columnContentType = ColumnContentType.VALUE_APRIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true, true);
 			table.getColumns().add(doubleColumn);
 
 			// Uncertainty
@@ -300,7 +300,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 			columnContentType = ColumnContentType.UNCERTAINTY_APRIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -316,7 +316,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.LENGTH;
 		columnContentType = ColumnContentType.APPROXIMATED_DISTANCE_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::distanceAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::distanceAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_TERRESTRIAL_OBSERVATION, columnIndex, true, true);
 		table.getColumns().add(doubleColumn);
 
 		//////////////////// ADJUSTED VALUES //////////////////////////
@@ -331,7 +331,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH;
 			columnContentType = ColumnContentType.VALUE_APOSTERIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			table.getColumns().add(doubleColumn);
 
 			// Uncertainty
@@ -341,7 +341,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 			columnContentType = ColumnContentType.UNCERTAINTY_APOSTERIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -354,7 +354,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.ANGLE;
 			columnContentType = ColumnContentType.VALUE_APOSTERIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			table.getColumns().add(doubleColumn);
 
 			// Uncertainty
@@ -364,7 +364,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 			columnContentType = ColumnContentType.UNCERTAINTY_APOSTERIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -377,7 +377,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH;
 			columnContentType = ColumnContentType.VALUE_APOSTERIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			table.getColumns().add(doubleColumn);
 
 			// Uncertainty
@@ -387,7 +387,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 			columnContentType = ColumnContentType.UNCERTAINTY_APOSTERIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -400,7 +400,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH;
 			columnContentType = ColumnContentType.VALUE_APOSTERIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			table.getColumns().add(doubleColumn);
 
 			// Uncertainty
@@ -410,7 +410,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 			columnContentType = ColumnContentType.UNCERTAINTY_APOSTERIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -423,7 +423,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.ANGLE;
 			columnContentType = ColumnContentType.VALUE_APOSTERIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::valueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			table.getColumns().add(doubleColumn);
 
 			// Uncertainty
@@ -433,7 +433,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 			columnContentType = ColumnContentType.UNCERTAINTY_APOSTERIORI;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::sigmaAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -450,7 +450,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.REDUNDANCY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::redundancyProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::redundancyProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -466,7 +466,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH_RESIDUAL;
 			columnContentType = ColumnContentType.RESIDUAL;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::residualProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::residualProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 						
@@ -477,7 +477,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH_RESIDUAL;
 			columnContentType = ColumnContentType.GROSS_ERROR;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::grossErrorProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::grossErrorProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -488,7 +488,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.LENGTH_RESIDUAL;
 			columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::minimalDetectableBiasProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::minimalDetectableBiasProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -502,7 +502,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.ANGLE_RESIDUAL;
 			columnContentType = ColumnContentType.RESIDUAL;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::residualProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::residualProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 						
@@ -513,7 +513,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.ANGLE_RESIDUAL;
 			columnContentType = ColumnContentType.GROSS_ERROR;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::grossErrorProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::grossErrorProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -524,7 +524,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			cellValueType = CellValueType.ANGLE_RESIDUAL;
 			columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::minimalDetectableBiasProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::minimalDetectableBiasProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
@@ -541,7 +541,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.INFLUENCE_ON_POINT_POSITION;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::influenceOnPointPositionProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::influenceOnPointPositionProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -552,7 +552,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.INFLUENCE_ON_NETWORK_DISTORTION;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::influenceOnNetworkDistortionProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::influenceOnNetworkDistortionProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -563,7 +563,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.OMEGA;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::omegaProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::omegaProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -574,7 +574,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.P_VALUE_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::pValueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::pValueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -585,7 +585,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.P_VALUE_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::pValueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::pValueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -596,7 +596,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.TEST_STATISTIC_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::testStatisticAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::testStatisticAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -607,7 +607,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.TEST_STATISTIC_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::testStatisticAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::testStatisticAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -619,7 +619,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		cellValueType = CellValueType.BOOLEAN;
 		columnContentType = ColumnContentType.SIGNIFICANT;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::significantProperty, getBooleanCallback(), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false);
+		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::significantProperty, getBooleanCallback(), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 		booleanColumn.setCellValueFactory(new Callback<CellDataFeatures<TerrestrialObservationRow, Boolean>, ObservableValue<Boolean>>() {
 			@Override
 			public ObservableValue<Boolean> call(CellDataFeatures<TerrestrialObservationRow, Boolean> param) {
@@ -633,7 +633,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		
 		this.addContextMenu(table, this.createContextMenu(false));
 		this.addDynamicRowAdder(table);
-
+		this.addColumnOrderSequenceListeners(tableContentType, table);
+		
 		this.tables.put(this.type, table);
 		this.table = table;
 	}
@@ -1017,4 +1018,25 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 		}
 	}
+	
+//	private static void setSortOrder(TableView<TerrestrialObservationRow> table, List<ColumnContentType> columnTypes) {
+//		ObservableList<TableColumn<TerrestrialObservationRow, ?>> sortOrder = FXCollections.observableArrayList();
+//		
+//		ObservableList<TableColumn<TerrestrialObservationRow, ?>> columns = table.getColumns();
+//		int idx = 0;
+//		for (ColumnContentType columnType : columnTypes) {
+//			for (TableColumn<TerrestrialObservationRow, ?> column : columns) {
+//				if (column instanceof ContentColumn) {
+//					ColumnContentType currentColumnType = ((ContentColumn<TerrestrialObservationRow,?>)column).getColumnProperty().getColumnContentType();
+//					if (currentColumnType == columnType) {
+//						sortOrder.add(column);
+//						((ContentColumn<TerrestrialObservationRow,?>)column).getColumnProperty().setSortType(idx++);
+//						break;
+//					}
+//				}
+//			}
+//		}
+//		
+//		table.getSortOrder().setAll(sortOrder);
+//	}
 }

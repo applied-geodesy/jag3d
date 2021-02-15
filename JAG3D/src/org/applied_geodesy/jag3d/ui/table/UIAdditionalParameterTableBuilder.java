@@ -77,7 +77,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		String tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.type.tooltip", "Type of the additional parameter");
 		ColumnTooltipHeader header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		ColumnContentType columnContentType = ColumnContentType.PARAMETER_NAME;
-		parameterTypeColumn = this.<ParameterType>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::parameterTypeProperty, getParameterTypeCallback(), ColumnType.VISIBLE, columnIndex, false); 
+		parameterTypeColumn = this.<ParameterType>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::parameterTypeProperty, getParameterTypeCallback(), ColumnType.VISIBLE, columnIndex, false, true); 
 		table.getColumns().add(parameterTypeColumn);
 		
 		// Parameter value
@@ -86,7 +86,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.value.tooltip", "Estimated value of additional parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		columnContentType = ColumnContentType.VALUE_APOSTERIORI;
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::valueAposterioriProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.NORMAL), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::valueAposterioriProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.NORMAL), ColumnType.VISIBLE, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 		
 		// Uncertainty
@@ -95,7 +95,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.uncertainty.tooltip", "A-posteriori uncertainty of additional parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		columnContentType = ColumnContentType.UNCERTAINTY_APOSTERIORI;
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::sigmaAposterioriProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.UNCERTAINTY), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::sigmaAposterioriProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.UNCERTAINTY), ColumnType.VISIBLE, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 		
 		// Confidence
@@ -104,7 +104,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.semiaxis.tooltip", "Confidence interval");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		columnContentType = ColumnContentType.CONFIDENCE_A;
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::confidenceProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.UNCERTAINTY), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::confidenceProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.UNCERTAINTY), ColumnType.VISIBLE, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 		
 		// Nabla
@@ -113,7 +113,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.grosserror.tooltip", "Gross-error of additional parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		columnContentType = ColumnContentType.GROSS_ERROR;
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::grossErrorProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.RESIDUAL), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::grossErrorProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.RESIDUAL), ColumnType.VISIBLE, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 		
 		// MDB
@@ -122,7 +122,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.minimaldetectablebias.tooltip", "Minimal detectable bias of additional parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS;
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::minimalDetectableBiasProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.RESIDUAL), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::minimalDetectableBiasProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.RESIDUAL), ColumnType.VISIBLE, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 		
 		// A-priori log(p)
@@ -132,7 +132,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		CellValueType cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.P_VALUE_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::pValueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::pValueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -143,7 +143,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.P_VALUE_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::pValueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::pValueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -154,7 +154,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.TEST_STATISTIC_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::testStatisticAprioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::testStatisticAprioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -165,7 +165,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.TEST_STATISTIC_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::testStatisticAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::testStatisticAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 		
@@ -177,7 +177,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		cellValueType = CellValueType.BOOLEAN;
 		columnContentType = ColumnContentType.SIGNIFICANT;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::significantProperty, getBooleanCallback(), ColumnType.VISIBLE, columnIndex, false);
+		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::significantProperty, getBooleanCallback(), ColumnType.VISIBLE, columnIndex, false, true);
 		booleanColumn.setCellValueFactory(new Callback<CellDataFeatures<AdditionalParameterRow, Boolean>, ObservableValue<Boolean>>() {
 			@Override
 			public ObservableValue<Boolean> call(CellDataFeatures<AdditionalParameterRow, Boolean> param) {
@@ -188,7 +188,8 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 			}
 		});
 		table.getColumns().add(booleanColumn);
-
+		this.addColumnOrderSequenceListeners(tableContentType, table);
+		
 		this.table = table;
 		this.isInitialize = true;
 	}

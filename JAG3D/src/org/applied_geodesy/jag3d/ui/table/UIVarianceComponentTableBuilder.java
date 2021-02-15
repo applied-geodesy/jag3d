@@ -99,7 +99,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		CellValueType cellValueType = CellValueType.STRING;
 		ColumnContentType columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.VARIANCE_COMPONENT_NAME;
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		varianceComponentTypeColumn = this.<VarianceComponentType>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::varianceComponentTypeProperty, getVarianceComponentTypeCallback(), this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false); 
+		varianceComponentTypeColumn = this.<VarianceComponentType>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::varianceComponentTypeProperty, getVarianceComponentTypeCallback(), this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false, this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS); 
 		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
 			varianceComponentTypeColumn.setMinWidth(150);
 		}
@@ -112,7 +112,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		cellValueType = CellValueType.STRING;
 		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.VARIANCE_COMPONENT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::nameProperty, getStringCallback(), this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false); 
+		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::nameProperty, getStringCallback(), this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false, this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS); 
 		table.getColumns().add(stringColumn);
 
 		// number of observations
@@ -122,7 +122,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		cellValueType = CellValueType.INTEGER;
 		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.REDUNDANCY;
-		integerColumn = this.<Integer>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::numberOfObservationsProperty, getIntegerCallback(), ColumnType.VISIBLE, columnIndex, false); 
+		integerColumn = this.<Integer>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::numberOfObservationsProperty, getIntegerCallback(), ColumnType.VISIBLE, columnIndex, false, this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS); 
 		table.getColumns().add(integerColumn);
 
 		// redundnacy
@@ -132,7 +132,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.REDUNDANCY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::redundancyProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::redundancyProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false, this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS); 
 		table.getColumns().add(doubleColumn);
 
 		// Omega
@@ -142,7 +142,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.OMEGA;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::omegaProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::omegaProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false, this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS); 
 		table.getColumns().add(doubleColumn);
 
 		// Sigma a-posteriori
@@ -152,7 +152,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.VARIANCE;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::sigma2aposterioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::sigma2aposterioriProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false, this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS); 
 		table.getColumns().add(doubleColumn);
 
 		// Decision of test statistic
@@ -163,7 +163,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		cellValueType = CellValueType.BOOLEAN;
 		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.SIGNIFICANT;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::significantProperty, getBooleanCallback(), this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false);
+		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::significantProperty, getBooleanCallback(), this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false, this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS);
 		booleanColumn.setCellValueFactory(new Callback<CellDataFeatures<VarianceComponentRow, Boolean>, ObservableValue<Boolean>>() {
 			@Override
 			public ObservableValue<Boolean> call(CellDataFeatures<VarianceComponentRow, Boolean> param) {
@@ -174,6 +174,9 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 			}
 		});
 		table.getColumns().add(booleanColumn);
+		if (this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS)
+			this.addColumnOrderSequenceListeners(tableContentType, table);
+		
 		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS)
 			table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		
