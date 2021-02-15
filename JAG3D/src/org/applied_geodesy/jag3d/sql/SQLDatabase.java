@@ -222,7 +222,7 @@ class SQLDatabase {
 		sqls.put(20201220.0026, "ALTER TABLE \"PointGroup\" DROP COLUMN \"consider_deflection\"\r\n");
 		
 		// add columns properties 
-		sqls.put(20210112.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TableColumnProperty\" (\"table_type\" SMALLINT NOT NULL, \"column_type\" SMALLINT NOT NULL, \"width\" DOUBLE DEFAULT 125 NOT NULL, \"sort_type\" TINYINT DEFAULT 1 NOT NULL, \"sort_order\" SMALLINT DEFAULT -1 NOT NULL, PRIMARY KEY(\"table_type\",\"column_type\"));\r\n");
+		sqls.put(20210112.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TableColumnProperty\" (\"table_type\" SMALLINT NOT NULL, \"column_type\" SMALLINT NOT NULL, \"width\" DOUBLE DEFAULT 125 NOT NULL, \"sort_type\" TINYINT DEFAULT 1 NOT NULL, \"sort_order\" SMALLINT DEFAULT -1 NOT NULL, \"column_order\" SMALLINT DEFAULT 0 NOT NULL, PRIMARY KEY(\"table_type\",\"column_type\"));\r\n");
 
 		return sqls;
 	}
