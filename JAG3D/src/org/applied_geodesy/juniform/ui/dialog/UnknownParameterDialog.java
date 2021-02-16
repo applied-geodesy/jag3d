@@ -61,6 +61,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -304,6 +308,16 @@ public class UnknownParameterDialog {
 				i18N.getString("UnknownParameterDialog.parameter.visible.label",   "Show parameter in parameter table"),
 				i18N.getString("UnknownParameterDialog.parameter.visible.tooltip", "If checked, the parameter will be shown in the parameter table of the feature"));
 
+		TextFlow noticeFlowPane = new TextFlow(); 
+		noticeFlowPane.setPadding(new Insets(10, 5, 10, 5));
+		noticeFlowPane.setTextAlignment(TextAlignment.JUSTIFY); 
+		noticeFlowPane.setLineSpacing(2.0); 
+		Text noticeLabel = new Text(i18N.getString("UnknownParameterDialog.warning.initial_guess.label", "Please note:")); 
+		noticeLabel.setFill(Color.DARKRED);
+		Text noticeMessage = new Text(i18N.getString("UnknownParameterDialog.warning.initial_guess.message", "For some options the automatic estimation of an initial guess must be disabled, and appropriate approximations have to be specified manually.")); 
+		noticeMessage.setFill(Color.BLACK);
+		noticeFlowPane.getChildren().addAll(noticeLabel, new Text(" "), noticeMessage);
+		
 		this.visibleCheckBox.selectedProperty().addListener(this.visibleChangeListener);
 		
 		this.parameterOwner = new Label();
@@ -368,6 +382,8 @@ public class UnknownParameterDialog {
 		descriptionLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		nameLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		ownerLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		noticeFlowPane.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		noticeFlowPane.setPrefSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
 		parameterTypeLabel.setMaxWidth(Double.MAX_VALUE);
 		processingTypeLabel.setMaxWidth(Double.MAX_VALUE);
@@ -407,6 +423,7 @@ public class UnknownParameterDialog {
 		GridPane.setHgrow(ownerLabel,          Priority.NEVER);
 		GridPane.setHgrow(buttonBox,           Priority.NEVER);
 		GridPane.setHgrow(orderButtonBox,      Priority.NEVER);
+		GridPane.setHgrow(noticeFlowPane,      Priority.ALWAYS);
 		
 		GridPane.setHgrow(this.nameTextField,           Priority.ALWAYS);
 		GridPane.setHgrow(this.parameterTypeComboBox,   Priority.ALWAYS);
@@ -416,14 +433,15 @@ public class UnknownParameterDialog {
 		GridPane.setHgrow(this.parameterList,           Priority.NEVER);
 		GridPane.setHgrow(this.parameterOwner,          Priority.ALWAYS);
 		GridPane.setHgrow(this.visibleCheckBox,         Priority.ALWAYS);
-
+		
 		GridPane.setVgrow(buttonBox,                    Priority.NEVER);
 		GridPane.setVgrow(orderButtonBox,               Priority.NEVER);
+		GridPane.setVgrow(noticeFlowPane,               Priority.NEVER);
 		GridPane.setVgrow(this.parameterList,           Priority.ALWAYS);
-
+		
 		GridPane.setHgrow(spacer, Priority.ALWAYS);
 		GridPane.setVgrow(spacer, Priority.ALWAYS);
-
+		
 		int row = 0;
 
 		gridPane.add(ownerLabel,                  1, row);  // column, row, columnspan, rowspan
@@ -445,7 +463,9 @@ public class UnknownParameterDialog {
 		gridPane.add(this.descriptionTextField,   2, row++);
 		
 		gridPane.add(this.visibleCheckBox,        1, row++, 2, 1);
-				
+		
+		gridPane.add(noticeFlowPane,              1, row++, 2, 1);
+	
 		gridPane.add(spacer,                      1, row++, 2, 1);
 		gridPane.add(buttonBox,                   1, row++);
 	
