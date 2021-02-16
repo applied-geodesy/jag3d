@@ -63,6 +63,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -292,6 +296,16 @@ public class RestrictionDialog {
 				i18n.getString("RestrictionDialog.restriction.remove.label",   "Remove"),
 				i18n.getString("RestrictionDialog.restriction.remove.tooltip", "Remove selected restriction")); 
 		
+		TextFlow noticeFlowPane = new TextFlow(); 
+		noticeFlowPane.setPadding(new Insets(10, 5, 10, 5));
+		noticeFlowPane.setTextAlignment(TextAlignment.JUSTIFY); 
+		noticeFlowPane.setLineSpacing(2.0); 
+		Text noticeLabel = new Text(i18n.getString("RestrictionDialog.warning.initial_guess.label", "Please note:")); 
+		noticeLabel.setFill(Color.DARKRED);
+		Text noticeMessage = new Text(i18n.getString("RestrictionDialog.warning.initial_guess.message", "For some options the automatic estimation of an initial guess must be disabled, and appropriate approximations have to be specified manually.")); 
+		noticeMessage.setFill(Color.BLACK);
+		noticeFlowPane.getChildren().addAll(noticeLabel, new Text(" "), noticeMessage);
+		
 		this.addRestrictionButton.setOnAction(restrictionEventHandler);
 		this.editRestrictionButton.setOnAction(restrictionEventHandler);
 		this.removeRestrictionButton.setOnAction(restrictionEventHandler);
@@ -346,6 +360,8 @@ public class RestrictionDialog {
 		descriptionLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		equationLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		ownerLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		noticeFlowPane.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		noticeFlowPane.setPrefSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
 		this.restrictionTypeLabel.setMaxWidth(Double.MAX_VALUE);
 		restrictionTypeLabel.setMaxWidth(Double.MAX_VALUE);
@@ -366,12 +382,14 @@ public class RestrictionDialog {
 		GridPane.setHgrow(this.restrictionList,      Priority.SOMETIMES);
 		GridPane.setHgrow(buttonBox,                 Priority.NEVER);
 		GridPane.setHgrow(orderButtonBox,            Priority.NEVER);
+		GridPane.setHgrow(noticeFlowPane,            Priority.ALWAYS);
 
 		GridPane.setVgrow(this.restrictionList,      Priority.ALWAYS);
 		GridPane.setVgrow(this.latexLabel,           Priority.NEVER);
 		GridPane.setVgrow(this.restrictionTypeLabel, Priority.NEVER);
 		GridPane.setVgrow(buttonBox,                 Priority.NEVER);
 		GridPane.setVgrow(orderButtonBox,            Priority.NEVER);
+		GridPane.setHgrow(noticeFlowPane,            Priority.NEVER);
 		
 		GridPane.setHgrow(spacer, Priority.ALWAYS);
 		GridPane.setVgrow(spacer, Priority.ALWAYS);
@@ -391,6 +409,8 @@ public class RestrictionDialog {
 		
 		gridPane.add(descriptionLabel,          1, row);
 		gridPane.add(this.descriptionTextField, 2, row++);
+		
+		gridPane.add(noticeFlowPane,            1, row++, 2, 1);
 		
 		gridPane.add(spacer,                    1, row++, 2, 1); // column, row, columnspan, rowspan
 		gridPane.add(buttonBox,                 1, row++);
