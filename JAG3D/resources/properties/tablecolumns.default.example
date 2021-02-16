@@ -1,0 +1,77 @@
+# !!! This is an example file and will not be used by JAG3D. Please !!!
+# !!! create a copy of this file named "tablecolumns.default",      !!!
+# !!! located in the same directory. Modify the copied file w.r.t.  !!!
+# !!! the desired values.                                           !!!
+#
+# Comments are indicated by # as first character
+#
+# Please note: The minimum column width is set to 50 px. The
+# preferred column width specified in the file must be exceed 
+# the minimum value.
+
+ENABLE                          =  75
+CODE                            =  75
+INSTRUMENT_HEIGHT               =  75
+REFLECTOR_HEIGHT                =  75
+OMEGA                           =  75
+VARIANCE                        =  75
+REDUNDANCY                      =  75
+REDUNDANCY_X                    =  75
+REDUNDANCY_Y                    =  75
+REDUNDANCY_Z                    =  75
+P_VALUE_APRIORI                 =  75
+P_VALUE_APOSTERIORI             =  75
+TEST_STATISTIC_APRIORI          =  75
+TEST_STATISTIC_APOSTERIORI      =  75
+
+INFLUENCE_ON_POINT_POSITION     = 100
+INFLUENCE_ON_POINT_POSITION_X   = 100
+INFLUENCE_ON_POINT_POSITION_Y   = 100
+INFLUENCE_ON_POINT_POSITION_Z   = 100
+FIRST_PRINCIPLE_COMPONENT_X     = 100
+FIRST_PRINCIPLE_COMPONENT_Y     = 100
+FIRST_PRINCIPLE_COMPONENT_Z     = 100
+CONFIDENCE_ALPHA                = 100
+CONFIDENCE_BETA                 = 100
+CONFIDENCE_GAMMA                = 100
+CONFIDENCE_A                    = 100
+CONFIDENCE_B                    = 100
+CONFIDENCE_C                    = 100
+RESIDUAL                        = 100
+RESIDUAL_X                      = 100
+RESIDUAL_Y                      = 100
+RESIDUAL_Z                      = 100
+GROSS_ERROR                     = 100
+GROSS_ERROR_X                   = 100
+GROSS_ERROR_Y                   = 100
+GROSS_ERROR_Z                   = 100
+MINIMAL_DETECTABLE_BIAS         = 100
+MINIMAL_DETECTABLE_BIAS_X       = 100
+MINIMAL_DETECTABLE_BIAS_Y       = 100
+MINIMAL_DETECTABLE_BIAS_Z       = 100
+UNCERTAINTY_APRIORI             = 100
+UNCERTAINTY_APOSTERIORI         = 100
+UNCERTAINTY_X_APRIORI           = 100
+UNCERTAINTY_X_APOSTERIORI       = 100
+UNCERTAINTY_Y_APRIORI           = 100
+UNCERTAINTY_Y_APOSTERIORI       = 100
+UNCERTAINTY_Z_APRIORI           = 100
+UNCERTAINTY_Z_APOSTERIORI       = 100
+INFLUENCE_ON_NETWORK_DISTORTION = 100
+APPROXIMATED_DISTANCE_APRIORI   = 100
+SIGNIFICANT                     = 100
+
+VALUE_APRIORI                   = 125
+VALUE_APOSTERIORI               = 125
+VALUE_X_APRIORI                 = 125
+VALUE_X_APOSTERIORI             = 125
+VALUE_Y_APRIORI                 = 125
+VALUE_Y_APOSTERIORI             = 125
+VALUE_Z_APRIORI                 = 125
+VALUE_Z_APOSTERIORI             = 125
+
+POINT_NAME                      = 150
+START_POINT_NAME                = 150
+END_POINT_NAME                  = 150
+VARIANCE_COMPONENT_NAME         = 150
+PARAMETER_NAME                  = 150

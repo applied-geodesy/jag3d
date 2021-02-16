@@ -28,20 +28,19 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EventListener;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
-import org.applied_geodesy.adjustment.Constant;
-import org.applied_geodesy.adjustment.DefaultValue;
 import org.applied_geodesy.adjustment.EstimationType;
-import org.applied_geodesy.adjustment.UnscentedTransformationParameter;
 import org.applied_geodesy.adjustment.network.DefaultAverageThreshold;
 import org.applied_geodesy.adjustment.network.DefectType;
 import org.applied_geodesy.adjustment.network.ObservationGroupUncertaintyType;
@@ -63,7 +62,6 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.ui.dialog.LeastSquaresSettingDialog.LeastSquaresSettings;
 import org.applied_geodesy.jag3d.ui.graphic.UIGraphicPaneBuilder;
-import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.sql.SQLGraphicManager;
 import org.applied_geodesy.jag3d.ui.io.ImportOption;
 import org.applied_geodesy.jag3d.ui.io.report.FTLReport;
@@ -86,6 +84,10 @@ import org.applied_geodesy.jag3d.ui.table.UITerrestrialObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITestStatisticTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIVarianceComponentTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIVerticalDeflectionTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.column.ColumnContentType;
+import org.applied_geodesy.jag3d.ui.table.column.ColumnPropertiesManager;
+import org.applied_geodesy.jag3d.ui.table.column.ColumnProperty;
+import org.applied_geodesy.jag3d.ui.table.column.TableContentType;
 import org.applied_geodesy.jag3d.ui.table.row.AdditionalParameterRow;
 import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
@@ -96,7 +98,6 @@ import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.TestStatisticRow;
 import org.applied_geodesy.jag3d.ui.table.row.VarianceComponentRow;
 import org.applied_geodesy.jag3d.ui.table.row.VerticalDeflectionRow;
-import org.applied_geodesy.jag3d.ui.table.rowhighlight.DefaultTableRowHighlightValue;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
@@ -125,13 +126,14 @@ import org.applied_geodesy.version.VersionType;
 import javafx.application.HostServices;
 import javafx.collections.FXCollections;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.TableColumn.SortType;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.paint.Color;
+import javafx.util.Pair;
 
 public class SQLManager {
 	private I18N i18n = I18N.getInstance();
-	private final static String TABLE_STORAGE_TYPE = "CACHED"; //"CACHED"; 
 	private DataBase dataBase;
 	private HostServices hostServices;
 	private List<EventListener> listenerList = new ArrayList<EventListener>();
@@ -215,6 +217,7 @@ public class SQLManager {
 
 	private void loadExistingDataBase() throws SQLException {
 		this.loadTableRowHighlight();
+		this.loadTableColumnProperties();
 		this.loadImportPreferences();
 		
 		this.loadPointGroups();
@@ -262,7 +265,7 @@ public class SQLManager {
 					"SET INITIAL SCHEMA \"OpenAdjustment\";",
 					"SET SCHEMA \"OpenAdjustment\";",
 
-					"CREATE " + TABLE_STORAGE_TYPE + " TABLE \"Version\"(\"type\" SMALLINT NOT NULL PRIMARY KEY, \"version\" DOUBLE NOT NULL);",
+					"CREATE " + SQLDatabase.TABLE_STORAGE_TYPE + " TABLE \"Version\"(\"type\" SMALLINT NOT NULL PRIMARY KEY, \"version\" DOUBLE NOT NULL);",
 					"INSERT INTO \"Version\" (\"type\", \"version\") VALUES (" + VersionType.ADJUSTMENT_CORE.getId() + ", 0), (" + VersionType.DATABASE.getId() + ", 0), (" + VersionType.USER_INTERFACE.getId() + ", 0);"
 			};
 		}
@@ -300,7 +303,7 @@ public class SQLManager {
 				throw new DatabaseVersionMismatchException("Error, database version of the stored project is greater than accepted database version of the application: " + databaseVersion + " > " +  Version.get(VersionType.DATABASE));
 			}
 			
-			Map<Double, String> querys = SQLManager.dataBase();
+			Map<Double, String> querys = SQLDatabase.dataBase();
 			for ( Map.Entry<Double, String> query : querys.entrySet() ) {
 				double subDBVersion = query.getKey();
 				String sql          = query.getValue();
@@ -362,183 +365,6 @@ public class SQLManager {
 		return false;
 	}
 
-	static Map<Double, String> dataBase() {
-		Map<Double, String> sqls = new LinkedHashMap<Double, String>();
-
-		sqls.put(20180106.0101, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ObservationGroup\"(\"id\" INTEGER GENERATED BY DEFAULT AS IDENTITY(START WITH 0) NOT NULL PRIMARY KEY,\"name\" VARCHAR(256) NOT NULL,\"type\" SMALLINT NOT NULL,\"enable\" BOOLEAN NOT NULL, \"reference_epoch\" BOOLEAN DEFAULT TRUE NOT NULL);\r\n");
-		sqls.put(20180106.0102, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ObservationGroupUncertainty\"(\"group_id\" INTEGER NOT NULL,\"type\" SMALLINT NOT NULL,\"value\" DOUBLE NOT NULL, PRIMARY KEY(\"group_id\",\"type\"), CONSTRAINT \"ObservationGroupUncertaintyOnGroupDelete\" FOREIGN KEY(\"group_id\") REFERENCES \"ObservationGroup\"(\"id\") ON DELETE CASCADE);\r\n");
-		sqls.put(20180106.0103, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ObservationApriori\"(\"id\" INTEGER GENERATED BY DEFAULT AS IDENTITY(START WITH 0) NOT NULL PRIMARY KEY,\"group_id\" INTEGER NOT NULL,\"start_point_name\" VARCHAR(256) NOT NULL,\"end_point_name\" VARCHAR(256) NOT NULL,\"instrument_height\" DOUBLE DEFAULT 0 NOT NULL,\"reflector_height\" DOUBLE DEFAULT 0 NOT NULL,\"value_0\" DOUBLE DEFAULT 0 NOT NULL,\"sigma_0\" DOUBLE DEFAULT 0 NOT NULL,\"distance_0\" DOUBLE DEFAULT 0 NOT NULL,\"enable\" BOOLEAN DEFAULT TRUE NOT NULL, CONSTRAINT \"ObservationOnGroupDelete\" FOREIGN KEY(\"group_id\") REFERENCES \"ObservationGroup\"(\"id\") ON DELETE CASCADE);\r\n");
-		sqls.put(20180106.0104, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ObservationAposteriori\"(\"id\" INTEGER NOT NULL PRIMARY KEY,\"value\" DOUBLE NOT NULL,\"sigma_0\" DOUBLE NOT NULL,\"sigma\" DOUBLE NOT NULL,\"redundancy\" DOUBLE NOT NULL,\"gross_error\" DOUBLE NOT NULL,\"minimal_detectable_bias\" DOUBLE NOT NULL,\"influence_on_position\" DOUBLE NOT NULL,\"influence_on_network_distortion\" DOUBLE NOT NULL,\"omega\" DOUBLE NOT NULL,\"p_prio\" DOUBLE NOT NULL,\"p_post\" DOUBLE NOT NULL,\"t_prio\" DOUBLE NOT NULL,\"t_post\" DOUBLE NOT NULL,\"significant\" BOOLEAN NOT NULL, CONSTRAINT \"ObservationOnDelete\" FOREIGN KEY(\"id\") REFERENCES \"ObservationApriori\"(\"id\") ON DELETE CASCADE);\r\n");
-
-		sqls.put(20180106.0105, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"GNSSObservationApriori\"(\"id\" INTEGER GENERATED BY DEFAULT AS IDENTITY(START WITH 0) NOT NULL PRIMARY KEY,\"group_id\" INTEGER NOT NULL,\"start_point_name\" VARCHAR(256) NOT NULL,\"end_point_name\" VARCHAR(256) NOT NULL,\"y0\" DOUBLE DEFAULT 0 NOT NULL,\"x0\" DOUBLE DEFAULT 0 NOT NULL,\"z0\" DOUBLE DEFAULT 0 NOT NULL,\"sigma_y0\" DOUBLE DEFAULT 0 NOT NULL,\"sigma_x0\" DOUBLE DEFAULT 0 NOT NULL,\"sigma_z0\" DOUBLE DEFAULT 0 NOT NULL,\"enable\" BOOLEAN DEFAULT TRUE NOT NULL, CONSTRAINT \"GNSSObservationOnGroupDelete\" FOREIGN KEY(\"group_id\") REFERENCES \"ObservationGroup\"(\"id\") ON DELETE CASCADE);\r\n");
-		sqls.put(20180106.0106, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"GNSSObservationAposteriori\"(\"id\" INTEGER NOT NULL PRIMARY KEY,\"y\" DOUBLE NOT NULL,\"x\" DOUBLE NOT NULL,\"z\" DOUBLE NOT NULL,\"sigma_y0\" DOUBLE NOT NULL,\"sigma_x0\" DOUBLE NOT NULL,\"sigma_z0\" DOUBLE NOT NULL,\"sigma_y\" DOUBLE NOT NULL,\"sigma_x\" DOUBLE NOT NULL,\"sigma_z\" DOUBLE NOT NULL,\"redundancy_y\" DOUBLE NOT NULL,\"redundancy_x\" DOUBLE NOT NULL,\"redundancy_z\" DOUBLE NOT NULL,\"gross_error_y\" DOUBLE NOT NULL,\"gross_error_x\" DOUBLE NOT NULL,\"gross_error_z\" DOUBLE NOT NULL,\"minimal_detectable_bias_y\" DOUBLE NOT NULL,\"minimal_detectable_bias_x\" DOUBLE NOT NULL,\"minimal_detectable_bias_z\" DOUBLE NOT NULL,\"influence_on_position_y\" DOUBLE NOT NULL,\"influence_on_position_x\" DOUBLE NOT NULL,\"influence_on_position_z\" DOUBLE NOT NULL,\"influence_on_network_distortion\" DOUBLE NOT NULL,\"omega\" DOUBLE NOT NULL,\"p_prio\" DOUBLE NOT NULL,\"p_post\" DOUBLE NOT NULL,\"t_prio\" DOUBLE NOT NULL,\"t_post\" DOUBLE NOT NULL,\"significant\" BOOLEAN NOT NULL, CONSTRAINT \"GNSSObservationOnDelete\" FOREIGN KEY(\"id\") REFERENCES \"GNSSObservationApriori\"(\"id\") ON DELETE CASCADE);\r\n");
-		
-		sqls.put(20180106.0107, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"AdditionalParameterApriori\"(\"id\" INTEGER GENERATED BY DEFAULT AS IDENTITY(START WITH 0) NOT NULL PRIMARY KEY,\"group_id\" INTEGER NOT NULL,\"type\" SMALLINT NOT NULL,\"value_0\" DOUBLE DEFAULT 0 NOT NULL,\"enable\" BOOLEAN NOT NULL, CONSTRAINT \"AdditionalParameterOnGroupDelete\" FOREIGN KEY(\"group_id\") REFERENCES \"ObservationGroup\"(\"id\") ON DELETE CASCADE);\r\n");
-		sqls.put(20180106.0108, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"AdditionalParameterAposteriori\"(\"id\" INTEGER NOT NULL PRIMARY KEY,\"value\" DOUBLE NOT NULL,\"sigma\" DOUBLE NOT NULL,\"confidence\" DOUBLE NOT NULL,\"gross_error\" DOUBLE NOT NULL,\"minimal_detectable_bias\" DOUBLE NOT NULL,\"p_prio\" DOUBLE NOT NULL,\"p_post\" DOUBLE NOT NULL,\"t_prio\" DOUBLE NOT NULL,\"t_post\" DOUBLE NOT NULL,\"significant\" BOOLEAN NOT NULL, CONSTRAINT \"AdditionalParameterOnDelete\" FOREIGN KEY(\"id\") REFERENCES \"AdditionalParameterApriori\"(\"id\") ON DELETE CASCADE);\r\n");
-
-		
-		sqls.put(20180106.0201, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"PointGroup\"(\"id\" INTEGER GENERATED BY DEFAULT AS IDENTITY(START WITH 0) NOT NULL PRIMARY KEY,\"name\" VARCHAR(256) NOT NULL,\"type\" SMALLINT NOT NULL,\"dimension\" TINYINT NOT NULL,\"enable\" BOOLEAN NOT NULL, \"consider_deflection\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
-		sqls.put(20180106.0202, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"PointGroupUncertainty\"(\"group_id\" INTEGER NOT NULL,\"type\" SMALLINT NOT NULL,\"value\" DOUBLE NOT NULL, PRIMARY KEY(\"group_id\",\"type\"), CONSTRAINT \"PointGroupUncertaintyOnGroupDelete\" FOREIGN KEY(\"group_id\") REFERENCES \"PointGroup\"(\"id\") ON DELETE CASCADE);\r\n");
-
-		sqls.put(20180106.0204, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"PointApriori\"(\"id\" INTEGER GENERATED BY DEFAULT AS IDENTITY(START WITH 0) NOT NULL PRIMARY KEY,\"group_id\" INTEGER NOT NULL,\"name\" VARCHAR(256) NOT NULL,\"code\" VARCHAR(256) NOT NULL,\"y0\" DOUBLE DEFAULT 0 NOT NULL,\"x0\" DOUBLE DEFAULT 0 NOT NULL,\"z0\" DOUBLE DEFAULT 0 NOT NULL,\"dy0\" DOUBLE DEFAULT 0 NOT NULL,\"dx0\" DOUBLE DEFAULT 0 NOT NULL,\"sigma_y0\" DOUBLE DEFAULT 0 NOT NULL,\"sigma_x0\" DOUBLE DEFAULT 0 NOT NULL,\"sigma_z0\" DOUBLE DEFAULT 0 NOT NULL,\"sigma_dy0\" DOUBLE DEFAULT 0 NOT NULL,\"sigma_dx0\" DOUBLE DEFAULT 0 NOT NULL,\"enable\" BOOLEAN DEFAULT TRUE NOT NULL, CONSTRAINT \"PointOnGroupDelete\" FOREIGN KEY(\"group_id\") REFERENCES \"PointGroup\"(\"id\") ON DELETE CASCADE, CONSTRAINT \"UniquePointName\" UNIQUE (\"name\"));\r\n");
-		sqls.put(20180106.0205, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"PointAposteriori\"(\"id\" INTEGER NOT NULL PRIMARY KEY,\"y\" DOUBLE NOT NULL,\"x\" DOUBLE NOT NULL,\"z\" DOUBLE NOT NULL,\"sigma_y0\" DOUBLE NOT NULL,\"sigma_x0\" DOUBLE NOT NULL,\"sigma_z0\" DOUBLE NOT NULL,\"sigma_y\" DOUBLE NOT NULL,\"sigma_x\" DOUBLE NOT NULL,\"sigma_z\" DOUBLE NOT NULL,\"confidence_major_axis\" DOUBLE NOT NULL,\"confidence_middle_axis\" DOUBLE NOT NULL,\"confidence_minor_axis\" DOUBLE NOT NULL,\"confidence_alpha\" DOUBLE NOT NULL,\"confidence_beta\" DOUBLE NOT NULL,\"confidence_gamma\" DOUBLE NOT NULL,\"helmert_major_axis\" DOUBLE NOT NULL,\"helmert_minor_axis\" DOUBLE NOT NULL,\"helmert_alpha\" DOUBLE NOT NULL,\"redundancy_y\" DOUBLE NOT NULL,\"redundancy_x\" DOUBLE NOT NULL,\"redundancy_z\" DOUBLE NOT NULL,\"gross_error_y\" DOUBLE NOT NULL,\"gross_error_x\" DOUBLE NOT NULL,\"gross_error_z\" DOUBLE NOT NULL,\"minimal_detectable_bias_y\" DOUBLE NOT NULL,\"minimal_detectable_bias_x\" DOUBLE NOT NULL,\"minimal_detectable_bias_z\" DOUBLE NOT NULL,\"influence_on_position_y\" DOUBLE NOT NULL,\"influence_on_position_x\" DOUBLE NOT NULL,\"influence_on_position_z\" DOUBLE NOT NULL,\"influence_on_network_distortion\" DOUBLE NOT NULL,\"first_principal_component_y\" DOUBLE NOT NULL,\"first_principal_component_x\" DOUBLE NOT NULL,\"first_principal_component_z\" DOUBLE NOT NULL,\"omega\" DOUBLE NOT NULL,\"p_prio\" DOUBLE NOT NULL,\"p_post\" DOUBLE NOT NULL,\"t_prio\" DOUBLE NOT NULL,\"t_post\" DOUBLE NOT NULL,\"significant\" BOOLEAN NOT NULL,\"covar_index\" INTEGER NOT NULL, CONSTRAINT \"PointOnDelete\" FOREIGN KEY(\"id\") REFERENCES \"PointApriori\"(\"id\") ON DELETE CASCADE);\r\n");
-
-		sqls.put(20180106.0206, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"DeflectionAposteriori\"(\"id\" INTEGER NOT NULL PRIMARY KEY,\"dy\" DOUBLE NOT NULL,\"dx\" DOUBLE NOT NULL,\"sigma_dy0\" DOUBLE NOT NULL,\"sigma_dx0\" DOUBLE NOT NULL,\"sigma_dy\" DOUBLE NOT NULL,\"sigma_dx\" DOUBLE NOT NULL,\"confidence_major_axis\" DOUBLE NOT NULL,\"confidence_minor_axis\" DOUBLE NOT NULL,\"redundancy_dy\" DOUBLE NOT NULL,\"redundancy_dx\" DOUBLE NOT NULL,\"gross_error_dy\" DOUBLE NOT NULL,\"gross_error_dx\" DOUBLE NOT NULL,\"minimal_detectable_bias_dy\" DOUBLE NOT NULL,\"minimal_detectable_bias_dx\" DOUBLE NOT NULL,\"omega\" DOUBLE NOT NULL,\"p_prio\" DOUBLE NOT NULL,\"p_post\" DOUBLE NOT NULL,\"t_prio\" DOUBLE NOT NULL,\"t_post\" DOUBLE NOT NULL,\"significant\" BOOLEAN NOT NULL,\"covar_index\" INTEGER NOT NULL, CONSTRAINT \"DeflectionOnDelete\" FOREIGN KEY(\"id\") REFERENCES \"PointApriori\"(\"id\") ON DELETE CASCADE);\r\n");
-
-		
-		sqls.put(20180106.0301, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"CongruenceAnalysisGroup\"(\"id\" INTEGER GENERATED BY DEFAULT AS IDENTITY(START WITH 0) NOT NULL PRIMARY KEY,\"name\" VARCHAR(256) NOT NULL,\"dimension\" TINYINT NOT NULL,\"enable\" BOOLEAN NOT NULL);\r\n");
-		sqls.put(20180106.0302, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"CongruenceAnalysisPointPairApriori\"(\"id\" INTEGER GENERATED BY DEFAULT AS IDENTITY(START WITH 0) NOT NULL PRIMARY KEY,\"group_id\" INTEGER NOT NULL,\"start_point_name\" VARCHAR(256) NOT NULL,\"end_point_name\" VARCHAR(256) NOT NULL,\"enable\" BOOLEAN NOT NULL, CONSTRAINT \"CongruenceAnalysisPointPairAprioriOnGroupDelete\" FOREIGN KEY(\"group_id\") REFERENCES \"CongruenceAnalysisGroup\"(\"id\") ON DELETE CASCADE, CONSTRAINT \"CongruenceAnalysisUniquePointNamesPerGroup\" UNIQUE (\"group_id\",\"start_point_name\",\"end_point_name\"));\r\n");
-		sqls.put(20180106.0303, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"CongruenceAnalysisPointPairAposteriori\"(\"id\" INTEGER NOT NULL PRIMARY KEY,\"y\" DOUBLE NOT NULL,\"x\" DOUBLE NOT NULL,\"z\" DOUBLE NOT NULL,\"sigma_y\" DOUBLE NOT NULL,\"sigma_x\" DOUBLE NOT NULL,\"sigma_z\" DOUBLE NOT NULL,\"confidence_major_axis\" DOUBLE NOT NULL,\"confidence_middle_axis\" DOUBLE NOT NULL,\"confidence_minor_axis\" DOUBLE NOT NULL,\"confidence_alpha\" DOUBLE NOT NULL,\"confidence_beta\" DOUBLE NOT NULL,\"confidence_gamma\" DOUBLE NOT NULL,\"confidence_major_axis_2d\" DOUBLE NOT NULL,\"confidence_minor_axis_2d\" DOUBLE NOT NULL,\"confidence_alpha_2d\" DOUBLE NOT NULL,\"gross_error_y\" DOUBLE NOT NULL,\"gross_error_x\" DOUBLE NOT NULL,\"gross_error_z\" DOUBLE NOT NULL,\"minimal_detectable_bias_y\" DOUBLE NOT NULL,\"minimal_detectable_bias_x\" DOUBLE NOT NULL,\"minimal_detectable_bias_z\" DOUBLE NOT NULL,\"p_prio\" DOUBLE NOT NULL,\"p_post\" DOUBLE NOT NULL,\"t_prio\" DOUBLE NOT NULL,\"t_post\" DOUBLE NOT NULL,\"significant\" BOOLEAN NOT NULL, CONSTRAINT \"CongruenceAnalysisPointPairOnDelete\" FOREIGN KEY(\"id\") REFERENCES \"CongruenceAnalysisPointPairApriori\"(\"id\") ON DELETE CASCADE);\r\n");
-
-		sqls.put(20180106.0304, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"CongruenceAnalysisStrainParameterRestriction\"(\"group_id\" INTEGER NOT NULL,\"type\" SMALLINT NOT NULL,\"enable\" BOOLEAN NOT NULL,PRIMARY KEY(\"group_id\",\"type\"), CONSTRAINT \"CongruenceAnalysisStrainParameterRestrictionOnGroupDelete\" FOREIGN KEY(\"group_id\") REFERENCES \"CongruenceAnalysisGroup\"(\"id\") ON DELETE CASCADE);\r\n");
-		sqls.put(20180106.0305, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"CongruenceAnalysisStrainParameterAposteriori\"(\"group_id\" INTEGER NOT NULL,\"type\" SMALLINT NOT NULL,\"value\" DOUBLE NOT NULL,\"sigma\" DOUBLE NOT NULL,\"confidence\" DOUBLE NOT NULL,\"gross_error\" DOUBLE NOT NULL,\"minimal_detectable_bias\" DOUBLE NOT NULL,\"p_prio\" DOUBLE NOT NULL,\"p_post\" DOUBLE NOT NULL,\"t_prio\" DOUBLE NOT NULL,\"t_post\" DOUBLE NOT NULL,\"significant\" BOOLEAN NOT NULL,PRIMARY KEY(\"group_id\",\"type\"), CONSTRAINT \"CongruenceAnalysisStrainParameterAposterioriOnGroupDelete\" FOREIGN KEY(\"group_id\") REFERENCES \"CongruenceAnalysisGroup\"(\"id\") ON DELETE CASCADE);\r\n");
-		
-		sqls.put(20180106.0401, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"VarianceComponent\"(\"type\" SMALLINT NOT NULL PRIMARY KEY,\"redundancy\" DOUBLE NOT NULL,\"omega\" DOUBLE NOT NULL,\"sigma2apost\" DOUBLE NOT NULL,\"number_of_observations\" INTEGER NOT NULL);\r\n");
-		sqls.put(20180106.0402, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"PrincipalComponent\"(\"index\" INTEGER NOT NULL PRIMARY KEY,\"value\" DOUBLE NOT NULL,\"ratio\" DOUBLE NOT NULL);\r\n");
-		sqls.put(20180106.0403, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"RankDefect\"(\"id\" INTEGER NOT NULL PRIMARY KEY,\"user_defined\" BOOLEAN DEFAULT FALSE NOT NULL,\"ty\" BOOLEAN DEFAULT FALSE NOT NULL,\"tx\" BOOLEAN DEFAULT FALSE NOT NULL,\"tz\" BOOLEAN DEFAULT FALSE NOT NULL,\"ry\" BOOLEAN DEFAULT FALSE NOT NULL,\"rx\" BOOLEAN DEFAULT FALSE NOT NULL,\"rz\" BOOLEAN DEFAULT FALSE NOT NULL,\"sy\" BOOLEAN DEFAULT FALSE NOT NULL,\"sx\" BOOLEAN DEFAULT FALSE NOT NULL,\"sz\" BOOLEAN DEFAULT FALSE NOT NULL,\"my\" BOOLEAN DEFAULT FALSE NOT NULL,\"mx\" BOOLEAN DEFAULT FALSE NOT NULL,\"mz\" BOOLEAN DEFAULT FALSE NOT NULL,\"mxy\" BOOLEAN DEFAULT FALSE NOT NULL,\"mxyz\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
-		sqls.put(20180106.0404, "INSERT INTO \"RankDefect\" (\"id\") VALUES (1);\r\n");
-		
-		sqls.put(20180106.0501, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TestStatistic\"(\"d1\" DOUBLE NOT NULL,\"d2\" DOUBLE NOT NULL,\"probability_value\" DOUBLE NOT NULL,\"power_of_test\" DOUBLE NOT NULL,\"quantile\" DOUBLE NOT NULL,\"non_centrality_parameter\" DOUBLE NOT NULL,\"p_value\" DOUBLE NOT NULL,PRIMARY KEY(\"d1\",\"d2\",\"probability_value\",\"power_of_test\"));\r\n");
-		sqls.put(20180106.0502, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TestStatisticDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + TestStatisticType.BAARDA_METHOD.getId() + " NOT NULL, \"probability_value\" DOUBLE DEFAULT " + DefaultValue.getProbabilityValue() + " NOT NULL,\"power_of_test\" DOUBLE DEFAULT " + DefaultValue.getPowerOfTest() + " NOT NULL,\"familywise_error_rate\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
-		sqls.put(20180106.0503, "INSERT INTO \"TestStatisticDefinition\" (\"id\") VALUES (1);\r\n");
-
-		sqls.put(20180106.0504, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ProjectionDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + ProjectionType.NONE.getId() + " NOT NULL,\"reference_height\" DOUBLE DEFAULT 0 NOT NULL);\r\n");
-		sqls.put(20180106.0505, "INSERT INTO \"ProjectionDefinition\" (\"id\") VALUES (1);\r\n");
-		
-		sqls.put(20180106.0506, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"AdjustmentDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + EstimationType.L2NORM.getId() + " NOT NULL, \"number_of_iterations\" INTEGER DEFAULT 50 NOT NULL, \"robust_estimation_limit\" DOUBLE DEFAULT " + DefaultValue.getRobustEstimationLimit() + " NOT NULL, \"number_of_principal_components\" INTEGER DEFAULT 1 NOT NULL, \"estimate_direction_set_orientation_approximation\" BOOLEAN DEFAULT TRUE NOT NULL, \"congruence_analysis\" BOOLEAN DEFAULT FALSE NOT NULL, \"export_covariance_matrix\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
-		sqls.put(20180106.0507, "INSERT INTO \"AdjustmentDefinition\" (\"id\") VALUES (1);\r\n");
-		
-		sqls.put(20180106.0508, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ProjectMetadata\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"name\" VARCHAR(256) DEFAULT '' NOT NULL, \"operator\" VARCHAR(256) DEFAULT '' NOT NULL, \"description\" VARCHAR(10000) DEFAULT '' NOT NULL, \"date\" TIMESTAMP(6) DEFAULT NOW() NOT NULL, \"customer_id\" VARCHAR(256) DEFAULT '' NOT NULL, \"project_id\" VARCHAR(256) DEFAULT '' NOT NULL);\r\n");
-		sqls.put(20180106.0509, "INSERT INTO \"ProjectMetadata\" (\"id\", \"operator\") VALUES (1, '" + (System.getProperty("user.name") == null ? "" : System.getProperty("user.name").replaceAll("'", "")) + "');\r\n");
-		
-		sqls.put(20180106.0510, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"AverageThreshold\"(\"type\" SMALLINT NOT NULL PRIMARY KEY,\"value\" DOUBLE);\r\n");
-		sqls.put(20180106.0511, "INSERT INTO \"AverageThreshold\" (\"type\", \"value\") VALUES (" + ObservationType.LEVELING.getId() + ", '" + DefaultAverageThreshold.getThreshold(ObservationType.LEVELING) + "'), (" + ObservationType.DIRECTION.getId() + ", '" + DefaultAverageThreshold.getThreshold(ObservationType.DIRECTION) + "'), (" + ObservationType.HORIZONTAL_DISTANCE.getId() + ", '" + DefaultAverageThreshold.getThreshold(ObservationType.HORIZONTAL_DISTANCE) + "'), (" + ObservationType.SLOPE_DISTANCE.getId() + ", '" + DefaultAverageThreshold.getThreshold(ObservationType.SLOPE_DISTANCE) + "'), (" + ObservationType.ZENITH_ANGLE.getId() + ", '" + DefaultAverageThreshold.getThreshold(ObservationType.ZENITH_ANGLE) + "'), (" + ObservationType.GNSS1D.getId() + ", '" + DefaultAverageThreshold.getThreshold(ObservationType.GNSS1D) + "'), (" + ObservationType.GNSS2D.getId() + ", '" + DefaultAverageThreshold.getThreshold(ObservationType.GNSS2D) + "'), (" + ObservationType.GNSS3D.getId() + ", '" + DefaultAverageThreshold.getThreshold(ObservationType.GNSS3D) + "');\r\n");
-
-		// Formatters
-		sqls.put(20180106.1001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"FormatterOption\" (\"type\" SMALLINT NOT NULL PRIMARY KEY, \"unit\" SMALLINT NULL, \"digits\" TINYINT NOT NULL);\r\n");
-			
-		// Generate indices
-		sqls.put(20180106.5001, "CREATE INDEX \"IndexPointAprioriGroupId\" ON \"PointApriori\"(\"group_id\");\r\n");
-		sqls.put(20180106.5002, "CREATE INDEX \"IndexPointAprioriName\" ON \"PointApriori\"(\"name\");\r\n");
-		sqls.put(20180106.5003, "CREATE INDEX \"IndexPointGroupUncertaintyGroupId\" ON \"PointGroupUncertainty\"(\"group_id\");\r\n");
-		
-		sqls.put(20180106.5011, "CREATE INDEX \"IndexObservationGroupUncertaintyGroupId\" ON \"ObservationGroupUncertainty\"(\"group_id\");\r\n");
-		sqls.put(20180106.5012, "CREATE INDEX \"IndexObservationGroupId\" ON \"ObservationApriori\"(\"group_id\");\r\n");
-		sqls.put(20180106.5013, "CREATE INDEX \"IndexGNSSObservationGroupId\" ON \"GNSSObservationApriori\"(\"group_id\");\r\n");
-		sqls.put(20180106.5014, "CREATE INDEX \"IndexObservationAprioriStartPointName\" ON \"ObservationApriori\"(\"start_point_name\");\r\n");
-		sqls.put(20180106.5015, "CREATE INDEX \"IndexObservationAprioriEndPointName\" ON \"ObservationApriori\"(\"end_point_name\");\r\n");
-		sqls.put(20180106.5016, "CREATE INDEX \"IndexGNSSObservationAprioriStartPointName\" ON \"GNSSObservationApriori\"(\"start_point_name\");\r\n");
-		sqls.put(20180106.5017, "CREATE INDEX \"IndexGNSSObservationAprioriEndPointName\" ON \"GNSSObservationApriori\"(\"end_point_name\");\r\n");
-		
-		sqls.put(20180106.5021, "CREATE INDEX \"IndexAdditionalParameterAprioriGroupId\" ON \"AdditionalParameterApriori\"(\"group_id\");\r\n");
-		sqls.put(20180107.0000, "CREATE INDEX \"IndexCongruenceAnalysisPointPairAprioriGroupId\" ON \"CongruenceAnalysisPointPairApriori\"(\"group_id\");\r\n");
-		
-		// Layer properties
-		sqls.put(20180219.0601, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"Layer\" (\"type\" SMALLINT NOT NULL PRIMARY KEY, \"red\" DOUBLE DEFAULT 0.5 NOT NULL, \"green\" DOUBLE DEFAULT 0.5 NOT NULL, \"blue\" DOUBLE DEFAULT 0.5 NOT NULL, \"symbol_size\" DOUBLE DEFAULT " + SymbolBuilder.DEFAULT_SIZE + " NOT NULL, \"line_width\" DOUBLE DEFAULT 1.0 NOT NULL, \"order\" INTEGER DEFAULT 0 NOT NULL, \"visible\" BOOLEAN DEFAULT TRUE NOT NULL);\r\n");
-		sqls.put(20180219.0602, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"LayerExtent\" (\"id\" INTEGER NOT NULL PRIMARY KEY, \"min_x\" DOUBLE NOT NULL, \"min_y\" DOUBLE NOT NULL, \"max_x\" DOUBLE NOT NULL, \"max_y\" DOUBLE NOT NULL);\r\n");
-		sqls.put(20180219.0603, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"LayerEllipseScale\" (\"id\" INTEGER NOT NULL PRIMARY KEY, \"value\" DOUBLE NOT NULL);\r\n");
-		sqls.put(20180219.0604, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"LayerFont\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"family\" VARCHAR(256) DEFAULT 'SYSTEM' NOT NULL, \"size\" DOUBLE DEFAULT 12.0 NOT NULL, \"red\" DOUBLE DEFAULT 0 NOT NULL, \"green\" DOUBLE DEFAULT 0 NOT NULL, \"blue\" DOUBLE DEFAULT 0 NOT NULL, CONSTRAINT \"LayerFontOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
-		sqls.put(20180219.0605, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"PointLayerProperty\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"type\" SMALLINT NOT NULL, \"point_1d_visible\" BOOLEAN DEFAULT FALSE NOT NULL, \"point_2d_visible\" BOOLEAN DEFAULT TRUE NOT NULL, \"point_3d_visible\" BOOLEAN DEFAULT TRUE NOT NULL, CONSTRAINT \"LayerSymbolOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
-		sqls.put(20180219.0606, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ObservationLayerProperty\" (\"layer\" SMALLINT NOT NULL, \"observation_type\" SMALLINT NOT NULL, \"red\" DOUBLE DEFAULT 0 NOT NULL, \"green\" DOUBLE DEFAULT 0 NOT NULL, \"blue\" DOUBLE DEFAULT 0 NOT NULL, \"visible\" BOOLEAN DEFAULT TRUE NOT NULL, PRIMARY KEY(\"layer\",\"observation_type\"), CONSTRAINT \"LayerObservationColorOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
-		sqls.put(20180219.0607, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ArrowLayerProperty\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"type\" SMALLINT NOT NULL, CONSTRAINT \"ArrowLayerPropertyOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
-		sqls.put(20180219.0608, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ConfidenceLayerProperty\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"red\" DOUBLE DEFAULT 0.5 NOT NULL, \"green\" DOUBLE DEFAULT 0.5 NOT NULL, \"blue\" DOUBLE DEFAULT 0.5 NOT NULL, CONSTRAINT \"ConfidenceLayerPropertyOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
-		
-		sqls.put(20180311.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"HighlightLayerProperty\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"red\" DOUBLE DEFAULT 0.5 NOT NULL, \"green\" DOUBLE DEFAULT 0.5 NOT NULL, \"blue\" DOUBLE DEFAULT 0.5 NOT NULL, \"line_width\" DOUBLE DEFAULT 2.5 NOT NULL, CONSTRAINT \"HighlightLayerPropertyOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
-		
-		// add residual columns to aposteriori tables
-		sqls.put(20180410.0001, "ALTER TABLE \"ObservationAposteriori\" ADD \"residual\" DOUBLE DEFAULT 0 NOT NULL\r\n");
-		
-		sqls.put(20180410.0011, "ALTER TABLE \"GNSSObservationAposteriori\" ADD \"residual_x\" DOUBLE DEFAULT 0 NOT NULL\r\n");
-		sqls.put(20180410.0012, "ALTER TABLE \"GNSSObservationAposteriori\" ADD \"residual_y\" DOUBLE DEFAULT 0 NOT NULL\r\n");
-		sqls.put(20180410.0013, "ALTER TABLE \"GNSSObservationAposteriori\" ADD \"residual_z\" DOUBLE DEFAULT 0 NOT NULL\r\n");
-		
-		sqls.put(20180410.0021, "ALTER TABLE \"PointAposteriori\" ADD \"residual_x\" DOUBLE DEFAULT 0 NOT NULL\r\n");
-		sqls.put(20180410.0022, "ALTER TABLE \"PointAposteriori\" ADD \"residual_y\" DOUBLE DEFAULT 0 NOT NULL\r\n");
-		sqls.put(20180410.0023, "ALTER TABLE \"PointAposteriori\" ADD \"residual_z\" DOUBLE DEFAULT 0 NOT NULL\r\n");
-		
-		sqls.put(20180410.0031, "ALTER TABLE \"DeflectionAposteriori\" ADD \"residual_dx\" DOUBLE DEFAULT 0 NOT NULL\r\n");
-		sqls.put(20180410.0032, "ALTER TABLE \"DeflectionAposteriori\" ADD \"residual_dy\" DOUBLE DEFAULT 0 NOT NULL\r\n");
-		
-		// add table row highlighting
-		sqls.put(20180411.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TableRowHighlightRange\" (\"type\" SMALLINT NOT NULL PRIMARY KEY, \"left_boundary\" DOUBLE NOT NULL, \"right_boundary\" DOUBLE NOT NULL);\r\n");
-		sqls.put(20180411.0002, "INSERT INTO \"TableRowHighlightRange\" (\"type\", \"left_boundary\", \"right_boundary\") VALUES (" + TableRowHighlightType.REDUNDANCY.getId() + ", '" + DefaultTableRowHighlightValue.getRange(TableRowHighlightType.REDUNDANCY)[0] + "', '" + DefaultTableRowHighlightValue.getRange(TableRowHighlightType.REDUNDANCY)[1] + "'), (" + TableRowHighlightType.P_PRIO_VALUE.getId() + ", '" + DefaultTableRowHighlightValue.getRange(TableRowHighlightType.P_PRIO_VALUE)[0] + "', '" + DefaultTableRowHighlightValue.getRange(TableRowHighlightType.P_PRIO_VALUE)[1] + "'), (" + TableRowHighlightType.INFLUENCE_ON_POSITION.getId() + ", '" + DefaultTableRowHighlightValue.getRange(TableRowHighlightType.INFLUENCE_ON_POSITION)[0] + "', '" + DefaultTableRowHighlightValue.getRange(TableRowHighlightType.INFLUENCE_ON_POSITION)[1] + "');\r\n");
-
-		sqls.put(20180411.0011, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TableRowHighlightProperty\" (\"type\" SMALLINT NOT NULL PRIMARY KEY, \"red\" DOUBLE DEFAULT 0.5 NOT NULL, \"green\" DOUBLE DEFAULT 0.5 NOT NULL, \"blue\" DOUBLE DEFAULT 0.5 NOT NULL);\r\n");
-		sqls.put(20180411.0012, "INSERT INTO \"TableRowHighlightProperty\" (\"type\", \"red\", \"green\", \"blue\") VALUES (" + TableRowHighlightRangeType.EXCELLENT.getId() + ", '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.EXCELLENT).getRed() + "', '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.EXCELLENT).getGreen() + "', '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.EXCELLENT).getBlue() + "'), (" + TableRowHighlightRangeType.SATISFACTORY.getId() + ", '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.SATISFACTORY).getRed() + "', '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.SATISFACTORY).getGreen() + "', '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.SATISFACTORY).getBlue() + "'), (" + TableRowHighlightRangeType.INADEQUATE.getId() + ", '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.INADEQUATE).getRed() + "', '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.INADEQUATE).getGreen() + "', '" + DefaultTableRowHighlightValue.getColor(TableRowHighlightRangeType.INADEQUATE).getBlue() + "');\r\n");
-
-		sqls.put(20180411.0021, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TableRowHighlightScheme\" (\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + TableRowHighlightType.NONE.getId() + " NOT NULL);\r\n");
-		sqls.put(20180411.0022, "INSERT INTO \"TableRowHighlightScheme\" (\"id\") VALUES (1);\r\n");
-
-		// add variance of unit weight
-		sqls.put(20180430.0001, "ALTER TABLE \"AdjustmentDefinition\" ADD \"apply_variance_of_unit_weight\" BOOLEAN DEFAULT TRUE NOT NULL\r\n");
-		
-		// add order id of items
-		sqls.put(20190225.0001, "ALTER TABLE \"ObservationGroup\" ADD \"order\" INTEGER DEFAULT 0 NOT NULL\r\n");
-		sqls.put(20190225.0002, "UPDATE \"ObservationGroup\" SET \"order\" = \"id\";\r\n");
-		
-		sqls.put(20190225.0011, "ALTER TABLE \"PointGroup\" ADD \"order\" INTEGER DEFAULT 0 NOT NULL\r\n");
-		sqls.put(20190225.0012, "UPDATE \"PointGroup\" SET \"order\" = \"id\";\r\n");
-		
-		sqls.put(20190225.0021, "ALTER TABLE \"CongruenceAnalysisGroup\" ADD \"order\" INTEGER DEFAULT 0 NOT NULL\r\n");
-		sqls.put(20190225.0022, "UPDATE \"CongruenceAnalysisGroup\" SET \"order\" = \"id\";\r\n");
-		
-		// add legend layer
-		sqls.put(20190309.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"LegendLayerProperty\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"type\" SMALLINT NOT NULL, CONSTRAINT \"LegendLayerPropertyOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
-		
-		// change and add projection/reduction tables
-		sqls.put(20200119.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ReductionDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"projection_type\" SMALLINT DEFAULT " + ProjectionType.NONE.getId() + " NOT NULL, \"reference_height\" DOUBLE DEFAULT 0 NOT NULL, \"earth_radius\" DOUBLE DEFAULT " + Constant.EARTH_RADIUS + " NOT NULL);\r\n");
-		sqls.put(20200119.0002, "INSERT INTO \"ReductionDefinition\" (\"id\", \"projection_type\", \"reference_height\", \"earth_radius\") (SELECT \"id\", CASEWHEN(\"type\" IN (4, 24, 34, 234), " + ProjectionType.GAUSS_KRUEGER.getId() + ", CASEWHEN(\"type\" IN (5, 25, 35, 235), " + ProjectionType.UTM.getId() + ", " + ProjectionType.NONE.getId() + ")) AS \"projection_type\", \"reference_height\", " + Constant.EARTH_RADIUS + " AS \"earth_radius\" FROM \"ProjectionDefinition\" WHERE \"id\" = 1 LIMIT 1);\r\n");
-		
-		sqls.put(20200119.0011, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ReductionTask\"(\"reduction_id\" INTEGER NOT NULL, \"type\" SMALLINT NOT NULL, PRIMARY KEY(\"reduction_id\", \"type\"), CONSTRAINT \"ReductionDefinitionOnGroupDelete\" FOREIGN KEY(\"reduction_id\") REFERENCES \"ReductionDefinition\"(\"id\") ON DELETE CASCADE);\r\n");
-		sqls.put(20200119.0012, "INSERT INTO \"ReductionTask\" (\"reduction_id\", \"type\") SELECT \"id\", CASEWHEN(\"type\" IN (4, 24, 34, 234, 5, 25, 35, 235), " + ReductionTaskType.DISTANCE.getId()  + ", -1) FROM \"ProjectionDefinition\" WHERE \"id\" = 1 LIMIT 1;\r\n");
-		sqls.put(20200119.0013, "INSERT INTO \"ReductionTask\" (\"reduction_id\", \"type\") SELECT \"id\", CASEWHEN(\"type\" IN (23, 34, 234, 35, 235),           " + ReductionTaskType.HEIGHT.getId()    + ", -2) FROM \"ProjectionDefinition\" WHERE \"id\" = 1 LIMIT 1;\r\n");
-		sqls.put(20200119.0014, "INSERT INTO \"ReductionTask\" (\"reduction_id\", \"type\") SELECT \"id\", CASEWHEN(\"type\" IN (23, 24, 234, 25, 235),           " + ReductionTaskType.DIRECTION.getId() + ", -3) FROM \"ProjectionDefinition\" WHERE \"id\" = 1 LIMIT 1;\r\n");
-		sqls.put(20200119.0015, "DELETE FROM \"ReductionTask\" WHERE \"type\" < 0;\r\n");
-		
-		sqls.put(20200119.0020, "DROP TABLE \"ProjectionDefinition\"\r\n");
-		
-		sqls.put(20200124.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"UnscentedTransformation\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"scaling\" DOUBLE DEFAULT " + UnscentedTransformationParameter.getAlpha() + " NOT NULL, \"damping\" DOUBLE DEFAULT " + UnscentedTransformationParameter.getBeta() + " NOT NULL, \"weight_zero\" DOUBLE DEFAULT " + UnscentedTransformationParameter.getWeightZero() + " NOT NULL);\r\n");
-		sqls.put(20200124.0002, "INSERT INTO \"UnscentedTransformation\" (\"id\") VALUES (1);\r\n");
-		
-		sqls.put(20200327.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ImportSeparation\" (\"id\" INTEGER NOT NULL PRIMARY KEY, \"separate\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
-		sqls.put(20200327.0002, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.LEVELING.getId() + ", "            + ImportOption.getInstance().isGroupSeparation(ObservationType.LEVELING)+ ");\r\n");
-		sqls.put(20200327.0003, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.DIRECTION.getId() + ", "           + ImportOption.getInstance().isGroupSeparation(ObservationType.DIRECTION)+ ");\r\n");
-		sqls.put(20200327.0004, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.HORIZONTAL_DISTANCE.getId() + ", " + ImportOption.getInstance().isGroupSeparation(ObservationType.HORIZONTAL_DISTANCE)+ ");\r\n");
-		sqls.put(20200327.0005, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.SLOPE_DISTANCE.getId() + ", "      + ImportOption.getInstance().isGroupSeparation(ObservationType.SLOPE_DISTANCE)+ ");\r\n");
-		sqls.put(20200327.0006, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.ZENITH_ANGLE.getId() + ", "        + ImportOption.getInstance().isGroupSeparation(ObservationType.ZENITH_ANGLE)+ ");\r\n");
-		sqls.put(20200327.0007, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.GNSS1D.getId() + ", "              + ImportOption.getInstance().isGroupSeparation(ObservationType.GNSS1D)+ ");\r\n");
-		sqls.put(20200327.0008, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.GNSS2D.getId() + ", "              + ImportOption.getInstance().isGroupSeparation(ObservationType.GNSS2D)+ ");\r\n");
-		sqls.put(20200327.0009, "INSERT INTO \"ImportSeparation\" (\"id\", \"separate\") VALUES (" + ObservationType.GNSS3D.getId() + ", "              + ImportOption.getInstance().isGroupSeparation(ObservationType.GNSS3D)+ ");\r\n");
-
-		// deflection tables
-		sqls.put(20201220.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"VerticalDeflectionGroup\"(\"id\" INTEGER GENERATED BY DEFAULT AS IDENTITY(START WITH 0) NOT NULL PRIMARY KEY,\"name\" VARCHAR(256) NOT NULL,\"type\" SMALLINT NOT NULL,\"enable\" BOOLEAN NOT NULL,\"order\" INTEGER DEFAULT 0 NOT NULL);\r\n");
-		sqls.put(20201220.0002, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"VerticalDeflectionGroupUncertainty\"(\"group_id\" INTEGER NOT NULL,\"type\" SMALLINT NOT NULL,\"value\" DOUBLE NOT NULL, PRIMARY KEY(\"group_id\",\"type\"), CONSTRAINT \"VerticalDeflectionUncertaintyOnGroupDelete\" FOREIGN KEY(\"group_id\") REFERENCES \"VerticalDeflectionGroup\"(\"id\") ON DELETE CASCADE);\r\n");
-
-		sqls.put(20201220.0003, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"VerticalDeflectionApriori\"(\"id\" INTEGER GENERATED BY DEFAULT AS IDENTITY(START WITH 0) NOT NULL PRIMARY KEY,\"group_id\" INTEGER NOT NULL,\"name\" VARCHAR(256) NOT NULL,\"y0\" DOUBLE DEFAULT 0 NOT NULL,\"x0\" DOUBLE DEFAULT 0 NOT NULL,\"sigma_y0\" DOUBLE DEFAULT 0 NOT NULL,\"sigma_x0\" DOUBLE DEFAULT 0 NOT NULL,\"enable\" BOOLEAN DEFAULT TRUE NOT NULL, CONSTRAINT \"VerticalDeflectionOnGroupDelete\" FOREIGN KEY(\"group_id\") REFERENCES \"VerticalDeflectionGroup\"(\"id\") ON DELETE CASCADE, CONSTRAINT \"UniqueVerticalDeflectionName\" UNIQUE (\"name\"));\r\n");
-		sqls.put(20201220.0004, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"VerticalDeflectionAposteriori\"(\"id\" INTEGER NOT NULL PRIMARY KEY,\"y\" DOUBLE NOT NULL,\"x\" DOUBLE NOT NULL,\"sigma_y0\" DOUBLE NOT NULL,\"sigma_x0\" DOUBLE NOT NULL,\"sigma_y\" DOUBLE NOT NULL,\"sigma_x\" DOUBLE NOT NULL,\"residual_y\" DOUBLE DEFAULT 0 NOT NULL,\"residual_x\" DOUBLE DEFAULT 0 NOT NULL,\"confidence_major_axis\" DOUBLE NOT NULL,\"confidence_minor_axis\" DOUBLE NOT NULL,\"redundancy_y\" DOUBLE NOT NULL,\"redundancy_x\" DOUBLE NOT NULL,\"gross_error_y\" DOUBLE NOT NULL,\"gross_error_x\" DOUBLE NOT NULL,\"minimal_detectable_bias_y\" DOUBLE NOT NULL,\"minimal_detectable_bias_x\" DOUBLE NOT NULL,\"omega\" DOUBLE NOT NULL,\"p_prio\" DOUBLE NOT NULL,\"p_post\" DOUBLE NOT NULL,\"t_prio\" DOUBLE NOT NULL,\"t_post\" DOUBLE NOT NULL,\"significant\" BOOLEAN NOT NULL,\"covar_index\" INTEGER NOT NULL, CONSTRAINT \"VerticalDeflectionOnDelete\" FOREIGN KEY(\"id\") REFERENCES \"VerticalDeflectionApriori\"(\"id\") ON DELETE CASCADE);\r\n");
-
-		// transfer deflection values to new tables
-		sqls.put(20201220.0010, "INSERT INTO \"VerticalDeflectionGroup\" (\"id\", \"name\", \"type\", \"enable\", \"order\") SELECT \"id\", \"name\", " + VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION.getId()  + " AS \"type\", \"enable\", \"order\" FROM \"PointGroup\" WHERE \"type\" = " + PointType.REFERENCE_POINT.getId()  + " and \"dimension\" = 3 and \"consider_deflection\" = TRUE\r\n");
-		sqls.put(20201220.0011, "INSERT INTO \"VerticalDeflectionGroup\" (\"id\", \"name\", \"type\", \"enable\", \"order\") SELECT \"id\", \"name\", " + VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION.getId() + " AS \"type\", \"enable\", \"order\" FROM \"PointGroup\" WHERE \"type\" = " + PointType.STOCHASTIC_POINT.getId() + " and \"dimension\" = 3 and \"consider_deflection\" = TRUE\r\n");
-		sqls.put(20201220.0012, "INSERT INTO \"VerticalDeflectionGroup\" (\"id\", \"name\", \"type\", \"enable\", \"order\") SELECT \"id\", \"name\", " + VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId()        + " AS \"type\", \"enable\", \"order\" FROM \"PointGroup\" WHERE \"type\" IN (" + PointType.NEW_POINT.getId() + "," + PointType.DATUM_POINT.getId() + ") and \"dimension\" = 3 and \"consider_deflection\" = TRUE\r\n");
-		
-		sqls.put(20201220.0013, "INSERT INTO \"VerticalDeflectionGroupUncertainty\" (\"group_id\", \"type\", \"value\") SELECT \"group_id\", " + VerticalDeflectionGroupUncertaintyType.DEFLECTION_X.getId() + " AS \"type\", \"value\" FROM \"PointGroupUncertainty\" JOIN \"PointGroup\" ON \"PointGroupUncertainty\".\"group_id\" = \"PointGroup\".\"id\" AND \"dimension\" = 3 AND \"consider_deflection\" = TRUE WHERE \"PointGroupUncertainty\".\"type\" = " + VerticalDeflectionGroupUncertaintyType.DEFLECTION_X.getId() + "\r\n");
-		sqls.put(20201220.0014, "INSERT INTO \"VerticalDeflectionGroupUncertainty\" (\"group_id\", \"type\", \"value\") SELECT \"group_id\", " + VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y.getId() + " AS \"type\", \"value\" FROM \"PointGroupUncertainty\" JOIN \"PointGroup\" ON \"PointGroupUncertainty\".\"group_id\" = \"PointGroup\".\"id\" AND \"dimension\" = 3 AND \"consider_deflection\" = TRUE WHERE \"PointGroupUncertainty\".\"type\" = " + VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y.getId() + "\r\n");
-		
-		sqls.put(20201220.0015, "INSERT INTO \"VerticalDeflectionApriori\" (\"name\", \"group_id\", \"y0\", \"x0\", \"sigma_y0\", \"sigma_x0\", \"enable\")  SELECT \"name\", \"group_id\", \"dy0\", \"dx0\", \"sigma_dy0\", \"sigma_dx0\", \"enable\" FROM \"PointApriori\" JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" WHERE \"dimension\" = 3 AND \"consider_deflection\" = TRUE\r\n");	
-
-		// remove old tables and entries
-		sqls.put(20201220.0020, "DELETE FROM \"PointGroupUncertainty\" WHERE \"type\" IN (" + VerticalDeflectionGroupUncertaintyType.DEFLECTION_X.getId() + ", " + VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y.getId() + ")\r\n");
-		sqls.put(20201220.0021, "DROP TABLE \"DeflectionAposteriori\"\r\n");
-		sqls.put(20201220.0022, "ALTER TABLE \"PointApriori\" DROP COLUMN \"dy0\"\r\n");
-		sqls.put(20201220.0023, "ALTER TABLE \"PointApriori\" DROP COLUMN \"dx0\"\r\n");
-		sqls.put(20201220.0024, "ALTER TABLE \"PointApriori\" DROP COLUMN \"sigma_dy0\"\r\n");
-		sqls.put(20201220.0025, "ALTER TABLE \"PointApriori\" DROP COLUMN \"sigma_dx0\"\r\n");
-		sqls.put(20201220.0026, "ALTER TABLE \"PointGroup\" DROP COLUMN \"consider_deflection\"\r\n");
-		
-		return sqls;
-	}
-
 	public boolean hasDatabase() {
 		return this.dataBase != null;
 	}
@@ -546,6 +372,14 @@ public class SQLManager {
 	public void closeDataBase() {
 		if (this.dataBase != null && this.dataBase.isOpen()) {
 			this.fireDatabaseStateChanged(ProjectDatabaseStateType.CLOSING);
+			
+			// save user-defined settings
+			try {
+				this.saveTableColumnProperties();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			
 			this.dataBase.close();
 			this.dataBase = null;
 			this.fireDatabaseStateChanged(ProjectDatabaseStateType.CLOSED);
@@ -4438,6 +4272,9 @@ public class SQLManager {
 	}
 
 	private void searchAndReplacePointNames(String searchRegex, String replaceRegex, VerticalDeflectionTreeItemValue... selectedTreeItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
 		String sql = "SELECT \"name\" FROM \"VerticalDeflectionApriori\" WHERE REGEXP_MATCHES(\"name\", ?) AND \"group_id\" = ?";
 		for (VerticalDeflectionTreeItemValue verticalDeflectionTreeItemValue : selectedTreeItemValues) {
 			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -4460,6 +4297,9 @@ public class SQLManager {
 	}
 	
 	private void searchAndReplacePointNames(String searchRegex, String replaceRegex, PointTreeItemValue... selectedTreeItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
 		String sql = "SELECT \"name\" FROM \"PointApriori\" WHERE REGEXP_MATCHES(\"name\", ?) AND \"group_id\" = ?";
 		for (PointTreeItemValue pointTreeItemValue : selectedTreeItemValues) {
 			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -4482,6 +4322,9 @@ public class SQLManager {
 	}
 	
 	private void searchAndReplacePointNames(String searchRegex, String replaceRegex, ObservationTreeItemValue... selectedTreeItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
 		String sql = "SELECT "
 				+ "DISTINCT \"end_point_name\" AS \"name\" FROM \"%s\" WHERE REGEXP_MATCHES(\"end_point_name\", ?) AND \"group_id\" = ? "
 				+ "UNION ALL "
@@ -4512,6 +4355,9 @@ public class SQLManager {
 	}
 	
 	private void searchAndReplacePointNames(String searchRegex, String replaceRegex, CongruenceAnalysisTreeItemValue... selectedTreeItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
 		String sql = "SELECT "
 				+ "DISTINCT \"end_point_name\" AS \"name\" FROM \"CongruenceAnalysisPointPairApriori\" WHERE REGEXP_MATCHES(\"end_point_name\", ?) AND \"group_id\" = ? "
 				+ "UNION ALL "
@@ -4702,6 +4548,126 @@ public class SQLManager {
 
 		return names;
 	}
+	
+	private void loadTableColumnProperties() throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
+		ColumnPropertiesManager columnPropertiesManager = ColumnPropertiesManager.getInstance();
+		columnPropertiesManager.clearOrder();
+		
+		SortedMap<Integer, ColumnContentType> sortOrderSequence = new TreeMap<Integer, ColumnContentType>(new Comparator<Integer>() {
+			@Override
+			public int compare(Integer o1, Integer o2) {
+				return o1.compareTo(o2);
+			}
+		});
+		
+		SortedMap<Integer, ColumnContentType> columnOrderSequence = new TreeMap<Integer, ColumnContentType>(new Comparator<Integer>() {
+			@Override
+			public int compare(Integer o1, Integer o2) {
+				return o1.compareTo(o2);
+			}
+		});
+		
+		String sql = "SELECT "
+				+ "\"table_type\", \"column_type\", \"width\", "
+				+ "\"sort_type\", \"sort_order\", \"column_order\" "
+				+ "FROM \"TableColumnProperty\" ORDER BY \"table_type\", \"column_order\" ASC";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+
+		TableContentType lastTableType = null;
+		while (rs.next()) {
+			TableContentType tableType   = TableContentType.getEnumByValue(rs.getInt("table_type"));
+			ColumnContentType columnType = ColumnContentType.getEnumByValue(rs.getInt("column_type"));
+			double width    = rs.getDouble("width");
+			int sortType    = rs.getInt("sort_type");
+			int sortOrder   = rs.getInt("sort_order");
+			int columnOrder = rs.getInt("column_order");
+			
+			if (tableType == null || tableType == TableContentType.UNSPECIFIC || columnType == null || columnType == ColumnContentType.DEFAULT || width <= 0)
+				continue;
+			
+			ColumnProperty columnProperty = columnPropertiesManager.getProperty(tableType, columnType);
+			columnProperty.setPrefWidth(width);
+			columnProperty.setSortType(sortType < 0 ? SortType.DESCENDING : SortType.ASCENDING);
+			columnProperty.setSortOrder(sortOrder);
+			
+			if (lastTableType != tableType) {
+				if (lastTableType != null) {
+					columnPropertiesManager.getSortOrder(lastTableType).setAll(sortOrderSequence.values());
+					columnPropertiesManager.getColumnsOrder(lastTableType).setAll(columnOrderSequence.values());
+				}
+
+				sortOrderSequence.clear();
+				columnOrderSequence.clear();
+				lastTableType = tableType;
+			}
+			
+			if (sortOrder >= 0)
+				sortOrderSequence.put(sortOrder, columnType);
+			columnOrderSequence.put(columnOrder, columnType);
+		}
+		if (lastTableType != null) {
+			columnPropertiesManager.getSortOrder(lastTableType).setAll(sortOrderSequence.values());
+			columnPropertiesManager.getColumnsOrder(lastTableType).setAll(columnOrderSequence.values());
+		}
+	}
+	
+	public void saveTableColumnProperties() throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
+		String sql = "MERGE INTO \"TableColumnProperty\" USING (VALUES "
+				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS INT), CAST(? AS INT)) "
+				+ ") AS \"vals\" (\"table_type\", \"column_type\", \"width\", \"sort_type\", \"sort_order\", \"column_order\") ON \"TableColumnProperty\".\"table_type\" = \"vals\".\"table_type\" AND \"TableColumnProperty\".\"column_type\" = \"vals\".\"column_type\" "
+				+ "WHEN MATCHED THEN UPDATE SET "
+				+ "\"TableColumnProperty\".\"width\"        = \"vals\".\"width\", "
+				+ "\"TableColumnProperty\".\"sort_type\"    = \"vals\".\"sort_type\", "
+				+ "\"TableColumnProperty\".\"sort_order\"   = \"vals\".\"sort_order\", "
+				+ "\"TableColumnProperty\".\"column_order\" = \"vals\".\"column_order\" "
+				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "\"vals\".\"table_type\", "
+				+ "\"vals\".\"column_type\", "
+				+ "\"vals\".\"width\", "
+				+ "\"vals\".\"sort_type\", "
+				+ "\"vals\".\"sort_order\", "
+				+ "\"vals\".\"column_order\" ";
+
+		boolean hasBatch = false;
+		
+		try {
+			ColumnPropertiesManager columnPropertiesManager = ColumnPropertiesManager.getInstance();
+			
+			this.dataBase.setAutoCommit(false);
+			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+			
+			for (Map.Entry<Pair<TableContentType, ColumnContentType>, ColumnProperty> entry : columnPropertiesManager) {
+				TableContentType tableType    = entry.getKey().getKey();
+				ColumnProperty columnProperty = entry.getValue();
+				ColumnContentType columnType  = columnProperty.getColumnContentType();
+				double width = columnProperty.getPrefWidth();
+
+				int idx = 1;
+				stmt.setInt(idx++, tableType.getId());
+				stmt.setInt(idx++, columnType.getId());
+				stmt.setDouble(idx++, width);
+				stmt.setInt(idx++, columnProperty.getSortType() == SortType.DESCENDING ? -1 : +1);
+				stmt.setInt(idx++, columnProperty.getSortOrder());
+				stmt.setInt(idx++, columnProperty.getColumnOrder());
+				stmt.addBatch();
+				hasBatch = true;
+			}
+			
+			if (hasBatch)
+				stmt.executeLargeBatch();
+		}
+		finally {
+			this.dataBase.setAutoCommit(true);
+		}
+	}
 
 	public void loadTableRowHighlight() throws SQLException {
 		TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
@@ -4712,6 +4678,9 @@ public class SQLManager {
 	}
 	
 	private void loadTableRowHighlightProperties(TableRowHighlight tableRowHighlight) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
 		String sql = "SELECT "
 				+ "\"red\", \"green\", \"blue\" "
 				+ "FROM \"TableRowHighlightProperty\" "
@@ -4740,6 +4709,9 @@ public class SQLManager {
 	}
 	
 	private void loadTableRowHighlightRange(TableRowHighlight tableRowHighlight) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
 		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getTableRowHighlightType();
 		String sql = "SELECT "
 				+ "\"left_boundary\", \"right_boundary\" "
@@ -4759,6 +4731,9 @@ public class SQLManager {
 	}
 	
 	private void loadTableRowHighlightType(TableRowHighlight tableRowHighlight) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
 		String sql = "SELECT "
 				+ "\"type\" "
 				+ "FROM \"TableRowHighlightScheme\" "
@@ -4798,6 +4773,9 @@ public class SQLManager {
 	}
 	
 	private void save(TableRowHighlightRangeType tableRowHighlightRangeType, Color color) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
 		String sql = "MERGE INTO \"TableRowHighlightProperty\" USING (VALUES "
 				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
 				+ ") AS \"vals\" (\"type\", \"red\", \"green\", \"blue\") ON \"TableRowHighlightProperty\".\"type\" = \"vals\".\"type\" "
@@ -4821,6 +4799,9 @@ public class SQLManager {
 	}
 	
 	private void save(TableRowHighlightType tableRowHighlightType, double leftBoundary, double rightBoundary) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
 		String sql = "MERGE INTO \"TableRowHighlightRange\" USING (VALUES "
 				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
 				+ ") AS \"vals\" (\"type\", \"left_boundary\", \"right_boundary\") ON \"TableRowHighlightRange\".\"type\" = \"vals\".\"type\" "
@@ -4841,6 +4822,9 @@ public class SQLManager {
 	}
 	
 	private void save(TableRowHighlightType tableRowHighlightType) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
 		String sql = "MERGE INTO \"TableRowHighlightScheme\" USING (VALUES "
 				+ "(CAST(? AS INT), CAST(? AS INT)) "
 				+ ") AS \"vals\" (\"id\", \"type\") ON \"TableRowHighlightScheme\".\"id\" = \"vals\".\"id\" "
@@ -4858,6 +4842,9 @@ public class SQLManager {
 	}
 	
 	public void loadImportPreferences() throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
 		ImportOption importOption = ImportOption.getInstance();
 		String sql = "SELECT "
 				+ "\"id\", \"separate\" "
@@ -4878,6 +4865,9 @@ public class SQLManager {
 	}
 	
 	public void saveImportPreferences() throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
 		String sql = "MERGE INTO \"ImportSeparation\" USING (VALUES "
 				+ "(CAST(? AS INT), CAST(? AS BOOLEAN)) "
 				+ ") AS \"vals\" (\"id\", \"separate\") ON \"ImportSeparation\".\"id\" = \"vals\".\"id\" "

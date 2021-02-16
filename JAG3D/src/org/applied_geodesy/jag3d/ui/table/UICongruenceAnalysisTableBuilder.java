@@ -34,6 +34,8 @@ import java.util.Map;
 
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dnd.CongruenceAnalysisRowDnD;
+import org.applied_geodesy.jag3d.ui.table.column.ColumnContentType;
+import org.applied_geodesy.jag3d.ui.table.column.TableContentType;
 import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
@@ -84,6 +86,18 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		this.init();
 		return this.table;
 	}
+	
+	private TableContentType getTableContentType() {
+		switch(this.dimension) {
+		case 1:
+			return TableContentType.CONGRUENCE_ANALYSIS_1D;
+		case 2:
+			return TableContentType.CONGRUENCE_ANALYSIS_2D;	
+		case 3:
+			return TableContentType.CONGRUENCE_ANALYSIS_3D;	
+		}
+		return TableContentType.UNSPECIFIC;
+	}
 
 	private void init() {
 		if (this.tables.containsKey(this.dimension)) {
@@ -93,6 +107,8 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		TableColumn<CongruenceAnalysisRow, Boolean> booleanColumn = null;
 		TableColumn<CongruenceAnalysisRow, String> stringColumn   = null;
 		TableColumn<CongruenceAnalysisRow, Double> doubleColumn   = null;
+		
+		TableContentType tableContentType = this.getTableContentType();
 
 		TableView<CongruenceAnalysisRow> table = this.createTable();
 		///////////////// A-PRIORI VALUES /////////////////////////////
@@ -102,8 +118,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		String labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.enable.label", "Enable");
 		String tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.enable.tooltip", "State of the point nexus");
 		CellValueType cellValueType = CellValueType.BOOLEAN;
+		ColumnContentType columnContentType = ColumnContentType.ENABLE;
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType,labelText, tooltipText);
-		booleanColumn = this.<Boolean>getColumn(header, CongruenceAnalysisRow::enableProperty, getBooleanCallback(), ColumnType.VISIBLE, columnIndex, true);
+		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::enableProperty, getBooleanCallback(), ColumnType.VISIBLE, columnIndex, true, true);
 		booleanColumn.setCellValueFactory(new Callback<CellDataFeatures<CongruenceAnalysisRow, Boolean>, ObservableValue<Boolean>>() {
 			@Override
 			public ObservableValue<Boolean> call(CellDataFeatures<CongruenceAnalysisRow, Boolean> param) {
@@ -115,24 +132,24 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		});
 		table.getColumns().add(booleanColumn);
 
-		// Station-ID
+		// POINT-ID REF
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.reference.epoch.name.label", "Point-Id (Reference epoch)");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.reference.epoch.name.tooltip", "Id of the point w.r.t. reference epoch");
 		cellValueType = CellValueType.STRING;
+		columnContentType = ColumnContentType.POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		stringColumn = this.<String>getColumn(header, CongruenceAnalysisRow::nameInReferenceEpochProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
-		stringColumn.setPrefWidth(175);
+		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::nameInReferenceEpochProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true); 
 		table.getColumns().add(stringColumn);
 
-		// Target-ID
+		// POINT-ID CONTR
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.control.epoch.name.label", "Point-Id (Control epoch)");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.control.epoch.name.tooltip", "Id of the point w.r.t. control epoch");
 		cellValueType = CellValueType.STRING;
+		columnContentType = ColumnContentType.POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		stringColumn = this.<String>getColumn(header, CongruenceAnalysisRow::nameInControlEpochProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true);
-		stringColumn.setPrefWidth(175);
+		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::nameInControlEpochProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true);
 		table.getColumns().add(stringColumn);
 
 		///////////////// A-POSTERIORI VALUES /////////////////////////////
@@ -143,8 +160,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.y.label", "y");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.y.tooltip", "A-posteriori y-component of displacement vector");
 		cellValueType = CellValueType.LENGTH;
+		columnContentType = ColumnContentType.VALUE_Y_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::yAposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::yAposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// X-Comp.
@@ -152,8 +170,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.x.label", "x");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.x.tooltip", "A-posteriori x-component of displacement vector");
 		cellValueType = CellValueType.LENGTH;
+		columnContentType = ColumnContentType.VALUE_X_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::xAposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::xAposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// Z-Comp.
@@ -161,8 +180,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.z.label", "z");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.z.tooltip", "A-posteriori z-component of displacement vector");
 		cellValueType = CellValueType.LENGTH;
+		columnContentType = ColumnContentType.VALUE_Z_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::zAposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 2 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::zAposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 2 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 
@@ -172,8 +192,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigma.y.label", "\u03C3y");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigma.y.tooltip", "A-posteriori uncertainty of y-component of displacement vector");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
+		columnContentType = ColumnContentType.UNCERTAINTY_Y_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::sigmaYaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::sigmaYaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -182,8 +203,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigma.x.label", "\u03C3x");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigma.x.tooltip", "A-posteriori uncertainty of x-component of displacement vector");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
+		columnContentType = ColumnContentType.UNCERTAINTY_X_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::sigmaXaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::sigmaXaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -192,8 +214,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigma.z.label", "\u03C3z");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.sigma.z.tooltip", "A-posteriori uncertainty of z-component of displacement vector");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
+		columnContentType = ColumnContentType.UNCERTAINTY_Z_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::sigmaZaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 2 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::sigmaZaposterioriProperty, getDoubleCallback(cellValueType), this.dimension != 2 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -203,8 +226,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.semiaxis.major.label", "a");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.semiaxis.major.tooltip", "Major semi axis");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
+		columnContentType = ColumnContentType.CONFIDENCE_A;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::confidenceAProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT_CONGRUENCE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::confidenceAProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT_CONGRUENCE, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -213,8 +237,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.semiaxis.middle.label", "b");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.semiaxis.middle.tooltip", "Middle semi axis");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
+		columnContentType = ColumnContentType.CONFIDENCE_B;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::confidenceBProperty, getDoubleCallback(cellValueType), this.dimension == 3 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::confidenceBProperty, getDoubleCallback(cellValueType), this.dimension == 3 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -223,8 +248,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.semiaxis.minor.label", "c");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.semiaxis.minor.tooltip", "Minor semi axis");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
+		columnContentType = ColumnContentType.CONFIDENCE_C;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::confidenceCProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::confidenceCProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -233,8 +259,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.semiaxisrotation.alpha.label", "\u03B1");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.semiaxisrotation.alpha.tooltip", "Rotation angle of confidence region");
 		cellValueType = CellValueType.ANGLE;
+		columnContentType = ColumnContentType.CONFIDENCE_ALPHA;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::confidenceAlphaProperty, getDoubleCallback(cellValueType), this.dimension == 3 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::confidenceAlphaProperty, getDoubleCallback(cellValueType), this.dimension == 3 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// beta
@@ -242,8 +269,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.semiaxisrotation.beta.label", "\u03B2");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.semiaxisrotation.beta.tooltip", "Rotation angle of confidence region");
 		cellValueType = CellValueType.ANGLE;
+		columnContentType = ColumnContentType.CONFIDENCE_BETA;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::confidenceBetaProperty, getDoubleCallback(cellValueType), this.dimension == 3 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::confidenceBetaProperty, getDoubleCallback(cellValueType), this.dimension == 3 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// gamma
@@ -251,8 +279,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.semiaxisrotation.gamma.label", "\u03B3");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.semiaxisrotation.gamma.tooltip", "Rotation angle of confidence region");
 		cellValueType = CellValueType.ANGLE;
+		columnContentType = ColumnContentType.CONFIDENCE_GAMMA;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::confidenceGammaProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::confidenceGammaProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// Gross-Error
@@ -261,8 +290,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.y.label", "\u2207y");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.y.tooltip", "Gross-error in y");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		columnContentType = ColumnContentType.RESIDUAL_Y;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::grossErrorYProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::grossErrorYProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -271,8 +301,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.x.label", "\u2207x");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.x.tooltip", "Gross-error in x");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		columnContentType = ColumnContentType.RESIDUAL_X;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::grossErrorXProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::grossErrorXProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -281,8 +312,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.z.label", "\u2207z");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.grosserror.z.tooltip", "Gross-error in z");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		columnContentType = ColumnContentType.RESIDUAL_Z;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::grossErrorZProperty, getDoubleCallback(cellValueType), this.dimension != 2 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::grossErrorZProperty, getDoubleCallback(cellValueType), this.dimension != 2 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -293,8 +325,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.y.label", "\u2207y(\u03B1,\u03B2)");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.y.tooltip", "Minimal detectable bias in y");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_Y;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::minimalDetectableBiasYProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::minimalDetectableBiasYProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -303,8 +336,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.x.label", "\u2207x(\u03B1,\u03B2)");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.x.tooltip", "Minimal detectable bias in x");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_X;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::minimalDetectableBiasXProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::minimalDetectableBiasXProperty, getDoubleCallback(cellValueType), this.dimension != 1 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -313,8 +347,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.z.label", "\u2207z(\u03B1,\u03B2)");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.z.tooltip", "Minimal detectable bias in z");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_Z;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::minimalDetectableBiasZProperty, getDoubleCallback(cellValueType), this.dimension != 2 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::minimalDetectableBiasZProperty, getDoubleCallback(cellValueType), this.dimension != 2 ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -324,8 +359,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.pvalue.apriori.label", "log(Pprio)");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.pvalue.apriori.tooltip", "A-priori p-value in logarithmic representation");
 		cellValueType = CellValueType.STATISTIC;
+		columnContentType = ColumnContentType.P_VALUE_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::pValueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT_CONGRUENCE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::pValueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT_CONGRUENCE, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -334,8 +370,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.pvalue.aposteriori.label", "log(Ppost)");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.pvalue.aposteriori.tooltip", "A-posteriori p-value in logarithmic representation");
 		cellValueType = CellValueType.STATISTIC;
+		columnContentType = ColumnContentType.P_VALUE_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::pValueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT_CONGRUENCE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::pValueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT_CONGRUENCE, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -344,8 +381,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.teststatistic.apriori.label", "Tprio");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.teststatistic.apriori.tooltip", "A-priori test statistic");
 		cellValueType = CellValueType.STATISTIC;
+		columnContentType = ColumnContentType.TEST_STATISTIC_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::testStatisticAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT_CONGRUENCE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::testStatisticAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT_CONGRUENCE, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -354,8 +392,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.teststatistic.aposteriori.label", "Tpost");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.teststatistic.aposteriori.tooltip", "A-posteriori test statistic");
 		cellValueType = CellValueType.STATISTIC;
+		columnContentType = ColumnContentType.TEST_STATISTIC_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, CongruenceAnalysisRow::testStatisticAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT_CONGRUENCE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::testStatisticAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT_CONGRUENCE, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -365,8 +404,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.testdecision.label", "Significant");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.testdecision.tooltip", "Checked, if null-hypothesis is rejected");
 		cellValueType = CellValueType.BOOLEAN;
+		columnContentType = ColumnContentType.SIGNIFICANT;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		booleanColumn = this.<Boolean>getColumn(header, CongruenceAnalysisRow::significantProperty, getBooleanCallback(), ColumnType.APOSTERIORI_POINT_CONGRUENCE, columnIndex, false);
+		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::significantProperty, getBooleanCallback(), ColumnType.APOSTERIORI_POINT_CONGRUENCE, columnIndex, false, true);
 		booleanColumn.setCellValueFactory(new Callback<CellDataFeatures<CongruenceAnalysisRow, Boolean>, ObservableValue<Boolean>>() {
 			@Override
 			public ObservableValue<Boolean> call(CellDataFeatures<CongruenceAnalysisRow, Boolean> param) {
@@ -380,6 +420,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 
 		this.addContextMenu(table, this.createContextMenu(false));
 		this.addDynamicRowAdder(table);
+		this.addColumnOrderSequenceListeners(tableContentType, table);
 
 		this.tables.put(this.dimension, table);
 		this.table = table;

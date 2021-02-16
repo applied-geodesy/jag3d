@@ -71,7 +71,7 @@ public class UIAverageObservationTableBuilder extends UITableBuilder<AveragedObs
 		labelText   = i18n.getString("UIAverageObservationTableBuilder.tableheader.station.name.label", "Station-Id");
 		tooltipText = i18n.getString("UIAverageObservationTableBuilder.tableheader.station.name.tooltip", "Id of station");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
-		stringColumn = this.<String>getColumn(header, AveragedObservationRow::startPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
+		stringColumn = this.<String>getColumn(header, AveragedObservationRow::startPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, false); 
 		table.getColumns().add(stringColumn);
 
 		// Target-ID
@@ -79,7 +79,7 @@ public class UIAverageObservationTableBuilder extends UITableBuilder<AveragedObs
 		labelText   = i18n.getString("UIAverageObservationTableBuilder.tableheader.target.name.label", "Target-Id");
 		tooltipText = i18n.getString("UIAverageObservationTableBuilder.tableheader.target.name.tooltip", "Id of target point");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
-		stringColumn = this.<String>getColumn(header, AveragedObservationRow::endPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true);
+		stringColumn = this.<String>getColumn(header, AveragedObservationRow::endPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(stringColumn);
 
 		// Parameter value
@@ -99,7 +99,6 @@ public class UIAverageObservationTableBuilder extends UITableBuilder<AveragedObs
 		table.getColumns().add(doubleColumn);
 
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-		
 		this.table = table;
 		this.isInitialize = true;
 	}
