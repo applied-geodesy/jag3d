@@ -21,6 +21,7 @@
 
 package org.applied_geodesy.util.unit;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ScaleUnit extends Unit {
@@ -28,11 +29,13 @@ public class ScaleUnit extends Unit {
 	public static ScaleUnit PARTS_PER_MILLION_WRT_ZERO = new ScaleUnit(UnitType.PARTS_PER_MILLION_WRT_ZERO);
 	public static ScaleUnit PARTS_PER_MILLION_WRT_ONE  = new ScaleUnit(UnitType.PARTS_PER_MILLION_WRT_ONE);
 
-	public static final Map<UnitType, ScaleUnit> UNITS = Map.of(
-			UnitType.UNITLESS,                   UNITLESS,
-			UnitType.PARTS_PER_MILLION_WRT_ZERO, PARTS_PER_MILLION_WRT_ZERO,
-			UnitType.PARTS_PER_MILLION_WRT_ONE,  PARTS_PER_MILLION_WRT_ONE
-	);
+	public static final Map<UnitType, ScaleUnit> UNITS;
+	static {
+		UNITS = new LinkedHashMap<UnitType, ScaleUnit>();
+		UNITS.put(UnitType.UNITLESS,                   UNITLESS);
+		UNITS.put(UnitType.PARTS_PER_MILLION_WRT_ZERO, PARTS_PER_MILLION_WRT_ZERO);
+		UNITS.put(UnitType.PARTS_PER_MILLION_WRT_ONE,  PARTS_PER_MILLION_WRT_ONE);
+	}
 	
 	private double a = 0.0, s = 1.0;
 

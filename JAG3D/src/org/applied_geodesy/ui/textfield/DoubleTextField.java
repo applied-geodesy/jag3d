@@ -244,6 +244,15 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 
 		case VECTOR_UNCERTAINTY:
 			return this.editorNumberFormat.format(this.options.convertVectorUncertaintyToView(value.doubleValue()));
+			
+		case TEMPERATURE:
+			return this.editorNumberFormat.format(this.options.convertTemperatureToView(value.doubleValue()));
+			
+		case PRESSURE:
+			return this.editorNumberFormat.format(this.options.convertPressureToView(value.doubleValue()));
+			
+		case PERCENT:
+			return this.editorNumberFormat.format(this.options.convertPercentToView(value.doubleValue()));
 
 		default:
 			return this.editorNumberFormat.format(value.doubleValue());
@@ -295,6 +304,15 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 
 		case VECTOR_UNCERTAINTY:
 			return this.options.toVectorUncertaintyFormat(value.doubleValue(), this.displayUnit);
+			
+		case TEMPERATURE:
+			return this.options.toTemperatureFormat(value.doubleValue(), this.displayUnit);
+			
+		case PRESSURE:
+			return this.options.toPressureFormat(value.doubleValue(), this.displayUnit);
+			
+		case PERCENT:
+			return this.options.toPercentFormat(value.doubleValue(), this.displayUnit);
 			
 		case DOUBLE:
 			return this.options.toDoubleFormat(value.doubleValue());
@@ -359,6 +377,15 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 						break;
 					case VECTOR_UNCERTAINTY:
 						newValue = this.options.convertVectorUncertaintyToModel(newValue.doubleValue());
+						break;
+					case TEMPERATURE:
+						newValue = this.options.convertTemperatureToModel(newValue.doubleValue());
+						break;
+					case PRESSURE:
+						newValue = this.options.convertPressureToModel(newValue.doubleValue());
+						break;
+					case PERCENT:
+						newValue = this.options.convertPercentToModel(newValue.doubleValue());
 						break;
 					default:
 						newValue = newValue.doubleValue();

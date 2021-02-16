@@ -34,7 +34,10 @@ import java.util.Map;
 
 import org.applied_geodesy.util.unit.AngleUnit;
 import org.applied_geodesy.util.unit.LengthUnit;
+import org.applied_geodesy.util.unit.PercentUnit;
+import org.applied_geodesy.util.unit.PressureUnit;
 import org.applied_geodesy.util.unit.ScaleUnit;
+import org.applied_geodesy.util.unit.TemperatureUnit;
 import org.applied_geodesy.util.unit.Unit;
 import org.applied_geodesy.util.unit.UnitType;
 
@@ -110,6 +113,10 @@ public class FormatterOptions {
 		AngleUnit  ANGLE_RESIDUAL_UNIT  = AngleUnit.MILLIGRADIAN;
 		ScaleUnit  SCALE_RESIDUAL_UNIT  = ScaleUnit.PARTS_PER_MILLION_WRT_ZERO;
 		LengthUnit VECTOR_RESIDUAL_UNIT = LengthUnit.MILLIMETER;
+		
+		TemperatureUnit TEMPERATURE_UNIT = TemperatureUnit.DEGREE_CELSIUS;
+		PressureUnit PRESSURE_UNIT       = PressureUnit.HECTOPASCAL;
+		PercentUnit PERCENT_UNIT         = PercentUnit.PERCENT;
 
 		final NumberFormat lengthFormatter = NumberFormat.getInstance(Locale.ENGLISH);
 		final NumberFormat angleFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
@@ -126,8 +133,12 @@ public class FormatterOptions {
 		final NumberFormat scaleResidualFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
 		final NumberFormat vectorResidualFormatter = NumberFormat.getInstance(Locale.ENGLISH);
 		
-		final NumberFormat statisticFormatter   = NumberFormat.getInstance(Locale.ENGLISH);
-		final NumberFormat doubleFormatter      = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat statisticFormatter = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat doubleFormatter    = NumberFormat.getInstance(Locale.ENGLISH);
+		
+		final NumberFormat temperatureFormatter = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat pressureFormatter    = NumberFormat.getInstance(Locale.ENGLISH);
+		final NumberFormat percentFormatter     = NumberFormat.getInstance(Locale.ENGLISH);
 		
 		lengthFormatter.setGroupingUsed(false);
 		angleFormatter.setGroupingUsed(false);
@@ -146,6 +157,10 @@ public class FormatterOptions {
 		scaleResidualFormatter.setGroupingUsed(false);
 		vectorResidualFormatter.setGroupingUsed(false);
 		
+		temperatureFormatter.setGroupingUsed(false);
+		pressureFormatter.setGroupingUsed(false);
+		percentFormatter.setGroupingUsed(false);
+		
 		lengthFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 		angleFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 		scaleFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
@@ -162,6 +177,10 @@ public class FormatterOptions {
 		angleResidualFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 		scaleResidualFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 		vectorResidualFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		
+		temperatureFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		pressureFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
+		percentFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 
 		this.setFractionDigits(lengthFormatter,      4);
 		this.setFractionDigits(angleFormatter,       5);
@@ -179,6 +198,10 @@ public class FormatterOptions {
 		this.setFractionDigits(angleResidualFormatter,   2);
 		this.setFractionDigits(scaleResidualFormatter,   2);
 		this.setFractionDigits(vectorResidualFormatter,  2);
+		
+		this.setFractionDigits(temperatureFormatter,  1);
+		this.setFractionDigits(pressureFormatter,     2);
+		this.setFractionDigits(percentFormatter,      1);
 		
 		this.formatterOptions.put(CellValueType.LENGTH,             new FormatterOption(CellValueType.LENGTH,             lengthFormatter, LENGTH_UNIT));
 		this.formatterOptions.put(CellValueType.LENGTH_UNCERTAINTY, new FormatterOption(CellValueType.LENGTH_UNCERTAINTY, lengthUncertaintyFormatter, LENGTH_UNCERTAINTY_UNIT));
@@ -198,6 +221,11 @@ public class FormatterOptions {
 		
 		this.formatterOptions.put(CellValueType.STATISTIC,          new FormatterOption(CellValueType.STATISTIC,          statisticFormatter, null));
 		this.formatterOptions.put(CellValueType.DOUBLE,             new FormatterOption(CellValueType.DOUBLE,             doubleFormatter, null));
+		
+		this.formatterOptions.put(CellValueType.TEMPERATURE,        new FormatterOption(CellValueType.TEMPERATURE,        temperatureFormatter, TEMPERATURE_UNIT));
+		this.formatterOptions.put(CellValueType.PRESSURE,           new FormatterOption(CellValueType.PRESSURE,           pressureFormatter, PRESSURE_UNIT));
+		this.formatterOptions.put(CellValueType.PERCENT,            new FormatterOption(CellValueType.PERCENT,            percentFormatter, PERCENT_UNIT));
+		
 	}
 	
 	private void setFractionDigits(NumberFormat format, int d) {
@@ -214,7 +242,32 @@ public class FormatterOptions {
 	public static FormatterOptions getInstance() {
 		return options;
 	}
-		
+	
+	
+	public double convertTemperatureToView(double d) {
+		return ((TemperatureUnit)this.formatterOptions.get(CellValueType.TEMPERATURE).getUnit()).fromDegreeCelsius(d);
+	}
+	
+	public double convertTemperatureToModel(double d) {
+		return ((TemperatureUnit)this.formatterOptions.get(CellValueType.TEMPERATURE).getUnit()).toDegreeCelsius(d);
+	}
+	
+	public double convertPressureToView(double d) {
+		return ((PressureUnit)this.formatterOptions.get(CellValueType.PRESSURE).getUnit()).fromHectopascal(d);
+	}
+	
+	public double convertPressureToModel(double d) {
+		return ((PressureUnit)this.formatterOptions.get(CellValueType.PRESSURE).getUnit()).toHectopascal(d);
+	}
+	
+	public double convertPercentToView(double d) {
+		return ((PercentUnit)this.formatterOptions.get(CellValueType.PERCENT).getUnit()).fromUnitless(d);
+	}
+	
+	public double convertPercentToModel(double d) {
+		return ((PercentUnit)this.formatterOptions.get(CellValueType.PERCENT).getUnit()).toUnitless(d);
+	}
+	
 	public double convertScaleToView(double d) {
 		return ((ScaleUnit)this.formatterOptions.get(CellValueType.SCALE).getUnit()).fromUnitless(d);
 	}
@@ -310,6 +363,20 @@ public class FormatterOptions {
 	public double convertVectorResidualToModel(double d) {
 		return ((LengthUnit)this.formatterOptions.get(CellValueType.VECTOR_RESIDUAL).getUnit()).toMeter(d);
 	}
+	
+	
+	public String toTemperatureFormat(double d, boolean displayUnit) {
+		return this.toViewFormat(CellValueType.TEMPERATURE, this.convertTemperatureToView(d), displayUnit);
+	}
+	
+	public String toPressureFormat(double d, boolean displayUnit) {
+		return this.toViewFormat(CellValueType.PRESSURE, this.convertPressureToView(d), displayUnit);
+	}
+	
+	public String toPercentFormat(double d, boolean displayUnit) {
+		return this.toViewFormat(CellValueType.PERCENT, this.convertPercentToView(d), displayUnit);
+	}
+	
 	
 	public String toAngleFormat(double d, boolean displayUnit) {
 		return this.toViewFormat(CellValueType.ANGLE, this.convertAngleToView(d), displayUnit);

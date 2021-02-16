@@ -84,6 +84,8 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> {
 				return this.editorNumberFormat.format(options.convertLengthUncertaintyToView(value.doubleValue()));
 			case SCALE:
 				return this.editorNumberFormat.format(options.convertScaleToView(value.doubleValue()));
+			case SCALE_RESIDUAL:
+				return this.editorNumberFormat.format(options.convertScaleResidualToView(value.doubleValue()));
 			case SCALE_UNCERTAINTY:
 				return this.editorNumberFormat.format(options.convertScaleUncertaintyToView(value.doubleValue()));
 			case STATISTIC:
@@ -91,8 +93,16 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> {
 				return this.editorNumberFormat.format(value.doubleValue());
 			case VECTOR:
 				return this.editorNumberFormat.format(options.convertVectorToView(value.doubleValue()));
+			case VECTOR_RESIDUAL:
+				return this.editorNumberFormat.format(options.convertVectorResidualToView(value.doubleValue()));
 			case VECTOR_UNCERTAINTY:
 				return this.editorNumberFormat.format(options.convertVectorUncertaintyToView(value.doubleValue()));
+			case TEMPERATURE:
+				return this.editorNumberFormat.format(options.convertTemperatureToView(value.doubleValue()));
+			case PRESSURE:
+				return this.editorNumberFormat.format(options.convertPressureToView(value.doubleValue()));
+			case PERCENT:
+				return this.editorNumberFormat.format(options.convertPercentToView(value.doubleValue()));
 			default:
 				System.err.println(this.getClass().getSimpleName() + " : Unsupported cell value type " + this.cellValueType);
 				return String.valueOf(value);
@@ -124,6 +134,8 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> {
 			return options.toLengthUncertaintyFormat(value.doubleValue(), displayUnit);
 		case SCALE:
 			return options.toScaleFormat(value.doubleValue(), displayUnit);
+		case SCALE_RESIDUAL:
+			return options.toScaleResidualFormat(value.doubleValue(), displayUnit);
 		case SCALE_UNCERTAINTY:
 			return options.toScaleUncertaintyFormat(value.doubleValue(), displayUnit);
 		case STATISTIC:
@@ -132,8 +144,16 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> {
 			return options.toDoubleFormat(value.doubleValue());
 		case VECTOR:
 			return options.toVectorFormat(value.doubleValue(), displayUnit);
+		case VECTOR_RESIDUAL:
+			return options.toVectorResidualFormat(value.doubleValue(), displayUnit);
 		case VECTOR_UNCERTAINTY:
 			return options.toVectorUncertaintyFormat(value.doubleValue(), displayUnit);
+		case TEMPERATURE:
+			return options.toTemperatureFormat(value.doubleValue(), displayUnit);
+		case PRESSURE:
+			return options.toPressureFormat(value.doubleValue(), displayUnit);
+		case PERCENT:
+			return options.toPercentFormat(value.doubleValue(), displayUnit);
 		default:
 			System.err.println(this.getClass().getSimpleName() + " : Unsupported cell value type " + this.cellValueType);
 			return String.valueOf(value);
@@ -161,6 +181,8 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> {
 					return options.convertLengthUncertaintyToModel(value);
 				case SCALE:
 					return options.convertScaleToModel(value);
+				case SCALE_RESIDUAL:
+					return options.convertScaleResidualToModel(value);
 				case SCALE_UNCERTAINTY:
 					return options.convertScaleUncertaintyToModel(value);
 				case STATISTIC:
@@ -168,8 +190,16 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> {
 					return value;
 				case VECTOR:
 					return options.convertVectorToModel(value);
+				case VECTOR_RESIDUAL:
+					return options.convertVectorResidualToModel(value);
 				case VECTOR_UNCERTAINTY:
 					return options.convertVectorUncertaintyToModel(value);
+				case TEMPERATURE:
+					return options.convertTemperatureToModel(value);
+				case PRESSURE:
+					return options.convertPressureToModel(value);
+				case PERCENT:
+					return options.convertPercentToModel(value);
 				default:
 					System.err.println(this.getClass().getSimpleName() + " : Unsupported cell value type " + this.cellValueType);
 					return value;

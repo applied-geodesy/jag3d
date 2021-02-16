@@ -21,6 +21,7 @@
 
 package org.applied_geodesy.util.unit;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.applied_geodesy.adjustment.Constant;
@@ -34,17 +35,19 @@ public class AngleUnit extends Unit {
 	public static AngleUnit ARCSECOND            = new AngleUnit(UnitType.ARCSECOND);
 	public static AngleUnit MILLIGRADIAN         = new AngleUnit(UnitType.MILLIGRADIAN);
 	public static AngleUnit MIL6400              = new AngleUnit(UnitType.MIL6400);
-
-	public static final Map<UnitType, AngleUnit> UNITS = Map.of(
-			UnitType.RADIAN,             RADIAN,
-			UnitType.DEGREE,             DEGREE,
-			UnitType.DEGREE_SEXAGESIMAL, DEGREE_SEXAGESIMAL,
-			UnitType.GRADIAN,            GRADIAN,
-			UnitType.MILLIRADIAN,        MILLIRADIAN,
-			UnitType.ARCSECOND,          ARCSECOND,
-			UnitType.MILLIGRADIAN,       MILLIGRADIAN,
-			UnitType.MIL6400,            MIL6400
-	);
+		
+	public static final Map<UnitType, AngleUnit> UNITS;
+	static {
+		UNITS = new LinkedHashMap<UnitType, AngleUnit>();
+		UNITS.put(UnitType.RADIAN,             RADIAN);
+		UNITS.put(UnitType.GRADIAN,            GRADIAN);
+		UNITS.put(UnitType.DEGREE,             DEGREE);
+		UNITS.put(UnitType.DEGREE_SEXAGESIMAL, DEGREE_SEXAGESIMAL);
+		UNITS.put(UnitType.MILLIRADIAN,        MILLIRADIAN);
+		UNITS.put(UnitType.MILLIGRADIAN,       MILLIGRADIAN);
+		UNITS.put(UnitType.ARCSECOND,          ARCSECOND);
+		UNITS.put(UnitType.MIL6400,            MIL6400);
+	}
 
 	private double conversionFactorToRadian = 1.0;
 	
