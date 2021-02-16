@@ -21,22 +21,27 @@
 
 package org.applied_geodesy.util.unit;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class LengthUnit extends Unit {
 	public static LengthUnit METER      = new LengthUnit(UnitType.METER);
 	public static LengthUnit MILLIMETER = new LengthUnit(UnitType.MILLIMETER);
 	public static LengthUnit MICROMETER = new LengthUnit(UnitType.MICROMETER);
+	public static LengthUnit NANOMETER  = new LengthUnit(UnitType.NANOMETER);
 	public static LengthUnit INCH       = new LengthUnit(UnitType.INCH);
 	public static LengthUnit FOOT       = new LengthUnit(UnitType.FOOT);
-
-	public static final Map<UnitType, LengthUnit> UNITS = Map.of(
-			UnitType.METER,      METER,
-			UnitType.MILLIMETER, MILLIMETER,
-			UnitType.MICROMETER, MICROMETER,
-			UnitType.INCH,       INCH,
-			UnitType.FOOT,       FOOT
-	);
+	
+	public static final Map<UnitType, LengthUnit> UNITS;
+	static {
+		UNITS = new LinkedHashMap<UnitType, LengthUnit>();
+		UNITS.put(UnitType.METER,      METER);
+		UNITS.put(UnitType.MILLIMETER, MILLIMETER);
+		UNITS.put(UnitType.MICROMETER, MICROMETER);
+		UNITS.put(UnitType.NANOMETER,  NANOMETER);
+		UNITS.put(UnitType.INCH,       INCH);
+		UNITS.put(UnitType.FOOT,       FOOT);
+	}
 		
 	private double conversionFactorToMeter = 1.0;
 	
@@ -57,6 +62,11 @@ public class LengthUnit extends Unit {
 			this.name         = i18n.getString("Unit.micrometer.name", "Micrometer");
 			this.abbreviation = i18n.getString("Unit.micrometer.abbreviation", "\u03BCm");
 			this.conversionFactorToMeter = 1E-6;
+			break;
+		case NANOMETER:
+			this.name         = i18n.getString("Unit.nanometer.name", "Nanometer");
+			this.abbreviation = i18n.getString("Unit.nanometer.abbreviation", "nm");
+			this.conversionFactorToMeter = 1E-9;
 			break;
 		case INCH:
 			this.name         = i18n.getString("Unit.inch.name", "Inch");
