@@ -28,6 +28,7 @@ import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.UnscentedTransformationParameter;
 import org.applied_geodesy.adjustment.geometry.FeatureAdjustment;
 import org.applied_geodesy.juniform.ui.i18n.I18N;
+import org.applied_geodesy.ui.spinner.DoubleSpinner;
 import org.applied_geodesy.ui.textfield.DoubleTextField;
 import org.applied_geodesy.ui.textfield.DoubleTextField.ValueSupport;
 import org.applied_geodesy.util.CellValueType;
@@ -66,7 +67,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 	private ComboBox<EstimationType> estimationTypeComboBox;
 	private DoubleTextField utAlphaTextField, utBetaTextField, utWeight0TextField;
 	private Spinner<Integer> iterationSpinner;
-	private Spinner<Double> lmDampingSpinner;
+	private DoubleSpinner lmDampingSpinner;
 	private CheckBox applyVarianceOfUnitWeightCheckBox, adjustModelParametersOnlyCheckBox, preconditioningCheckBox, estimateCenterOfMassCheckBox, estimateInitialGuessCheckBox;
 	private FeatureAdjustment adjustment;
 	private LeastSquaresSettingDialog() {}
@@ -159,7 +160,6 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 			@Override
 			public Void call(ButtonType buttonType) {
 				if (buttonType == ButtonType.OK) {
-					
 					adjustment.getVarianceComponentOfUnitWeight().setApplyAposterioriVarianceOfUnitWeight(applyVarianceOfUnitWeightCheckBox.isSelected());
 					adjustment.setAdjustModelParametersOnly(adjustModelParametersOnlyCheckBox.isSelected());
 					adjustment.setPreconditioning(preconditioningCheckBox.isSelected());
@@ -238,7 +238,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		Label dampingLabel   = new Label(i18N.getString("LeastSquaresSettingDialog.lm.damping.label", "Levenberg-Marquardt damping value \u03BB:"));
 		
 		this.iterationSpinner = DialogUtil.createIntegerSpinner(0, DefaultValue.getMaximalNumberOfIterations(), 10, i18N.getString("LeastSquaresSettingDialog.iterations.tooltip", "Set maximum permissible iteration value"));
-		this.lmDampingSpinner = DialogUtil.createDoubleSpinner(options.getFormatterOptions().get(CellValueType.STATISTIC).getFormatter(), 0.0, 100000.00, 10.0, i18N.getString("LeastSquaresSettingDialog.lm.damping.tooltip", "Set damping value of Levenberg-Marquardt algorithm. The algorithm will be applied, if \u03BB \u003E 0"));
+		this.lmDampingSpinner = DialogUtil.createDoubleSpinner(CellValueType.STATISTIC, 0.0, 100000.0, 10.0, i18N.getString("LeastSquaresSettingDialog.lm.damping.tooltip", "Set damping value of Levenberg-Marquardt algorithm. The algorithm will be applied, if \u03BB \u003E 0"));
 		
 		iterationLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		iterationLabel.setMaxSize(Control.USE_PREF_SIZE, Double.MAX_VALUE);

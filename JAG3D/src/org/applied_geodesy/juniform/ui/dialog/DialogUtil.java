@@ -35,6 +35,7 @@ import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
 import org.applied_geodesy.adjustment.geometry.restriction.RestrictionType;
 import org.applied_geodesy.adjustment.geometry.restriction.TrigonometricRestriction.TrigonometricFunctionType;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
+import org.applied_geodesy.ui.spinner.DoubleSpinner;
 import org.applied_geodesy.ui.textfield.DoubleTextField;
 import org.applied_geodesy.ui.textfield.DoubleTextField.ValueSupport;
 import org.applied_geodesy.util.CellValueType;
@@ -288,59 +289,15 @@ class DialogUtil {
 		return typeComboBox;
 	}
 	
-	static Spinner<Double> createDoubleSpinner(NumberFormat numberFormat, double min, double max, double amountToStepBy, String tooltip) {
-		StringConverter<Double> converter = new StringConverter<Double>() {
-			@Override
-			public Double fromString(String s) {
-				if (s == null || s.trim().isEmpty())
-					return null;
-				else {
-					try {
-						return numberFormat.parse(s.replaceAll(",", ".")).doubleValue();
-					}
-					catch (Exception nfe) {
-						nfe.printStackTrace();
-					}
-				}
-				return null;
-			}
-
-			@Override
-			public String toString(Double d) {
-				return d == null ? "" : numberFormat.format(d);
-			}
-		};
-
-		SpinnerValueFactory.DoubleSpinnerValueFactory doubleFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(min, max);
-		Spinner<Double> doubleSpinner = new Spinner<Double>();
-		doubleSpinner.setEditable(true);
-		doubleSpinner.setValueFactory(doubleFactory);
-		//doubleSpinner.getStyleClass().add(Spinner.STYLE_CLASS_ARROWS_ON_RIGHT_HORIZONTAL);
-
-		doubleFactory.setConverter(converter);
-		doubleFactory.setAmountToStepBy(amountToStepBy);
-
-		TextFormatter<Double> formatter = new TextFormatter<Double>(doubleFactory.getConverter(), doubleFactory.getValue());
-		doubleSpinner.getEditor().setTextFormatter(formatter);
-		doubleSpinner.getEditor().setAlignment(Pos.BOTTOM_RIGHT);
-		doubleFactory.valueProperty().bindBidirectional(formatter.valueProperty());
-
+	static DoubleSpinner createDoubleSpinner(CellValueType cellValueType, double min, double max, double amountToStepBy, String tooltip) {
+		DoubleSpinner doubleSpinner = new DoubleSpinner(cellValueType, min, max, amountToStepBy);
 		doubleSpinner.setMinWidth(75);
 		doubleSpinner.setPrefWidth(100);
 		doubleSpinner.setMaxWidth(Double.MAX_VALUE);
 		doubleSpinner.setTooltip(new Tooltip(tooltip));
-		
-		doubleFactory.valueProperty().addListener(new ChangeListener<Double>() {
-			@Override
-			public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
-				if (newValue == null)
-					doubleFactory.setValue(oldValue);
-			}
-		});
-
 		return doubleSpinner;
 	}
-	
+		
 	static Spinner<Integer> createIntegerSpinner(int min, int max, int amountToStepBy, String tooltip) {
 		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
 		numberFormat.setMaximumFractionDigits(0);

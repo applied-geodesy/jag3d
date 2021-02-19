@@ -33,10 +33,10 @@ import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.UnscentedTransformationParameter;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.ui.dialog.OptionDialog;
+import org.applied_geodesy.ui.spinner.DoubleSpinner;
 import org.applied_geodesy.ui.textfield.DoubleTextField;
 import org.applied_geodesy.ui.textfield.DoubleTextField.ValueSupport;
 import org.applied_geodesy.util.CellValueType;
-import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.application.Platform;
@@ -229,14 +229,13 @@ public class LeastSquaresSettingDialog {
 	private boolean enableUnscentedTransformation = false;
 	private I18N i18n = I18N.getInstance();
 	private static LeastSquaresSettingDialog leastSquaresSettingDialog = new LeastSquaresSettingDialog();
-	private FormatterOptions options = FormatterOptions.getInstance();
 	private Dialog<LeastSquaresSettings> dialog = null;
 	private Window window;
 	private ComboBox<EstimationType> estimationTypeComboBox;
 	private LeastSquaresSettings settings = new LeastSquaresSettings();
 	private Spinner<Integer> iterationSpinner;
 	private Spinner<Integer> principalComponentSpinner;
-	private Spinner<Double> robustSpinner;
+	private DoubleSpinner robustSpinner;
 	private DoubleTextField alphaTextField, betaTextField, weight0TextField;
 	private CheckBox orientationApproximationCheckBox, congruenceAnalysisCheckBox, applyVarianceOfUnitWeightCheckBox, exportCovarianceMatrixCheckBox;
 	private LeastSquaresSettingDialog() {}
@@ -624,61 +623,15 @@ public class LeastSquaresSettingDialog {
 		return integerSpinner;
 	}
 	
-	private Spinner<Double> createDoubleSpinner(double min, double max, double amountToStepBy, String tooltip) {
-		NumberFormat numberFormat = options.getFormatterOptions().get(CellValueType.STATISTIC).getFormatter();
-
-		StringConverter<Double> converter = new StringConverter<Double>() {
-			@Override
-			public Double fromString(String s) {
-				if (s == null || s.trim().isEmpty())
-					return null;
-				else {
-					try {
-						return numberFormat.parse(s.replaceAll(",", ".")).doubleValue();
-					}
-					catch (Exception nfe) {
-						nfe.printStackTrace();
-					}
-				}
-				return null;
-			}
-
-			@Override
-			public String toString(Double d) {
-				return d == null ? "" : numberFormat.format(d);
-			}
-		};
-
-		SpinnerValueFactory.DoubleSpinnerValueFactory doubleFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(min, max);
-		Spinner<Double> doubleSpinner = new Spinner<Double>();
-		doubleSpinner.setEditable(true);
-		doubleSpinner.setValueFactory(doubleFactory);
-		//doubleSpinner.getStyleClass().add(Spinner.STYLE_CLASS_ARROWS_ON_RIGHT_HORIZONTAL);
-
-		doubleFactory.setConverter(converter);
-		doubleFactory.setAmountToStepBy(amountToStepBy);
-
-		TextFormatter<Double> formatter = new TextFormatter<Double>(doubleFactory.getConverter(), doubleFactory.getValue());
-		doubleSpinner.getEditor().setTextFormatter(formatter);
-		doubleSpinner.getEditor().setAlignment(Pos.BOTTOM_RIGHT);
-		doubleFactory.valueProperty().bindBidirectional(formatter.valueProperty());
-
+	private DoubleSpinner createDoubleSpinner(double min, double max, double amountToStepBy, String tooltip) {
+		DoubleSpinner doubleSpinner = new DoubleSpinner(CellValueType.STATISTIC, min, max, amountToStepBy);
 		doubleSpinner.setMinWidth(75);
 		doubleSpinner.setPrefWidth(100);
 		doubleSpinner.setMaxWidth(Double.MAX_VALUE);
 		doubleSpinner.setTooltip(new Tooltip(tooltip));
-		
-		doubleFactory.valueProperty().addListener(new ChangeListener<Double>() {
-			@Override
-			public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
-				if (newValue == null)
-					doubleFactory.setValue(oldValue);
-			}
-		});
-
 		return doubleSpinner;
 	}
-	
+		
 	private void save() {
 		try {
 			SQLManager.getInstance().save(this.settings);
