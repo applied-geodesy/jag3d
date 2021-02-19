@@ -251,7 +251,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 		case PRESSURE:
 			return this.editorNumberFormat.format(this.options.convertPressureToView(value.doubleValue()));
 			
-		case PERCENT:
+		case PERCENTAGE:
 			return this.editorNumberFormat.format(this.options.convertPercentToView(value.doubleValue()));
 
 		default:
@@ -311,7 +311,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 		case PRESSURE:
 			return this.options.toPressureFormat(value.doubleValue(), this.displayUnit);
 			
-		case PERCENT:
+		case PERCENTAGE:
 			return this.options.toPercentFormat(value.doubleValue(), this.displayUnit);
 			
 		case DOUBLE:
@@ -384,7 +384,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 					case PRESSURE:
 						newValue = this.options.convertPressureToModel(newValue.doubleValue());
 						break;
-					case PERCENT:
+					case PERCENTAGE:
 						newValue = this.options.convertPercentToModel(newValue.doubleValue());
 						break;
 					default:
