@@ -67,7 +67,7 @@ public class ColumnTooltipHeader implements FormatterChangedListener {
 	public void formatterChanged(FormatterEvent evt) {
 		if (this.displayUnit && evt.getEventType() == FormatterEventType.UNIT_CHANGED && this.type == evt.getCellType()) {
 			Unit unit = evt.getNewUnit();
-			this.unitText.set("[" + unit.getAbbreviation() + "]");
+			this.unitText.set(" [" + unit.getAbbreviation() + "]");
 		}
 	}
 
