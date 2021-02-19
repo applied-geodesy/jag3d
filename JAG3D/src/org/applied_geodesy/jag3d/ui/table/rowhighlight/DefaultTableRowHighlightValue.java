@@ -27,9 +27,9 @@ import java.util.Properties;
 import javafx.scene.paint.Color;
 
 public class DefaultTableRowHighlightValue {
-	private static final double[] REDUNDANCY            = new double[] {0.3, 0.7};
-	private static final double[] P_PRIO_VALUE          = new double[] {1.0, 5.0};
-	private static final double[] INFLUENCE_ON_POSITION = new double[] {0.001, 0.005};
+	private static final double[] REDUNDANCY            = new double[] {0.3,  0.7};    // 30 % - 70 %
+	private static final double[] P_PRIO_VALUE          = new double[] {0.01, 0.05};   //  1 % - 5 %
+	private static final double[] INFLUENCE_ON_POSITION = new double[] {0.001, 0.005}; // 1 mm - 5 mm
 	
 	private static final Color EXCELLENT_COLOR    = Color.web("#bcee68");
 	private static final Color SATISFACTORY_COLOR = Color.web("#ffec8b");
@@ -103,7 +103,7 @@ public class DefaultTableRowHighlightValue {
 			rightBoundary = Double.parseDouble(PROPERTIES.getProperty("P_PRIO_VALUE_RIGHT_BOUNDARY"));
 		} catch (Exception e) {}
 		
-		return leftBoundary > 0 && rightBoundary > 0 && leftBoundary < 100 && rightBoundary < 100 && leftBoundary < rightBoundary ? new double[] {leftBoundary, rightBoundary} : new double[] {P_PRIO_VALUE[0], P_PRIO_VALUE[1]};
+		return leftBoundary > 0 && rightBoundary > 0 && leftBoundary < 1 && rightBoundary < 1 && leftBoundary < rightBoundary ? new double[] {leftBoundary, rightBoundary} : new double[] {P_PRIO_VALUE[0], P_PRIO_VALUE[1]};
 	}
 	
 	public static double[] getRangeOfInfluenceOnPosition() {

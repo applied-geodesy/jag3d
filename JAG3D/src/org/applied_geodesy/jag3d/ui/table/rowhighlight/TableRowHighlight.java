@@ -35,7 +35,7 @@ public class TableRowHighlight {
 	private Color satisfactoryColor = DefaultTableRowHighlightValue.getSatisfactoryColor();
 	private Color inadequateColor   = DefaultTableRowHighlightValue.getInadequateColor();
 	
-	private double leftBoundary = Double.NaN;
+	private double leftBoundary  = Double.NaN;
 	private double rightBoundary = Double.NaN;
 	
 	private TableRowHighlightType tableRowHighlightType = TableRowHighlightType.NONE;

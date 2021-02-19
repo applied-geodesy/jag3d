@@ -159,6 +159,8 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 	private ColorPicker inadequateColorPicker;
 	
 	private Accordion accordion = new Accordion();
+	private Label rightBoundaryRedundancy;
+	private Label rightBoundaryPValue;
 
 	private TableRowHighlightDialog() {}
 
@@ -316,29 +318,35 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 			break;
 
 		case REDUNDANCY:
-			radioButtonLabelText   = i18n.getString("TableRowHighlightDialog.range.redundancy.label", "Redundancy r");
+			radioButtonLabelText   = String.format(
+					Locale.ENGLISH, "%s [%s]", 
+					i18n.getString("TableRowHighlightDialog.range.redundancy.label", "Redundancy r"),
+					options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation()
+					);	
 			radioButtonToolTipText = i18n.getString("TableRowHighlightDialog.range.redundancy.tooltip", "Highlighting table rows depending on redundancy");
 			leftBoundary    = new Label("0 \u2264 "); 
 			middleBoundaray = new Label(" \u003C ");
-			rightBoundary   = new Label(" \u2264 1");
+			rightBoundary   = new Label(" \u2264 " + Math.round(options.convertPercentToView(1)));
 
-			leftRangeField  = this.createMinMaxDoubleTextField(tableRowHighlightType, range[0], 0, 1, CellValueType.STATISTIC, false, false);
-			rightRangeField = this.createMinMaxDoubleTextField(tableRowHighlightType, range[1], 0, 1, CellValueType.STATISTIC, false, false);
+			leftRangeField  = this.createMinMaxDoubleTextField(tableRowHighlightType, range[0], 0, 1, CellValueType.PERCENTAGE, false, false);
+			rightRangeField = this.createMinMaxDoubleTextField(tableRowHighlightType, range[1], 0, 1, CellValueType.PERCENTAGE, false, false);
+			this.rightBoundaryRedundancy = rightBoundary;
 			break;
 
 		case P_PRIO_VALUE:
 			radioButtonLabelText = String.format(
 					Locale.ENGLISH, "%s [%s]", 
 					i18n.getString("TableRowHighlightDialog.range.probability_value.label", "Probability value p"),
-					"\u0025"
+					options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation()
 					);
 			radioButtonToolTipText = i18n.getString("TableRowHighlightDialog.range.probability_value.tooltip", "Highlighting table rows depending on (a-priori) p-value");
 			leftBoundary    = new Label("0 \u003C "); 
 			middleBoundaray = new Label(" \u003C ");
-			rightBoundary   = new Label(" \u003C 100");
+			rightBoundary   = new Label(" \u003C " + Math.round(options.convertPercentToView(1)));
 
-			leftRangeField  = this.createMinMaxDoubleTextField(tableRowHighlightType, range[0], 0, 100, CellValueType.STATISTIC, true, true);
-			rightRangeField = this.createMinMaxDoubleTextField(tableRowHighlightType, range[1], 0, 100, CellValueType.STATISTIC, true, true);
+			leftRangeField  = this.createMinMaxDoubleTextField(tableRowHighlightType, range[0], 0, 1, CellValueType.PERCENTAGE, true, true);
+			rightRangeField = this.createMinMaxDoubleTextField(tableRowHighlightType, range[1], 0, 1, CellValueType.PERCENTAGE, true, true);
+			this.rightBoundaryPValue = rightBoundary;
 			break;
 
 		case INFLUENCE_ON_POSITION:
@@ -528,28 +536,50 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 	@Override
 	public void formatterChanged(FormatterEvent evt) {
 		if (evt.getEventType() == FormatterEventType.UNIT_CHANGED) {
+			if (evt.getCellType() == CellValueType.PERCENTAGE) {
+				this.rightBoundaryRedundancy.setText(" \u2264 " + Math.round(options.convertPercentToView(1)));
+				this.rightBoundaryPValue.setText(" \u003C " + Math.round(options.convertPercentToView(1)));
+			}
+			
 			for (Toggle toggleButton : this.highlightOptionGroup.getToggles()) {
-				if (toggleButton.getUserData() == TableRowHighlightType.INFLUENCE_ON_POSITION && toggleButton instanceof RadioButton) {
+				if ((evt.getCellType() == CellValueType.LENGTH_RESIDUAL || evt.getCellType() == CellValueType.PERCENTAGE) &&
+					(toggleButton.getUserData() == TableRowHighlightType.INFLUENCE_ON_POSITION || toggleButton.getUserData() == TableRowHighlightType.P_PRIO_VALUE || toggleButton.getUserData() == TableRowHighlightType.REDUNDANCY) &&
+					toggleButton instanceof RadioButton) {
+					
 					RadioButton radioButton = (RadioButton)toggleButton;
+					
+					String labelText = null;
+					String unitAbbr  = null;
+					if (evt.getCellType() == CellValueType.LENGTH_RESIDUAL && toggleButton.getUserData() == TableRowHighlightType.INFLUENCE_ON_POSITION) {
+						labelText = i18n.getString("TableRowHighlightDialog.range.influenceonposition.label", "Influence on point position");
+						unitAbbr  = options.getFormatterOptions().get(CellValueType.LENGTH_RESIDUAL).getUnit().getAbbreviation();
+					}
+					else if (evt.getCellType() == CellValueType.PERCENTAGE && toggleButton.getUserData() == TableRowHighlightType.P_PRIO_VALUE) {
+						labelText = i18n.getString("TableRowHighlightDialog.range.probability_value.label", "Probability value p");
+						unitAbbr  = options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation();						
+					}
+					else if (evt.getCellType() == CellValueType.PERCENTAGE && toggleButton.getUserData() == TableRowHighlightType.REDUNDANCY) {
+						labelText = i18n.getString("TableRowHighlightDialog.range.redundancy.label", "Redundancy r");
+						unitAbbr  = options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation();		
+					}
+					else {
+						continue;
+					}
+					
 					if (radioButton.getGraphic() instanceof Label) {
 						((Label)radioButton.getGraphic()).setText(
 								String.format(
 										Locale.ENGLISH, "%s [%s]", 
-										i18n.getString("TableRowHighlightDialog.range.influenceonposition.label", "Influence on point position"),
-										options.getFormatterOptions().get(CellValueType.LENGTH_RESIDUAL).getUnit().getAbbreviation()
-										)
+										labelText, unitAbbr)
 								);
 					}
 					else {
 						radioButton.setText(
 								String.format(
 										Locale.ENGLISH, "%s [%s]", 
-										i18n.getString("TableRowHighlightDialog.range.influenceonposition.label", "Influence on point position"),
-										options.getFormatterOptions().get(CellValueType.LENGTH_RESIDUAL).getUnit().getAbbreviation()
-										)
+										labelText, unitAbbr)
 								);
 					}
-					break;
 				}
 			}
 		}
