@@ -12,7 +12,7 @@
 	<#if test_statistic_params??>
 		<table>
 			<caption><#outputformat "plainText">${test_statistic_table_caption}</#outputformat></caption>
-			<#include "teststatistic_thead.ftlh" parse=false>
+			<#include "teststatistic_thead.ftlh" parse=true>
 			<#include "teststatistic_tbody.ftlh" parse=true>
 			<#include "teststatistic_tfoot.ftlh" parse=false>
 		</table>

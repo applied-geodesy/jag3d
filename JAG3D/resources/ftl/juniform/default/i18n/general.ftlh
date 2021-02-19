@@ -51,8 +51,8 @@
 				</#if>
 			</dd>
 
-			<dt>Probability Value &alpha; [%]</dt><dd>${test_statistic_probability_value?string[df_statistic]}</dd>
-			<dt>Test Power (1-&beta;) [%]</dt><dd>${test_statistic_power_of_test?string[df_statistic]}</dd>
+			<dt><#outputformat "plainText">Probability Value &alpha; [${unit_abbr_percentage}]</#outputformat></dt><dd>${test_statistic_probability_value?string[df_percentage]}</dd>
+			<dt><#outputformat "plainText">Test Power (1-&beta;) [${unit_abbr_percentage}]</#outputformat></dt><dd>${test_statistic_power_of_test?string[df_percentage]}</dd>
 
 		</dl>
 	</section>

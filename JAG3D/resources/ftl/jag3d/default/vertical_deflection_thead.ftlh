@@ -22,8 +22,8 @@
 		</#if>
 		
 		<#if group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
-			<th><#outputformat "plainText">r<sub>Y</sub></#outputformat></th>
-			<th><#outputformat "plainText">r<sub>X</sub></#outputformat></th>
+			<th><#outputformat "plainText">r<sub>Y</sub><span class="unit">${unit_abbr_percentage}</span></#outputformat></th>
+			<th><#outputformat "plainText">r<sub>X</sub><span class="unit">${unit_abbr_percentage}</span></#outputformat></th>
 			
 			<th><#outputformat "plainText">&epsilon;<sub>Y</sub></#outputformat></th>
 			<th><#outputformat "plainText">&epsilon;<sub>X</sub></#outputformat></th>

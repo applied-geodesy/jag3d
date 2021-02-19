@@ -63,11 +63,11 @@
 				</#if>
 				
 				<#if group.type == "GNSS2D" || group.type == "GNSS3D">
-					<td><@printFormattedNumber value=observation.redundancy_y format=df_statistic/></td>
-					<td><@printFormattedNumber value=observation.redundancy_x format=df_statistic/></td>
+					<td><@printFormattedNumber value=observation.redundancy_y format=df_percentage/></td>
+					<td><@printFormattedNumber value=observation.redundancy_x format=df_percentage/></td>
 				</#if>
 				<#if group.type == "GNSS1D" || group.type == "GNSS3D">
-					<td><@printFormattedNumber value=observation.redundancy_z format=df_statistic/></td>
+					<td><@printFormattedNumber value=observation.redundancy_z format=df_percentage/></td>
 				</#if>
 				
 				<#if group.type == "GNSS2D" || group.type == "GNSS3D">
@@ -109,7 +109,7 @@
 				<#else>
 					<td><@printFormattedNumber value=observation.sigma format=df_length_uncertainty/></td>
 				</#if>	
-				<td><@printFormattedNumber value=observation.redundancy format=df_statistic/></td>
+				<td><@printFormattedNumber value=observation.redundancy format=df_percentage/></td>
 				
 				<#if apply_angle_unit??>
 					<td><@printFormattedNumber value=observation.residual format=df_angle_residual/></td>

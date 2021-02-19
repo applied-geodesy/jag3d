@@ -50,9 +50,9 @@
 					Sph&auml;rische Simplex Unscented Transformation
 				</#if>
 			</dd>
-
-			<dt>Irrtumswahrscheinlichkeit &alpha; [%]</dt><dd>${test_statistic_probability_value?string[df_statistic]}</dd>
-			<dt>Macht des Tests (1-&beta;) [%]</dt><dd>${test_statistic_power_of_test?string[df_statistic]}</dd>
-
+			
+			<dt><#outputformat "plainText">Irrtumswahrscheinlichkeit &alpha; [${unit_abbr_percentage}]</#outputformat></dt><dd>${test_statistic_probability_value?string[df_percentage]}</dd>
+			<dt><#outputformat "plainText">Macht des Tests (1-&beta;) [${unit_abbr_percentage}]</#outputformat></dt><dd>${test_statistic_power_of_test?string[df_percentage]}</dd>
+			
 		</dl>
 	</section>
