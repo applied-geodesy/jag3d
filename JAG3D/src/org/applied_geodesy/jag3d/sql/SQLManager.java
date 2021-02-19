@@ -116,6 +116,7 @@ import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.util.sql.DataBase;
 import org.applied_geodesy.util.unit.AngleUnit;
 import org.applied_geodesy.util.unit.LengthUnit;
+import org.applied_geodesy.util.unit.PercentUnit;
 import org.applied_geodesy.util.unit.ScaleUnit;
 import org.applied_geodesy.util.unit.Unit;
 import org.applied_geodesy.util.unit.UnitType;
@@ -406,11 +407,14 @@ public class SQLManager {
 				int digits = rs.getInt("digits");
 				UnitType unitType = UnitType.getEnumByValue(rs.getInt("unit"));
 				if (!rs.wasNull() && unitType != null) {
-					unit = LengthUnit.getUnit(unitType);
-					if (unit == null)
+					if ((type == CellValueType.LENGTH || type == CellValueType.LENGTH_RESIDUAL || type == CellValueType.LENGTH_UNCERTAINTY) && unit == null)
+						unit = LengthUnit.getUnit(unitType);
+					if ((type == CellValueType.ANGLE || type == CellValueType.ANGLE_RESIDUAL || type == CellValueType.ANGLE_UNCERTAINTY) && unit == null)
 						unit = AngleUnit.getUnit(unitType);
-					if (unit == null)
+					if ((type == CellValueType.SCALE || type == CellValueType.SCALE_RESIDUAL || type == CellValueType.SCALE_UNCERTAINTY) && unit == null)
 						unit = ScaleUnit.getUnit(unitType);
+					if (type == CellValueType.PERCENTAGE && unit == null)
+						unit = PercentUnit.getUnit(unitType);
 				}
 
 				if (digits >= 0)
@@ -3653,7 +3657,7 @@ public class SQLManager {
 	public void saveFormatterOption(FormatterOption option) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
-		
+
 		String sql = "MERGE INTO \"FormatterOption\" USING (VALUES "
 				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS INT)) "
 				+ ") AS \"vals\" (\"type\",\"unit\",\"digits\") ON \"FormatterOption\".\"type\" = \"vals\".\"type\" "
@@ -3668,7 +3672,7 @@ public class SQLManager {
 		CellValueType type = option.getType();
 		Unit unit   = option.getUnit();
 		int digits  = option.getFractionDigits();
-		
+
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		stmt.setInt(idx++, type.getId());
