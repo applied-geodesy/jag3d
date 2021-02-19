@@ -28,7 +28,7 @@ public class SidakTestStatistic extends TestStatistic {
 	private double ncp = -1;
 	
 	public SidakTestStatistic() {
-		this(Integer.MAX_VALUE, 0.1, 80.0, false);
+		this(Integer.MAX_VALUE, 0.001, 0.8, false);
 	}
 	
 	public SidakTestStatistic(int numberOfIndependentHypothesis, double alpha, double beta, boolean isAlphaGlobal) {
@@ -38,14 +38,14 @@ public class SidakTestStatistic extends TestStatistic {
 		
 		if (isAlphaGlobal && this.numberOfIndependentHypothesis > 0) {
 			this.alphaGlobal = alpha;
-			double d = 1.0 - alpha * 0.01;
-			this.alphaLocal = (1.0 - Math.pow(d, 1.0 / this.numberOfIndependentHypothesis)) * 100.0;
+			double d = 1.0 - alpha;
+			this.alphaLocal = (1.0 - Math.pow(d, 1.0 / this.numberOfIndependentHypothesis));
 			this.ncp = TestStatistic.getNoncentralityParameter(this.numberOfIndependentHypothesis, alpha, this.beta);
 		}
 		else if (!isAlphaGlobal && this.numberOfIndependentHypothesis > 0) {
 			this.alphaLocal = alpha;
-			double d = 1.0 - alpha * 0.01;
-			this.alphaGlobal = (1.0 - Math.pow(d, this.numberOfIndependentHypothesis)) * 100.0;
+			double d = 1.0 - alpha;
+			this.alphaGlobal = (1.0 - Math.pow(d, this.numberOfIndependentHypothesis));
 			this.ncp = TestStatistic.getNoncentralityParameter(1.0, alpha, this.beta);
 		}
 		else {
@@ -92,7 +92,7 @@ public class SidakTestStatistic extends TestStatistic {
 	public static void main(String args[]) {
 		int numberOfIndependentHypothesis = 100;
 
-		SidakTestStatistic testStatistic = new SidakTestStatistic(numberOfIndependentHypothesis, 0.1, 80.0, false);
+		SidakTestStatistic testStatistic = new SidakTestStatistic(numberOfIndependentHypothesis, 0.001, 0.8, false);
 		
 		TestStatisticParameterSet set[] = new TestStatisticParameterSet[] {
 				new TestStatisticParameterSet(1, Double.POSITIVE_INFINITY),
