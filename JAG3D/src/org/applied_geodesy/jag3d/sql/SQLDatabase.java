@@ -224,6 +224,11 @@ class SQLDatabase {
 		// add columns properties 
 		sqls.put(20210112.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TableColumnProperty\" (\"table_type\" SMALLINT NOT NULL, \"column_type\" SMALLINT NOT NULL, \"width\" DOUBLE DEFAULT 125 NOT NULL, \"sort_type\" TINYINT DEFAULT 1 NOT NULL, \"sort_order\" SMALLINT DEFAULT -1 NOT NULL, \"column_order\" SMALLINT DEFAULT 0 NOT NULL, PRIMARY KEY(\"table_type\",\"column_type\"));\r\n");
 
+		// percent values: use beta as an indicator, i.e. if beta > 0 perform update 
+		sqls.put(20210215.0001, "UPDATE \"TestStatistic\" SET \"probability_value\" = \"probability_value\" / 100, \"power_of_test\" = \"power_of_test\" / 100 WHERE ((SELECT \"power_of_test\" FROM \"TestStatisticDefinition\") > 1);\r\n");
+		sqls.put(20210215.0002, "UPDATE \"TableRowHighlightRange\" SET \"left_boundary\" = \"left_boundary\" / 100, \"right_boundary\" = \"right_boundary\" / 100 WHERE \"type\" = " + TableRowHighlightType.P_PRIO_VALUE.getId() + " AND ((SELECT \"power_of_test\" FROM \"TestStatisticDefinition\") > 1);\r\n");
+		sqls.put(20210215.0003, "UPDATE \"TestStatisticDefinition\" SET \"probability_value\" = \"probability_value\" / 100, \"power_of_test\" = \"power_of_test\" / 100 WHERE \"power_of_test\" > 1;\r\n");
+
 		return sqls;
 	}
 }
