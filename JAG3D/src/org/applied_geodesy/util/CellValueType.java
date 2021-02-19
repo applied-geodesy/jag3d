@@ -47,7 +47,7 @@ public enum CellValueType {
 	VECTOR_RESIDUAL(42),
 	
 	STATISTIC(50),
-	PERCENT(51),
+	PERCENTAGE(51),
 	
 	TEMPERATURE(60),
 	PRESSURE(61),

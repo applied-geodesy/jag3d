@@ -201,7 +201,7 @@ public class FormatterOptions {
 		
 		this.setFractionDigits(temperatureFormatter,  1);
 		this.setFractionDigits(pressureFormatter,     2);
-		this.setFractionDigits(percentFormatter,      1);
+		this.setFractionDigits(percentFormatter,      2);
 		
 		this.formatterOptions.put(CellValueType.LENGTH,             new FormatterOption(CellValueType.LENGTH,             lengthFormatter, LENGTH_UNIT));
 		this.formatterOptions.put(CellValueType.LENGTH_UNCERTAINTY, new FormatterOption(CellValueType.LENGTH_UNCERTAINTY, lengthUncertaintyFormatter, LENGTH_UNCERTAINTY_UNIT));
@@ -224,7 +224,7 @@ public class FormatterOptions {
 		
 		this.formatterOptions.put(CellValueType.TEMPERATURE,        new FormatterOption(CellValueType.TEMPERATURE,        temperatureFormatter, TEMPERATURE_UNIT));
 		this.formatterOptions.put(CellValueType.PRESSURE,           new FormatterOption(CellValueType.PRESSURE,           pressureFormatter, PRESSURE_UNIT));
-		this.formatterOptions.put(CellValueType.PERCENT,            new FormatterOption(CellValueType.PERCENT,            percentFormatter, PERCENT_UNIT));
+		this.formatterOptions.put(CellValueType.PERCENTAGE,         new FormatterOption(CellValueType.PERCENTAGE,         percentFormatter, PERCENT_UNIT));
 		
 	}
 	
@@ -261,11 +261,11 @@ public class FormatterOptions {
 	}
 	
 	public double convertPercentToView(double d) {
-		return ((PercentUnit)this.formatterOptions.get(CellValueType.PERCENT).getUnit()).fromUnitless(d);
+		return ((PercentUnit)this.formatterOptions.get(CellValueType.PERCENTAGE).getUnit()).fromUnitless(d);
 	}
 	
 	public double convertPercentToModel(double d) {
-		return ((PercentUnit)this.formatterOptions.get(CellValueType.PERCENT).getUnit()).toUnitless(d);
+		return ((PercentUnit)this.formatterOptions.get(CellValueType.PERCENTAGE).getUnit()).toUnitless(d);
 	}
 	
 	public double convertScaleToView(double d) {
@@ -374,7 +374,7 @@ public class FormatterOptions {
 	}
 	
 	public String toPercentFormat(double d, boolean displayUnit) {
-		return this.toViewFormat(CellValueType.PERCENT, this.convertPercentToView(d), displayUnit);
+		return this.toViewFormat(CellValueType.PERCENTAGE, this.convertPercentToView(d), displayUnit);
 	}
 	
 	
