@@ -447,7 +447,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.redundancy.label", "r");
 		tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.redundancy.tooltip", "Redundancy");
-		cellValueType = CellValueType.STATISTIC;
+		cellValueType = CellValueType.PERCENTAGE;
 		columnContentType = ColumnContentType.REDUNDANCY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::redundancyProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);

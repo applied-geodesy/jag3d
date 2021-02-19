@@ -229,8 +229,8 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.redundancy.x.label", "rx");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.x.tooltip", "Redundancy of x-component");
-		cellValueType = CellValueType.STATISTIC;
-		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		cellValueType = CellValueType.PERCENTAGE;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FeaturePoint::redundancyXProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
@@ -239,8 +239,8 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.redundancy.y.label", "ry");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.y.tooltip", "Redundancy of y-component");
-		cellValueType = CellValueType.STATISTIC;
-		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		cellValueType = CellValueType.PERCENTAGE;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FeaturePoint::redundancyYProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
@@ -249,7 +249,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.redundancy.z.label", "rz");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.z.tooltip", "Redundancy of z-component");
-		cellValueType = CellValueType.STATISTIC;
+		cellValueType = CellValueType.PERCENTAGE;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, FeaturePoint::redundancyZProperty, getDoubleCallback(cellValueType), this.featureType == FeatureType.SURFACE ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
