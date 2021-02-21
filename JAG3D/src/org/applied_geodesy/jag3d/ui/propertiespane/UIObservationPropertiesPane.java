@@ -190,8 +190,8 @@ public class UIObservationPropertiesPane {
 	private ObservationTreeItemValue selectedObservationItemValues[] = null;
 	
 	private LineChart<Number,Number> lineChart;
-	private final double minDistanceForUncertaintyChart = 7.0;
-    private final double maxDistanceForUncertaintyChart = 153.0;
+	private final double minDistanceForUncertaintyChart = 5.0;
+    private final double maxDistanceForUncertaintyChart = 150.0;
 	
 	private FormatterOptions options = FormatterOptions.getInstance();
 
@@ -613,7 +613,7 @@ public class UIObservationPropertiesPane {
 	}
 
 	private Node createUncertaintyChartPane() {
-		NumberAxis xAxis = new NumberAxis();
+		NumberAxis xAxis = new NumberAxis(0, 155, 10);
         NumberAxis yAxis = new NumberAxis();
         
         xAxis.setForceZeroInRange(true);
