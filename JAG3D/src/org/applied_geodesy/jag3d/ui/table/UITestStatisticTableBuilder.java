@@ -50,6 +50,7 @@ public class UITestStatisticTableBuilder extends UITableBuilder<TestStatisticRow
 		
 		TableColumn<TestStatisticRow, Double> doubleColumn = null; 
 		CellValueType cellValueTypeStatistic = CellValueType.STATISTIC;
+		CellValueType cellValueTypePercent   = CellValueType.PERCENTAGE;
 		
 		// Degree of freedom numerator
 		int columnIndex = table.getColumns().size(); 
@@ -69,18 +70,18 @@ public class UITestStatisticTableBuilder extends UITableBuilder<TestStatisticRow
 	
 		// Probability value
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UITestStatisticTableBuilder.tableheader.probability_value.label", "\u03B1 [\u0025]");
+		labelText   = i18n.getString("UITestStatisticTableBuilder.tableheader.probability_value.label", "\u03B1");
 		tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.probability_value.tooltip", "Probability value (type I-error)");
-		header = new ColumnTooltipHeader(cellValueTypeStatistic, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::probabilityValueProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
+		header = new ColumnTooltipHeader(cellValueTypePercent, labelText, tooltipText, options.getFormatterOptions().get(cellValueTypePercent).getUnit());
+		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::probabilityValueProperty, getDoubleCallback(cellValueTypePercent), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
 		// test power
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UITestStatisticTableBuilder.tableheader.power_of_test.label", "1 - \u03B2 [\u0025]");
+		labelText   = i18n.getString("UITestStatisticTableBuilder.tableheader.power_of_test.label", "1 - \u03B2");
 		tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.power_of_test.tooltip", "Power of test (type II-error)");
-		header = new ColumnTooltipHeader(cellValueTypeStatistic, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::powerOfTestProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
+		header = new ColumnTooltipHeader(cellValueTypePercent, labelText, tooltipText, options.getFormatterOptions().get(cellValueTypePercent).getUnit());
+		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::powerOfTestProperty, getDoubleCallback(cellValueTypePercent), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
 		// noncentrality parameter

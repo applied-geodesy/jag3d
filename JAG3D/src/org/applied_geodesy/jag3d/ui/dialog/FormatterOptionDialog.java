@@ -38,6 +38,7 @@ import org.applied_geodesy.util.FormatterOptions.FormatterOption;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.util.unit.AngleUnit;
 import org.applied_geodesy.util.unit.LengthUnit;
+import org.applied_geodesy.util.unit.PercentUnit;
 import org.applied_geodesy.util.unit.ScaleUnit;
 import org.applied_geodesy.util.unit.Unit;
 import org.applied_geodesy.util.unit.UnitType;
@@ -311,12 +312,20 @@ public class FormatterOptionDialog {
 	}
 	
 	private TitledPane createFormatterOptionStatisticsPane() {
-		String title   = i18n.getString("FormatterOptionDialog.statistic.title", "Statistics");
+		String title   = i18n.getString("FormatterOptionDialog.statistic.title", "Statistic values");
 		String tooltip = i18n.getString("FormatterOptionDialog.statistic.tooltip", "Preferences for unitless statistics values");
 		GridPane gridPane = this.createGridPane();
 
 		Map<CellValueType, FormatterOption> formatterOptions = options.getFormatterOptions();
 		int row = 0;
+		this.addRow(
+				i18n.getString("FormatterOptionDialog.unit.percentage.label", "Percentages values:"),
+    			i18n.getString("FormatterOptionDialog.unit.percentage.tooltip.digits", "Set number of fraction digits for type percentage"),
+    			i18n.getString("FormatterOptionDialog.unit.percentage.tooltip.unit", "Set unit for percentage values"),
+				formatterOptions.get(CellValueType.PERCENTAGE),
+				gridPane,
+				++row);
+		
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.statistic.label", "Statistic (unitless):"),
     			i18n.getString("FormatterOptionDialog.unit.statistic.tooltip.digits", "Set number of fraction digits for type statistic"),
@@ -368,11 +377,11 @@ public class FormatterOptionDialog {
 		ComboBox<Unit> unitComboBox = null;
 		Unit unit = option.getUnit();
 		if (unit != null) {
-			if (AngleUnit.getUnit(unit.getType()) != null) {
+			if ((type == CellValueType.ANGLE || type == CellValueType.ANGLE_RESIDUAL || type == CellValueType.ANGLE_UNCERTAINTY) && AngleUnit.getUnit(unit.getType()) != null) {
 				Collection<? extends Unit> angleUnits = new LinkedHashSet<AngleUnit>(AngleUnit.UNITS.values());
 				unitComboBox = this.createUnitComboBox(type, comboboxTooltip, angleUnits);
 			}
-			else if (ScaleUnit.getUnit(unit.getType()) != null) {
+			else if ((type == CellValueType.SCALE || type == CellValueType.SCALE_RESIDUAL || type == CellValueType.SCALE_UNCERTAINTY) && ScaleUnit.getUnit(unit.getType()) != null) {
 				List<ScaleUnit> scaleUnits = null; 
 				switch(type) {
 				case SCALE:
@@ -389,14 +398,19 @@ public class FormatterOptionDialog {
 					);
 					break;
 				default:
-					System.out.println(this.getClass().getSimpleName() + " Error, not a scale type " + type);
+					System.err.println(this.getClass().getSimpleName() + " Error, not a scale type " + type);
 					break;
 				}
 				if (scaleUnits != null)
 					unitComboBox = this.createUnitComboBox(type, comboboxTooltip, scaleUnits);
 			}
-			else if (LengthUnit.getUnit(unit.getType()) != null) {
+			else if ((type == CellValueType.LENGTH || type == CellValueType.LENGTH_RESIDUAL || type == CellValueType.LENGTH_UNCERTAINTY ||
+					type == CellValueType.VECTOR || type == CellValueType.VECTOR_RESIDUAL || type == CellValueType.VECTOR_UNCERTAINTY) && 
+					LengthUnit.getUnit(unit.getType()) != null) {
 				unitComboBox = this.createUnitComboBox(type, comboboxTooltip, LengthUnit.UNITS.values());
+			}
+			else if (type == CellValueType.PERCENTAGE && PercentUnit.getUnit(unit.getType()) != null) {
+				unitComboBox = this.createUnitComboBox(type, comboboxTooltip, PercentUnit.UNITS.values());
 			}
 		}
 		

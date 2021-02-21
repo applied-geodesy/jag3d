@@ -22,9 +22,9 @@
 package org.applied_geodesy.adjustment;
 
 public class DefaultValue {
-	private final static int MAXIMAL_ITERATIONS = 5000;
-	private final static double PROBABILITY_VALUE = 0.1;
-	private final static double POWER_OF_TEST = 80.0;
+	private final static int MAXIMAL_ITERATIONS         = 5000;
+	private final static double PROBABILITY_VALUE       = 0.001;
+	private final static double POWER_OF_TEST           = 0.8;
 	private final static double ROBUST_ESTIMATION_LIMIT = 3.5;
 	
 	private DefaultValue() {}

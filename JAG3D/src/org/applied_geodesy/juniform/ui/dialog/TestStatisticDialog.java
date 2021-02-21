@@ -21,6 +21,7 @@
 
 package org.applied_geodesy.juniform.ui.dialog;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
@@ -29,8 +30,10 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.FormatterChangedListener;
 import org.applied_geodesy.util.FormatterEvent;
+import org.applied_geodesy.util.FormatterEventType;
 import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.juniform.ui.i18n.I18N;
+import org.applied_geodesy.ui.spinner.DoubleSpinner;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -41,7 +44,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -56,11 +58,12 @@ public class TestStatisticDialog implements FormatterChangedListener {
 	private static TestStatisticDialog testStatisticDialog = new TestStatisticDialog();
 	private FormatterOptions options = FormatterOptions.getInstance();
 	private Dialog<TestStatisticDefinition> dialog = null;
-	private Spinner<Double> probabilityValueSpinner, testPowerSpinner;
+	private DoubleSpinner probabilityValueSpinner, testPowerSpinner;
 	private ComboBox<TestStatisticType> testStatisticTypeComboBox;
 	private CheckBox familywiseErrorRateCheckBox; 
 	private Window window;
 	private TestStatisticDefinition testStatisticDefinition;
+	private Label probabilityValueLabel, testPowerLabel;
 
 	private TestStatisticDialog() {}
 
@@ -90,7 +93,7 @@ public class TestStatisticDialog implements FormatterChangedListener {
 	
 	private void setTestStatisticDefinition(TestStatisticDefinition testStatisticDefinition) {
 		this.testStatisticDefinition = testStatisticDefinition;
-		
+
 		this.familywiseErrorRateCheckBox.setSelected(this.testStatisticDefinition.isFamilywiseErrorRate());
 		this.testStatisticTypeComboBox.getSelectionModel().select(this.testStatisticDefinition.getTestStatisticType());
 
@@ -100,8 +103,8 @@ public class TestStatisticDialog implements FormatterChangedListener {
 		double probabilityValue = this.testStatisticDefinition.getProbabilityValue();
 		double powerOfTest      = this.testStatisticDefinition.getPowerOfTest();
 
-		probabilityValue = Math.max(Math.min(probabilityValue, probabilityValueSpinnerFactory.getMax()), probabilityValueSpinnerFactory.getMin());
-		powerOfTest      = Math.max(Math.min(powerOfTest, testPowerSpinnerFactory.getMax()), testPowerSpinnerFactory.getMin());
+		probabilityValue = Math.max(Math.min(this.options.convertPercentToView(probabilityValue), probabilityValueSpinnerFactory.getMax()), probabilityValueSpinnerFactory.getMin());
+		powerOfTest      = Math.max(Math.min(this.options.convertPercentToView(powerOfTest), testPowerSpinnerFactory.getMax()), testPowerSpinnerFactory.getMin());
 
 		probabilityValueSpinnerFactory.setValue(probabilityValue);
 		testPowerSpinnerFactory.setValue(powerOfTest);
@@ -124,8 +127,8 @@ public class TestStatisticDialog implements FormatterChangedListener {
 			@Override
 			public TestStatisticDefinition call(ButtonType buttonType) {
 				if (buttonType == ButtonType.OK) {
-					double probabilityValue = probabilityValueSpinner.getValue();
-					double powerOfTest      = testPowerSpinner.getValue();
+					double probabilityValue = probabilityValueSpinner.getNumber().doubleValue();
+					double powerOfTest      = testPowerSpinner.getNumber().doubleValue();
 
 					boolean familywiseErrorRate = familywiseErrorRateCheckBox.isSelected();
 					TestStatisticType testStatisticType = testStatisticTypeComboBox.getSelectionModel().getSelectedItem();
@@ -145,22 +148,22 @@ public class TestStatisticDialog implements FormatterChangedListener {
 	}
 
 	private Node createPane() {
-		String labelProbabilityValue   = i18N.getString("TestStatisticDialog.probability.label", "Probability value \u03B1 [\u0025]:");
+		String labelProbabilityValue   = String.format(Locale.ENGLISH, i18N.getString("TestStatisticDialog.probability.label", "Probability value \u03B1 [%s]:"), this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation());
+		String labelTestPower          = String.format(Locale.ENGLISH, i18N.getString("TestStatisticDialog.testpower.label", "Power of test 1 - \u03B2 [%s]:"), this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation());
+		
 		String tooltipProbabilityValue = i18N.getString("TestStatisticDialog.probability.tooltip", "Set probability value (type I error)");
-
-		String labelTestPower   = i18N.getString("TestStatisticDialog.testpower.label", "Power of test 1 - \u03B2 [\u0025]:");
-		String tooltipTestPower = i18N.getString("TestStatisticDialog.testpower.tooltip", "Set power of test (type II error)");
+		String tooltipTestPower        = i18N.getString("TestStatisticDialog.testpower.tooltip", "Set power of test (type II error)");
 
 		String labelFamilywiseErrorRate   = i18N.getString("TestStatisticDialog.familywiseerror.label", "Familywise error rate");
 		String tooltipFamilywiseErrorRate = i18N.getString("TestStatisticDialog.familywiseerror.tooltip", "If checked, probability value \u03B1 defines familywise error rate");
 
-		Label probabilityValueLabel = new Label(labelProbabilityValue);
-		Label testPowerLabel        = new Label(labelTestPower);
+		this.probabilityValueLabel = new Label(labelProbabilityValue);
+		this.testPowerLabel        = new Label(labelTestPower);
 		
 		this.familywiseErrorRateCheckBox = DialogUtil.createCheckBox(labelFamilywiseErrorRate, tooltipFamilywiseErrorRate);
 		
-		this.probabilityValueSpinner = DialogUtil.createDoubleSpinner(options.getFormatterOptions().get(CellValueType.STATISTIC).getFormatter(), 0.05, 30.00, 0.05, tooltipProbabilityValue);
-		this.testPowerSpinner        = DialogUtil.createDoubleSpinner(options.getFormatterOptions().get(CellValueType.STATISTIC).getFormatter(), 50.0, 99.95, 0.05, tooltipTestPower);
+		this.probabilityValueSpinner = DialogUtil.createDoubleSpinner(CellValueType.PERCENTAGE, 0.0005, 0.30, 0.01, tooltipProbabilityValue);
+		this.testPowerSpinner        = DialogUtil.createDoubleSpinner(CellValueType.PERCENTAGE, 0.50, 0.9995, 0.01, tooltipTestPower);
 
 		this.testStatisticTypeComboBox = DialogUtil.createTestStatisticTypeComboBox(createTestStatisticTypeStringConverter(), i18N.getString("TestStatisticDialog.type.tooltip", "Select method for type I error adaption"));
 		
@@ -246,7 +249,12 @@ public class TestStatisticDialog implements FormatterChangedListener {
 	
 	@Override
 	public void formatterChanged(FormatterEvent evt) {
-		this.probabilityValueSpinner.getEditor().setText(options.toStatisticFormat(this.probabilityValueSpinner.getValueFactory().getValue()));
-		this.testPowerSpinner.getEditor().setText(options.toStatisticFormat(this.testPowerSpinner.getValueFactory().getValue()));
+		if (evt != null && evt.getCellType() == CellValueType.PERCENTAGE && evt.getEventType() == FormatterEventType.UNIT_CHANGED) {
+			String labelProbabilityValue = String.format(Locale.ENGLISH, i18N.getString("TestStatisticDialog.probability.label", "Probability value \u03B1 [%s]:"), this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation());
+			String labelTestPower        = String.format(Locale.ENGLISH, i18N.getString("TestStatisticDialog.testpower.label", "Power of test 1 - \u03B2 [%s]:"), this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation());
+
+			this.probabilityValueLabel.setText(labelProbabilityValue);
+			this.testPowerLabel.setText(labelTestPower);
+		}
 	}
 }

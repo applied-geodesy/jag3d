@@ -31,9 +31,9 @@ public abstract class TestStatistic {
 	private final TestStatisticType type;
 	private final double alpha, beta;
 	public TestStatistic (TestStatisticType type, double alpha, double beta) {
-		this.type = type;
+		this.type  = type;
 		this.alpha = alpha;
-		this.beta = beta;
+		this.beta  = beta;
 	};
 	
 	public double getProbabilityValue() {
@@ -71,7 +71,7 @@ public abstract class TestStatistic {
 	public static double getQuantileViaNCP(double n2, double ncp, double beta) {
 		if (n2 <= 0)
 			return Double.POSITIVE_INFINITY;
-		return NonCentralChiSquare.quantile(1.0-0.01*beta, n2, ncp, true, false)/n2;
+		return NonCentralChiSquare.quantile(1.0-beta, n2, ncp, true, false)/n2;
 	}
 	
 	/**
@@ -89,7 +89,7 @@ public abstract class TestStatistic {
 		if (Double.isInfinite(ncp))
 			return TestStatistic.getQuantileViaNCP(n2, ncp, beta);
 		
-		return NonCentralF.quantile(1.0-0.01*beta, n2, m2, ncp, true, false);
+		return NonCentralF.quantile(1.0-beta, n2, m2, ncp, true, false);
 	}
 	
 	/**
@@ -101,7 +101,7 @@ public abstract class TestStatistic {
 	public static double getQuantile(double n1, double alpha) {
 		if (n1 <= 0)
 			return Double.POSITIVE_INFINITY;
-		return ChiSquare.quantile(1.0-0.01*alpha, n1, true, false)/n1;
+		return ChiSquare.quantile(1.0-alpha, n1, true, false)/n1;
 	}
 	
 	/**
@@ -118,7 +118,7 @@ public abstract class TestStatistic {
 		if (Double.isInfinite(m1))
 			return TestStatistic.getQuantile(n1, alpha);
 		
-		return F.quantile(1.0-0.01*alpha, n1, m1, true, false);
+		return F.quantile(1.0-alpha, n1, m1, true, false);
 	}
 	
 	/**
@@ -134,15 +134,15 @@ public abstract class TestStatistic {
 			return Double.POSITIVE_INFINITY;
 		
 		if (n1 == n2) {
-			return ChiSquare.quantile(1.0-0.01*alpha, n1, true, false)/n1;
-			//return F.quantile(1.0-0.01*alpha, n1, 1000000, true, false);
+			return ChiSquare.quantile(1.0-alpha, n1, true, false)/n1;
+			//return F.quantile(1.0-alpha, n1, 1000000, true, false);
 		}
 		else {
 			//double ncp = TestStatistic.getNoncentralityParameter(n1, 1000000, alpha, beta);
 			double ncp = TestStatistic.getNoncentralityParameter(n1, alpha, beta);
 			if (Double.isInfinite(ncp))
 				return Double.POSITIVE_INFINITY;
-			return NonCentralChiSquare.quantile(1.0-0.01*beta, n2, ncp, true, false)/n2;
+			return NonCentralChiSquare.quantile(1.0-beta, n2, ncp, true, false)/n2;
 		}
 	}
 	
@@ -166,7 +166,7 @@ public abstract class TestStatistic {
 		if (Double.isInfinite(ncp))
 			return Double.POSITIVE_INFINITY;
 
-		return NonCentralF.quantile(1.0-0.01*beta, n2, m2, ncp, true, false);
+		return NonCentralF.quantile(1.0-beta, n2, m2, ncp, true, false);
 	}
 	
 	/**
@@ -187,7 +187,7 @@ public abstract class TestStatistic {
 		if (Double.isInfinite(ncp))
 			return Double.POSITIVE_INFINITY;
 		
-		return NonCentralF.quantile(1.0-0.01*beta, n2, m2, ncp, true, false);
+		return NonCentralF.quantile(1.0-beta, n2, m2, ncp, true, false);
 	}
 
 	/**
@@ -205,17 +205,16 @@ public abstract class TestStatistic {
 			return 0.0;
 	
 		alpha = Math.max(alpha, 1.0E-10);
-		beta  = 0.01*beta;
 		if (n == 1)
 			return Math.pow(
-						Normal.quantile(1.0-0.005*alpha, 0.0, 1.0, true, false) + 
+						Normal.quantile(1.0-0.5*alpha, 0.0, 1.0, true, false) + 
 						Normal.quantile(beta, 0.0, 1.0, true, false), 
 					2);
 		
 		int itr = 0;
 		double EPS_APPROX = 0.0001;
 		double EPS_NEWTON = EPS_APPROX*EPS_APPROX;
-		double q1 = ChiSquare.quantile(1.0-0.01*alpha, n, true, false);
+		double q1 = ChiSquare.quantile(1.0-alpha, n, true, false);
 
 		double lowerNCP = 0;
 		double upperNCP = 50;
@@ -257,7 +256,7 @@ public abstract class TestStatistic {
 		}
 		
 		if (Math.abs(ncp - ncp0) > EPS_NEWTON || itr++ >= 200)
-			System.err.println("TestStatitic, Fehler beim Bestimmen des Nichtzentralitaetsparameters! Iterationsanzahl = " + itr + ", epsilon = " + Math.abs(ncp - ncp0));
+			System.err.println("Error, iteration limit reached during noncentrality parameter estimation: itr = " + itr + ", epsilon = " + Math.abs(ncp - ncp0));
 		
 		return ncp;
 	}
@@ -281,13 +280,12 @@ public abstract class TestStatistic {
 			return TestStatistic.getNoncentralityParameter(n, alpha, beta); 
 		
 		alpha = Math.max(alpha, 1.0E-10);
-		beta = 0.01*beta;
 		
 		double EPS_APPROX = 0.0001;
 		double EPS = EPS_APPROX*EPS_APPROX;
 		int itr = 0;
 		
-		double q1 = F.quantile(1.0-0.01*alpha, n, m, true, false);
+		double q1 = F.quantile(1.0-alpha, n, m, true, false);
 		double lowerNCP = 0;
 		double upperNCP = 50;
 		
@@ -327,7 +325,7 @@ public abstract class TestStatistic {
 		}		
 
 		if (Math.abs(beta2 - beta) > EPS || itr++ >= 200)
-			System.err.println("TestStatitic, Fehler beim Bestimmen des Nichtzentralitaetsparameters! Iterationsanzahl = " + itr + ", epsilon = " + Math.abs(beta2 - beta));
+			System.err.println("Error, iteration limit reached during noncentrality parameter estimation: itr = " + itr + ", epsilon = " + Math.abs(beta2 - beta));
 		
 		return 0.5*(lowerNCP + upperNCP);
 	}
@@ -342,8 +340,8 @@ public abstract class TestStatistic {
 	 */
 	public static double getProbabilityValue(double x, double n1) {
 		if (Double.isNaN(x) || Double.isInfinite(x) || x < 0 || n1 <= 0)
-			return 100.0;
-		return ChiSquare.cumulative(n1*x, n1, false, false)*100.0;
+			return 1.0;
+		return ChiSquare.cumulative(n1*x, n1, false, false);
 	}
 	
 	/**
@@ -356,10 +354,10 @@ public abstract class TestStatistic {
 	 */
 	public static double getProbabilityValue(double x, double n1, double m1) {
 		if (Double.isNaN(x) || Double.isInfinite(x) || x < 0 || n1 <= 0 || m1 <= 0)
-			return 100.0;
+			return 1.0;
 		if (Double.isInfinite(m1))
 			return TestStatistic.getProbabilityValue(x, n1);
-		return F.cumulative(x, n1, m1, false, false)*100.0;
+		return F.cumulative(x, n1, m1, false, false);
 	}
 	
 	/**
@@ -373,8 +371,8 @@ public abstract class TestStatistic {
 	 */
 	public static double getPowerOfTest(double x, double n1, double ncp) {
 		if (Double.isNaN(x) || Double.isInfinite(x) || x < 0 || n1 <= 0)
-			return 100.0;
-		return NonCentralChiSquare.cumulative(n1*x, n1, ncp, false, false)*100.0;
+			return 1.0;
+		return NonCentralChiSquare.cumulative(n1*x, n1, ncp, false, false);
 	}
 	
 	/**
@@ -387,10 +385,10 @@ public abstract class TestStatistic {
 	 */
 	public static double getPowerOfTest(double x, double n1, double m1, double ncp) {
 		if (Double.isNaN(x) || Double.isInfinite(x) || x < 0 || n1 <= 0 || m1 <= 0)
-			return 100.0;
+			return 1.0;
 		if (Double.isInfinite(m1))
 			return TestStatistic.getPowerOfTest(x, n1, ncp);
-		return NonCentralF.cumulative(x, n1, m1, ncp, false, false)*100.0;
+		return NonCentralF.cumulative(x, n1, m1, ncp, false, false);
 	}
 	
 	/**

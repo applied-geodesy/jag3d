@@ -88,12 +88,12 @@
 			
 			<#if group.type == "STOCHASTIC_POINT">
 				<#if group.dimension != 1>
-					<td><@printFormattedNumber value=point.redundancy_y format=df_statistic/></td>
-					<td><@printFormattedNumber value=point.redundancy_x format=df_statistic/></td>
+					<td><@printFormattedNumber value=point.redundancy_y format=df_percentage/></td>
+					<td><@printFormattedNumber value=point.redundancy_x format=df_percentage/></td>
 				</#if>
 			
 				<#if group.dimension != 2>
-					<td><@printFormattedNumber value=point.redundancy_z format=df_statistic/></td>
+					<td><@printFormattedNumber value=point.redundancy_z format=df_percentage/></td>
 				</#if>
 			</#if>
 			

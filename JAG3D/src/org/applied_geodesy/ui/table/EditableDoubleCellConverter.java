@@ -101,7 +101,7 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> {
 				return this.editorNumberFormat.format(options.convertTemperatureToView(value.doubleValue()));
 			case PRESSURE:
 				return this.editorNumberFormat.format(options.convertPressureToView(value.doubleValue()));
-			case PERCENT:
+			case PERCENTAGE:
 				return this.editorNumberFormat.format(options.convertPercentToView(value.doubleValue()));
 			default:
 				System.err.println(this.getClass().getSimpleName() + " : Unsupported cell value type " + this.cellValueType);
@@ -152,7 +152,7 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> {
 			return options.toTemperatureFormat(value.doubleValue(), displayUnit);
 		case PRESSURE:
 			return options.toPressureFormat(value.doubleValue(), displayUnit);
-		case PERCENT:
+		case PERCENTAGE:
 			return options.toPercentFormat(value.doubleValue(), displayUnit);
 		default:
 			System.err.println(this.getClass().getSimpleName() + " : Unsupported cell value type " + this.cellValueType);
@@ -198,7 +198,7 @@ public class EditableDoubleCellConverter extends EditableCellConverter<Double> {
 					return options.convertTemperatureToModel(value);
 				case PRESSURE:
 					return options.convertPressureToModel(value);
-				case PERCENT:
+				case PERCENTAGE:
 					return options.convertPercentToModel(value);
 				default:
 					System.err.println(this.getClass().getSimpleName() + " : Unsupported cell value type " + this.cellValueType);

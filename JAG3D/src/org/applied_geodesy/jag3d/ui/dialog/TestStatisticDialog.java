@@ -21,22 +21,22 @@
 
 package org.applied_geodesy.jag3d.ui.dialog;
 
-import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.ui.dialog.OptionDialog;
+import org.applied_geodesy.ui.spinner.DoubleSpinner;
 import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.FormatterChangedListener;
 import org.applied_geodesy.util.FormatterEvent;
+import org.applied_geodesy.util.FormatterEventType;
 import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -46,9 +46,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TextFormatter;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -63,10 +61,11 @@ public class TestStatisticDialog implements FormatterChangedListener {
 	private static TestStatisticDialog testStatisticDialog = new TestStatisticDialog();
 	private FormatterOptions options = FormatterOptions.getInstance();
 	private Dialog<TestStatisticDefinition> dialog = null;
-	private Spinner<Double> probabilityValueSpinner, testPowerSpinner;
+	private DoubleSpinner probabilityValueSpinner, testPowerSpinner;
 	private ComboBox<TestStatisticType> testStatisticTypeComboBox;
 	private CheckBox familywiseErrorRateCheckBox; 
 	private Window window;
+	private Label probabilityValueLabel, testPowerLabel;
 
 	private TestStatisticDialog() {}
 
@@ -112,8 +111,8 @@ public class TestStatisticDialog implements FormatterChangedListener {
 			public TestStatisticDefinition call(ButtonType buttonType) {
 				if (buttonType == ButtonType.OK) {
 
-					double probabilityValue = probabilityValueSpinner.getValue();
-					double powerOfTest      = testPowerSpinner.getValue();
+					double probabilityValue = probabilityValueSpinner.getNumber().doubleValue();
+					double powerOfTest      = testPowerSpinner.getNumber().doubleValue();
 
 					boolean familywiseErrorRate = familywiseErrorRateCheckBox.isSelected();
 
@@ -135,22 +134,22 @@ public class TestStatisticDialog implements FormatterChangedListener {
 	}
 
 	private Node createPane() {
-		String labelProbabilityValue   = i18n.getString("TestStatisticDialog.probability.label", "Probability value \u03B1 [\u0025]:");
+		String labelProbabilityValue = String.format(Locale.ENGLISH, i18n.getString("TestStatisticDialog.probability.label", "Probability value \u03B1 [%s]:"), this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation());
+		String labelTestPower        = String.format(Locale.ENGLISH, i18n.getString("TestStatisticDialog.testpower.label", "Power of test 1 - \u03B2 [%s]:"), this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation());
+		
 		String tooltipProbabilityValue = i18n.getString("TestStatisticDialog.probability.tooltip", "Set probability value (type I error)");
-
-		String labelTestPower   = i18n.getString("TestStatisticDialog.testpower.label", "Power of test 1 - \u03B2 [\u0025]:");
-		String tooltipTestPower = i18n.getString("TestStatisticDialog.testpower.tooltip", "Set power of test (type II error)");
+		String tooltipTestPower        = i18n.getString("TestStatisticDialog.testpower.tooltip", "Set power of test (type II error)");
 
 		String labelFamilywiseErrorRate   = i18n.getString("TestStatisticDialog.familywiseerror.label", "Familywise error rate");
 		String tooltipFamilywiseErrorRate = i18n.getString("TestStatisticDialog.familywiseerror.tooltip", "If checked, probability value \u03B1 defines familywise error rate");
 
-		Label probabilityValueLabel = new Label(labelProbabilityValue);
-		Label testPowerLabel        = new Label(labelTestPower);
+		this.probabilityValueLabel = new Label(labelProbabilityValue);
+		this.testPowerLabel        = new Label(labelTestPower);
 		
 		this.familywiseErrorRateCheckBox = this.createCheckBox(labelFamilywiseErrorRate, tooltipFamilywiseErrorRate);
 		
-		this.probabilityValueSpinner = this.createDoubleSpinner(0.05, 30.00, 0.05, tooltipProbabilityValue);
-		this.testPowerSpinner        = this.createDoubleSpinner(50.0, 99.95, 0.05, tooltipTestPower);
+		this.probabilityValueSpinner = this.createDoubleSpinner(0.0005, 0.30, 0.01, tooltipProbabilityValue);
+		this.testPowerSpinner        = this.createDoubleSpinner(0.50, 0.9995, 0.01, tooltipTestPower);
 
 		this.testStatisticTypeComboBox = this.createTestStatisticTypeComboBox();
 		
@@ -231,58 +230,12 @@ public class TestStatisticDialog implements FormatterChangedListener {
 		return typeComboBox;
 	}
 
-	private Spinner<Double> createDoubleSpinner(double min, double max, double amountToStepBy, String tooltip) {
-		NumberFormat numberFormat = options.getFormatterOptions().get(CellValueType.STATISTIC).getFormatter();
-
-		StringConverter<Double> converter = new StringConverter<Double>() {
-			@Override
-			public Double fromString(String s) {
-				if (s == null || s.trim().isEmpty())
-					return null;
-				else {
-					try {
-						return numberFormat.parse(s.replaceAll(",", ".")).doubleValue();
-					}
-					catch (Exception nfe) {
-						nfe.printStackTrace();
-					}
-				}
-				return null;
-			}
-
-			@Override
-			public String toString(Double d) {
-				return d == null ? "" : numberFormat.format(d);
-			}
-		};
-
-		SpinnerValueFactory.DoubleSpinnerValueFactory doubleFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(min, max);
-		Spinner<Double> doubleSpinner = new Spinner<Double>();
-		doubleSpinner.setEditable(true);
-		doubleSpinner.setValueFactory(doubleFactory);
-		//doubleSpinner.getStyleClass().add(Spinner.STYLE_CLASS_ARROWS_ON_RIGHT_HORIZONTAL);
-
-		doubleFactory.setConverter(converter);
-		doubleFactory.setAmountToStepBy(amountToStepBy);
-
-		TextFormatter<Double> formatter = new TextFormatter<Double>(doubleFactory.getConverter(), doubleFactory.getValue());
-		doubleSpinner.getEditor().setTextFormatter(formatter);
-		doubleSpinner.getEditor().setAlignment(Pos.BOTTOM_RIGHT);
-		doubleFactory.valueProperty().bindBidirectional(formatter.valueProperty());
-
+	private DoubleSpinner createDoubleSpinner(double min, double max, double amountToStepBy, String tooltip) {
+		DoubleSpinner doubleSpinner = new DoubleSpinner(CellValueType.PERCENTAGE, min, max, amountToStepBy);
 		doubleSpinner.setMinWidth(75);
 		doubleSpinner.setPrefWidth(100);
 		doubleSpinner.setMaxWidth(Double.MAX_VALUE);
 		doubleSpinner.setTooltip(new Tooltip(tooltip));
-		
-		doubleFactory.valueProperty().addListener(new ChangeListener<Double>() {
-			@Override
-			public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
-				if (newValue == null)
-					doubleFactory.setValue(oldValue);
-			}
-		});
-
 		return doubleSpinner;
 	}
 
@@ -317,9 +270,9 @@ public class TestStatisticDialog implements FormatterChangedListener {
 			double probabilityValue = testStatistic.getProbabilityValue();
 			double powerOfTest      = testStatistic.getPowerOfTest();
 
-			probabilityValue = Math.max(Math.min(probabilityValue, probabilityValueSpinnerFactory.getMax()), probabilityValueSpinnerFactory.getMin());
-			powerOfTest      = Math.max(Math.min(powerOfTest, testPowerSpinnerFactory.getMax()), testPowerSpinnerFactory.getMin());
-
+			probabilityValue = Math.max(Math.min(this.options.convertPercentToView(probabilityValue), probabilityValueSpinnerFactory.getMax()), probabilityValueSpinnerFactory.getMin());
+			powerOfTest      = Math.max(Math.min(this.options.convertPercentToView(powerOfTest), testPowerSpinnerFactory.getMax()), testPowerSpinnerFactory.getMin());
+	
 			probabilityValueSpinnerFactory.setValue(probabilityValue);
 			testPowerSpinnerFactory.setValue(powerOfTest);
 
@@ -339,12 +292,6 @@ public class TestStatisticDialog implements FormatterChangedListener {
 		}
 	}
 	
-	@Override
-	public void formatterChanged(FormatterEvent evt) {
-		this.probabilityValueSpinner.getEditor().setText(options.toStatisticFormat(this.probabilityValueSpinner.getValueFactory().getValue()));
-		this.testPowerSpinner.getEditor().setText(options.toStatisticFormat(this.testPowerSpinner.getValueFactory().getValue()));
-	}
-	
 	private CheckBox createCheckBox(String title, String tooltip) {
 		Label label = new Label(title);
 		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
@@ -356,5 +303,16 @@ public class TestStatisticDialog implements FormatterChangedListener {
 		checkBox.setMinHeight(Control.USE_PREF_SIZE);
 		checkBox.setMaxHeight(Double.MAX_VALUE);
 		return checkBox;
+	}
+	
+	@Override
+	public void formatterChanged(FormatterEvent evt) {
+		if (evt != null && evt.getCellType() == CellValueType.PERCENTAGE && evt.getEventType() == FormatterEventType.UNIT_CHANGED) {
+			String labelProbabilityValue = String.format(Locale.ENGLISH, i18n.getString("TestStatisticDialog.probability.label", "Probability value \u03B1 [%s]:"), this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation());
+			String labelTestPower        = String.format(Locale.ENGLISH, i18n.getString("TestStatisticDialog.testpower.label", "Power of test 1 - \u03B2 [%s]:"), this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation());
+
+			this.probabilityValueLabel.setText(labelProbabilityValue);
+			this.testPowerLabel.setText(labelTestPower);
+		}
 	}
 }

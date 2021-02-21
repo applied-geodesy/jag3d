@@ -70,11 +70,11 @@
 			</#if>
 			
 			<#if group.type == "GNSS2D" || group.type == "GNSS3D">
-				<th><#outputformat "plainText">r<sub>Y</sub></#outputformat></th>
-				<th><#outputformat "plainText">r<sub>X</sub></#outputformat></th>
+				<th><#outputformat "plainText">r<sub>Y</sub><span class="unit">${unit_abbr_percentage}</span></#outputformat></th>
+				<th><#outputformat "plainText">r<sub>X</sub><span class="unit">${unit_abbr_percentage}</span></#outputformat></th>
 			</#if>
 			<#if group.type == "GNSS1D" || group.type == "GNSS3D">
-				<th><#outputformat "plainText">r<sub>Z</sub></#outputformat></th>
+				<th><#outputformat "plainText">r<sub>Z</sub><span class="unit">${unit_abbr_percentage}</span></#outputformat></th>
 			</#if>
 			
 			<#if group.type == "GNSS2D" || group.type == "GNSS3D">
@@ -112,7 +112,7 @@
 			</#if>
 		<#else>
 			<th><#outputformat "plainText">&sigma;<span class="unit">${apply_angle_unit?then(unit_abbr_angle_uncertainty, unit_abbr_length_uncertainty)}</span></#outputformat></th>
-			<th><#outputformat "plainText">r</#outputformat></th>
+			<th><#outputformat "plainText">r<span class="unit">${unit_abbr_percentage}</span></#outputformat></th>
 			<th><#outputformat "plainText">&epsilon;<span class="unit">${apply_angle_unit?then(unit_abbr_angle_residual, unit_abbr_length_residual)}</span></#outputformat></th>
 			<th><#outputformat "plainText">&nabla;<span class="unit">${apply_angle_unit?then(unit_abbr_angle_residual, unit_abbr_length_residual)}</span></#outputformat></th>
 			<th><#outputformat "plainText">EP<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>

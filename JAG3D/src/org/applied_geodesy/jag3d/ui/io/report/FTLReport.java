@@ -213,6 +213,11 @@ public class FTLReport {
 				keyDigits = "digits_scale_uncertainty";
 				keyUnit   = "unit_abbr_scale_uncertainty";
 				break;
+				
+			case PERCENTAGE:
+				keyDigits = "digits_percentage";
+				keyUnit   = "unit_abbr_percentage";
+				break;
 
 			case STATISTIC:
 				keyDigits = "digits_statistic";
@@ -381,8 +386,8 @@ public class FTLReport {
 		ResultSet rs = stmt.executeQuery();
 		if (rs.next()) {
 			TestStatisticType type = TestStatisticType.getEnumByValue(rs.getInt("type"));
-			double probabilityValue = rs.getDouble("probability_value");
-			double powerOfTest      = rs.getDouble("power_of_test");
+			double probabilityValue = options.convertPercentToView(rs.getDouble("probability_value"));
+			double powerOfTest      = options.convertPercentToView(rs.getDouble("power_of_test"));
 			List<HashMap<String, Number>> testStatistics = new ArrayList<HashMap<String, Number>>();
 			stmt = this.dataBase.getPreparedStatement(sqlTestStatistic);
 			rs = stmt.executeQuery();
@@ -392,7 +397,15 @@ public class FTLReport {
 				HashMap<String, Number> h = new HashMap<String, Number>();
 				for(int i = 1; i <= cnt; i++) {
 					String key = rsmd.getColumnLabel(i);
-					h.put(key, rs.getDouble(i) );
+					switch(key) {
+					case "probability_value":
+					case "power_of_test":
+						h.put(key, options.convertPercentToView(rs.getDouble(i)) );
+						break;
+					default:
+						h.put(key, rs.getDouble(i) );
+						break;
+					}
 				}					
 				testStatistics.add(h);
 			}
@@ -630,6 +643,10 @@ public class FTLReport {
 				statistics.put("value",   options.convertLengthResidualToView(rs.getDouble("value")));
 				statistics.put("average", options.convertLengthResidualToView(rs.getDouble("average")));
 			}
+			else if (tableRowHighlightType == TableRowHighlightType.REDUNDANCY) {
+				statistics.put("value",   options.convertPercentToView(rs.getDouble("value")));
+				statistics.put("average", options.convertPercentToView(rs.getDouble("average")));
+			}
 			else {
 				statistics.put("value",   rs.getDouble("value"));
 				statistics.put("average", rs.getDouble("average"));
@@ -673,12 +690,12 @@ public class FTLReport {
 			return part;
 		
 		part.put("type", observationType.name());
-		part.put("left_boundary",  tableRowHighlightType == TableRowHighlightType.INFLUENCE_ON_POSITION ? options.convertLengthResidualToView(range[0]) : range[0]);
-		part.put("right_boundary", tableRowHighlightType == TableRowHighlightType.INFLUENCE_ON_POSITION ? options.convertLengthResidualToView(range[1]) : range[1]);
+		part.put("left_boundary",  tableRowHighlightType == TableRowHighlightType.INFLUENCE_ON_POSITION ? options.convertLengthResidualToView(range[0]) : options.convertPercentToView(range[0]));
+		part.put("right_boundary", tableRowHighlightType == TableRowHighlightType.INFLUENCE_ON_POSITION ? options.convertLengthResidualToView(range[1]) : options.convertPercentToView(range[1]));
 		
 		if (tableRowHighlightType == TableRowHighlightType.P_PRIO_VALUE) {
-			range[0] = Math.log(range[0] / 100.0);
-			range[1] = Math.log(range[1] / 100.0);
+			range[0] = Math.log(range[0]);
+			range[1] = Math.log(range[1]);
 		}
 
 		String sql = "SELECT COUNT(*) AS \"value\" FROM \"ObservationApriori\" "
@@ -836,7 +853,13 @@ public class FTLReport {
 					case "first_principal_component_y":
 					case "first_principal_component_z":
 						h.put(key, options.convertLengthResidualToView(pointSet.getDouble(i)));
-						break;				
+						break;	
+						
+					case "redundancy_x":
+					case "redundancy_y":
+					case "redundancy_z":
+						h.put(key, options.convertPercentToView(pointSet.getDouble(i)));
+						break;
 
 					case "significant":
 						h.put(key, pointSet.getBoolean(i));
@@ -983,6 +1006,11 @@ public class FTLReport {
 					case "minimal_detectable_bias_x":
 					case "minimal_detectable_bias_y":
 						h.put(key, options.convertAngleResidualToView(verticalDeflectionSet.getDouble(i)));
+						break;
+						
+					case "redundancy_x":
+					case "redundancy_y":
+						h.put(key, options.convertPercentToView(verticalDeflectionSet.getDouble(i)));
 						break;
 
 					default: // Statistics
@@ -1138,6 +1166,10 @@ public class FTLReport {
 					case "influence_on_position":
 					case "influence_on_network_distortion":
 						h.put(key, options.convertLengthResidualToView(observationSet.getDouble(i)));
+						break;
+						
+					case "redundancy":
+						h.put(key, options.convertPercentToView(observationSet.getDouble(i)));
 						break;
 
 					default: // Point names, statistics, etc.
@@ -1298,6 +1330,12 @@ public class FTLReport {
 					case "influence_on_position_z":
 					case "influence_on_network_distortion":
 						h.put(key, options.convertLengthResidualToView(observationSet.getDouble(i)));
+						break;
+						
+					case "redundancy_x":
+					case "redundancy_y":
+					case "redundancy_z":
+						h.put(key, options.convertPercentToView(observationSet.getDouble(i)));
 						break;
 
 					default: // Point names, statistics, etc.

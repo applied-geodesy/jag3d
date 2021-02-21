@@ -204,6 +204,11 @@ public class FTLReport {
 				keyDigits = "digits_vector_uncertainty";
 				keyUnit   = "unit_abbr_vector_uncertainty";
 				break;
+				
+			case PERCENTAGE:
+				keyDigits = "digits_percentage";
+				keyUnit   = "unit_abbr_percentage";
+				break;
 
 			case STATISTIC:
 				keyDigits = "digits_statistic";
@@ -255,8 +260,8 @@ public class FTLReport {
 		double probabilityValue = testStatisticDefinition.getProbabilityValue();
 		
 		this.setParam("test_statistic_method", type.name());
-		this.setParam("test_statistic_probability_value", probabilityValue);
-		this.setParam("test_statistic_power_of_test", powerOfTest);
+		this.setParam("test_statistic_probability_value", options.convertPercentToView(probabilityValue));
+		this.setParam("test_statistic_power_of_test",     options.convertPercentToView(powerOfTest));
 		
 		List<HashMap<String, Number>> testStatistics = new ArrayList<HashMap<String, Number>>();
 		TestStatisticParameterSet[] testStatisticParameterSets = this.adjustment.getTestStatisticParameters().getTestStatisticParameterSets();
@@ -264,8 +269,8 @@ public class FTLReport {
 			HashMap<String, Number> h = new HashMap<String, Number>();
 			h.put("d1", testStatisticParameterSet.getNumeratorDof());
 			h.put("d2", testStatisticParameterSet.getDenominatorDof());
-			h.put("probability_value", testStatisticParameterSet.getProbabilityValue());
-			h.put("power_of_test", testStatisticParameterSet.getPowerOfTest());
+			h.put("probability_value", options.convertPercentToView(testStatisticParameterSet.getProbabilityValue()));
+			h.put("power_of_test",     options.convertPercentToView(testStatisticParameterSet.getPowerOfTest()));
 			h.put("quantile", testStatisticParameterSet.getQuantile());
 			h.put("p_value", testStatisticParameterSet.getLogarithmicProbabilityValue());
 			h.put("non_centrality_parameter", testStatisticParameterSet.getNoncentralityParameter());
@@ -437,8 +442,8 @@ public class FTLReport {
 				h.put("gross_error_x", grossErrorX);
 				h.put("gross_error_y", grossErrorY);
 				
-				h.put("redundancy_x", redundancyX);
-				h.put("redundancy_y", redundancyY);
+				h.put("redundancy_x", options.convertPercentToView(redundancyX));
+				h.put("redundancy_y", options.convertPercentToView(redundancyY));
 				
 				redundancyGroupX += redundancyX;
 				redundancyGroupY += redundancyY;
@@ -465,7 +470,7 @@ public class FTLReport {
 				
 				h.put("gross_error_z", grossErrorZ);
 				
-				h.put("redundancy_z", redundancyZ);
+				h.put("redundancy_z", options.convertPercentToView(redundancyZ));
 				
 				redundancyGroupZ += redundancyZ;
 				maxGrossErrorGroupZ = Math.abs(grossErrorZ) > Math.abs(maxGrossErrorGroupZ) ? grossErrorZ : maxGrossErrorGroupZ;

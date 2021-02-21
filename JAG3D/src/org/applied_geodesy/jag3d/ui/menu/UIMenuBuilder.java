@@ -110,7 +110,10 @@ public class UIMenuBuilder {
 						MenuItemType.EXIT,
 						MenuItemType.RECENTLY_USED,
 						MenuItemType.ABOUT,
-						MenuItemType.CHECK_UPDATES
+						MenuItemType.CHECK_UPDATES,
+						MenuItemType.MODULE_GEOTRA,
+						MenuItemType.MODULE_COORDTRANS,
+						MenuItemType.MODULE_JUNIFORM
 						)
 				);
 

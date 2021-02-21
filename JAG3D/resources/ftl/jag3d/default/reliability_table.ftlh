@@ -13,8 +13,8 @@
 				<caption><#outputformat "plainText">${table_caption_map['redundancy']}</#outputformat></caption>
 				<#assign group           = reliability_summary.redundancy>
 				<#assign df_format       = df_statistic>
-				<#assign label_value     = "r<sub>min</sub>">
-				<#assign label_avg_value = "r<sub>avg</sub>">
+				<#assign label_value     = "r<sub>min</sub> [${unit_abbr_percentage}]">
+				<#assign label_avg_value = "r<sub>avg</sub> [${unit_abbr_percentage}]">
 				<#include "reliability_thead.ftlh" parse=true>
 				
 				<#list observation_types as observation_type>

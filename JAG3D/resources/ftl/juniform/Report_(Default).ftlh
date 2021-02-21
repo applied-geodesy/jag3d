@@ -18,6 +18,7 @@
 <#assign df_vector_residual     = "${digits_vector_residual???then(digits_vector_residual, 0.00)};;       roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
 <#assign df_vector_uncertainty  = "${digits_vector_uncertainty???then(digits_vector_uncertainty, 0.00)};; roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
 
+<#assign df_percentage         = "${digits_percentage???then(digits_percentage, 0.00)};; roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
 <#assign df_statistic          = "${digits_statistic???then(digits_statistic, 0.00)};;  roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
 <#assign df_double             = "${digits_double???then(digits_double, 0.00000)};;  roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
 
@@ -34,9 +35,11 @@
 <#assign unit_abbr_scale_residual     = "${unit_abbr_scale_residual???then(unit_abbr_scale_residual, '\xfffd')}">
 <#assign unit_abbr_scale_uncertainty  = "${unit_abbr_scale_uncertainty???then(unit_abbr_scale_uncertainty, '\xfffd')}">
 
-<#assign unit_abbr_vector              = "${unit_abbr_vector???then(unit_abbr_vector, '\xfffd')}">
-<#assign unit_abbr_vector_residual     = "${unit_abbr_vector_residual???then(unit_abbr_vector_residual, '\xfffd')}">
-<#assign unit_abbr_vector_uncertainty  = "${unit_abbr_vector_uncertainty???then(unit_abbr_vector_uncertainty, '\xfffd')}">
+<#assign unit_abbr_vector             = "${unit_abbr_vector???then(unit_abbr_vector, '\xfffd')}">
+<#assign unit_abbr_vector_residual    = "${unit_abbr_vector_residual???then(unit_abbr_vector_residual, '\xfffd')}">
+<#assign unit_abbr_vector_uncertainty = "${unit_abbr_vector_uncertainty???then(unit_abbr_vector_uncertainty, '\xfffd')}">
+
+<#assign unit_abbr_percentage         = "${unit_abbr_percentage???then(unit_abbr_percentage, '\xfffd')}">
 
 <#macro printFormattedNumber value format>
 	<#if format == df_angle && sexagesimal_angle?? || format == df_angle_residual && sexagesimal_angle_residual?? || format == df_angle_uncertainty && sexagesimal_angle_uncertainty??>

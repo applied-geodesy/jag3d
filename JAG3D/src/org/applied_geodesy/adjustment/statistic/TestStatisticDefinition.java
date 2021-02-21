@@ -34,8 +34,8 @@ public class TestStatisticDefinition {
 	
 	public TestStatisticDefinition(TestStatisticType testStatisticType, double probabilityValue, double powerOfTest, boolean familywiseErrorRate) {
 		this.testStatisticType = testStatisticType == null ? TestStatisticType.BAARDA_METHOD : testStatisticType;
-		this.probabilityValue  = probabilityValue > 0 && probabilityValue < 100 ? probabilityValue : DefaultValue.getProbabilityValue();
-		this.powerOfTest       = powerOfTest > 0 && powerOfTest < 100 ? powerOfTest : DefaultValue.getPowerOfTest();
+		this.probabilityValue  = probabilityValue > 0 && probabilityValue < 1 ? probabilityValue : DefaultValue.getProbabilityValue();
+		this.powerOfTest       = powerOfTest > 0 && powerOfTest < 1 ? powerOfTest : DefaultValue.getPowerOfTest();
 		this.familywiseErrorRate = familywiseErrorRate;
 	}
 

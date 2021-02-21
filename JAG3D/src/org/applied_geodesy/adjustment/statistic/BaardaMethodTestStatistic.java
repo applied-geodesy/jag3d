@@ -59,7 +59,7 @@ public class BaardaMethodTestStatistic extends TestStatistic {
 				double quantile = this.n1 == n2 && Double.isInfinite(this.m1) ? TestStatistic.getQuantile(n2, this.alpha) : TestStatistic.getQuantileViaNCP(n2, this.ncp, this.beta);
 				double logP     = TestStatistic.getLogarithmicProbabilityValue(quantile, n2);
 				double alpha    = this.n1 == n2 && Double.isInfinite(this.m1) ? this.alpha : TestStatistic.getProbabilityValue(quantile, n2);				
-				alpha = alpha <= 0.0 ? Constant.EPS : alpha >= 100.0 ? 100.0-Math.sqrt(Constant.EPS) : alpha;
+				alpha = alpha <= 0.0 ? Constant.EPS : alpha >= 1.0 ? 1.0-Math.sqrt(Constant.EPS) : alpha;
 				parameter.setProbabilityValue(alpha);
 				parameter.setQuantile(quantile);
 				parameter.setLogarithmicProbabilityValue(logP);
@@ -68,7 +68,7 @@ public class BaardaMethodTestStatistic extends TestStatistic {
 				double quantile = this.n1 == n2 && this.m1 == m2 ? TestStatistic.getQuantile(n2, m2, this.alpha) : TestStatistic.getQuantileViaNCP(n2, m2, this.ncp, this.beta);
 				double logP     = TestStatistic.getLogarithmicProbabilityValue(quantile, n2, m2);
 				double alpha    = this.n1 == n2 && this.m1 == m2 ? this.alpha : TestStatistic.getProbabilityValue(quantile, n2, m2);
-				alpha = alpha <= 0.0 ? Constant.EPS : alpha >= 100.0 ? 100.0-Math.sqrt(Constant.EPS) : alpha;
+				alpha = alpha <= 0.0 ? Constant.EPS : alpha >= 1.0 ? 1.0-Math.sqrt(Constant.EPS) : alpha;
 				parameter.setProbabilityValue(alpha);
 				parameter.setQuantile(quantile);
 				parameter.setLogarithmicProbabilityValue(logP);
@@ -80,7 +80,7 @@ public class BaardaMethodTestStatistic extends TestStatistic {
 		
 	public static void main(String args[]) {
 		int dof = 100;
-		BaardaMethodTestStatistic bMeth = new BaardaMethodTestStatistic(1, 0.1, 80.0);
+		BaardaMethodTestStatistic bMeth = new BaardaMethodTestStatistic(1, 0.001, 0.8);
 		
 		TestStatisticParameterSet set[] = new TestStatisticParameterSet[] {
 				new TestStatisticParameterSet(1, Double.POSITIVE_INFINITY),

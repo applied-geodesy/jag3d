@@ -25,7 +25,7 @@ public class UnadjustedTestStatitic extends TestStatistic {
 	private final double alpha, beta;
 	
 	public UnadjustedTestStatitic() {
-		this(0.1, 80.0);
+		this(0.001, 0.8);
 	}
 	
 	public UnadjustedTestStatitic(double alpha, double beta) {
@@ -46,16 +46,16 @@ public class UnadjustedTestStatitic extends TestStatistic {
 			parameter.setProbabilityValue(this.alpha);
 			parameter.setPowerOfTest(this.beta);
 			if (Double.isInfinite(m2)) {
-				double quantile	= TestStatistic.getQuantile(n2, alpha);
-				double ncp      = TestStatistic.getNoncentralityParameter(n2, alpha, this.beta);
+				double quantile	= TestStatistic.getQuantile(n2, this.alpha);
+				double ncp      = TestStatistic.getNoncentralityParameter(n2, this.alpha, this.beta);
 				double logP     = TestStatistic.getLogarithmicProbabilityValue(quantile, n2);
 				parameter.setQuantile(quantile);
 				parameter.setNoncentralityParameter(ncp);
 				parameter.setLogarithmicProbabilityValue(logP);
 			}
 			else {
-				double quantile	= TestStatistic.getQuantile(n2, m2, alpha);
-				double ncp      = TestStatistic.getNoncentralityParameter(n2, m2, alpha, this.beta);
+				double quantile	= TestStatistic.getQuantile(n2, m2, this.alpha);
+				double ncp      = TestStatistic.getNoncentralityParameter(n2, m2, this.alpha, this.beta);
 				double logP     = TestStatistic.getLogarithmicProbabilityValue(quantile, n2, m2);
 				parameter.setQuantile(quantile);
 				parameter.setNoncentralityParameter(ncp);
@@ -68,7 +68,7 @@ public class UnadjustedTestStatitic extends TestStatistic {
 	public static void main(String args[]) {
 		int dof = 10000000;
 
-		UnadjustedTestStatitic bMeth = new UnadjustedTestStatitic(0.1, 80.0);
+		UnadjustedTestStatitic bMeth = new UnadjustedTestStatitic(0.001, 0.8);
 		
 		TestStatisticParameterSet set[] = new TestStatisticParameterSet[] {
 				new TestStatisticParameterSet(1, Double.POSITIVE_INFINITY),
