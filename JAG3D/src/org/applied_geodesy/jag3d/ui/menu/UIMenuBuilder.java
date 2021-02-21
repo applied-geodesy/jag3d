@@ -254,10 +254,12 @@ public class UIMenuBuilder {
 	private void createAnalysisMenu(Menu parentMenu) {
 		MenuItem congruentPointItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.congruentpoint.label", "Congr_uent points"), true, MenuItemType.CONGRUENT_POINT, new KeyCodeCombination(KeyCode.P, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 		MenuItem rowHighlightItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.highlight.label", "Ro_w highlighting"), true, MenuItemType.HIGHLIGHT_TABLE_ROWS, new KeyCodeCombination(KeyCode.H, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem analysisChartsItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.chart.label", "Analysis charts"), true, MenuItemType.ANALYSIS_CHARTS, new KeyCodeCombination(KeyCode.Y, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 				
 		parentMenu.getItems().addAll(
 				congruentPointItem,
-				rowHighlightItem
+				rowHighlightItem,
+				analysisChartsItem
 				);
 	}
 
