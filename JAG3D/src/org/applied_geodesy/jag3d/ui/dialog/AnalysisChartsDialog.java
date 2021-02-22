@@ -44,8 +44,11 @@ import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -71,6 +74,14 @@ public class AnalysisChartsDialog {
 		public void changed(ObservableValue<? extends TerrestrialObservationType> observable, TerrestrialObservationType oldValue, TerrestrialObservationType newValue) {
 			if (newValue != null)
 				updateChartData(newValue);
+		}
+	}
+	
+	private class ProbabilityDensityFunctionChangeListener implements ChangeListener<Boolean> {
+		@Override
+		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+			TerrestrialObservationType type = terrestrialObservationTypeComboBox.getValue();
+			updateChartData(type);
 		}
 	}
 	
@@ -107,6 +118,7 @@ public class AnalysisChartsDialog {
 	private Dialog<Void> dialog = null;
 	private Window window;
 	private ComboBox<TerrestrialObservationType> terrestrialObservationTypeComboBox;
+	private CheckBox gaussianProbabilityDensityFunctionCheckBox, kernelDensityEstimationCheckBox;
 	private AreaChart<Number,Number> histogramChart;
 	private AnalysisChartsDialog() {}
 
@@ -151,6 +163,21 @@ public class AnalysisChartsDialog {
 	
 	private Node createPane() {
 		BorderPane borderPane = new BorderPane();
+				
+		this.gaussianProbabilityDensityFunctionCheckBox = this.createCheckBox(i18n.getString("ResidualAnalysisDialog.histogram.probability_density_function.label", "Gaussian probability density function"), i18n.getString("ResidualAnalysisDialog.histogram.probability_density_function.tooltip", "If selected, the probability density function of the standard normal distribution is estimated"));
+		this.kernelDensityEstimationCheckBox = this.createCheckBox(i18n.getString("ResidualAnalysisDialog.histogram.kernel_density_estimation.label", "Kernel density estimation"), i18n.getString("ResidualAnalysisDialog.histogram.kernel_density_estimation.tooltip", "If selected, the probability density function is estimated by a kernel density estimation"));
+		this.gaussianProbabilityDensityFunctionCheckBox.setSelected(true);
+		this.kernelDensityEstimationCheckBox.setSelected(true);
+		HBox cbNode = new HBox(10);
+		Region regionLeft  = new Region();
+		Region regionRight = new Region();
+        HBox.setHgrow(regionLeft,  Priority.ALWAYS);
+        HBox.setHgrow(regionRight, Priority.ALWAYS);
+		cbNode.setPadding(new Insets(5, 10, 5, 10));
+		cbNode.getChildren().addAll(regionLeft, this.gaussianProbabilityDensityFunctionCheckBox, this.kernelDensityEstimationCheckBox, regionRight);
+		ProbabilityDensityFunctionChangeListener probabilityDensityFunctionChangeListener = new ProbabilityDensityFunctionChangeListener();
+		this.gaussianProbabilityDensityFunctionCheckBox.selectedProperty().addListener(probabilityDensityFunctionChangeListener);
+		this.kernelDensityEstimationCheckBox.selectedProperty().addListener(probabilityDensityFunctionChangeListener);
 		
 		this.terrestrialObservationTypeComboBox = this.createTerrestrialObservationTypeComboBox(TerrestrialObservationType.ALL, i18n.getString("ResidualAnalysisDialog.observationtype.terrestrial.tooltip", "Set observational residual type"));
 		Region spacer = new Region();
@@ -163,6 +190,7 @@ public class AnalysisChartsDialog {
 		
 		borderPane.setTop(hbox);
 		borderPane.setCenter(this.histogramChart);
+		borderPane.setBottom(cbNode);
 		
 		this.terrestrialObservationTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new TerrestrialObservationTypeChangeListener());
 		this.options.addFormatterChangedListener(new TickFormatChangedListener());
@@ -256,6 +284,19 @@ public class AnalysisChartsDialog {
 		return typeComboBox;
 	}
 	
+	private CheckBox createCheckBox(String title, String tooltip) {
+		Label label = new Label(title);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setPadding(new Insets(0,0,0,3));
+		CheckBox checkBox = new CheckBox();
+		checkBox.setGraphic(label);
+		checkBox.setTooltip(new Tooltip(tooltip));
+		checkBox.setMinHeight(Control.USE_PREF_SIZE);
+		checkBox.setMaxHeight(Double.MAX_VALUE);
+		return checkBox;
+	}
+	
 	private void updateChartData(TerrestrialObservationType terrestrialObservationType) {
 		try {
 			terrestrialObservationType = terrestrialObservationType == null ? TerrestrialObservationType.ALL : terrestrialObservationType;
@@ -266,71 +307,30 @@ public class AnalysisChartsDialog {
 
 			if (normalizedResiduals == null || normalizedResiduals.isEmpty())
 				return;
-
-			int length = normalizedResiduals.size();
+			
+			// Sort data
 			Collections.sort(normalizedResiduals);
 
-			double binWidth = this.getBinWidth(normalizedResiduals);
-			double minValue = normalizedResiduals.get(0);
-			double maxValue = normalizedResiduals.get(length - 1);
-			int numberOfBins = Math.max((int)Math.ceil((maxValue - minValue) / binWidth), 1);
-
-			int bins[] = new int[numberOfBins];
-
-			for (int i = 0, j = 0; i < length; i++) {
-				if (normalizedResiduals.get(i) <= (minValue + (j+1) * binWidth) && j < numberOfBins) {
-					bins[j]++;
-				}
-				else {
-					do {
-						j++;
-					}
-					while (!(normalizedResiduals.get(i) <= (minValue + (j+1) * binWidth) && j < numberOfBins));
-					
-					if (j < numberOfBins)
-						bins[j]++;
-				}
-			}
-
-			double xRange = Math.ceil(Math.max(4, Math.max(Math.abs(minValue), Math.abs(maxValue))) + 0.5);
-			double yRange = 0.0;
-
-			for (int i=0; i<bins.length; i++) {       	
-				if (bins[i] == 0)
-					continue;
-
-				double width = minValue + i * binWidth;
-				double pdf   = (double)bins[i]/(double)length/binWidth;
-				XYChart.Series<Number, Number> bar = new XYChart.Series<Number, Number>();
-				bar.getData().add(new XYChart.Data<Number, Number>(width,            0));
-				bar.getData().add(new XYChart.Data<Number, Number>(width,            pdf));
-				bar.getData().add(new XYChart.Data<Number, Number>(width + binWidth, pdf));
-				bar.getData().add(new XYChart.Data<Number, Number>(width + binWidth, 0));
-
-				this.histogramChart.getData().add(bar);
-				Node line = bar.getNode().lookup(".chart-series-area-line");
-				line.setStyle("-fx-stroke: rgba(75, 75, 75, 1); -fx-stroke-width: 1.0px;");  
-				Node area = bar.getNode().lookup(".chart-series-area-fill");
-				area.setStyle("-fx-fill: rgba(75, 75, 75, 0.25);");
-
-				yRange = Math.max(yRange, pdf);
-			}
-
-			XYChart.Series<Number, Number> probabilityDensity = new XYChart.Series<Number, Number>();
-			final double fac = 1.0/Math.sqrt(2.0*Math.PI);
-			for (double i = -4; i <= 4; i += 0.01) {
-				double pdf = fac * Math.exp(-0.5 * i*i);
-				probabilityDensity.getData().add(new XYChart.Data<Number, Number>(i,  pdf));
-				yRange = Math.max(yRange, pdf);
-			}
-			yRange = Math.ceil(yRange * 10) / 10;
-			this.histogramChart.getData().add(probabilityDensity);
+			double xRange = 0, yRange = 0; 
+			double range[] = this.plotHistogram(this.histogramChart, normalizedResiduals);
+			xRange = range[0];
+			yRange = range[1];
 			
-			Node line = probabilityDensity.getNode().lookup(".chart-series-area-line"); 
-			line.setStyle("-fx-stroke: rgba(200, 0, 0, 1); -fx-stroke-width: 2.5px;");  
-			Node area = probabilityDensity.getNode().lookup(".chart-series-area-fill");
-			area.setStyle("-fx-fill: rgba(200, 0, 0, 0);"); 
+			if (this.gaussianProbabilityDensityFunctionCheckBox.isSelected()) {
+				range = this.plotGaussianProbabilityDensityFunction(this.histogramChart);
+				xRange = Math.max(xRange, range[0]);
+				yRange = Math.max(yRange, range[1]);
+			}
 			
+			if (this.kernelDensityEstimationCheckBox.isSelected()) {
+				range = this.plotKernelDensityEstimation(this.histogramChart, normalizedResiduals);
+				xRange = Math.max(xRange, range[0]);
+				yRange = Math.max(yRange, range[1]);
+			}
+			
+			xRange = Math.ceil(xRange + 0.05);
+			yRange = Math.ceil((yRange + 0.005) * 10) / 10;
+
 			NumberAxis xAxis = (NumberAxis)this.histogramChart.getXAxis();
 			NumberAxis yAxis = (NumberAxis)this.histogramChart.getYAxis();
 			
@@ -355,6 +355,144 @@ public class AnalysisChartsDialog {
 		}
 	}
 	
+	private double[] plotHistogram(AreaChart<Number,Number> areaChart, List<Double> data) {
+		int length = data.size();
+		
+		double iqr = this.getInterQuartileRange(data);
+		double binWidth = 2.0 * iqr * Math.pow(length, -1.0/3.0);
+		double minValue = data.get(0);
+		double maxValue = data.get(length - 1);
+		int numberOfBins = Math.max((int)Math.ceil((maxValue - minValue) / binWidth), 1);
+
+		int bins[] = new int[numberOfBins];
+
+		for (int i = 0, j = 0; i < length; i++) {
+			if (data.get(i) <= (minValue + (j+1) * binWidth) && j < numberOfBins) {
+				bins[j]++;
+			}
+			else {
+				do {
+					j++;
+				}
+				while (!(data.get(i) <= (minValue + (j+1) * binWidth) && j < numberOfBins));
+				
+				if (j < numberOfBins)
+					bins[j]++;
+			}
+		}
+
+		double yRange = 0.0;
+		
+		for (int i=0; i<bins.length; i++) {       	
+			if (bins[i] == 0)
+				continue;
+
+			double width = minValue + i * binWidth;
+			double pdf   = (double)bins[i]/(double)length/binWidth;
+			XYChart.Series<Number, Number> bar = new XYChart.Series<Number, Number>();
+			bar.getData().add(new XYChart.Data<Number, Number>(width,            0));
+			bar.getData().add(new XYChart.Data<Number, Number>(width,            pdf));
+			bar.getData().add(new XYChart.Data<Number, Number>(width + binWidth, pdf));
+			bar.getData().add(new XYChart.Data<Number, Number>(width + binWidth, 0));
+
+			this.histogramChart.getData().add(bar);
+			Node line = bar.getNode().lookup(".chart-series-area-line");
+			if (line != null)
+				line.setStyle("-fx-stroke: rgba(75, 75, 75, 1); -fx-stroke-width: 1.0px;");  
+			Node area = bar.getNode().lookup(".chart-series-area-fill");
+			if (area != null)
+				area.setStyle("-fx-fill: rgba(75, 75, 75, 0.25);");
+
+			yRange = Math.max(yRange, pdf);
+		}
+		
+		double xRange = Math.max(Math.abs(minValue), Math.abs(maxValue + binWidth));
+		
+		return new double[] {xRange, yRange};
+	}
+	
+	private double[] plotGaussianProbabilityDensityFunction(AreaChart<Number,Number> areaChart) {
+		double xRange = 0, yRange = 0;
+		XYChart.Series<Number, Number> probabilityDensity = new XYChart.Series<Number, Number>();
+		for (double x = -3.9; x <= 3.9; x += 0.01) {
+			double pdf = this.getStandardGaussian(x);
+			probabilityDensity.getData().add(new XYChart.Data<Number, Number>(x,  pdf));
+			xRange = Math.max(xRange, Math.abs(x));
+			yRange = Math.max(yRange, Math.abs(pdf));
+		}
+
+		areaChart.getData().add(probabilityDensity);
+		
+		Node line = probabilityDensity.getNode().lookup(".chart-series-area-line"); 
+		if (line != null)
+			line.setStyle("-fx-stroke: rgba(200, 0, 0, 1); -fx-stroke-width: 2.5px;");  
+		Node area = probabilityDensity.getNode().lookup(".chart-series-area-fill");
+		if (area != null)
+			area.setStyle("-fx-fill: rgba(200, 0, 0, 0);"); 
+		
+		return new double[] {xRange, yRange};
+	}
+	
+	private double[] plotKernelDensityEstimation(AreaChart<Number,Number> areaChart, List<Double> data) {
+		double iqr = this.getInterQuartileRange(data);
+		int length = data.size();
+		double mean = length > 1 ? this.getMean(data) : 0;
+		double std  = length > 1 ? Math.sqrt(this.getVariance(data, mean)) : 1.0;		
+		double minValue = data.get(0);
+		double maxValue = data.get(length - 1);
+		double xRange = 0, yRange = 0;
+		double bandWidth = 0.9 * Math.min(std, iqr / 1.34897950039216) * Math.pow(length, -1.0/5.0); // 1.34... == norminv(0.75)*2
+
+
+		XYChart.Series<Number, Number> kernelEstimation = new XYChart.Series<Number, Number>();
+		
+		double t = mean;
+		double yt = Double.MAX_VALUE;
+		double inc = 0.01;
+		int cnt = 0;
+		do {
+			yt = 0;
+			t = mean - (cnt++) * inc;  
+			for (int j = 0; j < length; j++) {
+				double x = (t - (data.get(j))) /  bandWidth;
+				double pdf = this.getStandardGaussian(x);
+				yt += pdf;
+			}
+			yt = 1.0/length/bandWidth * yt;
+			kernelEstimation.getData().add(new XYChart.Data<Number, Number>(t,  yt));
+			xRange = Math.max(xRange, Math.abs(t));
+			yRange = Math.max(yRange, Math.abs(yt));	
+		} 
+		while( Math.abs(yt) > 0.0005 || t > minValue );
+		
+		t = mean;
+		yt = Double.MAX_VALUE;
+		cnt = 0;
+		do {
+			yt = 0;
+			t = mean + (++cnt) * inc;  
+			for (int j = 0; j < length; j++) {
+				double x = (t - (data.get(j))) /  bandWidth;
+				double pdf = this.getStandardGaussian(x);
+				yt += pdf;
+			}
+			yt = 1.0/length/bandWidth * yt;
+			kernelEstimation.getData().add(new XYChart.Data<Number, Number>(t,  yt));
+			xRange = Math.max(xRange, Math.abs(t));
+			yRange = Math.max(yRange, Math.abs(yt));	
+		} 
+		while( Math.abs(yt) > 0.0005 || t < maxValue);
+				
+		areaChart.getData().add(kernelEstimation);
+		if (kernelEstimation.getNode() != null) {
+			Node line = kernelEstimation.getNode().lookup(".chart-series-area-line");
+			line.setStyle("-fx-stroke: rgba(0, 0, 150, 1); -fx-stroke-width: 2.5px; -fx-stroke-dash-array: 10 7 10 7;");  
+			Node area = kernelEstimation.getNode().lookup(".chart-series-area-fill");
+			area.setStyle("-fx-fill: rgba(0, 0, 0, 0);"); 
+		}
+		return new double[] {xRange, yRange};
+	}
+		
 	private ObservationType[] getSelectedObservationTypes(TerrestrialObservationType terrestrialObservationType) {
 		ObservationType observationTypes[];
 		if (terrestrialObservationType == TerrestrialObservationType.ALL) {
@@ -378,13 +516,16 @@ public class AnalysisChartsDialog {
 		try {
 			
 			List<ObservationType> projectObservationTypes = SQLManager.getInstance().getProjectObservationTypes();
-			TerrestrialObservationType[] terrestrialObservationTypeArray = new TerrestrialObservationType[projectObservationTypes.size() + 1];
+			TerrestrialObservationType[] terrestrialObservationTypeArray = new TerrestrialObservationType[projectObservationTypes.size() == 1 ? 1 : projectObservationTypes.size() + 1];
 			terrestrialObservationTypeArray[0] = TerrestrialObservationType.ALL;
-			int idx = 1;
-			for (ObservationType obsType : projectObservationTypes) {
-				TerrestrialObservationType type = TerrestrialObservationType.getEnumByValue(obsType);
-				if (type != null)
-					terrestrialObservationTypeArray[idx++] = type;
+
+			if (projectObservationTypes.size() > 1) {
+				int idx = 1;
+				for (ObservationType obsType : projectObservationTypes) {
+					TerrestrialObservationType type = TerrestrialObservationType.getEnumByValue(obsType);
+					if (type != null)
+						terrestrialObservationTypeArray[idx++] = type;
+				}
 			}
 
 			this.terrestrialObservationTypeComboBox.getSelectionModel().clearSelection();
@@ -406,17 +547,36 @@ public class AnalysisChartsDialog {
 		}
 	}
 	
-	private double getInterquartileRange(List<Double> values) {
+	private double getInterQuartileRange(List<Double> values) {
     	double n = values.size();
     	double q1 = values.get((int)Math.floor(0.25 * n));
     	double q3 = values.get((int)Math.floor(0.75 * n));
     	
 		return q3 - q1;
     }
-    
-	private double getBinWidth(List<Double> values) {
-    	double iqr = this.getInterquartileRange(values);
-    	double n = values.size();
-    	return 2.0 * iqr / Math.pow(n, 1.0/3.0);
-    }
+	
+	private double getStandardGaussian(double x) {
+		final double fac = 1.0/Math.sqrt(2.0*Math.PI);
+		return fac * Math.exp(-0.5 * x*x);
+	}
+	
+	private double getVariance(List<Double> values, double mean) {
+		double var = 0;
+		double n = values.size();
+
+		for (Double value : values) {
+			double res = value.doubleValue() - mean;
+			var += res * res;
+		}
+		return var / n;
+	}
+	
+	private double getMean(List<Double> values) {
+		double mean = 0;
+		double n = values.size();
+		for (Double value : values) {
+			mean += value.doubleValue();
+		}
+		return mean = n > 0 ? mean / n : 0;
+	}
 }
