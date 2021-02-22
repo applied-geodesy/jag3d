@@ -37,6 +37,7 @@ import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dialog.AboutDialog;
+import org.applied_geodesy.jag3d.ui.dialog.AnalysisChartsDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ApproximationValuesDialog;
 import org.applied_geodesy.jag3d.ui.dialog.AverageDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ColumnImportDialog;
@@ -142,6 +143,7 @@ public class JAG3D extends Application {
 		ColumnImportDialog.setOwner(primaryStage);
 		TableRowHighlightDialog.setOwner(primaryStage);
 		ImportOptionDialog.setOwner(primaryStage);
+		AnalysisChartsDialog.setOwner(primaryStage);
 	}
 
 	@Override
@@ -293,7 +295,7 @@ public class JAG3D extends Application {
 	}
 
 	public static void main(String[] args) {
-		//Locale.setDefault(Locale.GERMAN);
+		//Locale.setDefault(Locale.ENGLISH);
 		//Locale.setDefault(new Locale("sr", "BA"));
 		try {
 			Logger[] loggers = new Logger[] {

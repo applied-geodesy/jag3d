@@ -4902,6 +4902,69 @@ public class SQLManager {
 			this.dataBase.setAutoCommit(true);
 		}
 	}
+	
+	public List<ObservationType> getProjectObservationTypes() throws SQLException {
+		List<ObservationType> observationTypes = new ArrayList<ObservationType>(ObservationType.values().length);
+
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return observationTypes;
+		
+		String sql = "SELECT DISTINCT \"type\" "
+				+ "FROM \"ObservationGroup\" "
+				+ "JOIN \"ObservationApriori\" "
+				+ "ON \"ObservationGroup\".\"id\" = \"ObservationApriori\".\"group_id\" AND \"ObservationApriori\".\"enable\" = TRUE " 
+				+ "JOIN \"ObservationAposteriori\" "
+				+ "ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
+				+ "WHERE \"ObservationGroup\".\"enable\" = TRUE";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			int id = rs.getInt("type");
+			ObservationType observationType = ObservationType.getEnumByValue(id);
+			if (observationType == null)
+				continue;
+
+			observationTypes.add(observationType);
+		}
+
+		return observationTypes;
+	}
+	
+	public List<Double> getNormalizedResiduals(ObservationType[] observationTypes) throws SQLException {
+		List<Double> normalizedResiduals = new ArrayList<Double>();
+		
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return normalizedResiduals;
+		
+		StringBuilder inArrayValues = new StringBuilder("?");
+		for (int i = 1; i < observationTypes.length; i++)
+			inArrayValues.append(",?");
+		
+		String sql = "SELECT SIGN(\"residual\") * SQRT(\"t_prio\") AS \"normalized_residual\" "
+				+ "FROM \"ObservationAposteriori\" JOIN \"ObservationApriori\" "
+				+ "ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
+				+ "JOIN \"ObservationGroup\" "
+				+ "ON \"ObservationGroup\".\"id\" = \"ObservationApriori\".\"group_id\" "
+				+ "WHERE \"ObservationGroup\".\"enable\" = TRUE "
+				+ "AND \"ObservationApriori\".\"enable\" = TRUE "
+				+ "AND \"type\" IN (" + inArrayValues + ") "
+				+ "ORDER BY \"normalized_residual\" ASC";
+
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		
+		int idx = 1;
+		for (ObservationType type : observationTypes) 
+			stmt.setInt(idx++, type.getId());
+		
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			double nv = rs.getDouble("normalized_residual");
+			normalizedResiduals.add(nv);
+		}
+
+		return normalizedResiduals;
+	}
 
 	public void executeStatement(String sql) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen() || sql == null || sql.isBlank() || sql.isEmpty())

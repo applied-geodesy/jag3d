@@ -26,6 +26,7 @@ import java.io.File;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.JAG3D;
 import org.applied_geodesy.jag3d.ui.dialog.AboutDialog;
+import org.applied_geodesy.jag3d.ui.dialog.AnalysisChartsDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ApproximationValuesDialog;
 import org.applied_geodesy.jag3d.ui.dialog.AverageDialog;
 import org.applied_geodesy.jag3d.ui.dialog.CongruentPointDialog;
@@ -182,6 +183,10 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 
 		case HIGHLIGHT_TABLE_ROWS:
 			TableRowHighlightDialog.showAndWait();
+			break;
+			
+		case ANALYSIS_CHARTS:
+			AnalysisChartsDialog.showAndWait();
 			break;
 			
 		case MODULE_COORDTRANS:
