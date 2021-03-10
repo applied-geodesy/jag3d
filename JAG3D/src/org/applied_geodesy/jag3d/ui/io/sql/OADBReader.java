@@ -441,6 +441,7 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		
 		String sql = "SELECT "
 				+ "\"start_point_name\", \"end_point_name\", \"enable\" "
+				+ "FROM \"CongruenceAnalysisPointPairApriori\" "
 				+ "WHERE \"group_id\" = ? "
 				+ "ORDER BY \"id\" ASC";
 
