@@ -71,6 +71,7 @@ public class DefaultColumnProperty {
 		case REDUNDANCY_X:
 		case REDUNDANCY_Y:
 		case REDUNDANCY_Z:
+		case NUMBER_OF_OBSERVATION:
 			
 		case P_VALUE_APRIORI:
 		case P_VALUE_APOSTERIORI:
@@ -132,6 +133,7 @@ public class DefaultColumnProperty {
 		case START_POINT_NAME:
 		case END_POINT_NAME:
 		case VARIANCE_COMPONENT_NAME:
+		case VARIANCE_COMPONENT_TYPE:
 		case PARAMETER_NAME:
 			value = -1;
 			try { value = Double.parseDouble(PROPERTIES.getProperty(columnContentType.name())); } catch (Exception e) {}
