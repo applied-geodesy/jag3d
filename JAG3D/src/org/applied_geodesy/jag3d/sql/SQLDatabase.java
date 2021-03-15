@@ -230,7 +230,7 @@ class SQLDatabase {
 		sqls.put(20210215.0003, "UPDATE \"TestStatisticDefinition\" SET \"probability_value\" = \"probability_value\" / 100, \"power_of_test\" = \"power_of_test\" / 100 WHERE \"power_of_test\" > 1;\r\n");
 		
 		// clear column properties
-		sqls.put(20210219.0001, "DELETE FROM \"TableColumnProperty\";\r\n");
+		sqls.put(20210312.0001, "DELETE FROM \"TableColumnProperty\";\r\n");
 		
 		return sqls;
 	}
