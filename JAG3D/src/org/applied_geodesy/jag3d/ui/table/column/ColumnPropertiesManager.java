@@ -58,9 +58,9 @@ public class ColumnPropertiesManager implements Iterable<Map.Entry<Pair<TableCon
 	}
 	
 	public void clearOrder() {
-		for (ObservableList<ColumnContentType> columnTypes : this.tableSortOrder.values())
-			columnTypes.clear();
 		for (ObservableList<ColumnContentType> columnTypes : this.tableColumnsOrder.values())
+			columnTypes.clear();
+		for (ObservableList<ColumnContentType> columnTypes : this.tableSortOrder.values())
 			columnTypes.clear();
 	}
 	

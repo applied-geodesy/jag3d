@@ -4573,11 +4573,11 @@ public class SQLManager {
 				return o1.compareTo(o2);
 			}
 		});
-		
+
 		String sql = "SELECT "
 				+ "\"table_type\", \"column_type\", \"width\", "
 				+ "\"sort_type\", \"sort_order\", \"column_order\" "
-				+ "FROM \"TableColumnProperty\" ORDER BY \"table_type\", \"column_order\" ASC";
+				+ "FROM \"TableColumnProperty\" ORDER BY \"table_type\" ASC, \"column_order\" ASC";
 		
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		ResultSet rs = stmt.executeQuery();
@@ -4598,7 +4598,8 @@ public class SQLManager {
 			columnProperty.setPrefWidth(width);
 			columnProperty.setSortType(sortType < 0 ? SortType.DESCENDING : SortType.ASCENDING);
 			columnProperty.setSortOrder(sortOrder);
-			
+			columnProperty.setColumnOrder(columnOrder);
+	
 			if (lastTableType != tableType) {
 				if (lastTableType != null) {
 					columnPropertiesManager.getSortOrder(lastTableType).setAll(sortOrderSequence.values());
@@ -4641,7 +4642,7 @@ public class SQLManager {
 				+ "\"vals\".\"column_order\" ";
 
 		boolean hasBatch = false;
-		
+
 		try {
 			ColumnPropertiesManager columnPropertiesManager = ColumnPropertiesManager.getInstance();
 			
