@@ -97,7 +97,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		String labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.label", "Component");
 		String tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.tooltip", "Type of estimated variance component");
 		CellValueType cellValueType = CellValueType.STRING;
-		ColumnContentType columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.VARIANCE_COMPONENT_NAME;
+		ColumnContentType columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.VARIANCE_COMPONENT_TYPE;
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		varianceComponentTypeColumn = this.<VarianceComponentType>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::varianceComponentTypeProperty, getVarianceComponentTypeCallback(), this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false, this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS); 
 		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
@@ -121,7 +121,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.number_of_observations.tooltip", "Number of observations");
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		cellValueType = CellValueType.INTEGER;
-		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.REDUNDANCY;
+		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.NUMBER_OF_OBSERVATION;
 		integerColumn = this.<Integer>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::numberOfObservationsProperty, getIntegerCallback(), ColumnType.VISIBLE, columnIndex, false, this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS); 
 		table.getColumns().add(integerColumn);
 
