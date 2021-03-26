@@ -110,6 +110,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		ADD,
 		REMOVE,
 		EXPORT,
+		MERGE,
 		SEARCH_AND_REPLACE,
 		CHANGE_TO_REFERENCE_POINT_GROUP,
 		CHANGE_TO_STOCHASTIC_POINT_GROUP,
@@ -577,6 +578,9 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 				case SEARCH_AND_REPLACE:
 					searchAndReplace(selectedItem);
 					break;
+				case MERGE:
+					mergeSelectedGroups(itemValue);
+					break;
 				default:
 					System.out.println(this.getClass().getSimpleName() + " : " + event);
 					break;
@@ -621,11 +625,15 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		exportItem.setUserData(ContextMenuType.EXPORT);
 		exportItem.setOnAction(listener);
 		
+		MenuItem mergeItem = new MenuItem(i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.merge", "Merge items"));
+		mergeItem.setUserData(ContextMenuType.MERGE);
+		mergeItem.setOnAction(listener);
+		
 		MenuItem searchAndReplaceItem = new MenuItem(i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.search_and_replace", "Search and replace"));
 		searchAndReplaceItem.setUserData(ContextMenuType.SEARCH_AND_REPLACE);
 		searchAndReplaceItem.setOnAction(listener);
 
-		this.contextMenu = new ContextMenu(addItem, removeItem, searchAndReplaceItem, exportItem);
+		this.contextMenu = new ContextMenu(addItem, removeItem, mergeItem, searchAndReplaceItem, exportItem);
 
 		if (TreeItemType.isPointTypeLeaf(itemType)) {
 			ToggleGroup pointTypeToogleGroup = new ToggleGroup();
@@ -954,6 +962,99 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		if (selectedItems != null && !selectedItems.isEmpty())
 			UITreeBuilder.getInstance().removeItems(new ArrayList<TreeItem<TreeItemValue>>(selectedItems));
 
+	}
+	
+	private void mergeSelectedGroups(TreeItemValue selectedItemValue) {
+		List<TreeItem<TreeItemValue>> selectedItems = this.getTreeView().getSelectionModel().getSelectedItems();
+		if (selectedItemValue != null && selectedItems != null && selectedItems.size() > 1) {
+			List<TreeItem<TreeItemValue>> removeItems = new ArrayList<TreeItem<TreeItemValue>>(selectedItems.size());
+			TreeItemType itemType = selectedItemValue.getItemType();
+			try {
+				if (TreeItemType.isPointTypeLeaf(itemType)) {
+					PointTreeItemValue referenceItemValue = (PointTreeItemValue)selectedItemValue;
+					List<PointTreeItemValue> treeItemValues = new ArrayList<PointTreeItemValue>(selectedItems.size());
+					for (TreeItem<TreeItemValue> treeItem : selectedItems) {
+						if (treeItem.getValue() == null || treeItem.getValue() == selectedItemValue || treeItem.getValue().getItemType() != itemType)
+							continue;
+
+						PointTreeItemValue itemValue = (PointTreeItemValue)treeItem.getValue();
+						if (itemValue.getDimension() != referenceItemValue.getDimension())
+							continue;
+
+						treeItemValues.add(itemValue);
+						removeItems.add(treeItem);
+					}
+
+					SQLManager.getInstance().mergeGroups(referenceItemValue, treeItemValues);
+				}
+
+				else if (TreeItemType.isObservationTypeLeaf(itemType) || TreeItemType.isGNSSObservationTypeLeaf(itemType)) {
+					ObservationTreeItemValue referenceItemValue = (ObservationTreeItemValue)selectedItemValue;
+					List<ObservationTreeItemValue> treeItemValues = new ArrayList<ObservationTreeItemValue>(selectedItems.size());
+					for (TreeItem<TreeItemValue> treeItem : selectedItems) {
+						if (treeItem.getValue() == null || treeItem.getValue() == selectedItemValue || treeItem.getValue().getItemType() != itemType)
+							continue;
+
+						ObservationTreeItemValue itemValue = (ObservationTreeItemValue)treeItem.getValue();
+						if (itemValue.getDimension() != referenceItemValue.getDimension())
+							continue;
+						
+						treeItemValues.add(itemValue);
+						removeItems.add(treeItem);
+					}
+
+					SQLManager.getInstance().mergeGroups(referenceItemValue, treeItemValues);
+				}
+				
+				else if (TreeItemType.isCongruenceAnalysisTypeLeaf(itemType)) {
+					CongruenceAnalysisTreeItemValue referenceItemValue = (CongruenceAnalysisTreeItemValue)selectedItemValue;
+					List<CongruenceAnalysisTreeItemValue> treeItemValues = new ArrayList<CongruenceAnalysisTreeItemValue>(selectedItems.size());
+					for (TreeItem<TreeItemValue> treeItem : selectedItems) {
+						if (treeItem.getValue() == null || treeItem.getValue() == selectedItemValue || treeItem.getValue().getItemType() != itemType)
+							continue;
+
+						CongruenceAnalysisTreeItemValue itemValue = (CongruenceAnalysisTreeItemValue)treeItem.getValue();
+						if (itemValue.getDimension() != referenceItemValue.getDimension())
+							continue;
+						
+						treeItemValues.add(itemValue);
+						removeItems.add(treeItem);
+					}
+
+					SQLManager.getInstance().mergeGroups(referenceItemValue, treeItemValues);
+				}
+
+				else if (TreeItemType.isVerticalDeflectionTypeLeaf(itemType)) {
+					VerticalDeflectionTreeItemValue referenceItemValue = (VerticalDeflectionTreeItemValue)selectedItemValue;
+					List<VerticalDeflectionTreeItemValue> treeItemValues = new ArrayList<VerticalDeflectionTreeItemValue>(selectedItems.size());
+					for (TreeItem<TreeItemValue> treeItem : selectedItems) {
+						if (treeItem.getValue() == null || treeItem.getValue() == selectedItemValue || treeItem.getValue().getItemType() != itemType)
+							continue;
+
+						VerticalDeflectionTreeItemValue itemValue = (VerticalDeflectionTreeItemValue)treeItem.getValue();
+						if (itemValue.getDimension() != referenceItemValue.getDimension())
+							continue;
+						
+						treeItemValues.add(itemValue);
+						removeItems.add(treeItem);
+					}
+
+					SQLManager.getInstance().mergeGroups(referenceItemValue, treeItemValues);
+				}
+
+				if (removeItems != null && !removeItems.isEmpty())
+					UITreeBuilder.getInstance().removeItems(removeItems);
+				
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				OptionDialog.showThrowableDialog (
+						i18n.getString("EditableMenuCheckBoxTreeCell.message.error.merge.exception.title",   "Unexpected SQL-Error"),
+						i18n.getString("EditableMenuCheckBoxTreeCell.message.error.merge.exception.header",  "Error, could not merge selected tree items."),
+						i18n.getString("EditableMenuCheckBoxTreeCell.message.error.merge.exception.message", "An exception has occurred during database transaction."),
+						e);
+			}
+		}
 	}
 	
 	private void searchAndReplace(TreeItem<TreeItemValue> selectedItem) {
