@@ -2737,6 +2737,91 @@ public class SQLManager {
 			rowData.setId(id);
 		}
 	}
+	
+	public void mergeGroups(ObservationTreeItemValue referenceItemValue, List<ObservationTreeItemValue> selectedItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen() ||
+				referenceItemValue == null || selectedItemValues == null || selectedItemValues.isEmpty())
+			return;
+		
+		StringBuilder inArrayValues = new StringBuilder("?");
+		for (int i=1; i<selectedItemValues.size(); i++)
+			inArrayValues.append(",?");
+
+		String tableName = TreeItemType.isGNSSObservationTypeLeaf(referenceItemValue.getItemType()) ? "GNSSObservationApriori" : "ObservationApriori";
+		String sql = "UPDATE \"" + tableName + "\" SET \"group_id\" = ? WHERE \"group_id\" IN (" + inArrayValues + ")";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		int idx = 1;
+		stmt.setInt(idx++, referenceItemValue.getGroupId());
+		for (int i = 0; i < selectedItemValues.size(); i++) {
+			int groupId = selectedItemValues.get(i).getGroupId();
+			stmt.setInt(idx++, groupId);
+		}
+		stmt.execute();
+	}
+	
+	public void mergeGroups(CongruenceAnalysisTreeItemValue referenceItemValue, List<CongruenceAnalysisTreeItemValue> selectedItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen() ||
+				referenceItemValue == null || selectedItemValues == null || selectedItemValues.isEmpty())
+			return;
+		
+		StringBuilder inArrayValues = new StringBuilder("?");
+		for (int i=1; i<selectedItemValues.size(); i++)
+			inArrayValues.append(",?");
+
+		String sql = "UPDATE \"CongruenceAnalysisPointPairApriori\" SET \"group_id\" = ? WHERE \"group_id\" IN (" + inArrayValues + ")";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		int idx = 1;
+		stmt.setInt(idx++, referenceItemValue.getGroupId());
+		for (int i = 0; i < selectedItemValues.size(); i++) {
+			int groupId = selectedItemValues.get(i).getGroupId();
+			stmt.setInt(idx++, groupId);
+		}
+		stmt.execute();
+	}
+	
+	public void mergeGroups(VerticalDeflectionTreeItemValue referenceItemValue, List<VerticalDeflectionTreeItemValue> selectedItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen() ||
+				referenceItemValue == null || selectedItemValues == null || selectedItemValues.isEmpty())
+			return;
+		
+		StringBuilder inArrayValues = new StringBuilder("?");
+		for (int i=1; i<selectedItemValues.size(); i++)
+			inArrayValues.append(",?");
+
+		String sql = "UPDATE \"VerticalDeflectionTreeItemValue\" SET \"group_id\" = ? WHERE \"group_id\" IN (" + inArrayValues + ")";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		int idx = 1;
+		stmt.setInt(idx++, referenceItemValue.getGroupId());
+		for (int i = 0; i < selectedItemValues.size(); i++) {
+			int groupId = selectedItemValues.get(i).getGroupId();
+			stmt.setInt(idx++, groupId);
+		}
+		stmt.execute();
+	}
+	
+	public void mergeGroups(PointTreeItemValue referenceItemValue, List<PointTreeItemValue> selectedItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen() ||
+				referenceItemValue == null || selectedItemValues == null || selectedItemValues.isEmpty())
+			return;
+		
+		StringBuilder inArrayValues = new StringBuilder("?");
+		for (int i=1; i<selectedItemValues.size(); i++)
+			inArrayValues.append(",?");
+
+		String sql = "UPDATE \"PointApriori\" SET \"group_id\" = ? WHERE \"group_id\" IN (" + inArrayValues + ")";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		int idx = 1;
+		stmt.setInt(idx++, referenceItemValue.getGroupId());
+		for (int i = 0; i < selectedItemValues.size(); i++) {
+			int groupId = selectedItemValues.get(i).getGroupId();
+			stmt.setInt(idx++, groupId);
+		}
+		stmt.execute();
+	}
 
 	// http://hsqldb.org/doc/2.0/guide/dataaccess-chapt.html#dac_merge_statement 
 	public void saveItem(PointRow rowData) throws SQLException {
