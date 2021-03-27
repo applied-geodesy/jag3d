@@ -58,6 +58,7 @@ public class ObservationTreeItemValue extends TreeItemValue implements Sortable,
 		this.groupIdProperty().set(groupId);
 	}
 	
+	@Override
 	public final int getDimension() {
 		switch (this.getItemType()) {
 		case GNSS_2D_LEAF:

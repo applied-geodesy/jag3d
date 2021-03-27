@@ -26,4 +26,6 @@ public interface Groupable {
 	public int getGroupId();
 	
 	public void setGroupId(int groupId);
+	
+	public int getDimension();
 }

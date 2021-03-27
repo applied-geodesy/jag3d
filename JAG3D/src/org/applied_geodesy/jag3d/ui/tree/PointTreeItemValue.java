@@ -60,6 +60,7 @@ public class PointTreeItemValue extends TreeItemValue implements Sortable, Group
 		this.groupIdProperty().set(groupId);
 	}
 	
+	@Override
 	public final int getDimension() {
 		switch (this.getItemType()) {
 		case REFERENCE_POINT_1D_LEAF:

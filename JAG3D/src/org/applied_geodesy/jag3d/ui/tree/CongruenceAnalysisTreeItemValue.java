@@ -57,6 +57,7 @@ public class CongruenceAnalysisTreeItemValue extends TreeItemValue implements So
 		this.groupIdProperty().set(groupId);
 	}
 	
+	@Override
 	public final int getDimension() {
 		switch (this.getItemType()) {
 		case CONGRUENCE_ANALYSIS_1D_LEAF:

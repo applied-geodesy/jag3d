@@ -60,6 +60,7 @@ public class VerticalDeflectionTreeItemValue extends TreeItemValue implements So
 		this.groupIdProperty().set(groupId);
 	}
 	
+	@Override
 	public final int getDimension() {
 		return 2;
 	}
