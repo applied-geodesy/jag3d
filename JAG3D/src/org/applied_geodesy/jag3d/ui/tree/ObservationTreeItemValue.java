@@ -29,7 +29,7 @@ import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-public class ObservationTreeItemValue extends TreeItemValue implements Sortable {
+public class ObservationTreeItemValue extends TreeItemValue implements Sortable, Groupable {
 	private IntegerProperty groupId = new SimpleIntegerProperty(-1);
 	private int orderId;
 	
@@ -48,10 +48,12 @@ public class ObservationTreeItemValue extends TreeItemValue implements Sortable 
 		return this.groupId;
 	}
 	
+	@Override
 	public int getGroupId() {
 		return this.groupIdProperty().get();
 	}
 	
+	@Override
 	public void setGroupId(final int groupId) {
 		this.groupIdProperty().set(groupId);
 	}
