@@ -579,7 +579,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 					searchAndReplace(selectedItem);
 					break;
 				case MERGE:
-					mergeSelectedGroups(itemValue);
+					mergeSelectedGroups(selectedItem);
 					break;
 				default:
 					System.out.println(this.getClass().getSimpleName() + " : " + event);
@@ -964,87 +964,40 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 
 	}
 	
-	private void mergeSelectedGroups(TreeItemValue selectedItemValue) {
+	private void mergeSelectedGroups(TreeItem<TreeItemValue> selectedItem) {
 		List<TreeItem<TreeItemValue>> selectedItems = this.getTreeView().getSelectionModel().getSelectedItems();
-		if (selectedItemValue != null && selectedItems != null && selectedItems.size() > 1) {
+		if (selectedItem != null && selectedItem.getValue() != null && selectedItems != null && selectedItems.size() > 1) {
+			TreeItemValue selectedItemValue = selectedItem.getValue();
 			List<TreeItem<TreeItemValue>> removeItems = new ArrayList<TreeItem<TreeItemValue>>(selectedItems.size());
 			TreeItemType itemType = selectedItemValue.getItemType();
+
+			if (!TreeItemType.isPointTypeLeaf(itemType) &&
+					!TreeItemType.isObservationTypeLeaf(itemType) && 
+					!TreeItemType.isGNSSObservationTypeLeaf(itemType) &&
+					!TreeItemType.isCongruenceAnalysisTypeLeaf(itemType) &&
+					!TreeItemType.isVerticalDeflectionTypeLeaf(itemType) &&
+					!(selectedItemValue instanceof Groupable)) 
+				return;
+
 			try {
-				if (TreeItemType.isPointTypeLeaf(itemType)) {
-					PointTreeItemValue referenceItemValue = (PointTreeItemValue)selectedItemValue;
-					List<PointTreeItemValue> treeItemValues = new ArrayList<PointTreeItemValue>(selectedItems.size());
-					for (TreeItem<TreeItemValue> treeItem : selectedItems) {
-						if (treeItem.getValue() == null || treeItem.getValue() == selectedItemValue || treeItem.getValue().getItemType() != itemType)
-							continue;
-
-						PointTreeItemValue itemValue = (PointTreeItemValue)treeItem.getValue();
-						if (itemValue.getDimension() != referenceItemValue.getDimension())
-							continue;
-
-						treeItemValues.add(itemValue);
-						removeItems.add(treeItem);
-					}
-
-					SQLManager.getInstance().mergeGroups(referenceItemValue, treeItemValues);
-				}
-
-				else if (TreeItemType.isObservationTypeLeaf(itemType) || TreeItemType.isGNSSObservationTypeLeaf(itemType)) {
-					ObservationTreeItemValue referenceItemValue = (ObservationTreeItemValue)selectedItemValue;
-					List<ObservationTreeItemValue> treeItemValues = new ArrayList<ObservationTreeItemValue>(selectedItems.size());
-					for (TreeItem<TreeItemValue> treeItem : selectedItems) {
-						if (treeItem.getValue() == null || treeItem.getValue() == selectedItemValue || treeItem.getValue().getItemType() != itemType)
-							continue;
-
-						ObservationTreeItemValue itemValue = (ObservationTreeItemValue)treeItem.getValue();
-						if (itemValue.getDimension() != referenceItemValue.getDimension())
-							continue;
-						
-						treeItemValues.add(itemValue);
-						removeItems.add(treeItem);
-					}
-
-					SQLManager.getInstance().mergeGroups(referenceItemValue, treeItemValues);
+				List<Groupable> treeItemValues = new ArrayList<Groupable>(selectedItems.size());
+				for (TreeItem<TreeItemValue> treeItem : selectedItems) {
+					if (treeItem.getValue() == null || treeItem.getValue() == selectedItemValue || treeItem.getValue().getItemType() != itemType)
+						continue;
+					
+					TreeItemValue itemValue = treeItem.getValue();
+					
+					if (!(itemValue instanceof Groupable) || ((Groupable)itemValue).getDimension() != ((Groupable)selectedItemValue).getDimension())
+						continue;
+					
+					treeItemValues.add((Groupable)itemValue);
+					removeItems.add(treeItem);
 				}
 				
-				else if (TreeItemType.isCongruenceAnalysisTypeLeaf(itemType)) {
-					CongruenceAnalysisTreeItemValue referenceItemValue = (CongruenceAnalysisTreeItemValue)selectedItemValue;
-					List<CongruenceAnalysisTreeItemValue> treeItemValues = new ArrayList<CongruenceAnalysisTreeItemValue>(selectedItems.size());
-					for (TreeItem<TreeItemValue> treeItem : selectedItems) {
-						if (treeItem.getValue() == null || treeItem.getValue() == selectedItemValue || treeItem.getValue().getItemType() != itemType)
-							continue;
-
-						CongruenceAnalysisTreeItemValue itemValue = (CongruenceAnalysisTreeItemValue)treeItem.getValue();
-						if (itemValue.getDimension() != referenceItemValue.getDimension())
-							continue;
-						
-						treeItemValues.add(itemValue);
-						removeItems.add(treeItem);
-					}
-
-					SQLManager.getInstance().mergeGroups(referenceItemValue, treeItemValues);
-				}
-
-				else if (TreeItemType.isVerticalDeflectionTypeLeaf(itemType)) {
-					VerticalDeflectionTreeItemValue referenceItemValue = (VerticalDeflectionTreeItemValue)selectedItemValue;
-					List<VerticalDeflectionTreeItemValue> treeItemValues = new ArrayList<VerticalDeflectionTreeItemValue>(selectedItems.size());
-					for (TreeItem<TreeItemValue> treeItem : selectedItems) {
-						if (treeItem.getValue() == null || treeItem.getValue() == selectedItemValue || treeItem.getValue().getItemType() != itemType)
-							continue;
-
-						VerticalDeflectionTreeItemValue itemValue = (VerticalDeflectionTreeItemValue)treeItem.getValue();
-						if (itemValue.getDimension() != referenceItemValue.getDimension())
-							continue;
-						
-						treeItemValues.add(itemValue);
-						removeItems.add(treeItem);
-					}
-
-					SQLManager.getInstance().mergeGroups(referenceItemValue, treeItemValues);
-				}
-
+				SQLManager.getInstance().mergeGroups(selectedItemValue, treeItemValues);
+				
 				if (removeItems != null && !removeItems.isEmpty())
 					UITreeBuilder.getInstance().removeItems(removeItems);
-				
 				
 			} catch (Exception e) {
 				e.printStackTrace();
