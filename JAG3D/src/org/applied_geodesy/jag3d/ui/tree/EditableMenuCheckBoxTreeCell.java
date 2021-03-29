@@ -110,6 +110,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		ADD,
 		REMOVE,
 		EXPORT,
+		MERGE,
 		SEARCH_AND_REPLACE,
 		CHANGE_TO_REFERENCE_POINT_GROUP,
 		CHANGE_TO_STOCHASTIC_POINT_GROUP,
@@ -577,6 +578,9 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 				case SEARCH_AND_REPLACE:
 					searchAndReplace(selectedItem);
 					break;
+				case MERGE:
+					mergeSelectedGroups(selectedItem);
+					break;
 				default:
 					System.out.println(this.getClass().getSimpleName() + " : " + event);
 					break;
@@ -621,11 +625,15 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		exportItem.setUserData(ContextMenuType.EXPORT);
 		exportItem.setOnAction(listener);
 		
+		MenuItem mergeItem = new MenuItem(i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.merge", "Merge items"));
+		mergeItem.setUserData(ContextMenuType.MERGE);
+		mergeItem.setOnAction(listener);
+		
 		MenuItem searchAndReplaceItem = new MenuItem(i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.search_and_replace", "Search and replace"));
 		searchAndReplaceItem.setUserData(ContextMenuType.SEARCH_AND_REPLACE);
 		searchAndReplaceItem.setOnAction(listener);
 
-		this.contextMenu = new ContextMenu(addItem, removeItem, searchAndReplaceItem, exportItem);
+		this.contextMenu = new ContextMenu(addItem, removeItem, mergeItem, searchAndReplaceItem, exportItem);
 
 		if (TreeItemType.isPointTypeLeaf(itemType)) {
 			ToggleGroup pointTypeToogleGroup = new ToggleGroup();
@@ -954,6 +962,52 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		if (selectedItems != null && !selectedItems.isEmpty())
 			UITreeBuilder.getInstance().removeItems(new ArrayList<TreeItem<TreeItemValue>>(selectedItems));
 
+	}
+	
+	private void mergeSelectedGroups(TreeItem<TreeItemValue> selectedItem) {
+		List<TreeItem<TreeItemValue>> selectedItems = this.getTreeView().getSelectionModel().getSelectedItems();
+		if (selectedItem != null && selectedItem.getValue() != null && selectedItems != null && selectedItems.size() > 1) {
+			TreeItemValue selectedItemValue = selectedItem.getValue();
+			List<TreeItem<TreeItemValue>> removeItems = new ArrayList<TreeItem<TreeItemValue>>(selectedItems.size());
+			TreeItemType itemType = selectedItemValue.getItemType();
+
+			if (!TreeItemType.isPointTypeLeaf(itemType) &&
+					!TreeItemType.isObservationTypeLeaf(itemType) && 
+					!TreeItemType.isGNSSObservationTypeLeaf(itemType) &&
+					!TreeItemType.isCongruenceAnalysisTypeLeaf(itemType) &&
+					!TreeItemType.isVerticalDeflectionTypeLeaf(itemType) &&
+					!(selectedItemValue instanceof Groupable)) 
+				return;
+
+			try {
+				List<Groupable> treeItemValues = new ArrayList<Groupable>(selectedItems.size());
+				for (TreeItem<TreeItemValue> treeItem : selectedItems) {
+					if (treeItem.getValue() == null || treeItem.getValue() == selectedItemValue || treeItem.getValue().getItemType() != itemType)
+						continue;
+					
+					TreeItemValue itemValue = treeItem.getValue();
+					
+					if (!(itemValue instanceof Groupable) || ((Groupable)itemValue).getDimension() != ((Groupable)selectedItemValue).getDimension())
+						continue;
+					
+					treeItemValues.add((Groupable)itemValue);
+					removeItems.add(treeItem);
+				}
+				
+				SQLManager.getInstance().mergeGroups(selectedItemValue, treeItemValues);
+				
+				if (removeItems != null && !removeItems.isEmpty())
+					UITreeBuilder.getInstance().removeItems(removeItems);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				OptionDialog.showThrowableDialog (
+						i18n.getString("EditableMenuCheckBoxTreeCell.message.error.merge.exception.title",   "Unexpected SQL-Error"),
+						i18n.getString("EditableMenuCheckBoxTreeCell.message.error.merge.exception.header",  "Error, could not merge selected tree items."),
+						i18n.getString("EditableMenuCheckBoxTreeCell.message.error.merge.exception.message", "An exception has occurred during database transaction."),
+						e);
+			}
+		}
 	}
 	
 	private void searchAndReplace(TreeItem<TreeItemValue> selectedItem) {

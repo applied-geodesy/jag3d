@@ -28,7 +28,7 @@ import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-public class CongruenceAnalysisTreeItemValue extends TreeItemValue implements Sortable {
+public class CongruenceAnalysisTreeItemValue extends TreeItemValue implements Sortable, Groupable {
 	private IntegerProperty groupId = new SimpleIntegerProperty(-1);
 	private int orderId;
 	
@@ -47,14 +47,17 @@ public class CongruenceAnalysisTreeItemValue extends TreeItemValue implements So
 		return this.groupId;
 	}
 	
+	@Override
 	public int getGroupId() {
 		return this.groupIdProperty().get();
 	}
 	
+	@Override
 	public void setGroupId(final int groupId) {
 		this.groupIdProperty().set(groupId);
 	}
 	
+	@Override
 	public final int getDimension() {
 		switch (this.getItemType()) {
 		case CONGRUENCE_ANALYSIS_1D_LEAF:
