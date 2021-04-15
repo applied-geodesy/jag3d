@@ -73,12 +73,12 @@
 			
 		<#if group.type != "REFERENCE_POINT">
 			<#if group.dimension != 1>
-				<td></td>
-				<td></td>
+				<td><@printFormattedNumber value=group.max_residual_y format=df_length_residual/></td>
+				<td><@printFormattedNumber value=group.max_residual_x format=df_length_residual/></td>
 			</#if>
 		
 			<#if group.dimension != 2>
-				<td></td>
+				<td><@printFormattedNumber value=group.max_residual_z format=df_length_residual/></td>
 			</#if>
 		</#if>
 
