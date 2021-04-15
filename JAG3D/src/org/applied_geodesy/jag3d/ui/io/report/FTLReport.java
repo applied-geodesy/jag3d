@@ -788,6 +788,7 @@ public class FTLReport {
 		while (groupSet.next()) {
 			double omegaGroup = 0.0, redundancyGroupX = 0.0, redundancyGroupY = 0.0, redundancyGroupZ = 0.0;
 			double maxGrossErrorGroupX = 0.0, maxGrossErrorGroupY = 0.0, maxGrossErrorGroupZ = 0.0;
+			double maxResidualGroupX = 0.0, maxResidualGroupY = 0.0, maxResidualGroupZ = 0.0;
 			boolean significantGroup = false;
 			int groupId = groupSet.getInt("id");
 
@@ -889,6 +890,10 @@ public class FTLReport {
 				double grossErrorY = pointSet.getDouble("gross_error_y");
 				double grossErrorZ = pointSet.getDouble("gross_error_z");
 
+				double residualX = pointSet.getDouble("residual_x");
+				double residualY = pointSet.getDouble("residual_y");
+				double residualZ = pointSet.getDouble("residual_z");
+				
 				omegaGroup += pointSet.getDouble("omega");
 				redundancyGroupX += redundancyX;
 				redundancyGroupY += redundancyY;
@@ -897,6 +902,10 @@ public class FTLReport {
 				maxGrossErrorGroupX = Math.abs(grossErrorX) > Math.abs(maxGrossErrorGroupX) ? grossErrorX : maxGrossErrorGroupX;
 				maxGrossErrorGroupY = Math.abs(grossErrorY) > Math.abs(maxGrossErrorGroupY) ? grossErrorY : maxGrossErrorGroupY;
 				maxGrossErrorGroupZ = Math.abs(grossErrorZ) > Math.abs(maxGrossErrorGroupZ) ? grossErrorZ : maxGrossErrorGroupZ;
+				
+				maxResidualGroupX = Math.abs(residualX) > Math.abs(maxResidualGroupX) ? residualX : maxResidualGroupX;
+				maxResidualGroupY = Math.abs(residualY) > Math.abs(maxResidualGroupY) ? residualY : maxResidualGroupY;
+				maxResidualGroupZ = Math.abs(residualZ) > Math.abs(maxResidualGroupZ) ? residualZ : maxResidualGroupZ;
 
 				if (!significantGroup && significant)
 					significantGroup = true;
@@ -921,6 +930,10 @@ public class FTLReport {
 				groupParam.put("max_gross_error_x", options.convertLengthResidualToView(maxGrossErrorGroupX));
 				groupParam.put("max_gross_error_y", options.convertLengthResidualToView(maxGrossErrorGroupY));
 				groupParam.put("max_gross_error_z", options.convertLengthResidualToView(maxGrossErrorGroupZ));
+				
+				groupParam.put("max_residual_x", options.convertLengthResidualToView(maxResidualGroupX));
+				groupParam.put("max_residual_y", options.convertLengthResidualToView(maxResidualGroupY));
+				groupParam.put("max_residual_z", options.convertLengthResidualToView(maxResidualGroupZ));
 
 				groups.add(groupParam);			
 			}
@@ -969,6 +982,7 @@ public class FTLReport {
 		while (groupSet.next()) {
 			double omegaGroup = 0.0, redundancyGroupX = 0.0, redundancyGroupY = 0.0;
 			double maxGrossErrorGroupX = 0.0, maxGrossErrorGroupY = 0.0;
+			double maxResidualGroupX = 0.0, maxResidualGroupY = 0.0;
 			boolean significantGroup = false;
 			int groupId = groupSet.getInt("id");
 
@@ -1034,6 +1048,9 @@ public class FTLReport {
 
 				double grossErrorX = verticalDeflectionSet.getDouble("gross_error_x");
 				double grossErrorY = verticalDeflectionSet.getDouble("gross_error_y");
+				
+				double residualX = verticalDeflectionSet.getDouble("residual_x");
+				double residualY = verticalDeflectionSet.getDouble("residual_y");
 
 
 				omegaGroup += verticalDeflectionSet.getDouble("omega");
@@ -1042,6 +1059,9 @@ public class FTLReport {
 
 				maxGrossErrorGroupX = Math.abs(grossErrorX) > Math.abs(maxGrossErrorGroupX) ? grossErrorX : maxGrossErrorGroupX;
 				maxGrossErrorGroupY = Math.abs(grossErrorY) > Math.abs(maxGrossErrorGroupY) ? grossErrorY : maxGrossErrorGroupY;
+				
+				maxResidualGroupX = Math.abs(residualX) > Math.abs(maxResidualGroupX) ? residualX : maxResidualGroupX;
+				maxResidualGroupY = Math.abs(residualY) > Math.abs(maxResidualGroupY) ? residualY : maxResidualGroupY;
 
 				if (!significantGroup && significant)
 					significantGroup = true;
@@ -1063,6 +1083,9 @@ public class FTLReport {
 
 				groupParam.put("max_gross_error_x", options.convertAngleResidualToView(maxGrossErrorGroupX));
 				groupParam.put("max_gross_error_y", options.convertAngleResidualToView(maxGrossErrorGroupY));
+				
+				groupParam.put("max_residual_x", options.convertAngleResidualToView(maxResidualGroupX));
+				groupParam.put("max_residual_y", options.convertAngleResidualToView(maxResidualGroupY));
 
 				groups.add(groupParam);					
 			}
@@ -1101,7 +1124,7 @@ public class FTLReport {
 		while (groupSet.next()) {
 			boolean significantGroup = false;
 			double omegaGroup = 0.0, redundancyGroup = 0.0;
-			double maxGrossErrorGroup = 0.0;
+			double maxGrossErrorGroup = 0.0, maxResidualGroup = 0.0;
 			HashMap<String, Object> groupParam = new HashMap<String, Object>();
 			List<HashMap<String, Object>> observations = new ArrayList<HashMap<String, Object>>();
 			int groupId = groupSet.getInt("id");
@@ -1189,11 +1212,12 @@ public class FTLReport {
 				boolean significant = observationSet.getBoolean("significant");
 				double redundancy   = observationSet.getDouble("redundancy");
 				double grossError   = observationSet.getDouble("gross_error");
+				double residual     = observationSet.getDouble("residual");
 
-				omegaGroup += observationSet.getDouble("omega");
-				redundancyGroup += redundancy;
+				omegaGroup        += observationSet.getDouble("omega");
+				redundancyGroup   += redundancy;
 				maxGrossErrorGroup = Math.abs(grossError) > Math.abs(maxGrossErrorGroup) ? grossError : maxGrossErrorGroup;
-
+				maxResidualGroup   = Math.abs(residual)   > Math.abs(maxResidualGroup)   ? residual : maxResidualGroup;
 				if (!significantGroup && significant)
 					significantGroup = true;
 
@@ -1206,6 +1230,7 @@ public class FTLReport {
 				case ZENITH_ANGLE:
 					groupParam.put("type", obsType.name());
 					groupParam.put("max_gross_error", options.convertAngleResidualToView(maxGrossErrorGroup));
+					groupParam.put("max_residual", options.convertAngleResidualToView(maxResidualGroup));
 					break;
 					
 				case LEVELING:
@@ -1213,6 +1238,7 @@ public class FTLReport {
 				case SLOPE_DISTANCE:
 					groupParam.put("type", obsType.name());
 					groupParam.put("max_gross_error", options.convertLengthResidualToView(maxGrossErrorGroup));
+					groupParam.put("max_residual", options.convertLengthResidualToView(maxResidualGroup));
 					break;
 				default:
 					continue;
@@ -1278,6 +1304,7 @@ public class FTLReport {
 		while (groupSet.next()) {
 			double omegaGroup = 0.0, redundancyGroupX = 0.0, redundancyGroupY = 0.0, redundancyGroupZ = 0.0;
 			double maxGrossErrorGroupX = 0.0, maxGrossErrorGroupY = 0.0, maxGrossErrorGroupZ = 0.0;
+			double maxResidualGroupX = 0.0, maxResidualGroupY = 0.0, maxResidualGroupZ = 0.0;
 			boolean significantGroup = false;
 			HashMap<String, Object> groupParam = new HashMap<String, Object>();
 			List<HashMap<String, Object>> observations = new ArrayList<HashMap<String, Object>>();
@@ -1361,6 +1388,10 @@ public class FTLReport {
 				double grossErrorX = observationSet.getDouble("gross_error_x");
 				double grossErrorY = observationSet.getDouble("gross_error_y");
 				double grossErrorZ = observationSet.getDouble("gross_error_z");
+				
+				double residualX = observationSet.getDouble("residual_x");
+				double residualY = observationSet.getDouble("residual_y");
+				double residualZ = observationSet.getDouble("residual_z");
 
 				omegaGroup += observationSet.getDouble("omega");
 				redundancyGroupX += redundancyX;
@@ -1370,6 +1401,10 @@ public class FTLReport {
 				maxGrossErrorGroupX = Math.abs(grossErrorX) > Math.abs(maxGrossErrorGroupX) ? grossErrorX : maxGrossErrorGroupX;
 				maxGrossErrorGroupY = Math.abs(grossErrorY) > Math.abs(maxGrossErrorGroupY) ? grossErrorY : maxGrossErrorGroupY;
 				maxGrossErrorGroupZ = Math.abs(grossErrorZ) > Math.abs(maxGrossErrorGroupZ) ? grossErrorZ : maxGrossErrorGroupZ;
+				
+				maxResidualGroupX = Math.abs(residualX) > Math.abs(maxResidualGroupX) ? residualX : maxResidualGroupX;
+				maxResidualGroupY = Math.abs(residualY) > Math.abs(maxResidualGroupY) ? residualY : maxResidualGroupY;
+				maxResidualGroupZ = Math.abs(residualZ) > Math.abs(maxResidualGroupZ) ? residualZ : maxResidualGroupZ;
 
 				if (!significantGroup && significant)
 					significant = true;
@@ -1404,6 +1439,10 @@ public class FTLReport {
 				groupParam.put("max_gross_error_x", options.convertLengthResidualToView(maxGrossErrorGroupX));
 				groupParam.put("max_gross_error_y", options.convertLengthResidualToView(maxGrossErrorGroupY));
 				groupParam.put("max_gross_error_z", options.convertLengthResidualToView(maxGrossErrorGroupZ));
+				
+				groupParam.put("max_residual_x", options.convertLengthResidualToView(maxResidualGroupX));
+				groupParam.put("max_residual_y", options.convertLengthResidualToView(maxResidualGroupY));
+				groupParam.put("max_residual_z", options.convertLengthResidualToView(maxResidualGroupZ));
 
 				List<HashMap<String, Object>> parameters = this.getAddionalParameters(groupId);
 

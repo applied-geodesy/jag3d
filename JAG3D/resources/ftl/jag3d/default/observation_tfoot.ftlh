@@ -62,11 +62,11 @@
 			</#if>
 			
 			<#if group.type == "GNSS2D" || group.type == "GNSS3D">
-				<td></td>
-				<td></td>
+				<td><@printFormattedNumber value=group.max_residual_y format=df_length_residual/></td>
+				<td><@printFormattedNumber value=group.max_residual_x format=df_length_residual/></td>
 			</#if>
 			<#if group.type == "GNSS1D" || group.type == "GNSS3D">
-				<td></td>
+				<td><@printFormattedNumber value=group.max_residual_z format=df_length_residual/></td>
 			</#if>
 			
 			<#if group.type == "GNSS2D" || group.type == "GNSS3D">
@@ -97,7 +97,20 @@
 		<#else>
 			<td></td>
 			<td><@printFormattedNumber value=group.redundancy format=df_statistic/></td>
-			<td></td>
+			<#if apply_angle_unit??>
+				<#if sexagesimal_angle_residual??>
+					<#assign signum  = (group.max_residual < 0)?then(-1, 1)>
+					<#assign value   = signum * group.max_residual>
+					<#assign degree  = value?floor>
+					<#assign minutes = ((value - degree) * 60)?floor>
+					<#assign seconds = ((((value - degree) * 60) - minutes) * 60)>
+					<td>${signum * degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle_residual]?string[1..])}</td>
+				<#else>
+					<td><@printFormattedNumber value=group.max_residual format=df_angle_residual/></td>
+				</#if>
+			<#else>
+				<td><@printFormattedNumber value=group.max_gross_error format=df_length_residual/></td>
+			</#if>
 			<#if apply_angle_unit??>
 				<#if sexagesimal_angle_residual??>
 					<#assign signum  = (group.max_gross_error < 0)?then(-1, 1)>
