@@ -265,7 +265,7 @@ public class UIMenuBuilder {
 
 	private void createPropertyMenu(Menu parentMenu) {
 		MenuItem formatterItem     = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.formatter.label", "Formatter preferences"), true, MenuItemType.FORMATTER_PREFERENCES, new KeyCodeCombination(KeyCode.ENTER, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
-		MenuItem importItem        = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.import.label", "Import preferences"), true, MenuItemType.IMPORT_PREFERENCES, new KeyCodeCombination(KeyCode.I, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
+		MenuItem importItem        = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.import.label", "Import preferences"), true, MenuItemType.IMPORT_PREFERENCES, new KeyCodeCombination(KeyCode.I, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
 		MenuItem leastSquaresItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.leastsquares.label", "Least-squares"), true, MenuItemType.LEAST_SQUARES, new KeyCodeCombination(KeyCode.Q, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 		MenuItem teststatisticItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.teststatistic.label", "Test statistic"), true, MenuItemType.TEST_STATISTIC, new KeyCodeCombination(KeyCode.T, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 		MenuItem projectionItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.projection.label", "Projection \u0026 reductions"), true, MenuItemType.PROJECTION_AND_REDUCTION, new KeyCodeCombination(KeyCode.I, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
