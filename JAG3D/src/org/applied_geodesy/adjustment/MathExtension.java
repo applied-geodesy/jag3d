@@ -212,8 +212,7 @@ public final class MathExtension {
 	 */
 	public static void solve(UpperSymmPackMatrix N, DenseVector n, boolean invert) throws MatrixSingularException, IllegalArgumentException {
 		final String UPLO = "U";
-		DenseMatrix nd = new DenseMatrix(n, false);
-		double[] na = nd.getData();
+		double[] nd = n.getData();
 		double Nd[] = N.getData();
 		int numRows = N.numRows();
 		int[] ipiv = new int[numRows];
@@ -221,7 +220,7 @@ public final class MathExtension {
 		intW info = new intW(0);
 		
 		// http://www.netlib.org/lapack/double/dspsv.f
-		LAPACK.getInstance().dspsv(UPLO, numRows, nd.numColumns(), Nd, ipiv, na, Math.max(1, numRows), info);
+		LAPACK.getInstance().dspsv(UPLO, numRows, 1, Nd, ipiv, nd, Math.max(1, numRows), info);
 
 		if (info.val > 0)
 			throw new MatrixSingularException();
