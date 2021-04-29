@@ -424,9 +424,9 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.redundancy.y.label", "ry");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.y.tooltip", "Redundancy of y-component");
-		cellValueType = CellValueType.STATISTIC;
+		cellValueType = CellValueType.PERCENTAGE;
 		columnContentType = ColumnContentType.REDUNDANCY_Y;
-		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::redundancyYProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT && this.dimension != 1 ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
@@ -435,9 +435,9 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.redundancy.x.label", "rx");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.x.tooltip", "Redundancy of x-component");
-		cellValueType = CellValueType.STATISTIC;
+		cellValueType = CellValueType.PERCENTAGE;
 		columnContentType = ColumnContentType.REDUNDANCY_X;
-		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::redundancyXProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT && this.dimension != 1 ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
@@ -446,9 +446,9 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.redundancy.z.label", "rz");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.z.tooltip", "Redundancy of z-component");
-		cellValueType = CellValueType.STATISTIC;
+		cellValueType = CellValueType.PERCENTAGE;
 		columnContentType = ColumnContentType.REDUNDANCY_Z;
-		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::redundancyZProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT && this.dimension != 2 ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);

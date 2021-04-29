@@ -266,9 +266,9 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.redundancy.y.label", "r\u03B6y");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.redundancy.y.tooltip", "Redundancy of y-component of deflection of the vertical");
-		cellValueType = CellValueType.STATISTIC;
+		cellValueType = CellValueType.PERCENTAGE;
 		columnContentType = ColumnContentType.REDUNDANCY_Y;
-		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::redundancyYProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
@@ -276,9 +276,9 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.redundancy.x.label", "r\u03B6x");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.redundancy.x.tooltip", "Redundancy of x-component of deflection of the vertical");
-		cellValueType = CellValueType.STATISTIC;
+		cellValueType = CellValueType.PERCENTAGE;
 		columnContentType = ColumnContentType.REDUNDANCY_X;
-		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::redundancyXProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
