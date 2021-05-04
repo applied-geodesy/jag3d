@@ -61,6 +61,7 @@ import org.applied_geodesy.adjustment.network.sql.SQLAdjustmentManager;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.ui.dialog.LeastSquaresSettingDialog.LeastSquaresSettings;
+import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog.ScopeType;
 import org.applied_geodesy.jag3d.ui.graphic.UIGraphicPaneBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.sql.SQLGraphicManager;
 import org.applied_geodesy.jag3d.ui.io.ImportOption;
@@ -4172,12 +4173,12 @@ public class SQLManager {
 
 		stmt.execute();
 	}
-		
-	public void searchAndReplacePointNames(String searchRegex, String replaceRegex, boolean applyToWholeProject, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
+	
+	public void searchAndReplacePointNames(String searchRegex, String replaceRegex, ScopeType scopeType, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
-		if (applyToWholeProject) {
+		if (scopeType != ScopeType.SELECTION) {
 			UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
 			TreeItemType[] itemTypes = TreeItemType.values();
 			for (TreeItemType itemType : itemTypes) {
@@ -4195,7 +4196,7 @@ public class SQLManager {
 						for (int i = 0; i < itemValues.length; i++) 
 							itemValues[i] = items.get(i).getValue();
 						
-						this.searchAndReplacePointNames(searchRegex, replaceRegex, false, itemValues[0], itemValues);
+						this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, itemValues[0], itemValues);
 					}
 				}
 			}
@@ -4208,117 +4209,124 @@ public class SQLManager {
 			}
 		}
 		else {
-			TreeItemType treeItemType = itemValue.getItemType();
+			this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, itemValue, selectedTreeItemValues);
+		}
+	}
+		
+	private void scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
+		TreeItemType treeItemType = itemValue.getItemType();
 
-			switch(treeItemType) {
-			case REFERENCE_POINT_1D_LEAF:
-			case REFERENCE_POINT_2D_LEAF:
-			case REFERENCE_POINT_3D_LEAF:
-			case STOCHASTIC_POINT_1D_LEAF:
-			case STOCHASTIC_POINT_2D_LEAF:
-			case STOCHASTIC_POINT_3D_LEAF:
-			case DATUM_POINT_1D_LEAF:
-			case DATUM_POINT_2D_LEAF:
-			case DATUM_POINT_3D_LEAF:
-			case NEW_POINT_1D_LEAF:
-			case NEW_POINT_2D_LEAF:
-			case NEW_POINT_3D_LEAF:
-				if (itemValue instanceof PointTreeItemValue) {
-					PointTreeItemValue pointItemValue = (PointTreeItemValue)itemValue;
-					PointTreeItemValue[] selectedPointItemValuesArray = null;
-					Set<PointTreeItemValue> selectedPointItemValues = new LinkedHashSet<PointTreeItemValue>();
-					selectedPointItemValues.add(pointItemValue);
+		switch(treeItemType) {
+		case REFERENCE_POINT_1D_LEAF:
+		case REFERENCE_POINT_2D_LEAF:
+		case REFERENCE_POINT_3D_LEAF:
+		case STOCHASTIC_POINT_1D_LEAF:
+		case STOCHASTIC_POINT_2D_LEAF:
+		case STOCHASTIC_POINT_3D_LEAF:
+		case DATUM_POINT_1D_LEAF:
+		case DATUM_POINT_2D_LEAF:
+		case DATUM_POINT_3D_LEAF:
+		case NEW_POINT_1D_LEAF:
+		case NEW_POINT_2D_LEAF:
+		case NEW_POINT_3D_LEAF:
+			if (itemValue instanceof PointTreeItemValue) {
+				PointTreeItemValue pointItemValue = (PointTreeItemValue)itemValue;
+				PointTreeItemValue[] selectedPointItemValuesArray = null;
+				Set<PointTreeItemValue> selectedPointItemValues = new LinkedHashSet<PointTreeItemValue>();
+				selectedPointItemValues.add(pointItemValue);
 
-					if (selectedTreeItemValues != null) {
-						for (TreeItemValue selectedItem : selectedTreeItemValues) {
-							if (selectedItem instanceof PointTreeItemValue)
-								selectedPointItemValues.add((PointTreeItemValue)selectedItem);
-						}
+				if (selectedTreeItemValues != null) {
+					for (TreeItemValue selectedItem : selectedTreeItemValues) {
+						if (selectedItem instanceof PointTreeItemValue)
+							selectedPointItemValues.add((PointTreeItemValue)selectedItem);
 					}
-					selectedPointItemValuesArray = selectedPointItemValues.toArray(new PointTreeItemValue[selectedPointItemValues.size()]);
-					this.searchAndReplacePointNames(searchRegex, replaceRegex, selectedPointItemValuesArray);
-					this.loadPoints(pointItemValue, selectedPointItemValuesArray);
 				}
-				break;
-
-			case CONGRUENCE_ANALYSIS_1D_LEAF:
-			case CONGRUENCE_ANALYSIS_2D_LEAF:
-			case CONGRUENCE_ANALYSIS_3D_LEAF:
-				if (itemValue instanceof CongruenceAnalysisTreeItemValue) {
-					CongruenceAnalysisTreeItemValue congruenceAnalysisTreeItemValue = (CongruenceAnalysisTreeItemValue)itemValue;
-					CongruenceAnalysisTreeItemValue[] selectedCongruenceAnalysisItemValuesArray = null;
-					Set<CongruenceAnalysisTreeItemValue> selectedCongruenceAnalysisItemValues = new LinkedHashSet<CongruenceAnalysisTreeItemValue>();
-					selectedCongruenceAnalysisItemValues.add(congruenceAnalysisTreeItemValue);
-
-					if (selectedTreeItemValues != null) {
-						for (TreeItemValue selectedItem : selectedTreeItemValues) {
-							if (selectedItem instanceof CongruenceAnalysisTreeItemValue)
-								selectedCongruenceAnalysisItemValues.add((CongruenceAnalysisTreeItemValue)selectedItem);
-						}
-					}
-					selectedCongruenceAnalysisItemValuesArray = selectedCongruenceAnalysisItemValues.toArray(new CongruenceAnalysisTreeItemValue[selectedCongruenceAnalysisItemValues.size()]);
-					this.searchAndReplacePointNames(searchRegex, replaceRegex, selectedCongruenceAnalysisItemValuesArray);
-					this.loadCongruenceAnalysisPointPair(congruenceAnalysisTreeItemValue, selectedCongruenceAnalysisItemValuesArray);
-				}
-				break;
-
-			case LEVELING_LEAF:
-			case DIRECTION_LEAF:
-			case HORIZONTAL_DISTANCE_LEAF:
-			case SLOPE_DISTANCE_LEAF:
-			case ZENITH_ANGLE_LEAF:
-			case GNSS_1D_LEAF:
-			case GNSS_2D_LEAF:
-			case GNSS_3D_LEAF:
-				if (itemValue instanceof ObservationTreeItemValue) {
-					ObservationTreeItemValue observationItemValue = (ObservationTreeItemValue)itemValue;
-					ObservationTreeItemValue[] selectedObservationItemValuesArray = null;
-					Set<ObservationTreeItemValue> selectedObservationItemValues = new LinkedHashSet<ObservationTreeItemValue>();
-					selectedObservationItemValues.add(observationItemValue);
-
-					if (selectedTreeItemValues != null) {
-						for (TreeItemValue selectedItem : selectedTreeItemValues) {
-							if (selectedItem instanceof ObservationTreeItemValue)
-								selectedObservationItemValues.add((ObservationTreeItemValue)selectedItem);
-						}
-					}
-					selectedObservationItemValuesArray = selectedObservationItemValues.toArray(new ObservationTreeItemValue[selectedObservationItemValues.size()]);
-					this.searchAndReplacePointNames(searchRegex, replaceRegex, selectedObservationItemValuesArray);
-					if (TreeItemType.isObservationTypeLeaf(treeItemType))
-						this.loadObservations(observationItemValue, selectedObservationItemValuesArray);
-					else if (TreeItemType.isGNSSObservationTypeLeaf(treeItemType))
-						this.loadGNSSObservations(observationItemValue, selectedObservationItemValuesArray);
-				}
-				break;
-				
-			case REFERENCE_VERTICAL_DEFLECTION_LEAF:
-			case STOCHASTIC_VERTICAL_DEFLECTION_LEAF:
-			case UNKNOWN_VERTICAL_DEFLECTION_LEAF:
-				if (itemValue instanceof VerticalDeflectionTreeItemValue) {
-					VerticalDeflectionTreeItemValue verticalDeflectionItemValue = (VerticalDeflectionTreeItemValue)itemValue;
-					VerticalDeflectionTreeItemValue[] selectedVerticalDeflectionItemValuesArray = null;
-					Set<VerticalDeflectionTreeItemValue> selectedVerticalDeflectionItemValues = new LinkedHashSet<VerticalDeflectionTreeItemValue>();
-					selectedVerticalDeflectionItemValues.add(verticalDeflectionItemValue);
-
-					if (selectedTreeItemValues != null) {
-						for (TreeItemValue selectedItem : selectedTreeItemValues) {
-							if (selectedItem instanceof VerticalDeflectionTreeItemValue)
-								selectedVerticalDeflectionItemValues.add((VerticalDeflectionTreeItemValue)selectedItem);
-						}
-					}
-					selectedVerticalDeflectionItemValuesArray = selectedVerticalDeflectionItemValues.toArray(new VerticalDeflectionTreeItemValue[selectedVerticalDeflectionItemValues.size()]);
-					this.searchAndReplacePointNames(searchRegex, replaceRegex, selectedVerticalDeflectionItemValuesArray);
-					this.loadVerticalDeflections(verticalDeflectionItemValue, selectedVerticalDeflectionItemValuesArray);
-				}
-				break;
-
-			default:
-				break;
+				selectedPointItemValuesArray = selectedPointItemValues.toArray(new PointTreeItemValue[selectedPointItemValues.size()]);
+				this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, selectedPointItemValuesArray);
+				this.loadPoints(pointItemValue, selectedPointItemValuesArray);
 			}
+			break;
+
+		case CONGRUENCE_ANALYSIS_1D_LEAF:
+		case CONGRUENCE_ANALYSIS_2D_LEAF:
+		case CONGRUENCE_ANALYSIS_3D_LEAF:
+			if (itemValue instanceof CongruenceAnalysisTreeItemValue) {
+				CongruenceAnalysisTreeItemValue congruenceAnalysisTreeItemValue = (CongruenceAnalysisTreeItemValue)itemValue;
+				CongruenceAnalysisTreeItemValue[] selectedCongruenceAnalysisItemValuesArray = null;
+				Set<CongruenceAnalysisTreeItemValue> selectedCongruenceAnalysisItemValues = new LinkedHashSet<CongruenceAnalysisTreeItemValue>();
+				selectedCongruenceAnalysisItemValues.add(congruenceAnalysisTreeItemValue);
+
+				if (selectedTreeItemValues != null) {
+					for (TreeItemValue selectedItem : selectedTreeItemValues) {
+						if (selectedItem instanceof CongruenceAnalysisTreeItemValue)
+							selectedCongruenceAnalysisItemValues.add((CongruenceAnalysisTreeItemValue)selectedItem);
+					}
+				}
+				selectedCongruenceAnalysisItemValuesArray = selectedCongruenceAnalysisItemValues.toArray(new CongruenceAnalysisTreeItemValue[selectedCongruenceAnalysisItemValues.size()]);
+				this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, selectedCongruenceAnalysisItemValuesArray);
+				this.loadCongruenceAnalysisPointPair(congruenceAnalysisTreeItemValue, selectedCongruenceAnalysisItemValuesArray);
+			}
+			break;
+
+		case LEVELING_LEAF:
+		case DIRECTION_LEAF:
+		case HORIZONTAL_DISTANCE_LEAF:
+		case SLOPE_DISTANCE_LEAF:
+		case ZENITH_ANGLE_LEAF:
+		case GNSS_1D_LEAF:
+		case GNSS_2D_LEAF:
+		case GNSS_3D_LEAF:
+			if (itemValue instanceof ObservationTreeItemValue) {
+				ObservationTreeItemValue observationItemValue = (ObservationTreeItemValue)itemValue;
+				ObservationTreeItemValue[] selectedObservationItemValuesArray = null;
+				Set<ObservationTreeItemValue> selectedObservationItemValues = new LinkedHashSet<ObservationTreeItemValue>();
+				selectedObservationItemValues.add(observationItemValue);
+
+				if (selectedTreeItemValues != null) {
+					for (TreeItemValue selectedItem : selectedTreeItemValues) {
+						if (selectedItem instanceof ObservationTreeItemValue)
+							selectedObservationItemValues.add((ObservationTreeItemValue)selectedItem);
+					}
+				}
+				selectedObservationItemValuesArray = selectedObservationItemValues.toArray(new ObservationTreeItemValue[selectedObservationItemValues.size()]);
+				this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, selectedObservationItemValuesArray);
+				if (TreeItemType.isObservationTypeLeaf(treeItemType))
+					this.loadObservations(observationItemValue, selectedObservationItemValuesArray);
+				else if (TreeItemType.isGNSSObservationTypeLeaf(treeItemType))
+					this.loadGNSSObservations(observationItemValue, selectedObservationItemValuesArray);
+			}
+			break;
+
+		case REFERENCE_VERTICAL_DEFLECTION_LEAF:
+		case STOCHASTIC_VERTICAL_DEFLECTION_LEAF:
+		case UNKNOWN_VERTICAL_DEFLECTION_LEAF:
+			if (itemValue instanceof VerticalDeflectionTreeItemValue) {
+				VerticalDeflectionTreeItemValue verticalDeflectionItemValue = (VerticalDeflectionTreeItemValue)itemValue;
+				VerticalDeflectionTreeItemValue[] selectedVerticalDeflectionItemValuesArray = null;
+				Set<VerticalDeflectionTreeItemValue> selectedVerticalDeflectionItemValues = new LinkedHashSet<VerticalDeflectionTreeItemValue>();
+				selectedVerticalDeflectionItemValues.add(verticalDeflectionItemValue);
+
+				if (selectedTreeItemValues != null) {
+					for (TreeItemValue selectedItem : selectedTreeItemValues) {
+						if (selectedItem instanceof VerticalDeflectionTreeItemValue)
+							selectedVerticalDeflectionItemValues.add((VerticalDeflectionTreeItemValue)selectedItem);
+					}
+				}
+				selectedVerticalDeflectionItemValuesArray = selectedVerticalDeflectionItemValues.toArray(new VerticalDeflectionTreeItemValue[selectedVerticalDeflectionItemValues.size()]);
+				this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, selectedVerticalDeflectionItemValuesArray);
+				this.loadVerticalDeflections(verticalDeflectionItemValue, selectedVerticalDeflectionItemValuesArray);
+			}
+			break;
+
+		default:
+			break;
 		}
 	}
 
-	private void searchAndReplacePointNames(String searchRegex, String replaceRegex, VerticalDeflectionTreeItemValue... selectedTreeItemValues) throws SQLException {
+	private void scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, VerticalDeflectionTreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
@@ -4343,7 +4351,7 @@ public class SQLManager {
 		}
 	}
 	
-	private void searchAndReplacePointNames(String searchRegex, String replaceRegex, PointTreeItemValue... selectedTreeItemValues) throws SQLException {
+	private void scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, PointTreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
@@ -4368,22 +4376,29 @@ public class SQLManager {
 		}
 	}
 	
-	private void searchAndReplacePointNames(String searchRegex, String replaceRegex, ObservationTreeItemValue... selectedTreeItemValues) throws SQLException {
+	private void scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, ObservationTreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
 		String sql = "SELECT "
-				+ "DISTINCT \"end_point_name\" AS \"name\" FROM \"%s\" WHERE REGEXP_MATCHES(\"end_point_name\", ?) AND \"group_id\" = ? "
+				+ "DISTINCT \"end_point_name\" AS \"name\" FROM \"%s\" JOIN \"ObservationGroup\" ON \"group_id\" = \"ObservationGroup\".\"id\" WHERE \"reference_epoch\" IN (?,?) AND REGEXP_MATCHES(\"end_point_name\", ?) AND \"group_id\" = ? "
 				+ "UNION ALL "
 				+ "SELECT "
-				+ "DISTINCT \"start_point_name\" AS \"name\" FROM \"%s\" WHERE REGEXP_MATCHES(\"start_point_name\", ?) AND \"group_id\" = ?";
+				+ "DISTINCT \"start_point_name\" AS \"name\" FROM \"%s\" JOIN \"ObservationGroup\" ON \"group_id\" = \"ObservationGroup\".\"id\" WHERE \"reference_epoch\" IN (?,?) AND REGEXP_MATCHES(\"start_point_name\", ?) AND \"group_id\" = ?";
 		
 		for (ObservationTreeItemValue observationTreeItemValue : selectedTreeItemValues) {
 			String tableName = TreeItemType.isObservationTypeLeaf(observationTreeItemValue.getItemType()) ? "ObservationApriori" : "GNSSObservationApriori";
 			PreparedStatement stmt = this.dataBase.getPreparedStatement(String.format(sql, tableName, tableName));
 			int idx = 1;
+//			stmt.setBoolean(idx++,   scopeType == ScopeType.SELECTION || scopeType == ScopeType.PROJECT || scopeType == ScopeType.REFERENCE_EPOCH);
+//			stmt.setBoolean(idx++, !(scopeType == ScopeType.SELECTION || scopeType == ScopeType.PROJECT || scopeType == ScopeType.CONTROL_EPOCH));
+			stmt.setBoolean(idx++, scopeType == ScopeType.REFERENCE_EPOCH);
+			stmt.setBoolean(idx++, scopeType != ScopeType.CONTROL_EPOCH);
 			stmt.setString(idx++, searchRegex);
 			stmt.setInt(idx++, observationTreeItemValue.getGroupId());
+			
+			stmt.setBoolean(idx++, scopeType == ScopeType.REFERENCE_EPOCH);
+			stmt.setBoolean(idx++, scopeType != ScopeType.CONTROL_EPOCH);
 			stmt.setString(idx++, searchRegex);
 			stmt.setInt(idx++, observationTreeItemValue.getGroupId());
 			
@@ -4401,7 +4416,7 @@ public class SQLManager {
 		}
 	}
 	
-	private void searchAndReplacePointNames(String searchRegex, String replaceRegex, CongruenceAnalysisTreeItemValue... selectedTreeItemValues) throws SQLException {
+	private void scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, CongruenceAnalysisTreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
