@@ -299,9 +299,9 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIGNSSObservationTableBuilder.tableheader.redundancy.y.label", "ry");
 		tooltipText = i18n.getString("UIGNSSObservationTableBuilder.tableheader.redundancy.y.tooltip", "Redundancy of y-component");
-		cellValueType = CellValueType.STATISTIC;
+		cellValueType = CellValueType.PERCENTAGE;
 		columnContentType = ColumnContentType.REDUNDANCY_Y;
-		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, GNSSObservationRow::redundancyYProperty, getDoubleCallback(cellValueType), this.type != ObservationType.GNSS1D ? ColumnType.APOSTERIORI_GNSS_OBSERVATION : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
@@ -310,9 +310,9 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIGNSSObservationTableBuilder.tableheader.redundancy.x.label", "rx");
 		tooltipText = i18n.getString("UIGNSSObservationTableBuilder.tableheader.redundancy.x.tooltip", "Redundancy of x-component");
-		cellValueType = CellValueType.STATISTIC;
+		cellValueType = CellValueType.PERCENTAGE;
 		columnContentType = ColumnContentType.REDUNDANCY_X;
-		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, GNSSObservationRow::redundancyXProperty, getDoubleCallback(cellValueType), this.type != ObservationType.GNSS1D ? ColumnType.APOSTERIORI_GNSS_OBSERVATION : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
@@ -321,9 +321,9 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIGNSSObservationTableBuilder.tableheader.redundancy.z.label", "rz");
 		tooltipText = i18n.getString("UIGNSSObservationTableBuilder.tableheader.redundancy.z.tooltip", "Redundancy of z-component");
-		cellValueType = CellValueType.STATISTIC;
+		cellValueType = CellValueType.PERCENTAGE;
 		columnContentType = ColumnContentType.REDUNDANCY_Z;
-		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, GNSSObservationRow::redundancyZProperty, getDoubleCallback(cellValueType), this.type != ObservationType.GNSS2D ?ColumnType.APOSTERIORI_GNSS_OBSERVATION : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);

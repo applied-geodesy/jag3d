@@ -22,8 +22,8 @@
 		</#if>
 		
 		<#if group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
-			<td><@printFormattedNumber value=group.redundancy_y format=df_statistic/></td>
-			<td><@printFormattedNumber value=group.redundancy_x format=df_statistic/></td>
+			<td><@printFormattedNumber value=group.redundancy_y format=df_percentage/></td>
+			<td><@printFormattedNumber value=group.redundancy_x format=df_percentage/></td>
 			
 			<#if sexagesimal_angle_residual??>
 				<#assign signum  = (group.max_residual_y < 0)?then(-1, 1)>
