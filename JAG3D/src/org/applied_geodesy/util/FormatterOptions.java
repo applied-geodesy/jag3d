@@ -99,24 +99,24 @@ public class FormatterOptions {
 	}
 	
 	private void init() {
-		LengthUnit LENGTH_UNIT = LengthUnit.METER;
-		AngleUnit  ANGLE_UNIT  = AngleUnit.GRADIAN;
-		ScaleUnit  SCALE_UNIT  = ScaleUnit.PARTS_PER_MILLION_WRT_ONE;
-		LengthUnit VECTOR_UNIT = LengthUnit.METER;
+		LengthUnit LENGTH_UNIT = DefaultFormatterOption.getLengthUnit();
+		AngleUnit  ANGLE_UNIT  = DefaultFormatterOption.getAngleUnit();
+		ScaleUnit  SCALE_UNIT  = DefaultFormatterOption.getScaleUnit();
+		LengthUnit VECTOR_UNIT = DefaultFormatterOption.getVectorUnit();
 		
-		LengthUnit LENGTH_UNCERTAINTY_UNIT = LengthUnit.MILLIMETER;
-		AngleUnit  ANGLE_UNCERTAINTY_UNIT  = AngleUnit.MILLIGRADIAN;
-		ScaleUnit  SCALE_UNCERTAINTY_UNIT  = ScaleUnit.PARTS_PER_MILLION_WRT_ZERO;
-		LengthUnit VECTOR_UNCERTAINTY_UNIT = LengthUnit.MILLIMETER;
+		LengthUnit LENGTH_UNCERTAINTY_UNIT = DefaultFormatterOption.getLengthUncertaintyUnit();
+		AngleUnit  ANGLE_UNCERTAINTY_UNIT  = DefaultFormatterOption.getAngleUncertaintyUnit();
+		ScaleUnit  SCALE_UNCERTAINTY_UNIT  = DefaultFormatterOption.getScaleUncertaintyUnit();
+		LengthUnit VECTOR_UNCERTAINTY_UNIT = DefaultFormatterOption.getVectorUncertaintyUnit();
 		
-		LengthUnit LENGTH_RESIDUAL_UNIT = LengthUnit.MILLIMETER;
-		AngleUnit  ANGLE_RESIDUAL_UNIT  = AngleUnit.MILLIGRADIAN;
-		ScaleUnit  SCALE_RESIDUAL_UNIT  = ScaleUnit.PARTS_PER_MILLION_WRT_ZERO;
-		LengthUnit VECTOR_RESIDUAL_UNIT = LengthUnit.MILLIMETER;
+		LengthUnit LENGTH_RESIDUAL_UNIT = DefaultFormatterOption.getLengthResidualUnit();
+		AngleUnit  ANGLE_RESIDUAL_UNIT  = DefaultFormatterOption.getAngleResidualUnit();
+		ScaleUnit  SCALE_RESIDUAL_UNIT  = DefaultFormatterOption.getScaleResidualUnit();
+		LengthUnit VECTOR_RESIDUAL_UNIT = DefaultFormatterOption.getVectorResidualUnit();
 		
-		TemperatureUnit TEMPERATURE_UNIT = TemperatureUnit.DEGREE_CELSIUS;
-		PressureUnit PRESSURE_UNIT       = PressureUnit.HECTOPASCAL;
-		PercentUnit PERCENT_UNIT         = PercentUnit.PERCENT;
+		TemperatureUnit TEMPERATURE_UNIT = DefaultFormatterOption.getTemperatureUnit();
+		PressureUnit PRESSURE_UNIT       = DefaultFormatterOption.getPressureUnit();
+		PercentUnit PERCENT_UNIT         = DefaultFormatterOption.getPercentUnit();
 
 		final NumberFormat lengthFormatter = NumberFormat.getInstance(Locale.ENGLISH);
 		final NumberFormat angleFormatter  = NumberFormat.getInstance(Locale.ENGLISH);
@@ -182,26 +182,26 @@ public class FormatterOptions {
 		pressureFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 		percentFormatter.setRoundingMode(RoundingMode.HALF_EVEN);
 
-		this.setFractionDigits(lengthFormatter,      4);
-		this.setFractionDigits(angleFormatter,       5);
-		this.setFractionDigits(scaleFormatter,       2);
-		this.setFractionDigits(vectorFormatter,      7);
-		this.setFractionDigits(statisticFormatter,   2);
-		this.setFractionDigits(doubleFormatter,      5);
+		this.setFractionDigits(lengthFormatter,      DefaultFormatterOption.getLengthFractionDigits());
+		this.setFractionDigits(angleFormatter,       DefaultFormatterOption.getAngleFractionDigits());
+		this.setFractionDigits(scaleFormatter,       DefaultFormatterOption.getScaleFractionDigits());
+		this.setFractionDigits(vectorFormatter,      DefaultFormatterOption.getVectorFractionDigits());
+		this.setFractionDigits(statisticFormatter,   DefaultFormatterOption.getStatisticFractionDigits());
+		this.setFractionDigits(doubleFormatter,      DefaultFormatterOption.getDoubleFractionDigits());
 		
-		this.setFractionDigits(lengthUncertaintyFormatter, 1);
-		this.setFractionDigits(angleUncertaintyFormatter,  2);
-		this.setFractionDigits(scaleUncertaintyFormatter,  1);
-		this.setFractionDigits(vectorUncertaintyFormatter, 1);
+		this.setFractionDigits(lengthUncertaintyFormatter, DefaultFormatterOption.getLengthUncertaintyFractionDigits());
+		this.setFractionDigits(angleUncertaintyFormatter,  DefaultFormatterOption.getAngleUncertaintyFractionDigits());
+		this.setFractionDigits(scaleUncertaintyFormatter,  DefaultFormatterOption.getScaleUncertaintyFractionDigits());
+		this.setFractionDigits(vectorUncertaintyFormatter, DefaultFormatterOption.getVectorUncertaintyFractionDigits());
 				
-		this.setFractionDigits(lengthResidualFormatter,  1);
-		this.setFractionDigits(angleResidualFormatter,   2);
-		this.setFractionDigits(scaleResidualFormatter,   2);
-		this.setFractionDigits(vectorResidualFormatter,  2);
+		this.setFractionDigits(lengthResidualFormatter,  DefaultFormatterOption.getLengthResidualFractionDigits());
+		this.setFractionDigits(angleResidualFormatter,   DefaultFormatterOption.getAngleUncertaintyFractionDigits());
+		this.setFractionDigits(scaleResidualFormatter,   DefaultFormatterOption.getScaleUncertaintyFractionDigits());
+		this.setFractionDigits(vectorResidualFormatter,  DefaultFormatterOption.getVectorUncertaintyFractionDigits());
 		
-		this.setFractionDigits(temperatureFormatter,  1);
-		this.setFractionDigits(pressureFormatter,     2);
-		this.setFractionDigits(percentFormatter,      2);
+		this.setFractionDigits(temperatureFormatter,  DefaultFormatterOption.getTemperatureFractionDigits());
+		this.setFractionDigits(pressureFormatter,     DefaultFormatterOption.getPressureFractionDigits());
+		this.setFractionDigits(percentFormatter,      DefaultFormatterOption.getPercentFractionDigits());
 		
 		this.formatterOptions.put(CellValueType.LENGTH,             new FormatterOption(CellValueType.LENGTH,             lengthFormatter, LENGTH_UNIT));
 		this.formatterOptions.put(CellValueType.LENGTH_UNCERTAINTY, new FormatterOption(CellValueType.LENGTH_UNCERTAINTY, lengthUncertaintyFormatter, LENGTH_UNCERTAINTY_UNIT));
