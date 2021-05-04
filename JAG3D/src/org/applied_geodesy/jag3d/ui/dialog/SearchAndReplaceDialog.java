@@ -34,7 +34,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
@@ -50,9 +49,17 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.Pair;
+import javafx.util.StringConverter;
 
 public class SearchAndReplaceDialog {
 
+	public enum ScopeType {
+		SELECTION,
+		PROJECT,
+		REFERENCE_EPOCH,
+		CONTROL_EPOCH;
+	}
+	
 	private I18N i18n = I18N.getInstance();
 	private static SearchAndReplaceDialog searchAndReplaceDialog = new SearchAndReplaceDialog();
 	private Dialog<Pair<String, String>> dialog = null;
@@ -61,7 +68,7 @@ public class SearchAndReplaceDialog {
 	private ComboBox<String> replaceComboBox = new ComboBox<String>();
 	private RadioButton normalModeRadioButton;
 	private RadioButton regularExpressionRadioButton;
-	private CheckBox applyToWholeProjectCheckBox;
+	private ComboBox<ScopeType> scopeTypeComboBox;	
 	private TreeItemValue itemValue;
 	private TreeItemValue selectedTreeItemValues[];
 	private SearchAndReplaceDialog() {}
@@ -135,18 +142,17 @@ public class SearchAndReplaceDialog {
 				i18n.getString("SearchAndReplaceDialog.mode.regex.label", "Regular expression"), 
 				i18n.getString("SearchAndReplaceDialog.mode.regex.tooltip", "If selected, regular expression mode will be applied"));
 		
-		this.applyToWholeProjectCheckBox = this.createCheckBox(
-				i18n.getString("SearchAndReplaceDialog.scope.label", "Apply to whole project"), 
-				i18n.getString("SearchAndReplaceDialog.scope.tooltip", "If checked, the point will be renamed in the whole project"));
-		
-		this.applyToWholeProjectCheckBox.setSelected(false);
+		this.scopeTypeComboBox = this.createScopeTypeComboBox(ScopeType.SELECTION, i18n.getString("SearchAndReplaceDialog.scope.tooltip", "Select scope of application"));
 
+		Label scopeLabel  = new Label(i18n.getString("SearchAndReplaceDialog.scope.label", "Scope:"));
 		Label searchLabel  = new Label(i18n.getString("SearchAndReplaceDialog.search.label", "Find what:"));
 		Label replaceLabel = new Label(i18n.getString("SearchAndReplaceDialog.replace.label", "Replace with:"));
 		Label modeLabel    = new Label(i18n.getString("SearchAndReplaceDialog.mode.label", "Mode:"));
 		
+		scopeLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		searchLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		replaceLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		scopeLabel.setLabelFor(this.scopeTypeComboBox);
 		searchLabel.setLabelFor(this.searchComboBox);
 		replaceLabel.setLabelFor(this.replaceComboBox);
 		
@@ -165,6 +171,7 @@ public class SearchAndReplaceDialog {
 		gridPane.setPadding(new Insets(5,15,5,15)); 
 		//gridPane.setGridLinesVisible(true);
 		
+		GridPane.setHgrow(scopeLabel,   Priority.NEVER);
 		GridPane.setHgrow(searchLabel,  Priority.NEVER);
 		GridPane.setHgrow(replaceLabel, Priority.NEVER);
 		GridPane.setHgrow(modeLabel,    Priority.NEVER);
@@ -172,9 +179,12 @@ public class SearchAndReplaceDialog {
 		GridPane.setHgrow(this.searchComboBox,  Priority.ALWAYS);
 		GridPane.setHgrow(this.replaceComboBox, Priority.ALWAYS);
 		GridPane.setHgrow(hbox,                 Priority.ALWAYS);
-		GridPane.setHgrow(this.applyToWholeProjectCheckBox, Priority.ALWAYS);
+		GridPane.setHgrow(this.scopeTypeComboBox, Priority.ALWAYS);
 				
 		int row = 1;
+		gridPane.add(scopeLabel,                   0, row);
+		gridPane.add(this.scopeTypeComboBox, 1, row++);
+		
 		gridPane.add(searchLabel,           0, row);
 		gridPane.add(this.searchComboBox,   1, row++);
 
@@ -183,9 +193,8 @@ public class SearchAndReplaceDialog {
 		
 		gridPane.add(modeLabel,             0, row);
 		gridPane.add(hbox,                  1, row++);
-		
-		gridPane.add(this.applyToWholeProjectCheckBox, 1, row++);
-		
+
+			
 		Platform.runLater(new Runnable() {
 			@Override public void run() {
 				searchComboBox.requestFocus();
@@ -217,16 +226,38 @@ public class SearchAndReplaceDialog {
 		return radioButton;
 	}
 	
-	private CheckBox createCheckBox(String text, String tooltip) {
-		Label label = new Label(text);
-		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		label.setPadding(new Insets(0,0,0,3));
-		CheckBox checkBox = new CheckBox();
-		checkBox.setGraphic(label);
-		checkBox.setTooltip(new Tooltip(tooltip));
-		checkBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		checkBox.setMaxWidth(Double.MAX_VALUE);
-		return checkBox;
+	private ComboBox<ScopeType> createScopeTypeComboBox(ScopeType item, String tooltip) {
+		ComboBox<ScopeType> typeComboBox = new ComboBox<ScopeType>();
+		typeComboBox.getItems().setAll(ScopeType.values());
+		typeComboBox.getSelectionModel().select(item);
+		typeComboBox.setConverter(new StringConverter<ScopeType>() {
+
+			@Override
+			public String toString(ScopeType type) {
+				if (type == null)
+					return null;
+				switch(type) {
+				case SELECTION:
+					return i18n.getString("SearchAndReplaceDialog.scope.selection.label", "Selected items");
+				case PROJECT:
+					return i18n.getString("SearchAndReplaceDialog.scope.project.label", "Whole project");
+				case REFERENCE_EPOCH:
+					return i18n.getString("SearchAndReplaceDialog.scope.reference_epoch.label", "Project and reference epoch");
+				case CONTROL_EPOCH:
+					return i18n.getString("SearchAndReplaceDialog.scope.control_epoch.label", "Project and control epoch");
+				}
+				return null;
+			}
+
+			@Override
+			public ScopeType fromString(String string) {
+				return ScopeType.valueOf(string);
+			}
+		});
+		typeComboBox.setTooltip(new Tooltip(tooltip));
+		typeComboBox.setMinWidth(150);
+		typeComboBox.setMaxWidth(Double.MAX_VALUE);
+		return typeComboBox;
 	}
 
 	private void save() {
@@ -246,14 +277,14 @@ public class SearchAndReplaceDialog {
 				this.replaceComboBox.getItems().add(replace);
 			this.replaceComboBox.setValue(replace);
 			
-			boolean applyToWholeProject = this.applyToWholeProjectCheckBox.isSelected();
+			ScopeType scopeType = this.scopeTypeComboBox.getValue();
 			boolean regExp = this.regularExpressionRadioButton.isSelected();
 			
 			// masking values
 			if (!regExp)
 				search = "^\\Q"+search+"\\E";
 
-			SQLManager.getInstance().searchAndReplacePointNames(search, replace, applyToWholeProject, this.itemValue, this.selectedTreeItemValues);
+			SQLManager.getInstance().searchAndReplacePointNames(search, replace, scopeType, this.itemValue, this.selectedTreeItemValues);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
