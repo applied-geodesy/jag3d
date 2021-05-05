@@ -4182,11 +4182,11 @@ public class SQLManager {
 			UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
 			TreeItemType[] itemTypes = TreeItemType.values();
 			for (TreeItemType itemType : itemTypes) {
-				if (TreeItemType.isPointTypeDirectory(itemType) ||
+				if (TreeItemType.isPointTypeDirectory(itemType) && scopeType == ScopeType.PROJECT ||
 						TreeItemType.isObservationTypeDirectory(itemType) ||
 						TreeItemType.isGNSSObservationTypeDirectory(itemType) ||
-						TreeItemType.isVerticalDeflectionTypeDirectory(itemType) ||
-						TreeItemType.isCongruenceAnalysisTypeDirectory(itemType)) {
+						TreeItemType.isVerticalDeflectionTypeDirectory(itemType) && scopeType == ScopeType.PROJECT ||
+						TreeItemType.isCongruenceAnalysisTypeDirectory(itemType) && scopeType == ScopeType.PROJECT) {
 
 					TreeItem<TreeItemValue> parent = treeBuilder.getDirectoryItemByType(itemType);
 
@@ -4514,11 +4514,11 @@ public class SQLManager {
 	}
 	
 	private boolean isNameCollisions(PointTreeItemValue pointTreeItemValue, String proposedName) throws SQLException {
-		String sql = "SELECT COUNT(\"id\") > 0 AS \"collisions\" FROM \"PointApriori\" WHERE \"name\" = ? AND \"group_id\" = ?";
+		String sql = "SELECT COUNT(\"id\") > 0 AS \"collisions\" FROM \"PointApriori\" WHERE \"name\" = ?"; // AND \"group_id\" = ?";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		int idx = 1;
 		stmt.setString(idx++, proposedName);
-		stmt.setInt(idx++, pointTreeItemValue.getGroupId());
+		//stmt.setInt(idx++, pointTreeItemValue.getGroupId());
 		ResultSet rs = stmt.executeQuery();
 		
 		boolean collisions = false;
