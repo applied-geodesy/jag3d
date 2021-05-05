@@ -23,7 +23,6 @@ package org.applied_geodesy.jag3d.ui.dialog;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
@@ -64,7 +63,7 @@ public class AnalysisChartsDialog {
 	private class TickFormatChangedListener implements FormatterChangedListener {
 		@Override
 		public void formatterChanged(FormatterEvent evt) {
-			if (evt.getCellType() == CellValueType.PERCENTAGE)
+			if (evt.getCellType() == CellValueType.STATISTIC)
 				updateTickLabels(histogramChart);
 		}
 	}
@@ -208,7 +207,7 @@ public class AnalysisChartsDialog {
         xAxis.setAnimated(false);
         xAxis.setAutoRanging(false);
         
-        yAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("ResidualAnalysisDialog.chart.histogram.axis.y.label", "Probability density [%s]"), options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation()));
+        yAxis.setLabel(i18n.getString("ResidualAnalysisDialog.chart.histogram.axis.y.label", "Probability density"));
         yAxis.setForceZeroInRange(true);
         yAxis.setMinorTickVisible(false);
         yAxis.setAnimated(false);
@@ -228,12 +227,12 @@ public class AnalysisChartsDialog {
 	
 	private void updateTickLabels(AreaChart<Number,Number> areaChart) {
 		NumberAxis yAxis = (NumberAxis)areaChart.getYAxis();
-		yAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("ResidualAnalysisDialog.chart.histogram.axis.y.label", "Probability density [%s]"), options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation()));
+		yAxis.setLabel(i18n.getString("ResidualAnalysisDialog.chart.histogram.axis.y.label", "Probability density"));
 		
 		yAxis.setTickLabelFormatter(new StringConverter<Number>() {
 			@Override
 			public String toString(Number number) {
-				return options.toPercentFormat(number.doubleValue(), false);
+				return options.toStatisticFormat(number.doubleValue());
 			}
 
 			@Override
@@ -317,7 +316,7 @@ public class AnalysisChartsDialog {
 			yRange = range[1];
 			
 			if (this.gaussianProbabilityDensityFunctionCheckBox.isSelected()) {
-				range = this.plotGaussianProbabilityDensityFunction(this.histogramChart);
+				range = this.plotGaussianProbabilityDensityFunction(this.histogramChart, normalizedResiduals);
 				xRange = Math.max(xRange, range[0]);
 				yRange = Math.max(yRange, range[1]);
 			}
@@ -411,7 +410,10 @@ public class AnalysisChartsDialog {
 		return new double[] {xRange, yRange};
 	}
 	
-	private double[] plotGaussianProbabilityDensityFunction(AreaChart<Number,Number> areaChart) {
+	private double[] plotGaussianProbabilityDensityFunction(AreaChart<Number,Number> areaChart, List<Double> data) {
+//		int length = data.size();
+//		double mean = length > 1 ? this.getMean(data) : 0;
+//		double var  = length > 1 ? this.getVariance(data, mean) : 1.0;		
 		double xRange = 0, yRange = 0;
 		XYChart.Series<Number, Number> probabilityDensity = new XYChart.Series<Number, Number>();
 		for (double x = -3.9; x <= 3.9; x += 0.01) {
@@ -556,8 +558,16 @@ public class AnalysisChartsDialog {
     }
 	
 	private double getStandardGaussian(double x) {
-		final double fac = 1.0/Math.sqrt(2.0*Math.PI);
-		return fac * Math.exp(-0.5 * x*x);
+		return this.getStandardGaussian(x, 0, 1);
+	}
+	
+	private double getStandardGaussian(double x, double mu, double var) {
+		if (var <= 0)
+			return 0;
+		final double fac = 1.0/Math.sqrt(2.0*Math.PI*var);
+		
+		double dx = x - mu;
+		return fac * Math.exp(-0.5 * dx*dx/var);
 	}
 	
 	private double getVariance(List<Double> values, double mean) {
