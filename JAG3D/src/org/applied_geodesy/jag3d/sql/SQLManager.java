@@ -5007,6 +5007,7 @@ public class SQLManager {
 				+ "ON \"ObservationGroup\".\"id\" = \"ObservationApriori\".\"group_id\" "
 				+ "WHERE \"ObservationGroup\".\"enable\" = TRUE "
 				+ "AND \"ObservationApriori\".\"enable\" = TRUE "
+				+ "AND \"redundancy\" > 0 "
 				+ "AND \"type\" IN (" + inArrayValues + ") "
 				+ "ORDER BY \"normalized_residual\" ASC";
 

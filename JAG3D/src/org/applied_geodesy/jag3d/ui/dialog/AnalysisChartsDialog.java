@@ -309,20 +309,24 @@ public class AnalysisChartsDialog {
 			
 			// Sort data
 			Collections.sort(normalizedResiduals);
+			
+			int length = normalizedResiduals.size();
+			double sampleMean     = length > 1 ? this.getMean(normalizedResiduals) : 0;
+			double sampleVariance = length > 1 ? this.getVariance(normalizedResiduals, sampleMean) : 1.0;	
 
 			double xRange = 0, yRange = 0; 
-			double range[] = this.plotHistogram(this.histogramChart, normalizedResiduals);
+			double range[] = this.plotHistogram(this.histogramChart, normalizedResiduals, sampleMean, sampleVariance);
 			xRange = range[0];
 			yRange = range[1];
 			
 			if (this.gaussianProbabilityDensityFunctionCheckBox.isSelected()) {
-				range = this.plotGaussianProbabilityDensityFunction(this.histogramChart, normalizedResiduals);
+				range = this.plotGaussianProbabilityDensityFunction(this.histogramChart, normalizedResiduals, sampleMean, sampleVariance);
 				xRange = Math.max(xRange, range[0]);
 				yRange = Math.max(yRange, range[1]);
 			}
 			
 			if (this.kernelDensityEstimationCheckBox.isSelected()) {
-				range = this.plotKernelDensityEstimation(this.histogramChart, normalizedResiduals);
+				range = this.plotKernelDensityEstimation(this.histogramChart, normalizedResiduals, sampleMean, sampleVariance);
 				xRange = Math.max(xRange, range[0]);
 				yRange = Math.max(yRange, range[1]);
 			}
@@ -354,15 +358,20 @@ public class AnalysisChartsDialog {
 		}
 	}
 	
-	private double[] plotHistogram(AreaChart<Number,Number> areaChart, List<Double> data) {
+	private double[] plotHistogram(AreaChart<Number,Number> areaChart, List<Double> data, double sampleMean, double sampleVariance) {
 		int length = data.size();
-		
+		double binWidth = 0;
 		double iqr = this.getInterQuartileRange(data);
-		double binWidth = 2.0 * iqr * Math.pow(length, -1.0/3.0);
 		double minValue = data.get(0);
 		double maxValue = data.get(length - 1);
-		int numberOfBins = Math.max((int)Math.ceil((maxValue - minValue) / binWidth), 1);
+		int numberOfBins = 0;
 
+		if (iqr > 0 || sampleVariance > 0) 
+			binWidth = iqr > 0 ? 2.0 * iqr * Math.pow(length, -1.0/3.0) : 3.49 * Math.sqrt(sampleVariance) * Math.pow(length, -1.0/3.0);
+		else 
+			binWidth = (maxValue - minValue) / Math.round(2.0 * Math.pow(length, 1.0/3.0));
+
+		numberOfBins = binWidth > 0 ? Math.max((int)Math.ceil((maxValue - minValue) / binWidth), 1) : 1;
 		int bins[] = new int[numberOfBins];
 
 		for (int i = 0, j = 0; i < length; i++) {
@@ -410,13 +419,12 @@ public class AnalysisChartsDialog {
 		return new double[] {xRange, yRange};
 	}
 	
-	private double[] plotGaussianProbabilityDensityFunction(AreaChart<Number,Number> areaChart, List<Double> data) {
-//		int length = data.size();
-//		double mean = length > 1 ? this.getMean(data) : 0;
-//		double var  = length > 1 ? this.getVariance(data, mean) : 1.0;		
+	private double[] plotGaussianProbabilityDensityFunction(AreaChart<Number,Number> areaChart, List<Double> data, double sampleMean, double sampleVariance) {
+
 		double xRange = 0, yRange = 0;
 		XYChart.Series<Number, Number> probabilityDensity = new XYChart.Series<Number, Number>();
 		for (double x = -3.9; x <= 3.9; x += 0.01) {
+			//double pdf = this.getStandardGaussian(x, sampleMean, sampleVariance);
 			double pdf = this.getStandardGaussian(x);
 			probabilityDensity.getData().add(new XYChart.Data<Number, Number>(x,  pdf));
 			xRange = Math.max(xRange, Math.abs(x));
@@ -435,26 +443,31 @@ public class AnalysisChartsDialog {
 		return new double[] {xRange, yRange};
 	}
 	
-	private double[] plotKernelDensityEstimation(AreaChart<Number,Number> areaChart, List<Double> data) {
+	private double[] plotKernelDensityEstimation(AreaChart<Number,Number> areaChart, List<Double> data, double sampleMean, double sampleVariance) {
 		double iqr = this.getInterQuartileRange(data);
 		int length = data.size();
-		double mean = length > 1 ? this.getMean(data) : 0;
-		double std  = length > 1 ? Math.sqrt(this.getVariance(data, mean)) : 1.0;		
+		//double mean = length > 1 ? this.getMean(data) : 0;
+		//double std  = length > 1 ? Math.sqrt(this.getVariance(data, mean)) : 1.0;
+		double std = sampleVariance > 0 ? Math.sqrt(sampleVariance) : 1.0;
 		double minValue = data.get(0);
 		double maxValue = data.get(length - 1);
 		double xRange = 0, yRange = 0;
-		double bandWidth = 0.9 * Math.min(std, iqr / 1.34897950039216) * Math.pow(length, -1.0/5.0); // 1.34... == norminv(0.75)*2
-
+		double bandWidth = 0;
+		
+		if (iqr > 0 && std > 0)
+			bandWidth = 0.9 * Math.min(std, iqr / 1.34897950039216) * Math.pow(length, -1.0/5.0); // 1.34... == norminv(0.75)*2
+		else
+			bandWidth = length > 0 ? Math.pow(4.0 * Math.pow(std, 5)/3.0/length, 1/5) : 1;
 
 		XYChart.Series<Number, Number> kernelEstimation = new XYChart.Series<Number, Number>();
 		
-		double t = mean;
+		double t = sampleMean;
 		double yt = Double.MAX_VALUE;
 		double inc = 0.01;
 		int cnt = 0;
 		do {
 			yt = 0;
-			t = mean - (cnt++) * inc;  
+			t = sampleMean - (cnt++) * inc;  
 			for (int j = 0; j < length; j++) {
 				double x = (t - (data.get(j))) /  bandWidth;
 				double pdf = this.getStandardGaussian(x);
@@ -467,12 +480,12 @@ public class AnalysisChartsDialog {
 		} 
 		while( Math.abs(yt) > 0.0005 || t > minValue );
 		
-		t = mean;
+		t = sampleMean;
 		yt = Double.MAX_VALUE;
 		cnt = 0;
 		do {
 			yt = 0;
-			t = mean + (++cnt) * inc;  
+			t = sampleMean + (++cnt) * inc;  
 			for (int j = 0; j < length; j++) {
 				double x = (t - (data.get(j))) /  bandWidth;
 				double pdf = this.getStandardGaussian(x);
@@ -553,10 +566,9 @@ public class AnalysisChartsDialog {
     	double n = values.size();
     	double q1 = values.get((int)Math.floor(0.25 * n));
     	double q3 = values.get((int)Math.floor(0.75 * n));
-    	
 		return q3 - q1;
     }
-	
+		
 	private double getStandardGaussian(double x) {
 		return this.getStandardGaussian(x, 0, 1);
 	}
