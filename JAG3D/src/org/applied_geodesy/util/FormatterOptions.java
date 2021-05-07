@@ -195,9 +195,9 @@ public class FormatterOptions {
 		this.setFractionDigits(vectorUncertaintyFormatter, DefaultFormatterOption.getVectorUncertaintyFractionDigits());
 				
 		this.setFractionDigits(lengthResidualFormatter,  DefaultFormatterOption.getLengthResidualFractionDigits());
-		this.setFractionDigits(angleResidualFormatter,   DefaultFormatterOption.getAngleUncertaintyFractionDigits());
-		this.setFractionDigits(scaleResidualFormatter,   DefaultFormatterOption.getScaleUncertaintyFractionDigits());
-		this.setFractionDigits(vectorResidualFormatter,  DefaultFormatterOption.getVectorUncertaintyFractionDigits());
+		this.setFractionDigits(angleResidualFormatter,   DefaultFormatterOption.getAngleResidualFractionDigits());
+		this.setFractionDigits(scaleResidualFormatter,   DefaultFormatterOption.getScaleResidualFractionDigits());
+		this.setFractionDigits(vectorResidualFormatter,  DefaultFormatterOption.getVectorResidualFractionDigits());
 		
 		this.setFractionDigits(temperatureFormatter,  DefaultFormatterOption.getTemperatureFractionDigits());
 		this.setFractionDigits(pressureFormatter,     DefaultFormatterOption.getPressureFractionDigits());
