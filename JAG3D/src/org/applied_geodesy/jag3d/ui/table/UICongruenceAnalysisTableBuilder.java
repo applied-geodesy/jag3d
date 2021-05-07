@@ -137,7 +137,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.reference.epoch.name.label", "Point-Id (Reference epoch)");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.reference.epoch.name.tooltip", "Id of the point w.r.t. reference epoch");
 		cellValueType = CellValueType.STRING;
-		columnContentType = ColumnContentType.POINT_NAME;
+		columnContentType = ColumnContentType.START_POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::nameInReferenceEpochProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true); 
 		table.getColumns().add(stringColumn);
@@ -147,7 +147,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.control.epoch.name.label", "Point-Id (Control epoch)");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.control.epoch.name.tooltip", "Id of the point w.r.t. control epoch");
 		cellValueType = CellValueType.STRING;
-		columnContentType = ColumnContentType.POINT_NAME;
+		columnContentType = ColumnContentType.END_POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::nameInControlEpochProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true);
 		table.getColumns().add(stringColumn);
