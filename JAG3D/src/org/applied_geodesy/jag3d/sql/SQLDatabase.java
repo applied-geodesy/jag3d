@@ -38,6 +38,7 @@ import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTas
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.io.ImportOption;
+import org.applied_geodesy.jag3d.ui.table.column.TableContentType;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.DefaultTableRowHighlightValue;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
@@ -231,6 +232,9 @@ class SQLDatabase {
 		
 		// clear column properties
 		sqls.put(20210312.0001, "DELETE FROM \"TableColumnProperty\";\r\n");
+		
+		// clear column properties for congruence analysis tables
+		sqls.put(20210315.0001, "DELETE FROM \"TableColumnProperty\" WHERE \"table_type\" IN (" + TableContentType.CONGRUENCE_ANALYSIS_1D.getId() + ", " + TableContentType.CONGRUENCE_ANALYSIS_2D.getId() + ", " + TableContentType.CONGRUENCE_ANALYSIS_3D.getId() + ");\r\n");
 		
 		return sqls;
 	}
