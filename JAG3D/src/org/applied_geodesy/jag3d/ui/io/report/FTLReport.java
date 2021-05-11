@@ -287,6 +287,8 @@ public class FTLReport {
 			this.setParam("project_project_id",  rs.getString("project_id"));
 			this.setParam("project_date",        new Date(rs.getTimestamp("date").getTime()));
 		}
+		
+		this.setParam("report_creation_date",  new Date(System.currentTimeMillis()));
 	}
 
 	private void addPrincipalComponent() throws SQLException {

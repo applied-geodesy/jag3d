@@ -63,8 +63,8 @@
 			<meta charset="UTF-8">
 			<meta name="generator" content="JUniForm - Java Unified Form Fitting v${version?string["#"]}">
 			<meta name="application-name" content="JUniForm - Java Unified Form Fitting - (c) by Michael Loesler - https://software.applied-geodesy.org">
-			<#if report_date??>
-				<meta name="date" content="${report_date?datetime?string("yyyy-MM-dd'T'HH:mm:ss")}">
+			<#if report_creation_date??>
+				<meta name="date" content="${report_creation_date?datetime?string("yyyy-MM-dd'T'HH:mm:ss")}">
 			</#if>
 			<link rel="shortcut icon" href="data:image/x-icon;base64,<#include "default/favicon.ftlh" parse=false>" type="image/x-icon">
 			<style><#include "default/style.css" parse=false></style>

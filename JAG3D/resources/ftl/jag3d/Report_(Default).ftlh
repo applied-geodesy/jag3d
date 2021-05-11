@@ -56,7 +56,7 @@
 			<meta name="application-name" content="JAG3D - Java Applied Geodesy 3D - (c) by Michael Loesler - https://software.applied-geodesy.org">
 			<meta name="author" content="${project_operator}">
 			<meta name="description" content="${project_description}">
-			<meta name="date" content="${project_date?datetime?string("yyyy-MM-dd'T'HH:mm:ss")}">
+			<meta name="date" content="${report_creation_date?datetime?string("yyyy-MM-dd'T'HH:mm:ss")}">
 			<link rel="shortcut icon" href="data:image/x-icon;base64,<#include "default/favicon.ftlh" parse=false>" type="image/x-icon">
 			<style><#include "default/style.css" parse=false></style>
 			<script><#include "default/javascript.js" parse=false></script>

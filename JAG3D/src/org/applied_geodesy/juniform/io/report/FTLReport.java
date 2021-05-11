@@ -232,7 +232,7 @@ public class FTLReport {
 	}
 	
 	private void addMetaData() {
-		this.setParam("report_date", new Date());
+		this.setParam("report_creation_date",  new Date(System.currentTimeMillis()));
 		this.setParam("version", org.applied_geodesy.version.juniform.Version.get());
 		this.setParam("estimation_type", this.adjustment.getEstimationType());
 	}
