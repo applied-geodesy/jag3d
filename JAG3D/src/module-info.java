@@ -39,7 +39,7 @@ module org.applied_geodesy.jag3d {
 	requires GeoTra;
 
 	requires org.hsqldb;
-	requires org.hsqldb.cmdline;
+	requires org.hsqldb.sqltool;
 	
 	requires java.desktop;
 	requires java.logging;

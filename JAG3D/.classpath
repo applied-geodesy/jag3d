@@ -17,11 +17,6 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/freemarker.jar">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/CoordTrans.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
@@ -72,12 +67,17 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/hsqldb-2.5.1.jar">
+	<classpathentry kind="lib" path="lib/hsqldb-2.6.0.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/sqltool-2.5.1.jar">
+	<classpathentry kind="lib" path="lib/sqltool-2.6.0.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/freemarker-2.3.31.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
