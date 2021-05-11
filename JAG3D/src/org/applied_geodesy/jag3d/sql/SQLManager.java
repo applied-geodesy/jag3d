@@ -2520,7 +2520,7 @@ public class SQLManager {
 			return;
 
 		String sql = "MERGE INTO \"ProjectMetadata\" USING (VALUES "
-				+ "(CAST(? AS INT), ?, ?, ?, ?, ?, ?) "
+				+ "(CAST(? AS INT), ?, ?, ?, CAST(? AS TIMESTAMP), ?, ?) "
 				+ ") AS \"vals\" (\"id\", \"name\", \"operator\", \"description\", \"date\", \"customer_id\", \"project_id\") ON \"ProjectMetadata\".\"id\" = \"vals\".\"id\" AND \"ProjectMetadata\".\"id\" = 1 "
 				+ "WHEN MATCHED THEN UPDATE SET "
 				+ "\"ProjectMetadata\".\"name\"        = \"vals\".\"name\", "
