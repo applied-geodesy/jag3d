@@ -332,7 +332,7 @@ public class FeatureAdjustmentDialog {
 			case NOT_INITIALISED:
 			case NO_CONVERGENCE:
 			case OUT_OF_MEMORY:
-			case ROBUST_ESTIMATION_FAILD:
+			case ROBUST_ESTIMATION_FAILED:
 			case SINGULAR_MATRIX:
 				break;
 
