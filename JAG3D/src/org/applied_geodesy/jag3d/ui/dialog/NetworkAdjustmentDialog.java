@@ -309,7 +309,7 @@ public class NetworkAdjustmentDialog {
 			case NOT_INITIALISED:
 			case NO_CONVERGENCE:
 			case OUT_OF_MEMORY:
-			case ROBUST_ESTIMATION_FAILD:
+			case ROBUST_ESTIMATION_FAILED:
 			case SINGULAR_MATRIX:
 				break;
 
@@ -444,7 +444,7 @@ public class NetworkAdjustmentDialog {
 				if (result != null) {
 					switch (result) {					
 					case NO_CONVERGENCE:
-					case ROBUST_ESTIMATION_FAILD:
+					case ROBUST_ESTIMATION_FAILED:
 						OptionDialog.showErrorDialog(
 								i18n.getString("NetworkAdjustmentDialog.message.error.failed.noconvergence.title",  "Network adjustment failed"),
 								i18n.getString("NetworkAdjustmentDialog.message.error.failed.noconvergence.header", "Iteration process diverges"),
