@@ -53,20 +53,28 @@
 			</dd>
 			
 			<#if projection_type??>
-				<dt>Beobachtungsreduktionen</dt>
+				<dt>Koordinatensystem</dt>
 				<dd>
-					<!--
-					<ul>
-						<#if projection_earth_radius??><li>Erdradius ${projection_earth_radius?string[df_length]} ${unit_abbr_length}</li></#if>
-						<#if projection_reference_height??><li>Referenzh&ouml;he ${projection_reference_height?string[df_length]} ${unit_abbr_length}</li></#if>
-					</ul>
-					-->
-					<ul>
-						<#if reduction_distance?? && reduction_distance && projection_type == 'GAUSS_KRUEGER'><li>Gau&szlig;-Kr&uuml;ger Streckenreduktion</li></#if>
-						<#if reduction_direction?? && reduction_direction && projection_type == 'GAUSS_KRUEGER'><li>Gau&szlig;-Kr&uuml;ger Richtungsreduktion</li></#if>
+					<#if projection_type == 'LOCAL_SPHERICAL'>
+						Lokal sph&auml;risches Erdmodell mit kartesischen Koordinaten
+					<#elseif projection_type == 'GAUSS_KRUEGER'>
+						Gau&szlig;-Kr&uuml;ger Projektion
+					<#elseif projection_type == 'UTM'>
+						Universal Transverse Mercator (UTM) Projektion
+					<#elseif projection_type == 'LOCAL_CARTESIAN'>
+						Lokal kartesisches System
+					</#if>
 						
-						<#if reduction_distance?? && reduction_distance && projection_type == 'UTM'><li>UTM Streckenreduktion</li></#if>
-						<#if reduction_direction?? && reduction_direction && projection_type == 'UTM'><li>UTM Richtungsreduktion</li></#if>
+					<ul>
+						<#if (reduction_earth_curvature?? && reduction_earth_curvature || reduction_height?? && reduction_height || reduction_distance?? && reduction_distance || reduction_direction?? && reduction_direction || projection_type == 'LOCAL_SPHERICAL') && projection_earth_radius??><li>Erdradius: R<sub>0</sub> = ${projection_earth_radius?string[df_length]} ${unit_abbr_length}</li></#if>
+						<#if (reduction_height?? && reduction_height || projection_type == 'LOCAL_SPHERICAL') && projection_reference_height??><li>Referenzh&ouml;he: h<sub>0</sub> = ${projection_reference_height?string[df_length]} ${unit_abbr_length}</li></#if>
+						
+						<#if projection_type == 'LOCAL_SPHERICAL'>
+							<#if projection_pivot_x0?? && projection_pivot_y0?? && projection_pivot_z0??><li>Pivotpunkt: Y<sub>0</sub> = ${projection_pivot_y0?string[df_length]} ${unit_abbr_length}, X<sub>0</sub> = ${projection_pivot_x0?string[df_length]} ${unit_abbr_length}, Z<sub>0</sub> = ${projection_pivot_z0?string[df_length]} ${unit_abbr_length}</li></#if>
+						</#if>
+
+						<#if reduction_distance?? && reduction_distance && (projection_type == 'GAUSS_KRUEGER' || projection_type == 'UTM')><li>Streckenreduktion</li></#if>
+						<#if reduction_direction?? && reduction_direction && (projection_type == 'GAUSS_KRUEGER' || projection_type == 'UTM')><li>Richtungsreduktion</li></#if>
 						
 						<#if reduction_height?? && reduction_height><li>H&ouml;henreduktion</li></#if>
 						<#if reduction_earth_curvature?? && reduction_earth_curvature><li>Erdkr&uuml;mmungsreduktion</li></#if>

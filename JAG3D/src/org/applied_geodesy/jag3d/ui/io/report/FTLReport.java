@@ -314,9 +314,9 @@ public class FTLReport {
 
 	private void addProjectionAndReductions() throws SQLException {
 		String sql = "SELECT "
-				+ "\"projection_type\", \"reference_height\", \"earth_radius\", \"type\" AS \"task_type\" "
+				+ "\"projection_type\", \"reference_height\", \"earth_radius\", \"x0\", \"y0\", \"z0\", \"type\" AS \"task_type\" "
 				+ "FROM \"ReductionTask\" "
-				+ "JOIN \"ReductionDefinition\" ON \"ReductionTask\".\"reduction_id\" = \"ReductionDefinition\".\"id\" "
+				+ "RIGHT JOIN \"ReductionDefinition\" ON \"ReductionTask\".\"reduction_id\" = \"ReductionDefinition\".\"id\" "
 				+ "WHERE \"ReductionDefinition\".\"id\" = 1";
 		
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -327,27 +327,43 @@ public class FTLReport {
 			ReductionTaskType taskType    = ReductionTaskType.getEnumByValue(rs.getInt("task_type"));
 			double referenceHeight        = rs.getDouble("reference_height");
 			double earthRadius            = rs.getDouble("earth_radius");
-	
-			if (taskType == null) 
-				continue;
+			double pivotPointX0           = rs.getDouble("x0");
+			double pivotPointY0           = rs.getDouble("y0");
+			double pivotPointZ0           = rs.getDouble("z0");
 
-			this.setParam("projection_type",             projectionType.name());
-			this.setParam("projection_reference_height", referenceHeight);
-			this.setParam("projection_earth_radius",     earthRadius);
+			// set default value
+			this.setParam("projection_type",   ProjectionType.LOCAL_CARTESIAN);
 			
-			switch(taskType) {
-			case DIRECTION:
-				this.setParam("reduction_direction", projectionType != ProjectionType.NONE);
-				break;
-			case DISTANCE:
-				this.setParam("reduction_distance", projectionType != ProjectionType.NONE);
-				break;
-			case EARTH_CURVATURE:
-				this.setParam("reduction_earth_curvature", Boolean.TRUE);
-				break;
-			case HEIGHT:
-				this.setParam("reduction_height", Boolean.TRUE);
-				break;			
+			if (projectionType == ProjectionType.LOCAL_SPHERICAL) {
+				this.setParam("projection_type",             projectionType.name());
+				this.setParam("projection_reference_height", referenceHeight);
+				this.setParam("projection_earth_radius",     earthRadius);
+				this.setParam("projection_pivot_x0",         pivotPointX0);
+				this.setParam("projection_pivot_y0",         pivotPointY0);
+				this.setParam("projection_pivot_z0",         pivotPointZ0);
+			}
+			else {			
+				if (taskType == null) 
+					continue;
+
+				this.setParam("projection_type",             projectionType.name());
+				this.setParam("projection_reference_height", referenceHeight);
+				this.setParam("projection_earth_radius",     earthRadius);
+
+				switch(taskType) {
+				case DIRECTION:
+					this.setParam("reduction_direction", projectionType != ProjectionType.LOCAL_CARTESIAN);
+					break;
+				case DISTANCE:
+					this.setParam("reduction_distance", projectionType != ProjectionType.LOCAL_CARTESIAN);
+					break;
+				case EARTH_CURVATURE:
+					this.setParam("reduction_earth_curvature", Boolean.TRUE);
+					break;
+				case HEIGHT:
+					this.setParam("reduction_height", Boolean.TRUE);
+					break;			
+				}
 			}
 		} 
 	}
