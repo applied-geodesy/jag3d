@@ -34,10 +34,11 @@ public enum EstimationStateType {
 	UNSCENTED_TRANSFORMATION_STEP(0),
 	INTERRUPT(-1),
 	SINGULAR_MATRIX(-2),
-	ROBUST_ESTIMATION_FAILD(-3),
+	ROBUST_ESTIMATION_FAILED(-3),
 	NO_CONVERGENCE(-4),
 	NOT_INITIALISED(-5),
-	OUT_OF_MEMORY(-6);
+	OUT_OF_MEMORY(-6),
+	;
 	
 	private int id;
 	private EstimationStateType(int id) {
