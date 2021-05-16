@@ -29,7 +29,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -115,6 +114,7 @@ public class NetworkAdjustment implements Runnable {
 	private boolean interrupt          = false,
 					freeNetwork	 	   = false,
 					congruenceAnalysis = false,
+					proofOfDatumDefectDetection = false,
 					applyAposterioriVarianceOfUnitWeight = true;
 
 	private double maxDx            = Double.MIN_VALUE,
@@ -2030,14 +2030,16 @@ public class NetworkAdjustment implements Runnable {
 
 		// ermittle Rank-Defekt anhand der Beobachtungen
 		this.freeNetwork = this.freeNetwork || (this.referencePoints == null || this.referencePoints.isEmpty()) && (this.stochasticPoints == null || this.stochasticPoints.isEmpty());
-		this.detectRankDefect();
 
-		if (this.freeNetwork && (this.datumPoints == null || this.datumPoints.isEmpty())) {
-			this.currentEstimationStatus = EstimationStateType.SINGULAR_MATRIX;
-	    	this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-	    	return this.currentEstimationStatus;
+		if (this.freeNetwork) {
+			if (this.datumPoints == null || this.datumPoints.isEmpty()) {
+				this.currentEstimationStatus = EstimationStateType.SINGULAR_MATRIX;
+				this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+				return this.currentEstimationStatus;
+			}
+			this.detectRankDefect();
 		}
-		
+	
 		// Fuehre die Strain-Parameter als mgl. Zusatzparameter mit ins Modell ein
 		if (this.freeNetwork && this.congruenceAnalysis)
 			this.addStrainParametersToModel();
@@ -2218,7 +2220,7 @@ public class NetworkAdjustment implements Runnable {
 					else if (runs-- <= 1) {
 						if (estimateCompleteModel) {
 							if (this.estimationType == EstimationType.L1NORM) {
-								this.currentEstimationStatus = EstimationStateType.ROBUST_ESTIMATION_FAILD;
+								this.currentEstimationStatus = EstimationStateType.ROBUST_ESTIMATION_FAILED;
 								this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
 								return this.currentEstimationStatus;
 							}
@@ -4101,8 +4103,7 @@ public class NetworkAdjustment implements Runnable {
 		}
 		return false;
 	}
-	
-	
+
 	/**
 	 * Fuegt einen varianzfreien Punkt dem Projekt hinzu
 	 * @param point
@@ -4177,7 +4178,7 @@ public class NetworkAdjustment implements Runnable {
 	public boolean addNewPoint(Point point, VerticalDeflectionType verticalDeflectionType) {
 		int dim = point.getDimension();
 		
-		if (verticalDeflectionType != null && verticalDeflectionType != VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION)
+		if (verticalDeflectionType != null && verticalDeflectionType == VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION)
 			dim += 2;
 		
 		if (this.allPoints.containsKey(point.getName())) {
@@ -4185,9 +4186,9 @@ public class NetworkAdjustment implements Runnable {
 					"ID " + point.getName() + " existiert bereits!");
 			return false;
 		}
-		else if (dim > point.getObservations().size()){
+		else if (dim > point.getObservations().size()) {
 			System.err.println(this.getClass() + "\nFehler, Punkt "+point.getName()+" besitzt nicht genuegend " +
-					"Beobachtungen um bestimmt zu werden! Punkt wird ignoriert. Dim = "+ point.getDimension()+", Obs = " + point.getObservations().size() );
+					"Beobachtungen um bestimmt zu werden! Punkt wird ignoriert. Dim = "+ dim +", Obs = " + point.getObservations().size() );
 			return false;
 		}
 		this.addUnknownParameter( point );
@@ -4273,19 +4274,24 @@ public class NetworkAdjustment implements Runnable {
 		return this.unknownParameters;
 	}
 	
-	/** 
-	 * Liefert den ermittelten Defekt der Normalgleichung
-	 * @return d
+	/**
+	 * Bestimmt den theoretischen Defekt der Normalgleichung basierend auf den terrestrischen Beobachtungen
+	 * Wahlweise wird eine Defekt-Analyse durchgefuehrt. 
+	 * @return RankDefect
+	 * @throws IllegalArgumentException
+	 * @throws NotConvergedException
 	 */
 	public RankDefect detectRankDefect() {
 		if (!this.freeNetwork || this.rankDefect.isUserDefinedRankDefect())
 			return this.rankDefect;
-
+	
 		this.rankDefect.reset();
 		
 		boolean is3DNet = false;
 		boolean is2DNet = false;
 		boolean is1DNet = false;
+		
+		int eigenValueDefectCounter = -1;
 		
 		for (int i=0; i<this.datumPoints.size(); i++) {
 			Point point = this.datumPoints.get(i);
@@ -4306,6 +4312,45 @@ public class NetworkAdjustment implements Runnable {
 				is1DNet = true;
 		}
 		
+		if (this.proofOfDatumDefectDetection) {
+			try {
+				int maxDefect = 0;
+				if (is1DNet)
+					maxDefect = 2;
+				else if (is2DNet)
+					maxDefect = 4;
+				else
+					maxDefect = 7;
+				maxDefect = Math.min(maxDefect, this.numberOfUnknownParameters); 
+				// Der Index ist Eins-Index-basierend, d.h., der kleinste Eigenwert hat den Index Eins und der groesste ist am Index n!
+				NormalEquationSystem neq = this.createNormalEquation();
+				UpperSymmPackMatrix N = neq.getMatrix();
+
+				Matrix eig[] = MathExtension.eig(N, this.numberOfUnknownParameters, 1, maxDefect, false);
+
+				double values[] = new double[maxDefect];
+				double threshold = 0;
+				for (int i = 0; i < maxDefect; i++) {
+					values[i] = Math.abs(eig[0].get(i, i));
+					if (is1DNet && i < 1)
+						threshold += values[i];
+					else if (is2DNet && i < 2)
+						threshold += values[i] / 2.0;
+					else if (is3DNet && i < 3)
+						threshold += values[i] / 3.0;
+				}
+				threshold = 10 * (threshold + SQRT_EPS);
+
+				eigenValueDefectCounter = 0;
+				for (int i = 0; i < maxDefect; i++)
+					eigenValueDefectCounter += Math.abs(eig[0].get(i, i)) < threshold ? 1 : 0;
+			} 
+			catch (IllegalArgumentException | NotConvergedException e) {
+				eigenValueDefectCounter = -1;
+				e.printStackTrace();
+			}
+		}
+		
 		// Setzte alle mgl. Defekte, die von den Beobachtungen 
 		// anschließend festgesetzt werden koennen. Translation
 		// ist bereits festgesetzt in Schleife drueber	
@@ -4314,7 +4359,7 @@ public class NetworkAdjustment implements Runnable {
 			this.rankDefect.setRotationX(DefectType.FREE);
 			this.rankDefect.setRotationY(DefectType.FREE);
 		}
-		if(is2DNet){
+		if (is2DNet){
 			this.rankDefect.setScaleXY(DefectType.FREE);
 			this.rankDefect.setRotationZ(DefectType.FREE);
 		}
@@ -4324,13 +4369,12 @@ public class NetworkAdjustment implements Runnable {
 			this.rankDefect.setRotationY(DefectType.FREE);
 			this.rankDefect.setRotationZ(DefectType.FREE);
 		}
-	
-		Set<String> deltaH2Points3DIds = new HashSet<String>();
-		int deltaH2Points3D  = 0;
-		int zenithangle3DOFStation = 0;
-		int gnss1DCount      = 0;
-		int gnss2DCount      = 0;
-		int gnss3DCount      = 0;
+
+		int deltaH2PointsWithKnownDeflections       = 0;
+		int zenithangleStationsWithKnownDeflections = 0;
+		int gnss1DCount = 0;
+		int gnss2DCount = 0;
+		int gnss3DCount = 0;
 		
 		for (int i=0; i<this.numberOfObservations; i++) {
 			Observation observation = this.projectObservations.get(i);
@@ -4343,69 +4387,77 @@ public class NetworkAdjustment implements Runnable {
 				continue;
 			
 			if (observation instanceof DeltaZ) {
-				// muss dim == 3 sein, darf keine Lotabweichungen haben oder aber besitzt Lotabweichungen die gleichzeitig aber auch Beobachtungen sind
-				if ((observation.getStartPoint().getDimension() == 3 && observation.getEndPoint().getDimension() == 3) && 
+				// muss dim == 1 oder 3 sein, darf keine Lotabweichungen haben oder aber besitzt Lotabweichungen die gleichzeitig aber auch Beobachtungen sind
+				if ((observation.getStartPoint().getDimension() != 2 && observation.getEndPoint().getDimension() != 2) && 
 						(!observation.getStartPoint().hasUnknownDeflectionParameters() || 
 								!observation.getEndPoint().hasUnknownDeflectionParameters() ||
 								observation.getStartPoint().hasUnknownDeflectionParameters() && observation.getStartPoint().hasObservedDeflectionParameters() ||
 								observation.getEndPoint().hasUnknownDeflectionParameters() && observation.getEndPoint().hasObservedDeflectionParameters() )) {
-					deltaH2Points3D++;
+
 					if (!observation.getStartPoint().hasUnknownDeflectionParameters())
-						deltaH2Points3DIds.add(observation.getStartPoint().getName());
+						deltaH2PointsWithKnownDeflections++;
 					if (!observation.getEndPoint().hasUnknownDeflectionParameters())
-						deltaH2Points3DIds.add(observation.getEndPoint().getName());
+						deltaH2PointsWithKnownDeflections++;
 				}
 				if (!is3DNet) {
 					if (!((DeltaZ)observation).getScale().isEnable())
 						this.rankDefect.setScaleZ(DefectType.FIXED);
-					else
+					else if (this.rankDefect.getScaleZ() != DefectType.FIXED)
 						this.rankDefect.setScaleZ(DefectType.FREE);
 
-					this.rankDefect.setRotationX(DefectType.FIXED);
-					this.rankDefect.setRotationY(DefectType.FIXED);
+//					this.rankDefect.setRotationX(DefectType.FIXED);
+//					this.rankDefect.setRotationY(DefectType.FIXED);
 				}
 				else {
 					if (!((DeltaZ)observation).getScale().isEnable())
 						this.rankDefect.setScaleXYZ(DefectType.FIXED);
-					else
+					else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
 						this.rankDefect.setScaleXYZ(DefectType.FREE);
 				}
 			}
 			else if (observation instanceof Direction) { 
 				if (!((Direction)observation).getOrientation().isEnable())
 					this.rankDefect.setRotationZ(DefectType.FIXED);
-				else 
+				else if (this.rankDefect.getRotationZ() != DefectType.FIXED)
 					this.rankDefect.setRotationZ(DefectType.FREE);
 			}
 			else if (observation instanceof HorizontalDistance) {
-				this.rankDefect.setRotationZ(DefectType.FREE);
+				if (this.rankDefect.getRotationZ() != DefectType.FIXED)
+					this.rankDefect.setRotationZ(DefectType.FREE);
+				
 				if (!is3DNet) {
 					if (!((HorizontalDistance)observation).getScale().isEnable())
 						this.rankDefect.setScaleXY(DefectType.FIXED);
-					else
+					else if (this.rankDefect.getScaleXY() != DefectType.FIXED)
 						this.rankDefect.setScaleXY(DefectType.FREE);
 				}
 				else {
 					if (!((HorizontalDistance)observation).getScale().isEnable())
 						this.rankDefect.setScaleXYZ(DefectType.FIXED);
-					else
+					else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
 						this.rankDefect.setScaleXYZ(DefectType.FREE);
 				}
 			}
 			else if (observation instanceof SlopeDistance) {
-				this.rankDefect.setRotationX(DefectType.FREE);
-				this.rankDefect.setRotationY(DefectType.FREE);
-				this.rankDefect.setRotationZ(DefectType.FREE);
+				if (this.rankDefect.getRotationX() != DefectType.FIXED)
+					this.rankDefect.setRotationX(DefectType.FREE);
+				if (this.rankDefect.getRotationY() != DefectType.FIXED)
+					this.rankDefect.setRotationY(DefectType.FREE);
+				if (this.rankDefect.getRotationZ() != DefectType.FIXED)
+					this.rankDefect.setRotationZ(DefectType.FREE);
+				
 				if (!((SlopeDistance)observation).getScale().isEnable())
 					this.rankDefect.setScaleXYZ(DefectType.FIXED);
-				else
+				else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
 					this.rankDefect.setScaleXYZ(DefectType.FREE);
 				
 			}
 			else if (observation instanceof ZenithAngle) {
-				this.rankDefect.setRotationZ(DefectType.FREE);
-				// muss dim == 3 sein, darf keine Lotabweichungen haben oder aber besitzt Lotabweichungen die gleichzeitig aber auch Beobachtungen sind
-				zenithangle3DOFStation += (observation.getStartPoint().getDimension() == 3 && 
+				if (this.rankDefect.getRotationZ() != DefectType.FIXED)
+					this.rankDefect.setRotationZ(DefectType.FREE);
+				
+				// muss dim == 3 sein, darf keine Lotabweichungen haben oder aber besitzt Lotabweichungen die gleichzeitig auch Beobachtungen sind
+				zenithangleStationsWithKnownDeflections += (observation.getStartPoint().getDimension() == 3 && 
 						(!observation.getStartPoint().hasUnknownDeflectionParameters() || 
 								observation.getStartPoint().hasUnknownDeflectionParameters() && observation.getStartPoint().hasObservedDeflectionParameters())) ? 1 : 0;
 			}
@@ -4416,24 +4468,24 @@ public class NetworkAdjustment implements Runnable {
 						if (!is3DNet) {
 							if (!((GNSSBaseline1D)observation).getScale().isEnable())
 								this.rankDefect.setScaleZ(DefectType.FIXED);
-							else
+							else if (this.rankDefect.getScaleZ() != DefectType.FIXED)
 								this.rankDefect.setScaleZ(DefectType.FREE);
 						}
 						else {
 							if (!((GNSSBaseline1D)observation).getScale().isEnable())
 								this.rankDefect.setScaleXYZ(DefectType.FIXED);
-							else
+							else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
 								this.rankDefect.setScaleXYZ(DefectType.FREE);
 						}
 
 						if (!((GNSSBaseline1D)observation).getRotationX().isEnable())
 							this.rankDefect.setRotationX(DefectType.FIXED);
-						else
+						else if (this.rankDefect.getRotationX() != DefectType.FIXED)
 							this.rankDefect.setRotationX(DefectType.FREE);
 
 						if (!((GNSSBaseline1D)observation).getRotationY().isEnable())
 							this.rankDefect.setRotationY(DefectType.FIXED);
-						else
+						else if (this.rankDefect.getRotationY() != DefectType.FIXED)
 							this.rankDefect.setRotationY(DefectType.FREE);
 					}
 				}
@@ -4444,19 +4496,19 @@ public class NetworkAdjustment implements Runnable {
 					if (gnss2DCount>1) {
 						if (!((GNSSBaseline2D)observation).getRotationZ().isEnable())
 							this.rankDefect.setRotationZ(DefectType.FIXED);
-						else 
+						else if (this.rankDefect.getRotationZ() != DefectType.FIXED)
 							this.rankDefect.setRotationZ(DefectType.FREE);
 					
 						if (!is3DNet) {
 							if (!((GNSSBaseline2D)observation).getScale().isEnable())
 								this.rankDefect.setScaleXY(DefectType.FIXED);
-							else
+							else if (this.rankDefect.getScaleXY() != DefectType.FIXED)
 								this.rankDefect.setScaleXY(DefectType.FREE);
 						}
 						else {
 							if (!((GNSSBaseline2D)observation).getScale().isEnable())
 								this.rankDefect.setScaleXYZ(DefectType.FIXED);
-							else
+							else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
 								this.rankDefect.setScaleXYZ(DefectType.FREE);
 						}
 					}
@@ -4468,48 +4520,46 @@ public class NetworkAdjustment implements Runnable {
 					if (gnss3DCount>3) {
 						if (!((GNSSBaseline3D)observation).getScale().isEnable())
 							this.rankDefect.setScaleXYZ(DefectType.FIXED);
-						else
+						else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
 							this.rankDefect.setScaleXYZ(DefectType.FREE);
 
 						if (!((GNSSBaseline3D)observation).getRotationX().isEnable())
 							this.rankDefect.setRotationX(DefectType.FIXED);
-						else
+						else if (this.rankDefect.getRotationX() != DefectType.FIXED)
 							this.rankDefect.setRotationX(DefectType.FREE);
 
 						if (!((GNSSBaseline3D)observation).getRotationY().isEnable())
 							this.rankDefect.setRotationY(DefectType.FIXED);
-						else
+						else if (this.rankDefect.getRotationY() != DefectType.FIXED)
 							this.rankDefect.setRotationY(DefectType.FREE);
 						
 						if (!((GNSSBaseline3D)observation).getRotationZ().isEnable())
 							this.rankDefect.setRotationZ(DefectType.FIXED);
-						else
+						else if (this.rankDefect.getRotationZ() != DefectType.FIXED)
 							this.rankDefect.setRotationZ(DefectType.FREE);
 					}
 				}
 			}
 		}
-		
-		deltaH2Points3D = Math.min(deltaH2Points3D, deltaH2Points3DIds.size());
 
-		if (deltaH2Points3D > 1) {
+		if (deltaH2PointsWithKnownDeflections > 1) {
 			this.rankDefect.setRotationX(DefectType.FIXED);
 			this.rankDefect.setRotationY(DefectType.FIXED);	
 		}
 		
-		if (zenithangle3DOFStation > 1) {
+		if (zenithangleStationsWithKnownDeflections > 1) {
 			this.rankDefect.setRotationX(DefectType.FIXED);
 			this.rankDefect.setRotationY(DefectType.FIXED);
 		}
 		
-		if (deltaH2Points3D == 1) {
+		if (!is1DNet && deltaH2PointsWithKnownDeflections == 1) {
 			if (this.rankDefect.getRotationX() == DefectType.FREE)
 				this.rankDefect.setRotationX(DefectType.FIXED);
 			else if (this.rankDefect.getRotationY() == DefectType.FREE)
 				this.rankDefect.setRotationY(DefectType.FIXED);
 		}
 		
-		if (zenithangle3DOFStation == 1) {
+		if (zenithangleStationsWithKnownDeflections == 1) {
 			if (this.rankDefect.getRotationX() == DefectType.FREE)
 				this.rankDefect.setRotationX(DefectType.FIXED);
 			else if (this.rankDefect.getRotationY() == DefectType.FREE)
@@ -4517,12 +4567,16 @@ public class NetworkAdjustment implements Runnable {
 		}
 
 		// In einem reinen Richtungs- und/oder Zenitwinkelnetz gibts 
-		// kein Strecken, die den Massstab festhalten. Er muss demnach 
+		// keine Strecken, die den Massstab festhalten. Er muss demnach 
 		// als Bedingung in die freie Ausgleichung eingefuehrt werden
-		if(is2DNet && this.rankDefect.getScaleXY() == DefectType.NOT_SET) 
+		if (is2DNet && this.rankDefect.getScaleXY() == DefectType.NOT_SET) 
 			this.rankDefect.setScaleXY(DefectType.FREE);
 		if (is3DNet && this.rankDefect.getScaleXYZ() == DefectType.NOT_SET)
 			this.rankDefect.setScaleXYZ(DefectType.FREE);
+
+		if (this.proofOfDatumDefectDetection && eigenValueDefectCounter != -1 && eigenValueDefectCounter != this.rankDefect.getDefect())
+			System.err.println("Error, the defect of the normal equations system is not "
+					+ "equal to its theoretical value: " + eigenValueDefectCounter + " vs. " + this.rankDefect.getDefect());
 
 		return this.rankDefect;
 	}

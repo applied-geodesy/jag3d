@@ -104,7 +104,6 @@ public class SQLAdjustmentManager {
 	private final DataBase dataBase;
 
 	private Map<String, Point> completePoints    = new LinkedHashMap<String, Point>();
-//	private Map<String, Point> completePointsWithDeflections = new LinkedHashMap<String, Point>();
 	private Map<String, Point> completeNewPoints = new LinkedHashMap<String, Point>();
 	
 	private Map<String, Point> completePointsWithReferenceDeflections  = new LinkedHashMap<String, Point>();
@@ -126,7 +125,7 @@ public class SQLAdjustmentManager {
 			congruenceAnalysis = false,
 			pure1DNetwork = true,
 			estimateOrientationApproximation = true,
-			applyableProjection = true;
+			applicableHorizontalProjection = true;
 
 	public SQLAdjustmentManager(DataBase dataBase) {
 		if (dataBase == null || !dataBase.isOpen())
@@ -185,10 +184,10 @@ public class SQLAdjustmentManager {
 		this.addVerticalDeflections();
 
 		if (this.pure1DNetwork)
-			this.applyableProjection = false;
+			this.applicableHorizontalProjection = false;
 
 		// wenn 2D Projektionen nicht moeglich sind, werden keine Reduktionen durchgefuehrt
-		if (this.reductions.getProjectionType() != ProjectionType.NONE && (this.reductions.applyReductionTask(ReductionTaskType.DIRECTION) || this.reductions.applyReductionTask(ReductionTaskType.DISTANCE)) && !this.applyableProjection) {
+		if ((this.reductions.getProjectionType() == ProjectionType.GAUSS_KRUEGER || this.reductions.getProjectionType() == ProjectionType.UTM) && (this.reductions.applyReductionTask(ReductionTaskType.DIRECTION) || this.reductions.applyReductionTask(ReductionTaskType.DISTANCE)) && !this.applicableHorizontalProjection) {
 			if (this.pure1DNetwork)
 				throw new IllegalProjectionPropertyException("Projection cannot applied to observations of leveling network! " + this.reductions.getProjectionType());
 			else
@@ -203,7 +202,7 @@ public class SQLAdjustmentManager {
 			String name = point.getName();
 			int dimension = point.getDimension();
 			VerticalDeflectionType type = null;
-			if (dimension == 3) {
+			if (dimension != 2) { // dimension == 3
 				if (this.completePointsWithReferenceDeflections.containsKey(name))
 					type = VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION;
 				else if (this.completePointsWithStochasticDeflections.containsKey(name))
@@ -227,7 +226,7 @@ public class SQLAdjustmentManager {
 				String name = point.getName();
 				int dimension = point.getDimension();
 				VerticalDeflectionType type = null;
-				if (dimension == 3) {
+				if (dimension != 2) { // dimension == 3
 					if (this.completePointsWithReferenceDeflections.containsKey(name))
 						type = VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION;
 					else if (this.completePointsWithStochasticDeflections.containsKey(name))
@@ -245,7 +244,7 @@ public class SQLAdjustmentManager {
 				String name = point.getName();
 				int dimension = point.getDimension();
 				VerticalDeflectionType type = null;
-				if (dimension == 3) {
+				if (dimension != 2) { // dimension == 3
 					if (this.completePointsWithReferenceDeflections.containsKey(name))
 						type = VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION;
 					else if (this.completePointsWithStochasticDeflections.containsKey(name))
@@ -260,7 +259,7 @@ public class SQLAdjustmentManager {
 				String name = point.getName();
 				int dimension = point.getDimension();
 				VerticalDeflectionType type = null;
-				if (dimension == 3) {
+				if (dimension != 2) { // dimension == 3
 					if (this.completePointsWithReferenceDeflections.containsKey(name))
 						type = VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION;
 					else if (this.completePointsWithStochasticDeflections.containsKey(name))
@@ -290,9 +289,12 @@ public class SQLAdjustmentManager {
 		this.congruenceAnalysisGroups.clear();
 		this.completeObservationGroups.clear();
 		
-		this.reductions.setProjectionType(ProjectionType.NONE);
+		this.reductions.setProjectionType(ProjectionType.LOCAL_CARTESIAN);
 		this.reductions.setReferenceHeight(0);
 		this.reductions.setEarthRadius(Constant.EARTH_RADIUS);
+		this.reductions.getPivotPoint().setX0(0);
+		this.reductions.getPivotPoint().setY0(0);
+		this.reductions.getPivotPoint().setZ0(0);
 		this.reductions.clear();
 
 		if (this.networkAdjustment != null) {
@@ -301,9 +303,9 @@ public class SQLAdjustmentManager {
 		}
 	}
 	
-	public void setReductionDefinition() throws SQLException {
+	private void setReductionDefinition() throws SQLException {
 		String sql = "SELECT "
-				+ "\"projection_type\", \"reference_height\", \"earth_radius\", \"type\" AS \"task_type\" "
+				+ "\"projection_type\", \"reference_height\", \"earth_radius\", \"x0\", \"y0\", \"z0\", \"type\" AS \"task_type\" "
 				+ "FROM \"ReductionTask\" "
 				+ "RIGHT JOIN \"ReductionDefinition\" "
 				+ "ON \"ReductionTask\".\"reduction_id\" = \"ReductionDefinition\".\"id\" "
@@ -319,14 +321,20 @@ public class SQLAdjustmentManager {
 			ProjectionType projectionType = ProjectionType.getEnumByValue(rs.getInt("projection_type"));
 			double referenceHeight        = rs.getDouble("reference_height");
 			double earthRadius            = rs.getDouble("earth_radius");
+			double x0                     = rs.getDouble("x0");
+			double y0                     = rs.getDouble("y0");
+			double z0                     = rs.getDouble("z0");
 
 			this.reductions.setProjectionType(projectionType);
 			this.reductions.setReferenceHeight(referenceHeight);
 			this.reductions.setEarthRadius(earthRadius);
+			this.reductions.getPivotPoint().setX0(x0);
+			this.reductions.getPivotPoint().setY0(y0);
+			this.reductions.getPivotPoint().setZ0(z0);
 
-			if (hasTaskType) {
+			if (hasTaskType && projectionType != ProjectionType.LOCAL_SPHERICAL) {
 				ReductionTaskType taskType = ReductionTaskType.getEnumByValue(taskTypeId);
-				reductions.addReductionTaskType(taskType);	
+				this.reductions.addReductionTaskType(taskType);	
 			}
 		}
 	}
@@ -506,14 +514,14 @@ public class SQLAdjustmentManager {
 				
 				this.pure1DNetwork = false;
 				if (y0 < 1100000 || y0 > 59800000 )
-					this.applyableProjection = false;
+					this.applicableHorizontalProjection = false;
 				break;
 			case 3:
 				point = new Point3D(name, x0, y0, z0, sigmaX0, sigmaY0, sigmaZ0);
 
 				this.pure1DNetwork = false;
 				if (y0 < 1100000 || y0 > 59800000 )
-					this.applyableProjection = false;
+					this.applicableHorizontalProjection = false;
 				break;
 			}
 			if (point != null && !this.completePoints.containsKey(point.getName())) {
@@ -538,7 +546,7 @@ public class SQLAdjustmentManager {
 				+ "JOIN \"PointApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"VerticalDeflectionApriori\".\"name\" "
 				+ "JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" "
 				+ "WHERE \"VerticalDeflectionGroup\".\"enable\" = TRUE AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
-				+ "AND \"PointGroup\".\"enable\" = TRUE AND \"PointApriori\".\"enable\" = TRUE AND \"PointGroup\".\"dimension\" = 3 "
+				+ "AND \"PointGroup\".\"enable\" = TRUE AND \"PointApriori\".\"enable\" = TRUE AND \"PointGroup\".\"dimension\" IN (1, 3) " // \"PointGroup\".\"dimension\" = 3 
 				+ "ORDER BY \"VerticalDeflectionGroup\".\"id\" ASC, \"VerticalDeflectionApriori\".\"id\" ASC";
 		
 		int idx = 1;
@@ -559,7 +567,7 @@ public class SQLAdjustmentManager {
 			String name = rs.getString("name");
 
 			Point point = this.completePoints.get(name);
-			if (point == null || point.getDimension() != 3)
+			if (point == null || point.getDimension() == 2) // point.getDimension() != 3
 				continue;
 
 			double y0 = rs.getDouble("y0");
@@ -1246,50 +1254,52 @@ public class SQLAdjustmentManager {
 				int idx = 1;
 				int dimension = point.getDimension();
 
-				if (dimension == 3) {
-					stmt.setString(idx++, point.getName());
+				if (dimension == 2) // if (dimension != 3)
+					continue;
+				
+				stmt.setString(idx++, point.getName());
 
-					stmt.setDouble(idx++, point.getVerticalDeflectionY().getValue());
-					stmt.setDouble(idx++, point.getVerticalDeflectionX().getValue());
+				stmt.setDouble(idx++, point.getVerticalDeflectionY().getValue());
+				stmt.setDouble(idx++, point.getVerticalDeflectionX().getValue());
 
-					stmt.setDouble(idx++, (point.getVerticalDeflectionY().getStdApriori() > 0 ? point.getVerticalDeflectionY().getStdApriori() : 0.0));
-					stmt.setDouble(idx++, (point.getVerticalDeflectionX().getStdApriori() > 0 ? point.getVerticalDeflectionX().getStdApriori() : 0.0));
+				stmt.setDouble(idx++, (point.getVerticalDeflectionY().getStdApriori() > 0 ? point.getVerticalDeflectionY().getStdApriori() : 0.0));
+				stmt.setDouble(idx++, (point.getVerticalDeflectionX().getStdApriori() > 0 ? point.getVerticalDeflectionX().getStdApriori() : 0.0));
 
-					stmt.setDouble(idx++, point.getVerticalDeflectionY().getStd() > 0 ? point.getVerticalDeflectionY().getStd() : 0.0);
-					stmt.setDouble(idx++, point.getVerticalDeflectionX().getStd() > 0 ? point.getVerticalDeflectionX().getStd() : 0.0);
+				stmt.setDouble(idx++, point.getVerticalDeflectionY().getStd() > 0 ? point.getVerticalDeflectionY().getStd() : 0.0);
+				stmt.setDouble(idx++, point.getVerticalDeflectionX().getStd() > 0 ? point.getVerticalDeflectionX().getStd() : 0.0);
 
-					stmt.setDouble(idx++, Math.max(point.getVerticalDeflectionX().getConfidence(), point.getVerticalDeflectionY().getConfidence()));
-					stmt.setDouble(idx++, Math.min(point.getVerticalDeflectionX().getConfidence(), point.getVerticalDeflectionY().getConfidence()));
+				stmt.setDouble(idx++, Math.max(point.getVerticalDeflectionX().getConfidence(), point.getVerticalDeflectionY().getConfidence()));
+				stmt.setDouble(idx++, Math.min(point.getVerticalDeflectionX().getConfidence(), point.getVerticalDeflectionY().getConfidence()));
 
-					stmt.setDouble(idx++, point.getVerticalDeflectionY().getValue0() - point.getVerticalDeflectionY().getValue());
-					stmt.setDouble(idx++, point.getVerticalDeflectionX().getValue0() - point.getVerticalDeflectionX().getValue());
-					
-					stmt.setDouble(idx++, point.getVerticalDeflectionY().getRedundancy());
-					stmt.setDouble(idx++, point.getVerticalDeflectionX().getRedundancy());
+				stmt.setDouble(idx++, point.getVerticalDeflectionY().getValue0() - point.getVerticalDeflectionY().getValue());
+				stmt.setDouble(idx++, point.getVerticalDeflectionX().getValue0() - point.getVerticalDeflectionX().getValue());
 
-					stmt.setDouble(idx++, point.getVerticalDeflectionY().getGrossError());
-					stmt.setDouble(idx++, point.getVerticalDeflectionX().getGrossError());
+				stmt.setDouble(idx++, point.getVerticalDeflectionY().getRedundancy());
+				stmt.setDouble(idx++, point.getVerticalDeflectionX().getRedundancy());
 
-					stmt.setDouble(idx++, point.getVerticalDeflectionY().getMinimalDetectableBias());
-					stmt.setDouble(idx++, point.getVerticalDeflectionX().getMinimalDetectableBias());
+				stmt.setDouble(idx++, point.getVerticalDeflectionY().getGrossError());
+				stmt.setDouble(idx++, point.getVerticalDeflectionX().getGrossError());
 
-					stmt.setDouble(idx++, point.getVerticalDeflectionX().getOmega() + point.getVerticalDeflectionY().getOmega());
+				stmt.setDouble(idx++, point.getVerticalDeflectionY().getMinimalDetectableBias());
+				stmt.setDouble(idx++, point.getVerticalDeflectionX().getMinimalDetectableBias());
 
-					// Statistische Groessen in X abgelegt
-					stmt.setDouble(idx++, point.getVerticalDeflectionX().getPprio());
-					stmt.setDouble(idx++, point.getVerticalDeflectionX().getPpost());
+				stmt.setDouble(idx++, point.getVerticalDeflectionX().getOmega() + point.getVerticalDeflectionY().getOmega());
 
-					stmt.setDouble(idx++, point.getVerticalDeflectionX().getTprio()); 
-					stmt.setDouble(idx++, point.getVerticalDeflectionX().getTpost());
+				// Statistische Groessen in X abgelegt
+				stmt.setDouble(idx++, point.getVerticalDeflectionX().getPprio());
+				stmt.setDouble(idx++, point.getVerticalDeflectionX().getPpost());
 
-					stmt.setBoolean(idx++, point.getVerticalDeflectionX().isSignificant());
+				stmt.setDouble(idx++, point.getVerticalDeflectionX().getTprio()); 
+				stmt.setDouble(idx++, point.getVerticalDeflectionX().getTpost());
 
-					stmt.setInt(idx++, Math.min(point.getVerticalDeflectionX().getColInJacobiMatrix(), point.getVerticalDeflectionY().getColInJacobiMatrix()));
+				stmt.setBoolean(idx++, point.getVerticalDeflectionX().isSignificant());
 
-					stmt.addBatch();
+				stmt.setInt(idx++, Math.min(point.getVerticalDeflectionX().getColInJacobiMatrix(), point.getVerticalDeflectionY().getColInJacobiMatrix()));
 
-					hasBatch = true;
-				}
+				stmt.addBatch();
+
+				hasBatch = true;
+				
 			}
 			if (hasBatch)
 				stmt.executeLargeBatch();

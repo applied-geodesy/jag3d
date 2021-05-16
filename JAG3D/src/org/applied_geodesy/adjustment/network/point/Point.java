@@ -431,7 +431,7 @@ public abstract class Point extends UnknownParameter {
 	 * @return unknown
 	 */
 	public boolean hasUnknownDeflectionParameters() {
-		return this.getDimension() == 3 && 
+		return this.getDimension() != 2 && 
 				(this.verticalDeflectionX.getColInJacobiMatrix() >= 0 && this.verticalDeflectionY.getColInJacobiMatrix() >= 0);
 	}
 
@@ -440,7 +440,7 @@ public abstract class Point extends UnknownParameter {
 	 * @return observed
 	 */
 	public boolean hasObservedDeflectionParameters() {
-		return this.getDimension() == 3 && 
+		return this.getDimension() != 2 && 
 				(this.verticalDeflectionX.getRowInJacobiMatrix() >= 0 && this.verticalDeflectionY.getRowInJacobiMatrix() >= 0);
 	}
 }
