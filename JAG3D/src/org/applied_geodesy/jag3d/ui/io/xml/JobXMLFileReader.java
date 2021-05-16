@@ -611,7 +611,8 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 	private double getEarthRadius() {
 		double earthRadius = Constant.EARTH_RADIUS;
 		try {
-			Reduction reductions = SQLManager.getInstance().getReductionDefinition();
+			Reduction reductions = new Reduction();
+			SQLManager.getInstance().load(reductions);
 			earthRadius = reductions.getEarthRadius();
 		} catch (SQLException e) {
 			e.printStackTrace();
