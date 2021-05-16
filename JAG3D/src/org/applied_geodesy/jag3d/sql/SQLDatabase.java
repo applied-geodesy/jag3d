@@ -88,7 +88,7 @@ class SQLDatabase {
 		sqls.put(20180106.0502, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TestStatisticDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + TestStatisticType.BAARDA_METHOD.getId() + " NOT NULL, \"probability_value\" DOUBLE DEFAULT " + DefaultValue.getProbabilityValue() + " NOT NULL,\"power_of_test\" DOUBLE DEFAULT " + DefaultValue.getPowerOfTest() + " NOT NULL,\"familywise_error_rate\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
 		sqls.put(20180106.0503, "INSERT INTO \"TestStatisticDefinition\" (\"id\") VALUES (1);\r\n");
 
-		sqls.put(20180106.0504, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ProjectionDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + ProjectionType.NONE.getId() + " NOT NULL,\"reference_height\" DOUBLE DEFAULT 0 NOT NULL);\r\n");
+		sqls.put(20180106.0504, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ProjectionDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + ProjectionType.LOCAL_CARTESIAN.getId() + " NOT NULL,\"reference_height\" DOUBLE DEFAULT 0 NOT NULL);\r\n");
 		sqls.put(20180106.0505, "INSERT INTO \"ProjectionDefinition\" (\"id\") VALUES (1);\r\n");
 		
 		sqls.put(20180106.0506, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"AdjustmentDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + EstimationType.L2NORM.getId() + " NOT NULL, \"number_of_iterations\" INTEGER DEFAULT 50 NOT NULL, \"robust_estimation_limit\" DOUBLE DEFAULT " + DefaultValue.getRobustEstimationLimit() + " NOT NULL, \"number_of_principal_components\" INTEGER DEFAULT 1 NOT NULL, \"estimate_direction_set_orientation_approximation\" BOOLEAN DEFAULT TRUE NOT NULL, \"congruence_analysis\" BOOLEAN DEFAULT FALSE NOT NULL, \"export_covariance_matrix\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
@@ -172,8 +172,8 @@ class SQLDatabase {
 		sqls.put(20190309.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"LegendLayerProperty\" (\"layer\" SMALLINT NOT NULL PRIMARY KEY, \"type\" SMALLINT NOT NULL, CONSTRAINT \"LegendLayerPropertyOnLayerDelete\" FOREIGN KEY(\"layer\") REFERENCES \"Layer\"(\"type\") ON DELETE CASCADE);\r\n");
 		
 		// change and add projection/reduction tables
-		sqls.put(20200119.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ReductionDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"projection_type\" SMALLINT DEFAULT " + ProjectionType.NONE.getId() + " NOT NULL, \"reference_height\" DOUBLE DEFAULT 0 NOT NULL, \"earth_radius\" DOUBLE DEFAULT " + Constant.EARTH_RADIUS + " NOT NULL);\r\n");
-		sqls.put(20200119.0002, "INSERT INTO \"ReductionDefinition\" (\"id\", \"projection_type\", \"reference_height\", \"earth_radius\") (SELECT \"id\", CASEWHEN(\"type\" IN (4, 24, 34, 234), " + ProjectionType.GAUSS_KRUEGER.getId() + ", CASEWHEN(\"type\" IN (5, 25, 35, 235), " + ProjectionType.UTM.getId() + ", " + ProjectionType.NONE.getId() + ")) AS \"projection_type\", \"reference_height\", " + Constant.EARTH_RADIUS + " AS \"earth_radius\" FROM \"ProjectionDefinition\" WHERE \"id\" = 1 LIMIT 1);\r\n");
+		sqls.put(20200119.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ReductionDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"projection_type\" SMALLINT DEFAULT " + ProjectionType.LOCAL_CARTESIAN.getId() + " NOT NULL, \"reference_height\" DOUBLE DEFAULT 0 NOT NULL, \"earth_radius\" DOUBLE DEFAULT " + Constant.EARTH_RADIUS + " NOT NULL);\r\n");
+		sqls.put(20200119.0002, "INSERT INTO \"ReductionDefinition\" (\"id\", \"projection_type\", \"reference_height\", \"earth_radius\") (SELECT \"id\", CASEWHEN(\"type\" IN (4, 24, 34, 234), " + ProjectionType.GAUSS_KRUEGER.getId() + ", CASEWHEN(\"type\" IN (5, 25, 35, 235), " + ProjectionType.UTM.getId() + ", " + ProjectionType.LOCAL_CARTESIAN.getId() + ")) AS \"projection_type\", \"reference_height\", " + Constant.EARTH_RADIUS + " AS \"earth_radius\" FROM \"ProjectionDefinition\" WHERE \"id\" = 1 LIMIT 1);\r\n");
 		
 		sqls.put(20200119.0011, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ReductionTask\"(\"reduction_id\" INTEGER NOT NULL, \"type\" SMALLINT NOT NULL, PRIMARY KEY(\"reduction_id\", \"type\"), CONSTRAINT \"ReductionDefinitionOnGroupDelete\" FOREIGN KEY(\"reduction_id\") REFERENCES \"ReductionDefinition\"(\"id\") ON DELETE CASCADE);\r\n");
 		sqls.put(20200119.0012, "INSERT INTO \"ReductionTask\" (\"reduction_id\", \"type\") SELECT \"id\", CASEWHEN(\"type\" IN (4, 24, 34, 234, 5, 25, 35, 235), " + ReductionTaskType.DISTANCE.getId()  + ", -1) FROM \"ProjectionDefinition\" WHERE \"id\" = 1 LIMIT 1;\r\n");
@@ -236,6 +236,11 @@ class SQLDatabase {
 		// clear column properties for congruence analysis tables
 		sqls.put(20210315.0001, "DELETE FROM \"TableColumnProperty\" WHERE \"table_type\" IN (" + TableContentType.CONGRUENCE_ANALYSIS_1D.getId() + ", " + TableContentType.CONGRUENCE_ANALYSIS_2D.getId() + ", " + TableContentType.CONGRUENCE_ANALYSIS_3D.getId() + ");\r\n");
 		
+		// add pivot point for spherical reduction
+		sqls.put(20210508.0001, "ALTER TABLE \"ReductionDefinition\" ADD \"x0\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+		sqls.put(20210508.0002, "ALTER TABLE \"ReductionDefinition\" ADD \"y0\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+		sqls.put(20210508.0003, "ALTER TABLE \"ReductionDefinition\" ADD \"z0\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+
 		return sqls;
 	}
 }
