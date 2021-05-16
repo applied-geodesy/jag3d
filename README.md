@@ -5,7 +5,7 @@ JAG3D (Java Applied Geodesy 3D) is one of the most popular open source least-squ
 
 Screenshot
 ----------
-![Java Applied Geodesy 3D (JAG3D)](/jag3d.png?raw=true "Java·Applied·Geodesy·3D (JAG3D)")
+![Java Applied Geodesy 3D (JAG3D)](/.images/jag3d.png?raw=true "Java·Applied·Geodesy·3D (JAG3D)")
 
 
 System requirements
