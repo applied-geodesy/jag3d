@@ -457,7 +457,7 @@ public class FeatureAdjustment {
 							if (this.estimationType == EstimationType.L1NORM) {
 								if (applyUnscentedTransformation && SigmaUT != null) 
 									this.prepareSphericalSimplexUnscentedTransformationObservation(-1, SigmaUT, 0);
-								this.currentEstimationStatus = EstimationStateType.ROBUST_ESTIMATION_FAILD;
+								this.currentEstimationStatus = EstimationStateType.ROBUST_ESTIMATION_FAILED;
 								this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
 								throw new NotConvergedException(Reason.Iterations, "Error, euqation system does not converge! Last iterate max|dx| = " + this.maxAbsDx + " (" + SQRT_EPS + ").");
 							}
