@@ -61,6 +61,13 @@ public class ZenithAngle extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -100,6 +107,13 @@ public class ZenithAngle extends Observation {
 		
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -141,6 +155,13 @@ public class ZenithAngle extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -181,6 +202,13 @@ public class ZenithAngle extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -220,6 +248,13 @@ public class ZenithAngle extends Observation {
 		
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -264,6 +299,13 @@ public class ZenithAngle extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -307,6 +349,13 @@ public class ZenithAngle extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -349,6 +398,13 @@ public class ZenithAngle extends Observation {
 		
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);

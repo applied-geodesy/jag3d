@@ -22,9 +22,11 @@
 package org.applied_geodesy.adjustment.network.observation.reduction;
 
 public enum ProjectionType {
-	NONE(0),
+	LOCAL_CARTESIAN(0),
 	GAUSS_KRUEGER(1),
-	UTM(2); 
+	UTM(2),
+	LOCAL_SPHERICAL(3),
+	;
 
 	private int id;
 	private ProjectionType(int id) {
@@ -40,6 +42,6 @@ public enum ProjectionType {
 			if(element.id == value)
 				return element;
 		}
-		return NONE;
+		return LOCAL_CARTESIAN;
 	}  
 }

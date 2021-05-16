@@ -24,10 +24,74 @@ package org.applied_geodesy.adjustment.network.observation;
 import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.observation.group.ObservationGroup;
+import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
 import org.applied_geodesy.adjustment.network.point.Point;
 
 public abstract class Observation {
+	class SphericalDeflectionParameters {
+		private double rxs = 0, rys = 0, rxe = 0, rye = 0;
+		
+		private SphericalDeflectionParameters(Observation observation) {
+			this(observation, Boolean.FALSE); 
+		}
+		
+		private SphericalDeflectionParameters(Observation observation, boolean aprioriValues) {
+			this.deriveSphericalDeflectionParameters(observation, aprioriValues); 
+		}
+		
+		private void deriveSphericalDeflectionParameters(Observation observation, boolean aprioriValues) {
+			Reduction reductions = observation.getReductions();
+
+			if (reductions == null || reductions.getProjectionType() != ProjectionType.LOCAL_SPHERICAL)
+				return;
+
+			double xs = aprioriValues ? observation.getStartPoint().getX0() : observation.getStartPoint().getX();
+			double ys = aprioriValues ? observation.getStartPoint().getY0() : observation.getStartPoint().getY();
+			//double zs = aprioriValues ? observation.getStartPoint().getZ0() : observation.getStartPoint().getZ();
+
+			double xe = aprioriValues ? observation.getEndPoint().getX0() : observation.getEndPoint().getX();
+			double ye = aprioriValues ? observation.getEndPoint().getY0() : observation.getEndPoint().getY();
+			//double ze = aprioriValues ? observation.getEndPoint().getZ0() : observation.getEndPoint().getZ();
+
+			double x0 = reductions.getPivotPoint().getX0();
+			double y0 = reductions.getPivotPoint().getY0();
+			double z0 = reductions.getPivotPoint().getZ0();
+
+			double R0 = reductions.getEarthRadius();
+			double h0 = reductions.getReferenceHeight();
+
+			double R = R0 + h0 - z0;
+
+			this.rxs =  (ys - y0) / R;
+			this.rys = -(xs - x0) / R;
+
+			this.rxe =  (ye - y0) / R;
+			this.rye = -(xe - x0) / R;
+		}
+		
+		public double getStartPointSphericalDeflectionX() {
+			return this.rxs;
+		}
+		
+		public double getStartPointSphericalDeflectionY() {
+			return this.rys;
+		}
+		
+		public double getEndPointSphericalDeflectionX() {
+			return this.rxe;
+		}
+		
+		public double getEndPointSphericalDeflectionY() {
+			return this.rye;
+		}
+		
+		@Override
+		public String toString() {
+			return "SphericalDeflectionParameters [rxs=" + rxs + ", rys=" + rys + ", rxe=" + rxe + ", rye=" + rye + "]";
+		}
+		
+	}
 	// ID der Beobachtung
 	private final int obsID;
 	
@@ -158,6 +222,13 @@ public abstract class Observation {
 		double rxe = this.endPoint.getVerticalDeflectionX().getValue();
 		double rye = this.endPoint.getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -190,6 +261,13 @@ public abstract class Observation {
 		
 		double rxe = this.endPoint.getVerticalDeflectionX().getValue0();
 		double rye = this.endPoint.getVerticalDeflectionY().getValue0();
+		
+		SphericalDeflectionParameters sphericalDeflectionParameters = new SphericalDeflectionParameters(this, Boolean.TRUE);
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -225,6 +303,13 @@ public abstract class Observation {
 		double rxe = this.endPoint.getVerticalDeflectionX().getValue();
 		double rye = this.endPoint.getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -259,6 +344,13 @@ public abstract class Observation {
 		
 		double rxe = this.endPoint.getVerticalDeflectionX().getValue0();
 		double rye = this.endPoint.getVerticalDeflectionY().getValue0();
+		
+		SphericalDeflectionParameters sphericalDeflectionParameters = new SphericalDeflectionParameters(this, Boolean.TRUE);
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -487,5 +579,8 @@ public abstract class Observation {
 	public String toString() {
 		return this.getClass().getSimpleName()+": " +this.startPoint.getName()+" - " + this.endPoint.getName() + ": " + this.observation;
 	}
-					
+	
+	SphericalDeflectionParameters getSphericalDeflectionParameters() {
+		return new SphericalDeflectionParameters(this);
+	}
 }
