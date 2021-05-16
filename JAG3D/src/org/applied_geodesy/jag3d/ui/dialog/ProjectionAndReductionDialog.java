@@ -46,9 +46,11 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -58,14 +60,24 @@ import javafx.util.Callback;
 
 public class ProjectionAndReductionDialog {
 	
-	private class ProjectionSelectionChangeListener implements ChangeListener<Boolean> {
+	private class ProjectionSelectionChangeListener  implements ChangeListener<Toggle> {
+
 		@Override
-		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-			boolean isProjection = utmProjectionRadioButton.isSelected() || gaussKruegerProjectionRadioButton.isSelected();
+		public void changed(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
+			distanceReductionCheckBox.setDisable(sphericalProjectionRadioButton.isSelected() || localCartesianProjectionRadioButton.isSelected());
+			directionReductionCheckBox.setDisable(sphericalProjectionRadioButton.isSelected() || localCartesianProjectionRadioButton.isSelected());
+			heightReductionCheckBox.setDisable(sphericalProjectionRadioButton.isSelected());
+			earthCurvatureReductionCheckBox.setDisable(sphericalProjectionRadioButton.isSelected());
 			
-			distanceReductionCheckBox.setDisable(!isProjection);
-			directionReductionCheckBox.setDisable(!isProjection);
-		}
+			pivotX0TextField.setDisable(!sphericalProjectionRadioButton.isSelected());
+			pivotY0TextField.setDisable(!sphericalProjectionRadioButton.isSelected());
+			pivotZ0TextField.setDisable(!sphericalProjectionRadioButton.isSelected());
+			
+			if (utmProjectionRadioButton.isSelected() || gaussKruegerProjectionRadioButton.isSelected()) {
+				distanceReductionCheckBox.setDisable(Boolean.FALSE);
+				directionReductionCheckBox.setDisable(Boolean.FALSE);
+			}
+		} 
 	}
 	
 	private I18N i18n = I18N.getInstance();
@@ -73,15 +85,16 @@ public class ProjectionAndReductionDialog {
 	private Dialog<Reduction> dialog = null;
 	private Window window;
 	private DoubleTextField referenceHeightTextField;
+	private DoubleTextField pivotX0TextField, pivotY0TextField, pivotZ0TextField;
 	private DoubleTextField earthRadiusTextField;
 	private CheckBox directionReductionCheckBox;
 	private CheckBox heightReductionCheckBox;
 	private CheckBox distanceReductionCheckBox;
 	private CheckBox earthCurvatureReductionCheckBox;
-	private RadioButton noneProjectionRadioButton;
+	private RadioButton localCartesianProjectionRadioButton;
 	private RadioButton gaussKruegerProjectionRadioButton;
 	private RadioButton utmProjectionRadioButton;
-	
+	private RadioButton sphericalProjectionRadioButton;
 	// For validating given earth radius cf. https://de.wikipedia.org/wiki/Erdradius#Radien_einiger_wichtiger_Erdellipsoide
 	private final static double EQUATORIAL_RADIUS = 6385000.0;
 	private final static double POLAR_RADIUS      = 6300000.0;
@@ -136,12 +149,17 @@ public class ProjectionAndReductionDialog {
 					
 					double earthRadius = earthRadiusTextField.getNumber();
 					double referenceHeight = referenceHeightTextField.getNumber();
+					double x0 = pivotX0TextField.getNumber();
+					double y0 = pivotY0TextField.getNumber();
+					double z0 = pivotZ0TextField.getNumber();
 					
-					ProjectionType projectionType = ProjectionType.NONE;
+					ProjectionType projectionType = ProjectionType.LOCAL_CARTESIAN;
 					if (utmProjectionRadioButton.isSelected())
 						projectionType = ProjectionType.UTM;
 					else if (gaussKruegerProjectionRadioButton.isSelected())
 						projectionType = ProjectionType.GAUSS_KRUEGER;
+					else if (sphericalProjectionRadioButton.isSelected())
+						projectionType = ProjectionType.LOCAL_SPHERICAL;
 					
 					// validate Earth radius
 					if (earthRadius > EQUATORIAL_RADIUS || earthRadius < POLAR_RADIUS)
@@ -150,6 +168,9 @@ public class ProjectionAndReductionDialog {
 					reductions.setReferenceHeight(referenceHeight);
 					reductions.setEarthRadius(earthRadius);
 					reductions.setProjectionType(projectionType);
+					reductions.getPivotPoint().setX0(x0);
+					reductions.getPivotPoint().setY0(y0);
+					reductions.getPivotPoint().setZ0(z0);
 					
 					if (directionReductionCheckBox.isSelected()) 
 						reductions.addReductionTaskType(ReductionTaskType.DIRECTION);
@@ -171,86 +192,75 @@ public class ProjectionAndReductionDialog {
 	}
 	
 	private Node createPane() {
-		VBox box = this.createVbox();
-		box.getChildren().addAll(
+		VBox propertiesBox = this.createVbox();
+		propertiesBox.getChildren().addAll(
 				this.createProjectionPane(),
 				this.createReductionOptionsPane()
 		);
 		
-		return box;
+		VBox parameterBox = this.createVbox();
+		parameterBox.getChildren().addAll(
+				this.createParameterPane()
+		);
+		
+		HBox.setHgrow(propertiesBox, Priority.ALWAYS);
+		HBox.setHgrow(parameterBox, Priority.ALWAYS);
+		
+		HBox hbox = this.createHbox();
+		hbox.getChildren().addAll(
+				propertiesBox,
+				parameterBox
+		);		
+		return hbox;
 	}
 	
 	private TitledPane createProjectionPane() {
-		String title   = i18n.getString("ProjectionAndReductionDialog.projection.title", "Map projection");
-		String tooltip = i18n.getString("ProjectionAndReductionDialog.projection.tooltip", "Map projection properties");
+		String title   = i18n.getString("ProjectionAndReductionDialog.properties.title", "Properties");
+		String tooltip = i18n.getString("ProjectionAndReductionDialog.properties.tooltip", "Projection properties");
 		
-		String labelProjNone   = i18n.getString("ProjectionAndReductionDialog.projection.none.label", "None");
-		String tooltipProjNone = i18n.getString("ProjectionAndReductionDialog.projection.none.tooltip", "If checked, no specific map projection will be applied");
+		String labelProjLocalCartesian   = i18n.getString("ProjectionAndReductionDialog.properties.local_cartesian.label", "Local Cartesian system");
+		String tooltipProjLocalCartesian = i18n.getString("ProjectionAndReductionDialog.properties.local_cartesian.tooltip", "If checked, a local Cartesian system will be used");
 
-		String labelProjGK   = i18n.getString("ProjectionAndReductionDialog.projection.gk.label", "Gau\u00DF-Kr\u00FCger");
-		String tooltipProjGK = i18n.getString("ProjectionAndReductionDialog.projection.gk.tooltip", "If checked, Gau\u00DF-Kr\u00FCger projection will be applied");
+		String labelProjGK   = i18n.getString("ProjectionAndReductionDialog.properties.gauss_krueger.label", "Gau\u00DF-Kr\u00FCger");
+		String tooltipProjGK = i18n.getString("ProjectionAndReductionDialog.properties.gauss_krueger.tooltip", "If checked, Gau\u00DF-Kr\u00FCger projection will be applied");
 
-		String labelProjUTM   = i18n.getString("ProjectionAndReductionDialog.projection.utm.label", "Universale Transverse Mercator");
-		String tooltipProjUTM = i18n.getString("ProjectionAndReductionDialog.projection.utm.tooltip", "If checked, UTM projection will be applied");
+		String labelProjUTM   = i18n.getString("ProjectionAndReductionDialog.properties.utm.label", "Universale Transverse Mercator");
+		String tooltipProjUTM = i18n.getString("ProjectionAndReductionDialog.properties.utm.tooltip", "If checked, UTM projection will be applied");
+		
+		String labelProjSpherical   = i18n.getString("ProjectionAndReductionDialog.properties.spherical.label", "Local spherical system");
+		String tooltipProjSpherical = i18n.getString("ProjectionAndReductionDialog.properties.spherical.tooltip", "If checked, a local spherical Earth model will be used");
 
 		ProjectionSelectionChangeListener projectionSelectionChangeListener = new ProjectionSelectionChangeListener();
-		this.noneProjectionRadioButton = this.createRadioButton(labelProjNone, tooltipProjNone);
+		this.localCartesianProjectionRadioButton = this.createRadioButton(labelProjLocalCartesian, tooltipProjLocalCartesian);
 		this.gaussKruegerProjectionRadioButton = this.createRadioButton(labelProjGK, tooltipProjGK);
 		this.utmProjectionRadioButton = this.createRadioButton(labelProjUTM, tooltipProjUTM);
-		this.noneProjectionRadioButton.selectedProperty().addListener(projectionSelectionChangeListener);
-		ToggleGroup group = new ToggleGroup();
-		group.getToggles().addAll(this.noneProjectionRadioButton, this.utmProjectionRadioButton, this.gaussKruegerProjectionRadioButton);
-		
-		this.earthRadiusTextField = new DoubleTextField(Constant.EARTH_RADIUS, CellValueType.LENGTH, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
-		this.earthRadiusTextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.projection.earthradius.tooltip", "Local radius of the Earth")));
-		this.earthRadiusTextField.setMinWidth(100);
-		this.earthRadiusTextField.setPrefWidth(150);
-		this.earthRadiusTextField.setMaxWidth(Double.MAX_VALUE);
-		
-		this.referenceHeightTextField = new DoubleTextField(0.0, CellValueType.LENGTH, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
-		this.referenceHeightTextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.projection.height.tooltip", "Height w.r.t. survey datum")));
-		this.referenceHeightTextField.setMinWidth(100);
-		this.referenceHeightTextField.setPrefWidth(150);
-		this.referenceHeightTextField.setMaxWidth(Double.MAX_VALUE);
-		
-		Label earthRadiusLabel = new Label(i18n.getString("ProjectionAndReductionDialog.projection.earthradius.label", "Earth radius:"));
-		earthRadiusLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		earthRadiusLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		earthRadiusLabel.setPadding(new Insets(0,0,0,3));
-		earthRadiusLabel.setLabelFor(this.earthRadiusTextField);
-		
-		Label referenceHeightLabel = new Label(i18n.getString("ProjectionAndReductionDialog.projection.referenceheight.label", "Reference height:"));
-		referenceHeightLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		referenceHeightLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		referenceHeightLabel.setPadding(new Insets(0,0,0,3));
-		referenceHeightLabel.setLabelFor(this.referenceHeightTextField);
+		this.sphericalProjectionRadioButton = this.createRadioButton(labelProjSpherical, tooltipProjSpherical);
 
+		ToggleGroup group = new ToggleGroup();
+		group.getToggles().addAll(this.localCartesianProjectionRadioButton, this.utmProjectionRadioButton, this.gaussKruegerProjectionRadioButton, this.sphericalProjectionRadioButton);
+		group.selectedToggleProperty().addListener(projectionSelectionChangeListener);
+		
 		GridPane gridPane = new GridPane();
 		gridPane.setMaxWidth(Double.MAX_VALUE);
 		gridPane.setHgap(20);
 		gridPane.setVgap(7);
 		gridPane.setPadding(new Insets(5, 10, 5, 10)); // oben, recht, unten, links
 
-		GridPane.setHgrow(this.noneProjectionRadioButton,         Priority.ALWAYS);
-		GridPane.setHgrow(this.gaussKruegerProjectionRadioButton, Priority.ALWAYS);
-		GridPane.setHgrow(this.utmProjectionRadioButton,          Priority.ALWAYS);
-		GridPane.setHgrow(earthRadiusLabel,                       Priority.SOMETIMES);	
-		GridPane.setHgrow(this.earthRadiusTextField,              Priority.ALWAYS);	
-		GridPane.setHgrow(referenceHeightLabel,                   Priority.SOMETIMES);	
-		GridPane.setHgrow(this.referenceHeightTextField,          Priority.ALWAYS);	
+		GridPane.setHgrow(this.localCartesianProjectionRadioButton, Priority.ALWAYS);
+		GridPane.setHgrow(this.gaussKruegerProjectionRadioButton,   Priority.ALWAYS);
+		GridPane.setHgrow(this.utmProjectionRadioButton,            Priority.ALWAYS);
+		GridPane.setHgrow(this.sphericalProjectionRadioButton,      Priority.ALWAYS);
 		
 		int row = 0;
-		gridPane.add(this.noneProjectionRadioButton,          0, ++row, 2, 1);
-		gridPane.add(this.gaussKruegerProjectionRadioButton,  0, ++row, 2, 1);
-		gridPane.add(this.utmProjectionRadioButton,           0, ++row, 2, 1);
-		gridPane.add(earthRadiusLabel,                        0, ++row, 1, 1);
-		gridPane.add(this.earthRadiusTextField,               1,   row, 1, 1);
-		gridPane.add(referenceHeightLabel,                    0, ++row, 1, 1);
-		gridPane.add(this.referenceHeightTextField,           1,   row, 1, 1);
+		gridPane.add(this.localCartesianProjectionRadioButton, 0, ++row, 1, 1);
+		gridPane.add(this.sphericalProjectionRadioButton,      0, ++row, 1, 1);
+		gridPane.add(this.gaussKruegerProjectionRadioButton,   0, ++row, 1, 1);
+		gridPane.add(this.utmProjectionRadioButton,            0, ++row, 1, 1);
+		
 		
 		Platform.runLater(new Runnable() {
 			@Override public void run() {
-				noneProjectionRadioButton.requestFocus();
+				localCartesianProjectionRadioButton.requestFocus();
 			}
 		});
 
@@ -267,8 +277,8 @@ public class ProjectionAndReductionDialog {
 		String directionLabel   = i18n.getString("ProjectionAndReductionDialog.reduction.direction.label", "Direction reduction");
 		String directionTooltip = i18n.getString("ProjectionAndReductionDialog.reduction.direction.tooltip", "If checked, direction reduction will be applied during network adjustment");
 		
-		String earthCurvatureLabel   = i18n.getString("ProjectionAndReductionDialog.reduction.earthcurvature.label", "Earth's curvature reduction");
-		String earthCurvatureTooltip = i18n.getString("ProjectionAndReductionDialog.reduction.earthcurvature.tooltip", "If checked, Earth's curvature reduction will be applied to horizontal distances and zenith angles during network adjustment");
+		String earthCurvatureLabel   = i18n.getString("ProjectionAndReductionDialog.reduction.earth_curvature.label", "Earth's curvature reduction");
+		String earthCurvatureTooltip = i18n.getString("ProjectionAndReductionDialog.reduction.earth_curvature.tooltip", "If checked, Earth's curvature reduction will be applied to horizontal distances and zenith angles during network adjustment");
 		
 		String heightLabel   = i18n.getString("ProjectionAndReductionDialog.reduction.height.label", "Height reduction");
 		String heightTooltip = i18n.getString("ProjectionAndReductionDialog.reduction.height.tooltip", "If checked, height reduction will be applied to horizontal distances during network adjustment");
@@ -298,11 +308,112 @@ public class ProjectionAndReductionDialog {
 		return this.createTitledPane(title, tooltip, gridPane);
 	}
 	
+	private TitledPane createParameterPane() {
+		String title   = i18n.getString("ProjectionAndReductionDialog.parameter.title", "Parameter");
+		String tooltip = i18n.getString("ProjectionAndReductionDialog.parameter.tooltip", "Parameters of projection model");
+		
+		this.earthRadiusTextField = new DoubleTextField(Constant.EARTH_RADIUS, CellValueType.LENGTH, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
+		this.earthRadiusTextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.earth_radius.tooltip", "Local radius of the Earth")));
+		this.earthRadiusTextField.setMinWidth(100);
+		this.earthRadiusTextField.setPrefWidth(150);
+		this.earthRadiusTextField.setMaxWidth(Double.MAX_VALUE);
+		
+		this.referenceHeightTextField = new DoubleTextField(0.0, CellValueType.LENGTH, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
+		this.referenceHeightTextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.reference_height.tooltip", "Height w.r.t. survey datum")));
+		this.referenceHeightTextField.setMinWidth(100);
+		this.referenceHeightTextField.setPrefWidth(150);
+		this.referenceHeightTextField.setMaxWidth(Double.MAX_VALUE);
+		
+		
+		this.pivotX0TextField = new DoubleTextField(0.0, CellValueType.LENGTH, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
+		this.pivotX0TextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.x0.tooltip", "X-component of pivot point")));
+		this.pivotX0TextField.setMinWidth(30);
+		this.pivotX0TextField.setPrefWidth(50);
+		this.pivotX0TextField.setMaxWidth(Double.MAX_VALUE);
+		
+		this.pivotY0TextField = new DoubleTextField(0.0, CellValueType.LENGTH, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
+		this.pivotY0TextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.y0.tooltip", "Y-component of pivot point")));
+		this.pivotY0TextField.setMinWidth(30);
+		this.pivotY0TextField.setPrefWidth(50);
+		this.pivotY0TextField.setMaxWidth(Double.MAX_VALUE);
+		
+		this.pivotZ0TextField = new DoubleTextField(0.0, CellValueType.LENGTH, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
+		this.pivotZ0TextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.z0.tooltip", "Z-component of pivot point")));
+		this.pivotZ0TextField.setMinWidth(30);
+		this.pivotZ0TextField.setPrefWidth(50);
+		this.pivotZ0TextField.setMaxWidth(Double.MAX_VALUE);
+		
+		Label earthRadiusLabel = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.earth_radius.label", "Earth radius:"));
+		earthRadiusLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		earthRadiusLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		earthRadiusLabel.setPadding(new Insets(0,0,0,3));
+		earthRadiusLabel.setLabelFor(this.earthRadiusTextField);
+		
+		Label referenceHeightLabel = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.reference_height.label", "Reference height:"));
+		referenceHeightLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		referenceHeightLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		referenceHeightLabel.setPadding(new Insets(0,0,0,3));
+		referenceHeightLabel.setLabelFor(this.referenceHeightTextField);
+		
+		Label pivotPointX0Label = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.x0.label", "Pivot point X0:"));
+		pivotPointX0Label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		pivotPointX0Label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		pivotPointX0Label.setPadding(new Insets(0,0,0,3));
+		pivotPointX0Label.setLabelFor(this.pivotX0TextField);
+		
+		Label pivotPointY0Label = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.y0.label", "Pivot point Y0:"));
+		pivotPointY0Label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		pivotPointY0Label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		pivotPointY0Label.setPadding(new Insets(0,0,0,3));
+		pivotPointY0Label.setLabelFor(this.pivotY0TextField);
+		
+		Label pivotPointZ0Label = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.z0.label", "Pivot point Z0:"));
+		pivotPointZ0Label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		pivotPointZ0Label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		pivotPointZ0Label.setPadding(new Insets(0,0,0,3));
+		pivotPointZ0Label.setLabelFor(this.pivotZ0TextField);
+
+		GridPane gridPane = new GridPane();
+		gridPane.setMaxWidth(Double.MAX_VALUE);
+		gridPane.setHgap(20);
+		gridPane.setVgap(7);
+		gridPane.setPadding(new Insets(5, 10, 5, 10)); // oben, recht, unten, links
+
+		GridPane.setHgrow(earthRadiusLabel,              Priority.SOMETIMES);	
+		GridPane.setHgrow(this.earthRadiusTextField,     Priority.ALWAYS);	
+		GridPane.setHgrow(referenceHeightLabel,          Priority.SOMETIMES);	
+		GridPane.setHgrow(this.referenceHeightTextField, Priority.ALWAYS);	
+		GridPane.setHgrow(pivotPointX0Label,             Priority.SOMETIMES);	
+		GridPane.setHgrow(this.pivotX0TextField,         Priority.ALWAYS);	
+		GridPane.setHgrow(pivotPointY0Label,             Priority.SOMETIMES);	
+		GridPane.setHgrow(this.pivotY0TextField,         Priority.ALWAYS);	
+		GridPane.setHgrow(pivotPointZ0Label,             Priority.SOMETIMES);	
+		GridPane.setHgrow(this.pivotZ0TextField,         Priority.ALWAYS);	
+		
+		int row = 0;
+		gridPane.add(earthRadiusLabel,              0, ++row, 1, 1);
+		gridPane.add(this.earthRadiusTextField,     1,   row, 1, 1);
+		gridPane.add(referenceHeightLabel,          0, ++row, 1, 1);
+		gridPane.add(this.referenceHeightTextField, 1,   row, 1, 1);
+		gridPane.add(pivotPointX0Label,             0, ++row, 1, 1);
+		gridPane.add(this.pivotX0TextField,         1,   row, 1, 1);
+		gridPane.add(pivotPointY0Label,             0, ++row, 1, 1);
+		gridPane.add(this.pivotY0TextField,         1,   row, 1, 1);
+		gridPane.add(pivotPointZ0Label,             0, ++row, 1, 1);
+		gridPane.add(this.pivotZ0TextField,         1,   row, 1, 1);
+
+		return this.createTitledPane(title, tooltip, gridPane);
+	}
+	
 	private void load() {
 		try {
-			Reduction reductions = SQLManager.getInstance().getReductionDefinition();
-			this.referenceHeightTextField.setNumber(reductions.getReferenceHeight());
-			this.earthRadiusTextField.setNumber(reductions.getEarthRadius());
+			Reduction reductions = new Reduction();
+			SQLManager.getInstance().load(reductions);
+			this.referenceHeightTextField.setValue(reductions.getReferenceHeight());
+			this.earthRadiusTextField.setValue(reductions.getEarthRadius());
+			this.pivotX0TextField.setValue(reductions.getPivotPoint().getX0());
+			this.pivotY0TextField.setValue(reductions.getPivotPoint().getY0());
+			this.pivotZ0TextField.setValue(reductions.getPivotPoint().getZ0());
 			
 			this.directionReductionCheckBox.setSelected(reductions.applyReductionTask(ReductionTaskType.DIRECTION));
 			this.distanceReductionCheckBox.setSelected(reductions.applyReductionTask(ReductionTaskType.DISTANCE));
@@ -310,9 +421,10 @@ public class ProjectionAndReductionDialog {
 			this.earthCurvatureReductionCheckBox.setSelected(reductions.applyReductionTask(ReductionTaskType.EARTH_CURVATURE));
 			
 			ProjectionType projection = reductions.getProjectionType();
-			this.noneProjectionRadioButton.setSelected(true);
+			this.localCartesianProjectionRadioButton.setSelected(true);
 			this.gaussKruegerProjectionRadioButton.setSelected(projection == ProjectionType.GAUSS_KRUEGER);
 			this.utmProjectionRadioButton.setSelected(projection == ProjectionType.UTM);
+			this.sphericalProjectionRadioButton.setSelected(projection == ProjectionType.LOCAL_SPHERICAL);
 			
 		}
 		catch (Exception e) {
@@ -380,8 +492,9 @@ public class ProjectionAndReductionDialog {
 		titledPane.setCollapsible(false);
 		titledPane.setAnimated(false);
 		titledPane.setContent(content);
+		titledPane.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		titledPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		titledPane.setPadding(new Insets(0, 10, 5, 10)); // oben, links, unten, rechts
+		titledPane.setPadding(new Insets(5, 5, 5, 5)); // oben, links, unten, rechts
 		//titledPane.setText(title);
 		Label label = new Label(title);
 		label.setTooltip(new Tooltip(tooltip));
@@ -391,9 +504,19 @@ public class ProjectionAndReductionDialog {
 	
 	private VBox createVbox() {
 		VBox vBox = new VBox();
+		vBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		vBox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		vBox.setPadding(new Insets(5, 10, 5, 10)); // oben, recht, unten, links
+		vBox.setPadding(new Insets(5, 0, 5, 0)); // oben, recht, unten, links
 		vBox.setSpacing(10);
 		return vBox;
+	}
+	
+	private HBox createHbox() {
+		HBox hBox = new HBox();
+		hBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		hBox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		hBox.setPadding(new Insets(5, 10, 5, 10)); // oben, recht, unten, links
+		hBox.setSpacing(5);
+		return hBox;
 	}
 }

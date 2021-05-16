@@ -25,10 +25,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.applied_geodesy.adjustment.Constant;
+import org.applied_geodesy.adjustment.network.point.Point3D;
 
 public class Reduction {
-	private ProjectionType projectionType = ProjectionType.NONE;
+	private ProjectionType projectionType = ProjectionType.LOCAL_CARTESIAN;
 	private double earthRadius = Constant.EARTH_RADIUS;
+	private Point3D pivotPoint = new Point3D("PIVOT_POINT_3D", 0.0, 0.0, 0.0);
 	private double referenceHeight = 0.0;
 	private Set<ReductionTaskType> reductionTypes = new HashSet<ReductionTaskType>(ReductionTaskType.values().length);
 	
@@ -46,6 +48,10 @@ public class Reduction {
 
 	public double getEarthRadius() {
 		return this.earthRadius;
+	}
+	
+	public Point3D getPivotPoint() {
+		return this.pivotPoint;
 	}
 	
 	public void clear() {

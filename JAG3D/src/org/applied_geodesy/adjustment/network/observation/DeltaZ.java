@@ -22,6 +22,8 @@
 package org.applied_geodesy.adjustment.network.observation;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
+import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
+import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
 import org.applied_geodesy.adjustment.network.parameter.AdditionalUnknownParameter;
 import org.applied_geodesy.adjustment.network.parameter.Scale;
 import org.applied_geodesy.adjustment.network.point.Point;
@@ -38,6 +40,10 @@ public class DeltaZ extends Observation {
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+				
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
 		double scale = this.scale.getValue();
@@ -48,6 +54,10 @@ public class DeltaZ extends Observation {
 	@Override
 	public double diffYs() {	
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+				
 		double srxs = Math.sin(rxs);
 		double scale = this.scale.getValue();
 		
@@ -59,6 +69,10 @@ public class DeltaZ extends Observation {
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+				
 		double crys = Math.cos(rys);
 		double crxs = Math.cos(rxs);
 		double scale = this.scale.getValue();
@@ -83,6 +97,13 @@ public class DeltaZ extends Observation {
 		
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -115,6 +136,13 @@ public class DeltaZ extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
 		double crys = Math.cos(rys);
@@ -137,6 +165,13 @@ public class DeltaZ extends Observation {
 		
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -162,6 +197,13 @@ public class DeltaZ extends Observation {
 		
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
 
 		double crxs = Math.cos(rxs);
 		double crxe = Math.cos(rxe);
@@ -190,6 +232,13 @@ public class DeltaZ extends Observation {
 		
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -234,6 +283,13 @@ public class DeltaZ extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -245,8 +301,22 @@ public class DeltaZ extends Observation {
 		double srxe = Math.sin(rxe);
 		
 		double w = th*(srxe*srxs + crxe*crxs*crye*crys + crxe*crxs*srye*srys) - ih + srxs*(ye - ys) + crxs*crys*(ze - zs) - crxs*srys*(xe - xs);
+		
+		double earthCurvatureCorrection = 0.0;
+		if (this.getReductions() != null && this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+			// Neitzel/Petrovic (2004): Ein verallgemeinertes Feldverfahren zur Überpruefung von Nivelliergeraeten, Gls. (18),(19) 
+			// c = SQRT(R*R - dist2D*dist2D) - R   bzw.   dist2D * dist2D / (2*R)
+			Reduction reductions = this.getReductions();
+			double dist2D = this.getStartPoint().getDistance2D(this.getEndPoint()); //this.getCalculatedDistance2D();
+			double z0 = reductions.getPivotPoint().getZ0();
+			double R0 = reductions.getEarthRadius();
+			double h0 = reductions.getReferenceHeight();
 
-		return w/this.scale.getValue();
+			double R = R0 + h0 - z0;
+
+			earthCurvatureCorrection = Math.hypot(R, dist2D) - R;
+		}
+		return w / this.scale.getValue() + earthCurvatureCorrection;
 	}
 	
 	@Override

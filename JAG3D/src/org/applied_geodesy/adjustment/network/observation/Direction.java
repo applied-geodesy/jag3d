@@ -56,6 +56,13 @@ public class Direction extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -94,6 +101,13 @@ public class Direction extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -131,6 +145,13 @@ public class Direction extends Observation {
 		
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -171,6 +192,13 @@ public class Direction extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -210,6 +238,13 @@ public class Direction extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -248,6 +283,13 @@ public class Direction extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -285,6 +327,13 @@ public class Direction extends Observation {
 		
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -327,7 +376,7 @@ public class Direction extends Observation {
 	    double obsDir = this.getValueApriori();
 
 	    // Richtungsreduktion
-		if (reductions.getProjectionType() != ProjectionType.NONE && reductions.applyReductionTask(ReductionTaskType.DIRECTION)) {
+		if ((reductions.getProjectionType() == ProjectionType.GAUSS_KRUEGER || reductions.getProjectionType() == ProjectionType.UTM) && reductions.applyReductionTask(ReductionTaskType.DIRECTION)) {
 			double R = reductions.getEarthRadius();
 	    	double scale = reductions.getProjectionType() == ProjectionType.UTM ? 0.9996 : 1.0;
 	    	double yS = this.getStartPoint().getY();
@@ -335,21 +384,18 @@ public class Direction extends Observation {
 	    	double yE = this.getEndPoint().getY();
 	    	double xE = this.getEndPoint().getX();
 	    	
-	    	// Prüfe Rechtswert der Koordinaten
-	    	if (yS >= 1100000 && yS <= 59800000 && yE >= 1100000 && yE <= 59800000) {
-	    		// Reduziere Rechtswert
-	    		yS = ((yS/1000000.0)%1)*1000000.0-500000.0;
-	    		yE = ((yE/1000000.0)%1)*1000000.0-500000.0;
-	    		
-	    		double k = -(xE - xS) * (2.0*yS + yE)/(6.0*R*R*scale*scale);
-	    		obsDir = MathExtension.MOD(obsDir + k, 2.0*Math.PI);
-	    	}
-	    }
-	    
+	    	// Reduziere Rechtswert
+	    	yS = ((yS/1000000.0)%1)*1000000.0-500000.0;
+	    	yE = ((yE/1000000.0)%1)*1000000.0-500000.0;
+
+	    	double k = -(xE - xS) * (2.0*yS + yE)/(6.0*R*R*scale*scale);
+	    	obsDir = MathExtension.MOD(obsDir + k, 2.0*Math.PI);
+		}
+
 	    double diffDir = obsDir - calDir;
-	    
+
 	    // Pruefung ist fuer RiWis, die Fast 0 bzw. 400 gon sind, um eine kleine Verbesserung zu bekommen.
-	    if (2.0*Math.PI-Math.abs(diffDir)<Math.abs(diffDir))
+	    if (2.0 * Math.PI - Math.abs(diffDir) < Math.abs(diffDir))
 	    	if (calDir < obsDir)
 	    		calDir += 2.0*Math.PI;
 	    	else
@@ -375,6 +421,13 @@ public class Direction extends Observation {
 		
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+		
+		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+		
+		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);

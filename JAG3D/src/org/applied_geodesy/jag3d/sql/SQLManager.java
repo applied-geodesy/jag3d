@@ -1716,7 +1716,6 @@ public class SQLManager {
 		ResultSet rs = stmt.executeQuery();
 		while (rs.next()) {
 			VerticalDeflectionRow row = new VerticalDeflectionRow();
-			// POINT
 
 			// a-priori-Values
 			row.setId(rs.getInt("id"));
@@ -3794,17 +3793,23 @@ public class SQLManager {
 			return;
 		
 		String sql = "MERGE INTO \"ReductionDefinition\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
-				+ ") AS \"vals\" (\"id\", \"projection_type\", \"reference_height\", \"earth_radius\") ON \"ReductionDefinition\".\"id\" = \"vals\".\"id\" AND \"ReductionDefinition\".\"id\" = 1 "
+				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"id\", \"projection_type\", \"reference_height\", \"earth_radius\", \"x0\", \"y0\", \"z0\") ON \"ReductionDefinition\".\"id\" = \"vals\".\"id\" AND \"ReductionDefinition\".\"id\" = 1 "
 				+ "WHEN MATCHED THEN UPDATE SET "
 				+ "\"ReductionDefinition\".\"projection_type\"  = \"vals\".\"projection_type\", "
 				+ "\"ReductionDefinition\".\"reference_height\" = \"vals\".\"reference_height\", "
-				+ "\"ReductionDefinition\".\"earth_radius\"     = \"vals\".\"earth_radius\" "
+				+ "\"ReductionDefinition\".\"earth_radius\"     = \"vals\".\"earth_radius\", "
+				+ "\"ReductionDefinition\".\"x0\"               = \"vals\".\"x0\", "
+				+ "\"ReductionDefinition\".\"y0\"               = \"vals\".\"y0\", "
+				+ "\"ReductionDefinition\".\"z0\"               = \"vals\".\"z0\"  "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"projection_type\", "
 				+ "\"vals\".\"reference_height\", "
-				+ "\"vals\".\"earth_radius\" ";
+				+ "\"vals\".\"earth_radius\", "
+				+ "\"vals\".\"x0\", "
+				+ "\"vals\".\"y0\", "
+				+ "\"vals\".\"z0\" ";
 		
 		
 		int idx = 1;
@@ -3814,6 +3819,9 @@ public class SQLManager {
 		stmt.setInt(idx++, reduction.getProjectionType().getId());
 		stmt.setDouble(idx++, reduction.getReferenceHeight());
 		stmt.setDouble(idx++, reduction.getEarthRadius());
+		stmt.setDouble(idx++, reduction.getPivotPoint().getX0());
+		stmt.setDouble(idx++, reduction.getPivotPoint().getY0());
+		stmt.setDouble(idx++, reduction.getPivotPoint().getZ0());
 		stmt.execute();
 
 		this.clearReductionTasks();
@@ -3902,12 +3910,10 @@ public class SQLManager {
 		stmt.execute();
 	}
 	
-	public Reduction getReductionDefinition() throws SQLException {
-		Reduction reductions = new Reduction();
-
+	public void load(Reduction reductions) throws SQLException {
 		if (this.hasDatabase() && this.dataBase.isOpen()) {
 			String sql = "SELECT "
-					+ "\"projection_type\", \"reference_height\", \"earth_radius\", \"type\" AS \"task_type\" "
+					+ "\"projection_type\", \"reference_height\", \"earth_radius\", \"x0\", \"y0\", \"z0\", \"type\" AS \"task_type\" "
 					+ "FROM \"ReductionTask\" "
 					+ "RIGHT JOIN \"ReductionDefinition\" "
 					+ "ON \"ReductionTask\".\"reduction_id\" = \"ReductionDefinition\".\"id\" "
@@ -3923,10 +3929,16 @@ public class SQLManager {
 				ProjectionType projectionType = ProjectionType.getEnumByValue(rs.getInt("projection_type"));
 				double referenceHeight        = rs.getDouble("reference_height");
 				double earthRadius            = rs.getDouble("earth_radius");
+				double x0                     = rs.getDouble("x0");
+				double y0                     = rs.getDouble("y0");
+				double z0                     = rs.getDouble("z0");
 
 				reductions.setProjectionType(projectionType);
 				reductions.setReferenceHeight(referenceHeight);
 				reductions.setEarthRadius(earthRadius);
+				reductions.getPivotPoint().setX0(x0);
+				reductions.getPivotPoint().setY0(y0);
+				reductions.getPivotPoint().setZ0(z0);
 	
 				if (hasTaskType) {
 					ReductionTaskType taskType = ReductionTaskType.getEnumByValue(taskTypeId);
@@ -3934,7 +3946,6 @@ public class SQLManager {
 				}
 			}
 		}
-		return reductions;
 	}
 		
 	public void save(boolean userDefined, RankDefect rankDefect) throws SQLException {
