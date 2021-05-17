@@ -1,23 +1,23 @@
 /***********************************************************************
-* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
-*                                                                      *
-* This program is free software; you can redistribute it and/or modify *
-* it under the terms of the GNU General Public License as published by *
-* the Free Software Foundation; either version 3 of the License, or    *
-* at your option any later version.                                    *
-*                                                                      *
-* This program is distributed in the hope that it will be useful,      *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
-* GNU General Public License for more details.                         *
-*                                                                      *
-* You should have received a copy of the GNU General Public License    *
-* along with this program; if not, see <http://www.gnu.org/licenses/>  *
-* or write to the                                                      *
-* Free Software Foundation, Inc.,                                      *
-* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
-*                                                                      *
-***********************************************************************/
+ * Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+ *                                                                      *
+ * This program is free software; you can redistribute it and/or modify *
+ * it under the terms of the GNU General Public License as published by *
+ * the Free Software Foundation; either version 3 of the License, or    *
+ * at your option any later version.                                    *
+ *                                                                      *
+ * This program is distributed in the hope that it will be useful,      *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ * GNU General Public License for more details.                         *
+ *                                                                      *
+ * You should have received a copy of the GNU General Public License    *
+ * along with this program; if not, see <http://www.gnu.org/licenses/>  *
+ * or write to the                                                      *
+ * Free Software Foundation, Inc.,                                      *
+ * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+ *                                                                      *
+ ***********************************************************************/
 
 package org.applied_geodesy.adjustment.network.observation;
 
@@ -30,7 +30,7 @@ import org.applied_geodesy.adjustment.network.point.Point;
 
 public class DeltaZ extends Observation {
 	private Scale scale = new Scale();
-	
+
 	public DeltaZ(int id, Point startPoint, Point endPoint, double startPointHeight, double endPointHeight, double observation, double sigma, double distanceForUncertaintyModel) {
 		super(id, startPoint, endPoint, startPointHeight, endPointHeight, observation, sigma, distanceForUncertaintyModel);
 	}
@@ -39,220 +39,196 @@ public class DeltaZ extends Observation {
 	public double diffXs() {
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
-		
+
 		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
 		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
 		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-				
+
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
 		double scale = this.scale.getValue();
-		
+
 		return (crxs*srys)/scale;
 	}
 
 	@Override
 	public double diffYs() {	
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
-		
+
 		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
 		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
-				
+
 		double srxs = Math.sin(rxs);
 		double scale = this.scale.getValue();
-		
+
 		return -srxs/scale;
 	}
-	
+
 	@Override
 	public double diffZs() {
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
-		
+
 		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
 		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
 		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-				
+
 		double crys = Math.cos(rys);
 		double crxs = Math.cos(rxs);
 		double scale = this.scale.getValue();
-		
+
 		return -(crxs*crys)/scale;
 	}
-	
+
 	@Override
 	public double diffVerticalDeflectionXs() {
 		double xs = this.getStartPoint().getX();
 		double ys = this.getStartPoint().getY();
 		double zs = this.getStartPoint().getZ();
-		
-		double xe = this.getEndPoint().getX();
-		double ye = this.getEndPoint().getY();
-		double ze = this.getEndPoint().getZ();
 
-		double th = this.getEndPointHeight();
-		
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
-		
-		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
-		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
-		
+
 		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
 		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
 		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
-		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
-		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
-		
+
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
 		double crys = Math.cos(rys);
-		
-		double crxe = Math.cos(rxe);
-		double crye = Math.cos(rye);
-		double srye = Math.sin(rye);
-		double srxe = Math.sin(rxe);
-		
+
 		double scale = this.scale.getValue();
-		
-		return (crxs*(ye - ys) - th*(crxe*crye*crys*srxs - crxs*srxe + crxe*srxs*srye*srys) - crys*srxs*(ze - zs) + srxs*srys*(xe - xs))/scale;
+
+		return -(ys*crxs - zs*crys*srxs + xs*srxs*srys)/scale;
 	}
-	
+
 	@Override
 	public double diffVerticalDeflectionYs() {
 		double xs = this.getStartPoint().getX();
 		double zs = this.getStartPoint().getZ();
-		
-		double xe = this.getEndPoint().getX();
-		double ze = this.getEndPoint().getZ();
 
-		double th = this.getEndPointHeight();
-		
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
-		
-		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
-		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
-		
+
 		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
 		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
 		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
-		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
-		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
-		
+
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
 		double crys = Math.cos(rys);
-		
-		double crxe = Math.cos(rxe);
-		double crye = Math.cos(rye);
-		double srye = Math.sin(rye);
-		
+
 		double scale = this.scale.getValue();
-		
-		return -(th*(crxe*crxs*crye*srys - crxe*crxs*crys*srye) + crxs*crys*(xe - xs) + crxs*srys*(ze - zs))/scale;
+
+		return (crxs*(xs*crys + zs*srys))/scale;
 	}
 
 	@Override
 	public double diffVerticalDeflectionXe() {
-		double th = this.getEndPointHeight();
-		
-		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
-		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
-		
+		double xe = this.getEndPoint().getX();
+		double ye = this.getEndPoint().getY();
+		double ze = this.getEndPoint().getZ();
+
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
-		
+
 		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
-		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
-		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
 		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
 		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
-		
-		double srxs = Math.sin(rxs);
-		double srys = Math.sin(rys);
-		double crxs = Math.cos(rxs);
-		double crys = Math.cos(rys);
-		
+
 		double crxe = Math.cos(rxe);
 		double crye = Math.cos(rye);
 		double srye = Math.sin(rye);
 		double srxe = Math.sin(rxe);
-		
+
 		double scale = this.scale.getValue();
-		
-		return -(th*(crxs*crye*crys*srxe - crxe*srxs + crxs*srxe*srye*srys))/scale;
+
+		return (ye*crxe - ze*crye*srxe + xe*srxe*srye)/scale;
 	}
-	
+
 	@Override
 	public double diffVerticalDeflectionYe() {
-		double th = this.getEndPointHeight();
-		
-		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
-		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
-		
+		double xe = this.getEndPoint().getX();
+		double ze = this.getEndPoint().getZ();
+
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
-		
+
 		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
-		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
-		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
 		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
 		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
 
-		double crxs = Math.cos(rxs);
 		double crxe = Math.cos(rxe);
+		double crye = Math.cos(rye);
+		double srye = Math.sin(rye);
 		
 		double scale = this.scale.getValue();
-		
-		return -(th*Math.sin(rye - rys)*crxe*crxs)/scale;
+
+		return -(crxe*(xe*crye + ze*srye))/scale;
 	}
 
-	
+
 	@Override
 	public double diffScale() {
 		double xs = this.getStartPoint().getX();
 		double ys = this.getStartPoint().getY();
 		double zs = this.getStartPoint().getZ();
-		
+
 		double xe = this.getEndPoint().getX();
 		double ye = this.getEndPoint().getY();
 		double ze = this.getEndPoint().getZ();
-		
+
 		double ih = this.getStartPointHeight();
 		double th = this.getEndPointHeight();
-		
-		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
-		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
-		
-		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
-		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
-		
-		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
-		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
-		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
-		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
-		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
-		
-		double srxs = Math.sin(rxs);
-		double srys = Math.sin(rys);
-		double crxs = Math.cos(rxs);
-		double crys = Math.cos(rys);
-		
-		double crxe = Math.cos(rxe);
-		double crye = Math.cos(rye);
-		double srye = Math.sin(rye);
-		double srxe = Math.sin(rxe);
-		
-		double w = th*(srxe*srxs + crxe*crxs*crye*crys + crxe*crxs*srye*srys) - ih + srxs*(ye - ys) + crxs*crys*(ze - zs) - crxs*srys*(xe - xs);
+
+		if (ih != 0 || th != 0) {
+			double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+			double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
+
+			double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+			double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+
+			SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+			rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+			rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+
+			rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+			rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+
+			double srxs = Math.sin(rxs);
+			double srys = Math.sin(rys);
+			double crxs = Math.cos(rxs);
+			double crys = Math.cos(rys);
+
+			double crxe = Math.cos(rxe);
+			double crye = Math.cos(rye);
+			double srye = Math.sin(rye);
+			double srxe = Math.sin(rxe);
+
+			// Rs' * [0 0 ih]'
+			double dxs = -crxs*srys * ih;
+			double dys =  srxs      * ih;
+			double dzs =  crxs*crys * ih;
+
+			// Re' * [0 0 th]'
+			double dxe = -crxe*srye * th;
+			double dye =  srxe      * th;
+			double dze =  crxe*crye * th;
+
+			xs = xs + dxs;
+			ys = ys + dys;
+			zs = zs + dzs;
+
+			xe = xe + dxe;
+			ye = ye + dye;
+			ze = ze + dze;
+		}
+
 		double scale = this.scale.getValue();
-		return -w/(scale*scale);
+		double dN = this.getApproximatedUndulationDifference(xs, ys, xe, ye);
+		double dh = ze - zs + dN;
+		return -dh/(scale*scale);
 	}
 
 	public AdditionalUnknownParameter getScale() {
@@ -269,54 +245,85 @@ public class DeltaZ extends Observation {
 		double xs = this.getStartPoint().getX();
 		double ys = this.getStartPoint().getY();
 		double zs = this.getStartPoint().getZ();
-		
+
 		double xe = this.getEndPoint().getX();
 		double ye = this.getEndPoint().getY();
 		double ze = this.getEndPoint().getZ();
-		
+
 		double ih = this.getStartPointHeight();
 		double th = this.getEndPointHeight();
-		
-		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
-		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
-		
-		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
-		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
-		
-		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
-		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
-		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
-		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
-		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
-		
-		double srxs = Math.sin(rxs);
-		double srys = Math.sin(rys);
-		double crxs = Math.cos(rxs);
-		double crys = Math.cos(rys);
-		
-		double crxe = Math.cos(rxe);
-		double crye = Math.cos(rye);
-		double srye = Math.sin(rye);
-		double srxe = Math.sin(rxe);
-		
-		double w = th*(srxe*srxs + crxe*crxs*crye*crys + crxe*crxs*srye*srys) - ih + srxs*(ye - ys) + crxs*crys*(ze - zs) - crxs*srys*(xe - xs);
-		
-		double earthCurvatureCorrection = 0.0;
-		if (this.getReductions() != null && this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
-			// Neitzel/Petrovic (2004): Ein verallgemeinertes Feldverfahren zur Überpruefung von Nivelliergeraeten, Gls. (18),(19) 
-			// c = SQRT(R*R - dist2D*dist2D) - R   bzw.   dist2D * dist2D / (2*R)
-			Reduction reductions = this.getReductions();
-			double dist2D = this.getStartPoint().getDistance2D(this.getEndPoint()); //this.getCalculatedDistance2D();
-			double z0 = reductions.getPivotPoint().getZ0();
-			double R0 = reductions.getEarthRadius();
-			double h0 = reductions.getReferenceHeight();
 
-			double R = R0 + h0 - z0;
+		if (ih != 0 || th != 0) {
+			double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+			double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 
-			earthCurvatureCorrection = Math.hypot(R, dist2D) - R;
+			double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+			double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+
+			SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
+			rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
+			rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
+
+			rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
+			rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+
+			double srxs = Math.sin(rxs);
+			double srys = Math.sin(rys);
+			double crxs = Math.cos(rxs);
+			double crys = Math.cos(rys);
+
+			double crxe = Math.cos(rxe);
+			double crye = Math.cos(rye);
+			double srye = Math.sin(rye);
+			double srxe = Math.sin(rxe);
+
+			// Rs' * [0 0 ih]'
+			double dxs = -crxs*srys * ih;
+			double dys =  srxs      * ih;
+			double dzs =  crxs*crys * ih;
+
+			// Re' * [0 0 th]'
+			double dxe = -crxe*srye * th;
+			double dye =  srxe      * th;
+			double dze =  crxe*crye * th;
+
+			xs = xs + dxs;
+			ys = ys + dys;
+			zs = zs + dzs;
+
+			xe = xe + dxe;
+			ye = ye + dye;
+			ze = ze + dze;
 		}
-		return w / this.scale.getValue() + earthCurvatureCorrection;
+		
+		double scale = this.scale.getValue();
+		double dN = this.getApproximatedUndulationDifference(xs, ys, xe, ye);
+		double dh = ze - zs + dN;
+		return dh / scale;
+	}
+
+	private double getApproximatedUndulationDifference(double xs, double ys, double xe, double ye) {
+		if (this.getReductions() == null || this.getReductions().getProjectionType() != ProjectionType.LOCAL_SPHERICAL)
+			return 0.0;
+		
+		// Neitzel/Petrovic (2004): Ein verallgemeinertes Feldverfahren zur Überpruefung von Nivelliergeraeten, Gls. (18),(19) 
+		// N = SQRT(R*R - dist2D*dist2D) - R   bzw. N = dist2D * dist2D / (2*R)
+		Reduction reductions = this.getReductions();
+		double x0 = reductions.getPivotPoint().getX0();
+		double y0 = reductions.getPivotPoint().getY0();
+		double z0 = reductions.getPivotPoint().getZ0();
+		double R0 = reductions.getEarthRadius();
+		double h0 = reductions.getReferenceHeight();
+
+		double R = R0 + h0 - z0;
+
+		// Approx. undulation
+		double dist2Ds = Math.hypot(xs - x0, ys - y0);
+		double dist2De = Math.hypot(xe - x0, ye - y0);
+		double Ns = Math.hypot(R, dist2Ds) - R;
+		double Ne = Math.hypot(R, dist2De) - R;
+
+		return Ne - Ns;
 	}
 	
 	@Override
