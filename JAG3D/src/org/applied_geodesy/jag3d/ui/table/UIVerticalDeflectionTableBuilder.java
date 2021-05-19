@@ -707,9 +707,9 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 			return;
 		
 		TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
-		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getTableRowHighlightType(); 
-		double leftBoundary  = tableRowHighlight.getLeftBoundary(); 
-		double rightBoundary = tableRowHighlight.getRightBoundary();
+		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getSelectedTableRowHighlightType(); 
+		double leftBoundary  = tableRowHighlight.getLeftBoundary(tableRowHighlightType); 
+		double rightBoundary = tableRowHighlight.getRightBoundary(tableRowHighlightType);
 
 		VerticalDeflectionRow item = row.getItem();
 

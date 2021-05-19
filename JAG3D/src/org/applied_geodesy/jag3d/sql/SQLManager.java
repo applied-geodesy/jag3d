@@ -4786,21 +4786,22 @@ public class SQLManager {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
-		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getTableRowHighlightType();
 		String sql = "SELECT "
 				+ "\"left_boundary\", \"right_boundary\" "
 				+ "FROM \"TableRowHighlightRange\" "
 				+ "WHERE \"type\" = ? LIMIT 1";
 
-		int idx = 1;
-		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
-		stmt.setInt(idx++, tableRowHighlightType.getId());
+		for (TableRowHighlightType tableRowHighlightType : TableRowHighlightType.values()) {
+			int idx = 1;
+			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+			stmt.setInt(idx++, tableRowHighlightType.getId());
 
-		ResultSet rs = stmt.executeQuery();
-		if (rs.next()) {
-			double leftBoundary  = rs.getDouble("left_boundary");
-			double rightBoundary = rs.getDouble("right_boundary");
-			tableRowHighlight.setRange(leftBoundary, rightBoundary);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				double leftBoundary  = rs.getDouble("left_boundary");
+				double rightBoundary = rs.getDouble("right_boundary");
+				tableRowHighlight.setRange(tableRowHighlightType, leftBoundary, rightBoundary);
+			}
 		}
 	}
 	
@@ -4819,13 +4820,12 @@ public class SQLManager {
 		if (rs.next()) {
 			TableRowHighlightType tableRowHighlightType = TableRowHighlightType.getEnumByValue(rs.getInt("type"));
 			if (tableRowHighlightType != null)
-				tableRowHighlight.setTableRowHighlightType(tableRowHighlightType);
+				tableRowHighlight.setSelectedTableRowHighlightType(tableRowHighlightType);
 		}
 	}
 
 	public void saveTableRowHighlight() throws SQLException {
 		TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
-		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getTableRowHighlightType();
 		
 		// save color properties
 		this.save(TableRowHighlightRangeType.EXCELLENT,    tableRowHighlight.getColor(TableRowHighlightRangeType.EXCELLENT));
@@ -4833,17 +4833,10 @@ public class SQLManager {
 		this.save(TableRowHighlightRangeType.INADEQUATE,   tableRowHighlight.getColor(TableRowHighlightRangeType.INADEQUATE));
 
 		// save range and display options
-		switch(tableRowHighlightType) {
-		case INFLUENCE_ON_POSITION:
-		case REDUNDANCY:
-		case P_PRIO_VALUE:
-			this.save(tableRowHighlightType, tableRowHighlight.getLeftBoundary(), tableRowHighlight.getRightBoundary());
-			// no break, to enter default-case 
-
-		default:
-			this.save(tableRowHighlightType);
-			break;
-		}
+		for (TableRowHighlightType tableRowHighlightType : TableRowHighlightType.values())
+			this.save(tableRowHighlightType, tableRowHighlight.getLeftBoundary(tableRowHighlightType), tableRowHighlight.getRightBoundary(tableRowHighlightType));
+		
+		this.save(tableRowHighlight.getSelectedTableRowHighlightType());
 	}
 	
 	private void save(TableRowHighlightRangeType tableRowHighlightRangeType, Color color) throws SQLException {

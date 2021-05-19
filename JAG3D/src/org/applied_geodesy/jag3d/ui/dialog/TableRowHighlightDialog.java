@@ -86,8 +86,8 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 					DoubleTextField[] fields = highlightRangeFieldMap.get(tableRowHighlightType);
 					double leftBoundary  = fields[0].getNumber();
 					double rightBoundary = fields[1].getNumber();
-					tableRowHighlight.setTableRowHighlightType(this.tableRowHighlightType);
-					tableRowHighlight.setRange(leftBoundary, rightBoundary);
+					tableRowHighlight.setSelectedTableRowHighlightType(this.tableRowHighlightType);
+					tableRowHighlight.setRange(this.tableRowHighlightType, leftBoundary, rightBoundary);
 				}
 				
 				ignoreChangeEvent = true;
@@ -114,13 +114,13 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 			if (!ignoreChangeEvent && newValue != null && newValue.isSelected() && newValue.getUserData() != null && newValue.getUserData() instanceof TableRowHighlightType && newValue instanceof RadioButton) {
 				TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
 				TableRowHighlightType tableRowHighlightType = (TableRowHighlightType)newValue.getUserData();
-				tableRowHighlight.setTableRowHighlightType(tableRowHighlightType);
+				tableRowHighlight.setSelectedTableRowHighlightType(tableRowHighlightType);
 				
 				if (highlightRangeFieldMap.containsKey(tableRowHighlightType) && highlightRangeFieldMap.get(tableRowHighlightType) != null) {
 					DoubleTextField[] fields = highlightRangeFieldMap.get(tableRowHighlightType);
 					double leftBoundary  = fields[0].getNumber();
 					double rightBoundary = fields[1].getNumber();
-					tableRowHighlight.setRange(leftBoundary, rightBoundary);
+					tableRowHighlight.setRange(tableRowHighlightType,leftBoundary, rightBoundary);
 				}
 				save();
 			}
@@ -303,7 +303,8 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 	private void addRow(GridPane parent, int row, TableRowHighlightType tableRowHighlightType, ToggleGroup group) {
 		String radioButtonLabelText = null, radioButtonToolTipText = null;
 		Label leftBoundary = null, middleBoundaray = null, rightBoundary = null;
-		double range[] = DefaultTableRowHighlightValue.getRange(tableRowHighlightType);
+
+		TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
 		DoubleTextField leftRangeField = null, rightRangeField = null;
 
 		switch(tableRowHighlightType) {
@@ -328,8 +329,8 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 			middleBoundaray = new Label(" \u003C ");
 			rightBoundary   = new Label(" \u2264 " + Math.round(options.convertPercentToView(1)));
 
-			leftRangeField  = this.createMinMaxDoubleTextField(tableRowHighlightType, range[0], 0, 1, CellValueType.PERCENTAGE, false, false);
-			rightRangeField = this.createMinMaxDoubleTextField(tableRowHighlightType, range[1], 0, 1, CellValueType.PERCENTAGE, false, false);
+			leftRangeField  = this.createMinMaxDoubleTextField(tableRowHighlightType, tableRowHighlight.getLeftBoundary(tableRowHighlightType), 0, 1, CellValueType.PERCENTAGE, false, false);
+			rightRangeField = this.createMinMaxDoubleTextField(tableRowHighlightType, tableRowHighlight.getRightBoundary(tableRowHighlightType), 0, 1, CellValueType.PERCENTAGE, false, false);
 			this.rightBoundaryRedundancy = rightBoundary;
 			break;
 
@@ -344,8 +345,8 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 			middleBoundaray = new Label(" \u003C ");
 			rightBoundary   = new Label(" \u003C " + Math.round(options.convertPercentToView(1)));
 
-			leftRangeField  = this.createMinMaxDoubleTextField(tableRowHighlightType, range[0], 0, 1, CellValueType.PERCENTAGE, true, true);
-			rightRangeField = this.createMinMaxDoubleTextField(tableRowHighlightType, range[1], 0, 1, CellValueType.PERCENTAGE, true, true);
+			leftRangeField  = this.createMinMaxDoubleTextField(tableRowHighlightType, tableRowHighlight.getLeftBoundary(tableRowHighlightType), 0, 1, CellValueType.PERCENTAGE, true, true);
+			rightRangeField = this.createMinMaxDoubleTextField(tableRowHighlightType, tableRowHighlight.getRightBoundary(tableRowHighlightType), 0, 1, CellValueType.PERCENTAGE, true, true);
 			this.rightBoundaryPValue = rightBoundary;
 			break;
 
@@ -360,8 +361,8 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 			middleBoundaray = new Label(" \u003C ");
 			rightBoundary   = new Label(" \u003C \u221E");
 
-			leftRangeField  = this.createMinMaxDoubleTextField(tableRowHighlightType, range[0], 0, Double.POSITIVE_INFINITY, CellValueType.LENGTH_RESIDUAL, false, false);
-			rightRangeField = this.createMinMaxDoubleTextField(tableRowHighlightType, range[1], 0, Double.POSITIVE_INFINITY, CellValueType.LENGTH_RESIDUAL, false, false);
+			leftRangeField  = this.createMinMaxDoubleTextField(tableRowHighlightType, tableRowHighlight.getLeftBoundary(tableRowHighlightType), 0, Double.POSITIVE_INFINITY, CellValueType.LENGTH_RESIDUAL, false, false);
+			rightRangeField = this.createMinMaxDoubleTextField(tableRowHighlightType, tableRowHighlight.getRightBoundary(tableRowHighlightType), 0, Double.POSITIVE_INFINITY, CellValueType.LENGTH_RESIDUAL, false, false);
 			break;
 
 		}
@@ -402,12 +403,10 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 		try {
 			SQLManager.getInstance().loadTableRowHighlight();
 
-			TableRowHighlightType tableRowHighlightType = tableRowHighlight.getTableRowHighlightType();
-			double leftBoundary  = tableRowHighlight.getLeftBoundary();
-			double rightBoundary = tableRowHighlight.getRightBoundary();
+			TableRowHighlightType selectedTableRowHighlightType = tableRowHighlight.getSelectedTableRowHighlightType();
 
 			for (Toggle toggleButton : this.highlightOptionGroup.getToggles()) {
-				if (toggleButton.getUserData() == tableRowHighlightType && toggleButton instanceof RadioButton) {
+				if (toggleButton.getUserData() == selectedTableRowHighlightType && toggleButton instanceof RadioButton) {
 					RadioButton radioButton = (RadioButton)toggleButton;
 					radioButton.setSelected(true);
 					radioButton.requestFocus();
@@ -415,10 +414,15 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 				}
 			}
 
-			if (tableRowHighlightType != TableRowHighlightType.NONE && this.highlightRangeFieldMap.containsKey(tableRowHighlightType) && this.highlightRangeFieldMap.get(tableRowHighlightType) != null) {
-				DoubleTextField[] fields = this.highlightRangeFieldMap.get(tableRowHighlightType);
-				fields[0].setNumber(leftBoundary);
-				fields[1].setNumber(rightBoundary);
+			for (TableRowHighlightType tableRowHighlightType : TableRowHighlightType.values()) {
+				if (tableRowHighlightType != TableRowHighlightType.NONE && this.highlightRangeFieldMap.containsKey(tableRowHighlightType) && this.highlightRangeFieldMap.get(tableRowHighlightType) != null) {
+					DoubleTextField[] fields = this.highlightRangeFieldMap.get(tableRowHighlightType);
+					double leftBoundary  = tableRowHighlight.getLeftBoundary(tableRowHighlightType);
+					double rightBoundary = tableRowHighlight.getRightBoundary(tableRowHighlightType);
+					
+					fields[0].setNumber(leftBoundary);
+					fields[1].setNumber(rightBoundary);
+				}
 			}
 
 			this.excellentColorPicker.setValue(tableRowHighlight.getColor(TableRowHighlightRangeType.EXCELLENT));

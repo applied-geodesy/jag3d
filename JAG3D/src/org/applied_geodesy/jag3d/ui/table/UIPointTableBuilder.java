@@ -1069,9 +1069,9 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 			return;
 		
 		TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
-		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getTableRowHighlightType(); 
-		double leftBoundary  = tableRowHighlight.getLeftBoundary(); 
-		double rightBoundary = tableRowHighlight.getRightBoundary();
+		TableRowHighlightType tableRowHighlightType = tableRowHighlight.getSelectedTableRowHighlightType(); 
+		double leftBoundary  = tableRowHighlight.getLeftBoundary(tableRowHighlightType); 
+		double rightBoundary = tableRowHighlight.getRightBoundary(tableRowHighlightType);
 
 		PointRow item = row.getItem();
 
