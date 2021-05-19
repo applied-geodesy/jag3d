@@ -120,12 +120,11 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 					DoubleTextField[] fields = highlightRangeFieldMap.get(tableRowHighlightType);
 					double leftBoundary  = fields[0].getNumber();
 					double rightBoundary = fields[1].getNumber();
-					tableRowHighlight.setRange(tableRowHighlightType,leftBoundary, rightBoundary);
+					tableRowHighlight.setRange(tableRowHighlightType, leftBoundary, rightBoundary);
 				}
 				save();
 			}
 		}
-
 	}
 
 	private class HighlightColorChangeListener implements ChangeListener<Color> {
