@@ -21,6 +21,9 @@
 
 package org.applied_geodesy.jag3d.ui.table.rowhighlight;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.applied_geodesy.jag3d.ui.table.UICongruenceAnalysisTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIGNSSObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIPointTableBuilder;
@@ -35,35 +38,43 @@ public class TableRowHighlight {
 	private Color satisfactoryColor = DefaultTableRowHighlightValue.getSatisfactoryColor();
 	private Color inadequateColor   = DefaultTableRowHighlightValue.getInadequateColor();
 	
-	private double leftBoundary  = Double.NaN;
-	private double rightBoundary = Double.NaN;
+	private Map<TableRowHighlightType, Double> leftBoundaries  = new HashMap<TableRowHighlightType, Double>(TableRowHighlightType.values().length);
+	private Map<TableRowHighlightType, Double> rightBoundaries = new HashMap<TableRowHighlightType, Double>(TableRowHighlightType.values().length);
 	
 	private TableRowHighlightType tableRowHighlightType = TableRowHighlightType.NONE;
 	
-	private TableRowHighlight() {}
+	private TableRowHighlight() {
+		for (TableRowHighlightType tableRowHighlightType : TableRowHighlightType.values()) {
+			double range[] = DefaultTableRowHighlightValue.getRange(tableRowHighlightType);
+			if (range != null && range.length >= 2)
+				this.setRange(tableRowHighlightType, range[0], range[1]);
+		}
+	}
 	
 	public static TableRowHighlight getInstance() {
 		return tableRowHighlight;
 	}
 	
-	public void setTableRowHighlightType(TableRowHighlightType tableRowHighlightType) {
+	public void setSelectedTableRowHighlightType(TableRowHighlightType tableRowHighlightType) {
 		this.tableRowHighlightType = tableRowHighlightType;
 	}
 	
-	public void setRange(double leftBoundary, double rightBoundary) {
-		this.leftBoundary  = Math.min(leftBoundary, rightBoundary);
-		this.rightBoundary = Math.max(leftBoundary, rightBoundary);
+	public void setRange(TableRowHighlightType tableRowHighlightType, double leftBoundary, double rightBoundary) {
+		double left  = Math.min(leftBoundary, rightBoundary);
+		double right = Math.max(leftBoundary, rightBoundary);
+		this.leftBoundaries.put(tableRowHighlightType, left);
+		this.rightBoundaries.put(tableRowHighlightType, right);
 	}
 	
-	public double getLeftBoundary() {
-		return this.leftBoundary;
+	public double getLeftBoundary(TableRowHighlightType tableRowHighlightType) {
+		return this.leftBoundaries.containsKey(tableRowHighlightType) ? this.leftBoundaries.get(tableRowHighlightType) : Double.NEGATIVE_INFINITY;
 	}
 
-	public double getRightBoundary() {
-		return this.rightBoundary;
+	public double getRightBoundary(TableRowHighlightType tableRowHighlightType) {
+		return this.rightBoundaries.containsKey(tableRowHighlightType) ? this.rightBoundaries.get(tableRowHighlightType) : Double.POSITIVE_INFINITY;
 	}
 	
-	public TableRowHighlightType getTableRowHighlightType() {
+	public TableRowHighlightType getSelectedTableRowHighlightType() {
 		return this.tableRowHighlightType;
 	}
 	
@@ -115,7 +126,7 @@ public class TableRowHighlight {
 	@Override
 	public String toString() {
 		return "TableRowHighlight [excellentColor=" + excellentColor + ", satisfactoryColor=" + satisfactoryColor
-				+ ", inadequateColor=" + inadequateColor + ", leftBoundary=" + leftBoundary + ", rightBoundary="
-				+ rightBoundary + ", tableRowHighlightType=" + tableRowHighlightType + "]";
+				+ ", inadequateColor=" + inadequateColor + ", leftBoundaries=" + leftBoundaries + ", rightBoundaries="
+				+ rightBoundaries + ", tableRowHighlightType=" + tableRowHighlightType + "]";
 	}
 }
