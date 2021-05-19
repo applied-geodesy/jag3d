@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Locale;
 import java.util.function.Function;
 
 import org.applied_geodesy.jag3d.ui.table.column.ColumnContentType;
@@ -376,8 +377,13 @@ public abstract class UITableBuilder<T> {
 	void highlightTableRow(TableRow<T> row) {}
 	
 	void setTableRowHighlight(TableRow<T> row, TableRowHighlightRangeType type) {
-		Color color = TableRowHighlight.getInstance().getColor(type);
-		row.setStyle(color != null && color != Color.TRANSPARENT ? String.format("-fx-background-color: #%s;", Integer.toHexString(row.getIndex() % 2 == 0 ? color.hashCode() : color.darker().hashCode())) : "");
+		Color color       = TableRowHighlight.getInstance().getColor(type);
+		Color darkerColor = color.darker();
+		
+		String rgbColor       = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f)", color.getRed()*255, color.getGreen()*255, color.getBlue()*255);
+		String rgbDarkerColor = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f)", darkerColor.getRed()*255, darkerColor.getGreen()*255, darkerColor.getBlue()*255);
+		
+		row.setStyle(color != null && color != Color.TRANSPARENT ? String.format("-fx-background-color: %s;", row.getIndex() % 2 == 0 ? rgbColor : rgbDarkerColor) : "");
 	}
 	
 	public abstract T getEmptyRow();
