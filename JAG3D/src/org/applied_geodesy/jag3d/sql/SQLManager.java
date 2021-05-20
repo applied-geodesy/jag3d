@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EventListener;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -4992,6 +4993,68 @@ public class SQLManager {
 		}
 
 		return observationTypes;
+	}
+	
+	public Map<TableRowHighlightRangeType, Integer> getChartData(TableRowHighlightType tableRowHighlightType, ObservationType[] observationTypes) throws SQLException {
+		// Default values
+		Map<TableRowHighlightRangeType, Integer> chartData = new LinkedHashMap<TableRowHighlightRangeType, Integer>();
+		chartData.put(TableRowHighlightRangeType.INADEQUATE,   0);
+		chartData.put(TableRowHighlightRangeType.SATISFACTORY, 0);
+		chartData.put(TableRowHighlightRangeType.EXCELLENT,    0);
+		
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return chartData;
+		
+		StringBuilder inArrayValues = new StringBuilder("?");
+		for (int i = 1; i < observationTypes.length; i++)
+			inArrayValues.append(",?");
+		
+		String sql = "SELECT "
+				+ "CASE "
+				+ "WHEN \"redundancy\" < (SELECT \"left_boundary\" FROM \"TableRowHighlightRange\" WHERE \"type\" = ? LIMIT 1) THEN CAST(? AS INT) "
+				+ "WHEN \"redundancy\" BETWEEN (SELECT \"left_boundary\" FROM \"TableRowHighlightRange\" WHERE \"type\" = ? LIMIT 1) AND (SELECT \"right_boundary\" FROM \"TableRowHighlightRange\" WHERE \"type\" = ? LIMIT 1) THEN CAST(? AS INT) "
+				+ "WHEN \"redundancy\" > (SELECT \"right_boundary\" FROM \"TableRowHighlightRange\" WHERE \"type\" = ? LIMIT 1) THEN CAST(? AS INT) "
+				+ "END AS \"range\", "
+				+ "COUNT(\"id\") AS \"data_count\" "
+				+ "FROM \"ObservationAposteriori\" "
+				+ "JOIN \"ObservationApriori\" "
+				+ "ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
+				+ "JOIN \"ObservationGroup\" "
+				+ "ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" "
+				+ "WHERE \"ObservationGroup\".\"enable\" = TRUE "
+				+ "AND \"ObservationApriori\".\"enable\" = TRUE "
+				+ "AND \"type\" IN (" + inArrayValues + ") "
+				+ "GROUP BY \"range\" "
+				+ "ORDER BY \"range\" ASC"; 
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+
+		int idx = 1;
+		stmt.setInt(idx++, tableRowHighlightType.getId()); // INADEQUATE range
+		stmt.setInt(idx++, TableRowHighlightRangeType.INADEQUATE.getId()); // INADEQUATE
+		
+		stmt.setInt(idx++, tableRowHighlightType.getId()); // SATISFACTORY - left range
+		stmt.setInt(idx++, tableRowHighlightType.getId()); // SATISFACTORY - right range
+		stmt.setInt(idx++, TableRowHighlightRangeType.SATISFACTORY.getId()); // SATISFACTORY
+		
+		stmt.setInt(idx++, tableRowHighlightType.getId()); // EXCELLENT range
+		stmt.setInt(idx++, TableRowHighlightRangeType.EXCELLENT.getId()); // EXCELLENT
+
+		for (ObservationType type : observationTypes) 
+			stmt.setInt(idx++, type.getId());
+ 
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			int range = rs.getInt("range");
+			int count = rs.getInt("data_count");
+			
+			TableRowHighlightRangeType tableRowHighlightRangeType = TableRowHighlightRangeType.getEnumByValue(range);
+			if (tableRowHighlightRangeType != null && tableRowHighlightRangeType != TableRowHighlightRangeType.NONE) {
+				chartData.put(tableRowHighlightRangeType, count);
+			}
+		}
+
+		return chartData;
 	}
 	
 	public List<Double> getNormalizedResiduals(ObservationType[] observationTypes) throws SQLException {
