@@ -178,7 +178,7 @@ public class UIMenuBuilder {
 		Menu importMenu = createMenu(i18n.getString("UIMenuBuilder.menu.import.label", "_Import"), true);
 		this.createImportMenu(importMenu);
 
-		Menu propertyMenu = createMenu(i18n.getString("UIMenuBuilder.menu.property.label", "Propert_ies"), true);
+		Menu propertyMenu = createMenu(i18n.getString("UIMenuBuilder.menu.property.label", "Propertie_s"), true);
 		this.createPropertyMenu(propertyMenu);
 
 		Menu preprocessingMenu = createMenu(i18n.getString("UIMenuBuilder.menu.preprocessing.label", "P_reprocessing"), true);

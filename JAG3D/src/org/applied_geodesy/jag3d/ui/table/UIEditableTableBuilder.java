@@ -21,6 +21,15 @@
 
 package org.applied_geodesy.jag3d.ui.table;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.applied_geodesy.jag3d.ui.table.row.GroupRow;
+import org.applied_geodesy.jag3d.ui.tree.Groupable;
+import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
+import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.ui.dialog.OptionDialog;
 
 import javafx.application.Platform;
@@ -29,14 +38,18 @@ import javafx.event.EventHandler;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TreeItem;
 
-public abstract class UIEditableTableBuilder<T> extends UITableBuilder<T> {
+public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITableBuilder<T> {
 
 	enum ContextMenuType {
 		REMOVE,
 		DUPLICATE,
 		MOVETO,
+		
+		SELECT_GROUPS,
 
 		MOVETO_NEW,
 		MOVETO_REFERENCE,
@@ -53,6 +66,8 @@ public abstract class UIEditableTableBuilder<T> extends UITableBuilder<T> {
 				case REMOVE:
 					removeRows();
 					break;
+				case SELECT_GROUPS:
+					selectGroups();
 				case MOVETO:
 				case MOVETO_REFERENCE:
 				case MOVETO_STOCHASTIC:
@@ -91,7 +106,13 @@ public abstract class UIEditableTableBuilder<T> extends UITableBuilder<T> {
 				ContextMenuType.DUPLICATE,
 				listener
 				);
-
+		
+		MenuItem selectGroupsMenuItem = this.createMenuItem(
+				i18n.getString("UIEditableTableBuilder.contextmenu.select", "Select item groups"),
+				ContextMenuType.SELECT_GROUPS,
+				listener
+				);
+		
 		ContextMenu contextMenu = new ContextMenu(removeMenuItem, duplicateMenuItem);
 
 		if (!isPointTable) {
@@ -130,11 +151,14 @@ public abstract class UIEditableTableBuilder<T> extends UITableBuilder<T> {
 					ContextMenuType.MOVETO_NEW,
 					listener
 					);
+			
+			
 
 			moveToMenu.getItems().addAll(moveToReferenceMenuItem, moveToStochasticMenuItem, moveToDatumMenuItem, moveToNewMenuItem);
 			contextMenu.getItems().add(moveToMenu);
 		}
-
+		
+		contextMenu.getItems().addAll(new SeparatorMenuItem(), selectGroupsMenuItem);
 		return contextMenu;
 	}
 
@@ -168,6 +192,8 @@ public abstract class UIEditableTableBuilder<T> extends UITableBuilder<T> {
 							e);
 					break;
 
+				case SELECT_GROUPS:
+					break;
 				}
 			}
 		});
@@ -202,4 +228,39 @@ public abstract class UIEditableTableBuilder<T> extends UITableBuilder<T> {
 	abstract void removeRows();
 	abstract void duplicateRows();
 	abstract void moveRows(ContextMenuType type);
+	private void selectGroups() {
+		try {
+			List<GroupRow> selectedRows = new ArrayList<GroupRow>(this.table.getSelectionModel().getSelectedItems());
+			Set<Integer> groupIds = new HashSet<Integer>();
+			for (GroupRow selectedRow : selectedRows)
+				groupIds.add(selectedRow.getGroupId());
+
+			if (groupIds == null || groupIds.isEmpty())
+				return;
+
+			List<TreeItem<TreeItemValue>> selectedTreeItems = new ArrayList<TreeItem<TreeItemValue>>(UITreeBuilder.getInstance().getTree().getSelectionModel().getSelectedItems());
+			if (selectedTreeItems.size() > 1) {
+				List<Integer> selectedTreeItemIndices = new ArrayList<Integer>(UITreeBuilder.getInstance().getTree().getSelectionModel().getSelectedIndices());
+				int indices[] = new int[groupIds.size()];
+
+				for (int i = 0, j = 0; i < selectedTreeItems.size(); i++) {
+					TreeItem<TreeItemValue> selectedTreeItem = selectedTreeItems.get(i);
+					if (selectedTreeItem.getValue() instanceof Groupable && groupIds.contains(((Groupable)selectedTreeItem.getValue()).getGroupId())) {
+						indices[j++] = selectedTreeItemIndices.get(i);
+						if (j == indices.length) // check against IndexOutOfBoundException
+							break;
+					}
+				}
+				Platform.runLater(new Runnable() {
+					@Override public void run() {
+						UITreeBuilder.getInstance().getTree().getSelectionModel().clearSelection();
+						UITreeBuilder.getInstance().getTree().getSelectionModel().selectIndices(indices[0], indices);
+					}
+				});
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
