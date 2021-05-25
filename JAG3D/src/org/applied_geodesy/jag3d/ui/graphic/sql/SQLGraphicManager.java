@@ -103,6 +103,8 @@ public class SQLGraphicManager {
 			case POINT_SHIFT_VERTICAL:
 			case PRINCIPAL_COMPONENT_HORIZONTAL:
 			case PRINCIPAL_COMPONENT_VERTICAL:
+			case POINT_RESIDUAL_HORIZONTAL:
+			case POINT_RESIDUAL_VERTICAL:
 				if (exists)
 					this.load((ArrowLayer)layer);
 				else
@@ -210,6 +212,8 @@ public class SQLGraphicManager {
 			case POINT_SHIFT_VERTICAL:
 			case PRINCIPAL_COMPONENT_HORIZONTAL:
 			case PRINCIPAL_COMPONENT_VERTICAL:
+			case POINT_RESIDUAL_HORIZONTAL:
+			case POINT_RESIDUAL_VERTICAL:
 			case OBSERVATION_APOSTERIORI:
 			case OBSERVATION_APRIORI:
 			case ABSOLUTE_CONFIDENCE:
@@ -257,6 +261,8 @@ public class SQLGraphicManager {
 			case STOCHASTIC_POINT_APRIORI:
 			case PRINCIPAL_COMPONENT_HORIZONTAL:
 			case PRINCIPAL_COMPONENT_VERTICAL:
+			case POINT_RESIDUAL_HORIZONTAL:
+			case POINT_RESIDUAL_VERTICAL:
 			case POINT_SHIFT_VERTICAL:
 			case LEGEND:
 				break;
@@ -320,6 +326,7 @@ public class SQLGraphicManager {
 					"\"y\",  \"x\", " + 
 					"\"helmert_major_axis\", \"helmert_minor_axis\", " +
 					"0.5 * PI() + \"helmert_alpha\" AS \"helmert_alpha\", " + // switch over to geodetic system north == x etc.
+					"\"y0\" - \"y\" AS \"residual_y\", \"x0\" - \"x\" AS \"residual_x\", \"z0\" - \"z\" AS \"residual_z\", " +
 					"\"first_principal_component_y\", \"first_principal_component_x\", \"first_principal_component_z\", " +
 					"\"significant\", " +
 					"\"dimension\" " + 
@@ -364,9 +371,18 @@ public class SQLGraphicManager {
 					double principleComponentY = rs.getDouble("first_principal_component_y");
 					double principleComponentZ = rs.getDouble("first_principal_component_z");
 					
+					double residualX = rs.getDouble("residual_x");
+					double residualY = rs.getDouble("residual_y");
+					double residualZ = rs.getDouble("residual_z");
+					
 					boolean significant = rs.getBoolean("significant");
 
-					GraphicPoint graphicPoint = new GraphicPoint(name, dimension, y, x, majorAxis, minorAxis, angle, principleComponentY, principleComponentX, principleComponentZ, significant);
+					GraphicPoint graphicPoint = new GraphicPoint(name, dimension, 
+							y, x, 
+							majorAxis, minorAxis, angle, 
+							residualY, residualX, residualZ,
+							principleComponentY, principleComponentX, principleComponentZ, 
+							significant);
 					pointList.add(graphicPoint);
 					pointMap.put(name, graphicPoint);
 				}

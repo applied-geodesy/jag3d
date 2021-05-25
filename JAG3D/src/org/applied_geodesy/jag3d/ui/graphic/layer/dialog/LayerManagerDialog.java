@@ -113,6 +113,8 @@ public class LayerManagerDialog {
 					case POINT_SHIFT_VERTICAL:
 					case PRINCIPAL_COMPONENT_HORIZONTAL:
 					case PRINCIPAL_COMPONENT_VERTICAL:
+					case POINT_RESIDUAL_HORIZONTAL:
+					case POINT_RESIDUAL_VERTICAL:
 						propertiesNode = UIArrowLayerPropertyBuilder.getLayerPropertyPane(layerManager, (ArrowLayer)selectedLayer);
 						break;
 						
@@ -337,6 +339,8 @@ public class LayerManagerDialog {
 				case POINT_SHIFT_VERTICAL:
 				case PRINCIPAL_COMPONENT_HORIZONTAL:
 				case PRINCIPAL_COMPONENT_VERTICAL:
+				case POINT_RESIDUAL_HORIZONTAL:
+				case POINT_RESIDUAL_VERTICAL:
 					sqlGraphicManager.save((ArrowLayer)layer, order);
 					break;
 					

@@ -28,21 +28,25 @@ import javafx.beans.property.SimpleBooleanProperty;
 
 public class GraphicPoint {
 	private WorldCoordinate coordinate;
-	private double minorAxis = 0.0, majorAxis = 0.0, angle = 0.0, principalComponentX = 0.0, principalComponentY = 0.0, principalComponentZ = 0.0;
+	private double minorAxis = 0.0, majorAxis = 0.0, angle = 0.0;
+	private double principalComponentX = 0.0, principalComponentY = 0.0, principalComponentZ = 0.0;
+	private double residualX = 0.0, residualY = 0.0, residualZ = 0.0;
 	private String name;
 	private int dimension;
 	private boolean significant;
 	private BooleanProperty visible = new SimpleBooleanProperty(Boolean.TRUE);
 	
 	public GraphicPoint(String name, int dimension, double x, double y) {
-		this(name, dimension, x, y, 0, 0, 0, false);
+		this(name, dimension, x, y, 0, 0, 0, 0, 0, 0, 0, 0, 0, false);
 	}
-	
-	public GraphicPoint(String name, int dimension, double x, double y, double majorAxis, double minorAxis, double angle, boolean significant) {
-		this(name, dimension, x, y, majorAxis, minorAxis, angle, 0, 0, 0, significant);
-	}
-	
-	public GraphicPoint(String name, int dimension, double x, double y, double majorAxis, double minorAxis, double angle, double principalComponentX, double principalComponentY, double principalComponentZ, boolean significant) {
+
+	public GraphicPoint(String name, int dimension, 
+			double x, double y, 
+			double majorAxis, double minorAxis, double angle, 
+			double residualX, double residualY, double residualZ,
+			double principalComponentX, double principalComponentY, double principalComponentZ, 
+			boolean significant) {
+
 		this.coordinate = new WorldCoordinate(x, y);
 		this.name = name;
 		this.dimension = dimension;
@@ -51,6 +55,9 @@ public class GraphicPoint {
 		this.principalComponentX = principalComponentX;
 		this.principalComponentY = principalComponentY;
 		this.principalComponentZ = principalComponentZ;
+		this.residualX = residualX;
+		this.residualY = residualY;
+		this.residualZ = residualZ;
 		this.angle = angle;
 		this.significant = significant;
 	}
@@ -129,6 +136,18 @@ public class GraphicPoint {
 	
 	public double getPrincipalComponentZ() {
 		return principalComponentZ;
+	}
+	
+	public double getResidualX() {
+		return residualX;
+	}
+
+	public double getResidualY() {
+		return residualY;
+	}
+	
+	public double getResidualZ() {
+		return residualZ;
 	}
 	
 	@Override

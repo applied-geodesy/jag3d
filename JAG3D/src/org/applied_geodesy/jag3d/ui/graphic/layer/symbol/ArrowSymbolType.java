@@ -24,6 +24,7 @@ package org.applied_geodesy.jag3d.ui.graphic.layer.symbol;
 public enum ArrowSymbolType {
 	STROKED_TRIANGLE_ARROW(11),
 	STROKED_TETRAGON_ARROW(12),
+	STROKED_ARROW(13),
 	
 	FILLED_TRIANGLE_ARROW(21),
 	FILLED_TETRAGON_ARROW(22),
