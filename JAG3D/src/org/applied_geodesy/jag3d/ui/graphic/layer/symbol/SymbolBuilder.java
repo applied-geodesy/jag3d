@@ -96,6 +96,10 @@ public class SymbolBuilder {
 			drawTetragonArrow(graphicsContext, coordinate, size, angle, symbolType == ArrowSymbolType.STROKED_TETRAGON_ARROW);
 			break;
 			
+		case STROKED_ARROW:
+			drawSimpleArrow(graphicsContext, coordinate, size, angle);
+			break;
+			
 		case STROKED_TRIANGLE_ARROW:	
 		case FILLED_TRIANGLE_ARROW:
 			drawTriangleArrow(graphicsContext, coordinate, size, angle, symbolType == ArrowSymbolType.STROKED_TRIANGLE_ARROW);
@@ -408,4 +412,18 @@ public class SymbolBuilder {
 		gc.restore();
 	}
 	
+	private static void drawSimpleArrow(GraphicsContext gc, PixelCoordinate coordinate, double size, double angle) {
+		double x = coordinate.getX(); // tip of a vector
+		double y = coordinate.getY();
+
+		gc.save();
+		gc.transform(new Affine(
+				new Rotate(angle * Constant.RHO_RAD2DEG, x, y)
+		));	
+
+		gc.strokeLine(x, y, x - size, y + 0.3 * size);
+		gc.strokeLine(x, y, x - size, y - 0.3 * size);
+
+		gc.restore();
+	}
 }

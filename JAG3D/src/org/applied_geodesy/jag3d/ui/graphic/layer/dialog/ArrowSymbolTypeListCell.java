@@ -64,6 +64,8 @@ public class ArrowSymbolTypeListCell extends ListCell<ArrowSymbolType> {
 			return i18n.getString("ArrowSymbolTypeListCell.symbol.filled_tetragon_arrow.label", "Filled tetragon arrow");
 		case FILLED_TRIANGLE_ARROW:
 			return i18n.getString("ArrowSymbolTypeListCell.symbol.filled_triangle_arrow.label", "Filled triangle arrow");
+		case STROKED_ARROW:
+			return i18n.getString("ArrowSymbolTypeListCell.symbol.stroked_arrow.label", "Stroked arrow");
 		case STROKED_TETRAGON_ARROW:
 			return i18n.getString("ArrowSymbolTypeListCell.symbol.stroked_tetragon_arrow.label", "Stroked tetragon arrow");
 		case STROKED_TRIANGLE_ARROW:
