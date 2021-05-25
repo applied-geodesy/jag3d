@@ -59,6 +59,7 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 
 		Color color, highlightColor;
 		double symbolSize = -1, lineWidth = -1, highlightLineWidth = -1;
+		boolean visible = Boolean.TRUE;
 
 		switch(layerType) {
 		case OBSERVATION_APRIORI:
@@ -69,7 +70,8 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 			}
 
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APRIORI_SYMBOL_SIZE")); } catch (Exception e) {}
-			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
+			try { lineWidth  = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APRIORI_LINE_WIDTH")); } catch (Exception e) {}
+			try { visible    = PROPERTIES.getProperty("OBSERVATION_APRIORI_VISIBLE").equalsIgnoreCase("TRUE"); } catch (Exception e) {}
 
 			break;
 
@@ -87,7 +89,8 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 			}
 
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_SYMBOL_SIZE")); } catch (Exception e) {}
-			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
+			try { lineWidth  = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_LINE_WIDTH")); } catch (Exception e) {}
+			try { visible    = PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_VISIBLE").equalsIgnoreCase("TRUE"); } catch (Exception e) {}
 			try { highlightLineWidth = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_HIGHLIGHT_LINE_WIDTH")); } catch (Exception e) {}
 			this.setHighlightLineWidth(highlightLineWidth >= 0 ? highlightLineWidth : 2.5);
 			this.setHighlightColor(highlightColor);
@@ -103,6 +106,8 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 		this.setLineWidth(lineWidth);
 		this.setSymbolSize(symbolSize);
 		this.setColor(color);
+		
+		this.setVisible(visible);
 		
 		this.initSymbolProperties();
 	}

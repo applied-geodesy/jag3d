@@ -39,6 +39,7 @@ public class RelativeConfidenceLayer extends ConfidenceLayer<PointShiftArrowLaye
 		
 		Color fillColor, strokeColor;
 		double lineWidth = -1;
+		boolean visible = Boolean.TRUE;
 		
 		try {
 			fillColor = Color.web(PROPERTIES.getProperty("RELATIVE_CONFIDENCE_FILL_COLOR", "#ffffe0"));
@@ -52,12 +53,15 @@ public class RelativeConfidenceLayer extends ConfidenceLayer<PointShiftArrowLaye
 			strokeColor = Color.web("#999999");
 		}
 
+		try { visible   = PROPERTIES.getProperty("RELATIVE_CONFIDENCE_VISIBLE").equalsIgnoreCase("TRUE"); } catch (Exception e) {}
 		try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("RELATIVE_CONFIDENCE_LINE_WIDTH")); } catch (Exception e) {}
 		lineWidth = lineWidth >= 0 ? lineWidth : 0.5;
 		
 		this.setStrokeColor(strokeColor);
 		this.setColor(fillColor);
 		this.setLineWidth(lineWidth);
+		
+		this.setVisible(visible);
 	}
 
 	@Override

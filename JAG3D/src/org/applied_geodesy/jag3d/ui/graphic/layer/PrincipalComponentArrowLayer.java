@@ -43,6 +43,8 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 		Color color;
 		ArrowSymbolType arrowSymbolType;
 		double symbolSize = -1, lineWidth = -1;
+		boolean visible = Boolean.FALSE;
+		
 		switch(layerType) {			
 		case PRINCIPAL_COMPONENT_HORIZONTAL:
 			try {
@@ -58,7 +60,8 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 			}
 			
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("PRINCIPAL_COMPONENT_HORIZONTAL_ARROW_SYMBOL_SIZE")); } catch (Exception e) {}
-			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("PRINCIPAL_COMPONENT_HORIZONTAL_ARROW_LINE_WIDTH")); } catch (Exception e) {}
+			try { lineWidth  = Double.parseDouble(PROPERTIES.getProperty("PRINCIPAL_COMPONENT_HORIZONTAL_ARROW_LINE_WIDTH")); } catch (Exception e) {}
+			try { visible    = PROPERTIES.getProperty("PRINCIPAL_COMPONENT_HORIZONTAL_VISIBLE").equalsIgnoreCase("TRUE"); } catch (Exception e) {}
 			
 			break;
 			
@@ -76,7 +79,8 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 			}
 			
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("PRINCIPAL_COMPONENT_VERTICAL_ARROW_SYMBOL_SIZE")); } catch (Exception e) {}
-			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("PRINCIPAL_COMPONENT_VERTICAL_ARROW_LINE_WIDTH")); } catch (Exception e) {}
+			try { lineWidth  = Double.parseDouble(PROPERTIES.getProperty("PRINCIPAL_COMPONENT_VERTICAL_ARROW_LINE_WIDTH")); } catch (Exception e) {}
+			try { visible    = PROPERTIES.getProperty("PRINCIPAL_COMPONENT_VERTICAL_VISIBLE").equalsIgnoreCase("TRUE"); } catch (Exception e) {}
 			
 			break;
 		
@@ -87,7 +91,7 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 		symbolSize = symbolSize >= 0 ? symbolSize : SymbolBuilder.DEFAULT_SIZE;
 		lineWidth = lineWidth >= 0 ? lineWidth : 1.0;
 
-		this.setVisible(false);
+		this.setVisible(visible);
 		this.setSymbolType(arrowSymbolType);
 		this.setColor(color);
 		this.setSymbolSize(symbolSize);

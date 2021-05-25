@@ -63,6 +63,7 @@ public class LegendLayer extends Layer implements FontLayer {
 		String fontFamily = null;
 		LegendPositionType legendPositionType;
 		double lineWidth = -1, fontSize = -1;
+		boolean visible = Boolean.TRUE;
 
 		fontFamily = PROPERTIES.getProperty("LEGEND_FONT_FAMILY", "System");
 		try {
@@ -83,7 +84,8 @@ public class LegendLayer extends Layer implements FontLayer {
 			legendPositionType = LegendPositionType.NORTH_EAST;
 		}
 		
-		try { fontSize = Double.parseDouble(PROPERTIES.getProperty("LEGEND_FONT_SIZE")); } catch (Exception e) {}
+		try { visible   = PROPERTIES.getProperty("LEGEND_VISIBLE").equalsIgnoreCase("TRUE"); } catch (Exception e) {}
+		try { fontSize  = Double.parseDouble(PROPERTIES.getProperty("LEGEND_FONT_SIZE")); } catch (Exception e) {}
 		try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("LEGEND_LINE_WIDTH")); } catch (Exception e) {}
 
 		lineWidth = lineWidth >= 0 ? lineWidth : 0.25;
@@ -97,6 +99,8 @@ public class LegendLayer extends Layer implements FontLayer {
 		this.setFontSize(fontSize);
 		this.setFontFamily(fontFamily);
 		this.setFontColor(fontColor);
+		
+		this.setVisible(visible);
 	}
 	
 	@Override

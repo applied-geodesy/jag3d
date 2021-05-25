@@ -41,6 +41,7 @@ public class AbsoluteConfidenceLayer extends ConfidenceLayer<PointLayer> {
 		
 		Color fillColor, strokeColor;
 		double lineWidth = -1;
+		boolean visible = Boolean.TRUE;
 		
 		try {
 			fillColor = Color.web(PROPERTIES.getProperty("ABSOLUTE_CONFIDENCE_FILL_COLOR", "#cccccc"));
@@ -54,12 +55,15 @@ public class AbsoluteConfidenceLayer extends ConfidenceLayer<PointLayer> {
 			strokeColor = Color.web("#e6e6e6");
 		}
 
+		try { visible   = PROPERTIES.getProperty("ABSOLUTE_CONFIDENCE_VISIBLE").equalsIgnoreCase("TRUE"); } catch (Exception e) {}
 		try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("ABSOLUTE_CONFIDENCE_LINE_WIDTH")); } catch (Exception e) {}
 		lineWidth = lineWidth >= 0 ? lineWidth : 0.5;
 		
 		this.setStrokeColor(strokeColor);
 		this.setColor(fillColor);
 		this.setLineWidth(lineWidth);
+		
+		this.setVisible(visible);
 	}
 	
 	@Override

@@ -39,7 +39,7 @@ public class GraphicPoint {
 	}
 	
 	public GraphicPoint(String name, int dimension, double x, double y, double majorAxis, double minorAxis, double angle, boolean significant) {
-		this(name, dimension, x, y, 0, 0, 0, 0, 0, 0, false);
+		this(name, dimension, x, y, majorAxis, minorAxis, angle, 0, 0, 0, significant);
 	}
 	
 	public GraphicPoint(String name, int dimension, double x, double y, double majorAxis, double minorAxis, double angle, double principalComponentX, double principalComponentY, double principalComponentZ, boolean significant) {
