@@ -44,6 +44,7 @@ public class PointShiftArrowLayer extends ArrowLayer {
 		Color color;
 		ArrowSymbolType arrowSymbolType;
 		double symbolSize = -1, lineWidth = -1;
+		boolean visible = Boolean.TRUE;
 		
 		switch(layerType) {			
 		case POINT_SHIFT_HORIZONTAL:
@@ -60,7 +61,8 @@ public class PointShiftArrowLayer extends ArrowLayer {
 			}
 
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_HORIZONTAL_ARROW_SYMBOL_SIZE")); } catch (Exception e) {}
-			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_HORIZONTAL_ARROW_LINE_WIDTH")); } catch (Exception e) {}
+			try { lineWidth  = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_HORIZONTAL_ARROW_LINE_WIDTH")); } catch (Exception e) {}
+			try { visible    = PROPERTIES.getProperty("POINT_SHIFT_HORIZONTAL_VISIBLE").equalsIgnoreCase("TRUE"); } catch (Exception e) {}
 
 			break;
 
@@ -78,7 +80,8 @@ public class PointShiftArrowLayer extends ArrowLayer {
 			}
 
 			try { symbolSize = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_VERTICAL_ARROW_SYMBOL_SIZE")); } catch (Exception e) {}
-			try { lineWidth = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_VERTICAL_ARROW_LINE_WIDTH")); } catch (Exception e) {}
+			try { lineWidth  = Double.parseDouble(PROPERTIES.getProperty("POINT_SHIFT_VERTICAL_ARROW_LINE_WIDTH")); } catch (Exception e) {}
+			try { visible    = PROPERTIES.getProperty("POINT_SHIFT_VERTICAL_VISIBLE").equalsIgnoreCase("TRUE"); } catch (Exception e) {}
 			
 			break;
 			
@@ -93,6 +96,8 @@ public class PointShiftArrowLayer extends ArrowLayer {
 		this.setColor(color);
 		this.setSymbolSize(symbolSize);
 		this.setLineWidth(lineWidth);
+		
+		this.setVisible(visible);
 	}
 	
 	@Override
