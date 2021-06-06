@@ -999,6 +999,9 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 				if (removeItems != null && !removeItems.isEmpty())
 					UITreeBuilder.getInstance().removeItems(removeItems);
 				
+				// load data to refresh group-ids of row data
+				SQLManager.getInstance().loadData(selectedItemValue);
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 				OptionDialog.showThrowableDialog (
