@@ -24,8 +24,10 @@ package org.applied_geodesy.jag3d.ui.table;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+import org.applied_geodesy.jag3d.DefaultApplicationProperty;
 import org.applied_geodesy.jag3d.ui.table.row.GroupRow;
 import org.applied_geodesy.jag3d.ui.tree.Groupable;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
@@ -35,6 +37,7 @@ import org.applied_geodesy.ui.dialog.OptionDialog;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -64,7 +67,19 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 				ContextMenuType contextMenuType = (ContextMenuType)((MenuItem)event.getSource()).getUserData();
 				switch(contextMenuType) {
 				case REMOVE:
-					removeRows();
+					boolean isDeleteConfirmed = !DefaultApplicationProperty.showConfirmDialogOnDelete();
+					if (!isDeleteConfirmed) {
+						Optional<ButtonType> result = OptionDialog.showConfirmationDialog(
+								i18n.getString("UIEditableTableBuilder.message.confirmation.delete.title",   "Delete items"),
+								i18n.getString("UIEditableTableBuilder.message.confirmation.delete.header",  "Delete items permanently?"),
+								i18n.getString("UIEditableTableBuilder.message.confirmation.delete.message", "Are you sure you want to remove the selected items?")
+								);
+						isDeleteConfirmed = result.isPresent() && result.get() == ButtonType.OK;
+					}
+					
+					if (isDeleteConfirmed)
+						removeRows();
+					
 					break;
 				case SELECT_GROUPS:
 					selectGroups();

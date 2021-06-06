@@ -21,7 +21,6 @@
 
 package org.applied_geodesy.jag3d.ui.menu;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -49,6 +48,7 @@ import javax.swing.SwingUtilities;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
+import org.applied_geodesy.jag3d.DefaultApplicationProperty;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
@@ -167,7 +167,7 @@ public class UIMenuBuilder {
 	private void init() {
 		SQLManager.getInstance().addProjectDatabaseStateChangeListener(new DatabaseStateChangeListener());
 
-		this.initHistoryPathFromProperties();
+		this.historyFile = DefaultApplicationProperty.getDefaultHistoryPath();
 
 		this.menuBar = new MenuBar();
 
@@ -1162,34 +1162,5 @@ public class UIMenuBuilder {
 				}
 			}
 		});
-	}
-
-	private void initHistoryPathFromProperties() {
-		BufferedInputStream bis = null;
-		final String path = "/properties/application.default";
-		try {
-			if (this.getClass().getResource(path) != null) {
-				Properties PROPERTIES = new Properties();
-				bis = new BufferedInputStream(this.getClass().getResourceAsStream(path));
-				PROPERTIES.load(bis);
-				String defaultHistoryPath = PROPERTIES.getProperty("HISTORY", System.getProperty("user.home", null));
-
-				if (defaultHistoryPath != null && Files.exists(Paths.get(defaultHistoryPath)) && Files.isDirectory(Paths.get(defaultHistoryPath), LinkOption.NOFOLLOW_LINKS))
-					this.historyFile = new File(defaultHistoryPath + File.separator + ".jag3d_history");
-				else 
-					this.historyFile = new File(System.getProperty("user.home") + File.separator + ".jag3d_history");
-			}  
-		} catch (Exception e) {
-			e.printStackTrace();
-			this.historyFile = new File(System.getProperty("user.home") + File.separator + ".jag3d_history");
-		}
-		finally {
-			try {
-				if (bis != null)
-					bis.close();  
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
 	}
 }
