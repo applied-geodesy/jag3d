@@ -13,5 +13,6 @@
 # D:/folder/subfolder instead of D:\folder\subfolder
 
 FULL_SCREEN = FALSE
+SHOW_CONFIRM_DIALOG_ON_DELETE = TRUE
 #WORKSPACE = D:\\PROJECTS
 #HISTORY = D:\\Application\JAG3D

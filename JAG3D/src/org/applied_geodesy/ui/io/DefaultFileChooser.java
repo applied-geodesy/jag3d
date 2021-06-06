@@ -21,47 +21,21 @@
 
 package org.applied_geodesy.ui.io;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Properties;
+
+import org.applied_geodesy.jag3d.DefaultApplicationProperty;
 
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
 
 public class DefaultFileChooser {
-	private static File lastSelectedDirectory = null;
+	private static File lastSelectedDirectory = DefaultApplicationProperty.getDefaultWorkspacePath();
 	private static ExtensionFilter lastSelectedExtensionFilter = null;
 	private static String lastSelectedFileName = "";
 	private static final FileChooser fileChooser = new FileChooser();
-	
-	static {
-		BufferedInputStream bis = null;
-		final String path = "/properties/application.default";
-		try {
-			if (DefaultFileChooser.class.getResource(path) != null) {
-				Properties PROPERTIES = new Properties();
-				bis = new BufferedInputStream(DefaultFileChooser.class.getResourceAsStream(path));
-				PROPERTIES.load(bis);
-				String defaultWorkspace = PROPERTIES.getProperty("WORKSPACE", System.getProperty("user.home", null));
-				if (defaultWorkspace != null && Files.exists(new File(defaultWorkspace).toPath())) {
-					lastSelectedDirectory = new File(defaultWorkspace);
-				}
-			}  
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		finally {
-			try {
-				if (bis != null)
-					bis.close();  
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
 		
 	private DefaultFileChooser() {}
 
