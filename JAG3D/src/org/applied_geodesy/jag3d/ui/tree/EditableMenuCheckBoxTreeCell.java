@@ -1011,12 +1011,13 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 				}
 				
 				SQLManager.getInstance().mergeGroups(selectedItemValue, treeItemValues);
-				
+				UITreeBuilder.getInstance().getTree().getSelectionModel().clearSelection();
 				if (removeItems != null && !removeItems.isEmpty())
 					UITreeBuilder.getInstance().removeItems(removeItems);
 				
 				// load data to refresh group-ids of row data
-				SQLManager.getInstance().loadData(selectedItemValue);
+				//SQLManager.getInstance().loadData(selectedItemValue);
+				UITreeBuilder.getInstance().getTree().getSelectionModel().select(selectedItem);
 				
 			} catch (Exception e) {
 				e.printStackTrace();
