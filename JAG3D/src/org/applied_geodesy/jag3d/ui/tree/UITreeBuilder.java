@@ -72,17 +72,17 @@ public class UITreeBuilder {
 				}
 				if (!isSaved)
 					save(this.treeItemValue);
-			}
 			
-			// refresh network plot, if visibility of group has changed
-			Tab selectedTab = UITabPaneBuilder.getInstance().getTabPane().getSelectionModel().getSelectedItem();
-			if (selectedTab != null && selectedTab.getUserData() instanceof TabType && ((TabType)selectedTab.getUserData()) == TabType.GRAPHIC) {
-				Platform.runLater(new Runnable() {
-					@Override
-					public void run() {
-						UIGraphicPaneBuilder.getInstance().getLayerManager().redraw();
-					}
-				});
+				// refresh network plot, if visibility of group has changed
+				Tab selectedTab = UITabPaneBuilder.getInstance().getTabPane().getSelectionModel().getSelectedItem();
+				if (selectedTab != null && selectedTab.getUserData() instanceof TabType && ((TabType)selectedTab.getUserData()) == TabType.GRAPHIC) {
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							UIGraphicPaneBuilder.getInstance().getLayerManager().redraw();
+						}
+					});
+				}
 			}
 		}
 	}
