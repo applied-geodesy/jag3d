@@ -25,8 +25,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.applied_geodesy.jag3d.sql.SQLManager;
+import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 import org.applied_geodesy.jag3d.ui.tabpane.UITabPaneBuilder;
 import org.applied_geodesy.ui.dialog.OptionDialog;
+import org.applied_geodesy.jag3d.ui.graphic.UIGraphicPaneBuilder;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.application.Platform;
@@ -41,6 +43,7 @@ import javafx.collections.ObservableMap;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -69,6 +72,17 @@ public class UITreeBuilder {
 				}
 				if (!isSaved)
 					save(this.treeItemValue);
+			
+				// refresh network plot, if visibility of group has changed
+				Tab selectedTab = UITabPaneBuilder.getInstance().getTabPane().getSelectionModel().getSelectedItem();
+				if (selectedTab != null && selectedTab.getUserData() instanceof TabType && ((TabType)selectedTab.getUserData()) == TabType.GRAPHIC) {
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							UIGraphicPaneBuilder.getInstance().getLayerManager().redraw();
+						}
+					});
+				}
 			}
 		}
 	}
