@@ -169,7 +169,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		cellValueType = CellValueType.LENGTH;
 		columnContentType = ColumnContentType.VALUE_Y_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, GNSSObservationRow::yAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_GNSS_OBSERVATION, columnIndex, true, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, GNSSObservationRow::yAprioriProperty, getDoubleCallback(cellValueType), this.type != ObservationType.GNSS1D ? ColumnType.APRIORI_GNSS_OBSERVATION : ColumnType.HIDDEN, columnIndex, true, true);
 		table.getColumns().add(doubleColumn);
 
 		// X0-Comp.
@@ -179,7 +179,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		cellValueType = CellValueType.LENGTH;
 		columnContentType = ColumnContentType.VALUE_X_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, GNSSObservationRow::xAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_GNSS_OBSERVATION, columnIndex, true, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, GNSSObservationRow::xAprioriProperty, getDoubleCallback(cellValueType), this.type != ObservationType.GNSS1D ? ColumnType.APRIORI_GNSS_OBSERVATION : ColumnType.HIDDEN, columnIndex, true, true);
 		table.getColumns().add(doubleColumn);
 
 		// Z0-Comp.
