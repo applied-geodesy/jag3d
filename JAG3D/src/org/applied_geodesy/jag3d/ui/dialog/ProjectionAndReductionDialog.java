@@ -326,48 +326,48 @@ public class ProjectionAndReductionDialog {
 		
 		
 		this.pivotX0TextField = new DoubleTextField(0.0, CellValueType.LENGTH, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
-		this.pivotX0TextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.x0.tooltip", "X-component of pivot point")));
+		this.pivotX0TextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.x0.tooltip", "X-component of principal point")));
 		this.pivotX0TextField.setMinWidth(30);
 		this.pivotX0TextField.setPrefWidth(50);
 		this.pivotX0TextField.setMaxWidth(Double.MAX_VALUE);
 		
 		this.pivotY0TextField = new DoubleTextField(0.0, CellValueType.LENGTH, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
-		this.pivotY0TextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.y0.tooltip", "Y-component of pivot point")));
+		this.pivotY0TextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.y0.tooltip", "Y-component of principal point")));
 		this.pivotY0TextField.setMinWidth(30);
 		this.pivotY0TextField.setPrefWidth(50);
 		this.pivotY0TextField.setMaxWidth(Double.MAX_VALUE);
 		
 		this.pivotZ0TextField = new DoubleTextField(0.0, CellValueType.LENGTH, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
-		this.pivotZ0TextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.z0.tooltip", "Z-component of pivot point")));
+		this.pivotZ0TextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.z0.tooltip", "Z-component of principal point")));
 		this.pivotZ0TextField.setMinWidth(30);
 		this.pivotZ0TextField.setPrefWidth(50);
 		this.pivotZ0TextField.setMaxWidth(Double.MAX_VALUE);
 		
-		Label earthRadiusLabel = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.earth_radius.label", "Earth radius:"));
+		Label earthRadiusLabel = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.earth_radius.label", "Earth radius R:"));
 		earthRadiusLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		earthRadiusLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		earthRadiusLabel.setPadding(new Insets(0,0,0,3));
 		earthRadiusLabel.setLabelFor(this.earthRadiusTextField);
 		
-		Label referenceHeightLabel = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.reference_height.label", "Reference height:"));
+		Label referenceHeightLabel = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.reference_height.label", "Reference height h0:"));
 		referenceHeightLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		referenceHeightLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		referenceHeightLabel.setPadding(new Insets(0,0,0,3));
 		referenceHeightLabel.setLabelFor(this.referenceHeightTextField);
 		
-		Label pivotPointX0Label = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.x0.label", "Pivot point X0:"));
+		Label pivotPointX0Label = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.x0.label", "Principal point X0:"));
 		pivotPointX0Label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		pivotPointX0Label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		pivotPointX0Label.setPadding(new Insets(0,0,0,3));
 		pivotPointX0Label.setLabelFor(this.pivotX0TextField);
 		
-		Label pivotPointY0Label = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.y0.label", "Pivot point Y0:"));
+		Label pivotPointY0Label = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.y0.label", "Principal point Y0:"));
 		pivotPointY0Label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		pivotPointY0Label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		pivotPointY0Label.setPadding(new Insets(0,0,0,3));
 		pivotPointY0Label.setLabelFor(this.pivotY0TextField);
 		
-		Label pivotPointZ0Label = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.z0.label", "Pivot point Z0:"));
+		Label pivotPointZ0Label = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.pivot.z0.label", "Principal point Z0:"));
 		pivotPointZ0Label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		pivotPointZ0Label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		pivotPointZ0Label.setPadding(new Insets(0,0,0,3));
