@@ -51,6 +51,7 @@ import org.applied_geodesy.adjustment.network.congruence.strain.Equation;
 import org.applied_geodesy.adjustment.network.congruence.strain.RestrictionType;
 import org.applied_geodesy.adjustment.network.congruence.strain.StrainAnalysisEquations;
 import org.applied_geodesy.adjustment.network.congruence.strain.parameter.StrainParameter;
+import org.applied_geodesy.adjustment.network.observation.ComponentType;
 import org.applied_geodesy.adjustment.network.observation.DeltaZ;
 import org.applied_geodesy.adjustment.network.observation.Direction;
 import org.applied_geodesy.adjustment.network.observation.GNSSBaseline;
@@ -4463,19 +4464,22 @@ public class NetworkAdjustment implements Runnable {
 			}
 			else if (observation instanceof GNSSBaseline1D) {
 				if (((GNSSBaseline1D)observation).getDimension() >= 1) {
+					double gnssZ = ((GNSSBaseline1D)observation).getBaselineComponent(ComponentType.Z).getValueApriori();
 					gnss1DCount++;
-					if (gnss1DCount>2) {
-						if (!is3DNet) {
-							if (!((GNSSBaseline1D)observation).getScale().isEnable())
-								this.rankDefect.setScaleZ(DefectType.FIXED);
-							else if (this.rankDefect.getScaleZ() != DefectType.FIXED)
-								this.rankDefect.setScaleZ(DefectType.FREE);
-						}
-						else {
-							if (!((GNSSBaseline1D)observation).getScale().isEnable())
-								this.rankDefect.setScaleXYZ(DefectType.FIXED);
-							else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
-								this.rankDefect.setScaleXYZ(DefectType.FREE);
+					if (gnss1DCount > 2) {
+						if (gnssZ != 0) {
+							if (!is3DNet) {
+								if (!((GNSSBaseline1D)observation).getScale().isEnable())
+									this.rankDefect.setScaleZ(DefectType.FIXED);
+								else if (this.rankDefect.getScaleZ() != DefectType.FIXED)
+									this.rankDefect.setScaleZ(DefectType.FREE);
+							}
+							else {
+								if (!((GNSSBaseline1D)observation).getScale().isEnable())
+									this.rankDefect.setScaleXYZ(DefectType.FIXED);
+								else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
+									this.rankDefect.setScaleXYZ(DefectType.FREE);
+							}
 						}
 
 						if (!((GNSSBaseline1D)observation).getRotationX().isEnable())
@@ -4492,51 +4496,66 @@ public class NetworkAdjustment implements Runnable {
 			}
 			else if (observation instanceof GNSSBaseline2D) {
 				if (((GNSSBaseline2D)observation).getDimension() >= 2) { // Ist vollstaendige Baseline X und Y vorhanden
-					gnss2DCount++;
-					if (gnss2DCount>1) {
-						if (!((GNSSBaseline2D)observation).getRotationZ().isEnable())
-							this.rankDefect.setRotationZ(DefectType.FIXED);
-						else if (this.rankDefect.getRotationZ() != DefectType.FIXED)
-							this.rankDefect.setRotationZ(DefectType.FREE);
-					
-						if (!is3DNet) {
-							if (!((GNSSBaseline2D)observation).getScale().isEnable())
-								this.rankDefect.setScaleXY(DefectType.FIXED);
-							else if (this.rankDefect.getScaleXY() != DefectType.FIXED)
-								this.rankDefect.setScaleXY(DefectType.FREE);
-						}
-						else {
-							if (!((GNSSBaseline2D)observation).getScale().isEnable())
-								this.rankDefect.setScaleXYZ(DefectType.FIXED);
-							else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
-								this.rankDefect.setScaleXYZ(DefectType.FREE);
+					double gnssX = ((GNSSBaseline2D)observation).getBaselineComponent(ComponentType.X).getValueApriori();
+					double gnssY = ((GNSSBaseline2D)observation).getBaselineComponent(ComponentType.Y).getValueApriori();
+					if (gnssX != 0 || gnssY != 0) {
+						gnss2DCount++;
+						if (gnss2DCount > 1) {
+							if (!((GNSSBaseline2D)observation).getRotationZ().isEnable())
+								this.rankDefect.setRotationZ(DefectType.FIXED);
+							else if (this.rankDefect.getRotationZ() != DefectType.FIXED)
+								this.rankDefect.setRotationZ(DefectType.FREE);
+
+							if (!is3DNet) {
+								if (!((GNSSBaseline2D)observation).getScale().isEnable())
+									this.rankDefect.setScaleXY(DefectType.FIXED);
+								else if (this.rankDefect.getScaleXY() != DefectType.FIXED)
+									this.rankDefect.setScaleXY(DefectType.FREE);
+							}
+							else {
+								if (!((GNSSBaseline2D)observation).getScale().isEnable())
+									this.rankDefect.setScaleXYZ(DefectType.FIXED);
+								else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
+									this.rankDefect.setScaleXYZ(DefectType.FREE);
+							}
 						}
 					}
 				}
 			}
 			else if (observation instanceof GNSSBaseline3D) {
 				if (((GNSSBaseline3D)observation).getDimension() >= 3) { // Ist vollstaendige Baseline X, Y und Z vorhanden
-					gnss3DCount++;
-					if (gnss3DCount>3) {
-						if (!((GNSSBaseline3D)observation).getScale().isEnable())
-							this.rankDefect.setScaleXYZ(DefectType.FIXED);
-						else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
-							this.rankDefect.setScaleXYZ(DefectType.FREE);
+					double gnssX = ((GNSSBaseline3D)observation).getBaselineComponent(ComponentType.X).getValueApriori();
+					double gnssY = ((GNSSBaseline3D)observation).getBaselineComponent(ComponentType.Y).getValueApriori();
+					double gnssZ = ((GNSSBaseline3D)observation).getBaselineComponent(ComponentType.Z).getValueApriori();
+					if (gnssX != 0 || gnssY != 0 || gnssZ != 0) {
+						gnss3DCount++;
+						if (gnss3DCount > 3) {
+							if (!((GNSSBaseline3D)observation).getScale().isEnable())
+								this.rankDefect.setScaleXYZ(DefectType.FIXED);
+							else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
+								this.rankDefect.setScaleXYZ(DefectType.FREE);
 
-						if (!((GNSSBaseline3D)observation).getRotationX().isEnable())
-							this.rankDefect.setRotationX(DefectType.FIXED);
-						else if (this.rankDefect.getRotationX() != DefectType.FIXED)
-							this.rankDefect.setRotationX(DefectType.FREE);
+							if (gnssY != 0 || gnssZ != 0) {
+								if (!((GNSSBaseline3D)observation).getRotationX().isEnable())
+									this.rankDefect.setRotationX(DefectType.FIXED);
+								else if (this.rankDefect.getRotationX() != DefectType.FIXED)
+									this.rankDefect.setRotationX(DefectType.FREE);
+							}
 
-						if (!((GNSSBaseline3D)observation).getRotationY().isEnable())
-							this.rankDefect.setRotationY(DefectType.FIXED);
-						else if (this.rankDefect.getRotationY() != DefectType.FIXED)
-							this.rankDefect.setRotationY(DefectType.FREE);
-						
-						if (!((GNSSBaseline3D)observation).getRotationZ().isEnable())
-							this.rankDefect.setRotationZ(DefectType.FIXED);
-						else if (this.rankDefect.getRotationZ() != DefectType.FIXED)
-							this.rankDefect.setRotationZ(DefectType.FREE);
+							if (gnssX != 0 || gnssZ != 0) {
+								if (!((GNSSBaseline3D)observation).getRotationY().isEnable())
+									this.rankDefect.setRotationY(DefectType.FIXED);
+								else if (this.rankDefect.getRotationY() != DefectType.FIXED)
+									this.rankDefect.setRotationY(DefectType.FREE);
+							}
+
+							if (gnssX != 0 || gnssY != 0) {
+								if (!((GNSSBaseline3D)observation).getRotationZ().isEnable())
+									this.rankDefect.setRotationZ(DefectType.FIXED);
+								else if (this.rankDefect.getRotationZ() != DefectType.FIXED)
+									this.rankDefect.setRotationZ(DefectType.FREE);
+							}
+						}
 					}
 				}
 			}
