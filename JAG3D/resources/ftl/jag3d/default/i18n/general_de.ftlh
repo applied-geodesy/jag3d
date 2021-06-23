@@ -48,7 +48,7 @@
 				<#elseif estimation_type == 'SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION'>
 					Sph&auml;rische Simplex Unscented Transformation
 				<#elseif estimation_type == 'SIMULATION'>
-					Netzplanung (Pr&auml;analyse)
+					Diagnoseausgleichung (Netzplanung)
 				</#if>
 			</dd>
 			
