@@ -302,6 +302,27 @@ public class DeltaZ extends Observation {
 		return dh / scale;
 	}
 
+//	private double getApproximatedUndulationDifferenceByAngles(double rxs, double rys, double rxe, double rye) {
+//		Reduction reductions = this.getReductions();
+//		double z0 = reductions.getPivotPoint().getZ0();
+//		double R0 = reductions.getEarthRadius();
+//		double h0 = reductions.getReferenceHeight();
+//		double rs = Math.hypot(rxs, rys);
+//		double re = Math.hypot(rxe, rye);	
+//		double R = R0 + h0 - z0;
+//	
+//		double Ns = R / Math.cos(rs) - R0;
+//		double Ne = R / Math.cos(re) - R0;
+//		
+//		double dist2Ds = R * rs;
+//		double dist2De = R * re;
+//
+//		double Ns = Math.hypot(R, dist2Ds) - R0;
+//		double Ne = Math.hypot(R, dist2De) - R0;
+//		
+//		return Ne - Ns;
+//	}
+	
 	private double getApproximatedUndulationDifference(double xs, double ys, double xe, double ye) {
 		if (this.getReductions() == null || this.getReductions().getProjectionType() != ProjectionType.LOCAL_SPHERICAL)
 			return 0.0;
@@ -320,8 +341,8 @@ public class DeltaZ extends Observation {
 		// Approx. undulation
 		double dist2Ds = Math.hypot(xs - x0, ys - y0);
 		double dist2De = Math.hypot(xe - x0, ye - y0);
-		double Ns = Math.hypot(R, dist2Ds) - R;
-		double Ne = Math.hypot(R, dist2De) - R;
+		double Ns = Math.hypot(R, dist2Ds) - R0;
+		double Ne = Math.hypot(R, dist2De) - R0;
 
 		return Ne - Ns;
 	}
