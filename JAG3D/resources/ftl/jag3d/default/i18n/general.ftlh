@@ -49,7 +49,7 @@
 				<#elseif estimation_type == 'SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION'>
 					Spherical Simplex Unscented Transformation
 				<#elseif estimation_type == 'SIMULATION'>
-					Pre-analyses (Network Simulation)
+					Diagnosis adjustment (Simulation)
 				</#if>
 			</dd>
 			
