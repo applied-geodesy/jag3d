@@ -25,7 +25,7 @@ public enum ProjectionType {
 	LOCAL_CARTESIAN(0),
 	GAUSS_KRUEGER(1),
 	UTM(2),
-	LOCAL_SPHERICAL(3),
+	LOCAL_ELLIPSOIDAL(3),
 	;
 
 	private int id;

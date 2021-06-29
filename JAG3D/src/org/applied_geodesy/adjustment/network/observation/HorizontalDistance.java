@@ -57,7 +57,7 @@ public class HorizontalDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -104,7 +104,7 @@ public class HorizontalDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -151,7 +151,7 @@ public class HorizontalDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -199,7 +199,7 @@ public class HorizontalDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -247,7 +247,7 @@ public class HorizontalDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -294,7 +294,7 @@ public class HorizontalDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -341,7 +341,7 @@ public class HorizontalDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -401,7 +401,7 @@ public class HorizontalDistance extends Observation {
 		
 		// Hoehenreduktion - Rueeger 1996, S. 99, Gl. 7.56
 		if (reductions.applyReductionTask(ReductionTaskType.HEIGHT)) {
-	    	double h0 = reductions.getReferenceHeight();
+	    	double h0 = reductions.getPrincipalPoint().getHeight();
 	    	obsDist = obsDist * R/(R+h0);
 	    }
 		

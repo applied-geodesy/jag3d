@@ -24,54 +24,21 @@ package org.applied_geodesy.adjustment.network.observation.reduction;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.applied_geodesy.adjustment.Constant;
-import org.applied_geodesy.adjustment.network.point.Point3D;
 import org.applied_geodesy.transformation.datum.Ellipsoid;
+import org.applied_geodesy.transformation.datum.PrincipalPoint;
 
 public class Reduction {
 	private ProjectionType projectionType = ProjectionType.LOCAL_CARTESIAN;
-	private double earthRadius = Constant.EARTH_RADIUS;
-	private Point3D localPrinciplePoint = new Point3D("PRINCIPLE_POINT_3D", 0.0, 0.0, 0.0);
-	private double referenceHeight    = 0.0;
-	private double referenceLatitude  = 0.0;
-	private double referenceLongitude = 0.0;
-	private Ellipsoid ellipsoid       = Ellipsoid.GRS80;
+	private PrincipalPoint principalPoint = new PrincipalPoint();
+	private Ellipsoid ellipsoid = Ellipsoid.SPHERE;
 	private Set<ReductionTaskType> reductionTypes = new HashSet<ReductionTaskType>(ReductionTaskType.values().length);
-	
-	public void setReferenceHeight(double referenceHeight) {
-		this.referenceHeight = referenceHeight;
-	}
-
-	public double getReferenceHeight() {
-		return this.referenceHeight;
-	}
-	
-	public void setReferenceLatitude(double referenceLatitude) {
-		this.referenceLatitude = referenceLatitude;
-	}
-
-	public double getReferenceLatitude() {
-		return this.referenceLatitude;
-	}
-	
-	public void setReferenceLongitude(double referenceLongitude) {
-		this.referenceLongitude = referenceLongitude;
-	}
-
-	public double getReferenceLongitude() {
-		return this.referenceLongitude;
-	}
-	
-	public void setEarthRadius(double earthRadius) {
-		this.earthRadius = earthRadius;
-	}
 
 	public double getEarthRadius() {
-		return this.earthRadius;
+		return this.ellipsoid.getRadiusOfConformalSphere(this.principalPoint.getLatitude());
 	}
 	
-	public Point3D getLocalPrinciplePoint() {
-		return this.localPrinciplePoint;
+	public PrincipalPoint getPrincipalPoint() {
+		return this.principalPoint;
 	}
 	
 	public void setEllipsoid(Ellipsoid ellipsoid) {

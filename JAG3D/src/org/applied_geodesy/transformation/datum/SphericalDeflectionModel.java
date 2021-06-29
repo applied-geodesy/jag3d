@@ -36,54 +36,37 @@ public class SphericalDeflectionModel {
 	}
 
 	private Reduction reductions;
-	private double r11 = 1, r12 = 0, r13 = 0;
-	private double r21 = 0, r22 = 1, r23 = 0;
-	private double r31 = 1, r32 = 0, r33 = 1;
 	private double X0 = 0, Y0 = 0, Z0 = 0, d0 = 0;
 	
 	public SphericalDeflectionModel(Reduction reductions) {
 		this.setReduction(reductions);
 	}
 	
-	public void setReduction(Reduction reductions) {
+	private void setReduction(Reduction reductions) {
 		this.reductions = reductions;
 		
 		double a = this.reductions.getEllipsoid().getMajorAxis();
 		double b = this.reductions.getEllipsoid().getMinorAxis();
-				
-		double longitude0 = this.reductions.getReferenceLongitude();
-		double latitude0  = this.reductions.getReferenceLatitude();
-		double h0         = this.reductions.getReferenceHeight();
+			
+		double R[][]    = this.reductions.getPrincipalPoint().getRotationSequenceXYZtoENU();
+		double latitude = this.reductions.getPrincipalPoint().getLatitude();
+		double h0       = this.reductions.getPrincipalPoint().getHeight();
 		
-		double sLatitude0 = Math.sin(latitude0);
-		double cLatitude0 = Math.cos(latitude0);
-		
-		double sLongitude0 = Math.sin(longitude0);
-		double cLongitude0 = Math.cos(longitude0);
-		
-		// https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ECEF_to_ENU
-		this.r11 = -sLongitude0;
-		this.r12 =  cLongitude0;
-		this.r13 =  0.0;
-		
-		this.r21 = -sLatitude0 * cLongitude0;
-		this.r22 = -sLatitude0 * sLongitude0;
-		this.r23 =  cLatitude0;
-		
-		this.r31 =  cLatitude0 * cLongitude0;
-		this.r32 =  cLatitude0 * sLongitude0;
-		this.r33 =  sLatitude0;
+		double cLatitude = Math.cos(latitude);
+		double r31 = R[2][0];
+		double r32 = R[2][1];
+		double r33 = R[2][2];
 
 	    double c    = a*a / b;
-	    double eta2 = this.reductions.getEllipsoid().getSecondSquaredEccentricity() * cLatitude0 * cLatitude0;
+	    double eta2 = this.reductions.getEllipsoid().getSecondSquaredEccentricity() * cLatitude * cLatitude;
 	    double V0   = Math.sqrt(1.0 + eta2);
 	    double N0   = c / V0;
 	 
-	    this.X0 = (N0 + h0) * this.r31;
-	    this.Y0 = (N0 + h0) * this.r32;
-	    this.Z0 = (Math.pow(b/a, 2) * N0 + h0) * this.r33;
+	    this.X0 = (N0 + h0) * r31;
+	    this.Y0 = (N0 + h0) * r32;
+	    this.Z0 = (Math.pow(b/a, 2) * N0 + h0) * r33;
 	    
-	    this.d0 = this.r31 * this.X0 + this.r32 * this.Y0 + this.r33 * this.Z0;
+	    this.d0 = r31 * this.X0 + r32 * this.Y0 + r33 * this.Z0;
 	}
 	
 	public void setSphericalDeflections(Point point) {
@@ -92,9 +75,10 @@ public class SphericalDeflectionModel {
 		double y = point.getY();
 		double z = dim == 2 ? 0.0 : point.getZ();
 		
-		double x0 = this.reductions.getLocalPrinciplePoint().getX0();
-		double y0 = this.reductions.getLocalPrinciplePoint().getY0();
-		double z0 = this.reductions.getLocalPrinciplePoint().getZ0();
+		double x0    = this.reductions.getPrincipalPoint().getX();
+		double y0    = this.reductions.getPrincipalPoint().getY();
+		double z0    = this.reductions.getPrincipalPoint().getZ();
+		double R[][] = this.reductions.getPrincipalPoint().getRotationSequenceXYZtoENU();
 		
 		double a = this.reductions.getEllipsoid().getMajorAxis();
 		double b = this.reductions.getEllipsoid().getMinorAxis();
@@ -110,17 +94,35 @@ public class SphericalDeflectionModel {
 		double sx = cLatitude * cLongitude;
 	    double sy = cLatitude * sLongitude;
 	    double sz = sLatitude;
+	    
+	    double r11 = R[0][0];
+	    double r12 = R[0][1];
+	    double r13 = R[0][2];
+	    
+	    double r21 = R[1][0];
+	    double r22 = R[1][1];
+	    double r23 = R[1][2];
+	    
+	    double r31 = R[2][0];
+	    double r32 = R[2][1];
+	    double r33 = R[2][2];
 
-		double rx =   this.r11 * sx + this.r12 * sy + this.r13 * sz;
-		double ry = -(this.r21 * sx + this.r22 * sy + this.r23 * sz);
+//		double rx =   r11 * sx + r12 * sy + r13 * sz;
+//		double ry = -(r21 * sx + r22 * sy + r23 * sz);
 
+	    double dx = r11 * sx + r12 * sy + r13 * sz;
+		double dy = r21 * sx + r22 * sy + r23 * sz;
+		double dz = r31 * sx + r32 * sy + r33 * sz;
+
+		double rx =  Math.asin(dx);
+		double ry = -Math.atan2(dy, dz);
 
 		// Abstand zw. Ellipsoid und Ebene
 		double surfX = geographicParameters.N * sx;
 	    double surfY = geographicParameters.N * sy;
 	    double surfZ = (Math.pow(b/a, 2) * geographicParameters.N) * sz;
 
-	    double h = (this.d0 - this.r31 * surfX - this.r32 * surfY - this.r33 * surfZ) / (this.r31 * sx + this.r32 * sy + this.r33 * sz);
+	    double h = (this.d0 - r31 * surfX - r32 * surfY - r33 * surfZ) / (r31 * sx + r32 * sy + r33 * sz);
 
 	    point.getSphericalDeflectionParameter().setSphericalDeflectionParameter(rx, ry, h);
 	}
@@ -130,11 +132,24 @@ public class SphericalDeflectionModel {
 		double b  = this.reductions.getEllipsoid().getMinorAxis();
 		double e1 = this.reductions.getEllipsoid().getFirstSquaredEccentricity();
 		double e2 = this.reductions.getEllipsoid().getSecondSquaredEccentricity();
+		
+		double R[][] = this.reductions.getPrincipalPoint().getRotationSequenceXYZtoENU();
+		double r11 = R[0][0];
+	    double r12 = R[0][1];
+	    double r13 = R[0][2];
+	    
+	    double r21 = R[1][0];
+	    double r22 = R[1][1];
+	    double r23 = R[1][2];
+	    
+	    double r31 = R[2][0];
+	    double r32 = R[2][1];
+	    double r33 = R[2][2];
 
 		// global XYZ from local ENU -> XYZ = P0 * R'*ENU
-		double X = this.X0 + this.r11 * east + this.r21 * north + this.r31 * up;
-		double Y = this.Y0 + this.r12 * east + this.r22 * north + this.r32 * up;
-		double Z = this.Z0 + this.r13 * east + this.r23 * north + this.r33 * up;
+		double X = this.X0 + r11 * east + r21 * north + r31 * up;
+		double Y = this.Y0 + r12 * east + r22 * north + r32 * up;
+		double Z = this.Z0 + r13 * east + r23 * north + r33 * up;
 		
 		double c = a*a/b;
 		double p = Math.hypot(X, Y);

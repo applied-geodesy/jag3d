@@ -56,7 +56,7 @@ public class SlopeDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -105,7 +105,7 @@ public class SlopeDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -154,7 +154,7 @@ public class SlopeDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -202,7 +202,7 @@ public class SlopeDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -250,7 +250,7 @@ public class SlopeDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -298,7 +298,7 @@ public class SlopeDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -346,7 +346,7 @@ public class SlopeDistance extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 

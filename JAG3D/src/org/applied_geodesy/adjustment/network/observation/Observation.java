@@ -52,7 +52,7 @@ public abstract class Observation {
 //			
 //			Reduction reductions = observation.getReductions();
 //
-//			if (reductions == null || reductions.getProjectionType() != ProjectionType.LOCAL_SPHERICAL)
+//			if (reductions == null || reductions.getProjectionType() != ProjectionType.LOCAL_ELLIPSOIDAL)
 //				return;
 //
 //			double xs = aprioriValues ? observation.getStartPoint().getX0() : observation.getStartPoint().getX();
@@ -233,7 +233,7 @@ public abstract class Observation {
 		double rxe = this.endPoint.getVerticalDeflectionX().getValue();
 		double rye = this.endPoint.getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.startPoint.getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.startPoint.getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -274,7 +274,7 @@ public abstract class Observation {
 		double rxe = this.endPoint.getVerticalDeflectionX().getValue0();
 		double rye = this.endPoint.getVerticalDeflectionY().getValue0();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.startPoint.getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.startPoint.getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -316,7 +316,7 @@ public abstract class Observation {
 		double rxe = this.endPoint.getVerticalDeflectionX().getValue();
 		double rye = this.endPoint.getVerticalDeflectionY().getValue();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.startPoint.getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.startPoint.getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -359,7 +359,7 @@ public abstract class Observation {
 		double rxe = this.endPoint.getVerticalDeflectionX().getValue0();
 		double rye = this.endPoint.getVerticalDeflectionY().getValue0();
 		
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.startPoint.getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.startPoint.getSphericalDeflectionParameter().getSphericalDeflectionY();
 

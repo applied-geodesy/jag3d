@@ -21,12 +21,14 @@
 
 package org.applied_geodesy.transformation.datum;
 
+import org.applied_geodesy.adjustment.Constant;
+
 public class Ellipsoid {
 	private final double majorAxis, minorAxis, inverseFlattening, flattening;
 	private double firstSquaredEccentricity, secondSquaredEccentricity;
-	private boolean isSphere = Boolean.FALSE;
+	private boolean sphereModel = Boolean.FALSE;
 	
-	public final static Ellipsoid SPHERE     = Ellipsoid.createEllipsoidFromMinorAxis(6371007.0, 6371007.0);
+	public final static Ellipsoid SPHERE     = Ellipsoid.createEllipsoidFromMinorAxis(Constant.EARTH_RADIUS, Constant.EARTH_RADIUS);
 	public final static Ellipsoid WGS84      = Ellipsoid.createEllipsoidFromSquaredEccentricity(6378137.0, 0.00669437999013);
 	public final static Ellipsoid GRS80      = Ellipsoid.createEllipsoidFromSquaredEccentricity(6378137.0, 0.00669438002290);
 	public final static Ellipsoid BESSEL1941 = Ellipsoid.createEllipsoidFromMinorAxis(Math.exp( 6.8046434637 * Math.log(10) ), Math.exp( 6.8031892839 * Math.log(10) ));
@@ -38,37 +40,37 @@ public class Ellipsoid {
 
 		switch (parameterType) {
 		case SQUARED_ECCENTRICITY:
-			this.firstSquaredEccentricity = secondEllipsoidParameterValue;
-			this.isSphere  = this.firstSquaredEccentricity == 0;
-			this.minorAxis = this.majorAxis * Math.sqrt(1.0 - this.firstSquaredEccentricity);
-			this.flattening = 1.0 - Math.sqrt(1.0 - this.firstSquaredEccentricity);
-			this.inverseFlattening = 1.0 / (1.0 - Math.sqrt(1.0 - firstSquaredEccentricity));
-			this.secondSquaredEccentricity = this.firstSquaredEccentricity / (1.0 - this.firstSquaredEccentricity);
+			this.firstSquaredEccentricity  = secondEllipsoidParameterValue;
+			this.sphereModel               = this.firstSquaredEccentricity == 0;
+			this.minorAxis                 = this.sphereModel ? this.majorAxis : this.majorAxis * Math.sqrt(1.0 - this.firstSquaredEccentricity);
+			this.flattening                = this.sphereModel ? 0.0 : 1.0 - Math.sqrt(1.0 - this.firstSquaredEccentricity);
+			this.inverseFlattening         = this.sphereModel ? Double.POSITIVE_INFINITY : 1.0 / (1.0 - Math.sqrt(1.0 - firstSquaredEccentricity));
+			this.secondSquaredEccentricity = this.sphereModel ? 0.0 : this.firstSquaredEccentricity / (1.0 - this.firstSquaredEccentricity);
 			break;
 
 		case INVERSE_FLATTENING:
-			this.isSphere                  = Boolean.FALSE;
 			this.inverseFlattening         = secondEllipsoidParameterValue;
-			this.flattening                = 1.0 / this.inverseFlattening;
-			this.minorAxis                 = this.majorAxis - this.majorAxis / this.inverseFlattening;
-			this.firstSquaredEccentricity  = (2.0 - 1.0 / this.inverseFlattening) / this.inverseFlattening;
-			this.secondSquaredEccentricity = this.flattening * (2.0 - this.flattening) / Math.pow(1.0 - this.flattening, 2);
+			this.sphereModel               = Double.POSITIVE_INFINITY == this.inverseFlattening;
+			this.flattening                = this.sphereModel ? 0.0 : 1.0 / this.inverseFlattening;
+			this.minorAxis                 = this.sphereModel ? this.majorAxis : this.majorAxis - this.majorAxis / this.inverseFlattening;
+			this.firstSquaredEccentricity  = this.sphereModel ? 0.0 : (2.0 - 1.0 / this.inverseFlattening) / this.inverseFlattening;
+			this.secondSquaredEccentricity = this.sphereModel ? 0.0 : this.flattening * (2.0 - this.flattening) / Math.pow(1.0 - this.flattening, 2);
 			break;
 
 		default: // MINOR_AXIS
-			this.minorAxis = secondEllipsoidParameterValue;
-			this.isSphere = this.minorAxis == this.majorAxis;
-			this.flattening                = isSphere ? 0.0 : 1.0 - this.minorAxis / this.majorAxis;
-			this.inverseFlattening         = isSphere ? Double.POSITIVE_INFINITY : this.majorAxis / (this.majorAxis - this.minorAxis);
-			this.firstSquaredEccentricity  = isSphere ? 0.0 : 1.0 - ((this.minorAxis * this.minorAxis) / (this.majorAxis * this.majorAxis));
-			this.secondSquaredEccentricity = isSphere ? 0.0 : (this.majorAxis * this.majorAxis - this.minorAxis * this.minorAxis) / (this.minorAxis * this.minorAxis);
+			this.minorAxis                 = secondEllipsoidParameterValue;
+			this.sphereModel               = this.minorAxis == this.majorAxis;
+			this.flattening                = this.sphereModel ? 0.0 : 1.0 - this.minorAxis / this.majorAxis;
+			this.inverseFlattening         = this.sphereModel ? Double.POSITIVE_INFINITY : this.majorAxis / (this.majorAxis - this.minorAxis);
+			this.firstSquaredEccentricity  = this.sphereModel ? 0.0 : 1.0 - ((this.minorAxis * this.minorAxis) / (this.majorAxis * this.majorAxis));
+			this.secondSquaredEccentricity = this.sphereModel ? 0.0 : (this.majorAxis * this.majorAxis - this.minorAxis * this.minorAxis) / (this.minorAxis * this.minorAxis);
 
 			break;
 		}
 	}
 	
-	public boolean isSphere() {
-		return this.isSphere;
+	public boolean isSphereModel() {
+		return this.sphereModel;
 	}
 
 	public static Ellipsoid createEllipsoidFromMinorAxis(double majorAxis, double minorAxis) {
@@ -84,6 +86,9 @@ public class Ellipsoid {
 	}
 	
 	public double getRadiusOfConformalSphere(double latitude) {
+		if (this.isSphereModel())
+			return this.majorAxis;
+		
 		double sin = Math.sin(latitude);
 		double e2 = this.getFirstSquaredEccentricity();
 		return this.majorAxis * Math.sqrt(1.0 - e2) / (1.0 - e2 * sin * sin);

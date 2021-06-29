@@ -39,7 +39,7 @@ public class DeltaZ extends Observation {
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 		}
@@ -55,7 +55,7 @@ public class DeltaZ extends Observation {
 	public double diffYs() {	
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 		}
 
@@ -70,7 +70,7 @@ public class DeltaZ extends Observation {
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 		}
@@ -91,7 +91,7 @@ public class DeltaZ extends Observation {
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 		}
@@ -114,7 +114,7 @@ public class DeltaZ extends Observation {
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 		}
@@ -137,7 +137,7 @@ public class DeltaZ extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 		}
@@ -160,7 +160,7 @@ public class DeltaZ extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 			rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 		}
@@ -195,7 +195,7 @@ public class DeltaZ extends Observation {
 			double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 			double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 
-			if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+			if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 				rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 				rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -233,7 +233,7 @@ public class DeltaZ extends Observation {
 		}
 		
 		double dN = 0;
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			double hs = this.getStartPoint().getSphericalDeflectionParameter().getFrameIntersectionHeight();
 			double he = this.getEndPoint().getSphericalDeflectionParameter().getFrameIntersectionHeight();
 			dN = he - hs;
@@ -273,7 +273,7 @@ public class DeltaZ extends Observation {
 			double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 			double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 
-			if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+			if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 				rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
 				rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
 
@@ -311,7 +311,7 @@ public class DeltaZ extends Observation {
 		}
 
 		double dN = 0;
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			double hs = this.getStartPoint().getSphericalDeflectionParameter().getFrameIntersectionHeight();
 			double he = this.getEndPoint().getSphericalDeflectionParameter().getFrameIntersectionHeight();
 			dN = he - hs;
@@ -344,7 +344,7 @@ public class DeltaZ extends Observation {
 //	}
 //	
 //	private double getApproximatedUndulationDifference(double xs, double ys, double xe, double ye) {
-//		if (this.getReductions() == null || this.getReductions().getProjectionType() != ProjectionType.LOCAL_SPHERICAL)
+//		if (this.getReductions() == null || this.getReductions().getProjectionType() != ProjectionType.LOCAL_ELLIPSOIDAL)
 //			return 0.0;
 //		
 //		// Neitzel/Petrovic (2004): Ein verallgemeinertes Feldverfahren zur Überpruefung von Nivelliergeraeten, Gls. (18),(19) 

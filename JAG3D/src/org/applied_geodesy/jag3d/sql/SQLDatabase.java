@@ -236,11 +236,21 @@ class SQLDatabase {
 		// clear column properties for congruence analysis tables
 		sqls.put(20210315.0001, "DELETE FROM \"TableColumnProperty\" WHERE \"table_type\" IN (" + TableContentType.CONGRUENCE_ANALYSIS_1D.getId() + ", " + TableContentType.CONGRUENCE_ANALYSIS_2D.getId() + ", " + TableContentType.CONGRUENCE_ANALYSIS_3D.getId() + ");\r\n");
 		
-		// add pivot point for spherical reduction
+		// add principle point for spherical reduction
 		sqls.put(20210508.0001, "ALTER TABLE \"ReductionDefinition\" ADD \"x0\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
 		sqls.put(20210508.0002, "ALTER TABLE \"ReductionDefinition\" ADD \"y0\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
 		sqls.put(20210508.0003, "ALTER TABLE \"ReductionDefinition\" ADD \"z0\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
-
+		
+		// add global definition of principle point
+		sqls.put(20210513.0001, "ALTER TABLE \"ReductionDefinition\" ADD \"reference_latitude\"  DOUBLE DEFAULT 0 NOT NULL;\r\n");
+		sqls.put(20210513.0002, "ALTER TABLE \"ReductionDefinition\" ADD \"reference_longitude\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+		sqls.put(20210513.0003, "ALTER TABLE \"ReductionDefinition\" ADD \"major_axis\" DOUBLE DEFAULT " + Constant.EARTH_RADIUS + " NOT NULL;\r\n");
+		sqls.put(20210513.0004, "ALTER TABLE \"ReductionDefinition\" ADD \"minor_axis\" DOUBLE DEFAULT " + Constant.EARTH_RADIUS + " NOT NULL;\r\n");
+		
+		// transfer Earth radius to semi-axes
+		sqls.put(20210513.0010, "UPDATE \"ReductionDefinition\" SET \"major_axis\" = \"earth_radius\", \"minor_axis\" = \"earth_radius\" WHERE \"id\" = 1;\r\n");
+		sqls.put(20210513.0011, "ALTER TABLE \"ReductionDefinition\" DROP COLUMN \"earth_radius\"\r\n");
+		
 		return sqls;
 	}
 }
