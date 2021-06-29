@@ -26,6 +26,7 @@ import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.network.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.network.parameter.VerticalDeflectionX;
 import org.applied_geodesy.adjustment.network.parameter.VerticalDeflectionY;
+import org.applied_geodesy.transformation.datum.SphericalDeflectionParameter;
 
 public abstract class Point extends UnknownParameter {
     // Punktnummer
@@ -38,6 +39,8 @@ public abstract class Point extends UnknownParameter {
 	// Lotabweichungsparameter fuer den Punkt in X/Y-Richtung
 	private VerticalDeflectionX verticalDeflectionX = new VerticalDeflectionX(this);
 	private VerticalDeflectionY verticalDeflectionY = new VerticalDeflectionY(this);
+	// Abweichungen aufgrund eines ellipsoidischen Erdmodells
+	private SphericalDeflectionParameter sphericalDeflectionParameter = new SphericalDeflectionParameter();
     // Grenzwert fuer Null
 	private final static double ZERO = Math.sqrt(Constant.EPS);
 	protected final double coordinates0[] = new double[3]; //coordinates0[] = new double[this.getDimension()];
@@ -442,5 +445,13 @@ public abstract class Point extends UnknownParameter {
 	public boolean hasObservedDeflectionParameters() {
 		return this.getDimension() != 2 && 
 				(this.verticalDeflectionX.getRowInJacobiMatrix() >= 0 && this.verticalDeflectionY.getRowInJacobiMatrix() >= 0);
+	}
+	
+	/**
+	 * Liefert die reinen geometrischen (festen) Anteile der Schiefstellung, wenn ein ellipsoidisches Modell verwendet wird
+	 * @return deflections
+	 */
+	public SphericalDeflectionParameter getSphericalDeflectionParameter() {
+		return this.sphericalDeflectionParameter;
 	}
 }

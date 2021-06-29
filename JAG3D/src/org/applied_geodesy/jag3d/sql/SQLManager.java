@@ -3820,9 +3820,9 @@ public class SQLManager {
 		stmt.setInt(idx++, reduction.getProjectionType().getId());
 		stmt.setDouble(idx++, reduction.getReferenceHeight());
 		stmt.setDouble(idx++, reduction.getEarthRadius());
-		stmt.setDouble(idx++, reduction.getPivotPoint().getX0());
-		stmt.setDouble(idx++, reduction.getPivotPoint().getY0());
-		stmt.setDouble(idx++, reduction.getPivotPoint().getZ0());
+		stmt.setDouble(idx++, reduction.getLocalPrinciplePoint().getX0());
+		stmt.setDouble(idx++, reduction.getLocalPrinciplePoint().getY0());
+		stmt.setDouble(idx++, reduction.getLocalPrinciplePoint().getZ0());
 		stmt.execute();
 
 		this.clearReductionTasks();
@@ -3937,9 +3937,9 @@ public class SQLManager {
 				reductions.setProjectionType(projectionType);
 				reductions.setReferenceHeight(referenceHeight);
 				reductions.setEarthRadius(earthRadius);
-				reductions.getPivotPoint().setX0(x0);
-				reductions.getPivotPoint().setY0(y0);
-				reductions.getPivotPoint().setZ0(z0);
+				reductions.getLocalPrinciplePoint().setX0(x0);
+				reductions.getLocalPrinciplePoint().setY0(y0);
+				reductions.getLocalPrinciplePoint().setZ0(z0);
 	
 				if (hasTaskType) {
 					ReductionTaskType taskType = ReductionTaskType.getEnumByValue(taskTypeId);

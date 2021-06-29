@@ -168,9 +168,9 @@ public class ProjectionAndReductionDialog {
 					reductions.setReferenceHeight(referenceHeight);
 					reductions.setEarthRadius(earthRadius);
 					reductions.setProjectionType(projectionType);
-					reductions.getPivotPoint().setX0(x0);
-					reductions.getPivotPoint().setY0(y0);
-					reductions.getPivotPoint().setZ0(z0);
+					reductions.getLocalPrinciplePoint().setX0(x0);
+					reductions.getLocalPrinciplePoint().setY0(y0);
+					reductions.getLocalPrinciplePoint().setZ0(z0);
 					
 					if (directionReductionCheckBox.isSelected()) 
 						reductions.addReductionTaskType(ReductionTaskType.DIRECTION);
@@ -411,9 +411,9 @@ public class ProjectionAndReductionDialog {
 			SQLManager.getInstance().load(reductions);
 			this.referenceHeightTextField.setValue(reductions.getReferenceHeight());
 			this.earthRadiusTextField.setValue(reductions.getEarthRadius());
-			this.pivotX0TextField.setValue(reductions.getPivotPoint().getX0());
-			this.pivotY0TextField.setValue(reductions.getPivotPoint().getY0());
-			this.pivotZ0TextField.setValue(reductions.getPivotPoint().getZ0());
+			this.pivotX0TextField.setValue(reductions.getLocalPrinciplePoint().getX0());
+			this.pivotY0TextField.setValue(reductions.getLocalPrinciplePoint().getY0());
+			this.pivotZ0TextField.setValue(reductions.getLocalPrinciplePoint().getZ0());
 			
 			this.directionReductionCheckBox.setSelected(reductions.applyReductionTask(ReductionTaskType.DIRECTION));
 			this.distanceReductionCheckBox.setSelected(reductions.applyReductionTask(ReductionTaskType.DISTANCE));

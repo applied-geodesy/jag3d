@@ -94,6 +94,8 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameters;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
+import org.applied_geodesy.transformation.datum.Ellipsoid;
+import org.applied_geodesy.transformation.datum.SphericalDeflectionModel;
 import org.applied_geodesy.util.sql.DataBase;
 import org.applied_geodesy.util.sql.HSQLDB;
 import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
@@ -193,6 +195,13 @@ public class SQLAdjustmentManager {
 			else
 				throw new IllegalProjectionPropertyException("Projection cannot applied to observations because the coordinates are invalid, e.g. missing zone number! " + this.reductions.getProjectionType());
 		}
+		
+		if (this.reductions.getProjectionType() == ProjectionType.LOCAL_SPHERICAL) {
+			SphericalDeflectionModel sphericalDeflectionModel = new SphericalDeflectionModel(this.reductions);
+			for (Point point : this.completePoints.values())
+				sphericalDeflectionModel.setSphericalDeflections(point);
+			this.networkAdjustment.setSphericalDeflectionModel(sphericalDeflectionModel);
+		}
 
 		// Fuege Beobachtungen zu den Punkten hinzu
 		this.completeObservationGroups.addAll(this.getObservationGroups());
@@ -239,7 +248,6 @@ public class SQLAdjustmentManager {
 			
 		}
 		else {
-			
 			for ( Point point : referencePoints.values() ) {
 				String name = point.getName();
 				int dimension = point.getDimension();
@@ -291,10 +299,13 @@ public class SQLAdjustmentManager {
 		
 		this.reductions.setProjectionType(ProjectionType.LOCAL_CARTESIAN);
 		this.reductions.setReferenceHeight(0);
+		this.reductions.setReferenceLatitude(0);
+		this.reductions.setReferenceLongitude(0);
 		this.reductions.setEarthRadius(Constant.EARTH_RADIUS);
-		this.reductions.getPivotPoint().setX0(0);
-		this.reductions.getPivotPoint().setY0(0);
-		this.reductions.getPivotPoint().setZ0(0);
+		//TODO
+		this.reductions.getLocalPrinciplePoint().setX0(0);
+		this.reductions.getLocalPrinciplePoint().setY0(0);
+		this.reductions.getLocalPrinciplePoint().setZ0(0);
 		this.reductions.clear();
 
 		if (this.networkAdjustment != null) {
@@ -313,8 +324,8 @@ public class SQLAdjustmentManager {
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		ResultSet rs = stmt.executeQuery();
-		
-		while (rs.next()) {
+		//TODO
+		if (rs.next()) {
 			int taskTypeId = rs.getInt("task_type");
 			boolean hasTaskType = !rs.wasNull();
 			
@@ -324,14 +335,24 @@ public class SQLAdjustmentManager {
 			double x0                     = rs.getDouble("x0");
 			double y0                     = rs.getDouble("y0");
 			double z0                     = rs.getDouble("z0");
+			
+			double referenceLongitude     = 6.72124 * Math.PI/200.0;
+			double referenceLatitude      = 51.3692 * Math.PI/200.0;
 
 			this.reductions.setProjectionType(projectionType);
 			this.reductions.setReferenceHeight(referenceHeight);
 			this.reductions.setEarthRadius(earthRadius);
-			this.reductions.getPivotPoint().setX0(x0);
-			this.reductions.getPivotPoint().setY0(y0);
-			this.reductions.getPivotPoint().setZ0(z0);
-
+			this.reductions.getLocalPrinciplePoint().setX0(x0);
+			this.reductions.getLocalPrinciplePoint().setY0(y0);
+			this.reductions.getLocalPrinciplePoint().setZ0(z0);
+			//TODO
+			this.reductions.setEllipsoid(Ellipsoid.GRS80); //.createEllipsoidFromMinorAxis(earthRadius, earthRadius));
+//			this.reductions.setEllipsoid(Ellipsoid.createEllipsoidFromMinorAxis(earthRadius, earthRadius));
+			this.reductions.setReferenceLatitude(referenceLatitude);
+			this.reductions.setReferenceLongitude(referenceLongitude);
+			System.out.println("R = " + this.reductions.getEllipsoid().getRadiusOfConformalSphere(referenceLatitude)+"   "+earthRadius);
+//			this.reductions.setEarthRadius(this.reductions.getEllipsoid().getRadiusOfConformalSphere(referenceLatitude));
+			
 			if (hasTaskType && projectionType != ProjectionType.LOCAL_SPHERICAL) {
 				ReductionTaskType taskType = ReductionTaskType.getEnumByValue(taskTypeId);
 				this.reductions.addReductionTaskType(taskType);	

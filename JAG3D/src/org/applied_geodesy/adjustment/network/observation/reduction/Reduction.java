@@ -26,12 +26,16 @@ import java.util.Set;
 
 import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.network.point.Point3D;
+import org.applied_geodesy.transformation.datum.Ellipsoid;
 
 public class Reduction {
 	private ProjectionType projectionType = ProjectionType.LOCAL_CARTESIAN;
 	private double earthRadius = Constant.EARTH_RADIUS;
-	private Point3D pivotPoint = new Point3D("PIVOT_POINT_3D", 0.0, 0.0, 0.0);
-	private double referenceHeight = 0.0;
+	private Point3D localPrinciplePoint = new Point3D("PRINCIPLE_POINT_3D", 0.0, 0.0, 0.0);
+	private double referenceHeight    = 0.0;
+	private double referenceLatitude  = 0.0;
+	private double referenceLongitude = 0.0;
+	private Ellipsoid ellipsoid       = Ellipsoid.GRS80;
 	private Set<ReductionTaskType> reductionTypes = new HashSet<ReductionTaskType>(ReductionTaskType.values().length);
 	
 	public void setReferenceHeight(double referenceHeight) {
@@ -42,6 +46,22 @@ public class Reduction {
 		return this.referenceHeight;
 	}
 	
+	public void setReferenceLatitude(double referenceLatitude) {
+		this.referenceLatitude = referenceLatitude;
+	}
+
+	public double getReferenceLatitude() {
+		return this.referenceLatitude;
+	}
+	
+	public void setReferenceLongitude(double referenceLongitude) {
+		this.referenceLongitude = referenceLongitude;
+	}
+
+	public double getReferenceLongitude() {
+		return this.referenceLongitude;
+	}
+	
 	public void setEarthRadius(double earthRadius) {
 		this.earthRadius = earthRadius;
 	}
@@ -50,8 +70,16 @@ public class Reduction {
 		return this.earthRadius;
 	}
 	
-	public Point3D getPivotPoint() {
-		return this.pivotPoint;
+	public Point3D getLocalPrinciplePoint() {
+		return this.localPrinciplePoint;
+	}
+	
+	public void setEllipsoid(Ellipsoid ellipsoid) {
+		this.ellipsoid = ellipsoid;
+	}
+	
+	public Ellipsoid getEllipsoid() {
+		return this.ellipsoid;
 	}
 	
 	public void clear() {

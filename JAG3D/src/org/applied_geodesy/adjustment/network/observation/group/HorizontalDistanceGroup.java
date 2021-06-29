@@ -59,7 +59,7 @@ public class HorizontalDistanceGroup extends ObservationGroup {
 	public double getStdB(Observation observation) {
 		double dist = observation.getDistanceForUncertaintyModel(); 
 		if (dist < Constant.EPS)
-			dist = observation.getCalculatedAprioriDistance2D();
+			dist = observation.getApproximatedCalculatedDistance2D();
 		return this.getStdB() * Math.sqrt(dist / 1000.0); // [km];
 	}
 	
@@ -67,7 +67,7 @@ public class HorizontalDistanceGroup extends ObservationGroup {
 	public double getStdC(Observation observation) {
 		double dist = observation.getDistanceForUncertaintyModel();
 		if (dist < Constant.EPS)
-			dist = observation.getCalculatedAprioriDistance2D();
+			dist = observation.getApproximatedCalculatedDistance2D();
 		return this.getStdC() * dist;
 	}
 
