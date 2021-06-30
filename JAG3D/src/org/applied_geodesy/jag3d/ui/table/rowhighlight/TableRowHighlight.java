@@ -28,6 +28,7 @@ import org.applied_geodesy.jag3d.ui.table.UICongruenceAnalysisTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIGNSSObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIPointTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITerrestrialObservationTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.UIVerticalDeflectionTableBuilder;
 
 import javafx.scene.paint.Color;
 
@@ -121,6 +122,7 @@ public class TableRowHighlight {
 		UIGNSSObservationTableBuilder.getInstance().refreshTable();
 		UIPointTableBuilder.getInstance().refreshTable();
 		UICongruenceAnalysisTableBuilder.getInstance().refreshTable();
+		UIVerticalDeflectionTableBuilder.getInstance().refreshTable();
 	}
 	
 	@Override
