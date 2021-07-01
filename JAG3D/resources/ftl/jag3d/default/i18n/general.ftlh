@@ -4,7 +4,7 @@
 			<dt>JAG3D Version</dt><dd>v${version?string["#"]}</dd>
 			<dt>Name of Project</dt><dd>${project_name}</dd>
 			<dt>Project Id</dt><dd>${project_project_id}</dd>
-			<dt>customer Id</dt><dd>${project_customer_id}</dd>
+			<dt>Customer Id</dt><dd>${project_customer_id}</dd>
 			<dt>Person in Charge</dt><dd>${project_operator}</dd>
 			<dt>Date of Calculation</dt><dd>${project_date?date?string("dd.MM.yyyy")}</dd>
 			
