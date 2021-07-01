@@ -55,7 +55,7 @@ public final class Constant {
 	public static final double HEKTOPASCAL2TORR = 760.0/1013.25;
 
 	
-	public static final double EARTH_RADIUS = 6371000.0;
+	public static final double EARTH_RADIUS = 6371007.0;
 
 	
 	public static final double EPS = Constant.mashEPS();

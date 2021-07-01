@@ -19,29 +19,27 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.adjustment.network.observation.reduction;
+package org.applied_geodesy.transformation.datum;
 
-public enum ProjectionType {
-	LOCAL_CARTESIAN(0),
-	GAUSS_KRUEGER(1),
-	UTM(2),
-	LOCAL_ELLIPSOIDAL(3),
-	;
+enum SecondEllipsoidParameterType {
+	MINOR_AXIS(1),
+	INVERSE_FLATTENING(2),
+	SQUARED_ECCENTRICITY(3);
 
-	private int id;
-	private ProjectionType(int id) {
+	private final int id;
+	private SecondEllipsoidParameterType(int id) {
 		this.id = id;
 	}
 
-	public final int getId() {
-		return id;
+	public int getId() {
+		return this.id;
 	}
 
-	public static ProjectionType getEnumByValue(int value) {
-		for(ProjectionType element : ProjectionType.values()) {
-			if(element.id == value)
-				return element;
-		}
-		return LOCAL_CARTESIAN;
-	}  
+	public static SecondEllipsoidParameterType getParameterById(int id) {
+		SecondEllipsoidParameterType[] params = SecondEllipsoidParameterType.values();
+		for (SecondEllipsoidParameterType param : params)
+			if (param.getId() == id)
+				return param;
+		return null;
+	}
 }

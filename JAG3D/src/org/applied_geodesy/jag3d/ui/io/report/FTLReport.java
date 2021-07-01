@@ -52,6 +52,7 @@ import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionTy
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
+import org.applied_geodesy.transformation.datum.Ellipsoid;
 import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.util.FormatterOptions.FormatterOption;
@@ -314,7 +315,10 @@ public class FTLReport {
 
 	private void addProjectionAndReductions() throws SQLException {
 		String sql = "SELECT "
-				+ "\"projection_type\", \"reference_height\", \"earth_radius\", \"x0\", \"y0\", \"z0\", \"type\" AS \"task_type\" "
+				+ "\"projection_type\", "
+				+ "\"reference_latitude\", \"reference_longitude\", \"reference_height\", "
+				+ "\"major_axis\", \"minor_axis\", "
+				+ "\"x0\", \"y0\", \"z0\", \"type\" AS \"task_type\" "
 				+ "FROM \"ReductionTask\" "
 				+ "RIGHT JOIN \"ReductionDefinition\" ON \"ReductionTask\".\"reduction_id\" = \"ReductionDefinition\".\"id\" "
 				+ "WHERE \"ReductionDefinition\".\"id\" = 1";
@@ -325,30 +329,37 @@ public class FTLReport {
 		while (rs.next()) {
 			ProjectionType projectionType = ProjectionType.getEnumByValue(rs.getInt("projection_type"));
 			ReductionTaskType taskType    = ReductionTaskType.getEnumByValue(rs.getInt("task_type"));
+			double referenceLatitude      = rs.getDouble("reference_latitude");
+			double referenceLongitude     = rs.getDouble("reference_longitude");
 			double referenceHeight        = rs.getDouble("reference_height");
-			double earthRadius            = rs.getDouble("earth_radius");
-			double pivotPointX0           = rs.getDouble("x0");
-			double pivotPointY0           = rs.getDouble("y0");
-			double pivotPointZ0           = rs.getDouble("z0");
+			double majorAxis              = rs.getDouble("major_axis");
+			double minorAxis              = rs.getDouble("minor_axis");
+			double principalPointX0       = rs.getDouble("x0");
+			double principalPointY0       = rs.getDouble("y0");
+			double principalPointZ0       = rs.getDouble("z0");
 
 			// set default value
 			this.setParam("projection_type",   ProjectionType.LOCAL_CARTESIAN);
 			
-			if (projectionType == ProjectionType.LOCAL_SPHERICAL) {
-				this.setParam("projection_type",             projectionType.name());
-				this.setParam("projection_reference_height", referenceHeight);
-				this.setParam("projection_earth_radius",     earthRadius);
-				this.setParam("projection_pivot_x0",         pivotPointX0);
-				this.setParam("projection_pivot_y0",         pivotPointY0);
-				this.setParam("projection_pivot_z0",         pivotPointZ0);
+			if (projectionType == ProjectionType.LOCAL_ELLIPSOIDAL) {
+				this.setParam("projection_type",                projectionType.name());
+				this.setParam("projection_reference_latitude",  options.convertAngleToView(referenceLatitude));
+				this.setParam("projection_reference_longitude", options.convertAngleToView(referenceLongitude));
+				this.setParam("projection_reference_height",    options.convertLengthToView(referenceHeight));
+				this.setParam("projection_major_axis",          options.convertLengthToView(majorAxis));
+				this.setParam("projection_minor_axis",          options.convertLengthToView(minorAxis));
+				this.setParam("projection_principal_point_x0",  options.convertLengthToView(principalPointX0));
+				this.setParam("projection_principal_point_y0",  options.convertLengthToView(principalPointY0));
+				this.setParam("projection_principal_point_z0",  options.convertLengthToView(principalPointZ0));
 			}
 			else {			
 				if (taskType == null) 
 					continue;
 
-				this.setParam("projection_type",             projectionType.name());
-				this.setParam("projection_reference_height", referenceHeight);
-				this.setParam("projection_earth_radius",     earthRadius);
+				this.setParam("projection_type",               projectionType.name());
+				this.setParam("projection_reference_height",   options.convertLengthToView(referenceHeight));
+				this.setParam("projection_reference_latitude", options.convertAngleToView(referenceLatitude));
+				this.setParam("projection_earth_radius",       options.convertLengthToView(Ellipsoid.createEllipsoidFromMinorAxis(majorAxis, minorAxis).getRadiusOfConformalSphere(referenceLatitude)));
 
 				switch(taskType) {
 				case DIRECTION:

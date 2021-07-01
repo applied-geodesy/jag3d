@@ -24,34 +24,29 @@ package org.applied_geodesy.adjustment.network.observation.reduction;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.applied_geodesy.adjustment.Constant;
-import org.applied_geodesy.adjustment.network.point.Point3D;
+import org.applied_geodesy.transformation.datum.Ellipsoid;
+import org.applied_geodesy.transformation.datum.PrincipalPoint;
 
 public class Reduction {
 	private ProjectionType projectionType = ProjectionType.LOCAL_CARTESIAN;
-	private double earthRadius = Constant.EARTH_RADIUS;
-	private Point3D pivotPoint = new Point3D("PIVOT_POINT_3D", 0.0, 0.0, 0.0);
-	private double referenceHeight = 0.0;
+	private PrincipalPoint principalPoint = new PrincipalPoint();
+	private Ellipsoid ellipsoid = Ellipsoid.SPHERE;
 	private Set<ReductionTaskType> reductionTypes = new HashSet<ReductionTaskType>(ReductionTaskType.values().length);
-	
-	public void setReferenceHeight(double referenceHeight) {
-		this.referenceHeight = referenceHeight;
-	}
-
-	public double getReferenceHeight() {
-		return this.referenceHeight;
-	}
-	
-	public void setEarthRadius(double earthRadius) {
-		this.earthRadius = earthRadius;
-	}
 
 	public double getEarthRadius() {
-		return this.earthRadius;
+		return this.ellipsoid.getRadiusOfConformalSphere(this.principalPoint.getLatitude());
 	}
 	
-	public Point3D getPivotPoint() {
-		return this.pivotPoint;
+	public PrincipalPoint getPrincipalPoint() {
+		return this.principalPoint;
+	}
+	
+	public void setEllipsoid(Ellipsoid ellipsoid) {
+		this.ellipsoid = ellipsoid;
+	}
+	
+	public Ellipsoid getEllipsoid() {
+		return this.ellipsoid;
 	}
 	
 	public void clear() {

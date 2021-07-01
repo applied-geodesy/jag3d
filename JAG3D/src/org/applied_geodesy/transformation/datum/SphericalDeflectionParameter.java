@@ -19,29 +19,28 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.adjustment.network.observation.reduction;
+package org.applied_geodesy.transformation.datum;
 
-public enum ProjectionType {
-	LOCAL_CARTESIAN(0),
-	GAUSS_KRUEGER(1),
-	UTM(2),
-	LOCAL_ELLIPSOIDAL(3),
-	;
-
-	private int id;
-	private ProjectionType(int id) {
-		this.id = id;
+public class SphericalDeflectionParameter {
+	private double rx = 0;
+	private double ry = 0;
+	private double h0 = 0;
+	
+	public double getSphericalDeflectionX() {
+		return this.rx;
 	}
-
-	public final int getId() {
-		return id;
+	
+	public double getSphericalDeflectionY() {
+		return this.ry;
 	}
-
-	public static ProjectionType getEnumByValue(int value) {
-		for(ProjectionType element : ProjectionType.values()) {
-			if(element.id == value)
-				return element;
-		}
-		return LOCAL_CARTESIAN;
-	}  
+	
+	public double getFrameIntersectionHeight() {
+		return this.h0;
+	}
+	
+	public void setSphericalDeflectionParameter(double rx, double ry, double h0) {
+		this.rx = rx;
+		this.ry = ry;
+		this.h0 = h0;
+	}
 }

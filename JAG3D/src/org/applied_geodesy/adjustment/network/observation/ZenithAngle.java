@@ -23,6 +23,7 @@ package org.applied_geodesy.adjustment.network.observation;
 
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.network.ObservationType;
+import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.network.parameter.AdditionalUnknownParameter;
@@ -61,12 +62,13 @@ public class ZenithAngle extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
-		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
-		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
-		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
-		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
+			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+
+			rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+		}
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -108,12 +110,13 @@ public class ZenithAngle extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
-		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
-		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
-		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
-		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
+			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+
+			rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+		}
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -155,12 +158,13 @@ public class ZenithAngle extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
-		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
-		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
-		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
-		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
+			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+
+			rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+		}
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -202,12 +206,13 @@ public class ZenithAngle extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
-		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
-		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
-		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
-		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
+			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+
+			rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+		}
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -249,12 +254,13 @@ public class ZenithAngle extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
-		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
-		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
-		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
-		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
+			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+
+			rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+		}
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -299,12 +305,13 @@ public class ZenithAngle extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
-		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
-		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
-		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
-		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
+			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+
+			rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+		}
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -349,12 +356,13 @@ public class ZenithAngle extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
-		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
-		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
-		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
-		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
+			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+
+			rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+		}
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -399,12 +407,13 @@ public class ZenithAngle extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 		
-		SphericalDeflectionParameters sphericalDeflectionParameters = this.getSphericalDeflectionParameters();
-		rxs += sphericalDeflectionParameters.getStartPointSphericalDeflectionX();
-		rys += sphericalDeflectionParameters.getStartPointSphericalDeflectionY();
-		
-		rxe += sphericalDeflectionParameters.getEndPointSphericalDeflectionX();
-		rye += sphericalDeflectionParameters.getEndPointSphericalDeflectionY();
+		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
+			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+
+			rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
+			rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
+		}
 		
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);

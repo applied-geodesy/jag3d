@@ -48,7 +48,7 @@ public class ZenithAngleGroup extends ObservationGroup {
 	public double getStdB(Observation observation) {
 		double dist = observation.getDistanceForUncertaintyModel();
 		if (dist < Constant.EPS)
-			dist = observation.getCalculatedAprioriDistance3D();
+			dist = observation.getApproximatedCalculatedDistance3D();
 		return dist > 0 ? this.getStdB()/Math.sqrt(dist) : 0.0;
 	}
 	
@@ -56,7 +56,7 @@ public class ZenithAngleGroup extends ObservationGroup {
 	public double getStdC(Observation observation) {
 		double dist = observation.getDistanceForUncertaintyModel();
 		if (dist < Constant.EPS)
-			dist = observation.getCalculatedAprioriDistance3D();
+			dist = observation.getApproximatedCalculatedDistance3D();
 		return dist > 0 ? this.getStdC()/dist : 0.0;
 	}
  

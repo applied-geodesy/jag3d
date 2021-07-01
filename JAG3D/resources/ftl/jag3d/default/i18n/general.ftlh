@@ -4,7 +4,7 @@
 			<dt>JAG3D Version</dt><dd>v${version?string["#"]}</dd>
 			<dt>Name of Project</dt><dd>${project_name}</dd>
 			<dt>Project Id</dt><dd>${project_project_id}</dd>
-			<dt>customer Id</dt><dd>${project_customer_id}</dd>
+			<dt>Customer Id</dt><dd>${project_customer_id}</dd>
 			<dt>Person in Charge</dt><dd>${project_operator}</dd>
 			<dt>Date of Calculation</dt><dd>${project_date?date?string("dd.MM.yyyy")}</dd>
 			
@@ -56,8 +56,8 @@
 			<#if projection_type??>
 				<dt>Coordinate frame</dt>
 				<dd>
-					<#if projection_type == 'LOCAL_SPHERICAL'>
-						Local spherical Earth model using Cartesian coordinates
+					<#if projection_type == 'LOCAL_ELLIPSOIDAL'>
+						Local ellipsoidal Earth model using Cartesian coordinates
 					<#elseif projection_type == 'GAUSS_KRUEGER'>
 						Gau&szlig;-Kr&uuml;ger projection
 					<#elseif projection_type == 'UTM'>
@@ -67,11 +67,13 @@
 					</#if>
 						
 					<ul>
-						<#if (reduction_earth_curvature?? && reduction_earth_curvature || reduction_height?? && reduction_height || reduction_distance?? && reduction_distance || reduction_direction?? && reduction_direction || projection_type == 'LOCAL_SPHERICAL') && projection_earth_radius??><li>Earth radius: R<sub>0</sub> = ${projection_earth_radius?string[df_length]} ${unit_abbr_length}</li></#if>
-						<#if (reduction_height?? && reduction_height || projection_type == 'LOCAL_SPHERICAL') && projection_reference_height??><li>Reference height: h<sub>0</sub> = ${projection_reference_height?string[df_length]} ${unit_abbr_length}</li></#if>
+						<#if (projection_type != 'LOCAL_ELLIPSOIDAL' && reduction_earth_curvature?? && reduction_earth_curvature || reduction_height?? && reduction_height || reduction_distance?? && reduction_distance || reduction_direction?? && reduction_direction) && projection_earth_radius??><li>Earth radius: R<sub>0</sub> = ${projection_earth_radius?string[df_length]} ${unit_abbr_length}</li></#if>
+						<#if (reduction_height?? && reduction_height && projection_type != 'LOCAL_ELLIPSOIDAL') && projection_reference_height??><li>Reference height: h<sub>0</sub> = ${projection_reference_height?string[df_length]} ${unit_abbr_length}</li></#if>
 						
-						<#if projection_type == 'LOCAL_SPHERICAL'>
-							<#if projection_pivot_x0?? && projection_pivot_y0?? && projection_pivot_z0??><li>Pivot point: Y<sub>0</sub> = ${projection_pivot_y0?string[df_length]} ${unit_abbr_length}, X<sub>0</sub> = ${projection_pivot_x0?string[df_length]} ${unit_abbr_length}, Z<sub>0</sub> = ${projection_pivot_z0?string[df_length]} ${unit_abbr_length}</li></#if>
+						<#if projection_type == 'LOCAL_ELLIPSOIDAL'>
+							<#if projection_principal_point_x0?? && projection_principal_point_y0?? && projection_principal_point_z0??><li>Local principal point: y<sub>0</sub> = ${projection_principal_point_y0?string[df_length]} ${unit_abbr_length}, x<sub>0</sub> = ${projection_principal_point_x0?string[df_length]} ${unit_abbr_length}, z<sub>0</sub> = ${projection_principal_point_z0?string[df_length]} ${unit_abbr_length}</li></#if>
+							<#if projection_reference_latitude?? && projection_reference_longitude?? && projection_reference_height??><li>Global principal point: &phi;<sub>0</sub> = ${projection_reference_latitude?string[df_angle]} ${unit_abbr_angle}, &lambda;<sub>0</sub> = ${projection_reference_longitude?string[df_angle]} ${unit_abbr_angle}, h<sub>0</sub> = ${projection_reference_height?string[df_length]} ${unit_abbr_length}</li></#if>
+							<#if projection_major_axis?? && projection_minor_axis??><li>Reference ellipsoid: a = ${projection_major_axis?string[df_length]} ${unit_abbr_length}, b = ${projection_minor_axis?string[df_length]} ${unit_abbr_length}</li></#if>
 						</#if>
 
 						<#if reduction_distance?? && reduction_distance && (projection_type == 'GAUSS_KRUEGER' || projection_type == 'UTM')><li>Distance reduction</li></#if>

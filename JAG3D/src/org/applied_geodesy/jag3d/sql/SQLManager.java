@@ -111,6 +111,7 @@ import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.jag3d.ui.tree.VerticalDeflectionTreeItemValue;
+import org.applied_geodesy.transformation.datum.Ellipsoid;
 import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.FormatterOptions;
@@ -3794,20 +3795,26 @@ public class SQLManager {
 			return;
 		
 		String sql = "MERGE INTO \"ReductionDefinition\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
-				+ ") AS \"vals\" (\"id\", \"projection_type\", \"reference_height\", \"earth_radius\", \"x0\", \"y0\", \"z0\") ON \"ReductionDefinition\".\"id\" = \"vals\".\"id\" AND \"ReductionDefinition\".\"id\" = 1 "
+				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"id\", \"projection_type\", \"reference_latitude\", \"reference_longitude\", \"reference_height\", \"major_axis\", \"minor_axis\", \"x0\", \"y0\", \"z0\") ON \"ReductionDefinition\".\"id\" = \"vals\".\"id\" AND \"ReductionDefinition\".\"id\" = 1 "
 				+ "WHEN MATCHED THEN UPDATE SET "
-				+ "\"ReductionDefinition\".\"projection_type\"  = \"vals\".\"projection_type\", "
-				+ "\"ReductionDefinition\".\"reference_height\" = \"vals\".\"reference_height\", "
-				+ "\"ReductionDefinition\".\"earth_radius\"     = \"vals\".\"earth_radius\", "
-				+ "\"ReductionDefinition\".\"x0\"               = \"vals\".\"x0\", "
-				+ "\"ReductionDefinition\".\"y0\"               = \"vals\".\"y0\", "
-				+ "\"ReductionDefinition\".\"z0\"               = \"vals\".\"z0\"  "
+				+ "\"ReductionDefinition\".\"projection_type\"     = \"vals\".\"projection_type\", "
+				+ "\"ReductionDefinition\".\"reference_latitude\"  = \"vals\".\"reference_latitude\", "
+				+ "\"ReductionDefinition\".\"reference_longitude\" = \"vals\".\"reference_longitude\", "
+				+ "\"ReductionDefinition\".\"reference_height\"    = \"vals\".\"reference_height\", "
+				+ "\"ReductionDefinition\".\"major_axis\"          = \"vals\".\"major_axis\", "
+				+ "\"ReductionDefinition\".\"minor_axis\"          = \"vals\".\"minor_axis\", "
+				+ "\"ReductionDefinition\".\"x0\"                  = \"vals\".\"x0\", "
+				+ "\"ReductionDefinition\".\"y0\"                  = \"vals\".\"y0\", "
+				+ "\"ReductionDefinition\".\"z0\"                  = \"vals\".\"z0\"  "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"projection_type\", "
+				+ "\"vals\".\"reference_latitude\", "
+				+ "\"vals\".\"reference_longitude\", "
 				+ "\"vals\".\"reference_height\", "
-				+ "\"vals\".\"earth_radius\", "
+				+ "\"vals\".\"major_axis\", "
+				+ "\"vals\".\"minor_axis\", "
 				+ "\"vals\".\"x0\", "
 				+ "\"vals\".\"y0\", "
 				+ "\"vals\".\"z0\" ";
@@ -3818,11 +3825,14 @@ public class SQLManager {
 		stmt.setInt(idx++, 1);
 		
 		stmt.setInt(idx++, reduction.getProjectionType().getId());
-		stmt.setDouble(idx++, reduction.getReferenceHeight());
-		stmt.setDouble(idx++, reduction.getEarthRadius());
-		stmt.setDouble(idx++, reduction.getPivotPoint().getX0());
-		stmt.setDouble(idx++, reduction.getPivotPoint().getY0());
-		stmt.setDouble(idx++, reduction.getPivotPoint().getZ0());
+		stmt.setDouble(idx++, reduction.getPrincipalPoint().getLatitude());
+		stmt.setDouble(idx++, reduction.getPrincipalPoint().getLongitude());
+		stmt.setDouble(idx++, reduction.getPrincipalPoint().getHeight());
+		stmt.setDouble(idx++, reduction.getEllipsoid().getMajorAxis());
+		stmt.setDouble(idx++, reduction.getEllipsoid().getMinorAxis());
+		stmt.setDouble(idx++, reduction.getPrincipalPoint().getX());
+		stmt.setDouble(idx++, reduction.getPrincipalPoint().getY());
+		stmt.setDouble(idx++, reduction.getPrincipalPoint().getZ());
 		stmt.execute();
 
 		this.clearReductionTasks();
@@ -3914,7 +3924,10 @@ public class SQLManager {
 	public void load(Reduction reductions) throws SQLException {
 		if (this.hasDatabase() && this.dataBase.isOpen()) {
 			String sql = "SELECT "
-					+ "\"projection_type\", \"reference_height\", \"earth_radius\", \"x0\", \"y0\", \"z0\", \"type\" AS \"task_type\" "
+					+ "\"projection_type\", "
+					+ "\"reference_latitude\", \"reference_longitude\", \"reference_height\", "
+					+ "\"major_axis\", \"minor_axis\", "
+					+ "\"x0\", \"y0\", \"z0\", \"type\" AS \"task_type\" "
 					+ "FROM \"ReductionTask\" "
 					+ "RIGHT JOIN \"ReductionDefinition\" "
 					+ "ON \"ReductionTask\".\"reduction_id\" = \"ReductionDefinition\".\"id\" "
@@ -3928,19 +3941,19 @@ public class SQLManager {
 				boolean hasTaskType = !rs.wasNull();
 				
 				ProjectionType projectionType = ProjectionType.getEnumByValue(rs.getInt("projection_type"));
+				double referenceLatitude      = rs.getDouble("reference_latitude");
+				double referenceLongitude     = rs.getDouble("reference_longitude");
 				double referenceHeight        = rs.getDouble("reference_height");
-				double earthRadius            = rs.getDouble("earth_radius");
+				double majorAxis              = rs.getDouble("major_axis");
+				double minorAxis              = rs.getDouble("minor_axis");
 				double x0                     = rs.getDouble("x0");
 				double y0                     = rs.getDouble("y0");
 				double z0                     = rs.getDouble("z0");
 
 				reductions.setProjectionType(projectionType);
-				reductions.setReferenceHeight(referenceHeight);
-				reductions.setEarthRadius(earthRadius);
-				reductions.getPivotPoint().setX0(x0);
-				reductions.getPivotPoint().setY0(y0);
-				reductions.getPivotPoint().setZ0(z0);
-	
+				reductions.setEllipsoid(Ellipsoid.createEllipsoidFromMinorAxis(majorAxis, minorAxis));
+				reductions.getPrincipalPoint().setCoordinates(x0, y0, z0, referenceLatitude, referenceLongitude, referenceHeight);
+
 				if (hasTaskType) {
 					ReductionTaskType taskType = ReductionTaskType.getEnumByValue(taskTypeId);
 					reductions.addReductionTaskType(taskType);	

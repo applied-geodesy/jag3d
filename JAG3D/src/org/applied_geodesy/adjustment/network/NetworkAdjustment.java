@@ -79,6 +79,7 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameters;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.adjustment.statistic.UnadjustedTestStatitic;
+import org.applied_geodesy.transformation.datum.SphericalDeflectionModel;
 
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.DenseVector;
@@ -101,7 +102,8 @@ public class NetworkAdjustment implements Runnable {
 	private static double SQRT_EPS = Math.sqrt(Constant.EPS);
 	private EstimationType estimationType = EstimationType.L2NORM;
 	private UpperSymmPackMatrix Qxx = null;
-
+	private SphericalDeflectionModel sphericalDeflectionModel = null;
+	
 	private int maximalNumberOfIterations        = DefaultValue.getMaximalNumberOfIterations(),
 				iterationStep                    = 0,
 				numberOfStochasticPointRows      = 0,
@@ -1642,13 +1644,13 @@ public class NetworkAdjustment implements Runnable {
 				int col = deflectionX.getColInJacobiMatrix();
 				double qll = deflectionX.getStdApriori() * deflectionX.getStdApriori();
 				n.set(col, n.get(col) + (deflectionX.getValue0()-deflectionX.getValue())/qll);
-				N.set(col, col, N.get(col, col++) + 1.0/qll);
+				N.set(col, col, N.get(col, col) + 1.0/qll);
 				
 				VerticalDeflection deflectionY = point.getVerticalDeflectionY();
 				col = deflectionY.getColInJacobiMatrix();
 				qll = deflectionY.getStdApriori() * deflectionY.getStdApriori();
 				n.set(col, n.get(col) + (deflectionY.getValue0()-deflectionY.getValue())/qll);
-				N.set(col, col, N.get(col, col++) + 1.0/qll);
+				N.set(col, col, N.get(col, col) + 1.0/qll);
 			}
 		}
 		
@@ -2127,10 +2129,11 @@ public class NetworkAdjustment implements Runnable {
 					this.numberOfHypotesis = 0;
 					this.iterationStep = this.maximalNumberOfIterations-runs;
 					this.currentEstimationStatus = EstimationStateType.ITERATE;
-					//if (!applyUnscentedTransformation)
-						this.change.firePropertyChange(this.currentEstimationStatus.name(), this.maximalNumberOfIterations, this.iterationStep);
 
-					// erzeuge Normalgleichung		
+					this.change.firePropertyChange(this.currentEstimationStatus.name(), this.maximalNumberOfIterations, this.iterationStep);
+
+					// erzeuge Normalgleichung
+					this.applySphericalVerticalDeflections();
 					NormalEquationSystem neq = this.createNormalEquation();
 					this.resetVarianceComponents();
 
@@ -5293,6 +5296,18 @@ public class NetworkAdjustment implements Runnable {
 		} finally {
 			this.Qxx = null;
 		}
+	}
+	
+	private void applySphericalVerticalDeflections() {
+		if (this.sphericalDeflectionModel != null) {
+			for (Point point : this.allPoints.values()) {
+				this.sphericalDeflectionModel.setSphericalDeflections(point);
+			}
+		}
+	}
+	
+	public void setSphericalDeflectionModel(SphericalDeflectionModel sphericalDeflectionModel) {
+		this.sphericalDeflectionModel = sphericalDeflectionModel;
 	}
 	
 	public boolean hasCovarianceExportPathAndBaseName() {
