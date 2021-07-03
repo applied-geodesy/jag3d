@@ -16,3 +16,12 @@ JAG3D is written in the platform-independent programming language Java and, ther
 Support and Installation
 ------------------------
 JAG3D is a portable least-squares software package - no need to install or uninstall. Just [download the latest version](https://github.com/applied-geodesy/jag3d/releases/latest), unpack and run. The JAG3D manual is organized by a [Wiki](https://software.applied-geodesy.org/wiki/). Training videos are compiled in a [playlist](https://www.youtube.com/playlist?list=PLyOqiH7SWWC94Zmi5TVT7ClDqQWNrjbJ1). Moreover, a [support forum](https://software.applied-geodesy.org/forum/) is available for technical support. 
+
+
+Evaluation of Compatibility among Network Adjustment Software
+-------------------------------------------------------------
+Colleagues from Conservatoire National des Arts et Métiers (CNAM), European Organization for Nuclear Research (CERN), and School of Management and Engineering Vaud (HEIG-VD) evaluated the compatibility among network adjustment software packages. A detailed description of the procedure is published in Journal of Surveying Engineering, cf. DOI: [10.1061/(ASCE)SU.1943-5428.0000304](https://doi.org/10.1061/(ASCE)SU.1943-5428.0000304). The authors compare the results of 17 networks using software packages developed by the authors' institutions, namely Compensation de Mesures Topographiques (CoMeT), Logiciel Général de Compensation (LGC), and Trinet+. The networks differ mainly in their extent. Whereas the smallest network is about 50 m, the largest network under consideration is about 40 km.
+
+Moreover, the authors kindly ask developers of least-squares adjustment applications to readjust these 17 networks and to provide the adjustment results. Up to now, the adjustment results of eight different software packages are available. A short summery of the individual characteristics of the used software packages as well as an interactive graphic of the results can be found on the official [CNAM website](http://comet.esgt.cnam.fr/index.php?page=0800). 
+
+It is a very important initiative to ensure the quality of adjustment packages. For that reason, the results obtained by JAG3D are available. The largest network extent is about 40 km, and the curvature of the Earth can no longer be neglected. The results obtained by JAG3D differ by about 20 µm for the horizontal and the vertical component w.r.t. the designed values. JAG3D offers comparable results to reputable software packages.
