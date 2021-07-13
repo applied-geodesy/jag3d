@@ -449,13 +449,15 @@ public class FormatterOptions {
 	public String toViewFormat(CellValueType type, double d, boolean displayUnit) {
 		Unit unit = this.formatterOptions.get(type).getUnit();
 		if (unit.getType() == UnitType.DEGREE_SEXAGESIMAL) {
-			double dms[] = this.toSexagesimalDegree(d);
+			double sigdms[] = this.toSexagesimalDegree(d);
 			
-			int degrees    = (int)dms[0];
-			int minutes    = (int)dms[1];
-			double seconds = dms[2]; 
-			
-			return String.format(Locale.ENGLISH, "%d \u00B7 %02d \u00B7 %s %s",
+			double sign    = sigdms[0];
+			int degrees    = (int)sigdms[1];
+			int minutes    = (int)sigdms[2];
+			double seconds = sigdms[3]; 
+	
+			return String.format(Locale.ENGLISH, "%s%d \u00B7 %02d \u00B7 %s %s",
+					sign < 0 ? "-":"",
 					degrees,
 					minutes,
 					this.formatterOptions.get(type).getFormatter().format(100+seconds).substring(1), // add 100 to get a leading zero (removed by substring)
@@ -486,7 +488,8 @@ public class FormatterOptions {
         }
 		
 		return new double[] {
-				sign * degrees,
+				sign,
+				degrees,
 				minutes,
 				seconds
 		};
