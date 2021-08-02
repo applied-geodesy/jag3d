@@ -2,7 +2,7 @@
 		<h2>Summary</h2>
 		<dl>
 			<dt>JUniForm Version</dt><dd>v${version?string["#"]}</dd>
-			<dt>Date of Calculation</dt><dd>${report_date?date?string("dd.MM.yyyy")}</dd>
+			<dt>Date of Calculation</dt><dd>${report_creation_date?date?string("dd.MM.yyyy")}</dd>
 
 			<dt>Geometric primitives</dt>
 			<dd>
