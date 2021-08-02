@@ -29,7 +29,7 @@ public class Version {
 	private final static Map<VersionType, Integer> versions = Map.of(
 			VersionType.ADJUSTMENT_CORE,   20210701,
 			VersionType.DATABASE,          20210629,
-			VersionType.USER_INTERFACE,    20210701
+			VersionType.USER_INTERFACE,    20210802
 	);
 	
 	private Version() {}
