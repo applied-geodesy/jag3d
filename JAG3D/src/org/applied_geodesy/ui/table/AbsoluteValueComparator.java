@@ -35,7 +35,7 @@ public class AbsoluteValueComparator implements Comparator<Double> {
 			return +1;
 		else if (Math.abs(val1.doubleValue()) < Math.abs(val2.doubleValue()))
 			return -1;
-		else if(Math.abs(val1.doubleValue()) > Math.abs(val2.doubleValue()))
+		else if (Math.abs(val1.doubleValue()) > Math.abs(val2.doubleValue()))
 			return +1;
 		else
 			return  0;

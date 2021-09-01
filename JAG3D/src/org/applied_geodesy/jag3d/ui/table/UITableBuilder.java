@@ -311,7 +311,7 @@ public abstract class UITableBuilder<T> {
 					if (event.getTarget() instanceof TableCell && table.getItems() != null && ((TableCell<?, ?>)event.getTarget()).getIndex() >= table.getItems().size()) {
 						table.getSelectionModel().clearAndSelect(table.getItems().size() - 1);
 					}
-					else if (table.getItems() != null && table.getItems().size() == table.getSelectionModel().getSelectedIndex() + 1) {
+					else if (event.getTarget() instanceof TableCell && table.getItems() != null && table.getItems().size() == table.getSelectionModel().getSelectedIndex() + 1) {
 						table.getItems().add(getEmptyRow());
 						//						table.scrollTo(emptyRow);
 						//						table.getSelectionModel().clearAndSelect(table.getItems().size() - 1);

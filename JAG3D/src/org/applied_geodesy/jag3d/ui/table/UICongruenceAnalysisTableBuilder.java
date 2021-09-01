@@ -48,6 +48,7 @@ import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.ui.table.AbsoluteValueComparator;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
+import org.applied_geodesy.ui.table.NaturalOrderComparator;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.application.Platform;
@@ -140,6 +141,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		columnContentType = ColumnContentType.START_POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::nameInReferenceEpochProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true); 
+		stringColumn.setComparator(new NaturalOrderComparator<String>());
 		table.getColumns().add(stringColumn);
 
 		// POINT-ID CONTR
@@ -150,6 +152,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		columnContentType = ColumnContentType.END_POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, CongruenceAnalysisRow::nameInControlEpochProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true);
+		stringColumn.setComparator(new NaturalOrderComparator<String>());
 		table.getColumns().add(stringColumn);
 
 		///////////////// A-POSTERIORI VALUES /////////////////////////////

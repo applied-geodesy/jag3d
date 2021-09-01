@@ -49,6 +49,7 @@ import org.applied_geodesy.jag3d.ui.tree.VerticalDeflectionTreeItemValue;
 import org.applied_geodesy.ui.table.AbsoluteValueComparator;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
+import org.applied_geodesy.ui.table.NaturalOrderComparator;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.application.Platform;
@@ -150,6 +151,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		columnContentType = ColumnContentType.POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true); 
+		stringColumn.setComparator(new NaturalOrderComparator<String>());
 		table.getColumns().add(stringColumn);
 		
 		// A-priori Deflection params

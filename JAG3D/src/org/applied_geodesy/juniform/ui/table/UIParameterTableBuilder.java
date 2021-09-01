@@ -34,6 +34,7 @@ import org.applied_geodesy.juniform.ui.dialog.UnknownParameterTypeDialog;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
 import org.applied_geodesy.ui.table.DisplayCellFormatType;
+import org.applied_geodesy.ui.table.NaturalOrderComparator;
 import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.ObservableUniqueList;
 
@@ -102,6 +103,7 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		String tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.name.tooltip", "Name of the model parameter");
 		ColumnTooltipHeader header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(header, UnknownParameter::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
+		stringColumn.setComparator(new NaturalOrderComparator<String>());
 		table.getColumns().add(stringColumn);
 		
 		// Parameter type
@@ -110,6 +112,7 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.type.tooltip", "Type of the model parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		parameterTypeColumn = this.<ParameterType>getColumn(header, UnknownParameter::parameterTypeProperty, getParameterTypeCallback(), ColumnType.VISIBLE, columnIndex, false); 
+		parameterTypeColumn.setComparator(new NaturalOrderComparator<ParameterType>());
 		table.getColumns().add(parameterTypeColumn);
 			
 		///////////////// A-POSTERIORI VALUES /////////////////////////////
@@ -135,6 +138,7 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.description.tooltip", "User-defined description of the parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText); 
 		stringColumn = this.<String>getColumn(header, UnknownParameter::descriptionProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
+		stringColumn.setComparator(new NaturalOrderComparator<String>());
 		table.getColumns().add(stringColumn);
 		
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
