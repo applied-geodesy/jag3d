@@ -36,6 +36,7 @@ import org.applied_geodesy.juniform.ui.dialog.MatrixDialog;
 import org.applied_geodesy.ui.table.AbsoluteValueComparator;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
+import org.applied_geodesy.ui.table.NaturalOrderComparator;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.application.Platform;
@@ -122,6 +123,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 		cellValueType = CellValueType.STRING;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(header, FeaturePoint::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
+		stringColumn.setComparator(new NaturalOrderComparator<String>());
 		table.getColumns().add(stringColumn);
 
 		// A-priori Components

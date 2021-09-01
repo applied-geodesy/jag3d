@@ -49,6 +49,7 @@ import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.ui.table.AbsoluteValueComparator;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
+import org.applied_geodesy.ui.table.NaturalOrderComparator;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.application.Platform;
@@ -210,6 +211,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		columnContentType = ColumnContentType.POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, PointRow::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true); 
+		stringColumn.setComparator(new NaturalOrderComparator<String>());
 		table.getColumns().add(stringColumn);
 
 		// Code
@@ -220,6 +222,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		columnContentType = ColumnContentType.CODE;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, PointRow::codeProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true); 
+		stringColumn.setComparator(new NaturalOrderComparator<String>());
 		table.getColumns().add(stringColumn);
 
 		// A-priori Components

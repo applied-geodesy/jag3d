@@ -49,6 +49,7 @@ import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.ui.table.AbsoluteValueComparator;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
+import org.applied_geodesy.ui.table.NaturalOrderComparator;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.application.Platform;
@@ -148,6 +149,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		columnContentType = ColumnContentType.START_POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, GNSSObservationRow::startPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true); 
+		stringColumn.setComparator(new NaturalOrderComparator<String>());
 		table.getColumns().add(stringColumn);
 
 		// Target-ID
@@ -158,6 +160,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		columnContentType = ColumnContentType.END_POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, GNSSObservationRow::endPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true);
+		stringColumn.setComparator(new NaturalOrderComparator<String>());
 		table.getColumns().add(stringColumn);
 		
 		
