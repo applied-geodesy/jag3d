@@ -133,7 +133,8 @@ public abstract class Observation {
     			   Pprio           =  0.0,
     			   Ppost     	   =  0.0,
     			   omega           =  0.0,
-    			   grzw			   =  0.0,
+    			   mdb			   =  0.0,
+    			   mtb			   =  0.0,
     			   ep              =  0.0,
     			   ef              =  0.0;
 			
@@ -565,11 +566,19 @@ public abstract class Observation {
 	}
 
 	public double getMinimalDetectableBias() {
-		return this.grzw;
+		return this.mdb;
 	}
 
-	public void setMinimalDetectableBias(double grzw) {
-		this.grzw = grzw;
+	public void setMinimalDetectableBias(double mdb) {
+		this.mdb = mdb;
+	}
+	
+	public double getMaximumTolerableBias() {
+		return this.mtb;
+	}
+	
+	public void setMaximumTolerableBias(double mtb) {
+		this.mtb = mtb;
 	}
 
 	public abstract ObservationType getObservationType();

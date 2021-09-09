@@ -251,6 +251,20 @@ class SQLDatabase {
 		sqls.put(20210513.0010, "UPDATE \"ReductionDefinition\" SET \"major_axis\" = \"earth_radius\", \"minor_axis\" = \"earth_radius\" WHERE \"id\" = 1;\r\n");
 		sqls.put(20210513.0011, "ALTER TABLE \"ReductionDefinition\" DROP COLUMN \"earth_radius\"\r\n");
 		
+		// add maximum tolerable bias
+		sqls.put(20210629.0001, "ALTER TABLE \"ObservationAposteriori\" ADD \"maximum_tolerable_bias\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+		
+		sqls.put(20210629.0011, "ALTER TABLE \"GNSSObservationAposteriori\" ADD \"maximum_tolerable_bias_x\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+		sqls.put(20210629.0012, "ALTER TABLE \"GNSSObservationAposteriori\" ADD \"maximum_tolerable_bias_y\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+		sqls.put(20210629.0013, "ALTER TABLE \"GNSSObservationAposteriori\" ADD \"maximum_tolerable_bias_z\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+		
+		sqls.put(20210629.0021, "ALTER TABLE \"PointAposteriori\" ADD \"maximum_tolerable_bias_x\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+		sqls.put(20210629.0022, "ALTER TABLE \"PointAposteriori\" ADD \"maximum_tolerable_bias_y\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+		sqls.put(20210629.0023, "ALTER TABLE \"PointAposteriori\" ADD \"maximum_tolerable_bias_z\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+		
+		sqls.put(20210629.0031, "ALTER TABLE \"VerticalDeflectionAposteriori\" ADD \"maximum_tolerable_bias_x\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+		sqls.put(20210629.0032, "ALTER TABLE \"VerticalDeflectionAposteriori\" ADD \"maximum_tolerable_bias_y\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+
 		return sqls;
 	}
 }
