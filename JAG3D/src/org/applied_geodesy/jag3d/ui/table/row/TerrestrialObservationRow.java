@@ -46,7 +46,8 @@ public class TerrestrialObservationRow extends ObservationRow {
 	private ObjectProperty<Double> grossError                   = new SimpleObjectProperty<Double>(this, "grossError");
 	private ObjectProperty<Double> influenceOnPointPosition     = new SimpleObjectProperty<Double>(this, "influenceOnPointPosition"); 
 	private ObjectProperty<Double> minimalDetectableBias        = new SimpleObjectProperty<Double>(this, "minimalDetectableBias");
-
+	private ObjectProperty<Double> maximumTolerableBias         = new SimpleObjectProperty<Double>(this, "maximumTolerableBias");
+	
 	public ObjectProperty<Double> valueAprioriProperty() {
 		return this.valueApriori;
 	}
@@ -190,7 +191,19 @@ public class TerrestrialObservationRow extends ObservationRow {
 	public void setMinimalDetectableBias(final Double minimalDetectableBias) {
 		this.minimalDetectableBiasProperty().set(minimalDetectableBias);
 	}
+	
+	public ObjectProperty<Double> maximumTolerableBiasProperty() {
+		return this.maximumTolerableBias;
+	}
 
+	public Double getMaximumTolerableBias() {
+		return this.maximumTolerableBiasProperty().get();
+	}
+
+	public void setMaximumTolerableBias(final Double maximumTolerableBias) {
+		this.maximumTolerableBiasProperty().set(maximumTolerableBias);
+	}
+	
 	public static TerrestrialObservationRow cloneRowApriori(TerrestrialObservationRow row) {
 		TerrestrialObservationRow clone = new TerrestrialObservationRow();
 
