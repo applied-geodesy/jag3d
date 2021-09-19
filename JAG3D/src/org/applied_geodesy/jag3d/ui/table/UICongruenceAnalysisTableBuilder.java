@@ -325,7 +325,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		// MDB
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.y.label", "\u2207y(\u03B1,\u03B2)");
+		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.y.label", "\u2207y(\u03BB)");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.y.tooltip", "Minimal detectable bias in y");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_Y;
@@ -336,7 +336,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.x.label", "\u2207x(\u03B1,\u03B2)");
+		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.x.label", "\u2207x(\u03BB)");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.x.tooltip", "Minimal detectable bias in x");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_X;
@@ -347,7 +347,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.z.label", "\u2207z(\u03B1,\u03B2)");
+		labelText   = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.z.label", "\u2207z(\u03BB)");
 		tooltipText = i18n.getString("UICongruenceAnalysisTableBuilder.tableheader.minimaldetectablebias.z.tooltip", "Minimal detectable bias in z");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_Z;

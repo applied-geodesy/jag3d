@@ -48,12 +48,12 @@
 		</#if>
 
 		<#if group.dimension != 1>
-			<th><#outputformat "plainText">&nabla;<sub>Y</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
-			<th><#outputformat "plainText">&nabla;<sub>X</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+			<th><#outputformat "plainText">&nabla;<sub>Y</sub>(&lambda;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+			<th><#outputformat "plainText">&nabla;<sub>X</sub>(&lambda;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 		</#if>
 		
 		<#if group.dimension != 2>
-			<th><#outputformat "plainText">&nabla;<sub>Z</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+			<th><#outputformat "plainText">&nabla;<sub>Z</sub>(&lambda;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 		</#if>
 		
 		<th><#outputformat "plainText">log(p<sub>prio</sub>)</#outputformat></th>

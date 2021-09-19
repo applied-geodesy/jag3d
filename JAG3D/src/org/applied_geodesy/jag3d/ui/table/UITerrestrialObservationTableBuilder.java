@@ -484,9 +484,20 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
 
+			// Maximum tolerable bias
+			columnIndex = table.getColumns().size(); 
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.maximumtolerablebias.label", "\u2207(1)");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.maximumtolerablebias.tooltip", "Maximum tolerable bias");
+			cellValueType = CellValueType.LENGTH_RESIDUAL;
+			columnContentType = ColumnContentType.MAXIMUM_TOLERABLE_BIAS;
+			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::maximumTolerableBiasProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
+			doubleColumn.setComparator(new AbsoluteValueComparator());
+			table.getColumns().add(doubleColumn);
+			
 			// Minimal detectable bias
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.minimaldetectablebias.label", "\u2207(\u03b1,\u03b2)");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.minimaldetectablebias.label", "\u2207(\u03BB)");
 			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.minimaldetectablebias.tooltip", "Minimal detectable bias");
 			cellValueType = CellValueType.LENGTH_RESIDUAL;
 			columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS;
@@ -519,10 +530,21 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::grossErrorProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
 			doubleColumn.setComparator(new AbsoluteValueComparator());
 			table.getColumns().add(doubleColumn);
+			
+			// Maximum tolerable bias
+			columnIndex = table.getColumns().size(); 
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.maximumtolerablebias.label", "\u2207(1)");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.maximumtolerablebias.tooltip", "Maximum tolerable bias");
+			cellValueType = CellValueType.ANGLE_RESIDUAL;
+			columnContentType = ColumnContentType.MAXIMUM_TOLERABLE_BIAS;
+			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+			doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::maximumTolerableBiasProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_TERRESTRIAL_OBSERVATION, columnIndex, false, true);
+			doubleColumn.setComparator(new AbsoluteValueComparator());
+			table.getColumns().add(doubleColumn);
 
 			// Minimal detectable bias
 			columnIndex = table.getColumns().size(); 
-			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.minimaldetectablebias.label", "\u2207(\u03b1,\u03b2)");
+			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.minimaldetectablebias.label", "\u2207(\u03BB)");
 			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.minimaldetectablebias.tooltip", "Minimal detectable bias");
 			cellValueType = CellValueType.ANGLE_RESIDUAL;
 			columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS;

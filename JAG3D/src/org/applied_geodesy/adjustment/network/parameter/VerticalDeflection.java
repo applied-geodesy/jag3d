@@ -33,7 +33,7 @@ public abstract class VerticalDeflection extends UnknownParameter {
             	   sigma0          = -1.0,
             	   sigma           =  0.0,
             	   omega           =  0.0,
-            	   value0, value, nabla, grzw, confidence;
+            	   value0, value, nabla, mdb, mtb, confidence;
 
 	public VerticalDeflection(Point point) {
 		this(point, 0.0);
@@ -131,11 +131,19 @@ public abstract class VerticalDeflection extends UnknownParameter {
 	}
 
 	public double getMinimalDetectableBias() {
-		return grzw;
+		return mdb;
 	}
 
-	public void setMinimalDetectableBias(double grzw) {
-		this.grzw = grzw;
+	public void setMinimalDetectableBias(double mdb) {
+		this.mdb = mdb;
+	}
+	
+	public double getMaximumTolerableBias() {
+		return this.mtb;
+	}
+	
+	public void setMaximumTolerableBias(double mtb) {
+		this.mtb = mtb;
 	}
 
 	public double getConfidence() {

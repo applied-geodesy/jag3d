@@ -1695,7 +1695,9 @@ public class SQLManager {
 				"\"confidence_major_axis\", \"confidence_minor_axis\", " + 
 				"\"residual_y\", \"residual_x\", " +
 				"\"redundancy_y\", \"redundancy_x\", " +
-				"\"gross_error_y\", \"gross_error_x\", \"minimal_detectable_bias_y\", \"minimal_detectable_bias_x\", " + 
+				"\"gross_error_y\", \"gross_error_x\", " +
+				"\"minimal_detectable_bias_y\", \"minimal_detectable_bias_x\", " +
+				"\"maximum_tolerable_bias_y\", \"maximum_tolerable_bias_x\", " +
 				"\"omega\", \"significant\", " + 
 				"\"t_prio\", \"t_post\", \"p_prio\", \"p_post\" " + 
 				"FROM \"VerticalDeflectionApriori\" " + 
@@ -1786,7 +1788,13 @@ public class SQLManager {
 
 			value = rs.getDouble("minimal_detectable_bias_y");
 			row.setMinimalDetectableBiasY(rs.wasNull() ? null : value);
+			
+			// MTB
+			value = rs.getDouble("maximum_tolerable_bias_x");
+			row.setMaximumTolerableBiasX(rs.wasNull() ? null : value);
 
+			value = rs.getDouble("maximum_tolerable_bias_y");
+			row.setMaximumTolerableBiasY(rs.wasNull() ? null : value);
 
 			// Statistics
 			value = rs.getDouble("omega");
@@ -1855,7 +1863,7 @@ public class SQLManager {
 		List<TerrestrialObservationRow> tableModel = FXCollections.observableArrayList();
 		String sql = "SELECT " + 
 				"\"ObservationApriori\".\"id\", \"group_id\", \"start_point_name\", \"end_point_name\", \"instrument_height\", \"reflector_height\", \"value_0\", \"distance_0\", \"ObservationApriori\".\"sigma_0\" AS \"sigma_0\", \"enable\", " + 
-				"\"ObservationAposteriori\".\"value\", \"sigma\", \"residual\", \"redundancy\", \"gross_error\", \"influence_on_position\", \"influence_on_network_distortion\", \"minimal_detectable_bias\", \"omega\", \"t_prio\", \"t_post\", \"p_prio\", \"p_post\", \"significant\" " + 
+				"\"ObservationAposteriori\".\"value\", \"sigma\", \"residual\", \"redundancy\", \"gross_error\", \"influence_on_position\", \"influence_on_network_distortion\", \"minimal_detectable_bias\", \"maximum_tolerable_bias\", \"omega\", \"t_prio\", \"t_post\", \"p_prio\", \"p_post\", \"significant\" " + 
 				"FROM \"ObservationApriori\" " + 
 				"INNER JOIN \"ObservationGroup\" ON \"ObservationApriori\".\"group_id\" = \"ObservationGroup\".\"id\" " + 
 				"LEFT JOIN \"ObservationAposteriori\" ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" " + 
@@ -1930,6 +1938,10 @@ public class SQLManager {
 			if (!rs.wasNull())
 				row.setMinimalDetectableBias(value);
 
+			value = rs.getDouble("maximum_tolerable_bias");
+			if (!rs.wasNull())
+				row.setMaximumTolerableBias(value);
+			
 			value = rs.getDouble("omega");
 			if (!rs.wasNull())
 				row.setOmega(value);
@@ -1983,6 +1995,7 @@ public class SQLManager {
 				"\"redundancy_y\", \"redundancy_x\", \"redundancy_z\", " +
 				"\"gross_error_y\", \"gross_error_x\", \"gross_error_z\", " +
 				"\"minimal_detectable_bias_y\", \"minimal_detectable_bias_x\", \"minimal_detectable_bias_z\", " +
+				"\"maximum_tolerable_bias_y\", \"maximum_tolerable_bias_x\", \"maximum_tolerable_bias_z\", " +
 				"\"influence_on_position_y\", \"influence_on_position_x\", \"influence_on_position_z\", \"influence_on_network_distortion\", " + 
 				"\"omega\", \"p_prio\", \"p_post\", \"t_prio\", \"t_post\", \"significant\" " + 
 
@@ -2086,6 +2099,16 @@ public class SQLManager {
 
 			value = rs.getDouble("minimal_detectable_bias_z");
 			row.setMinimalDetectableBiasZ(rs.wasNull() ? null : value);
+			
+			// MTB
+			value = rs.getDouble("maximum_tolerable_bias_x");
+			row.setMaximumTolerableBiasX(rs.wasNull() ? null : value);
+
+			value = rs.getDouble("maximum_tolerable_bias_y");
+			row.setMaximumTolerableBiasY(rs.wasNull() ? null : value);
+
+			value = rs.getDouble("maximum_tolerable_bias_z");
+			row.setMaximumTolerableBiasZ(rs.wasNull() ? null : value);
 
 			// EP + EFSPmax
 			value = rs.getDouble("influence_on_position_x");
@@ -2176,7 +2199,10 @@ public class SQLManager {
 				"\"residual_y\", \"residual_x\", \"residual_z\", " + 
 				"\"redundancy_y\", \"redundancy_x\", \"redundancy_z\", " + 
 				"\"gross_error_y\", \"gross_error_x\", \"gross_error_z\", \"influence_on_position_y\", \"influence_on_position_x\", \"influence_on_position_z\", " + 
-				"\"influence_on_network_distortion\", \"minimal_detectable_bias_y\", \"minimal_detectable_bias_x\", \"minimal_detectable_bias_z\", \"first_principal_component_y\", \"first_principal_component_x\", \"first_principal_component_z\", " + 
+				"\"influence_on_network_distortion\", "+
+				"\"minimal_detectable_bias_y\", \"minimal_detectable_bias_x\", \"minimal_detectable_bias_z\", " +
+				"\"maximum_tolerable_bias_y\", \"maximum_tolerable_bias_x\", \"maximum_tolerable_bias_z\", " +
+				"\"first_principal_component_y\", \"first_principal_component_x\", \"first_principal_component_z\", " + 
 				"\"omega\", \"significant\", " + 
 				"\"t_prio\", \"t_post\", \"p_prio\", \"p_post\", " + 
 				// Part: group
@@ -2309,6 +2335,16 @@ public class SQLManager {
 
 			value = rs.getDouble("minimal_detectable_bias_z");
 			row.setMinimalDetectableBiasZ(rs.wasNull() ? null : value);
+			
+			// MTB
+			value = rs.getDouble("maximum_tolerable_bias_x");
+			row.setMaximumTolerableBiasX(rs.wasNull() ? null : value);
+
+			value = rs.getDouble("maximum_tolerable_bias_y");
+			row.setMaximumTolerableBiasY(rs.wasNull() ? null : value);
+
+			value = rs.getDouble("maximum_tolerable_bias_z");
+			row.setMaximumTolerableBiasZ(rs.wasNull() ? null : value);			
 
 			// PCA
 			value = rs.getDouble("first_principal_component_x");

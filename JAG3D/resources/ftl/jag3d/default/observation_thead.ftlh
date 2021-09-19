@@ -104,11 +104,19 @@
 			<th><#outputformat "plainText">EP&middot;SP<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			
 			<#if group.type == "GNSS2D" || group.type == "GNSS3D">
-				<th><#outputformat "plainText">&nabla;(&alpha;,&beta;)<sub>Y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
-				<th><#outputformat "plainText">&nabla;(&alpha;,&beta;)<sub>X</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&nabla;(1)<sub>Y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&nabla;(1)<sub>X</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			</#if>
 			<#if group.type == "GNSS1D" || group.type == "GNSS3D">
-				<th><#outputformat "plainText">&nabla;(&alpha;,&beta;)<sub>Z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&nabla;(1)<sub>Z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+			</#if>
+			
+			<#if group.type == "GNSS2D" || group.type == "GNSS3D">
+				<th><#outputformat "plainText">&nabla;(&lambda;)<sub>Y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+				<th><#outputformat "plainText">&nabla;(&lambda;)<sub>X</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+			</#if>
+			<#if group.type == "GNSS1D" || group.type == "GNSS3D">
+				<th><#outputformat "plainText">&nabla;(&lambda;)<sub>Z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			</#if>
 		<#else>
 			<th><#outputformat "plainText">&sigma;<span class="unit">${apply_angle_unit?then(unit_abbr_angle_uncertainty, unit_abbr_length_uncertainty)}</span></#outputformat></th>
@@ -117,7 +125,8 @@
 			<th><#outputformat "plainText">&nabla;<span class="unit">${apply_angle_unit?then(unit_abbr_angle_residual, unit_abbr_length_residual)}</span></#outputformat></th>
 			<th><#outputformat "plainText">EP<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 			<th><#outputformat "plainText">EF&#183;SP<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
-			<th><#outputformat "plainText">&nabla;(&alpha;,&beta;)<span class="unit">${apply_angle_unit?then(unit_abbr_angle_residual, unit_abbr_length_residual)}</span></#outputformat></th>
+			<th><#outputformat "plainText">&nabla;(1)<span class="unit">${apply_angle_unit?then(unit_abbr_angle_residual, unit_abbr_length_residual)}</span></#outputformat></th>
+			<th><#outputformat "plainText">&nabla;(&lambda;)<span class="unit">${apply_angle_unit?then(unit_abbr_angle_residual, unit_abbr_length_residual)}</span></#outputformat></th>
 		</#if>
 		
 		<th><#outputformat "plainText">&Omega;</#outputformat></th>

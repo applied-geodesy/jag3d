@@ -71,6 +71,11 @@
 			<td></td>
 		</#if>
 		
+		<#if group.type == "REFERENCE_VERTICAL_DEFLECTION" || group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
+			<td></td>
+			<td></td>
+		</#if>
+		
 		<#if group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
 			<td><@printFormattedNumber value=group.omega format=df_statistic/></td>
 		</#if>

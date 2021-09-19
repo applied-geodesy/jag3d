@@ -120,7 +120,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		
 		// MDB
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.minimaldetectablebias.label", "\u2207(\u03B1,\u03B2)");
+		labelText   = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.minimaldetectablebias.label", "\u2207(\u03BB)");
 		tooltipText = i18n.getString("UIAdditionalParameterTableBuilder.tableheader.minimaldetectablebias.tooltip", "Minimal detectable bias of additional parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS;

@@ -48,7 +48,8 @@ public abstract class Point extends UnknownParameter {
 	               redundancy[]  = new double[this.getDimension()],
 	               ep[]          = new double[this.getDimension()],
                    nabla[]       = new double[this.getDimension()],
-                   grzw[]        = new double[this.getDimension()],
+                   mdb[]         = new double[this.getDimension()],
+                   mtb[]         = new double[this.getDimension()],
                    sigma[]       = new double[this.getDimension()],
                    sigma0[]      = new double[this.getDimension()],
                    confidenceAxis[]  = new double[this.getDimension()],
@@ -353,21 +354,38 @@ public abstract class Point extends UnknownParameter {
 			this.nabla = nabla;
 	}
 
-	public void setMinimalDetectableBiases(double[] grzw) {
-		if (grzw.length == this.getDimension())
-			this.grzw = grzw;
+	public void setMinimalDetectableBiases(double[] mdb) {
+		if (mdb.length == this.getDimension())
+			this.mdb = mdb;
 	}
 
 	public double getMinimalDetectableBiasX() {
-		return this.grzw[0];
+		return this.mdb[0];
 	}	
 
 	public double getMinimalDetectableBiasY() {
-		return this.grzw[1];
+		return this.mdb[1];
 	}	
 
 	public double getMinimalDetectableBiasZ() {
-		return this.grzw[this.getDimension()-1];
+		return this.mdb[this.getDimension()-1];
+	}
+	
+	public void setMaximumTolerableBiases(double[] mtb) {
+		if (mtb.length == this.getDimension())
+			this.mtb = mtb;
+	}
+	
+	public double getMaximumTolerableBiasX() {
+		return this.mtb[0];
+	}	
+
+	public double getMaximumTolerableBiasY() {
+		return this.mtb[1];
+	}	
+
+	public double getMaximumTolerableBiasZ() {
+		return this.mtb[this.getDimension()-1];
 	}
 
 	public void setOmega(double omega) {

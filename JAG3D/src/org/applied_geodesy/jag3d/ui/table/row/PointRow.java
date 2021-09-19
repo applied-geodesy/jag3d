@@ -29,70 +29,73 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public class PointRow extends GroupRow {
-	private ObjectProperty<String> name = new SimpleObjectProperty<String>();
-	private ObjectProperty<String> code = new SimpleObjectProperty<String>("0"); 
+	private ObjectProperty<String> name = new SimpleObjectProperty<String>(this, "name");
+	private ObjectProperty<String> code = new SimpleObjectProperty<String>(this, "code", "0"); 
 	
-	private ObjectProperty<Double> xApriori = new SimpleObjectProperty<Double>(0.0);
-	private ObjectProperty<Double> yApriori = new SimpleObjectProperty<Double>(0.0);
-	private ObjectProperty<Double> zApriori = new SimpleObjectProperty<Double>(0.0);
+	private ObjectProperty<Double> xApriori = new SimpleObjectProperty<Double>(this, "xApriori", 0.0);
+	private ObjectProperty<Double> yApriori = new SimpleObjectProperty<Double>(this, "yApriori", 0.0);
+	private ObjectProperty<Double> zApriori = new SimpleObjectProperty<Double>(this, "zApriori", 0.0);
 	
-	private ObjectProperty<Double> sigmaXapriori = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> sigmaYapriori = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> sigmaZapriori = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> sigmaXapriori = new SimpleObjectProperty<Double>(this, "sigmaXapriori");
+	private ObjectProperty<Double> sigmaYapriori = new SimpleObjectProperty<Double>(this, "sigmaYapriori");
+	private ObjectProperty<Double> sigmaZapriori = new SimpleObjectProperty<Double>(this, "sigmaZapriori");
 	
-	private ObjectProperty<Double> xAposteriori = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> yAposteriori = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> zAposteriori = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> xAposteriori = new SimpleObjectProperty<Double>(this, "xAposteriori");
+	private ObjectProperty<Double> yAposteriori = new SimpleObjectProperty<Double>(this, "yAposteriori");
+	private ObjectProperty<Double> zAposteriori = new SimpleObjectProperty<Double>(this, "zAposteriori");
 	
-	private ObjectProperty<Double> sigmaXaposteriori = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> sigmaYaposteriori = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> sigmaZaposteriori = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> sigmaXaposteriori = new SimpleObjectProperty<Double>(this, "sigmaXaposteriori");
+	private ObjectProperty<Double> sigmaYaposteriori = new SimpleObjectProperty<Double>(this, "sigmaYaposteriori");
+	private ObjectProperty<Double> sigmaZaposteriori = new SimpleObjectProperty<Double>(this, "sigmaZaposteriori");
 
-	private ObjectProperty<Double> minimalDetectableBiasX = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> minimalDetectableBiasY = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> minimalDetectableBiasZ = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> minimalDetectableBiasX = new SimpleObjectProperty<Double>(this, "minimalDetectableBiasX");
+	private ObjectProperty<Double> minimalDetectableBiasY = new SimpleObjectProperty<Double>(this, "minimalDetectableBiasY");
+	private ObjectProperty<Double> minimalDetectableBiasZ = new SimpleObjectProperty<Double>(this, "minimalDetectableBiasZ");
 	
-	private ObjectProperty<Double> residualX = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> residualY = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> residualZ = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> maximumTolerableBiasX = new SimpleObjectProperty<Double>(this, "maximumTolerableBiasX");
+	private ObjectProperty<Double> maximumTolerableBiasY = new SimpleObjectProperty<Double>(this, "maximumTolerableBiasY");
+	private ObjectProperty<Double> maximumTolerableBiasZ = new SimpleObjectProperty<Double>(this, "maximumTolerableBiasZ");
 	
-	private ObjectProperty<Double> redundancyX = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> redundancyY = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> redundancyZ = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> residualX = new SimpleObjectProperty<Double>(this, "residualX");
+	private ObjectProperty<Double> residualY = new SimpleObjectProperty<Double>(this, "residualY");
+	private ObjectProperty<Double> residualZ = new SimpleObjectProperty<Double>(this, "residualZ");
 	
-	private ObjectProperty<Double> grossErrorX = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> grossErrorY = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> grossErrorZ = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> redundancyX = new SimpleObjectProperty<Double>(this, "redundancyX");
+	private ObjectProperty<Double> redundancyY = new SimpleObjectProperty<Double>(this, "redundancyY");
+	private ObjectProperty<Double> redundancyZ = new SimpleObjectProperty<Double>(this, "redundancyZ");
+	
+	private ObjectProperty<Double> grossErrorX = new SimpleObjectProperty<Double>(this, "grossErrorX");
+	private ObjectProperty<Double> grossErrorY = new SimpleObjectProperty<Double>(this, "grossErrorY");
+	private ObjectProperty<Double> grossErrorZ = new SimpleObjectProperty<Double>(this, "grossErrorZ");
 
-	private ObjectProperty<Double> omega                    = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> omega                    = new SimpleObjectProperty<Double>(this, "omega");
 	
-	private ObjectProperty<Double> testStatisticApriori     = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> testStatisticAposteriori = new SimpleObjectProperty<Double>(); 
+	private ObjectProperty<Double> testStatisticApriori     = new SimpleObjectProperty<Double>(this, "testStatisticApriori");
+	private ObjectProperty<Double> testStatisticAposteriori = new SimpleObjectProperty<Double>(this, "testStatisticAposteriori"); 
 	
-	private ObjectProperty<Double> pValueApriori            = new SimpleObjectProperty<Double>(); 
-	private ObjectProperty<Double> pValueAposteriori        = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> pValueApriori            = new SimpleObjectProperty<Double>(this, "pValueApriori"); 
+	private ObjectProperty<Double> pValueAposteriori        = new SimpleObjectProperty<Double>(this, "pValueAposteriori");
 	
-	private ObjectProperty<Double> confidenceA = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> confidenceB = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> confidenceC = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> confidenceA = new SimpleObjectProperty<Double>(this, "confidenceA");
+	private ObjectProperty<Double> confidenceB = new SimpleObjectProperty<Double>(this, "confidenceB");
+	private ObjectProperty<Double> confidenceC = new SimpleObjectProperty<Double>(this, "confidenceC");
 	
-	private ObjectProperty<Double> confidenceAlpha = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> confidenceBeta = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> confidenceGamma = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> confidenceAlpha = new SimpleObjectProperty<Double>(this, "confidenceAlpha");
+	private ObjectProperty<Double> confidenceBeta  = new SimpleObjectProperty<Double>(this, "confidenceBeta");
+	private ObjectProperty<Double> confidenceGamma = new SimpleObjectProperty<Double>(this, "confidenceGamma");
 	
-	private BooleanProperty significant = new SimpleBooleanProperty(Boolean.FALSE);
-	private BooleanProperty enable      = new SimpleBooleanProperty(Boolean.TRUE);
+	private BooleanProperty significant = new SimpleBooleanProperty(this, "significant", Boolean.FALSE);
+	private BooleanProperty enable      = new SimpleBooleanProperty(this, "enable",      Boolean.TRUE);
 	
-	private ObjectProperty<Double> firstPrincipalComponentX = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> firstPrincipalComponentY = new SimpleObjectProperty<Double>(); 
-	private ObjectProperty<Double> firstPrincipalComponentZ = new SimpleObjectProperty<Double>(); 
+	private ObjectProperty<Double> firstPrincipalComponentX = new SimpleObjectProperty<Double>(this, "firstPrincipalComponentX");
+	private ObjectProperty<Double> firstPrincipalComponentY = new SimpleObjectProperty<Double>(this, "firstPrincipalComponentY"); 
+	private ObjectProperty<Double> firstPrincipalComponentZ = new SimpleObjectProperty<Double>(this, "firstPrincipalComponentZ"); 
 	
-	private ObjectProperty<Double> influenceOnPointPositionX = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> influenceOnPointPositionY = new SimpleObjectProperty<Double>();
-	private ObjectProperty<Double> influenceOnPointPositionZ = new SimpleObjectProperty<Double>();
+	private ObjectProperty<Double> influenceOnPointPositionX = new SimpleObjectProperty<Double>(this, "influenceOnPointPositionX");
+	private ObjectProperty<Double> influenceOnPointPositionY = new SimpleObjectProperty<Double>(this, "influenceOnPointPositionY");
+	private ObjectProperty<Double> influenceOnPointPositionZ = new SimpleObjectProperty<Double>(this, "influenceOnPointPositionZ");
 	
-	private ObjectProperty<Double> influenceOnNetworkDistortion = new SimpleObjectProperty<Double>();
-	
+	private ObjectProperty<Double> influenceOnNetworkDistortion = new SimpleObjectProperty<Double>(this, "influenceOnNetworkDistortion");
 	
 	public BooleanProperty enableProperty() {
 		return this.enable;
@@ -308,6 +311,42 @@ public class PointRow extends GroupRow {
 	
 	public void setMinimalDetectableBiasZ(final Double minimalDetectableBiasZ) {
 		this.minimalDetectableBiasZProperty().set(minimalDetectableBiasZ);
+	}
+	
+	public ObjectProperty<Double> maximumTolerableBiasXProperty() {
+		return this.maximumTolerableBiasX;
+	}
+
+	public Double getMaximumTolerableBiasX() {
+		return this.maximumTolerableBiasXProperty().get();
+	}
+
+	public void setMaximumTolerableBiasX(final Double maximumTolerableBiasX) {
+		this.maximumTolerableBiasXProperty().set(maximumTolerableBiasX);
+	}
+	
+	public ObjectProperty<Double> maximumTolerableBiasYProperty() {
+		return this.maximumTolerableBiasY;
+	}
+
+	public Double getMaximumTolerableBiasY() {
+		return this.maximumTolerableBiasYProperty().get();
+	}
+
+	public void setMaximumTolerableBiasY(final Double maximumTolerableBiasY) {
+		this.maximumTolerableBiasYProperty().set(maximumTolerableBiasY);
+	}
+	
+	public ObjectProperty<Double> maximumTolerableBiasZProperty() {
+		return this.maximumTolerableBiasZ;
+	}
+
+	public Double getMaximumTolerableBiasZ() {
+		return this.maximumTolerableBiasZProperty().get();
+	}
+
+	public void setMaximumTolerableBiasZ(final Double maximumTolerableBiasZ) {
+		this.maximumTolerableBiasZProperty().set(maximumTolerableBiasZ);
 	}
 	
 	public final ObjectProperty<Double> residualXProperty() {

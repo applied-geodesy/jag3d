@@ -8,7 +8,7 @@
 		<th>a</th>
 
 		<th>&nabla;</th>
-		<th>&nabla;(&alpha;,&beta;)</th>
+		<th>&nabla;(&lambda;)</th>
 
 		<th>log(p<sub>prio</sub>)</th>
 		<th>log(p<sub>post</sub>)</th>

@@ -29,6 +29,11 @@
 				<td><@printFormattedNumber value=deflection.gross_error_y format=df_angle_residual/></td>
 				<td><@printFormattedNumber value=deflection.gross_error_x format=df_angle_residual/></td>
 			</#if>
+			
+			<#if group.type == "REFERENCE_VERTICAL_DEFLECTION" || group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
+				<td><@printFormattedNumber value=deflection.maximum_tolerable_bias_y format=df_angle_residual/></td>
+				<td><@printFormattedNumber value=deflection.maximum_tolerable_bias_x format=df_angle_residual/></td>
+			</#if>
 						
 			<#if group.type == "REFERENCE_VERTICAL_DEFLECTION" || group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
 				<td><@printFormattedNumber value=deflection.minimal_detectable_bias_y format=df_angle_residual/></td>

@@ -744,8 +744,10 @@ public class NetworkAdjustment implements Runnable {
 	
 					//Qll_P.mult(nabla0, ep);
 					
-					deflectionX.setMinimalDetectableBias(nabla0.get(0));
-					deflectionY.setMinimalDetectableBias(nabla0.get(1));
+					//deflectionX.setMinimalDetectableBias(nabla0.get(0));
+					//deflectionY.setMinimalDetectableBias(nabla0.get(1));
+					deflectionX.setMaximumTolerableBias(nabla0.get(0));
+					deflectionY.setMaximumTolerableBias(nabla0.get(1));
 			    }
 			    else {
 			    	Qnn.mult(Pv, nabla);
@@ -770,8 +772,10 @@ public class NetworkAdjustment implements Runnable {
 						if (nQn0 > 0)
 							nabla0.set(j, nabla0.get(j)/Math.sqrt(nQn0));
 					
-					deflectionX.setMinimalDetectableBias(nabla0.get(0));
-					deflectionY.setMinimalDetectableBias(nabla0.get(1));
+					//deflectionX.setMinimalDetectableBias(nabla0.get(0));
+					//deflectionY.setMinimalDetectableBias(nabla0.get(1));
+					deflectionX.setMaximumTolerableBias(nabla0.get(0));
+					deflectionY.setMaximumTolerableBias(nabla0.get(1));
 			    }
 			}
 		}
@@ -945,7 +949,8 @@ public class NetworkAdjustment implements Runnable {
 //						if (nQn0 > 0)
 //							nabla0.set(j, nabla0.get(j)/Math.sqrt(nQn0));
 					Qll_P.mult(nabla0, ep);
-					point.setMinimalDetectableBiases( Matrices.getArray(nabla0) );
+					//point.setMinimalDetectableBiases( Matrices.getArray(nabla0) );
+					point.setMaximumTolerableBiases( Matrices.getArray(nabla0) );
 					point.setInfluencesOnPointPosition( Matrices.getArray(ep) );
 					point.setInfluenceOnNetworkDistortion(efsp);
 			    }
@@ -969,7 +974,8 @@ public class NetworkAdjustment implements Runnable {
 					for (int j=0; j<dim; j++)
 						if (nQn0 > 0)
 							nabla0.set(j, nabla0.get(j)/Math.sqrt(nQn0));
-					point.setMinimalDetectableBiases(Matrices.getArray(nabla0));
+					//point.setMinimalDetectableBiases(Matrices.getArray(nabla0));
+					point.setMaximumTolerableBiases( Matrices.getArray(nabla0) );
 					point.setInfluenceOnNetworkDistortion(efsp);
 			    }
 			}
@@ -3042,7 +3048,8 @@ public class NetworkAdjustment implements Runnable {
 					for (int j=0; j<dim; j++)
 						nabla0.set(j, confidenceRegion.getMinimalDetectableBias(j));
 
-					point.setMinimalDetectableBiases(Matrices.getArray(nabla0));
+					//point.setMinimalDetectableBiases(Matrices.getArray(nabla0));
+					point.setMaximumTolerableBiases(Matrices.getArray(nabla0));
 			    }
 			    else {
 			    	Qnn.mult(BTPv, nabla);
@@ -3057,7 +3064,8 @@ public class NetworkAdjustment implements Runnable {
 					if (nQn0 > 0) {
 						for (int j=0; j<dim; j++)
 							nabla0.set(j, nabla0.get(j)/Math.sqrt(nQn0));
-						point.setMinimalDetectableBiases(Matrices.getArray(nabla0));
+						//point.setMinimalDetectableBiases(Matrices.getArray(nabla0));
+						point.setMaximumTolerableBiases(Matrices.getArray(nabla0));
 					}
 			    }
 			}
@@ -3157,8 +3165,10 @@ public class NetworkAdjustment implements Runnable {
 			    	// Nichtzentralitaetsparameter ist noch nicht bestimmt, 
 					// sodass GRZW ein vorlaeufiger Wert ist, 
 				    // der nabla*Pnn*nabla == 1 erfuellt.
-					deflectionX.setMinimalDetectableBias(confidenceRegion.getMinimalDetectableBias(0));
-					deflectionY.setMinimalDetectableBias(confidenceRegion.getMinimalDetectableBias(1));
+					//deflectionX.setMinimalDetectableBias(confidenceRegion.getMinimalDetectableBias(0));
+					//deflectionY.setMinimalDetectableBias(confidenceRegion.getMinimalDetectableBias(1));
+					deflectionX.setMaximumTolerableBias(confidenceRegion.getMinimalDetectableBias(0));
+					deflectionY.setMaximumTolerableBias(confidenceRegion.getMinimalDetectableBias(1));
 			    }
 			    else {
 			    	Qnn.mult(BTPv, nabla);
@@ -3173,8 +3183,10 @@ public class NetworkAdjustment implements Runnable {
 					BTPQvvPB.mult(nabla0, PQvvPnabla0);
 					double nQn0 = nabla0.dot(PQvvPnabla0);
 					if (nQn0 > 0) {
-						deflectionX.setMinimalDetectableBias(nabla0.get(0)/Math.sqrt(nQn0));
-						deflectionY.setMinimalDetectableBias(nabla0.get(1)/Math.sqrt(nQn0));
+						//deflectionX.setMinimalDetectableBias(nabla0.get(0)/Math.sqrt(nQn0));
+						//deflectionY.setMinimalDetectableBias(nabla0.get(1)/Math.sqrt(nQn0));
+						deflectionX.setMaximumTolerableBias(nabla0.get(0)/Math.sqrt(nQn0));
+						deflectionY.setMaximumTolerableBias(nabla0.get(1)/Math.sqrt(nQn0));
 					}
 			    }
 			}
@@ -3192,19 +3204,19 @@ public class NetworkAdjustment implements Runnable {
 				double kPrio = tsPrio.getQuantile();
 				double kPost = tsPost.getQuantile();
 				
-				double grzw[] = new double[dim];
+				double mdb[] = new double[dim];
 				if (dim != 1) {
-					grzw[0] = point.getMinimalDetectableBiasX()*lamda;
-					grzw[1] = point.getMinimalDetectableBiasY()*lamda;
+					mdb[0] = point.getMaximumTolerableBiasX()*lamda;
+					mdb[1] = point.getMaximumTolerableBiasY()*lamda;
 				}
 				if (dim != 2) {
-					grzw[dim-1] = point.getMinimalDetectableBiasZ()*lamda;
+					mdb[dim-1] = point.getMaximumTolerableBiasZ()*lamda;
 				}
 				
-				point.setMinimalDetectableBiases(grzw);
+				point.setMinimalDetectableBiases(mdb);
 				// Bei Simulation ist Nabla == GRZW, da keine Fehler bestimmbar sind
 				if (this.estimationType == EstimationType.SIMULATION)
-					point.setGrossErrors(grzw);
+					point.setGrossErrors(mdb);
 				else {
 					double tPrio = point.getTprio();
 					double tPost = point.getTpost();
@@ -3233,8 +3245,8 @@ public class NetworkAdjustment implements Runnable {
 				double kPrio = tsPrio.getQuantile();
 				double kPost = tsPost.getQuantile();
 				
-				deflectionX.setMinimalDetectableBias(lamda * deflectionX.getMinimalDetectableBias());
-				deflectionY.setMinimalDetectableBias(lamda * deflectionY.getMinimalDetectableBias());
+				deflectionX.setMinimalDetectableBias(lamda * deflectionX.getMaximumTolerableBias());
+				deflectionY.setMinimalDetectableBias(lamda * deflectionY.getMaximumTolerableBias());
 				
 				// Bei Simulation ist Nabla == GRZW, da keine Fehler bestimmbar sind
 				if (this.estimationType == EstimationType.SIMULATION) {
@@ -3293,26 +3305,26 @@ public class NetworkAdjustment implements Runnable {
 						double Kprio = tsPrio.getQuantile();
 						double Kpost = tsPost.getQuantile();
 	
-						double grzw[] = new double[dim];
+						double mdb[] = new double[dim];
 						double ep[]   = new double[dim];
 						if (dim != 1) {
-							grzw[0] = point.getMinimalDetectableBiasX()*lamda;
-							grzw[1] = point.getMinimalDetectableBiasY()*lamda;
+							mdb[0] = point.getMaximumTolerableBiasX()*lamda;
+							mdb[1] = point.getMaximumTolerableBiasY()*lamda;
 							
 							ep[0] = point.getInfluenceOnPointPositionX()*lamda;
 							ep[1] = point.getInfluenceOnPointPositionY()*lamda;
 						}
 						if (dim != 2) {
-							grzw[dim-1] = point.getMinimalDetectableBiasZ()*lamda;
-							ep[dim-1]   = point.getInfluenceOnPointPositionZ()*lamda;
+							mdb[dim-1] = point.getMaximumTolerableBiasZ()*lamda;
+							ep[dim-1]  = point.getInfluenceOnPointPositionZ()*lamda;
 						}
 						
-						point.setMinimalDetectableBiases(grzw);
+						point.setMinimalDetectableBiases(mdb);
 						// Bei Simulation ist Nabla == GRZW, da keine Fehler bestimmbar sind
 						// EP und EFSP wird dann aus GRZW bestimmt
 						if (this.estimationType == EstimationType.SIMULATION) {
 							point.setInfluenceOnNetworkDistortion(point.getInfluenceOnNetworkDistortion() * lamda * Math.sqrt(sigma2PointMax));
-							point.setGrossErrors(grzw);
+							point.setGrossErrors(mdb);
 							point.setInfluencesOnPointPosition(ep);
 						}
 						else {
@@ -3379,8 +3391,8 @@ public class NetworkAdjustment implements Runnable {
 							double Kprio = tsPrio.getQuantile();
 							double Kpost = tsPost.getQuantile();
 
-							deflectionX.setMinimalDetectableBias( deflectionX.getMinimalDetectableBias() * lamda );
-							deflectionY.setMinimalDetectableBias( deflectionY.getMinimalDetectableBias() * lamda );
+							deflectionX.setMinimalDetectableBias( deflectionX.getMaximumTolerableBias() * lamda );
+							deflectionY.setMinimalDetectableBias( deflectionY.getMaximumTolerableBias() * lamda );
 
 							// Bei Simulation ist Nabla == GRZW, da keine Fehler bestimmbar sind
 							if (this.estimationType == EstimationType.SIMULATION) {
@@ -3832,7 +3844,7 @@ public class NetworkAdjustment implements Runnable {
 				int dim = gnss.getDimension();
 	
 				TestStatisticParameterSet tsPrio = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, Double.POSITIVE_INFINITY);
-				double lamda = Math.sqrt(Math.abs(tsPrio.getNoncentralityParameter()));
+				double lambda = Math.sqrt(Math.abs(tsPrio.getNoncentralityParameter()));
 
 				List<Observation> baseline = gnss.getBaselineComponents();
 				
@@ -3881,7 +3893,7 @@ public class NetworkAdjustment implements Runnable {
 						Vector nabla0 = new DenseVector(dim);
 						Vector ep     = new DenseVector(gnss.getDimension());
 						for (int j=0; j<dim; j++)
-							nabla0.set(j, confidenceRegion.getMinimalDetectableBias(j)*lamda);
+							nabla0.set(j, confidenceRegion.getMinimalDetectableBias(j)*lambda);
 
 						ATQxxBP.mult(nabla0, ep);
 						
@@ -3894,6 +3906,7 @@ public class NetworkAdjustment implements Runnable {
 						for (int j=0; j<dim; j++) {
 							double nablaJ = nabla0.get(j);
 							baseline.get(j).setMinimalDetectableBias(nablaJ);
+							baseline.get(j).setMaximumTolerableBias(confidenceRegion.getMinimalDetectableBias(j));
 							baseline.get(j).setGrossError(nablaJ);
 							baseline.get(j).setInfluenceOnPointPosition(ep.get(j));
 							baseline.get(j).setInfluenceOnNetworkDistortion( Math.sqrt(sigma2PointMax * Math.abs(du2 - uz2)) );
@@ -3922,12 +3935,18 @@ public class NetworkAdjustment implements Runnable {
 					    Vector PQvvPnabla0 = new DenseVector(nabla0);
 					    subPQvvP.mult(nabla0, PQvvPnabla0);
 						double nQn0 = nabla0.dot(PQvvPnabla0);
-						for (int j=0; j<dim; j++)
-							if (nQn0 > 0)
-								nabla0.set(j, nabla0.get(j)/Math.sqrt(nQn0)*lamda);
+//						for (int j=0; j<dim; j++)
+//							if (nQn0 > 0)
+//								nabla0.set(j, nabla0.get(j)/Math.sqrt(nQn0)*lamda);
 
 						for (int j=0; j<dim; j++) {
-							baseline.get(j).setMinimalDetectableBias( nabla0.get(j) );
+							double mtb = 0;
+							if (nQn0 > 0)
+								mtb = nabla0.get(j)/Math.sqrt(nQn0);
+							
+//							baseline.get(j).setMinimalDetectableBias( nabla0.get(j) );
+							baseline.get(j).setMinimalDetectableBias( mtb * lambda );
+							baseline.get(j).setMaximumTolerableBias( mtb );
 							baseline.get(j).setGrossError( nabla.get(j) );	
 							baseline.get(j).setInfluenceOnPointPosition( ep.get(j) );
 							baseline.get(j).setInfluenceOnNetworkDistortion( Math.sqrt(sigma2PointMax * Math.abs(du2 - uz2)) );
@@ -3945,8 +3964,10 @@ public class NetworkAdjustment implements Runnable {
 				double r   = observation.getRedundancy();
 				double v   = this.estimationType == EstimationType.SIMULATION ? 0.0 : observation.getCorrection();
 				double pvv  = v*v/qll;
-				double grzw = r > SQRT_EPS ? Math.sqrt(Math.abs(lamda*qll/r)) : 0.0;
-				observation.setMinimalDetectableBias(grzw);
+				double mdb = r > SQRT_EPS ? Math.sqrt(Math.abs(lamda*qll/r)) : 0.0;
+				double mtb = r > SQRT_EPS ? Math.sqrt(Math.abs(qll/r)) : 0.0;
+				observation.setMinimalDetectableBias(mdb);
+				observation.setMaximumTolerableBias(mtb);
 				
 				// Distance fuer Richtungen/Zenitwinkel zur Bestimmung von EP in [m]
 				double dist = 1;
@@ -3966,14 +3987,15 @@ public class NetworkAdjustment implements Runnable {
 						observation.setGrossError( nabla );
 						observation.setInfluenceOnPointPosition( observation.getInfluenceOnPointPosition() * nabla * dist);
 						observation.setInfluenceOnNetworkDistortion( Math.sqrt(sigma2PointMax * Math.abs(du2 - uz2)));
-						observation.setMinimalDetectableBias( Math.signum(v)*grzw );
+						observation.setMinimalDetectableBias( Math.signum(v)*mdb );
+						observation.setMaximumTolerableBias( Math.signum(v)*mtb);
 					}
 					else { // if (this.estimationType == EstimationType.SIMULATION) {
-						double uz2 = grzw * observation.getInfluenceOnNetworkDistortion() * grzw;
-						double du2 = grzw * (1 - r)/qll * grzw;
+						double uz2 = mdb * observation.getInfluenceOnNetworkDistortion() * mdb;
+						double du2 = mdb * (1 - r)/qll * mdb;
 						
-						observation.setGrossError( grzw );
-						observation.setInfluenceOnPointPosition( observation.getInfluenceOnPointPosition() * grzw * dist);
+						observation.setGrossError( mdb );
+						observation.setInfluenceOnPointPosition( observation.getInfluenceOnPointPosition() * mdb * dist);
 						observation.setInfluenceOnNetworkDistortion( Math.sqrt(sigma2PointMax * Math.abs(du2 - uz2)));
 					} 	
 				}

@@ -178,7 +178,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		// A-priori Deflection uncertainties
 		// Y0-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.y0.label", "\u03C3\u03B6y0");
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.y0.label", "\u03C3y0");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.y0.tooltip", "A-priori uncertainty of y-component");
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.UNCERTAINTY_Y_APRIORI;
@@ -189,7 +189,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 
 		// X0-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.x0.label", "\u03C3\u03B6x0");
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.x0.label", "\u03C3x0");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.x0.tooltip", "A-priori uncertainty of x-component");
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.UNCERTAINTY_X_APRIORI;
@@ -224,7 +224,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		// Uncertainty
 		// y-comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.y.label", "\u03c3\u03B6y");
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.y.label", "\u03c3y");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.y.tooltip", "A-posteriori uncertainty of y-component of deflection of the vertical");
 		cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 		columnContentType = ColumnContentType.UNCERTAINTY_Y_APOSTERIORI;
@@ -234,7 +234,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 
 		// x-comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.x.label", "\u03c3\u03B6x");
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.x.label", "\u03c3x");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.x.tooltip", "A-posteriori uncertainty of x-component of deflection of the vertical");
 		cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 		columnContentType = ColumnContentType.UNCERTAINTY_X_APOSTERIORI;
@@ -266,7 +266,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		// Redundancy
 		// ry
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.redundancy.y.label", "r\u03B6y");
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.redundancy.y.label", "ry");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.redundancy.y.tooltip", "Redundancy of y-component of deflection of the vertical");
 		cellValueType = CellValueType.PERCENTAGE;
 		columnContentType = ColumnContentType.REDUNDANCY_Y;
@@ -276,7 +276,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 
 		// rx
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.redundancy.x.label", "r\u03B6x");
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.redundancy.x.label", "rx");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.redundancy.x.tooltip", "Redundancy of x-component of deflection of the vertical");
 		cellValueType = CellValueType.PERCENTAGE;
 		columnContentType = ColumnContentType.REDUNDANCY_X;
@@ -287,7 +287,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		// Residual
 		// y-epsilon
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.y.label", "\u03B5\u03B6y");
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.y.label", "\u03B5y");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component of deflection of the vertical");
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_Y;
@@ -297,7 +297,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 
 		// x-epsilon
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.x.label", "\u03B5\u03B6x");
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.x.label", "\u03B5x");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component of deflection of the vertical");
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_X;
@@ -308,7 +308,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		// Gross-error
 		// y-Nabla
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.grosserror.y.label", "\u2207\u03B6y");
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.grosserror.y.label", "\u2207y");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.grosserror.y.tooltip", "Gross-error of deflection of the vertical in y");
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.GROSS_ERROR_Y;
@@ -318,18 +318,39 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 
 		// x-Nabla
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.grosserror.x.label", "\u2207\u03B6x");
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.grosserror.x.label", "\u2207x");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.grosserror.x.tooltip", "Gross-error of deflection of the vertical in x");
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.GROSS_ERROR_X;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::grossErrorXProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
+		
+		// MTB
+		// y-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.maximumtolerablebias.y.label", "\u2207x(1)");
+		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.maximumtolerablebias.y.tooltip", "Maximum tolerable bias of deflection of the vertical in y");
+		cellValueType = CellValueType.ANGLE_RESIDUAL;
+		columnContentType = ColumnContentType.MAXIMUM_TOLERABLE_BIAS_Y;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::maximumTolerableBiasYProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
+		table.getColumns().add(doubleColumn);
+
+		// x-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.maximumtolerablebias.x.label", "\u2207y(1)");
+		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.maximumtolerablebias.x.tooltip", "Maximum tolerable bias of deflection of the vertical in x");
+		cellValueType = CellValueType.ANGLE_RESIDUAL;
+		columnContentType = ColumnContentType.MAXIMUM_TOLERABLE_BIAS_X;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::maximumTolerableBiasXProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
+		table.getColumns().add(doubleColumn);
 
 		// MDB
-		// y-MDB
+		// y-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.minimaldetectablebias.y.label", "\u2207\u03B6x(\u03B1,\u03B2)");
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.minimaldetectablebias.y.label", "\u2207x(\u03BB)");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.minimaldetectablebias.y.tooltip", "Minimal detectable bias of deflection of the vertical in y");
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_Y;
@@ -337,9 +358,9 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::minimalDetectableBiasYProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
-		// x-MDB
+		// x-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.minimaldetectablebias.x.label", "\u2207\u03B6y(\u03B1,\u03B2)");
+		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.minimaldetectablebias.x.label", "\u2207y(\u03BB)");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.minimaldetectablebias.x.tooltip", "Minimal detectable bias of deflection of the vertical in x");
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_X;

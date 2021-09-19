@@ -97,6 +97,14 @@
 				<td><@printFormattedNumber value=observation.influence_on_network_distortion format=df_length_residual/></td>
 
 				<#if group.type == "GNSS2D" || group.type == "GNSS3D">
+					<td><@printFormattedNumber value=observation.maximum_tolerable_bias_y format=df_length_residual/></td>
+					<td><@printFormattedNumber value=observation.maximum_tolerable_bias_x format=df_length_residual/></td>
+				</#if>
+				<#if group.type == "GNSS1D" || group.type == "GNSS3D">
+					<td><@printFormattedNumber value=observation.maximum_tolerable_bias_z format=df_length_residual/></td>
+				</#if>
+
+				<#if group.type == "GNSS2D" || group.type == "GNSS3D">
 					<td><@printFormattedNumber value=observation.minimal_detectable_bias_y format=df_length_residual/></td>
 					<td><@printFormattedNumber value=observation.minimal_detectable_bias_x format=df_length_residual/></td>
 				</#if>
@@ -123,8 +131,10 @@
 				<td><@printFormattedNumber value=observation.influence_on_network_distortion format=df_length_residual/></td>
 				
 				<#if apply_angle_unit??>
+					<td><@printFormattedNumber value=observation.maximum_tolerable_bias format=df_angle_residual/></td>
 					<td><@printFormattedNumber value=observation.minimal_detectable_bias format=df_angle_residual/></td>
 				<#else>
+					<td><@printFormattedNumber value=observation.maximum_tolerable_bias format=df_length_residual/></td>
 					<td><@printFormattedNumber value=observation.minimal_detectable_bias format=df_length_residual/></td>
 				</#if>
 			</#if>

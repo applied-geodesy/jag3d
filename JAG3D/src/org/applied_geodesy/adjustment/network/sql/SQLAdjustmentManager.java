@@ -1134,23 +1134,24 @@ public class SQLAdjustmentManager {
 	private void savePoints() throws SQLException {
 		boolean hasBatch = false;
 
-		String sql = "INSERT INTO \"PointAposteriori\" (" +
-				"\"id\",\"y\",\"x\",\"z\"," +
-				"\"sigma_y0\",\"sigma_x0\",\"sigma_z0\"," +
-				"\"sigma_y\",\"sigma_x\",\"sigma_z\"," +
-				"\"confidence_major_axis\",\"confidence_middle_axis\",\"confidence_minor_axis\"," +
-				"\"confidence_alpha\",\"confidence_beta\",\"confidence_gamma\"," +
-				"\"helmert_major_axis\",\"helmert_minor_axis\",\"helmert_alpha\"," +
-				"\"residual_y\",\"residual_x\",\"residual_z\"," +
-				"\"redundancy_y\",\"redundancy_x\",\"redundancy_z\"," +
-				"\"gross_error_y\",\"gross_error_x\",\"gross_error_z\"," +
-				"\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\",\"minimal_detectable_bias_z\"," +
-				"\"influence_on_position_y\",\"influence_on_position_x\",\"influence_on_position_z\"," +
-				"\"influence_on_network_distortion\", " + 
-				"\"first_principal_component_y\",\"first_principal_component_x\",\"first_principal_component_z\"," +
-				"\"omega\",\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\",\"covar_index\") VALUES (" +
-				"(SELECT \"id\" FROM \"PointApriori\" WHERE \"name\" = ?), " +
-				"?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		String sql = "INSERT INTO \"PointAposteriori\" (" 
+				+ "\"id\",\"y\",\"x\",\"z\"," 
+				+ "\"sigma_y0\",\"sigma_x0\",\"sigma_z0\"," 
+				+ "\"sigma_y\",\"sigma_x\",\"sigma_z\"," 
+				+ "\"confidence_major_axis\",\"confidence_middle_axis\",\"confidence_minor_axis\"," 
+				+ "\"confidence_alpha\",\"confidence_beta\",\"confidence_gamma\"," 
+				+ "\"helmert_major_axis\",\"helmert_minor_axis\",\"helmert_alpha\"," 
+				+ "\"residual_y\",\"residual_x\",\"residual_z\"," 
+				+ "\"redundancy_y\",\"redundancy_x\",\"redundancy_z\"," 
+				+ "\"gross_error_y\",\"gross_error_x\",\"gross_error_z\"," 
+				+ "\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\",\"minimal_detectable_bias_z\"," 
+				+ "\"maximum_tolerable_bias_y\",\"maximum_tolerable_bias_x\",\"maximum_tolerable_bias_z\", "
+				+ "\"influence_on_position_y\",\"influence_on_position_x\",\"influence_on_position_z\"," 
+				+ "\"influence_on_network_distortion\", " 
+				+ "\"first_principal_component_y\",\"first_principal_component_x\",\"first_principal_component_z\","
+				+ "\"omega\",\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\",\"covar_index\") VALUES (" 
+				+ "(SELECT \"id\" FROM \"PointApriori\" WHERE \"name\" = ?), "
+				+ "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		try {
 			this.dataBase.setAutoCommit(false);
@@ -1200,6 +1201,10 @@ public class SQLAdjustmentManager {
 				stmt.setDouble(idx++, dimension != 1 ? point.getMinimalDetectableBiasY() : 0.0);
 				stmt.setDouble(idx++, dimension != 1 ? point.getMinimalDetectableBiasX() : 0.0);
 				stmt.setDouble(idx++, dimension != 2 ? point.getMinimalDetectableBiasZ() : 0.0);
+				
+				stmt.setDouble(idx++, dimension != 1 ? point.getMaximumTolerableBiasY() : 0.0);
+				stmt.setDouble(idx++, dimension != 1 ? point.getMaximumTolerableBiasX() : 0.0);
+				stmt.setDouble(idx++, dimension != 2 ? point.getMaximumTolerableBiasZ() : 0.0);
 
 				stmt.setDouble(idx++, dimension != 1 ? point.getInfluenceOnPointPositionY() : 0.0);
 				stmt.setDouble(idx++, dimension != 1 ? point.getInfluenceOnPointPositionX() : 0.0);
@@ -1236,18 +1241,19 @@ public class SQLAdjustmentManager {
 
 	private void saveVerticalDeflections() throws SQLException {
 		boolean hasBatch = false;
-		String sql = "INSERT INTO \"VerticalDeflectionAposteriori\" (" +
-				"\"id\",\"y\",\"x\"," +
-				"\"sigma_y0\",\"sigma_x0\"," +
-				"\"sigma_y\",\"sigma_x\"," +
-				"\"confidence_major_axis\",\"confidence_minor_axis\"," +
-				"\"residual_y\",\"residual_x\"," +
-				"\"redundancy_y\",\"redundancy_x\"," +
-				"\"gross_error_y\",\"gross_error_x\"," +
-				"\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\"," +
-				"\"omega\",\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\",\"covar_index\") VALUES (" +
-				"(SELECT \"id\" FROM \"VerticalDeflectionApriori\" WHERE \"name\" = ?), " +
-				"?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+		String sql = "INSERT INTO \"VerticalDeflectionAposteriori\" ("
+				+ "\"id\",\"y\",\"x\"," 
+				+ "\"sigma_y0\",\"sigma_x0\"," 
+				+ "\"sigma_y\",\"sigma_x\"," 
+				+ "\"confidence_major_axis\",\"confidence_minor_axis\"," 
+				+ "\"residual_y\",\"residual_x\"," 
+				+ "\"redundancy_y\",\"redundancy_x\"," 
+				+ "\"gross_error_y\",\"gross_error_x\"," 
+				+ "\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\"," 
+				+ "\"maximum_tolerable_bias_y\",\"maximum_tolerable_bias_x\"," 
+				+ "\"omega\",\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\",\"covar_index\") VALUES (" 
+				+ "(SELECT \"id\" FROM \"VerticalDeflectionApriori\" WHERE \"name\" = ?), " 
+				+ "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		try {
 			this.dataBase.setAutoCommit(false);
@@ -1289,6 +1295,9 @@ public class SQLAdjustmentManager {
 
 				stmt.setDouble(idx++, point.getVerticalDeflectionY().getMinimalDetectableBias());
 				stmt.setDouble(idx++, point.getVerticalDeflectionX().getMinimalDetectableBias());
+				
+				stmt.setDouble(idx++, point.getVerticalDeflectionY().getMaximumTolerableBias());
+				stmt.setDouble(idx++, point.getVerticalDeflectionX().getMaximumTolerableBias());
 
 				stmt.setDouble(idx++, point.getVerticalDeflectionX().getOmega() + point.getVerticalDeflectionY().getOmega());
 
@@ -1324,25 +1333,26 @@ public class SQLAdjustmentManager {
 				+ "\"sigma_0\", \"sigma\", "
 				+ "\"residual\", "
 				+ "\"redundancy\", "
-				+ "\"gross_error\", \"minimal_detectable_bias\", "
+				+ "\"gross_error\", \"minimal_detectable_bias\", \"maximum_tolerable_bias\", "
 				+ "\"influence_on_position\", \"influence_on_network_distortion\", "
 				+ "\"omega\", "
 				+ "\"p_prio\", \"p_post\", "
 				+ "\"t_prio\", \"t_post\", "
-				+ "\"significant\") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "\"significant\") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-		String sqlGNSSObs = "INSERT INTO \"GNSSObservationAposteriori\" (" +
-				"\"id\", \"y\", \"x\", \"z\", " +
-				"\"sigma_y0\", \"sigma_x0\", \"sigma_z0\", " +
-				"\"sigma_y\", \"sigma_x\", \"sigma_z\", " +
-				"\"residual_y\", \"residual_x\", \"residual_z\", " +
-				"\"redundancy_y\", \"redundancy_x\", \"redundancy_z\", " +
-				"\"gross_error_y\", \"gross_error_x\", \"gross_error_z\", " +
-				"\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\",\"minimal_detectable_bias_z\", " +
-				"\"influence_on_position_y\", \"influence_on_position_x\", \"influence_on_position_z\", " +
-				"\"influence_on_network_distortion\", " +
-				"\"omega\", \"p_prio\", \"p_post\", \"t_prio\", \"t_post\", \"significant\") " +
-				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,?, ?, ?, ?, ?, ?, ?)"; 
+		String sqlGNSSObs = "INSERT INTO \"GNSSObservationAposteriori\" ("
+				+ "\"id\", \"y\", \"x\", \"z\", "
+				+ "\"sigma_y0\", \"sigma_x0\", \"sigma_z0\", "
+				+ "\"sigma_y\", \"sigma_x\", \"sigma_z\", "
+				+ "\"residual_y\", \"residual_x\", \"residual_z\", "
+				+ "\"redundancy_y\", \"redundancy_x\", \"redundancy_z\", "
+				+ "\"gross_error_y\", \"gross_error_x\", \"gross_error_z\", "
+				+ "\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\",\"minimal_detectable_bias_z\", "
+				+ "\"maximum_tolerable_bias_y\",\"maximum_tolerable_bias_x\",\"maximum_tolerable_bias_z\", "
+				+ "\"influence_on_position_y\", \"influence_on_position_x\", \"influence_on_position_z\", "
+				+ "\"influence_on_network_distortion\", "
+				+ "\"omega\", \"p_prio\", \"p_post\", \"t_prio\", \"t_post\", \"significant\") "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
 
 		try {
 			this.dataBase.setAutoCommit(false);
@@ -1406,6 +1416,10 @@ public class SQLAdjustmentManager {
 						stmt.setDouble(idx++, gnssY == null ? 0.0 : gnssY.getMinimalDetectableBias());
 						stmt.setDouble(idx++, gnssX == null ? 0.0 : gnssX.getMinimalDetectableBias());
 						stmt.setDouble(idx++, gnssZ == null ? 0.0 : gnssZ.getMinimalDetectableBias());
+						
+						stmt.setDouble(idx++, gnssY == null ? 0.0 : gnssY.getMaximumTolerableBias());
+						stmt.setDouble(idx++, gnssX == null ? 0.0 : gnssX.getMaximumTolerableBias());
+						stmt.setDouble(idx++, gnssZ == null ? 0.0 : gnssZ.getMaximumTolerableBias());
 
 						stmt.setDouble(idx++, gnssY == null ? 0.0 : gnssY.getInfluenceOnPointPosition());
 						stmt.setDouble(idx++, gnssX == null ? 0.0 : gnssX.getInfluenceOnPointPosition());
@@ -1448,6 +1462,7 @@ public class SQLAdjustmentManager {
 
 						stmt.setDouble(idx++, observation.getGrossError());
 						stmt.setDouble(idx++, observation.getMinimalDetectableBias());
+						stmt.setDouble(idx++, observation.getMaximumTolerableBias());
 
 						stmt.setDouble(idx++, observation.getInfluenceOnPointPosition());
 						stmt.setDouble(idx++, observation.getInfluenceOnNetworkDistortion());

@@ -802,6 +802,7 @@ public class FTLReport {
 				"\"gross_error_x\", \"gross_error_y\", \"gross_error_z\", " +
 				"\"influence_on_position_x\", \"influence_on_position_y\", \"influence_on_position_z\", \"influence_on_network_distortion\", " +
 				"\"minimal_detectable_bias_x\", \"minimal_detectable_bias_y\", \"minimal_detectable_bias_z\", " +
+				"\"maximum_tolerable_bias_x\", \"maximum_tolerable_bias_y\", \"maximum_tolerable_bias_z\", " +
 				"\"first_principal_component_y\", \"first_principal_component_x\", \"first_principal_component_z\", " +
 				"\"omega\", \"p_prio\", \"p_post\", \"t_prio\", \"t_post\", \"significant\" " +
 				"FROM \"PointApriori\" " +
@@ -879,6 +880,9 @@ public class FTLReport {
 					case "minimal_detectable_bias_x":
 					case "minimal_detectable_bias_y":
 					case "minimal_detectable_bias_z":
+					case "maximum_tolerable_bias_x":
+					case "maximum_tolerable_bias_y":
+					case "maximum_tolerable_bias_z":
 					case "first_principal_component_x":
 					case "first_principal_component_y":
 					case "first_principal_component_z":
@@ -989,6 +993,7 @@ public class FTLReport {
 
 				+ "\"residual_x\", \"residual_y\", "
 				+ "\"minimal_detectable_bias_x\", \"minimal_detectable_bias_y\", "
+				+ "\"maximum_tolerable_bias_x\", \"maximum_tolerable_bias_y\", " 
 
 				+ "CASEWHEN(\"sigma_x\" < 0, 0.0, \"sigma_x\") AS \"sigma_x\", "
 				+ "CASEWHEN(\"sigma_y\" < 0, 0.0, \"sigma_y\") AS \"sigma_y\", "
@@ -1048,6 +1053,8 @@ public class FTLReport {
 					case "gross_error_y":
 					case "minimal_detectable_bias_x":
 					case "minimal_detectable_bias_y":
+					case "maximum_tolerable_bias_x":
+					case "maximum_tolerable_bias_y":
 						h.put(key, options.convertAngleResidualToView(verticalDeflectionSet.getDouble(i)));
 						break;
 						
@@ -1135,7 +1142,7 @@ public class FTLReport {
 				+ "\"start_point_name\",\"end_point_name\",\"instrument_height\",\"reflector_height\", "
 				+ "\"value_0\",\"distance_0\", "
 				+ "\"ObservationAposteriori\".\"sigma_0\" AS \"sigma_0\", "
-				+ "\"value\",\"redundancy\",\"residual\",\"gross_error\",\"minimal_detectable_bias\", "
+				+ "\"value\",\"redundancy\",\"residual\",\"gross_error\",\"minimal_detectable_bias\",\"maximum_tolerable_bias\", "
 				+ "CASEWHEN(\"sigma\" < 0, 0.0, \"sigma\") AS \"sigma\", "
 				+ "\"influence_on_position\",\"influence_on_network_distortion\", "
 				+ "\"omega\",\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\" "
@@ -1203,6 +1210,7 @@ public class FTLReport {
 
 					case "gross_error":
 					case "minimal_detectable_bias":
+					case "maximum_tolerable_bias":
 					case "residual":
 						switch(obsType) {
 						case DIRECTION:
@@ -1315,6 +1323,7 @@ public class FTLReport {
 				+ "\"redundancy_y\",\"redundancy_x\",\"redundancy_z\","
 				+ "\"gross_error_y\",\"gross_error_x\",\"gross_error_z\","
 				+ "\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\",\"minimal_detectable_bias_z\","
+				+ "\"maximum_tolerable_bias_y\",\"maximum_tolerable_bias_x\",\"maximum_tolerable_bias_z\","
 				+ "\"influence_on_position_y\",\"influence_on_position_x\",\"influence_on_position_z\","
 				+ "\"influence_on_network_distortion\","
 				+ "\"omega\",\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\" "
@@ -1381,6 +1390,9 @@ public class FTLReport {
 					case "minimal_detectable_bias_x":
 					case "minimal_detectable_bias_y":
 					case "minimal_detectable_bias_z":
+					case "maximum_tolerable_bias_x":
+					case "maximum_tolerable_bias_y":
+					case "maximum_tolerable_bias_z":
 					case "influence_on_position_x":
 					case "influence_on_position_y":
 					case "influence_on_position_z":
@@ -1673,6 +1685,7 @@ public class FTLReport {
 		ResultSet groupSet = stmtGroup.executeQuery();
 		while (groupSet.next()) {
 			boolean significantGroup = false;
+			double maxGrossErrorGroupX = 0, maxGrossErrorGroupY = 0, maxGrossErrorGroupZ = 0;
 			HashMap<String, Object> groupParam = new HashMap<String, Object>();
 			int groupId = groupSet.getInt("id");
 
@@ -1736,6 +1749,14 @@ public class FTLReport {
 
 				boolean significant = pointPairSet.getBoolean("significant");
 
+				double grossErrorX = pointPairSet.getDouble("gross_error_x");
+				double grossErrorY = pointPairSet.getDouble("gross_error_y");
+				double grossErrorZ = pointPairSet.getDouble("gross_error_z");
+
+				maxGrossErrorGroupX = Math.abs(grossErrorX) > Math.abs(maxGrossErrorGroupX) ? grossErrorX : maxGrossErrorGroupX;
+				maxGrossErrorGroupY = Math.abs(grossErrorY) > Math.abs(maxGrossErrorGroupY) ? grossErrorY : maxGrossErrorGroupY;
+				maxGrossErrorGroupZ = Math.abs(grossErrorZ) > Math.abs(maxGrossErrorGroupZ) ? grossErrorZ : maxGrossErrorGroupZ;
+
 				if (!significantGroup && significant)
 					significantGroup = true;
 				
@@ -1748,6 +1769,9 @@ public class FTLReport {
 				groupParam.put("dimension",           dim);
 				groupParam.put("point_pairs",         pointPairs);
 				groupParam.put("significant",         significantGroup );
+				groupParam.put("max_gross_error_x",   options.convertLengthResidualToView(maxGrossErrorGroupX));
+				groupParam.put("max_gross_error_y",   options.convertLengthResidualToView(maxGrossErrorGroupY));
+				groupParam.put("max_gross_error_z",   options.convertLengthResidualToView(maxGrossErrorGroupZ));
 
 				List<HashMap<String, Object>> strainParams = this.getStrainParameters(groupId);
 				if (strainParams != null && !strainParams.isEmpty())

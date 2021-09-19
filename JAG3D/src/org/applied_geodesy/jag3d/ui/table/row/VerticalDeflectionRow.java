@@ -47,6 +47,9 @@ public class VerticalDeflectionRow extends GroupRow {
 	private ObjectProperty<Double> minimalDetectableBiasX = new SimpleObjectProperty<Double>();
 	private ObjectProperty<Double> minimalDetectableBiasY = new SimpleObjectProperty<Double>();
 	
+	private ObjectProperty<Double> maximumTolerableBiasX = new SimpleObjectProperty<Double>(this, "maximumTolerableBiasX");
+	private ObjectProperty<Double> maximumTolerableBiasY = new SimpleObjectProperty<Double>(this, "maximumTolerableBiasY");
+	
 	private ObjectProperty<Double> residualX = new SimpleObjectProperty<Double>();
 	private ObjectProperty<Double> residualY = new SimpleObjectProperty<Double>();
 	
@@ -208,6 +211,30 @@ public class VerticalDeflectionRow extends GroupRow {
 	
 	public final Double getMinimalDetectableBiasY() {
 		return this.minimalDetectableBiasYProperty().get();
+	}
+	
+	public ObjectProperty<Double> maximumTolerableBiasXProperty() {
+		return this.maximumTolerableBiasX;
+	}
+
+	public Double getMaximumTolerableBiasX() {
+		return this.maximumTolerableBiasXProperty().get();
+	}
+
+	public void setMaximumTolerableBiasX(final Double maximumTolerableBiasX) {
+		this.maximumTolerableBiasXProperty().set(maximumTolerableBiasX);
+	}
+	
+	public ObjectProperty<Double> maximumTolerableBiasYProperty() {
+		return this.maximumTolerableBiasY;
+	}
+
+	public Double getMaximumTolerableBiasY() {
+		return this.maximumTolerableBiasYProperty().get();
+	}
+
+	public void setMaximumTolerableBiasY(final Double maximumTolerableBiasY) {
+		this.maximumTolerableBiasYProperty().set(maximumTolerableBiasY);
 	}
 	
 	public final void setMinimalDetectableBiasY(final Double minimalDetectableBiasY) {

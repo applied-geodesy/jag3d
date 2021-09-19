@@ -50,6 +50,10 @@ public class GNSSObservationRow extends ObservationRow {
 	private ObjectProperty<Double> minimalDetectableBiasY = new SimpleObjectProperty<Double>(this, "minimalDetectableBiasY");
 	private ObjectProperty<Double> minimalDetectableBiasZ = new SimpleObjectProperty<Double>(this, "minimalDetectableBiasZ");
 	
+	private ObjectProperty<Double> maximumTolerableBiasX = new SimpleObjectProperty<Double>(this, "maximumTolerableBiasX");
+	private ObjectProperty<Double> maximumTolerableBiasY = new SimpleObjectProperty<Double>(this, "maximumTolerableBiasY");
+	private ObjectProperty<Double> maximumTolerableBiasZ = new SimpleObjectProperty<Double>(this, "maximumTolerableBiasZ");
+	
 	private ObjectProperty<Double> residualX = new SimpleObjectProperty<Double>(this, "residualX");
 	private ObjectProperty<Double> residualY = new SimpleObjectProperty<Double>(this, "residualY");
 	private ObjectProperty<Double> residualZ = new SimpleObjectProperty<Double>(this, "residualZ");
@@ -244,6 +248,42 @@ public class GNSSObservationRow extends ObservationRow {
 	
 	public void setMinimalDetectableBiasZ(final Double minimalDetectableBiasZ) {
 		this.minimalDetectableBiasZProperty().set(minimalDetectableBiasZ);
+	}
+	
+	public ObjectProperty<Double> maximumTolerableBiasXProperty() {
+		return this.maximumTolerableBiasX;
+	}
+
+	public Double getMaximumTolerableBiasX() {
+		return this.maximumTolerableBiasXProperty().get();
+	}
+
+	public void setMaximumTolerableBiasX(final Double maximumTolerableBiasX) {
+		this.maximumTolerableBiasXProperty().set(maximumTolerableBiasX);
+	}
+	
+	public ObjectProperty<Double> maximumTolerableBiasYProperty() {
+		return this.maximumTolerableBiasY;
+	}
+
+	public Double getMaximumTolerableBiasY() {
+		return this.maximumTolerableBiasYProperty().get();
+	}
+
+	public void setMaximumTolerableBiasY(final Double maximumTolerableBiasY) {
+		this.maximumTolerableBiasYProperty().set(maximumTolerableBiasY);
+	}
+	
+	public ObjectProperty<Double> maximumTolerableBiasZProperty() {
+		return this.maximumTolerableBiasZ;
+	}
+
+	public Double getMaximumTolerableBiasZ() {
+		return this.maximumTolerableBiasZProperty().get();
+	}
+
+	public void setMaximumTolerableBiasZ(final Double maximumTolerableBiasZ) {
+		this.maximumTolerableBiasZProperty().set(maximumTolerableBiasZ);
 	}
 	
 	public final ObjectProperty<Double> residualXProperty() {
