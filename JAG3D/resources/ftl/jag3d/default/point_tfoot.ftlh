@@ -106,6 +106,17 @@
 			<td></td>
 		</#if>
 		
+		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT">
+			<#if group.dimension != 1>
+				<td></td>
+				<td></td>
+			</#if>
+		
+			<#if group.dimension != 2>
+				<td></td>
+			</#if>
+		</#if>
+		
 		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>
 			<#if group.dimension != 1>
 				<td></td>

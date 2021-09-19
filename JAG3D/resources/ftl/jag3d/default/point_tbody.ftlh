@@ -132,6 +132,17 @@
 				<td><@printFormattedNumber value=point.influence_on_network_distortion format=df_length_residual/></td>
 			</#if>
 			
+			<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT">
+				<#if group.dimension != 1>
+					<td><@printFormattedNumber value=point.maximum_tolerable_bias_y format=df_length_residual/></td>
+					<td><@printFormattedNumber value=point.maximum_tolerable_bias_x format=df_length_residual/></td>
+				</#if>
+			
+				<#if group.dimension != 2>
+					<td><@printFormattedNumber value=point.maximum_tolerable_bias_z format=df_length_residual/></td>
+				</#if>
+			</#if>
+			
 			<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>
 				<#if group.dimension != 1>
 					<td><@printFormattedNumber value=point.minimal_detectable_bias_y format=df_length_residual/></td>

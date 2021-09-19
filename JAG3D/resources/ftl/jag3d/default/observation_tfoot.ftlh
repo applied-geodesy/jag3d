@@ -94,7 +94,16 @@
 			<#if group.type == "GNSS1D" || group.type == "GNSS3D">
 				<td></td>
 			</#if>
+			
+			<#if group.type == "GNSS2D" || group.type == "GNSS3D">
+				<td></td>
+				<td></td>
+			</#if>
+			<#if group.type == "GNSS1D" || group.type == "GNSS3D">
+				<td></td>
+			</#if>
 		<#else>
+			<td></td>
 			<td></td>
 			<td><@printFormattedNumber value=group.redundancy format=df_percentage/></td>
 			<#if apply_angle_unit??>

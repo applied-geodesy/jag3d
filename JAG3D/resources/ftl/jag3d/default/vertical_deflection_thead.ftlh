@@ -35,8 +35,13 @@
 		</#if>
 		
 		<#if group.type == "REFERENCE_VERTICAL_DEFLECTION" || group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
-			<th><#outputformat "plainText">&nabla;<sub>Y</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_angle_residual}</span></#outputformat></th>
-			<th><#outputformat "plainText">&nabla;<sub>X</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_angle_residual}</span></#outputformat></th>
+			<th><#outputformat "plainText">&nabla;<sub>Y</sub>(1)<span class="unit">${unit_abbr_angle_residual}</span></#outputformat></th>
+			<th><#outputformat "plainText">&nabla;<sub>X</sub>(1)<span class="unit">${unit_abbr_angle_residual}</span></#outputformat></th>
+		</#if>
+		
+		<#if group.type == "REFERENCE_VERTICAL_DEFLECTION" || group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
+			<th><#outputformat "plainText">&nabla;<sub>Y</sub>(&lambda;)<span class="unit">${unit_abbr_angle_residual}</span></#outputformat></th>
+			<th><#outputformat "plainText">&nabla;<sub>X</sub>(&lambda;)<span class="unit">${unit_abbr_angle_residual}</span></#outputformat></th>
 		</#if>
 		
 		<#if group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
