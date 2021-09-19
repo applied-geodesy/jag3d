@@ -31,7 +31,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public class TerrestrialObservationRow extends ObservationRow {
-	private ObjectProperty<Double> valueApriori     = new SimpleObjectProperty<Double>(this, "valueApriori");
+	private ObjectProperty<Double> valueApriori     = new SimpleObjectProperty<Double>(this, "valueApriori", 0.0);
 	private ObjectProperty<Double> valueAposteriori = new SimpleObjectProperty<Double>(this, "valueAposteriori");
 	private ObjectProperty<Double> distanceApriori  = new SimpleObjectProperty<Double>(this, "distanceApriori");
 
