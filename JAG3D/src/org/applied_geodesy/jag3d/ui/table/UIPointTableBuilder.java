@@ -523,11 +523,45 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::grossErrorZProperty, getDoubleCallback(cellValueType), this.dimension != 2 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 2 && this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
+		
+		// MTB
+		// y-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.y.label", "\u2207y(1)");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.y.tooltip", "Maximum tolerable bias in y");
+		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		columnContentType = ColumnContentType.MAXIMUM_TOLERABLE_BIAS_Y;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::maximumTolerableBiasYProperty, getDoubleCallback(cellValueType), this.dimension != 1 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 1 && this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn.setComparator(new AbsoluteValueComparator());
+		table.getColumns().add(doubleColumn);
+
+		// x-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.x.label", "\u2207x(1)");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.x.tooltip", "Maximum tolerable bias in x");
+		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		columnContentType = ColumnContentType.MAXIMUM_TOLERABLE_BIAS_X;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::maximumTolerableBiasXProperty, getDoubleCallback(cellValueType), this.dimension != 1 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 1 && this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn.setComparator(new AbsoluteValueComparator());
+		table.getColumns().add(doubleColumn);
+
+		// z-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.z.label", "\u2207z(1)");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.z.tooltip", "Maximum tolerable bias in z");
+		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		columnContentType = ColumnContentType.MAXIMUM_TOLERABLE_BIAS_Z;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::maximumTolerableBiasZProperty, getDoubleCallback(cellValueType), this.dimension != 2 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 2 && this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn.setComparator(new AbsoluteValueComparator());
+		table.getColumns().add(doubleColumn);
 
 		// MDB
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.y.label", "\u2207y(\u03B1,\u03B2)");
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.y.label", "\u2207y(\u03BB)");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.y.tooltip", "Minimal detectable bias in y");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_Y;
@@ -538,7 +572,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.x.label", "\u2207x(\u03B1,\u03B2)");
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.x.label", "\u2207x(\u03BB)");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.x.tooltip", "Minimal detectable bias in x");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_X;
@@ -549,7 +583,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.z.label", "\u2207z(\u03B1,\u03B2)");
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.z.label", "\u2207z(\u03BB)");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.z.tooltip", "Minimal detectable bias in z");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_Z;
