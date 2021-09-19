@@ -662,6 +662,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		
 		this.tables.put(this.type, table);
 		this.table = table;
+		
 	}
 
 	@Override
@@ -768,8 +769,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 	}
 	
 	private boolean isComplete(TerrestrialObservationRow row) {
-		return row.getStartPointName() != null && !row.getStartPointName().trim().isEmpty() &&
-				row.getEndPointName() != null  && !row.getEndPointName().trim().isEmpty() &&
+		return row.getStartPointName() != null && !row.getStartPointName().isBlank() &&
+				row.getEndPointName() != null  && !row.getEndPointName().isBlank() &&
 				!row.getStartPointName().equals(row.getEndPointName()) &&
 				row.getInstrumentHeight() != null &&
 				row.getReflectorHeight() != null &&
@@ -778,7 +779,24 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 	
 	@Override
 	public TerrestrialObservationRow getEmptyRow() {
-		return new TerrestrialObservationRow();
+		TerrestrialObservationRow emptyRow = new TerrestrialObservationRow();
+		// use the start point name of an existing row as default value, if observations are set of directions
+		if (this.type == ObservationType.DIRECTION && !this.table.getItems().isEmpty()) {
+			List<TerrestrialObservationRow> items = this.table.getItems();
+			String startPointName = null;
+			for (TerrestrialObservationRow observationRow : items) {
+				if (!this.isComplete(observationRow))
+					continue;
+				
+				if (startPointName == null) {
+					startPointName = observationRow.getStartPointName();
+					break;
+				}
+			}
+			if (startPointName != null)
+				emptyRow.setStartPointName(startPointName);
+		}
+		return emptyRow;
 	}
 	
 	@Override

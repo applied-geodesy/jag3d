@@ -966,9 +966,8 @@ public class SQLManager {
 		if (tableModel.size() == 2) // the group and the total vce are identical
 			tableModel.remove(0);
 
-		if (!tableModel.isEmpty())
-			table.getItems().setAll(tableModel);
-		else
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
@@ -1070,9 +1069,8 @@ public class SQLManager {
 		if (tableModel.size() == 2) // the group and the total vce are identical
 			tableModel.remove(0);
 
-		if (!tableModel.isEmpty())
-			table.getItems().setAll(tableModel);
-		else
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
@@ -1217,9 +1215,8 @@ public class SQLManager {
 		if (tableModel.size() == 2) // the group and the total vce are identical
 			tableModel.remove(0);
 
-		if (!tableModel.isEmpty())
-			table.getItems().setAll(tableModel);
-		else
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
@@ -1270,9 +1267,8 @@ public class SQLManager {
 			tableModel.add(row);
 		}
 
-		if (!tableModel.isEmpty())
-			table.getItems().setAll(tableModel);
-		else
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
@@ -1362,9 +1358,8 @@ public class SQLManager {
 			tableModel.add(row);
 		}
 
-		if (!tableModel.isEmpty())
-			table.getItems().setAll(tableModel);
-		else
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
@@ -1485,9 +1480,9 @@ public class SQLManager {
 				tableModel.add(row);
 			}
 		}
-		if (!tableModel.isEmpty())
-			table.getItems().setAll(tableModel);
-		else
+
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
@@ -1619,9 +1614,9 @@ public class SQLManager {
 			row.setSignificant(!rs.wasNull() && significant == Boolean.TRUE);
 			tableModel.add(row);
 		}
-		if (!tableModel.isEmpty())
-			table.getItems().setAll(tableModel);
-		else
+
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
@@ -1818,9 +1813,8 @@ public class SQLManager {
 			tableModel.add(row);
 		}
 
-		if (!tableModel.isEmpty())
-			table.getItems().setAll(tableModel);
-		else
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
@@ -1968,10 +1962,9 @@ public class SQLManager {
 
 			tableModel.add(row);
 		}
-
-		if (!tableModel.isEmpty())
-			table.getItems().setAll(tableModel);
-		else
+		
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
@@ -2145,9 +2138,8 @@ public class SQLManager {
 			tableModel.add(row);
 		}
 
-		if (!tableModel.isEmpty())
-			table.getItems().setAll(tableModel);
-		else
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
@@ -2391,9 +2383,8 @@ public class SQLManager {
 			tableModel.add(row);
 		}
 
-		if (!tableModel.isEmpty())
-			table.getItems().setAll(tableModel);
-		else
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
@@ -2522,9 +2513,8 @@ public class SQLManager {
 			tableModel.add(row);
 		}
 
-		if (!tableModel.isEmpty())
-			table.getItems().setAll(tableModel);
-		else
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
