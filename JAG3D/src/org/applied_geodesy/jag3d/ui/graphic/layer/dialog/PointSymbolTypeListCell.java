@@ -70,7 +70,7 @@ public class PointSymbolTypeListCell extends ListCell<PointSymbolType> {
 		case CROSSED_SQUARE:
 			return i18n.getString("PointSymbolTypeListCell.symbol.crossed_square.label", "Crossed square");
 		case FILLED_CIRCLE:
-			return i18n.getString("PointSymbolTypeListCell.symbol.filled_square.label", "Filled circle");
+			return i18n.getString("PointSymbolTypeListCell.symbol.filled_circle.label", "Filled circle");
 		case FILLED_DIAMAND:
 			return i18n.getString("PointSymbolTypeListCell.symbol.filled_diamand.label", "Filled diamand");
 		case FILLED_HEPTAGON:
