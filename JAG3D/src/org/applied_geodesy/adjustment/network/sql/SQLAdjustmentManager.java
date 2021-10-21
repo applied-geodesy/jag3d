@@ -321,7 +321,7 @@ public class SQLAdjustmentManager {
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		ResultSet rs = stmt.executeQuery();
 
-		if (rs.next()) {
+		while (rs.next()) {
 			int taskTypeId = rs.getInt("task_type");
 			boolean hasTaskType = !rs.wasNull();
 			
