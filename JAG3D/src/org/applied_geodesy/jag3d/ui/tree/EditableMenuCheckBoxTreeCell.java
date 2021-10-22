@@ -25,12 +25,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
-import org.applied_geodesy.jag3d.DefaultApplicationProperty;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
@@ -66,7 +64,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
@@ -961,23 +958,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 	}
 
 	private void removeSelectedGroups() {
-		List<TreeItem<TreeItemValue>> selectedItems = this.getTreeView().getSelectionModel().getSelectedItems();
-		if (selectedItems == null || selectedItems.isEmpty())
-			return;
-		
-		boolean isDeleteConfirmed = !DefaultApplicationProperty.showConfirmDialogOnDelete();
-		
-		if (!isDeleteConfirmed) {
-			Optional<ButtonType> result = OptionDialog.showConfirmationDialog(
-					i18n.getString("EditableMenuCheckBoxTreeCell.message.confirmation.delete.title",   "Delete groups"),
-					i18n.getString("EditableMenuCheckBoxTreeCell.message.confirmation.delete.header",  "Delete groups permanently?"),
-					i18n.getString("EditableMenuCheckBoxTreeCell.message.confirmation.delete.message", "Are you sure you want to remove the selected groups?")
-					);
-			isDeleteConfirmed = result.isPresent() && result.get() == ButtonType.OK;
-		}
-		
-		if (isDeleteConfirmed)
-			UITreeBuilder.getInstance().removeItems(new ArrayList<TreeItem<TreeItemValue>>(selectedItems));
+		UITreeBuilder.getInstance().removeSelectedGroups();
 	}
 	
 	private void mergeSelectedGroups(TreeItem<TreeItemValue> selectedItem) {

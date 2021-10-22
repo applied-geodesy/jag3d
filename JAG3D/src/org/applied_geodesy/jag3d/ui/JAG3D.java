@@ -50,6 +50,7 @@ import org.applied_geodesy.jag3d.ui.dialog.RankDefectDialog;
 import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog;
 import org.applied_geodesy.jag3d.ui.dialog.TableRowHighlightDialog;
 import org.applied_geodesy.jag3d.ui.dialog.TestStatisticDialog;
+import org.applied_geodesy.jag3d.ui.graphic.UIGraphicPaneBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.layer.dialog.LayerManagerDialog;
 import org.applied_geodesy.jag3d.ui.menu.UIMenuBuilder;
 import org.applied_geodesy.jag3d.ui.tabpane.UITabPaneBuilder;
@@ -74,6 +75,10 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeView;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -209,6 +214,27 @@ public class JAG3D extends Application {
 			border.setBottom(hbox);
 
 			Scene scene = new Scene(border);
+			
+			scene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+				final KeyCombination zoomInKeyComb     = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
+				final KeyCombination zoomOutKeyComb    = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
+				final KeyCombination zoomInKeyCombNum  = new KeyCodeCombination(KeyCode.ADD, KeyCombination.CONTROL_DOWN);
+				final KeyCombination zoomOutKeyCombNum = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
+			    public void handle(KeyEvent keyEvent) {
+			        if (keyEvent.getCode() == KeyCode.F5 && !adjustmentButton.isDisabled()) {
+			        	adjustmentButton.fire();
+			        	keyEvent.consume();
+			        }
+			        else if ((zoomInKeyComb.match(keyEvent) || zoomInKeyCombNum.match(keyEvent)) && tabPane.getSelectionModel().getSelectedItem() != null && tabPane.getSelectionModel().getSelectedItem().getContent() == UIGraphicPaneBuilder.getInstance().getPane()) {
+			        	UIGraphicPaneBuilder.getInstance().getLayerManager().zoomIn();
+			        	keyEvent.consume();
+			        }
+			        else if ((zoomOutKeyComb.match(keyEvent) || zoomOutKeyCombNum.match(keyEvent)) && tabPane.getSelectionModel().getSelectedItem() != null && tabPane.getSelectionModel().getSelectedItem().getContent() == UIGraphicPaneBuilder.getInstance().getPane()) {
+			        	UIGraphicPaneBuilder.getInstance().getLayerManager().zoomOut();
+			        	keyEvent.consume();
+			        }
+			    }
+			});
 
 			try {
 				primaryStage.getIcons().addAll(
