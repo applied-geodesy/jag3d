@@ -21,9 +21,12 @@
 
 package org.applied_geodesy.jag3d.ui.tree;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import org.applied_geodesy.jag3d.DefaultApplicationProperty;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 import org.applied_geodesy.jag3d.ui.tabpane.UITabPaneBuilder;
@@ -40,6 +43,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import javafx.event.EventHandler;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.SelectionMode;
@@ -47,6 +52,8 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 public class UITreeBuilder {
@@ -284,6 +291,16 @@ public class UITreeBuilder {
 		this.treeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 //		this.treeView.getSelectionModel().selectedItemProperty().addListener(this.treeSelectionChangeListener);
 		this.treeView.getSelectionModel().getSelectedItems().addListener(this.treeListSelectionChangeListener);
+		
+		this.treeView.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent keyEvent) {
+				if (keyEvent.getSource() == treeView && keyEvent.getCode() == KeyCode.DELETE) {
+					removeSelectedGroups();
+					keyEvent.consume();
+				}
+			}
+		});
 	}
 
 	public void removeAllItems() {
@@ -695,5 +712,25 @@ public class UITreeBuilder {
 	
 	public TreeItem<TreeItemValue> getDirectoryItemByType(TreeItemType itemType) {
 		return this.directoryItemMap.get(itemType);
+	}
+	
+	void removeSelectedGroups() {
+		List<TreeItem<TreeItemValue>> selectedItems = this.treeView.getSelectionModel().getSelectedItems();
+		if (selectedItems == null || selectedItems.isEmpty())
+			return;
+		
+		boolean isDeleteConfirmed = !DefaultApplicationProperty.showConfirmDialogOnDelete();
+		
+		if (!isDeleteConfirmed) {
+			Optional<ButtonType> result = OptionDialog.showConfirmationDialog(
+					i18n.getString("UITreeBuiler.message.confirmation.delete.title",   "Delete groups"),
+					i18n.getString("UITreeBuiler.message.confirmation.delete.header",  "Delete groups permanently?"),
+					i18n.getString("UITreeBuiler.message.confirmation.delete.message", "Are you sure you want to remove the selected groups?")
+					);
+			isDeleteConfirmed = result.isPresent() && result.get() == ButtonType.OK;
+		}
+		
+		if (isDeleteConfirmed)
+			removeItems(new ArrayList<TreeItem<TreeItemValue>>(selectedItems));
 	}
 }

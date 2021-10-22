@@ -44,6 +44,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITableBuilder<T> {
 
@@ -67,19 +69,7 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 				ContextMenuType contextMenuType = (ContextMenuType)((MenuItem)event.getSource()).getUserData();
 				switch(contextMenuType) {
 				case REMOVE:
-					boolean isDeleteConfirmed = !DefaultApplicationProperty.showConfirmDialogOnDelete();
-					if (!isDeleteConfirmed) {
-						Optional<ButtonType> result = OptionDialog.showConfirmationDialog(
-								i18n.getString("UIEditableTableBuilder.message.confirmation.delete.title",   "Delete items"),
-								i18n.getString("UIEditableTableBuilder.message.confirmation.delete.header",  "Delete items permanently?"),
-								i18n.getString("UIEditableTableBuilder.message.confirmation.delete.message", "Are you sure you want to remove the selected items?")
-								);
-						isDeleteConfirmed = result.isPresent() && result.get() == ButtonType.OK;
-					}
-					
-					if (isDeleteConfirmed)
-						removeRows();
-					
+					removeTableRows();
 					break;
 				case SELECT_GROUPS:
 					selectGroups();
@@ -105,7 +95,8 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 		this.table = super.createTable();
 		this.table.setEditable(true);
 		this.enableDragSupport();
-
+		this.addTableKeyEvents();
+		
 		return this.table;
 	}
 
@@ -277,5 +268,36 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private void removeTableRows() {
+		List<GroupRow> selectedRows = new ArrayList<GroupRow>(this.table.getSelectionModel().getSelectedItems());
+		if (selectedRows == null || selectedRows.isEmpty())
+			return;
+		
+		boolean isDeleteConfirmed = !DefaultApplicationProperty.showConfirmDialogOnDelete();
+		if (!isDeleteConfirmed) {
+			Optional<ButtonType> result = OptionDialog.showConfirmationDialog(
+					i18n.getString("UIEditableTableBuilder.message.confirmation.delete.title",   "Delete items"),
+					i18n.getString("UIEditableTableBuilder.message.confirmation.delete.header",  "Delete items permanently?"),
+					i18n.getString("UIEditableTableBuilder.message.confirmation.delete.message", "Are you sure you want to remove the selected items?")
+					);
+			isDeleteConfirmed = result.isPresent() && result.get() == ButtonType.OK;
+		}
+		
+		if (isDeleteConfirmed)
+			removeRows();
+	}
+	
+	private void addTableKeyEvents() {
+		this.table.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent keyEvent) {
+				if (keyEvent.getSource() == table && keyEvent.getCode() == KeyCode.DELETE) {
+					removeTableRows();
+					keyEvent.consume();
+				}
+			}
+		});
 	}
 }
