@@ -291,16 +291,8 @@ public class UITreeBuilder {
 		this.treeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 //		this.treeView.getSelectionModel().selectedItemProperty().addListener(this.treeSelectionChangeListener);
 		this.treeView.getSelectionModel().getSelectedItems().addListener(this.treeListSelectionChangeListener);
-		
-		this.treeView.setOnKeyPressed(new EventHandler<KeyEvent>() {
-			@Override
-			public void handle(KeyEvent keyEvent) {
-				if (keyEvent.getSource() == treeView && keyEvent.getCode() == KeyCode.DELETE) {
-					removeSelectedGroups();
-					keyEvent.consume();
-				}
-			}
-		});
+
+		this.addTreeKeyEvents();
 	}
 
 	public void removeAllItems() {
@@ -732,5 +724,16 @@ public class UITreeBuilder {
 		
 		if (isDeleteConfirmed)
 			removeItems(new ArrayList<TreeItem<TreeItemValue>>(selectedItems));
+	}
+	
+	private void addTreeKeyEvents() {
+		this.treeView.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+			public void handle(KeyEvent keyEvent) {
+				if (keyEvent.getSource() == treeView && keyEvent.getCode() == KeyCode.DELETE) {
+					removeSelectedGroups();
+					keyEvent.consume();
+				}
+			}
+		});
 	}
 }
