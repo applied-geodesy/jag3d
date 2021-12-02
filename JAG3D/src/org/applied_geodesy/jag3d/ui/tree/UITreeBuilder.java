@@ -729,7 +729,7 @@ public class UITreeBuilder {
 	private void addTreeKeyEvents() {
 		this.treeView.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
 			public void handle(KeyEvent keyEvent) {
-				if (keyEvent.getSource() == treeView && keyEvent.getCode() == KeyCode.DELETE) {
+				if (keyEvent.getSource() == treeView && keyEvent.getTarget() == treeView && keyEvent.getCode() == KeyCode.DELETE) {
 					removeSelectedGroups();
 					keyEvent.consume();
 				}

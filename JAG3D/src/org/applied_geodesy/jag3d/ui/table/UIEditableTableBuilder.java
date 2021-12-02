@@ -292,7 +292,7 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 	private void addTableKeyEvents() {
 		this.table.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
 			public void handle(KeyEvent keyEvent) {
-				if (keyEvent.getSource() == table && keyEvent.getCode() == KeyCode.DELETE) {
+				if (keyEvent.getSource() == table && keyEvent.getTarget() == table && keyEvent.getCode() == KeyCode.DELETE) {
 					removeTableRows();
 					keyEvent.consume();
 				}
