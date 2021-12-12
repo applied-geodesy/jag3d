@@ -91,6 +91,7 @@ public class SphericalDeflectionModel {
 		double sLongitude = Math.sin(geographicParameters.longitude);
 		double cLongitude = Math.cos(geographicParameters.longitude);
 		
+		// Hofmann-Wellenhof et al. 1994, Gl (3.11)
 		double sx = cLatitude * cLongitude;
 	    double sy = cLatitude * sLongitude;
 	    double sz = sLatitude;
