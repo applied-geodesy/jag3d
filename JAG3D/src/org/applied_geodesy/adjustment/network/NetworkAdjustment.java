@@ -29,6 +29,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -81,6 +82,7 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.adjustment.statistic.UnadjustedTestStatitic;
 import org.applied_geodesy.transformation.datum.SphericalDeflectionModel;
 
+import javafx.util.Pair;
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Matrices;
@@ -4402,6 +4404,8 @@ public class NetworkAdjustment implements Runnable {
 		int gnss2DCount = 0;
 		int gnss3DCount = 0;
 		
+		Set<Pair<String,String>> zenithangleStationNamesWithKnownDeflections = new HashSet<Pair<String,String>>();
+		
 		for (int i=0; i<this.numberOfObservations; i++) {
 			Observation observation = this.projectObservations.get(i);
 			ObservationGroup observationGroup = observation.getObservationGroup();
@@ -4483,9 +4487,16 @@ public class NetworkAdjustment implements Runnable {
 					this.rankDefect.setRotationZ(DefectType.FREE);
 				
 				// muss dim == 3 sein, darf keine Lotabweichungen haben oder aber besitzt Lotabweichungen die gleichzeitig auch Beobachtungen sind
-				zenithangleStationsWithKnownDeflections += (observation.getStartPoint().getDimension() == 3 && 
+//				zenithangleStationsWithKnownDeflections += (observation.getStartPoint().getDimension() == 3 && 
+//						(!observation.getStartPoint().hasUnknownDeflectionParameters() || 
+//								observation.getStartPoint().hasUnknownDeflectionParameters() && observation.getStartPoint().hasObservedDeflectionParameters())) ? 1 : 0;
+				Pair<String, String> stationAndTargetNames = new Pair<String, String>(observation.getStartPoint().getName(), observation.getEndPoint().getName());
+				if (observation.getStartPoint().getDimension() == 3 && !zenithangleStationNamesWithKnownDeflections.contains(stationAndTargetNames) && 
 						(!observation.getStartPoint().hasUnknownDeflectionParameters() || 
-								observation.getStartPoint().hasUnknownDeflectionParameters() && observation.getStartPoint().hasObservedDeflectionParameters())) ? 1 : 0;
+								observation.getStartPoint().hasUnknownDeflectionParameters() && observation.getStartPoint().hasObservedDeflectionParameters())) {
+					zenithangleStationsWithKnownDeflections++;
+					zenithangleStationNamesWithKnownDeflections.add(stationAndTargetNames);
+				}
 			}
 			else if (observation instanceof GNSSBaseline1D) {
 				if (((GNSSBaseline1D)observation).getDimension() >= 1) {
