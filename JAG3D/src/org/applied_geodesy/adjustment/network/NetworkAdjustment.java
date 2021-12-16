@@ -3221,7 +3221,7 @@ public class NetworkAdjustment implements Runnable {
 					point.setGrossErrors(mdb);
 				else {
 					double tPrio = point.getTprio();
-					double tPost = point.getTpost();
+					double tPost = this.applyAposterioriVarianceOfUnitWeight ? point.getTpost() : 0.0;
 					double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, dim);
 					double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim) : 0.0;
 					point.setProbabilityValues(pPrio, pPost);
@@ -3238,7 +3238,7 @@ public class NetworkAdjustment implements Runnable {
 				VerticalDeflectionY deflectionY = point.getVerticalDeflectionY();
 				
 				int dim = 2;
-				deflectionX.calcStochasticParameters(sigma2apost, dof);
+				deflectionX.calcStochasticParameters(sigma2apost, dof, this.applyAposterioriVarianceOfUnitWeight);
 
 				TestStatisticParameterSet tsPrio = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, Double.POSITIVE_INFINITY);
 				TestStatisticParameterSet tsPost = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, dof-dim);
@@ -3257,7 +3257,7 @@ public class NetworkAdjustment implements Runnable {
 				}
 				else {
 					double tPrio = deflectionX.getTprio();
-					double tPost = deflectionX.getTpost();
+					double tPost = this.applyAposterioriVarianceOfUnitWeight ? deflectionX.getTpost() : 0.0;
 					double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, dim);
 					double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim) : 0.0;
 					// deflectionX strellt stoch. Parameter fuer beide Lotparameter bereit
@@ -3332,7 +3332,7 @@ public class NetworkAdjustment implements Runnable {
 						else {
 							point.setInfluenceOnNetworkDistortion(point.getInfluenceOnNetworkDistortion() * Math.sqrt(sigma2PointMax));
 							double tPrio = point.getTprio();
-							double tPost = point.getTpost();
+							double tPost = this.applyAposterioriVarianceOfUnitWeight ? point.getTpost() : 0.0;
 							double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, dim);
 							double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim) : 0.0;
 							point.setProbabilityValues(pPrio, pPost);
@@ -3384,7 +3384,7 @@ public class NetworkAdjustment implements Runnable {
 						deflectionY.setStd(Math.sqrt(sigma2apost * subQxx.get(1, 1)));
 
 						if ((deflectionX.getRowInJacobiMatrix() >= 0 && deflectionY.getRowInJacobiMatrix() >= 0) || (this.congruenceAnalysis && this.freeNetwork)) { 
-							deflectionX.calcStochasticParameters(sigma2apost, dof);
+							deflectionX.calcStochasticParameters(sigma2apost, dof, this.applyAposterioriVarianceOfUnitWeight);
 
 							TestStatisticParameterSet tsPrio = this.significanceTestStatisticParameters.getTestStatisticParameter(2, Double.POSITIVE_INFINITY);
 							TestStatisticParameterSet tsPost = this.significanceTestStatisticParameters.getTestStatisticParameter(2, dof-2);
@@ -3403,7 +3403,7 @@ public class NetworkAdjustment implements Runnable {
 							}
 							else {
 								double tPrio = deflectionX.getTprio();
-								double tPost = deflectionX.getTpost();
+								double tPost = this.applyAposterioriVarianceOfUnitWeight ? deflectionX.getTpost() : 0.0;
 								double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, 2);
 								double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, 2, dof-2) : 0.0;
 								deflectionX.setPprio(pPrio);
@@ -3605,7 +3605,7 @@ public class NetworkAdjustment implements Runnable {
 							tie.setSigma(sigma);
 
 							double tPrio = tie.getTprio();
-							double tPost = tie.getTpost();
+							double tPost = this.applyAposterioriVarianceOfUnitWeight ? tie.getTpost() : 0.0;
 							double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, dim);
 							double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof) : 0.0;
 
@@ -3646,7 +3646,7 @@ public class NetworkAdjustment implements Runnable {
 							StrainParameter parameter = strainAnalysisEquations.get(i);
 							parameter.setMinimalDetectableBias(parameter.getMinimalDetectableBias() * sqrtLambdaParam);
 							double tPrio = parameter.getTprio();
-							double tPost = parameter.getTpost();
+							double tPost = this.applyAposterioriVarianceOfUnitWeight ? parameter.getTpost() : 0.0;
 							double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, 1);
 							double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, 1, dof) : 0.0;
 							parameter.setConfidence(parameter.getStd() * Math.sqrt( kPrioParam ));

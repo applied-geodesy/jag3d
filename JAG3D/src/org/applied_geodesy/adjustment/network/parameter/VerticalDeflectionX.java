@@ -91,14 +91,14 @@ public class VerticalDeflectionX extends VerticalDeflection {
 		return this.pPost;
 	}
 
-	public void calcStochasticParameters(double sigma2apost, int redundancy) {
+	public void calcStochasticParameters(double sigma2apost, int redundancy, boolean applyAposterioriVarianceOfUnitWeight) {
 		// Bestimmung der Testgroessen
 		double omega = sigma2apost*(double)redundancy;
 		final int dim = 2;
 		double sigma2apostDeflection = (redundancy-dim)>0?(omega-this.nablaCoVarNable)/(redundancy-dim):0.0;
 		
 		this.setTprio(this.nablaCoVarNable/dim);
-		this.setTpost((sigma2apostDeflection > VerticalDeflectionX.ZERO)?this.nablaCoVarNable/(dim*sigma2apostDeflection):0.0);
+		this.setTpost((applyAposterioriVarianceOfUnitWeight && sigma2apost > VerticalDeflectionX.ZERO) ? this.nablaCoVarNable/(dim*sigma2apostDeflection):0.0);
 	}
 	
 	@Override
