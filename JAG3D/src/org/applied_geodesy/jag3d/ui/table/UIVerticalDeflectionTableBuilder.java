@@ -287,22 +287,22 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		// Residual
 		// y-epsilon
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.y.label", "\u03B5y");
-		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component of deflection of the vertical");
+		labelText   = this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.y.label", "\u03B5y")                                                 : i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.deviation.y.label", "\u0394y");
+		tooltipText = this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component of deflection of the vertical") : i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.deviation.y.tooltip", "Deviation of y-component w.r.t. y0");
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_Y;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::residualYProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::residualYProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// x-epsilon
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.x.label", "\u03B5x");
-		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component of deflection of the vertical");
+		labelText   = this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.x.label", "\u03B5y")                                                 : i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.deviation.x.label", "\u0394x");
+		tooltipText = this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component of deflection of the vertical") : i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.deviation.x.tooltip", "Deviation of x-component w.r.t. x0");
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_X;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::residualXProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::residualXProperty, getDoubleCallback(cellValueType), this.type != VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION ? ColumnType.APOSTERIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, false, true);
 		table.getColumns().add(doubleColumn);
 
 		// Gross-error

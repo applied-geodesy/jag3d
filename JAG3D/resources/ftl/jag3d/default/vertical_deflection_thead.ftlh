@@ -24,9 +24,11 @@
 		<#if group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
 			<th><#outputformat "plainText">r<sub>Y</sub><span class="unit">${unit_abbr_percentage}</span></#outputformat></th>
 			<th><#outputformat "plainText">r<sub>X</sub><span class="unit">${unit_abbr_percentage}</span></#outputformat></th>
-			
-			<th><#outputformat "plainText">&epsilon;<sub>Y</sub></#outputformat></th>
-			<th><#outputformat "plainText">&epsilon;<sub>X</sub></#outputformat></th>
+		</#if>
+		
+		<#if group.type != "REFERENCE_VERTICAL_DEFLECTION">
+			<th><#outputformat "plainText">${(group.type == "STOCHASTIC_VERTICAL_DEFLECTION")?string("&epsilon;", "&Delta;")}<sub>Y</sub></#outputformat></th>
+			<th><#outputformat "plainText">${(group.type == "STOCHASTIC_VERTICAL_DEFLECTION")?string("&epsilon;", "&Delta;")}<sub>X</sub></#outputformat></th>
 		</#if>
 		
 		<#if group.type == "REFERENCE_VERTICAL_DEFLECTION" || group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
