@@ -21,6 +21,9 @@
 			<#if group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
 				<td><@printFormattedNumber value=deflection.redundancy_y format=df_percentage/></td>
 				<td><@printFormattedNumber value=deflection.redundancy_x format=df_percentage/></td>
+			</#if>
+			
+			<#if group.type != "REFERENCE_POINT">
 				<td><@printFormattedNumber value=deflection.residual_y format=df_angle_residual/></td>
 				<td><@printFormattedNumber value=deflection.residual_x format=df_angle_residual/></td>
 			</#if>
