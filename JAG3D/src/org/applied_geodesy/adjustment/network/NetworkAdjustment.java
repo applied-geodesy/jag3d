@@ -5382,6 +5382,9 @@ public class NetworkAdjustment implements Runnable {
     						//Pkt,Type(XYZ),Coord,Row in NGL, Num Obs
     		String format = "%25s\t%5s\t%35.15f\t%10d\t%10d%n";
     		for ( Point point : this.allPoints.values() ) {
+    			if (this.interrupt)
+    				break;
+    			
     			int colInJacobi = point.getColInJacobiMatrix();
     			int rowInJacobi = point.getRowInJacobiMatrix();
     			int dim = point.getDimension();
@@ -5433,7 +5436,13 @@ public class NetworkAdjustment implements Runnable {
     		pw = new PrintWriter(new BufferedWriter(new FileWriter( f )));
 
     		for (int i=0; i<this.numberOfUnknownParameters; i++) {
+    			if (this.interrupt)
+    				break;
+    			
     			for (int j=0; j<this.numberOfUnknownParameters; j++) {
+    				if (this.interrupt)
+        				break;
+    				
     				pw.printf(Locale.ENGLISH, "%+35.15f  ", sigma2apost*this.Qxx.get(i,j));
     			}
     			pw.println();
