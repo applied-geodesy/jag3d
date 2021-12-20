@@ -69,11 +69,11 @@ public class UIPrincipalComponentTableBuilder extends UITableBuilder<PrincipalCo
 		table.getColumns().add(doubleColumn);
 	
 		// ratio eigenvalue vs. trace(Cxx)
-		cellValueType = CellValueType.STATISTIC;
+		cellValueType = CellValueType.PERCENTAGE;
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPrincipalComponentTableBuilder.tableheader.ratio.label", "\u03BB(k)/trace(Cxx)");
 		tooltipText = i18n.getString("UIPrincipalComponentTableBuilder.tableheader.ratio.tooltip", "Ratio of eigenvalue \u03BB(k) w.r.t. trace of variance-covariance-matrix");
-		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, PrincipalComponentRow::ratioProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 		

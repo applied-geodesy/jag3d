@@ -302,7 +302,7 @@ public class FTLReport {
 			HashMap<String, Number> component = new HashMap<String, Number>();
 			int index    = rs.getInt("index");
 			double value = options.convertLengthResidualToView(rs.getDouble("value"));
-			double ratio = rs.getDouble("ratio");
+			double ratio = options.convertPercentToView(rs.getDouble("ratio"));
 			component.put("index", index);
 			component.put("value", value);
 			component.put("ratio", ratio);
