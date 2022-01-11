@@ -196,7 +196,7 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 			
 			Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 			dispersion.set(0, 0, sigmaX * sigmaX);
-			dispersion.set(1, 1, sigmaX * sigmaX);
+			dispersion.set(1, 1, sigmaX * sigmaX); // if only two uncertainty colums are given, set sx = sy; sz
 			dispersion.set(2, 2, sigmaZ * sigmaZ);
 			point.setDispersionApriori(dispersion);
 			return point;
@@ -210,7 +210,7 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 			
 			Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 			dispersion.set(0, 0, sigmaX * sigmaX);
-			dispersion.set(1, 1, sigmaX * sigmaX);
+			dispersion.set(1, 1, sigmaY * sigmaY);
 			dispersion.set(2, 2, sigmaZ * sigmaZ);
 			point.setDispersionApriori(dispersion);
 			return point;
