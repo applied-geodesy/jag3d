@@ -108,8 +108,8 @@ public class SphericalDeflectionModel {
 	    double r32 = R[2][1];
 	    double r33 = R[2][2];
 
-	    double dx = r11 * sx + r12 * sy + r13 * sz;
-		double dy = r21 * sx + r22 * sy + r23 * sz;
+	    double dy = r11 * sx + r12 * sy + r13 * sz;
+		double dx = r21 * sx + r22 * sy + r23 * sz;
 		double dz = r31 * sx + r32 * sy + r33 * sz;
 		
 		// Approx. fuer kleine Netze
@@ -117,8 +117,8 @@ public class SphericalDeflectionModel {
 //		double ry = -(r21 * sx + r22 * sy + r23 * sz);
 
 		// Sequence Ry*Rx
-		double rx =  Math.asin(dx);
-		double ry = -Math.atan2(dy, dz);
+		double rx =  Math.asin(dy);
+		double ry = -Math.atan2(dx, dz);
 		
 		// Abstand zw. Ellipsoid und Ebene
 		double surfX = geographicParameters.N * sx;
