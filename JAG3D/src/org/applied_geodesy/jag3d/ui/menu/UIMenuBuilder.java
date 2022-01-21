@@ -787,6 +787,8 @@ public class UIMenuBuilder {
 
 			if (project != null) {
 				DataBase dataBase = new HSQLDB(project);
+				if ((SQLManager.getInstance().getDataBase().getURI().equals(dataBase.getURI())))
+					throw new IOException(this.getClass().getSimpleName() + " : Error, cannot re-import data to the same database!");
 				if (!OADBReader.isCurrentOADBVersion(dataBase)) 
 					throw new DatabaseVersionMismatchException(this.getClass().getSimpleName() + ": Error, database version of the stored project is unequal to the required version of the application!");
 					
