@@ -5443,7 +5443,7 @@ public class NetworkAdjustment implements Runnable {
     				if (this.interrupt)
         				break;
     				
-    				pw.printf(Locale.ENGLISH, "%+35.15f  ", sigma2apost*this.Qxx.get(i,j));
+    				pw.printf(Locale.ENGLISH, "%+35.25f  ", sigma2apost*this.Qxx.get(i,j));
     			}
     			pw.println();
     		}
