@@ -262,9 +262,12 @@ public class SearchAndReplaceDialog {
 
 	private void save() {
 		try {
+			this.searchComboBox.commitValue();
+			this.replaceComboBox.commitValue();
+			
 			String search  = this.searchComboBox.getValue();
 			String replace = this.replaceComboBox.getValue();
-
+			
 			search  = search == null  ? "" : search;
 			replace = replace == null ? "" : replace;
 
