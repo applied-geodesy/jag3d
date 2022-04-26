@@ -30,9 +30,12 @@ import org.applied_geodesy.util.ObservableLimitedList;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
@@ -144,7 +147,21 @@ public class SearchAndReplaceDialog {
 		
 		this.scopeTypeComboBox = this.createScopeTypeComboBox(ScopeType.SELECTION, i18n.getString("SearchAndReplaceDialog.scope.tooltip", "Select scope of application"));
 
-		Label scopeLabel  = new Label(i18n.getString("SearchAndReplaceDialog.scope.label", "Scope:"));
+		Button switchInputButton = new Button(i18n.getString("SearchAndReplaceDialog.switch.label", "\u21C5"));
+		switchInputButton.setTooltip(new Tooltip(i18n.getString("SearchAndReplaceDialog.switch.tooltip", "Switch values")));
+		switchInputButton.setStyle("-fx-font-size:2em");
+		switchInputButton.setPadding(new Insets(2, 2, 2, 2));
+		switchInputButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override public void handle(ActionEvent e) {
+				String search  = searchComboBox.getValue();
+				String replace = replaceComboBox.getValue();
+				
+				searchComboBox.setValue(replace);
+				replaceComboBox.setValue(search);
+			}
+		});
+
+		Label scopeLabel   = new Label(i18n.getString("SearchAndReplaceDialog.scope.label", "Scope:"));
 		Label searchLabel  = new Label(i18n.getString("SearchAndReplaceDialog.search.label", "Find what:"));
 		Label replaceLabel = new Label(i18n.getString("SearchAndReplaceDialog.replace.label", "Replace with:"));
 		Label modeLabel    = new Label(i18n.getString("SearchAndReplaceDialog.mode.label", "Mode:"));
@@ -152,6 +169,8 @@ public class SearchAndReplaceDialog {
 		scopeLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		searchLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		replaceLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		switchInputButton.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		
 		scopeLabel.setLabelFor(this.scopeTypeComboBox);
 		searchLabel.setLabelFor(this.searchComboBox);
 		replaceLabel.setLabelFor(this.replaceComboBox);
@@ -165,34 +184,36 @@ public class SearchAndReplaceDialog {
 
 		GridPane gridPane = new GridPane();
 		gridPane.setMaxWidth(Double.MAX_VALUE);
-		gridPane.setHgap(20);
+		gridPane.setHgap(10);
 		gridPane.setVgap(10);
 		gridPane.setAlignment(Pos.CENTER);
 		gridPane.setPadding(new Insets(5,15,5,15)); 
 		//gridPane.setGridLinesVisible(true);
 		
-		GridPane.setHgrow(scopeLabel,   Priority.NEVER);
-		GridPane.setHgrow(searchLabel,  Priority.NEVER);
-		GridPane.setHgrow(replaceLabel, Priority.NEVER);
-		GridPane.setHgrow(modeLabel,    Priority.NEVER);
+		GridPane.setHgrow(scopeLabel,        Priority.NEVER);
+		GridPane.setHgrow(searchLabel,       Priority.NEVER);
+		GridPane.setHgrow(replaceLabel,      Priority.NEVER);
+		GridPane.setHgrow(modeLabel,         Priority.NEVER);
+		GridPane.setHgrow(switchInputButton, Priority.NEVER);
 		
-		GridPane.setHgrow(this.searchComboBox,  Priority.ALWAYS);
-		GridPane.setHgrow(this.replaceComboBox, Priority.ALWAYS);
-		GridPane.setHgrow(hbox,                 Priority.ALWAYS);
+		GridPane.setHgrow(this.searchComboBox,    Priority.ALWAYS);
+		GridPane.setHgrow(this.replaceComboBox,   Priority.ALWAYS);
+		GridPane.setHgrow(hbox,                   Priority.ALWAYS);
 		GridPane.setHgrow(this.scopeTypeComboBox, Priority.ALWAYS);
 				
 		int row = 1;
-		gridPane.add(scopeLabel,                   0, row);
-		gridPane.add(this.scopeTypeComboBox, 1, row++);
+		gridPane.add(scopeLabel,             0, row);
+		gridPane.add(this.scopeTypeComboBox, 1, row++, 2, 1);
 		
-		gridPane.add(searchLabel,           0, row);
-		gridPane.add(this.searchComboBox,   1, row++);
+		gridPane.add(switchInputButton,      3, row, 1, 2);
+		gridPane.add(searchLabel,            0, row);
+		gridPane.add(this.searchComboBox,    1, row++, 2, 1);
 
-		gridPane.add(replaceLabel,          0, row);
-		gridPane.add(this.replaceComboBox,  1, row++);
+		gridPane.add(replaceLabel,           0, row);
+		gridPane.add(this.replaceComboBox,   1, row++, 2, 1);
 		
-		gridPane.add(modeLabel,             0, row);
-		gridPane.add(hbox,                  1, row++);
+		gridPane.add(modeLabel,              0, row);
+		gridPane.add(hbox,                   1, row++, 2, 1);
 
 			
 		Platform.runLater(new Runnable() {
