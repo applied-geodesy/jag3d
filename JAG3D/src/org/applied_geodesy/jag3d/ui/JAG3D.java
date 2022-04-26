@@ -21,6 +21,7 @@
 
 package org.applied_geodesy.jag3d.ui;
 
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -214,7 +215,7 @@ public class JAG3D extends Application {
 			border.setBottom(hbox);
 
 			Scene scene = new Scene(border);
-			
+
 			scene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
 				final KeyCombination zoomInKeyComb     = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
 				final KeyCombination zoomOutKeyComb    = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
@@ -235,7 +236,18 @@ public class JAG3D extends Application {
 			        }
 			    }
 			});
+			
+			// add external style definitions
+			try {
+				URL appStyleURL = JAG3D.class.getResource("/css/jag3d.css");
+				if (appStyleURL != null)
+					scene.getStylesheets().add(appStyleURL.toExternalForm());
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
 
+			// add icons
 			try {
 				primaryStage.getIcons().addAll(
 						ImageUtils.getImage("JAG3D_16x16.png"),
