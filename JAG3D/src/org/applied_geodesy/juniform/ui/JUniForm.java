@@ -21,6 +21,7 @@
 
 package org.applied_geodesy.juniform.ui;
 
+import java.net.URL;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -192,6 +193,18 @@ public class JUniForm extends Application {
 			border.setBottom(hbox);
 
 			Scene scene = new Scene(border);
+			
+			// add external style definitions
+			try {
+				URL appStyleURL = JUniForm.class.getResource("/css/juniform.css");
+				if (appStyleURL != null)
+					scene.getStylesheets().add(appStyleURL.toExternalForm());
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+			// add icons
 			try {
 				primaryStage.getIcons().addAll(
 						ImageUtils.getImage("JUniForm_16x16.png"),
