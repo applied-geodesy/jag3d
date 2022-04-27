@@ -55,14 +55,6 @@ import javafx.util.Pair;
 import javafx.util.StringConverter;
 
 public class SearchAndReplaceDialog {
-
-	public enum ScopeType {
-		SELECTION,
-		PROJECT,
-		REFERENCE_EPOCH,
-		CONTROL_EPOCH;
-	}
-	
 	private I18N i18n = I18N.getInstance();
 	private static SearchAndReplaceDialog searchAndReplaceDialog = new SearchAndReplaceDialog();
 	private Dialog<Pair<String, String>> dialog = null;

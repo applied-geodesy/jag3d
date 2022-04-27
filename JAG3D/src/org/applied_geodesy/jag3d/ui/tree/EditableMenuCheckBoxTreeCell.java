@@ -34,6 +34,7 @@ import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.JAG3D;
+import org.applied_geodesy.jag3d.ui.dialog.InstrumentAndReflectorHeightAdaptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog;
 import org.applied_geodesy.jag3d.ui.dnd.CongruenceAnalysisRowDnD;
 import org.applied_geodesy.jag3d.ui.dnd.GNSSObservationRowDnD;
@@ -112,6 +113,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		EXPORT,
 		MERGE,
 		SEARCH_AND_REPLACE,
+		ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT,
 		CHANGE_TO_REFERENCE_POINT_GROUP,
 		CHANGE_TO_STOCHASTIC_POINT_GROUP,
 		CHANGE_TO_DATUM_POINT_GROUP,
@@ -578,6 +580,9 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 				case SEARCH_AND_REPLACE:
 					searchAndReplace(selectedItem);
 					break;
+				case ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT:
+					adaptInstrumentAndReflectorHeights(selectedItem);
+					break;
 				case MERGE:
 					mergeSelectedGroups(selectedItem);
 					break;
@@ -632,10 +637,21 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		MenuItem searchAndReplaceItem = new MenuItem(i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.search_and_replace", "Search and replace"));
 		searchAndReplaceItem.setUserData(ContextMenuType.SEARCH_AND_REPLACE);
 		searchAndReplaceItem.setOnAction(listener);
-
-		this.contextMenu = new ContextMenu(addItem, removeItem, mergeItem, searchAndReplaceItem, exportItem);
-
-		if (TreeItemType.isPointTypeLeaf(itemType)) {
+		
+		this.contextMenu = new ContextMenu(addItem, removeItem, mergeItem, exportItem, searchAndReplaceItem);
+		
+		if (TreeItemType.isObservationTypeLeaf(itemType)) {
+			MenuItem instrumentAndReflectorHeightItem = new MenuItem(i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.instrument_and_reflector_height", "Height adaption"));
+			instrumentAndReflectorHeightItem.setUserData(ContextMenuType.ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT);
+			instrumentAndReflectorHeightItem.setOnAction(listener);
+			
+			this.contextMenu.getItems().addAll(
+					new SeparatorMenuItem(),
+					instrumentAndReflectorHeightItem
+					);
+		}
+		
+		else if (TreeItemType.isPointTypeLeaf(itemType)) {
 			ToggleGroup pointTypeToogleGroup = new ToggleGroup();
 
 			RadioMenuItem referencePointMenuItem = createRadioMenuItem(
@@ -1009,6 +1025,19 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 						e);
 			}
 		}
+	}
+	
+	private void adaptInstrumentAndReflectorHeights(TreeItem<TreeItemValue> selectedItem) {
+		List<TreeItem<TreeItemValue>> selectedItems = this.getTreeView().getSelectionModel().getSelectedItems();
+
+		TreeItemValue selectedTreeItemValues[] = new TreeItemValue[selectedItems != null ? selectedItems.size() : 0];
+		for (int i=0; i<selectedItems.size(); i++) {
+			selectedTreeItemValues[i] = selectedItems.get(i).getValue();
+		}
+		
+//		this.getTreeView().getSelectionModel().clearSelection();
+		InstrumentAndReflectorHeightAdaptionDialog.showAndWait(selectedItem.getValue(), selectedTreeItemValues);
+//		this.getTreeView().getSelectionModel().select(selectedItem);
 	}
 	
 	private void searchAndReplace(TreeItem<TreeItemValue> selectedItem) {
