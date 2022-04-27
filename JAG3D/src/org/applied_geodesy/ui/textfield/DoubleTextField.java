@@ -203,6 +203,8 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 			return null;
 
 		value = this.getNumber();
+		if (value == null)
+			return null;
 
 		switch(this.type) {
 		case ANGLE:
@@ -264,6 +266,8 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 			return null;
 		
 		value = this.getNumber();
+		if (value == null)
+			return null;
 		
 		switch(this.type) {
 		case ANGLE:
@@ -394,6 +398,9 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 					// set new value, if valid
 					this.setNumber(!this.check(newValue) ? this.getNumber() : newValue);
 				}
+			}
+			else if ((input == null || input.trim().isEmpty()) && this.check(null)) {
+				this.setNumber(null);
 			}
 			this.selectAll();
 			

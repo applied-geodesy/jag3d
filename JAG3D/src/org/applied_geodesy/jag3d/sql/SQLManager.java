@@ -62,7 +62,7 @@ import org.applied_geodesy.adjustment.network.sql.SQLAdjustmentManager;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.ui.dialog.LeastSquaresSettingDialog.LeastSquaresSettings;
-import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog.ScopeType;
+import org.applied_geodesy.jag3d.ui.dialog.ScopeType;
 import org.applied_geodesy.jag3d.ui.graphic.UIGraphicPaneBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.sql.SQLGraphicManager;
 import org.applied_geodesy.jag3d.ui.io.ImportOption;
@@ -4223,6 +4223,112 @@ public class SQLManager {
 		stmt.setDouble(idx++,   settings.getWeightZero());
 
 		stmt.execute();
+	}
+	
+	public void adaptInstrumentAndReflectorHeights(String stationNameRegex, String targetNameRegex, Double instrumentHeight, Double reflectorHeight, ScopeType scopeType, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
+		if (instrumentHeight == null && reflectorHeight == null)
+			return;
+		
+		if (scopeType != ScopeType.SELECTION) {
+			UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
+			TreeItemType[] itemTypes = TreeItemType.values();
+			for (TreeItemType itemType : itemTypes) {
+				if (TreeItemType.isObservationTypeDirectory(itemType)) {
+
+					TreeItem<TreeItemValue> parent = treeBuilder.getDirectoryItemByType(itemType);
+
+					if (parent != null && !parent.getChildren().isEmpty()) {
+						List<TreeItem<TreeItemValue>> items = parent.getChildren();
+						TreeItemValue[] itemValues = new TreeItemValue[items.size()];
+						for (int i = 0; i < itemValues.length; i++) 
+							itemValues[i] = items.get(i).getValue();
+						
+						this.scopedInstrumentAndReflectorHeightsAdaption(scopeType, stationNameRegex, targetNameRegex, instrumentHeight, reflectorHeight, itemValues[0], itemValues);
+					}
+				}
+			}
+			
+			List<TreeItem<TreeItemValue>> selectedItems = new ArrayList<TreeItem<TreeItemValue>>(treeBuilder.getTree().getSelectionModel().getSelectedItems());
+			if (selectedItems != null && !selectedItems.isEmpty()) {
+				treeBuilder.getTree().getSelectionModel().clearSelection();
+				for (TreeItem<TreeItemValue> selectedItem : selectedItems)
+					treeBuilder.getTree().getSelectionModel().select(selectedItem);
+			}
+		}
+		else {
+			this.scopedInstrumentAndReflectorHeightsAdaption(scopeType, stationNameRegex, targetNameRegex, instrumentHeight, reflectorHeight, itemValue, selectedTreeItemValues);
+		}
+	}
+	
+	private void scopedInstrumentAndReflectorHeightsAdaption(ScopeType scopeType, String stationNameRegex, String targetNameRegex, Double instrumentHeight, Double reflectorHeight, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
+		TreeItemType treeItemType = itemValue.getItemType();
+		
+		switch(treeItemType) {
+		case LEVELING_LEAF:
+		case DIRECTION_LEAF:
+		case HORIZONTAL_DISTANCE_LEAF:
+		case SLOPE_DISTANCE_LEAF:
+		case ZENITH_ANGLE_LEAF:
+			if (itemValue instanceof ObservationTreeItemValue) {
+				ObservationTreeItemValue observationItemValue = (ObservationTreeItemValue)itemValue;
+				ObservationTreeItemValue[] selectedObservationItemValuesArray = null;
+				Set<ObservationTreeItemValue> selectedObservationItemValues = new LinkedHashSet<ObservationTreeItemValue>();
+				selectedObservationItemValues.add(observationItemValue);
+
+				if (selectedTreeItemValues != null) {
+					for (TreeItemValue selectedItem : selectedTreeItemValues) {
+						if (selectedItem instanceof ObservationTreeItemValue)
+							selectedObservationItemValues.add((ObservationTreeItemValue)selectedItem);
+					}
+				}
+				selectedObservationItemValuesArray = selectedObservationItemValues.toArray(new ObservationTreeItemValue[selectedObservationItemValues.size()]);
+
+				StringBuffer sql = new StringBuffer("UPDATE \"ObservationApriori\" SET ");
+				
+				if (instrumentHeight != null) {
+					sql.append("\"instrument_height\" = ? ");
+					if (reflectorHeight != null)
+						sql.append(" AND ");
+				}
+				if (reflectorHeight != null)
+					sql.append("\"reflector_height\" = ? ");
+				
+				sql.append("WHERE REGEXP_MATCHES(\"start_point_name\", ?) AND REGEXP_MATCHES(\"end_point_name\", ?) AND \"group_id\" = ? AND (SELECT \"reference_epoch\" FROM \"ObservationGroup\" WHERE \"id\" = ?) IN (?,?) ");
+				
+				for (ObservationTreeItemValue observationTreeItemValue : selectedObservationItemValues) {
+					PreparedStatement stmt = this.dataBase.getPreparedStatement(sql.toString());
+					int idx = 1;
+					
+					if (instrumentHeight != null)
+						stmt.setDouble(idx++, instrumentHeight.doubleValue());
+					
+					if (reflectorHeight != null)
+						stmt.setDouble(idx++, reflectorHeight.doubleValue());
+					
+					stmt.setString(idx++, stationNameRegex);
+					stmt.setString(idx++, targetNameRegex);
+					
+					stmt.setInt(idx++, observationTreeItemValue.getGroupId());
+					stmt.setInt(idx++, observationTreeItemValue.getGroupId());
+
+					stmt.setBoolean(idx++, scopeType == ScopeType.REFERENCE_EPOCH);
+					stmt.setBoolean(idx++, scopeType != ScopeType.CONTROL_EPOCH);
+					
+					stmt.execute();
+				}
+				this.loadObservations(observationItemValue, selectedObservationItemValuesArray);
+			}
+			break;
+			
+		default:
+			break;
+		}
 	}
 	
 	public void searchAndReplacePointNames(String searchRegex, String replaceRegex, ScopeType scopeType, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
