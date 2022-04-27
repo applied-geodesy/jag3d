@@ -134,8 +134,8 @@ public class SearchAndReplaceDialog {
 				i18n.getString("SearchAndReplaceDialog.search.tooltip", "Enter old point name"));
 		
 		this.replaceComboBox = this.createComboBox(
-				i18n.getString("SearchAndReplaceDialog.replace.prompt", "Old point name"),
-				i18n.getString("SearchAndReplaceDialog.replace.tooltip", "Enter old point name"));
+				i18n.getString("SearchAndReplaceDialog.replace.prompt", "New point name"),
+				i18n.getString("SearchAndReplaceDialog.replace.tooltip", "Enter new point name"));
 		
 		this.normalModeRadioButton = this.createRadioButton(
 				i18n.getString("SearchAndReplaceDialog.mode.normal.label", "Normal"), 
