@@ -252,7 +252,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.redundancy.z.label", "rz");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.z.tooltip", "Redundancy of z-component");
 		cellValueType = CellValueType.PERCENTAGE;
-		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FeaturePoint::redundancyZProperty, getDoubleCallback(cellValueType), this.featureType == FeatureType.SURFACE ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
