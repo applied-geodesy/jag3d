@@ -433,6 +433,9 @@ public class FTLReport {
 				h.put("minimal_detectable_bias_x", options.convertLengthResidualToView(point.getMinimalDetectableBiasX()));
 				h.put("minimal_detectable_bias_y", options.convertLengthResidualToView(point.getMinimalDetectableBiasY()));
 				
+				h.put("maximum_tolerable_bias_x", options.convertLengthResidualToView(point.getMaximumTolerableBiasX()));
+				h.put("maximum_tolerable_bias_y", options.convertLengthResidualToView(point.getMaximumTolerableBiasY()));
+				
 				double grossErrorX = options.convertLengthResidualToView(point.getGrossErrorX());
 				double grossErrorY = options.convertLengthResidualToView(point.getGrossErrorY());
 				
@@ -463,6 +466,8 @@ public class FTLReport {
 				h.put("residual_z", options.convertLengthResidualToView(point.getResidualZ()));
 				
 				h.put("minimal_detectable_bias_z", options.convertLengthResidualToView(point.getMinimalDetectableBiasZ()));
+				
+				h.put("maximum_tolerable_bias_z", options.convertLengthResidualToView(point.getMaximumTolerableBiasZ()));
 				
 				double grossErrorZ = options.convertLengthResidualToView(point.getGrossErrorZ());
 				

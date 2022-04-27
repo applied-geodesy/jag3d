@@ -354,7 +354,7 @@ public class FeaturePoint extends Point implements Iterable<GeometricPrimitive> 
 	}
 	
 	public double getMaximumTolerableBiasX() {
-		return this.minimalDetectableBiasX.get();
+		return this.maximumTolerableBiasX.get();
 	}
 	
 	public void setMaximumTolerableBiasX(double maximumTolerableBiasX) {
@@ -366,7 +366,7 @@ public class FeaturePoint extends Point implements Iterable<GeometricPrimitive> 
 	}
 	
 	public double getMaximumTolerableBiasY() {
-		return this.minimalDetectableBiasY.get();
+		return this.maximumTolerableBiasY.get();
 	}
 	
 	public void setMaximumTolerableBiasY(double maximumTolerableBiasY) {
@@ -378,7 +378,7 @@ public class FeaturePoint extends Point implements Iterable<GeometricPrimitive> 
 	}
 	
 	public double getMaximumTolerableBiasZ() {
-		return this.minimalDetectableBiasZ.get();
+		return this.maximumTolerableBiasZ.get();
 	}
 	
 	public void setMaximumTolerableBiasZ(double maximumTolerableBiasZ) {
