@@ -322,7 +322,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 		// MDB
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.x.label", "\u2207x(\u03B1,\u03B2)");
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.x.label", "\u2207x(\u03BB)");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.x.tooltip", "Minimal detectable bias in x");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
@@ -332,7 +332,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 		
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.y.label", "\u2207y(\u03B1,\u03B2)");
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.y.label", "\u2207y(\u03BB)");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.y.tooltip", "Minimal detectable bias in y");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
@@ -342,11 +342,42 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.z.label", "\u2207z(\u03B1,\u03B2)");
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.z.label", "\u2207z(\u03BB)");
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.z.tooltip", "Minimal detectable bias in z");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FeaturePoint::minimalDetectableBiasZProperty, getDoubleCallback(cellValueType), this.featureType == FeatureType.SURFACE ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn.setComparator(new AbsoluteValueComparator());
+		table.getColumns().add(doubleColumn);
+		
+		// MTB
+		// x-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.x.label", "\u2207x(1)");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.x.tooltip", "Maximum tolerable bias in x");
+		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(header, FeaturePoint::maximumTolerableBiasXProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT, columnIndex, false);
+		doubleColumn.setComparator(new AbsoluteValueComparator());
+		table.getColumns().add(doubleColumn);
+
+		// y-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.y.label", "\u2207y(1)");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.y.tooltip", "Maximum tolerable bias in y");
+		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(header, FeaturePoint::maximumTolerableBiasYProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT, columnIndex, false);
+		doubleColumn.setComparator(new AbsoluteValueComparator());
+		table.getColumns().add(doubleColumn);
+
+		// z-Comp
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.z.label", "\u2207z(1)");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.z.tooltip", "Maximum tolerable bias in z");
+		cellValueType = CellValueType.LENGTH_RESIDUAL;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
+		doubleColumn = this.<Double>getColumn(header, FeaturePoint::maximumTolerableBiasZProperty, getDoubleCallback(cellValueType), this.featureType == FeatureType.SURFACE ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 		

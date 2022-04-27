@@ -1148,7 +1148,7 @@ public class FeatureAdjustment {
 			if (dim != 2)
 				point.setGrossErrorZ(grossErrors.get(dim - 1));
 
-			// estimate minimal detectable bias, using same orientation as gross error vector
+			// estimate maximum tolerable/minimal detectable bias, using same orientation as gross error vector
 			// nabla0 * Pnn * nabla0 == 1  or  nabla0 * Pnn * nabla0 == ncp
 			Vector minimalDetectableBias = new DenseVector(grossErrors, true);
 			Vector weightedMinimalDetectableBias = new DenseVector(dim);
@@ -1162,9 +1162,13 @@ public class FeatureAdjustment {
 			if (dim != 1) {
 				point.setMinimalDetectableBiasX(nonCentralityParameter * minimalDetectableBias.get(0));
 				point.setMinimalDetectableBiasY(nonCentralityParameter * minimalDetectableBias.get(1));
+				point.setMaximumTolerableBiasX(minimalDetectableBias.get(0));
+				point.setMaximumTolerableBiasY(minimalDetectableBias.get(1));
 			}
-			if (dim != 2)
+			if (dim != 2) {
 				point.setMinimalDetectableBiasZ(nonCentralityParameter * minimalDetectableBias.get(dim - 1));
+				point.setMaximumTolerableBiasZ(minimalDetectableBias.get(dim - 1));
+			}
 			
 			// change sign, i.e. residual vs. error
 			double T = -weightedResiduals.dot(grossErrors);
