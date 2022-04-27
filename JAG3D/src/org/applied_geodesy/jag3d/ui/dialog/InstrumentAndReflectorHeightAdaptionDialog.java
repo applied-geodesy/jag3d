@@ -123,12 +123,12 @@ public class InstrumentAndReflectorHeightAdaptionDialog {
 	
 	private Node createPane() {
 		this.stationNameComboBox = this.createComboBox(
-				i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.station.prompt", "Id of station point"),
-				i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.station.tooltip", "Enter station name (optional)"));
+				i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.station.prompt", "Id of station point (optional)"),
+				i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.station.tooltip", "Enter station name (leave blank, if not required)"));
 		
 		this.targetNameComboBox = this.createComboBox(
-				i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.target.prompt", "Id of target point"),
-				i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.target.tooltip", "Enter target name (optional)"));
+				i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.target.prompt", "Id of target point (optional)"),
+				i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.target.tooltip", "Enter target name (leave blank, if not required)"));
 		
 		this.normalModeRadioButton = this.createRadioButton(
 				i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.mode.normal.label", "Normal"), 

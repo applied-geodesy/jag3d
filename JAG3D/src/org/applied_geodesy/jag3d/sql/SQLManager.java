@@ -4294,13 +4294,13 @@ public class SQLManager {
 				if (instrumentHeight != null) {
 					sql.append("\"instrument_height\" = ? ");
 					if (reflectorHeight != null)
-						sql.append(" AND ");
+						sql.append(", ");
 				}
 				if (reflectorHeight != null)
 					sql.append("\"reflector_height\" = ? ");
 				
 				sql.append("WHERE REGEXP_MATCHES(\"start_point_name\", ?) AND REGEXP_MATCHES(\"end_point_name\", ?) AND \"group_id\" = ? AND (SELECT \"reference_epoch\" FROM \"ObservationGroup\" WHERE \"id\" = ?) IN (?,?) ");
-				
+
 				for (ObservationTreeItemValue observationTreeItemValue : selectedObservationItemValues) {
 					PreparedStatement stmt = this.dataBase.getPreparedStatement(sql.toString());
 					int idx = 1;
