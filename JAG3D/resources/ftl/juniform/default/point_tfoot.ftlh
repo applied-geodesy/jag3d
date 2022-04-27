@@ -64,6 +64,15 @@
 		<#if feature_points.dimension != 2>
 			<td></td>
 		</#if>
+		
+		<#if feature_points.dimension != 1>
+			<td></td>
+			<td></td>
+		</#if>
+		
+		<#if feature_points.dimension != 2>
+			<td></td>
+		</#if>
 			
 		<td></td>
 		<td></td>

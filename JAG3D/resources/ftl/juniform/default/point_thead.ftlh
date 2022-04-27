@@ -57,12 +57,21 @@
 		</#if>
 		
 		<#if feature_points.dimension != 1>
-			<th><#outputformat "plainText">&nabla;<sub>x</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
-			<th><#outputformat "plainText">&nabla;<sub>y</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+			<th><#outputformat "plainText">&nabla;<sub>x</sub>(1)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+			<th><#outputformat "plainText">&nabla;<sub>y</sub>(1)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 		</#if>
 		
 		<#if feature_points.dimension != 2>
-			<th><#outputformat "plainText">&nabla;<sub>z</sub>(&alpha;,&beta;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+			<th><#outputformat "plainText">&nabla;<sub>z</sub>(1)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+		</#if>
+		
+		<#if feature_points.dimension != 1>
+			<th><#outputformat "plainText">&nabla;<sub>x</sub>(&lambda;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+			<th><#outputformat "plainText">&nabla;<sub>y</sub>(&lambda;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+		</#if>
+		
+		<#if feature_points.dimension != 2>
+			<th><#outputformat "plainText">&nabla;<sub>z</sub>(&lambda;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 		</#if>
 
 		<th><#outputformat "plainText">log(p<sub>prio</sub>)</#outputformat></th>
