@@ -3076,6 +3076,7 @@ public class NetworkAdjustment implements Runnable {
 				if (this.interrupt)
 					return;
 				Point point = this.pointsWithReferenceDeflection.get(i);
+				boolean isStation = false;
 				
 				VerticalDeflectionX deflectionX = point.getVerticalDeflectionX();
 				VerticalDeflectionY deflectionY = point.getVerticalDeflectionY();
@@ -3100,6 +3101,7 @@ public class NetworkAdjustment implements Runnable {
 								b = observationB.diffVerticalDeflectionXs();
 							else if (c==1)
 								b = observationB.diffVerticalDeflectionYs();
+							isStation = true;
 						}
 						else if (observationB.getEndPoint().equals(point)) {
 							if (c==0)
@@ -3147,7 +3149,7 @@ public class NetworkAdjustment implements Runnable {
 				boolean isCalculated = false;
 				ConfidenceRegion confidenceRegion = null;
 
-				if (observations.size() >= dim) {
+				if (isStation && observations.size() >= dim) {
 					try {
 						Qnn = MathExtension.pinv(BTPQvvPB, -1);
 						confidenceRegion = new ConfidenceRegion(Qnn);
