@@ -150,6 +150,7 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 		case IMPORT_LAND_XML2D:
 		case IMPORT_LAND_XML3D:
 		case IMPORT_M5:
+		case IMPORT_GKA:
 		case IMPORT_JOB_XML2D:
 		case IMPORT_JOB_XML2DH:
 		case IMPORT_JOB_XML3D:
