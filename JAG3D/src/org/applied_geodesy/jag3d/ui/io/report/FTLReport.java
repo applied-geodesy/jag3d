@@ -43,10 +43,13 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.applied_geodesy.adjustment.EstimationType;
+import org.applied_geodesy.adjustment.network.ObservationGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.ParameterType;
+import org.applied_geodesy.adjustment.network.PointGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.adjustment.network.VarianceComponentType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
@@ -782,7 +785,10 @@ public class FTLReport {
 
 	private List<HashMap<String, Object>> getPointGroups(int dim, PointType pointType) throws SQLException {
 		List<HashMap<String, Object>> groups = new ArrayList<HashMap<String, Object>>();
+		
 		String sqlGroup = "SELECT \"id\", \"name\" FROM \"PointGroup\" WHERE \"dimension\" = ? AND \"type\" = ? AND \"enable\" = TRUE";
+		
+		String sqlUncertainty = "SELECT \"type\", \"value\" FROM \"PointGroupUncertainty\" WHERE \"group_id\" = ?";
 
 		String sqlPoint = "SELECT " +
 				"\"name\", \"code\", " +
@@ -810,7 +816,10 @@ public class FTLReport {
 				"WHERE \"PointApriori\".\"group_id\" = ? AND \"PointApriori\".\"enable\" = TRUE " + 
 				"ORDER BY \"PointApriori\".\"id\" ASC"; 
 
-		PreparedStatement stmtGroup = this.dataBase.getPreparedStatement(sqlGroup);
+		PreparedStatement stmtGroup       = this.dataBase.getPreparedStatement(sqlGroup);
+		PreparedStatement stmtPoint       = this.dataBase.getPreparedStatement(sqlPoint);
+		PreparedStatement stmtUncertainty = this.dataBase.getPreparedStatement(sqlUncertainty);
+		
 		stmtGroup.setInt(1, dim);
 		stmtGroup.setInt(2, pointType.getId());
 
@@ -821,11 +830,22 @@ public class FTLReport {
 			double maxResidualGroupX = 0.0, maxResidualGroupY = 0.0, maxResidualGroupZ = 0.0;
 			boolean significantGroup = false;
 			int groupId = groupSet.getInt("id");
-
-			HashMap<String, Object> groupParam = new HashMap<String, Object>();
-			List<HashMap<String, Object>> points = new ArrayList<HashMap<String, Object>>();
-			PreparedStatement stmtPoint = this.dataBase.getPreparedStatement(sqlPoint);
 			stmtPoint.setInt(1, groupId);
+			stmtUncertainty.setInt(1, groupId);
+			
+			HashMap<String, Object> groupParam         = new HashMap<String, Object>();
+			HashMap<String, Object> groupUncertainties = new HashMap<String, Object>();
+			List<HashMap<String, Object>> points       = new ArrayList<HashMap<String, Object>>();
+
+			if (pointType == PointType.STOCHASTIC_POINT) {
+				ResultSet uncertaintySet = stmtUncertainty.executeQuery();
+				while (uncertaintySet.next()) {
+					PointGroupUncertaintyType uncertaintyType = PointGroupUncertaintyType.getEnumByValue(uncertaintySet.getInt("type"));
+					double value = uncertaintySet.getDouble("value");
+					if (uncertaintyType != null && value > 0)
+						groupUncertainties.put(uncertaintyType.name().toLowerCase(), options.convertLengthUncertaintyToView(value));
+				}
+			}
 
 			ResultSet pointSet = stmtPoint.executeQuery();
 			ResultSetMetaData rsmd = pointSet.getMetaData();
@@ -967,6 +987,9 @@ public class FTLReport {
 				groupParam.put("max_residual_x", options.convertLengthResidualToView(maxResidualGroupX));
 				groupParam.put("max_residual_y", options.convertLengthResidualToView(maxResidualGroupY));
 				groupParam.put("max_residual_z", options.convertLengthResidualToView(maxResidualGroupZ));
+				
+				if (groupUncertainties != null && !groupUncertainties.isEmpty())
+					groupParam.put("uncertainties", groupUncertainties);
 
 				groups.add(groupParam);			
 			}
@@ -977,7 +1000,10 @@ public class FTLReport {
 
 	private List<HashMap<String, Object>> getVerticalDeflectionGroups(VerticalDeflectionType verticalDeflectionType) throws SQLException {
 		List<HashMap<String, Object>> groups = new ArrayList<HashMap<String, Object>>();
+		
 		String sqlGroup = "SELECT \"id\", \"name\" FROM \"VerticalDeflectionGroup\" WHERE \"type\" = ? AND \"enable\" = TRUE";
+		
+		String sqlUncertainty = "SELECT \"type\", \"value\" FROM \"VerticalDeflectionGroupUncertainty\" WHERE \"group_id\" = ?";
 		
 		String sqlDeflection = "SELECT"
 				+ "\"name\", "
@@ -1009,7 +1035,10 @@ public class FTLReport {
 				+ "ORDER BY \"id\" ASC"; 
 		
 
-		PreparedStatement stmtGroup = this.dataBase.getPreparedStatement(sqlGroup);
+		PreparedStatement stmtGroup       = this.dataBase.getPreparedStatement(sqlGroup);
+		PreparedStatement stmtDeflection  = this.dataBase.getPreparedStatement(sqlDeflection);
+		PreparedStatement stmtUncertainty = this.dataBase.getPreparedStatement(sqlUncertainty);
+		
 		stmtGroup.setInt(1, verticalDeflectionType.getId());
 
 		ResultSet groupSet = stmtGroup.executeQuery();
@@ -1020,10 +1049,22 @@ public class FTLReport {
 			boolean significantGroup = false;
 			int groupId = groupSet.getInt("id");
 
-			HashMap<String, Object> groupParam = new HashMap<String, Object>();
-			List<HashMap<String, Object>> deflections = new ArrayList<HashMap<String, Object>>();
-			PreparedStatement stmtDeflection = this.dataBase.getPreparedStatement(sqlDeflection);
+			HashMap<String, Object> groupParam         = new HashMap<String, Object>();
+			HashMap<String, Object> groupUncertainties = new HashMap<String, Object>();
+			List<HashMap<String, Object>> deflections  = new ArrayList<HashMap<String, Object>>();
+			
 			stmtDeflection.setInt(1, groupId);
+			stmtUncertainty.setInt(1, groupId);
+			
+			if (verticalDeflectionType == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION) {
+				ResultSet uncertaintySet = stmtUncertainty.executeQuery();
+				while (uncertaintySet.next()) {
+					VerticalDeflectionGroupUncertaintyType uncertaintyType = VerticalDeflectionGroupUncertaintyType.getEnumByValue(uncertaintySet.getInt("type"));
+					double value = uncertaintySet.getDouble("value");
+					if (uncertaintyType != null && value > 0)
+						groupUncertainties.put(uncertaintyType.name().toLowerCase(), options.convertAngleUncertaintyToView(value));
+				}
+			}
 
 			ResultSet verticalDeflectionSet = stmtDeflection.executeQuery();
 			ResultSetMetaData rsmd = verticalDeflectionSet.getMetaData();
@@ -1122,6 +1163,9 @@ public class FTLReport {
 				
 				groupParam.put("max_residual_x", options.convertAngleResidualToView(maxResidualGroupX));
 				groupParam.put("max_residual_y", options.convertAngleResidualToView(maxResidualGroupY));
+				
+				if (groupUncertainties != null && !groupUncertainties.isEmpty())
+					groupParam.put("uncertainties", groupUncertainties);
 
 				groups.add(groupParam);					
 			}
@@ -1137,6 +1181,8 @@ public class FTLReport {
 		List<HashMap<String, Object>> groups = new ArrayList<HashMap<String, Object>>();
 
 		String sqlGroup = "SELECT \"id\", \"name\" FROM \"ObservationGroup\" WHERE \"type\" = ? AND \"enable\" = TRUE";
+		
+		String sqlUncertainty = "SELECT \"type\", \"value\" FROM \"ObservationGroupUncertainty\" WHERE \"group_id\" = ?";
 
 		String sqlObservation = "SELECT "
 				+ "\"start_point_name\",\"end_point_name\",\"instrument_height\",\"reflector_height\", "
@@ -1154,6 +1200,8 @@ public class FTLReport {
 
 		PreparedStatement stmtGroup       = this.dataBase.getPreparedStatement(sqlGroup);
 		PreparedStatement stmtObservation = this.dataBase.getPreparedStatement(sqlObservation);
+		PreparedStatement stmtUncertainty = this.dataBase.getPreparedStatement(sqlUncertainty);
+		
 		stmtGroup.setInt(1, obsType.getId());
 
 		ResultSet groupSet = stmtGroup.executeQuery();
@@ -1165,7 +1213,53 @@ public class FTLReport {
 			List<HashMap<String, Object>> observations = new ArrayList<HashMap<String, Object>>();
 			int groupId = groupSet.getInt("id");
 			stmtObservation.setInt(1, groupId);
+			stmtUncertainty.setInt(1, groupId);
+			
+			ResultSet uncertaintySet = stmtUncertainty.executeQuery();
+			HashMap<String, Object> groupUncertainties = new HashMap<String, Object>();
+			while (uncertaintySet.next()) {
+				ObservationGroupUncertaintyType uncertaintyType = ObservationGroupUncertaintyType.getEnumByValue(uncertaintySet.getInt("type"));
+				if (uncertaintyType != null) {
+					double value = uncertaintySet.getDouble("value");
+					if (value <= 0)
+						continue;
+					
+					switch(obsType) {
+					case DIRECTION:
+					case ZENITH_ANGLE:
+						switch (uncertaintyType) {
+						case ZERO_POINT_OFFSET:
+							groupUncertainties.put(uncertaintyType.name().toLowerCase(), options.convertAngleUncertaintyToView(value));
+							break;
+						
+						case SQUARE_ROOT_DISTANCE_DEPENDENT:
+						case DISTANCE_DEPENDENT:
+							groupUncertainties.put(uncertaintyType.name().toLowerCase(), options.convertLengthUncertaintyToView(value));
+							break;					
+						}
 
+						break;
+					case LEVELING:
+					case HORIZONTAL_DISTANCE:
+					case SLOPE_DISTANCE:
+						switch (uncertaintyType) {
+						case ZERO_POINT_OFFSET:
+						case SQUARE_ROOT_DISTANCE_DEPENDENT:
+							groupUncertainties.put(uncertaintyType.name().toLowerCase(), options.convertLengthUncertaintyToView(value));
+							break;
+							
+						case DISTANCE_DEPENDENT:
+							groupUncertainties.put(uncertaintyType.name().toLowerCase(), options.convertScaleUncertaintyToView(value));
+							break;					
+						}
+					
+						break;
+					default: // GNSS
+						break;
+					}
+				}
+			}
+			
 			ResultSet observationSet = stmtObservation.executeQuery();
 			ResultSetMetaData rsmd = observationSet.getMetaData();
 			int cnt = rsmd.getColumnCount();
@@ -1290,6 +1384,9 @@ public class FTLReport {
 				groupParam.put("redundancy",      options.convertPercentToView(redundancyGroup));
 				groupParam.put("significant",     significantGroup);
 
+				if (groupUncertainties != null && !groupUncertainties.isEmpty())
+					groupParam.put("uncertainties", groupUncertainties);
+
 				List<HashMap<String, Object>> parameters = this.getAddionalParameters(groupId);
 
 				if (parameters != null && !parameters.isEmpty())
@@ -1306,6 +1403,8 @@ public class FTLReport {
 		List<HashMap<String, Object>> groups = new ArrayList<HashMap<String, Object>>();
 
 		String sqlGroup = "SELECT \"id\", \"name\" FROM \"ObservationGroup\" WHERE \"type\" = ? AND \"enable\" = TRUE";
+		
+		String sqlUncertainty = "SELECT \"type\", \"value\" FROM \"ObservationGroupUncertainty\" WHERE \"group_id\" = ?";
 
 		String sqlObservation = "SELECT "
 				+ "\"start_point_name\",\"end_point_name\",\"y0\",\"x0\",\"z0\", "
@@ -1335,7 +1434,8 @@ public class FTLReport {
 
 		PreparedStatement stmtGroup = this.dataBase.getPreparedStatement(sqlGroup);
 		PreparedStatement stmtObservation = this.dataBase.getPreparedStatement(sqlObservation);
-
+		PreparedStatement stmtUncertainty = this.dataBase.getPreparedStatement(sqlUncertainty);
+		
 		stmtGroup.setInt(1, obsType.getId());
 
 		ResultSet groupSet = stmtGroup.executeQuery();
@@ -1349,6 +1449,38 @@ public class FTLReport {
 
 			int groupId = groupSet.getInt("id");
 			stmtObservation.setInt(1, groupId);
+			stmtUncertainty.setInt(1, groupId);
+		
+			ResultSet uncertaintySet = stmtUncertainty.executeQuery();
+			HashMap<String, Object> groupUncertainties = new HashMap<String, Object>();
+			while (uncertaintySet.next()) {
+				ObservationGroupUncertaintyType uncertaintyType = ObservationGroupUncertaintyType.getEnumByValue(uncertaintySet.getInt("type"));
+				if (uncertaintyType != null) {
+					double value = uncertaintySet.getDouble("value");
+					if (value <= 0)
+						continue;
+					
+					switch(obsType) {
+					case GNSS1D:
+					case GNSS2D:
+					case GNSS3D:
+						switch (uncertaintyType) {
+						case ZERO_POINT_OFFSET:
+						case SQUARE_ROOT_DISTANCE_DEPENDENT:
+							groupUncertainties.put(uncertaintyType.name().toLowerCase(), options.convertLengthUncertaintyToView(value));
+							break;
+							
+						case DISTANCE_DEPENDENT:
+							groupUncertainties.put(uncertaintyType.name().toLowerCase(), options.convertScaleUncertaintyToView(value));
+							break;
+						}
+
+						break;
+					default: // terrestrial observations
+						break;
+					}
+				}
+			}
 
 			ResultSet observationSet = stmtObservation.executeQuery();
 			ResultSetMetaData rsmd = observationSet.getMetaData();
@@ -1485,6 +1617,9 @@ public class FTLReport {
 				groupParam.put("max_residual_y", options.convertLengthResidualToView(maxResidualGroupY));
 				groupParam.put("max_residual_z", options.convertLengthResidualToView(maxResidualGroupZ));
 
+				if (groupUncertainties != null && !groupUncertainties.isEmpty())
+					groupParam.put("uncertainties", groupUncertainties);
+				
 				List<HashMap<String, Object>> parameters = this.getAddionalParameters(groupId);
 
 				if (parameters != null && !parameters.isEmpty())
