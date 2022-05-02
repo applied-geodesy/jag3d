@@ -61,6 +61,7 @@ import org.applied_geodesy.jag3d.ui.io.CongruenceAnalysisFlatFileReader;
 import org.applied_geodesy.jag3d.ui.io.DL100FileReader;
 import org.applied_geodesy.jag3d.ui.io.DimensionType;
 import org.applied_geodesy.jag3d.ui.io.FlatFileReader;
+import org.applied_geodesy.jag3d.ui.io.GKAFileReader;
 import org.applied_geodesy.jag3d.ui.io.GSIFileReader;
 import org.applied_geodesy.jag3d.ui.io.M5FileReader;
 import org.applied_geodesy.jag3d.ui.io.ObservationFlatFileReader;
@@ -467,10 +468,12 @@ public class UIMenuBuilder {
 		MenuItem hexml3DFileItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.hexagon.landxml.3d.label", "LandXML 1.2 3D"), true, MenuItemType.IMPORT_LAND_XML3D, null, this.menuEventHandler, true);
 
 		Menu importTrimbleFlatMenu = createMenu(i18n.getString("UIMenuBuilder.menu.import.trimble.label", "Trimble/Zeiss"), true);
-		MenuItem m5FileItem        = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.trimble.m5.label", "M5 (DiNi)"), true, MenuItemType.IMPORT_M5, null, this.menuEventHandler, true);
+		MenuItem m5FileItem        = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.trimble.m5.label", "M5 (DiNi)"), true, MenuItemType.IMPORT_M5,  null, this.menuEventHandler, true);
+		MenuItem gkaFileItem       = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.trimble.gka.label", "GKA"),      true, MenuItemType.IMPORT_GKA, null, this.menuEventHandler, true);
 		MenuItem jxml2DFileItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.trimble.jobxml.2d.label", "JobXML 2D"),    true, MenuItemType.IMPORT_JOB_XML2D,  null, this.menuEventHandler, true);
 		MenuItem jxml2DHFileItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.trimble.jobxml.2dh.label", "JobXML 2D+H"), true, MenuItemType.IMPORT_JOB_XML2DH, null, this.menuEventHandler, true);
 		MenuItem jxml3DFileItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.trimble.jobxml.3d.label", "JobXML 3D"),    true, MenuItemType.IMPORT_JOB_XML3D,  null, this.menuEventHandler, true);
+		
 
 		MenuItem dl100FileItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.topcon.dl100.label", "DL-100 (Topcon)"), true, MenuItemType.IMPORT_DL100, null, this.menuEventHandler, true);
 
@@ -491,6 +494,7 @@ public class UIMenuBuilder {
 
 		importTrimbleFlatMenu.getItems().addAll(
 				m5FileItem,
+				gkaFileItem,
 				new SeparatorMenuItem(),
 				jxml2DFileItem,
 				jxml2DHFileItem,
@@ -988,6 +992,9 @@ public class UIMenuBuilder {
 
 		case IMPORT_M5:
 			this.importFile(new M5FileReader(), M5FileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.m5.title", "Import data from M5 files"));
+			break;
+		case IMPORT_GKA:
+			this.importFile(new GKAFileReader(), GKAFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.gka.title", "Import data from GKA files"));
 			break;
 		case IMPORT_Z:
 			this.importFile(new ZFileReader(), ZFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.z.title", "Import data from Z files"));

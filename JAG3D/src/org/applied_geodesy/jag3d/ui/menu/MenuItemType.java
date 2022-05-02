@@ -85,6 +85,7 @@ enum MenuItemType {
 	IMPORT_DL100,
 	
 	IMPORT_M5,
+	IMPORT_GKA,
 	
 	IMPORT_GSI1D,
 	IMPORT_GSI2D,
