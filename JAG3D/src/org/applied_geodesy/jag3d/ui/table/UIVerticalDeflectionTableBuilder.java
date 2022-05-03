@@ -739,23 +739,65 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		if (!row.isSelected() && item != null) {
 			switch(tableRowHighlightType) {
 			case TEST_STATISTIC:
-				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.INADEQUATE : TableRowHighlightRangeType.EXCELLENT);
+				if (this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION)
+					this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.INADEQUATE : TableRowHighlightRangeType.EXCELLENT);
+				else
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				break;
+				
+			case GROSS_ERROR:
+				if (this.type != VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION) {
+					Double grossErrorX = item.getGrossErrorX();
+					Double grossErrorY = item.getGrossErrorY();
+
+					Double mtbX = item.getMaximumTolerableBiasX();
+					Double mtbY = item.getMaximumTolerableBiasY();
+
+					Double mdbX = item.getMinimalDetectableBiasX();
+					Double mdbY = item.getMinimalDetectableBiasY();
+
+					double dMTB = Double.NaN;
+					double dMDB = Double.NaN;
+
+					if (grossErrorX != null && grossErrorY != null && mtbX != null && mtbY != null && mdbX != null && mdbY != null) {
+						dMTB = Math.max(Math.abs(grossErrorX) - Math.abs(mtbX), Math.abs(grossErrorY) - Math.abs(mtbY));
+						dMDB = Math.min(Math.abs(mdbX) - Math.abs(grossErrorX), Math.abs(mdbY) - Math.abs(grossErrorY));
+						
+						if (dMTB > 0 && dMDB >= 0) 
+							this.setTableRowHighlight(row, TableRowHighlightRangeType.SATISFACTORY);
+
+						else if (dMDB < 0) 
+							this.setTableRowHighlight(row, TableRowHighlightRangeType.INADEQUATE);
+
+						else // if (dMTB <= 0) 
+							this.setTableRowHighlight(row, TableRowHighlightRangeType.EXCELLENT);
+					}
+					else
+						this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				}
+				else
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				
 				break;
 				
 			case REDUNDANCY:
-				Double redundancyX = item.getRedundancyX();
-				Double redundancyY = item.getRedundancyY();
-				Double redundancy = null;
+				if (this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION) {
+					Double redundancyX = item.getRedundancyX();
+					Double redundancyY = item.getRedundancyY();
+					Double redundancy = null;
 
-				if (redundancyY != null && redundancyX != null) 
-					redundancy = Math.min(redundancyY, redundancyX);
+					if (redundancyY != null && redundancyX != null) 
+						redundancy = Math.min(redundancyY, redundancyX);
 
-				if (redundancy == null) 
-					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+					if (redundancy == null) 
+						this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+					else
+						this.setTableRowHighlight(row, redundancy < leftBoundary ? TableRowHighlightRangeType.INADEQUATE : 
+							redundancy <= rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
+								TableRowHighlightRangeType.EXCELLENT);
+				}
 				else
-					this.setTableRowHighlight(row, redundancy < leftBoundary ? TableRowHighlightRangeType.INADEQUATE : 
-						redundancy <= rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
-							TableRowHighlightRangeType.EXCELLENT);
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 				
 				break;
 				

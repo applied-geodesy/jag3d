@@ -244,6 +244,7 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 		int row = 0;
 		this.addRow(gridPane, row++, TableRowHighlightType.NONE,                  this.highlightOptionGroup);
 		this.addRow(gridPane, row++, TableRowHighlightType.TEST_STATISTIC,        this.highlightOptionGroup);
+		this.addRow(gridPane, row++, TableRowHighlightType.GROSS_ERROR,           this.highlightOptionGroup);
 		this.addRow(gridPane, row++, TableRowHighlightType.REDUNDANCY,            this.highlightOptionGroup);
 		this.addRow(gridPane, row++, TableRowHighlightType.P_PRIO_VALUE,          this.highlightOptionGroup);
 		this.addRow(gridPane, row++, TableRowHighlightType.INFLUENCE_ON_POSITION, this.highlightOptionGroup);
@@ -315,6 +316,11 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 		case TEST_STATISTIC:
 			radioButtonLabelText   = i18n.getString("TableRowHighlightDialog.range.test_statistic.label", "Test statistic Tprio \u2228 Tpost");
 			radioButtonToolTipText = i18n.getString("TableRowHighlightDialog.range.test_statistic.tooltip", "Highlighting table rows depending on test statistic decisions");
+			break;
+			
+		case GROSS_ERROR:
+			radioButtonLabelText   = i18n.getString("TableRowHighlightDialog.range.gross_error.label", "Gross error \u2207(1) \u2264 \u2207 \u2264 \u2207(\u03bb)");
+			radioButtonToolTipText = i18n.getString("TableRowHighlightDialog.range.gross_error.tooltip", "Highlighting table rows depending on estimated gross error");
 			break;
 
 		case REDUNDANCY:

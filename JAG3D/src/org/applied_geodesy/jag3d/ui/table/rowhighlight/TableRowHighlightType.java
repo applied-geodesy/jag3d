@@ -26,7 +26,8 @@ public enum TableRowHighlightType {
 	TEST_STATISTIC(1), 
 	REDUNDANCY(2), 
 	INFLUENCE_ON_POSITION(3), 
-	P_PRIO_VALUE(4)
+	P_PRIO_VALUE(4),
+	GROSS_ERROR(5)
 	;
 
 	private int id;

@@ -1017,6 +1017,33 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.INADEQUATE : TableRowHighlightRangeType.EXCELLENT);
 				break;
 				
+			case GROSS_ERROR:
+				Double grossError = item.getGrossError();
+				Double mtb = item.getMaximumTolerableBias();
+				Double mdb = item.getMinimalDetectableBias();
+
+				double dMTB = Double.NaN;
+				double dMDB = Double.NaN;
+				
+				if (grossError != null && mtb != null && mdb != null) {
+					dMTB = Math.abs(grossError) - Math.abs(mtb);
+					dMDB = Math.abs(mdb) - Math.abs(grossError);
+
+					if (dMTB > 0 && dMDB >= 0) 
+						this.setTableRowHighlight(row, TableRowHighlightRangeType.SATISFACTORY);
+
+					else if (dMDB < 0) 
+						this.setTableRowHighlight(row, TableRowHighlightRangeType.INADEQUATE);
+
+					else // if (dMTB <= 0) 
+						this.setTableRowHighlight(row, TableRowHighlightRangeType.EXCELLENT);
+
+				}
+				else
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				
+				break;
+				
 			case REDUNDANCY:
 				Double redundancy = item.getRedundancy();
 				if (redundancy == null) 

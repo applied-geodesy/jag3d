@@ -929,6 +929,55 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 				this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.INADEQUATE : TableRowHighlightRangeType.EXCELLENT);
 				break;
 				
+			case GROSS_ERROR:
+				Double grossErrorX = item.getGrossErrorX();
+				Double grossErrorY = item.getGrossErrorY();
+				Double grossErrorZ = item.getGrossErrorZ();
+				
+				Double mtbX = item.getMaximumTolerableBiasX();
+				Double mtbY = item.getMaximumTolerableBiasY();
+				Double mtbZ = item.getMaximumTolerableBiasZ();
+				
+				Double mdbX = item.getMinimalDetectableBiasX();
+				Double mdbY = item.getMinimalDetectableBiasY();
+				Double mdbZ = item.getMinimalDetectableBiasZ();
+
+				double dMTB = Double.NaN;
+				double dMDB = Double.NaN;
+				
+				if (this.type == ObservationType.GNSS1D && grossErrorZ != null && mtbZ != null && mdbZ != null) {
+					dMTB = Math.abs(grossErrorZ) - Math.abs(mtbZ);
+					dMDB = Math.abs(mdbZ) - Math.abs(grossErrorZ);
+				}
+				
+				else if (this.type == ObservationType.GNSS2D && grossErrorX != null && grossErrorY != null && mtbX != null && mtbY != null && mdbX != null && mdbY != null) {
+					dMTB = Math.max(Math.abs(grossErrorX) - Math.abs(mtbX), Math.abs(grossErrorY) - Math.abs(mtbY));
+					dMDB = Math.min(Math.abs(mdbX) - Math.abs(grossErrorX), Math.abs(mdbY) - Math.abs(grossErrorY));
+				}
+				
+				else if (this.type == ObservationType.GNSS3D && grossErrorX != null && grossErrorY != null && grossErrorZ != null && mtbZ != null && mtbX != null && mtbY != null && mdbZ != null && mdbX != null && mdbY != null) {
+					dMTB = Math.max(Math.max(Math.abs(grossErrorX) - Math.abs(mtbX), Math.abs(grossErrorY) - Math.abs(mtbY)), Math.abs(grossErrorZ) - Math.abs(mtbZ));
+					dMDB = Math.min(Math.min(Math.abs(mdbX) - Math.abs(grossErrorX), Math.abs(mdbY) - Math.abs(grossErrorY)), Math.abs(mdbZ) - Math.abs(grossErrorZ));
+				}
+				
+				if (!Double.isNaN(dMTB) && !Double.isNaN(dMDB)) { 
+					if (dMTB <= 0) 
+						this.setTableRowHighlight(row, TableRowHighlightRangeType.EXCELLENT);
+
+					else if (dMTB > 0 && dMDB >= 0) 
+						this.setTableRowHighlight(row, TableRowHighlightRangeType.SATISFACTORY);
+
+					else if (dMDB < 0) 
+						this.setTableRowHighlight(row, TableRowHighlightRangeType.INADEQUATE);
+
+					else
+						this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				}
+				else
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				
+				break;
+				
 			case REDUNDANCY:
 				Double redundancyX = item.getRedundancyX();
 				Double redundancyY = item.getRedundancyY();

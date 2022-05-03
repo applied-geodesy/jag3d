@@ -130,6 +130,7 @@ public class DefaultTableRowHighlightValue {
 
 		case NONE:
 		case TEST_STATISTIC:
+		case GROSS_ERROR:
 			return null;
 		}
 		
