@@ -1117,6 +1117,58 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 			case TEST_STATISTIC:
 				if (this.type != PointType.NEW_POINT)
 					this.setTableRowHighlight(row, item.isSignificant() ? TableRowHighlightRangeType.INADEQUATE : TableRowHighlightRangeType.EXCELLENT);
+				else
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				break;
+				
+			case GROSS_ERROR:
+				if (this.type != PointType.NEW_POINT) {
+					Double grossErrorX = item.getGrossErrorX();
+					Double grossErrorY = item.getGrossErrorY();
+					Double grossErrorZ = item.getGrossErrorZ();
+
+					Double mtbX = item.getMaximumTolerableBiasX();
+					Double mtbY = item.getMaximumTolerableBiasY();
+					Double mtbZ = item.getMaximumTolerableBiasZ();
+
+					Double mdbX = item.getMinimalDetectableBiasX();
+					Double mdbY = item.getMinimalDetectableBiasY();
+					Double mdbZ = item.getMinimalDetectableBiasZ();
+
+					double dMTB = Double.NaN;
+					double dMDB = Double.NaN;
+
+					if (this.dimension == 1 && grossErrorZ != null && mtbZ != null && mdbZ != null) {
+						dMTB = Math.abs(grossErrorZ) - Math.abs(mtbZ);
+						dMDB = Math.abs(mdbZ) - Math.abs(grossErrorZ);
+					}
+
+					else if (this.dimension == 2 && grossErrorX != null && grossErrorY != null && mtbX != null && mtbY != null && mdbX != null && mdbY != null) {
+						dMTB = Math.max(Math.abs(grossErrorX) - Math.abs(mtbX), Math.abs(grossErrorY) - Math.abs(mtbY));
+						dMDB = Math.min(Math.abs(mdbX) - Math.abs(grossErrorX), Math.abs(mdbY) - Math.abs(grossErrorY));
+					}
+
+					else if (this.dimension == 3 && grossErrorX != null && grossErrorY != null && grossErrorZ != null && mtbZ != null && mtbX != null && mtbY != null && mdbZ != null && mdbX != null && mdbY != null) {
+						dMTB = Math.max(Math.max(Math.abs(grossErrorX) - Math.abs(mtbX), Math.abs(grossErrorY) - Math.abs(mtbY)), Math.abs(grossErrorZ) - Math.abs(mtbZ));
+						dMDB = Math.min(Math.min(Math.abs(mdbX) - Math.abs(grossErrorX), Math.abs(mdbY) - Math.abs(grossErrorY)), Math.abs(mdbZ) - Math.abs(grossErrorZ));
+					}
+
+					if (!Double.isNaN(dMTB) && !Double.isNaN(dMDB)) {
+						if (dMDB < 0) 
+							this.setTableRowHighlight(row, TableRowHighlightRangeType.INADEQUATE);
+						
+						else if (dMTB > 0 && dMDB >= 0) 
+							this.setTableRowHighlight(row, TableRowHighlightRangeType.SATISFACTORY);
+						
+						else // (dMTB <= 0) 
+							this.setTableRowHighlight(row, TableRowHighlightRangeType.EXCELLENT);
+					}
+					else
+						this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				}
+				else
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				
 				break;
 				
 			case REDUNDANCY:
@@ -1142,42 +1194,52 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 							redundancy <= rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
 								TableRowHighlightRangeType.EXCELLENT);
 				}
+				else
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 				
 				break;
 				
 			case INFLUENCE_ON_POSITION:
-				Double influenceOnPositionX = item.getInfluenceOnPointPositionX();
-				Double influenceOnPositionY = item.getInfluenceOnPointPositionY();
-				Double influenceOnPositionZ = item.getInfluenceOnPointPositionZ();
-				Double influenceOnPosition = null;
-				
-				if (this.dimension == 1 && influenceOnPositionZ != null) 
-					influenceOnPosition = influenceOnPositionZ;
+				if (this.type == PointType.STOCHASTIC_POINT) {
+					Double influenceOnPositionX = item.getInfluenceOnPointPositionX();
+					Double influenceOnPositionY = item.getInfluenceOnPointPositionY();
+					Double influenceOnPositionZ = item.getInfluenceOnPointPositionZ();
+					Double influenceOnPosition = null;
 
-				else if (this.dimension == 2 && influenceOnPositionY != null && influenceOnPositionX != null) 
-					influenceOnPosition = Math.max(influenceOnPositionY, influenceOnPositionX);
-				
-				else if (this.dimension == 3 && influenceOnPositionY != null && influenceOnPositionX != null && influenceOnPositionZ != null)
-					influenceOnPosition = Math.max(influenceOnPositionZ, Math.max(influenceOnPositionY, influenceOnPositionX));
-				
-				if (influenceOnPosition == null) 
-					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+					if (this.dimension == 1 && influenceOnPositionZ != null) 
+						influenceOnPosition = influenceOnPositionZ;
+
+					else if (this.dimension == 2 && influenceOnPositionY != null && influenceOnPositionX != null) 
+						influenceOnPosition = Math.max(influenceOnPositionY, influenceOnPositionX);
+
+					else if (this.dimension == 3 && influenceOnPositionY != null && influenceOnPositionX != null && influenceOnPositionZ != null)
+						influenceOnPosition = Math.max(influenceOnPositionZ, Math.max(influenceOnPositionY, influenceOnPositionX));
+
+					if (influenceOnPosition == null) 
+						this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+					else
+						this.setTableRowHighlight(row, Math.abs(influenceOnPosition) < leftBoundary ? TableRowHighlightRangeType.EXCELLENT : 
+							Math.abs(influenceOnPosition) <= rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
+								TableRowHighlightRangeType.INADEQUATE);
+				}
 				else
-					this.setTableRowHighlight(row, Math.abs(influenceOnPosition) < leftBoundary ? TableRowHighlightRangeType.EXCELLENT : 
-						Math.abs(influenceOnPosition) <= rightBoundary ? TableRowHighlightRangeType.SATISFACTORY :
-							TableRowHighlightRangeType.INADEQUATE);
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 				
 				break;
 				
 			case P_PRIO_VALUE:
-				Double pValue = item.getPValueApriori();
-				if (pValue == null) 
-					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+				if (this.type != PointType.NEW_POINT) {
+					Double pValue = item.getPValueApriori();
+					if (pValue == null) 
+						this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+					else
+						this.setTableRowHighlight(row, pValue < Math.log(leftBoundary / 100.0) ? TableRowHighlightRangeType.INADEQUATE : 
+							pValue <= Math.log(rightBoundary / 100.0) ? TableRowHighlightRangeType.SATISFACTORY :
+								TableRowHighlightRangeType.EXCELLENT);
+				}
 				else
-					this.setTableRowHighlight(row, pValue < Math.log(leftBoundary / 100.0) ? TableRowHighlightRangeType.INADEQUATE : 
-						pValue <= Math.log(rightBoundary / 100.0) ? TableRowHighlightRangeType.SATISFACTORY :
-							TableRowHighlightRangeType.EXCELLENT);
-				
+					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
+
 				break;
 				
 			case NONE:

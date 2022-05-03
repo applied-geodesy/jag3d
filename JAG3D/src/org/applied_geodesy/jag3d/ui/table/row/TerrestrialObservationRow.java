@@ -160,7 +160,7 @@ public class TerrestrialObservationRow extends ObservationRow {
 		return this.grossError;
 	}
 
-	public Double getgrossError() {
+	public Double getGrossError() {
 		return this.grossErrorProperty().get();
 	}
 
