@@ -38,7 +38,7 @@ var TableSorter = function(table) {
 	var icons = [String.fromCharCode(9650), String.fromCharCode(9660)];
 	this.init = function() {
 		if(!document.getElementsByTagName){
-			// window.alert("Fehler, Bowser unterstützt DOM-Methoden nicht!");
+			console.log("Error, Browser does not support DOM method: getElementsByTagName");
 			return;
 		}
 		this.addTableHeadEvent( this.tHead );

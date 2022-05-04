@@ -135,11 +135,11 @@ public class PointTreeItemValue extends TreeItemValue implements Sortable, Group
 	
 	public static double getDefaultUncertainty(PointGroupUncertaintyType uncertaintyType) {
 		switch(uncertaintyType) {
-		case CONSTANT_X:
+		case COMPONENT_X:
 			return DefaultUncertainty.getUncertaintyX();
-		case CONSTANT_Y:
+		case COMPONENT_Y:
 			return DefaultUncertainty.getUncertaintyY();
-		case CONSTANT_Z:
+		case COMPONENT_Z:
 			return DefaultUncertainty.getUncertaintyZ();
 		default:
 			return 0;

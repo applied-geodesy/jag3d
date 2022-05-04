@@ -27,8 +27,24 @@
 				</#if>
 				${group.name}
 			</h2>
+			
 			<table class="j3d_datatable">
-				<caption><#outputformat "plainText">${observation_table_caption}</#outputformat>: ${group.name}</caption>
+				<caption><#outputformat "plainText">
+					${observation_table_caption}</#outputformat>: ${group.name}
+					<#if group.uncertainties??>
+						<ul class="group_uncertainties">
+							<#if apply_angle_unit>
+								<#if group.uncertainties.zero_point_offset??><li>&sigma;<sub>a</sub> = <@printFormattedNumber value=group.uncertainties.zero_point_offset format=df_angle_uncertainty/><span class="unit">${unit_abbr_angle_uncertainty}</span></li></#if>
+								<#if group.uncertainties.square_root_distance_dependent??><li>&sigma;<sub>b</sub> = <@printFormattedNumber value=group.uncertainties.square_root_distance_dependent format=df_length_uncertainty/><span class="unit">${unit_abbr_length_uncertainty}</span></li></#if>
+								<#if group.uncertainties.distance_dependent??><li>&sigma;<sub>c</sub> = <@printFormattedNumber value=group.uncertainties.distance_dependent format=df_length_uncertainty/><span class="unit">${unit_abbr_length_uncertainty}</span></li></#if>
+							<#else>
+								<#if group.uncertainties.zero_point_offset??><li>&sigma;<sub>a</sub> = <@printFormattedNumber value=group.uncertainties.zero_point_offset format=df_length_uncertainty/><span class="unit">${unit_abbr_length_uncertainty}</span></li></#if>
+								<#if group.uncertainties.square_root_distance_dependent??><li>&sigma;<sub>b</sub> = <@printFormattedNumber value=group.uncertainties.square_root_distance_dependent format=df_length_uncertainty/><span class="unit">${unit_abbr_length_uncertainty}</span></li></#if>
+								<#if group.uncertainties.distance_dependent??><li>&sigma;<sub>c</sub> = <@printFormattedNumber value=group.uncertainties.distance_dependent format=df_scale_uncertainty/><span class="unit">${unit_abbr_scale_uncertainty}</span></li></#if>
+							</#if>
+						</ul>
+					</#if>
+				</caption>
 				<#include "observation_thead.ftlh" parse=true>
 				<#include "observation_tbody.ftlh" parse=true>
 				<#include "observation_tfoot.ftlh" parse=true>

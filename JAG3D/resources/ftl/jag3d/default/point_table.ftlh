@@ -15,7 +15,16 @@
 				${group.name}
 			</h2>
 			<table class="j3d_datatable">
-				<caption><#outputformat "plainText">${point_table_caption}</#outputformat>: ${group.name}</caption>
+				<caption><#outputformat "plainText">
+					${point_table_caption}</#outputformat>: ${group.name}
+					<#if group.uncertainties?? && group.type == "STOCHASTIC_POINT">
+						<ul class="group_uncertainties">
+							<#if group.dimension != 1 && group.uncertainties.component_y??><li>&sigma;<sub>y</sub> = <@printFormattedNumber value=group.uncertainties.component_y format=df_length_uncertainty/><span class="unit">${unit_abbr_length_uncertainty}</span></li></#if>
+							<#if group.dimension != 1 && group.uncertainties.component_x??><li>&sigma;<sub>x</sub> = <@printFormattedNumber value=group.uncertainties.component_x format=df_length_uncertainty/><span class="unit">${unit_abbr_length_uncertainty}</span></li></#if>
+							<#if group.dimension != 2 && group.uncertainties.component_z??><li>&sigma;<sub>z</sub> = <@printFormattedNumber value=group.uncertainties.component_z format=df_length_uncertainty/><span class="unit">${unit_abbr_length_uncertainty}</span></li></#if>
+						</ul>
+					</#if>					
+					</caption>
 				<#include "point_thead.ftlh" parse=true>
 				<#include "point_tbody.ftlh" parse=true>
 				<#include "point_tfoot.ftlh" parse=true>

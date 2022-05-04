@@ -155,24 +155,27 @@ section h2 {
     padding: 0;
     font: bold 1.1em Georgia, Times, 'Times New Roman', serif;
 }
-section ul.rank_defect {
+section ul.rank_defect, section ul.group_uncertainties {
     margin: 0;
     padding: 0;
     display: inline-block;
 }
-section ul.rank_defect li {
+section ul.rank_defect li, section ul.group_uncertainties li {
     display: inline;
     list-style-type: none;
     margin: 0px;
 }
-section ul.rank_defect li:after {
+section ul.rank_defect li:after, section ul.group_uncertainties li:after {
     content: ", ";
 }
 section ul.rank_defect li:first-child:before {
     content: "(";
 }
-section ul.rank_defect li:last-child:after {
+section ul.rank_defect li:last-child:after, section ul.group_uncertainties li:last-child:after {
     content: ")";
+}
+section ul.group_uncertainties li:first-child:before {
+    content: "(A-priori: ";
 }
 section dl dd li {
     margin-left: 15px;

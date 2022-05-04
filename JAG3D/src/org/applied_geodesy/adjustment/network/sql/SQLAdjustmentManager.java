@@ -485,13 +485,13 @@ public class SQLAdjustmentManager {
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
-		stmt.setInt(idx++, PointGroupUncertaintyType.CONSTANT_Y.getId());
+		stmt.setInt(idx++, PointGroupUncertaintyType.COMPONENT_Y.getId());
 		stmt.setDouble(idx++, DefaultUncertainty.getUncertaintyY());
 
-		stmt.setInt(idx++, PointGroupUncertaintyType.CONSTANT_X.getId());
+		stmt.setInt(idx++, PointGroupUncertaintyType.COMPONENT_X.getId());
 		stmt.setDouble(idx++, DefaultUncertainty.getUncertaintyX());
 
-		stmt.setInt(idx++, PointGroupUncertaintyType.CONSTANT_Z.getId());
+		stmt.setInt(idx++, PointGroupUncertaintyType.COMPONENT_Z.getId());
 		stmt.setDouble(idx++, DefaultUncertainty.getUncertaintyZ());
 
 		stmt.setInt(idx++, type.getId());
