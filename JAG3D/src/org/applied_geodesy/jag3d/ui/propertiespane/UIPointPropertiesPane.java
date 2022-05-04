@@ -130,9 +130,9 @@ public class UIPointPropertiesPane {
 //		if (this.propertiesNode != null)
 //			this.propertiesNode.requestFocus();
 		
-		this.setUncertaintyY(PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.CONSTANT_Y));
-		this.setUncertaintyX(PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.CONSTANT_X));
-		this.setUncertaintyZ(PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.CONSTANT_Z));
+		this.setUncertaintyY(PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.COMPONENT_Y));
+		this.setUncertaintyX(PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.COMPONENT_X));
+		this.setUncertaintyZ(PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.COMPONENT_Z));
 	}
 	
 	public void setTreeItemValue(PointTreeItemValue... selectedPointItemValues) {
@@ -171,11 +171,11 @@ public class UIPointPropertiesPane {
 
 	public boolean setUncertainty(PointGroupUncertaintyType type, Double value) {
 		switch(type) {
-		case CONSTANT_X:
+		case COMPONENT_X:
 			return this.setUncertaintyX(value);
-		case CONSTANT_Y:
+		case COMPONENT_Y:
 			return this.setUncertaintyY(value);
-		case CONSTANT_Z:
+		case COMPONENT_Z:
 			return this.setUncertaintyZ(value);
 		default:
 			return false;
@@ -186,9 +186,9 @@ public class UIPointPropertiesPane {
 		if (this.type == TreeItemType.STOCHASTIC_POINT_1D_LEAF || this.type == TreeItemType.STOCHASTIC_POINT_2D_LEAF || this.type == TreeItemType.STOCHASTIC_POINT_3D_LEAF) {
 			GridPane gridPane = this.createGridPane();
 
-			double sigmaY = PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.CONSTANT_Y);
-			double sigmaX = PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.CONSTANT_X);
-			double sigmaZ = PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.CONSTANT_Z);
+			double sigmaY = PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.COMPONENT_Y);
+			double sigmaX = PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.COMPONENT_X);
+			double sigmaZ = PointTreeItemValue.getDefaultUncertainty(PointGroupUncertaintyType.COMPONENT_Z);
 
 			double fieldMinWidth = 200;
 			double fieldMaxWidth = 350;
@@ -196,20 +196,20 @@ public class UIPointPropertiesPane {
 			int row = 0;
 
 			if (this.type == TreeItemType.STOCHASTIC_POINT_2D_LEAF || this.type == TreeItemType.STOCHASTIC_POINT_3D_LEAF) {
-				ProgressIndicator databaseTransactionuncertaintyCoordinateYLabelProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.CONSTANT_Y);
+				ProgressIndicator databaseTransactionuncertaintyCoordinateYLabelProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.COMPONENT_Y);
 				Label uncertaintyCoordinateYLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.y.label", "\u03C3y"));
 				this.uncertaintyCoordinateYField = new UncertaintyTextField(sigmaY, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.EXCLUDING_INCLUDING_INTERVAL);
 				this.uncertaintyCoordinateYField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.y.tooltip", "Uncertainty of y-component of stochastic points")));
-				this.uncertaintyCoordinateYField.setUserData(PointGroupUncertaintyType.CONSTANT_Y);
+				this.uncertaintyCoordinateYField.setUserData(PointGroupUncertaintyType.COMPONENT_Y);
 				this.uncertaintyCoordinateYField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateYField));
 				this.uncertaintyCoordinateYField.setMinWidth(fieldMinWidth);
 				this.uncertaintyCoordinateYField.setMaxWidth(fieldMaxWidth);
 				
-				ProgressIndicator databaseTransactionuncertaintyCoordinateXLabelProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.CONSTANT_X);
+				ProgressIndicator databaseTransactionuncertaintyCoordinateXLabelProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.COMPONENT_X);
 				Label uncertaintyCoordinateXLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.x.label", "\u03C3x"));
 				this.uncertaintyCoordinateXField = new UncertaintyTextField(sigmaX, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.EXCLUDING_INCLUDING_INTERVAL);
 				this.uncertaintyCoordinateXField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.x.tooltip", "Uncertainty of x-component of stochastic points")));
-				this.uncertaintyCoordinateXField.setUserData(PointGroupUncertaintyType.CONSTANT_X);
+				this.uncertaintyCoordinateXField.setUserData(PointGroupUncertaintyType.COMPONENT_X);
 				this.uncertaintyCoordinateXField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateXField));
 				this.uncertaintyCoordinateXField.setMinWidth(fieldMinWidth);
 				this.uncertaintyCoordinateXField.setMaxWidth(fieldMaxWidth);
@@ -235,11 +235,11 @@ public class UIPointPropertiesPane {
 			}
 
 			if (this.type == TreeItemType.STOCHASTIC_POINT_1D_LEAF || this.type == TreeItemType.STOCHASTIC_POINT_3D_LEAF) {		
-				ProgressIndicator databaseTransactionuncertaintyCoordinateZLabelProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.CONSTANT_Z);
+				ProgressIndicator databaseTransactionuncertaintyCoordinateZLabelProgressIndicator = this.createDatabaseTransactionProgressIndicator(PointGroupUncertaintyType.COMPONENT_Z);
 				Label uncertaintyCoordinateZLabel = new Label(i18n.getString("UIPointPropertiesPane.uncertainty.point.z.label", "\u03C3z"));
 				this.uncertaintyCoordinateZField = new UncertaintyTextField(sigmaZ, CellValueType.LENGTH_UNCERTAINTY, true, DoubleTextField.ValueSupport.EXCLUDING_INCLUDING_INTERVAL);
 				this.uncertaintyCoordinateZField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.z.tooltip", "Uncertainty of z-component of stochastic points")));
-				this.uncertaintyCoordinateZField.setUserData(PointGroupUncertaintyType.CONSTANT_Z);
+				this.uncertaintyCoordinateZField.setUserData(PointGroupUncertaintyType.COMPONENT_Z);
 				this.uncertaintyCoordinateZField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateZField));
 				this.uncertaintyCoordinateZField.setMinWidth(fieldMinWidth);
 				this.uncertaintyCoordinateZField.setMaxWidth(fieldMaxWidth);
@@ -335,13 +335,13 @@ public class UIPointPropertiesPane {
 		try {
 			Double value = null;
 			switch(uncertaintyType) {
-			case CONSTANT_Y:
+			case COMPONENT_Y:
 				value = this.uncertaintyCoordinateYField.getNumber();
 				break;
-			case CONSTANT_X:
+			case COMPONENT_X:
 				value = this.uncertaintyCoordinateXField.getNumber();
 				break;
-			case CONSTANT_Z:
+			case COMPONENT_Z:
 				value = this.uncertaintyCoordinateZField.getNumber();
 				break;
 			default:

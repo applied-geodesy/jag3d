@@ -155,11 +155,11 @@ public class SQLManager3x {
 							
 				// Uncertainties of point groups
 				"INSERT INTO \"PointGroupUncertainty\" (\"group_id\", \"type\", \"value\") "
-				+ "SELECT \"id\", " + PointGroupUncertaintyType.CONSTANT_X.getId() + " AS \"type\", \"sigma_x0\" FROM \"PUBLIC\".\"PointGroup\" WHERE \"PUBLIC\".\"PointGroup\".\"dimension\" <> 1"
+				+ "SELECT \"id\", " + PointGroupUncertaintyType.COMPONENT_X.getId() + " AS \"type\", \"sigma_x0\" FROM \"PUBLIC\".\"PointGroup\" WHERE \"PUBLIC\".\"PointGroup\".\"dimension\" <> 1"
 				+ "UNION ALL "
-				+ "SELECT \"id\", " + PointGroupUncertaintyType.CONSTANT_Y.getId() + " AS \"type\", \"sigma_y0\" FROM \"PUBLIC\".\"PointGroup\" WHERE \"PUBLIC\".\"PointGroup\".\"dimension\" <> 1"
+				+ "SELECT \"id\", " + PointGroupUncertaintyType.COMPONENT_Y.getId() + " AS \"type\", \"sigma_y0\" FROM \"PUBLIC\".\"PointGroup\" WHERE \"PUBLIC\".\"PointGroup\".\"dimension\" <> 1"
 				+ "UNION ALL "
-				+ "SELECT \"id\", " + PointGroupUncertaintyType.CONSTANT_Z.getId() + " AS \"type\", \"sigma_z0\" FROM \"PUBLIC\".\"PointGroup\" WHERE \"PUBLIC\".\"PointGroup\".\"dimension\" <> 2"
+				+ "SELECT \"id\", " + PointGroupUncertaintyType.COMPONENT_Z.getId() + " AS \"type\", \"sigma_z0\" FROM \"PUBLIC\".\"PointGroup\" WHERE \"PUBLIC\".\"PointGroup\".\"dimension\" <> 2"
 				+ "UNION ALL "
 				+ "SELECT \"id\", " + VerticalDeflectionGroupUncertaintyType.DEFLECTION_X.getId() + " AS \"type\", \"sigma_dx0\" * PI() / 200 AS \"sigma_dx0\" FROM \"PUBLIC\".\"PointGroup\" WHERE \"PUBLIC\".\"PointGroup\".\"dimension\" = 3 AND \"PUBLIC\".\"PointGroup\".\"type\" = " + PointType.STOCHASTIC_POINT.getId() 
 				+ "UNION ALL "
