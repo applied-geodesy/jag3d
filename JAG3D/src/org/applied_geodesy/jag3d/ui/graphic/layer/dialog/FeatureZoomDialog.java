@@ -44,6 +44,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -62,7 +63,7 @@ public class FeatureZoomDialog {
 	private ObservableList<Layer> layers;
 	private ComboBox<GraphicPoint> pointsComboBox;	
 	private FeatureZoomDialog() {}
-
+	private Slider scaleSlider;
 
 	public static void setOwner(Window owner) {
 		window = owner;
@@ -121,17 +122,23 @@ public class FeatureZoomDialog {
 
 		this.dialog.getDialogPane().setContent(this.createPane());
 		this.dialog.setResizable(true);
-		
 	}
 	
 	private Node createPane() {
 		Label pointsLabel   = new Label(i18n.getString("FeatureZoomDialog.feature.points.label", "Adjusted points:"));
+		Label scaleLabel    = new Label(i18n.getString("FeatureZoomDialog.scale.label", "Scaling factor:"));
+		
 		this.pointsComboBox = this.createPointComboBox(i18n.getString("FeatureZoomDialog.feature.points.tooltip", "Select point to zoom"));
+		this.scaleSlider    = this.createScalingSlider(0.25, 1.75, 1.0, i18n.getString("FeatureZoomDialog.scale.tooltip", "Set scaling factor to zoom in or to zoom out"));
 		
 		pointsLabel.setLabelFor(this.pointsComboBox);
-		GridPane.setHgrow(pointsLabel, Priority.NEVER);
+		scaleLabel.setLabelFor(this.scaleSlider);
 		
-		GridPane.setHgrow(this.pointsComboBox,    Priority.ALWAYS);
+		GridPane.setHgrow(pointsLabel, Priority.NEVER);
+		GridPane.setHgrow(scaleLabel,  Priority.NEVER);
+		
+		GridPane.setHgrow(this.pointsComboBox,   Priority.ALWAYS);
+		GridPane.setHgrow(this.scaleSlider,      Priority.ALWAYS);
 		
 		GridPane gridPane = new GridPane();
 		gridPane.setMaxWidth(Double.MAX_VALUE);
@@ -143,6 +150,8 @@ public class FeatureZoomDialog {
 		int row = 1;
 		gridPane.add(pointsLabel,         0, row);
 		gridPane.add(this.pointsComboBox, 1, row++);
+		gridPane.add(scaleLabel,          0, row);
+		gridPane.add(this.scaleSlider,    1, row++);
 	
 		return gridPane;
 	}
@@ -154,6 +163,20 @@ public class FeatureZoomDialog {
 		typeComboBox.setMinWidth(150);
 		typeComboBox.setMaxWidth(Double.MAX_VALUE);
 		return typeComboBox;
+	}
+	
+	private Slider createScalingSlider(double min, double max, double value, String tooltip) {
+		Slider slider = new Slider(min, max, value);
+
+		slider.setShowTickLabels(true);
+		slider.setShowTickMarks(true);
+		slider.setMajorTickUnit(0.5);
+		slider.setMinorTickCount(1);
+		slider.setBlockIncrement(0.25);
+		slider.setMinWidth(150);
+		slider.setMaxWidth(Double.MAX_VALUE);
+		slider.setTooltip(new Tooltip(tooltip));
+		return slider;
 	}
 	
 	private void load() {
@@ -205,6 +228,7 @@ public class FeatureZoomDialog {
 
 		double extentWidth  = graphicExtent.getExtentWidth();
 		double extentHeight = graphicExtent.getExtentHeight();
+		double scale        = graphicExtent.getScale();
 
 		double newMinX = pointX - 0.5 * extentWidth;
 		double newMaxX = pointX + 0.5 * extentWidth;
@@ -213,6 +237,8 @@ public class FeatureZoomDialog {
 		double newMaxY = pointY - 0.5 * extentHeight;
 
 		graphicExtent.set(newMinX, newMinY, newMaxX, newMaxY);
+		graphicExtent.setScale(scale * this.scaleSlider.getValue());
+		
 		this.layerManager.draw();
 	}
 }
