@@ -53,6 +53,7 @@ import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog;
 import org.applied_geodesy.jag3d.ui.dialog.TableRowHighlightDialog;
 import org.applied_geodesy.jag3d.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.jag3d.ui.graphic.UIGraphicPaneBuilder;
+import org.applied_geodesy.jag3d.ui.graphic.layer.dialog.FeatureZoomDialog;
 import org.applied_geodesy.jag3d.ui.graphic.layer.dialog.LayerManagerDialog;
 import org.applied_geodesy.jag3d.ui.menu.UIMenuBuilder;
 import org.applied_geodesy.jag3d.ui.tabpane.UITabPaneBuilder;
@@ -151,6 +152,7 @@ public class JAG3D extends Application {
 		ImportOptionDialog.setOwner(primaryStage);
 		AnalysisChartsDialog.setOwner(primaryStage);
 		InstrumentAndReflectorHeightAdaptionDialog.setOwner(primaryStage);
+		FeatureZoomDialog.setOwner(primaryStage);
 	}
 
 	@Override

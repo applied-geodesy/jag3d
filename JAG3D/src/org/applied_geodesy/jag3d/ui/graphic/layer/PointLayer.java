@@ -461,7 +461,7 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 		}
 	}
 
-	List<GraphicPoint> getPoints() {
+	public List<GraphicPoint> getPoints() {
 		return this.points;
 	}
 
