@@ -144,7 +144,7 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			double prismConst = 0; 
 			if (columns.length > 15)
 				try {prismConst = Double.parseDouble(columns[15].trim());} catch(NumberFormatException e) {prismConst = 0.0;};
-		System.out.println(prismConst);	
+
 			double distance = 0;
 			try {
 				TerrestrialObservationRow obs = new TerrestrialObservationRow();
