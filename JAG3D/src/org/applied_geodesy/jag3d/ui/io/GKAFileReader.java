@@ -130,7 +130,7 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			//1,2007_2,2207,4,345660.92,1,2,201.73478,0.00120,0.000,265.9469,0.00020000,297.0004,0.00020000,0.000,0.000,0.142,0.0,1,,,,-0.0304,-0.0003,0,1022.10,12.90,,3,,,0
 			//2,2008_2,2207,4,345669.75,1,1,154.83761,0.00115,0.000,51.4744,0.00020000,104.4044,0.00020000,0.000,0.000,0.142,0.0,1,,,,0.0244,-0.0029,0,1022.00,12.90,,3,,,0
 			String columns[] = line.split(",");
-			if (columns.length < 12)
+			if (columns.length < 15)
 				return;
 			
 			String endPointName = columns[1].trim();
@@ -141,6 +141,10 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			// Target height for distance measurement
 			try {th = Double.parseDouble(columns[9].trim());} catch(NumberFormatException e) {th = 0.0;};
 			
+			double prismConst = 0; 
+			if (columns.length > 15)
+				try {prismConst = Double.parseDouble(columns[15].trim());} catch(NumberFormatException e) {prismConst = 0.0;};
+		System.out.println(prismConst);	
 			double distance = 0;
 			try {
 				TerrestrialObservationRow obs = new TerrestrialObservationRow();
@@ -149,7 +153,8 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				obs.setInstrumentHeight(this.ih);
 				obs.setReflectorHeight(th);
 				distance = Double.parseDouble(columns[7].trim()); 
-				if (distance > 0) {
+				if (distance > 0 && (distance + prismConst) > 0) {
+					distance = distance + prismConst;
 					obs.setValueApriori(distance);
 					obs.setDistanceApriori(distance);
 					this.slopeDistances.add(obs);
