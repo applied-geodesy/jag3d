@@ -34,6 +34,7 @@ import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.JAG3D;
+import org.applied_geodesy.jag3d.ui.graphic.layer.dialog.FeatureZoomDialog;
 import org.applied_geodesy.jag3d.ui.graphic.layer.dialog.LayerManagerDialog;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 import org.applied_geodesy.jag3d.ui.graphic.sql.SQLGraphicManager;
@@ -472,6 +473,13 @@ public class LayerManager {
 				ToolbarType.EXPORT,
 				toolbarActionEventHandler
 				);
+		
+		Button featureZoomButton  = this.createButton(
+				"graphic_feature_zoom_32x32.png", 
+				i18n.getString("LayerManager.toolbar.button.featurezoom.tooltip", "Zoom to feature"),
+				ToolbarType.FEATURE_ZOOM,
+				toolbarActionEventHandler
+				);
 				
 		this.scaleSpinner = this.createDoubleSpinner(1, Double.MAX_VALUE, 5000, 250, i18n.getString("LayerManager.toolbar.scale.tooltip", "Scale of arrows and confidences"), 0);
 		this.scaleSpinner.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
@@ -496,6 +504,7 @@ public class LayerManager {
 				new Separator(),
 				expandButton,
 				redrawButton,
+				featureZoomButton,
 				exportButton,
 				new Separator(),
 				layerButton,
@@ -535,6 +544,10 @@ public class LayerManager {
 			layerProperties();
 			break;
 			
+		case FEATURE_ZOOM:
+			featureZoom();
+			break;
+			
 		case NONE:
 		case MOVE:
 		case WINDOW_ZOOM:
@@ -572,6 +585,10 @@ public class LayerManager {
 			//this.expand();
 			this.draw();
 		}
+	}
+	
+	public void featureZoom() {
+		FeatureZoomDialog.showAndWait(this, this.layers);
 	}
 	
 	public void layerProperties() {

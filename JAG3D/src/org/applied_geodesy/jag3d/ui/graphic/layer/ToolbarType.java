@@ -31,6 +31,7 @@ public enum ToolbarType {
 	NONE,
 	EXPORT,
 	LAYER_PROPERTIES,
+	FEATURE_ZOOM,
 	
 	;
 
