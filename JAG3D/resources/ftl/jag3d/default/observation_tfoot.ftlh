@@ -104,7 +104,6 @@
 			</#if>
 		<#else>
 			<td></td>
-			<td></td>
 			<td><@printFormattedNumber value=group.redundancy format=df_percentage/></td>
 			<#if apply_angle_unit??>
 				<#if sexagesimal_angle_residual??>
@@ -134,6 +133,7 @@
 			<#else>
 				<td><@printFormattedNumber value=group.max_gross_error format=df_length_residual/></td>
 			</#if>
+			<td></td>
 			<td></td>
 			<td></td>
 			<td></td>
