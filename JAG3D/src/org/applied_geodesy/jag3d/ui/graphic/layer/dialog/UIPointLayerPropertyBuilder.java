@@ -21,10 +21,14 @@
 
 package org.applied_geodesy.jag3d.ui.graphic.layer.dialog;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerManager;
 import org.applied_geodesy.jag3d.ui.graphic.layer.PointLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.PointSymbolType;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -43,6 +47,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 
 public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 	private class SymbolTypeChangeListener implements ChangeListener<PointSymbolType> {
@@ -135,6 +140,16 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		}
 	}
 	
+	private class HighlightTypeChangeListener implements ChangeListener<TableRowHighlightType> {
+		@Override
+		public void changed(ObservableValue<? extends TableRowHighlightType> observable, TableRowHighlightType oldValue, TableRowHighlightType newValue) {
+			if (currentLayer != null && newValue != null && layerManager != null) {
+				currentLayer.setHighlightType(newValue);
+				layerManager.draw();
+			}
+		}
+	}
+	
 	private class PointVisibleChangeListener implements ChangeListener<Boolean> {
 		private int dim;
 		PointVisibleChangeListener(int dim) {
@@ -176,6 +191,7 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 	private Node highlightPane = null;
 	private ComboBox<Double> highlightLineWidthComboBox;
 	private ColorPicker highlightColorPicker;
+	private ComboBox<TableRowHighlightType> highlightTypeComboBox;
 	
 	private CheckBox point1DVisibleCheckBox;
 	private CheckBox point2DVisibleCheckBox;
@@ -226,8 +242,13 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		case DATUM_POINT_APOSTERIORI:
 		case REFERENCE_POINT_APOSTERIORI:
 		case STOCHASTIC_POINT_APOSTERIORI:
+			this.prepareHighlightTypeComboBox(this.highlightTypeComboBox);
 			this.highlightColorPicker.setValue(this.currentLayer.getHighlightColor());
 			this.highlightLineWidthComboBox.getSelectionModel().select(this.currentLayer.getHighlightLineWidth());
+			if (this.highlightTypeComboBox.getItems().contains(this.currentLayer.getHighlightType()))
+				this.highlightTypeComboBox.getSelectionModel().select(this.currentLayer.getHighlightType());
+			else
+				this.highlightTypeComboBox.getSelectionModel().select(TableRowHighlightType.NONE);
 			this.highlightPane.setVisible(true);
 			this.highlightPane.setManaged(true);
 			break;
@@ -267,10 +288,7 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		
 		this.fontFamilyComboBox = this.createFontFamliyComboBox(i18n.getString("UIPointLayerPropertyBuilder.font.family.tooltip", "Set font familiy"));
 		this.fontSizeComboBox   = this.createSizeComboBox(i18n.getString("UIPointLayerPropertyBuilder.font.size.tooltip", "Set font size"), fontSizes, 1);
-		this.fontColorPicker    = new ColorPicker(Color.BLACK);
-		this.fontColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.fontColorPicker.setMaxWidth(Double.MAX_VALUE);
-		this.fontColorPicker.getStyleClass().add("split-button");
+		this.fontColorPicker    = this.createColorPicker(Color.BLACK, i18n.getString("UIPointLayerPropertyBuilder.font.color.tooltip", "Set font color"));
 		
 		this.fontFamilyComboBox.getSelectionModel().selectedItemProperty().addListener(new FontFamilyChangeListener());
 		this.fontSizeComboBox.getSelectionModel().selectedItemProperty().addListener(new FontSizeChangeListener());
@@ -323,11 +341,7 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		this.symbolTypeComboBox = this.createSymbolComboBox(i18n.getString("UIPointLayerPropertyBuilder.symbol.type.tooltip", "Set point symbol type"));
 		this.symbolSizeComboBox = this.createSizeComboBox(i18n.getString("UIPointLayerPropertyBuilder.symbol.size.tooltip", "Set point symbol size"), symbolSizes, 1);
 		this.lineWidthComboBox  = this.createLineWidthComboBox(i18n.getString("UIPointLayerPropertyBuilder.symbol.linewidth.tooltip", "Set line width"));
-		
-		this.symbolColorPicker = new ColorPicker(Color.DARKBLUE);
-		this.symbolColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.symbolColorPicker.setMaxWidth(Double.MAX_VALUE);
-		this.symbolColorPicker.getStyleClass().add("split-button");
+		this.symbolColorPicker  = this.createColorPicker(Color.DARKBLUE, i18n.getString("UIPointLayerPropertyBuilder.symbol.color.tooltip", "Set symbol color"));
 		
 		// add listeners
 		this.symbolTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new SymbolTypeChangeListener());
@@ -375,30 +389,37 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		Label highlightColorLabel = new Label(i18n.getString("UIPointLayerPropertyBuilder.highlight.color.label", "Highlight color:"));
 		highlightColorLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
+		Label highlightTypeLabel = new Label(i18n.getString("UIPointLayerPropertyBuilder.highlight.type.label", "Highlight type:"));
+		highlightTypeLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+				
 		Label highlightLineWidthLabel = new Label(i18n.getString("UIPointLayerPropertyBuilder.highlight.linewidth.label", "Line width:"));
 		highlightLineWidthLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
+		this.highlightTypeComboBox      = this.createHighlightTypeComboBox(i18n.getString("UIPointLayerPropertyBuilder.highlight.type.tooltip", "Set type of highlighting"), this.getHighlightTypeStringConverter());
 		this.highlightLineWidthComboBox = this.createLineWidthComboBox(i18n.getString("UIPointLayerPropertyBuilder.highlight.linewidth.tooltip", "Set line width for highlighting"));
-				
-		this.highlightColorPicker  = new ColorPicker(Color.DARKBLUE);
-		this.highlightColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.highlightColorPicker.setMaxWidth(Double.MAX_VALUE);
-		this.highlightColorPicker.getStyleClass().add("split-button");
+		this.highlightColorPicker       = this.createColorPicker(Color.DARKBLUE, i18n.getString("UIPointLayerPropertyBuilder.highlight.color.tooltip", "Set color of highlighting"));
 		
 		// add listener
 		this.highlightColorPicker.valueProperty().addListener(new HighlightColorChangeListener());
 		this.highlightLineWidthComboBox.getSelectionModel().selectedItemProperty().addListener(new HighlightLineWidthChangeListener());
+		this.highlightTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new HighlightTypeChangeListener());
 		
 		highlightColorLabel.setLabelFor(this.highlightColorPicker);
+		highlightTypeLabel.setLabelFor(this.highlightTypeComboBox);
 		highlightLineWidthLabel.setLabelFor(this.highlightLineWidthComboBox);
 		
 		GridPane.setHgrow(highlightColorLabel,     Priority.NEVER);
+		GridPane.setHgrow(highlightTypeLabel,      Priority.NEVER);
 		GridPane.setHgrow(highlightLineWidthLabel, Priority.NEVER);
 		
 		GridPane.setHgrow(this.highlightColorPicker,       Priority.ALWAYS);
+		GridPane.setHgrow(this.highlightTypeComboBox,      Priority.ALWAYS);
 		GridPane.setHgrow(this.highlightLineWidthComboBox, Priority.ALWAYS);
 		
 		int row = 0;
+		gridPane.add(highlightTypeLabel,         0, row);
+		gridPane.add(this.highlightTypeComboBox, 1, row++);
+		
 		gridPane.add(highlightColorLabel,       0, row);
 		gridPane.add(this.highlightColorPicker, 1, row++);
 		
@@ -460,5 +481,53 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		typeComboBox.setTooltip(new Tooltip(tooltip));
 		typeComboBox.setMaxWidth(Double.MAX_VALUE);
 		return typeComboBox;
+	}
+	
+	private void prepareHighlightTypeComboBox(ComboBox<TableRowHighlightType> typeComboBox) {
+		LinkedHashSet<TableRowHighlightType> supportedHiglightTypes = new LinkedHashSet<TableRowHighlightType>(Arrays.asList(TableRowHighlightType.values()));
+		if (this.currentLayer != null) {
+			switch(this.currentLayer.getLayerType()) {
+			case DATUM_POINT_APOSTERIORI:
+			case REFERENCE_POINT_APOSTERIORI:
+				supportedHiglightTypes.remove(TableRowHighlightType.INFLUENCE_ON_POSITION);
+				supportedHiglightTypes.remove(TableRowHighlightType.REDUNDANCY);
+				break;
+			default:
+				break;
+			}
+		}
+		typeComboBox.getSelectionModel().clearSelection();
+		typeComboBox.getItems().setAll(supportedHiglightTypes);
+		typeComboBox.getSelectionModel().select(TableRowHighlightType.NONE);
+	}
+	
+	private StringConverter<TableRowHighlightType> getHighlightTypeStringConverter() {
+		return new StringConverter<TableRowHighlightType>() {
+			@Override
+			public String toString(TableRowHighlightType type) {
+				if (type == null)
+					return null;
+				switch(type) {
+				case NONE:
+					return i18n.getString("UIPointLayerPropertyBuilder.highlight.type.none.label", "None");
+				case TEST_STATISTIC:
+					return i18n.getString("UIPointLayerPropertyBuilder.highlight.type.test_statistic.label", "Test statistic");
+				case REDUNDANCY:
+					return i18n.getString("UIPointLayerPropertyBuilder.highlight.type.redundancy.label", "Redundancy");
+				case INFLUENCE_ON_POSITION:
+					return i18n.getString("UIPointLayerPropertyBuilder.highlight.type.influence_on_position.label", "Influence on position");
+				case P_PRIO_VALUE:
+					return i18n.getString("UIPointLayerPropertyBuilder.highlight.type.p_prio.label", "p-Value (a-priori)");
+				case GROSS_ERROR:
+					return i18n.getString("UIPointLayerPropertyBuilder.highlight.type.gross_error.label", "Gross error");
+				}
+				return null;
+			}
+
+			@Override
+			public TableRowHighlightType fromString(String string) {
+				return TableRowHighlightType.valueOf(string);
+			}
+		};
 	}
 }

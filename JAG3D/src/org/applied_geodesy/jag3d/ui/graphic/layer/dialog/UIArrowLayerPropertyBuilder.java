@@ -156,11 +156,8 @@ public class UIArrowLayerPropertyBuilder extends UILayerPropertyBuilder {
 		this.symbolTypeComboBox  = this.createSymbolComboBox(i18n.getString("UIArrowLayerPropertyBuilder.symbol.type.tooltip", "Set arrow symbol type"));
 		this.symbolSizeComboBox  = this.createSizeComboBox(i18n.getString("UIArrowLayerPropertyBuilder.symbol.size.tooltip", "Set arrow symbol size"), symbolSizes, 1);
 		this.lineWidthComboBox   = this.createLineWidthComboBox(i18n.getString("UIArrowLayerPropertyBuilder.symbol.linewidth.tooltip", "Set line width"));
-		this.symbolColorPicker   = new ColorPicker(Color.DARKBLUE);
-		this.symbolColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.symbolColorPicker.setMaxWidth(Double.MAX_VALUE);
-		this.symbolColorPicker.getStyleClass().add("split-button");
-		
+		this.symbolColorPicker   = this.createColorPicker(Color.DARKBLUE, i18n.getString("UIArrowLayerPropertyBuilder.symbol.color.tooltip", "Set symbol color"));
+
 		// add listeners
 		this.symbolTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new SymbolTypeChangeListener());
 		this.symbolSizeComboBox.getSelectionModel().selectedItemProperty().addListener(new SymbolSizeChangeListener());

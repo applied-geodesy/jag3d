@@ -24,12 +24,15 @@ package org.applied_geodesy.jag3d.ui.graphic.layer.dialog;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
@@ -38,6 +41,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -150,5 +154,25 @@ public abstract class UILayerPropertyBuilder {
 		typeComboBox.setTooltip(new Tooltip(tooltip));
 		typeComboBox.setMaxWidth(Double.MAX_VALUE);
 		return typeComboBox;
+	}
+	
+	ComboBox<TableRowHighlightType> createHighlightTypeComboBox(String tooltip, StringConverter<TableRowHighlightType> converter) {
+		ComboBox<TableRowHighlightType> typeComboBox = new ComboBox<TableRowHighlightType>();
+		typeComboBox.getItems().setAll(TableRowHighlightType.values());
+		typeComboBox.getSelectionModel().select(TableRowHighlightType.NONE);
+		typeComboBox.setConverter(converter);
+		typeComboBox.setTooltip(new Tooltip(tooltip));
+		typeComboBox.setMinWidth(150);
+		typeComboBox.setMaxWidth(Double.MAX_VALUE);
+		return typeComboBox;
+	}
+	
+	ColorPicker createColorPicker(Color color, String tooltip) {
+		ColorPicker colorPicker = new ColorPicker(color);
+		colorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		colorPicker.setMaxWidth(Double.MAX_VALUE);
+		colorPicker.getStyleClass().add("split-button");
+		colorPicker.setTooltip(new Tooltip(tooltip));
+		return colorPicker;
 	}
 }

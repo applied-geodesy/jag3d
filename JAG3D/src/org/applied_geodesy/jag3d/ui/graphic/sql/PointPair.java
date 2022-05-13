@@ -23,7 +23,8 @@ package org.applied_geodesy.jag3d.ui.graphic.sql;
 
 public class PointPair {
 	private GraphicPoint startPoint, endPoint;
-	private boolean significant;
+	private boolean significant = false, grossErrorExceeded = false;
+	private double redundancy = 1.0, influenceOnPosition = 0.0, pPrio = 0;
 	
 	public PointPair(GraphicPoint startPoint, GraphicPoint endPoint) {
 		this.startPoint = startPoint;
@@ -39,10 +40,42 @@ public class PointPair {
 	}
 	
 	public boolean isSignificant() {
-		return significant;
+		return this.significant;
 	}
 	
 	public void setSignificant(boolean significant) {
 		this.significant = significant;
+	}
+	
+	public boolean isGrossErrorExceeded() {
+		return this.grossErrorExceeded;
+	}
+	
+	public void setGrossErrorExceeded(boolean grossErrorExceeded) {
+		this.grossErrorExceeded = grossErrorExceeded;
+	}
+	
+	public double getRedundancy() {
+		return this.redundancy;
+	}
+	
+	public void setRedundancy(double redundancy) {
+		this.redundancy = redundancy;
+	}
+	
+	public double getInfluenceOnPosition() {
+		return this.influenceOnPosition;
+	}
+	
+	public void setInfluenceOnPosition(double influenceOnPosition) {
+		this.influenceOnPosition = influenceOnPosition;
+	}
+	
+	public double getPprio() {
+		return this.pPrio;
+	}
+	
+	public void setPprio(double pPrio) {
+		this.pPrio = pPrio;
 	}
 }

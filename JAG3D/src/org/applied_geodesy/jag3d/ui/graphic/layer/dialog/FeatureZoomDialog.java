@@ -97,7 +97,7 @@ public class FeatureZoomDialog {
 
 		this.dialog = new Dialog<GraphicPoint>();
 		this.dialog.setTitle(i18n.getString("FeatureZoomDialog.title", "Feature zoom"));
-		this.dialog.setHeaderText(i18n.getString("FeatureZoomDialog.header", "Zoom to feature"));
+		this.dialog.setHeaderText(i18n.getString("FeatureZoomDialog.header", "Zoom and center to point"));
 
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);

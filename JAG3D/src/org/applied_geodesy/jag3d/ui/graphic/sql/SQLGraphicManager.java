@@ -32,6 +32,7 @@ import java.util.Map;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ArrowLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ConfidenceLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.FontLayer;
@@ -319,22 +320,37 @@ public class SQLGraphicManager {
 
 		if (type != null) {
 
-			String sql = "SELECT " + 
+			String sql = "SELECT "  
 					// Part: point
-					"\"name\", " + 
-					"\"y0\", \"x0\", " +
-					"\"y\",  \"x\", " + 
-					"\"helmert_major_axis\", \"helmert_minor_axis\", " +
-					"0.5 * PI() + \"helmert_alpha\" AS \"helmert_alpha\", " + // switch over to geodetic system north == x etc.
-					"\"y0\" - \"y\" AS \"residual_y\", \"x0\" - \"x\" AS \"residual_x\", \"z0\" - \"z\" AS \"residual_z\", " +
-					"\"first_principal_component_y\", \"first_principal_component_x\", \"first_principal_component_z\", " +
-					"\"significant\", " +
-					"\"dimension\" " + 
-					"FROM \"PointApriori\" " + 
-					"JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" " + 
-					"LEFT JOIN \"PointAposteriori\" ON \"PointApriori\".\"id\" = \"PointAposteriori\".\"id\" " + 
-					"WHERE \"PointGroup\".\"type\" = ? AND \"PointApriori\".\"enable\" = TRUE AND \"PointGroup\".\"enable\" = TRUE " +
-					"ORDER BY \"PointGroup\".\"id\" ASC, \"PointApriori\".\"id\" ASC";
+					+ "\"name\", " 
+					+ "\"y0\", \"x0\", " 
+					+ "\"y\",  \"x\", " 
+					+ "\"helmert_major_axis\", \"helmert_minor_axis\", " 
+					+ "0.5 * PI() + \"helmert_alpha\" AS \"helmert_alpha\", "  // switch over to geodetic system north == x etc.
+					+ "\"y0\" - \"y\" AS \"residual_y\", \"x0\" - \"x\" AS \"residual_x\", \"z0\" - \"z\" AS \"residual_z\", " 
+					+ "\"first_principal_component_y\", \"first_principal_component_x\", \"first_principal_component_z\", " 
+					+ "(CASE "
+					+ "WHEN \"dimension\" = 3 THEN LEAST(\"redundancy_x\", \"redundancy_y\", \"redundancy_z\") "
+					+ "WHEN \"dimension\" = 2 THEN LEAST(\"redundancy_x\", \"redundancy_y\") "
+					+ "ELSE \"redundancy_z\" "
+					+ "END) AS \"redundancy\", "
+					+ "(CASE "
+					+ "WHEN \"dimension\" = 3 THEN GREATEST(ABS(\"influence_on_position_x\"), ABS(\"influence_on_position_y\"), ABS(\"influence_on_position_z\")) "
+					+ "WHEN \"dimension\" = 2 THEN GREATEST(ABS(\"influence_on_position_x\"), ABS(\"influence_on_position_y\")) "
+					+ "ELSE ABS(\"influence_on_position_z\") "
+					+ "END) AS \"influence_on_position\", "
+					+ "CASE WHEN ("
+					+ "ABS(\"gross_error_x\") > ABS(\"minimal_detectable_bias_x\") "
+					+ "OR ABS(\"gross_error_y\") > ABS(\"minimal_detectable_bias_y\") "
+					+ "OR ABS(\"gross_error_z\") > ABS(\"minimal_detectable_bias_z\") "
+					+ ") THEN TRUE ELSE FALSE END AS \"gross_error_exceeded\", "
+					+ "\"p_prio\", \"significant\", " 
+					+ "\"dimension\" "  
+					+ "FROM \"PointApriori\" " 
+					+ "JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" " 
+					+ "LEFT JOIN \"PointAposteriori\" ON \"PointApriori\".\"id\" = \"PointAposteriori\".\"id\" " 
+					+ "WHERE \"PointGroup\".\"type\" = ? AND \"PointApriori\".\"enable\" = TRUE AND \"PointGroup\".\"enable\" = TRUE "
+					+ "ORDER BY \"PointGroup\".\"id\" ASC, \"PointApriori\".\"id\" ASC";
 
 			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 			int idx = 1;
@@ -355,6 +371,10 @@ public class SQLGraphicManager {
 					pointMap.put(name, graphicPoint);
 				}
 				else {
+					boolean significant = rs.getBoolean("significant");
+					if (rs.wasNull())
+						continue;
+					
 					double x = rs.getDouble("x");
 					if (rs.wasNull())
 						continue;
@@ -366,6 +386,7 @@ public class SQLGraphicManager {
 					double majorAxis = rs.getDouble("helmert_major_axis");
 					double minorAxis = rs.getDouble("helmert_minor_axis");
 					double angle     = rs.getDouble("helmert_alpha");
+					double pPrio     = rs.getDouble("p_prio");
 					
 					double principleComponentX = rs.getDouble("first_principal_component_x");
 					double principleComponentY = rs.getDouble("first_principal_component_y");
@@ -375,14 +396,17 @@ public class SQLGraphicManager {
 					double residualY = rs.getDouble("residual_y");
 					double residualZ = rs.getDouble("residual_z");
 					
-					boolean significant = rs.getBoolean("significant");
+					double minRedundancy = rs.getDouble("redundancy");
+					double maxInfluenceOnPosition = rs.getDouble("influence_on_position");
+					boolean grossErrorExceeded = rs.getBoolean("gross_error_exceeded");
 
 					GraphicPoint graphicPoint = new GraphicPoint(name, dimension, 
 							y, x, 
 							majorAxis, minorAxis, angle, 
 							residualY, residualX, residualZ,
 							principleComponentY, principleComponentX, principleComponentZ, 
-							significant);
+							minRedundancy, maxInfluenceOnPosition,
+							pPrio, grossErrorExceeded, significant);
 					pointList.add(graphicPoint);
 					pointMap.put(name, graphicPoint);
 				}
@@ -404,7 +428,11 @@ public class SQLGraphicManager {
 				+ "\"StartPointAposteriori\".\"x\" AS \"xs\", \"StartPointAposteriori\".\"y\" AS \"ys\", "
 				+ "\"EndPointApriori\".\"x0\" AS \"xe0\", \"EndPointApriori\".\"y0\" AS \"ye0\", "
 				+ "\"EndPointAposteriori\".\"x\" AS \"xe\", \"EndPointAposteriori\".\"y\" AS \"ye\", "
-				+ "\"ObservationAposteriori\".\"significant\" "
+				+ "\"ObservationAposteriori\".\"significant\", "
+				+ "\"ObservationAposteriori\".\"redundancy\", "
+				+ "ABS(\"ObservationAposteriori\".\"influence_on_position\") AS \"influence_on_position\", "
+				+ "CASE WHEN (ABS(\"ObservationAposteriori\".\"gross_error\") > ABS(\"ObservationAposteriori\".\"minimal_detectable_bias\")) THEN TRUE ELSE FALSE END AS \"gross_error_exceeded\", "
+				+ "\"ObservationAposteriori\".\"p_prio\" "
 				+ "FROM \"ObservationApriori\" "
 				+ "JOIN \"ObservationGroup\" ON \"ObservationGroup\".\"id\" = \"ObservationApriori\".\"group_id\" "
 				+ "LEFT JOIN \"ObservationAposteriori\" ON \"ObservationAposteriori\".\"id\" = \"ObservationApriori\".\"id\" "
@@ -425,7 +453,23 @@ public class SQLGraphicManager {
 				+ "\"StartPointAposteriori\".\"x\" AS \"xs\", \"StartPointAposteriori\".\"y\" AS \"ys\", "
 				+ "\"EndPointApriori\".\"x0\" AS \"xe0\", \"EndPointApriori\".\"y0\" AS \"ye0\", "
 				+ "\"EndPointAposteriori\".\"x\" AS \"xe\", \"EndPointAposteriori\".\"y\" AS \"ye\", "
-				+ "\"GNSSObservationAposteriori\".\"significant\" "
+				+ "\"GNSSObservationAposteriori\".\"significant\", "
+				+ "(CASE "
+				+ "WHEN \"ObservationGroup\".\"type\" = ? THEN LEAST(\"GNSSObservationAposteriori\".\"redundancy_x\", \"GNSSObservationAposteriori\".\"redundancy_y\", \"GNSSObservationAposteriori\".\"redundancy_z\") "
+				+ "WHEN \"ObservationGroup\".\"type\" = ? THEN LEAST(\"GNSSObservationAposteriori\".\"redundancy_x\", \"GNSSObservationAposteriori\".\"redundancy_y\") "
+				+ "ELSE \"GNSSObservationAposteriori\".\"redundancy_z\" "
+				+ "END) AS \"redundancy\", "
+				+ "(CASE "
+				+ "WHEN \"ObservationGroup\".\"type\" = ? THEN GREATEST(ABS(\"GNSSObservationAposteriori\".\"influence_on_position_x\"), ABS(\"GNSSObservationAposteriori\".\"influence_on_position_y\"), ABS(\"GNSSObservationAposteriori\".\"influence_on_position_z\")) "
+				+ "WHEN \"ObservationGroup\".\"type\" = ? THEN GREATEST(ABS(\"GNSSObservationAposteriori\".\"influence_on_position_x\"), ABS(\"GNSSObservationAposteriori\".\"influence_on_position_y\")) "
+				+ "ELSE ABS(\"GNSSObservationAposteriori\".\"influence_on_position_z\") "
+				+ "END) AS \"influence_on_position\", "
+				+ "CASE WHEN ("
+				+ "ABS(\"GNSSObservationAposteriori\".\"gross_error_x\") > ABS(\"GNSSObservationAposteriori\".\"minimal_detectable_bias_x\") "
+				+ "OR ABS(\"GNSSObservationAposteriori\".\"gross_error_y\") > ABS(\"GNSSObservationAposteriori\".\"minimal_detectable_bias_y\") "
+				+ "OR ABS(\"GNSSObservationAposteriori\".\"gross_error_z\") > ABS(\"GNSSObservationAposteriori\".\"minimal_detectable_bias_z\") "
+				+ ") THEN TRUE ELSE FALSE END AS \"gross_error_exceeded\", "
+				+ "\"GNSSObservationAposteriori\".\"p_prio\" "
 				+ "FROM \"GNSSObservationApriori\" "
 				+ "JOIN \"ObservationGroup\" ON \"ObservationGroup\".\"id\" = \"GNSSObservationApriori\".\"group_id\" "
 				+ "LEFT JOIN \"GNSSObservationAposteriori\" ON \"GNSSObservationAposteriori\".\"id\" = \"GNSSObservationApriori\".\"id\" "
@@ -441,6 +485,11 @@ public class SQLGraphicManager {
 				+ "AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		int idx = 1;
+		stmt.setInt(idx++, ObservationType.GNSS3D.getId()); // redundancy
+		stmt.setInt(idx++, ObservationType.GNSS2D.getId());
+		stmt.setInt(idx++, ObservationType.GNSS3D.getId()); // influence on position
+		stmt.setInt(idx++, ObservationType.GNSS2D.getId());
 		ResultSet rs = stmt.executeQuery();
 
 		while (rs.next()) {
@@ -508,6 +557,11 @@ public class SQLGraphicManager {
 				boolean significant = rs.getBoolean("significant");
 				if (rs.wasNull())
 					continue;
+				
+				double redundancy = rs.getDouble("redundancy");
+				double influenceOnPosition = rs.getDouble("influence_on_position");
+				double pPrio = rs.getDouble("p_prio");
+				boolean grossErrorExceeded = rs.getBoolean("gross_error_exceeded");
 
 				if (!observationMap.containsKey(key)) {
 					GraphicPoint startPoint = completePointMap.get(startPointName);
@@ -519,7 +573,11 @@ public class SQLGraphicManager {
 				ObservableMeasurement observableLink = observationMap.get(key);
 				if (significant)
 					observableLink.setSignificant(significant);
-					
+				observableLink.setRedundancy(Math.min(observableLink.getRedundancy(), redundancy));
+				observableLink.setInfluenceOnPosition(Math.max(observableLink.getInfluenceOnPosition(), influenceOnPosition));
+				observableLink.setPprio(Math.min(observableLink.getPprio(), pPrio));
+				observableLink.setGrossErrorExceeded(grossErrorExceeded);
+
 				switch(observationType) {
 				case LEVELING:
 					if (startPointName.equals(observableLink.getStartPoint().getName()))
@@ -771,19 +829,21 @@ public class SQLGraphicManager {
 	
 	private void save(HighlightableLayer layer) throws SQLException {
 		String sql = "MERGE INTO \"HighlightLayerProperty\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
-				+ ") AS \"vals\" (\"layer\", \"red\", \"green\", \"blue\", \"line_width\") ON \"HighlightLayerProperty\".\"layer\" = \"vals\".\"layer\" "
+				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS INT)) "
+				+ ") AS \"vals\" (\"layer\", \"red\", \"green\", \"blue\", \"line_width\", \"type\") ON \"HighlightLayerProperty\".\"layer\" = \"vals\".\"layer\" "
 				+ "WHEN MATCHED THEN UPDATE SET "
-				+ "\"HighlightLayerProperty\".\"red\"       = \"vals\".\"red\", "
+				+ "\"HighlightLayerProperty\".\"red\"        = \"vals\".\"red\", "
 				+ "\"HighlightLayerProperty\".\"green\"      = \"vals\".\"green\", "
 				+ "\"HighlightLayerProperty\".\"blue\"       = \"vals\".\"blue\", "
-				+ "\"HighlightLayerProperty\".\"line_width\" = \"vals\".\"line_width\" "
+				+ "\"HighlightLayerProperty\".\"line_width\" = \"vals\".\"line_width\", "
+				+ "\"HighlightLayerProperty\".\"type\"       = \"vals\".\"type\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"layer\", "
 				+ "\"vals\".\"red\", "
 				+ "\"vals\".\"green\", "
 				+ "\"vals\".\"blue\","
-				+ "\"vals\".\"line_width\" ";
+				+ "\"vals\".\"line_width\", "
+				+ "\"vals\".\"type\" ";
 		
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -792,6 +852,7 @@ public class SQLGraphicManager {
 		stmt.setDouble(idx++,  layer.getHighlightColor().getGreen());
 		stmt.setDouble(idx++,  layer.getHighlightColor().getBlue());
 		stmt.setDouble(idx++,  layer.getHighlightLineWidth());
+		stmt.setInt(idx++,     layer.getHighlightType().getId());
 		stmt.execute();
 	}
 	
@@ -1023,7 +1084,7 @@ public class SQLGraphicManager {
 	
 	private void loadHighlightProperties(HighlightableLayer layer) throws SQLException {
 		String sql = "SELECT "
-				+ "\"red\", \"green\", \"blue\", \"line_width\" "
+				+ "\"red\", \"green\", \"blue\", \"line_width\", \"type\" "
 				+ "FROM \"HighlightLayerProperty\" "
 				+ "WHERE \"layer\" = ? LIMIT 1";
 
@@ -1033,6 +1094,13 @@ public class SQLGraphicManager {
 		ResultSet rs = stmt.executeQuery();
 
 		if (rs.next()) {
+			int typeId = rs.getInt("type");
+			TableRowHighlightType type = TableRowHighlightType.getEnumByValue(typeId);
+			if (!rs.wasNull() && type != null)
+				layer.setHighlightType(type);
+			else
+				layer.setHighlightType(TableRowHighlightType.NONE);
+			
 			double opacity = 1.0;
 
 			double red = rs.getDouble("red");
