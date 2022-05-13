@@ -112,7 +112,7 @@ public class UILegendLayerPropertyBuilder extends UILayerPropertyBuilder {
 	private ComboBox<Double> fontSizeComboBox;
 	
 	private ComboBox<Double> lineWidthComboBox;
-	private ColorPicker symbolColorPicker;
+	private ColorPicker borderColorPicker;
 	private ComboBox<LegendPositionType> legendPositionTypeComboBox;
 	
 	private LegendLayer currentLayer = null;
@@ -154,7 +154,7 @@ public class UILegendLayerPropertyBuilder extends UILayerPropertyBuilder {
 		
 		// border properties
 		this.lineWidthComboBox.getSelectionModel().select(this.currentLayer.getLineWidth());
-		this.symbolColorPicker.setValue(this.currentLayer.getColor());
+		this.borderColorPicker.setValue(this.currentLayer.getColor());
 		this.legendPositionTypeComboBox.getSelectionModel().select(this.currentLayer.getLegendPositionType());
 	}
 	
@@ -174,20 +174,16 @@ public class UILegendLayerPropertyBuilder extends UILayerPropertyBuilder {
 		for (int i = 0; i < symbolSizes.length; i++)
 			symbolSizes[i] = 5 + 0.5 * i;
 		
-		this.lineWidthComboBox  = this.createLineWidthComboBox(i18n.getString("UILegendLayerPropertyBuilder.border.linewidth.tooltip", "Set line width"));
+		this.lineWidthComboBox          = this.createLineWidthComboBox(i18n.getString("UILegendLayerPropertyBuilder.border.linewidth.tooltip", "Set line width"));
 		this.legendPositionTypeComboBox = this.createEstimationTypeComboBox(LegendPositionType.NORTH_EAST, i18n.getString("UILegendLayerPropertyBuilder.legendposition.tooltip", "Set legend position"));
-		
-		this.symbolColorPicker  = new ColorPicker(Color.LIGHTSLATEGREY);
-		this.symbolColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.symbolColorPicker.setMaxWidth(Double.MAX_VALUE);
-		this.symbolColorPicker.getStyleClass().add("split-button");
+		this.borderColorPicker          = this.createColorPicker(Color.LIGHTSLATEGREY, i18n.getString("UILegendLayerPropertyBuilder.border.color.tooltip", "Set legend border color"));
 		
 		// add listeners
 		this.lineWidthComboBox.getSelectionModel().selectedItemProperty().addListener(new LineWidthChangeListener());
 		this.legendPositionTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new LegendPositionTypeChangeListener());
-		this.symbolColorPicker.valueProperty().addListener(new ColorChangeListener());
+		this.borderColorPicker.valueProperty().addListener(new ColorChangeListener());
 		
-		borderColorLabel.setLabelFor(this.symbolColorPicker);
+		borderColorLabel.setLabelFor(this.borderColorPicker);
 		borderLineWidthLabel.setLabelFor(this.lineWidthComboBox);
 		legendPositionTypeLabel.setLabelFor(this.legendPositionTypeComboBox);
 		
@@ -195,13 +191,13 @@ public class UILegendLayerPropertyBuilder extends UILayerPropertyBuilder {
 		GridPane.setHgrow(borderLineWidthLabel,    Priority.NEVER);
 		GridPane.setHgrow(legendPositionTypeLabel, Priority.NEVER);
 		
-		GridPane.setHgrow(this.symbolColorPicker,          Priority.ALWAYS);
+		GridPane.setHgrow(this.borderColorPicker,          Priority.ALWAYS);
 		GridPane.setHgrow(this.lineWidthComboBox,          Priority.ALWAYS);
 		GridPane.setHgrow(this.legendPositionTypeComboBox, Priority.ALWAYS);
 
 		int row = 0;		
 		gridPane.add(borderColorLabel,       0, row);
-		gridPane.add(this.symbolColorPicker, 1, row++);
+		gridPane.add(this.borderColorPicker, 1, row++);
 		
 		gridPane.add(borderLineWidthLabel,   0, row);
 		gridPane.add(this.lineWidthComboBox, 1, row++);
@@ -230,10 +226,7 @@ public class UILegendLayerPropertyBuilder extends UILayerPropertyBuilder {
 		
 		this.fontFamilyComboBox = this.createFontFamliyComboBox(i18n.getString("UILegendLayerPropertyBuilder.font.family.tooltip", "Set font familiy"));
 		this.fontSizeComboBox   = this.createSizeComboBox(i18n.getString("UILegendLayerPropertyBuilder.font.size.tooltip", "Set font size"), fontSizes, 1);
-		this.fontColorPicker    = new ColorPicker(Color.SLATEGREY);
-		this.fontColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.fontColorPicker.setMaxWidth(Double.MAX_VALUE);
-		this.fontColorPicker.getStyleClass().add("split-button");
+		this.fontColorPicker    = this.createColorPicker(Color.SLATEGREY, i18n.getString("UILegendLayerPropertyBuilder.font.color.tooltip", "Set font color"));
 		
 		this.fontFamilyComboBox.getSelectionModel().selectedItemProperty().addListener(new FontFamilyChangeListener());
 		this.fontSizeComboBox.getSelectionModel().selectedItemProperty().addListener(new FontSizeChangeListener());

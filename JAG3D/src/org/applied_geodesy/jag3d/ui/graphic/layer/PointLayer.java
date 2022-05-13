@@ -25,6 +25,8 @@ import java.util.List;
 
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.HighlightableLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.PointSymbolType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
@@ -55,6 +57,7 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 
 	private ObjectProperty<Color> highlightColor = new SimpleObjectProperty<Color>(Color.ORANGERED); //#FF4500
 	private DoubleProperty highlightLineWidth    = new SimpleDoubleProperty(2.5);
+	private ObjectProperty<TableRowHighlightType> highlightType = new SimpleObjectProperty<TableRowHighlightType>(TableRowHighlightType.NONE);
 
 	private BooleanProperty point1DVisible = new SimpleBooleanProperty(Boolean.FALSE);
 	private BooleanProperty point2DVisible = new SimpleBooleanProperty(Boolean.TRUE);
@@ -64,6 +67,7 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 		super(layerType);
 
 		Color symbolColor, fontColor, highlightColor;
+		TableRowHighlightType highlightType;
 		PointSymbolType pointSymbolType;
 		String fontFamily = null;
 		double symbolSize = -1, lineWidth = -1, fontSize = -1, highlightLineWidth = -1;
@@ -112,6 +116,14 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 			} catch (Exception e) {
 				symbolColor = Color.web("#006400");
 			}
+			
+			try {
+				highlightType = TableRowHighlightType.valueOf(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_HIGHLIGHT_TYPE", "NONE"));
+				if (highlightType == null)
+					highlightType = TableRowHighlightType.NONE;
+			} catch (Exception e) {
+				highlightType = TableRowHighlightType.NONE;
+			}
 
 			try {
 				highlightColor = Color.web(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_HIGHLIGHT_COLOR", "#FF4500"));
@@ -133,6 +145,7 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 			try { highlightLineWidth = Double.parseDouble(PROPERTIES.getProperty("REFERENCE_POINT_APOSTERIORI_HIGHLIGHT_LINE_WIDTH")); } catch (Exception e) {}
 			this.setHighlightLineWidth(highlightLineWidth >= 0 ? highlightLineWidth : 2.5);
 			this.setHighlightColor(highlightColor);
+			this.setHighlightType(highlightType);
 
 			break;
 
@@ -178,6 +191,14 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 			} catch (Exception e) {
 				symbolColor = Color.web("#daa520");
 			}
+			
+			try {
+				highlightType = TableRowHighlightType.valueOf(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_HIGHLIGHT_TYPE", "NONE"));
+				if (highlightType == null)
+					highlightType = TableRowHighlightType.NONE;
+			} catch (Exception e) {
+				highlightType = TableRowHighlightType.NONE;
+			}
 
 			try {
 				highlightColor = Color.web(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_HIGHLIGHT_COLOR", "#FF4500"));
@@ -199,6 +220,7 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 			try { highlightLineWidth = Double.parseDouble(PROPERTIES.getProperty("STOCHASTIC_POINT_APOSTERIORI_HIGHLIGHT_LINE_WIDTH")); } catch (Exception e) {}
 			this.setHighlightLineWidth(highlightLineWidth >= 0 ? highlightLineWidth : 2.5);
 			this.setHighlightColor(highlightColor);
+			this.setHighlightType(highlightType);
 
 			break;
 
@@ -244,6 +266,14 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 			} catch (Exception e) {
 				symbolColor = Color.web("#1e90ff");
 			}
+			
+			try {
+				highlightType = TableRowHighlightType.valueOf(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_HIGHLIGHT_TYPE", "NONE"));
+				if (highlightType == null)
+					highlightType = TableRowHighlightType.NONE;
+			} catch (Exception e) {
+				highlightType = TableRowHighlightType.NONE;
+			}
 
 			try {
 				highlightColor = Color.web(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_HIGHLIGHT_COLOR", "#FF4500"));
@@ -265,6 +295,7 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 			try { highlightLineWidth = Double.parseDouble(PROPERTIES.getProperty("DATUM_POINT_APOSTERIORI_HIGHLIGHT_LINE_WIDTH")); } catch (Exception e) {}
 			this.setHighlightLineWidth(highlightLineWidth >= 0 ? highlightLineWidth : 2.5);
 			this.setHighlightColor(highlightColor);
+			this.setHighlightType(highlightType);
 
 			break;
 
@@ -366,36 +397,60 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 			PixelCoordinate pixelCoordinate = GraphicExtent.toPixelCoordinate(point.getCoordinate(), graphicExtent);
 
 			if (this.contains(graphicExtent, pixelCoordinate)) {
-				Color symbolColor, fontColor;
-				double lineWidth;
 				// set layer color and line width properties
-				if (point.isSignificant()) {
-					symbolColor = this.getHighlightColor();
-					fontColor   = this.getHighlightColor();
-					lineWidth   = this.getHighlightLineWidth();
-				}
-				else { 
+				Color symbolColor = this.getColor();
+				Color fontColor   = this.getFontColor();
+				double lineWidth  = this.getLineWidth();
+				
+				TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
+				double leftBoundary  = tableRowHighlight.getLeftBoundary(this.getHighlightType());
+				double rightBoundary = tableRowHighlight.getRightBoundary(this.getHighlightType());
+
+				switch(this.getHighlightType()) {
+				case INFLUENCE_ON_POSITION:
+					if (point.getMaxInfluenceOnPosition() > rightBoundary) {
+						symbolColor = this.getHighlightColor();
+						fontColor   = this.getHighlightColor();
+						lineWidth   = this.getHighlightLineWidth();
+					}
+					break;
+				case P_PRIO_VALUE:
+					if (point.getPprio() < Math.log(leftBoundary / 100.0)) {
+						symbolColor = this.getHighlightColor();
+						fontColor   = this.getHighlightColor();
+						lineWidth   = this.getHighlightLineWidth();
+					}
+					break;
+				case REDUNDANCY:
+					if (point.getMinRedundancy() < leftBoundary) {
+						symbolColor = this.getHighlightColor();
+						fontColor   = this.getHighlightColor();
+						lineWidth   = this.getHighlightLineWidth();
+					}
+					break;
+				case TEST_STATISTIC:
+					if (point.isSignificant()) {
+						symbolColor = this.getHighlightColor();
+						fontColor   = this.getHighlightColor();
+						lineWidth   = this.getHighlightLineWidth();
+					}
+					break;
+				case GROSS_ERROR:
+					if (point.isGrossErrorExceeded()) {
+						symbolColor = this.getHighlightColor();
+						fontColor   = this.getHighlightColor();
+						lineWidth   = this.getHighlightLineWidth();
+					}
+					break;
+				case NONE: // DEFAULT
 					symbolColor = this.getColor();
 					fontColor   = this.getFontColor();
 					lineWidth   = this.getLineWidth();
+					break;
 				}
-				
+
 				this.drawPointSymbol(graphicsContext, pixelCoordinate, symbolColor, symbolType, symbolSize, lineWidth);
 				this.drawPointText(graphicsContext, pixelCoordinate, point.getName().trim(), fontColor, fontFamily, symbolSize, lineWidth, fontSize);
-//				graphicsContext.setLineWidth(lineWidth);
-//
-//				graphicsContext.setStroke(symbolColor);
-//				graphicsContext.setFill(symbolColor);
-//
-//				SymbolBuilder.drawSymbol(graphicsContext, pixelCoordinate, symbolType, symbolSize);
-//
-//				// set text color
-//				graphicsContext.setStroke(fontColor);
-//				graphicsContext.setFill(fontColor);
-//				graphicsContext.setFont(Font.font(fontFamily, FontWeight.NORMAL, FontPosture.REGULAR, fontSize));		
-//				graphicsContext.fillText(point.getName().trim(), 
-//						pixelCoordinate.getX() + 0.5 * (symbolSize + lineWidth + 1), 
-//						pixelCoordinate.getY() + 0.5 * (symbolSize + fontSize + lineWidth + 1));
 			}
 		}
 	}
@@ -620,6 +675,21 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 	@Override
 	public final void setHighlightLineWidth(final double highlightLineWidth) {
 		this.highlightLineWidthProperty().set(highlightLineWidth);
+	}
+	
+	@Override
+	public ObjectProperty<TableRowHighlightType> highlightTypeProperty() {
+		return this.highlightType;
+	}
+	
+	@Override
+	public TableRowHighlightType getHighlightType() {
+		return this.highlightTypeProperty().get();
+	}
+	
+	@Override
+	public void setHighlightType(final TableRowHighlightType highlightType) {
+		this.highlightTypeProperty().set(highlightType);
 	}
 
 	@Override

@@ -28,16 +28,18 @@ import javafx.beans.property.SimpleBooleanProperty;
 
 public class GraphicPoint {
 	private WorldCoordinate coordinate;
-	private double minorAxis = 0.0, majorAxis = 0.0, angle = 0.0;
+	private double minorAxis = 0.0, majorAxis = 0.0, angle = 0.0, pPrio = 0;
 	private double principalComponentX = 0.0, principalComponentY = 0.0, principalComponentZ = 0.0;
 	private double residualX = 0.0, residualY = 0.0, residualZ = 0.0;
+	private double minRedundancy = 0.0;
+	private double maxInfluenceOnPosition = 0.0;
 	private String name;
 	private int dimension;
-	private boolean significant;
+	private boolean significant = false, grossErrorExceeded = false;
 	private BooleanProperty visible = new SimpleBooleanProperty(Boolean.TRUE);
 	
 	public GraphicPoint(String name, int dimension, double x, double y) {
-		this(name, dimension, x, y, 0, 0, 0, 0, 0, 0, 0, 0, 0, false);
+		this(name, dimension, x, y, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false);
 	}
 
 	public GraphicPoint(String name, int dimension, 
@@ -45,7 +47,8 @@ public class GraphicPoint {
 			double majorAxis, double minorAxis, double angle, 
 			double residualX, double residualY, double residualZ,
 			double principalComponentX, double principalComponentY, double principalComponentZ, 
-			boolean significant) {
+			double minRedundancy, double maxInfluenceOnPosition,
+			double pPrio, boolean grossErrorExceeded, boolean significant) {
 
 		this.coordinate = new WorldCoordinate(x, y);
 		this.name = name;
@@ -58,12 +61,16 @@ public class GraphicPoint {
 		this.residualX = residualX;
 		this.residualY = residualY;
 		this.residualZ = residualZ;
+		this.minRedundancy = minRedundancy;
+		this.maxInfluenceOnPosition = maxInfluenceOnPosition;
 		this.angle = angle;
+		this.pPrio = pPrio;
+		this.grossErrorExceeded = grossErrorExceeded;
 		this.significant = significant;
 	}
 	
 	public WorldCoordinate getCoordinate() {
-		return coordinate;
+		return this.coordinate;
 	}
 
 	public void setCoordinate(WorldCoordinate coordinate) {
@@ -71,7 +78,7 @@ public class GraphicPoint {
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(String name) {
@@ -79,15 +86,23 @@ public class GraphicPoint {
 	}
 
 	public boolean isSignificant() {
-		return significant;
+		return this.significant;
 	}
 	
 	public void setSignificant(boolean significant) {
 		this.significant = significant;
 	}
+	
+	public boolean isGrossErrorExceeded() {
+		return this.grossErrorExceeded;
+	}
+	
+	public void setGrossErrorExceeded(boolean grossErrorExceeded) {
+		this.grossErrorExceeded = grossErrorExceeded;
+	}
 
 	public double getMinorAxis() {
-		return minorAxis;
+		return this.minorAxis;
 	}
 
 	public void setMinorAxis(double minorAxis) {
@@ -95,7 +110,7 @@ public class GraphicPoint {
 	}
 
 	public double getMajorAxis() {
-		return majorAxis;
+		return this.majorAxis;
 	}
 
 	public void setMajorAxis(double majorAxis) {
@@ -103,7 +118,7 @@ public class GraphicPoint {
 	}
 
 	public double getAngle() {
-		return angle;
+		return this.angle;
 	}
 
 	public void setAngle(double angle) {
@@ -123,31 +138,43 @@ public class GraphicPoint {
 	}
 
 	public int getDimension() {
-		return dimension;
+		return this.dimension;
 	}
 
 	public double getPrincipalComponentX() {
-		return principalComponentX;
+		return this.principalComponentX;
 	}
 
 	public double getPrincipalComponentY() {
-		return principalComponentY;
+		return this.principalComponentY;
 	}
 	
 	public double getPrincipalComponentZ() {
-		return principalComponentZ;
+		return this.principalComponentZ;
 	}
 	
 	public double getResidualX() {
-		return residualX;
+		return this.residualX;
 	}
 
 	public double getResidualY() {
-		return residualY;
+		return this.residualY;
 	}
 	
 	public double getResidualZ() {
-		return residualZ;
+		return this.residualZ;
+	}
+	
+	public double getMinRedundancy() {
+		return this.minRedundancy;
+	}
+
+	public double getMaxInfluenceOnPosition() {
+		return this.maxInfluenceOnPosition;
+	}
+	
+	public double getPprio() {
+		return this.pPrio;
 	}
 	
 	@Override

@@ -265,6 +265,8 @@ class SQLDatabase {
 		sqls.put(20210629.0031, "ALTER TABLE \"VerticalDeflectionAposteriori\" ADD \"maximum_tolerable_bias_x\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
 		sqls.put(20210629.0032, "ALTER TABLE \"VerticalDeflectionAposteriori\" ADD \"maximum_tolerable_bias_y\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
 
+		// add highlight type
+		sqls.put(20210923.0001, "ALTER TABLE \"HighlightLayerProperty\" ADD \"type\" SMALLINT DEFAULT " + TableRowHighlightType.NONE.getId() + " NOT NULL\r\n");
 		return sqls;
 	}
 }

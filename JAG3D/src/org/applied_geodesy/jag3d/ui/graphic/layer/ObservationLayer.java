@@ -33,6 +33,8 @@ import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.sql.GraphicPoint;
 import org.applied_geodesy.jag3d.ui.graphic.sql.ObservableMeasurement;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -51,12 +53,12 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 
 	private ObjectProperty<Color> highlightColor = new SimpleObjectProperty<Color>(Color.ORANGERED); //#FF4500
 	private DoubleProperty highlightLineWidth    = new SimpleDoubleProperty(2.5);
-	
+	private ObjectProperty<TableRowHighlightType> highlightType = new SimpleObjectProperty<TableRowHighlightType>(TableRowHighlightType.NONE);
 	private Set<ObservationType> projectObservationTypes = new LinkedHashSet<ObservationType>(10); // Store all given ObservationType of the project
 	
 	ObservationLayer(LayerType layerType) {
 		super(layerType);
-
+		TableRowHighlightType highlightType;
 		Color color, highlightColor;
 		double symbolSize = -1, lineWidth = -1, highlightLineWidth = -1;
 		boolean visible = Boolean.TRUE;
@@ -77,6 +79,14 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 
 		case OBSERVATION_APOSTERIORI:
 			try {
+				highlightType = TableRowHighlightType.valueOf(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_HIGHLIGHT_TYPE", "NONE"));
+				if (highlightType == null)
+					highlightType = TableRowHighlightType.NONE;
+			} catch (Exception e) {
+				highlightType = TableRowHighlightType.NONE;
+			}
+			
+			try {
 				highlightColor = Color.web(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_HIGHLIGHT_COLOR", "#FF4500"));
 			} catch (Exception e) {
 				highlightColor = Color.web("#FF4500");
@@ -94,7 +104,8 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 			try { highlightLineWidth = Double.parseDouble(PROPERTIES.getProperty("OBSERVATION_APOSTERIORI_HIGHLIGHT_LINE_WIDTH")); } catch (Exception e) {}
 			this.setHighlightLineWidth(highlightLineWidth >= 0 ? highlightLineWidth : 2.5);
 			this.setHighlightColor(highlightColor);
-
+			this.setHighlightType(highlightType);
+			
 			break;
 		default:
 			throw new IllegalArgumentException("Error, unsupported layer type " + layerType);
@@ -272,8 +283,49 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 			double dx = (xe-xs)/distance;
 			double dy = (ye-ys)/distance;
 			
-			Color color      = observableLink.isSignificant() ? this.getHighlightColor()     : this.getColor();
-			double lineWidth = observableLink.isSignificant() ? this.getHighlightLineWidth() : this.getLineWidth();
+			Color color      = this.getColor();
+			double lineWidth = this.getLineWidth();
+			
+			TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
+			double leftBoundary  = tableRowHighlight.getLeftBoundary(this.getHighlightType());
+			double rightBoundary = tableRowHighlight.getRightBoundary(this.getHighlightType());
+
+			switch(this.getHighlightType()) {
+			case INFLUENCE_ON_POSITION:
+				if (observableLink.getInfluenceOnPosition() > rightBoundary) {
+					color     = this.getHighlightColor();
+					lineWidth = this.getHighlightLineWidth();
+				}
+				break;
+			case P_PRIO_VALUE:
+				if (observableLink.getPprio() < Math.log(leftBoundary / 100.0)) {
+					color     = this.getHighlightColor();
+					lineWidth = this.getHighlightLineWidth();
+				}
+				break;
+			case REDUNDANCY:
+				if (observableLink.getRedundancy() < leftBoundary) {
+					color     = this.getHighlightColor();
+					lineWidth = this.getHighlightLineWidth();
+				}
+				break;
+			case TEST_STATISTIC:
+				if (observableLink.isSignificant()) {
+					color     = this.getHighlightColor();
+					lineWidth = this.getHighlightLineWidth();
+				}
+				break;
+			case GROSS_ERROR:
+				if (observableLink.isGrossErrorExceeded()) {
+					color     = this.getHighlightColor();
+					lineWidth = this.getHighlightLineWidth();
+				}
+				break;
+			case NONE: // DEFAULT
+				color     = this.getColor();
+				lineWidth = this.getLineWidth();
+				break;
+			}
 			
 			graphicsContext.setStroke(color);
 			graphicsContext.setLineWidth(lineWidth);
@@ -441,6 +493,21 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 	@Override
 	public final void setHighlightLineWidth(final double highlightLineWidth) {
 		this.highlightLineWidthProperty().set(highlightLineWidth);
+	}
+	
+	@Override
+	public ObjectProperty<TableRowHighlightType> highlightTypeProperty() {
+		return this.highlightType;
+	}
+	
+	@Override
+	public TableRowHighlightType getHighlightType() {
+		return this.highlightTypeProperty().get();
+	}
+	
+	@Override
+	public void setHighlightType(final TableRowHighlightType highlightType) {
+		this.highlightTypeProperty().set(highlightType);
 	}
 	
 	@Override

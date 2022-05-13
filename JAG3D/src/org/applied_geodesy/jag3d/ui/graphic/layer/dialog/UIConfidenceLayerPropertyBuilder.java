@@ -123,17 +123,10 @@ public class UIConfidenceLayerPropertyBuilder extends UILayerPropertyBuilder {
 		Label symbolLineWidthLabel = new Label(i18n.getString("UIConfidenceLayerPropertyBuilder.symbol.linewidth.label", "Line width:"));
 		symbolLineWidthLabel.setMinWidth(Control.USE_PREF_SIZE);
 
-		this.lineWidthComboBox  = this.createLineWidthComboBox(i18n.getString("UIConfidenceLayerPropertyBuilder.symbol.linewidth.tooltip", "Set line width"));
-		this.symbolStrokeColorPicker = new ColorPicker(Color.BLACK);
-		this.symbolStrokeColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.symbolStrokeColorPicker.setMaxWidth(Double.MAX_VALUE);
-		this.symbolStrokeColorPicker.getStyleClass().add("split-button");
-		
-		this.symbolFillColorPicker = new ColorPicker(Color.LIGHTGREY);
-		this.symbolFillColorPicker.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		this.symbolFillColorPicker.setMaxWidth(Double.MAX_VALUE);
-		this.symbolFillColorPicker.getStyleClass().add("split-button");
-		
+		this.lineWidthComboBox       = this.createLineWidthComboBox(i18n.getString("UIConfidenceLayerPropertyBuilder.symbol.linewidth.tooltip", "Set line width"));
+		this.symbolStrokeColorPicker = this.createColorPicker(Color.BLACK, i18n.getString("UIConfidenceLayerPropertyBuilder.symbol.color.tooltip", "Set stroke color"));
+		this.symbolFillColorPicker   = this.createColorPicker(Color.LIGHTGREY, i18n.getString("UIConfidenceLayerPropertyBuilder.symbol.fill_color.tooltip", "Set fill color"));
+				
 		// add listeners
 		this.lineWidthComboBox.getSelectionModel().selectedItemProperty().addListener(new LineWidthChangeListener());
 		this.symbolFillColorPicker.valueProperty().addListener(new FillColorChangeListener());

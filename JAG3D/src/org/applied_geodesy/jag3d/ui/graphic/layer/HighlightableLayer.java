@@ -21,6 +21,8 @@
 
 package org.applied_geodesy.jag3d.ui.graphic.layer;
 
+import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.paint.Color;
@@ -33,4 +35,8 @@ public interface HighlightableLayer extends IdentifiableLayer {
 	public DoubleProperty highlightLineWidthProperty();
 	public double getHighlightLineWidth();
 	public void setHighlightLineWidth(final double highlightLineWidth);
+	
+	public ObjectProperty<TableRowHighlightType> highlightTypeProperty();
+	public TableRowHighlightType getHighlightType();
+	public void setHighlightType(final TableRowHighlightType highlightType);
 }
