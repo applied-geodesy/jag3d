@@ -47,6 +47,7 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	private boolean isNewStation = false;
 	private String startPointName = null, lastStartPointName = null;
 	private double ih = 0.0;
+	private Double edmRefractiveIndex = null, edmCarrierWavelength = null;
 	private TreeItem<TreeItemValue> lastTreeItem = null;
 
 	private List<TerrestrialObservationRow> horizontalDistances = null;
@@ -121,6 +122,8 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		if (line.startsWith("#GNV11")) {
 			this.isNewStation = false;
 			this.startPointName = null;
+			this.edmRefractiveIndex = null;
+			this.edmCarrierWavelength = null;
 			this.ih = 0.0;
 		}
 
@@ -141,9 +144,20 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			// Target height for distance measurement
 			try {th = Double.parseDouble(columns[9].trim());} catch(NumberFormatException e) {th = 0.0;};
 			
-			double prismConst = 0; 
+			double prismConst  = 0; 
+			double scale = 1.0;
 			if (columns.length > 15)
 				try {prismConst = Double.parseDouble(columns[15].trim());} catch(NumberFormatException e) {prismConst = 0.0;};
+				
+			if (columns.length > 27) {
+				double pressure    = 99.99; // 99.99 == Not set
+				double temperature = 99.99;
+				
+				try {pressure    = Double.parseDouble(columns[25].trim());} catch(NumberFormatException e) {pressure = 99.99;};	
+				try {temperature = Double.parseDouble(columns[26].trim());} catch(NumberFormatException e) {temperature = 99.99;};
+				
+				scale = this.getFirstVelocityCorrection(temperature,  pressure);
+			}
 
 			double distance = 0;
 			try {
@@ -154,7 +168,7 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				obs.setReflectorHeight(th);
 				distance = Double.parseDouble(columns[7].trim()); 
 				if (distance > 0 && (distance + prismConst) > 0) {
-					distance = distance + prismConst;
+					distance = scale * distance + prismConst;
 					obs.setValueApriori(distance);
 					obs.setDistanceApriori(distance);
 					this.slopeDistances.add(obs);
@@ -202,12 +216,16 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			// P_tach, Tachname, orient, nsatzr, nsatzz, h_tach, I_extach, EX_tach, EY_tach, EZ_tach, ori, J,N,	nWeatherFlag, nBattery
 			// 38140004,Ost,0,0,0,0.00000000,1,,,,0.0,278.77885605,80.65533842,1,100
 			String columns[] = line.split(",");
-			if (columns.length < 6)
+			if (columns.length < 13)
 				return;
 			this.startPointName = columns[1].trim();
 			if (this.lastStartPointName == null)
 				this.lastStartPointName = this.startPointName;
 			try {this.ih = Double.parseDouble(columns[5].trim());} catch(NumberFormatException e) {this.ih = 0.0;};
+			// EDM Korrekturwerte fuer 1. Geschwindigkeitskorrektur
+			try {this.edmRefractiveIndex   = Double.parseDouble(columns[11].trim());} catch(NumberFormatException e) {this.edmRefractiveIndex = null;};
+			try {this.edmCarrierWavelength = Double.parseDouble(columns[12].trim());} catch(NumberFormatException e) {this.edmCarrierWavelength = null;};
+			
 			this.isNewStation = false;
 		}
 		
@@ -217,6 +235,8 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			this.lastStartPointName = this.startPointName;
 			this.isNewStation = true;
 			this.startPointName = null;
+			this.edmRefractiveIndex = null;
+			this.edmCarrierWavelength = null;
 			this.ih = 0.0;
 		}
 	}
@@ -280,4 +300,11 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		};
 	}
 
+	private double getFirstVelocityCorrection(double temperature, double pressure) {
+		if (this.edmCarrierWavelength == null || this.edmRefractiveIndex == null || pressure == 99.99 || temperature == 99.99)
+			return 1.0;
+		// Ferhat, G., Rouillon, H. and Malet J.-P. 2020: Analysis of atmospheric refraction 
+		// on Electronic Distance Measurements applied to landslide monitoring, Eq. (5)
+		return 1.0 + (this.edmCarrierWavelength - this.edmRefractiveIndex * pressure / (temperature + 273.16)) * 1.0E-6;
+	}
 }
