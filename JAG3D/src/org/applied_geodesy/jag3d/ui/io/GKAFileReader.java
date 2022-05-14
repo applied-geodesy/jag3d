@@ -157,6 +157,7 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				try {temperature = Double.parseDouble(columns[26].trim());} catch(NumberFormatException e) {temperature = 99.99;};
 				
 				scale = this.getFirstVelocityCorrection(temperature,  pressure);
+				scale = scale > 0 ? scale : 1.0;
 			}
 
 			double distance = 0;
@@ -303,8 +304,7 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	private double getFirstVelocityCorrection(double temperature, double pressure) {
 		if (this.edmCarrierWavelength == null || this.edmRefractiveIndex == null || pressure == 99.99 || temperature == 99.99)
 			return 1.0;
-		// Ferhat, G., Rouillon, H. and Malet J.-P. 2020: Analysis of atmospheric refraction 
-		// on Electronic Distance Measurements applied to landslide monitoring, Eq. (5)
-		return 1.0 + (this.edmCarrierWavelength - this.edmRefractiveIndex * pressure / (temperature + 273.16)) * 1.0E-6;
+		// Trimble Access General Survey (2011, p. 581)
+		return 1.0 + (this.edmRefractiveIndex - this.edmCarrierWavelength * pressure / (temperature + 273.16)) * 1.0E-6;
 	}
 }
