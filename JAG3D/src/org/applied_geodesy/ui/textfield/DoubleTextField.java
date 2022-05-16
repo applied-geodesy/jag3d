@@ -53,7 +53,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 	}
 	
 	private FormatterOptions options = FormatterOptions.getInstance();
-	private final static int EDITOR_ADDITIONAL_DIGITS = 10;
+	private final static int EDITOR_ADDITIONAL_DIGITS = 20;
 	private double lowerBoundary = Double.NEGATIVE_INFINITY, upperBoundary = Double.POSITIVE_INFINITY;
 	private NumberFormat editorNumberFormat;
 	private CellValueType type;
