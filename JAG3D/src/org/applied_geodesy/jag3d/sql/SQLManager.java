@@ -143,6 +143,7 @@ public class SQLManager {
 	private HostServices hostServices;
 	private List<EventListener> listenerList = new ArrayList<EventListener>();
 	private static SQLManager SQL_MANAGER = new SQLManager();
+	public final static double EQUAL_VALUE_TRESHOLD = 0.0001;
 
 	private SQLManager() {}
 
@@ -1381,38 +1382,38 @@ public class SQLManager {
 		for (int i=1; i<selectedObservationItemValues.length; i++)
 			inGroupArrayValues.append(",?");
 
-		String sql = "SELECT \"AdditionalParameterApriori\".\"id\" AS \"id\", \"enable\", \"group_id\", \"type\", " +
+		String sqlAdditionalParameter = "SELECT \"AdditionalParameterApriori\".\"id\" AS \"id\", \"enable\", \"group_id\", \"type\", " +
 				"\"value_0\", \"value\", \"sigma\", \"t_prio\", \"t_post\", \"p_prio\", \"p_post\", \"confidence\", \"gross_error\", \"minimal_detectable_bias\", \"significant\" " +
 				"FROM \"AdditionalParameterApriori\" " +
 				"LEFT JOIN \"AdditionalParameterAposteriori\" ON \"AdditionalParameterApriori\".\"id\" = \"AdditionalParameterAposteriori\".\"id\" " +
 				"WHERE \"group_id\" IN (" + inGroupArrayValues + ") AND \"type\" IN (" + inTypeArrayValues + ") ORDER BY \"group_id\" ASC, \"type\" ASC";
 
-		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		PreparedStatement stmtAdditionalParameter = this.dataBase.getPreparedStatement(sqlAdditionalParameter);
 		int idx = 1;
-		for (int i=0; i<selectedObservationItemValues.length; i++)
-			stmt.setInt(idx++, selectedObservationItemValues[i].getGroupId());
+		for (int i = 0; i < selectedObservationItemValues.length; i++)
+			stmtAdditionalParameter.setInt(idx++, selectedObservationItemValues[i].getGroupId());
 
-		for (int i=0; i<parameterTypes.length; i++) 
-			stmt.setInt(idx++, parameterTypes[i].getId());
+		for (int i = 0; i < parameterTypes.length; i++) 
+			stmtAdditionalParameter.setInt(idx++, parameterTypes[i].getId());
 
 		UIAdditionalParameterTableBuilder tableBuilder = UIAdditionalParameterTableBuilder.getInstance();
 		TableView<AdditionalParameterRow> table = tableBuilder.getTable();
 		List<AdditionalParameterRow> tableModel = FXCollections.observableArrayList();
 
-		ResultSet rs = stmt.executeQuery();
-		while (rs.next()) {
+		ResultSet rsAdditionalParameter = stmtAdditionalParameter.executeQuery();
+		while (rsAdditionalParameter.next()) {
 			ParameterType paramType = null;
-			int type = rs.getInt("type");
-			if (rs.wasNull() || (paramType = ParameterType.getEnumByValue(type)) == null)
+			int type = rsAdditionalParameter.getInt("type");
+			if (rsAdditionalParameter.wasNull() || (paramType = ParameterType.getEnumByValue(type)) == null)
 				continue;
 
-			int paramId    = rs.getInt("id");
-			int groupId    = rs.getInt("group_id");
-			double value0  = rs.getDouble("value_0");
-			boolean enable = rs.getBoolean("enable");
+			int paramId    = rsAdditionalParameter.getInt("id");
+			int groupId    = rsAdditionalParameter.getInt("group_id");
+			double value0  = rsAdditionalParameter.getDouble("value_0");
+			boolean enable = rsAdditionalParameter.getBoolean("enable");
 
 			// Settings/Properties of selected Item
-			if (observationItemValue.getGroupId() == groupId)
+			if (observationItemValue.getGroupId() == groupId) 
 				propertiesPane.setAdditionalParameter(paramType, value0, enable);
 
 			// Result of all selected Items
@@ -1420,62 +1421,62 @@ public class SQLManager {
 				AdditionalParameterRow row = new AdditionalParameterRow();
 				row.setId(paramId);
 				row.setParameterType(paramType);
-				double value = rs.getDouble("value");
-				if (!rs.wasNull()) 
+				double value = rsAdditionalParameter.getDouble("value");
+				if (!rsAdditionalParameter.wasNull()) 
 					row.setValueAposteriori(value);
 				else
 					continue;
 
-				value = rs.getDouble("sigma");
-				if (!rs.wasNull())
+				value = rsAdditionalParameter.getDouble("sigma");
+				if (!rsAdditionalParameter.wasNull())
 					row.setSigmaAposteriori(value);
 				else
 					continue;
 
-				value = rs.getDouble("confidence");
-				if (!rs.wasNull())
+				value = rsAdditionalParameter.getDouble("confidence");
+				if (!rsAdditionalParameter.wasNull())
 					row.setConfidence(value);
 				else
 					continue;
 
-				value = rs.getDouble("gross_error");
-				if (!rs.wasNull())
+				value = rsAdditionalParameter.getDouble("gross_error");
+				if (!rsAdditionalParameter.wasNull())
 					row.setGrossError(value);
 				else
 					continue;
 
-				value = rs.getDouble("minimal_detectable_bias");
-				if (!rs.wasNull())
+				value = rsAdditionalParameter.getDouble("minimal_detectable_bias");
+				if (!rsAdditionalParameter.wasNull())
 					row.setMinimalDetectableBias(value);
 				else
 					continue;
 
-				value = rs.getDouble("p_prio");
-				if (!rs.wasNull())
+				value = rsAdditionalParameter.getDouble("p_prio");
+				if (!rsAdditionalParameter.wasNull())
 					row.setPValueApriori(value);
 				else
 					continue;
 
-				value = rs.getDouble("p_post");
-				if (!rs.wasNull())
+				value = rsAdditionalParameter.getDouble("p_post");
+				if (!rsAdditionalParameter.wasNull())
 					row.setPValueAposteriori(value);
 				else
 					continue;
 
-				value = rs.getDouble("t_prio");
-				if (!rs.wasNull())
+				value = rsAdditionalParameter.getDouble("t_prio");
+				if (!rsAdditionalParameter.wasNull())
 					row.setTestStatisticApriori(value);
 				else
 					continue;
 
-				value = rs.getDouble("t_post");
-				if (!rs.wasNull())
+				value = rsAdditionalParameter.getDouble("t_post");
+				if (!rsAdditionalParameter.wasNull())
 					row.setTestStatisticAposteriori(value);
 				else
 					continue;
 
-				boolean significant = rs.getBoolean("significant");
-				row.setSignificant(!rs.wasNull() && significant == Boolean.TRUE);
+				boolean significant = rsAdditionalParameter.getBoolean("significant");
+				row.setSignificant(!rsAdditionalParameter.wasNull() && significant == Boolean.TRUE);
 
 				tableModel.add(row);
 			}
@@ -1655,8 +1656,25 @@ public class SQLManager {
 		String sql = "SELECT \"type\", \"value\" "
 				+ "FROM \"VerticalDeflectionGroupUncertainty\" "
 				+ "WHERE \"group_id\" = ?";
+		
+		StringBuilder inArrayValues = new StringBuilder("?");
+		for (int i = 1; i < selectedVerticalDeflectionItemValues.length; i++)
+			inArrayValues.append(",?");
+		
+		String sqlIdentical = "SELECT "
+				+ "COUNT(\"value\") AS \"counter\" "
+				+ "FROM \"VerticalDeflectionGroupUncertainty\" "
+				+ "WHERE "
+				+ "\"group_id\" IN (" + inArrayValues + ") AND "
+				+ "\"VerticalDeflectionGroupUncertainty\".\"type\" = ? AND "
+				+ "CASEWHEN(\"value\" > 0, ABS(\"value\" - ?) / \"value\", 0) < ?";
+		
+		PreparedStatement stmtIdentical = this.dataBase.getPreparedStatement(sqlIdentical);
+		int idx = 1;
+		for (int i = 0; i < selectedVerticalDeflectionItemValues.length; i++)
+			stmtIdentical.setInt(idx++, selectedVerticalDeflectionItemValues[i].getGroupId());
+		
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
-
 		stmt.setInt(1, verticalDeflectionItemValue.getGroupId());
 
 		ResultSet rs = stmt.executeQuery();
@@ -1664,7 +1682,18 @@ public class SQLManager {
 			VerticalDeflectionGroupUncertaintyType type = VerticalDeflectionGroupUncertaintyType.getEnumByValue(rs.getInt("type"));
 			if (type != null) {
 				double value = rs.getDouble("value");
-				propertiesPane.setUncertainty(type, value);
+				boolean isIdenticalGroupSetting = false;
+				
+				stmtIdentical.setInt(idx, type.getId());
+				stmtIdentical.setDouble(idx+1, value);
+				stmtIdentical.setDouble(idx+2, EQUAL_VALUE_TRESHOLD);
+
+				ResultSet rsIdentical = stmtIdentical.executeQuery();
+				if (rsIdentical.next()) {
+					int cnt = rsIdentical.getInt("counter");
+					isIdenticalGroupSetting = cnt == selectedVerticalDeflectionItemValues.length;
+				}
+				propertiesPane.setUncertainty(type, value, !isIdenticalGroupSetting);
 			}
 		}
 	}
@@ -1827,19 +1856,47 @@ public class SQLManager {
 		UIObservationPropertiesPane propertiesPane = propertiesPaneBuilder.getObservationPropertiesPane(observationItemValue.getItemType());
 		propertiesPane.setTreeItemValue(selectedObservationItemValues);
 
-		String sql = "SELECT \"type\", \"value\" "
+		String sqlUncertainty = "SELECT \"type\", \"value\" "
 				+ "FROM \"ObservationGroupUncertainty\" "
 				+ "WHERE \"group_id\" = ?";
-		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
-		stmt.setInt(1, observationItemValue.getGroupId());
+		StringBuilder inArrayValues = new StringBuilder("?");
+		for (int i = 1; i < selectedObservationItemValues.length; i++)
+			inArrayValues.append(",?");
+		
+		String sqlIdentical = "SELECT "
+				+ "COUNT(\"value\") AS \"counter\" "
+				+ "FROM \"ObservationGroupUncertainty\" "
+				+ "WHERE "
+				+ "\"group_id\" IN (" + inArrayValues + ") AND "
+				+ "\"ObservationGroupUncertainty\".\"type\" = ? AND "
+				+ "CASEWHEN(\"value\" > 0, ABS(\"value\" - ?) / \"value\", 0) < ?";
+		
+		PreparedStatement stmtIdentical = this.dataBase.getPreparedStatement(sqlIdentical);
+		int idx = 1;
+		for (int i = 0; i < selectedObservationItemValues.length; i++)
+			stmtIdentical.setInt(idx++, selectedObservationItemValues[i].getGroupId());
+		
+		PreparedStatement stmtUncertainty = this.dataBase.getPreparedStatement(sqlUncertainty);
+		stmtUncertainty.setInt(1, observationItemValue.getGroupId());
 
-		ResultSet rs = stmt.executeQuery();
-		while (rs.next()) {
-			ObservationGroupUncertaintyType type = ObservationGroupUncertaintyType.getEnumByValue(rs.getInt("type"));
+		ResultSet rsUncertainty = stmtUncertainty.executeQuery();
+		while (rsUncertainty.next()) {
+			ObservationGroupUncertaintyType type = ObservationGroupUncertaintyType.getEnumByValue(rsUncertainty.getInt("type"));
 			if (type != null) {
-				double value = rs.getDouble("value");
-				propertiesPane.setUncertainty(type, value);
+				double value = rsUncertainty.getDouble("value");
+				boolean isIdenticalGroupSetting = false;
+								
+				stmtIdentical.setInt(idx, type.getId());
+				stmtIdentical.setDouble(idx+1, value);
+				stmtIdentical.setDouble(idx+2, EQUAL_VALUE_TRESHOLD);
+
+				ResultSet rsIdentical = stmtIdentical.executeQuery();
+				if (rsIdentical.next()) {
+					int cnt = rsIdentical.getInt("counter");
+					isIdenticalGroupSetting = cnt == selectedObservationItemValues.length;
+				}
+				propertiesPane.setUncertainty(type, value, !isIdenticalGroupSetting);
 			}
 		}
 	}
@@ -2152,19 +2209,47 @@ public class SQLManager {
 		UIPointPropertiesPane propertiesPane = propertiesPaneBuilder.getPointPropertiesPane(pointItemValue.getItemType());
 		propertiesPane.setTreeItemValue(selectedPointItemValues);
 
-		String sql = "SELECT \"type\", \"value\" "
+		String sqlUncertainty = "SELECT \"type\", \"value\" "
 				+ "FROM \"PointGroupUncertainty\" "
 				+ "WHERE \"group_id\" = ?";
-		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		
+		StringBuilder inArrayValues = new StringBuilder("?");
+		for (int i = 1; i < selectedPointItemValues.length; i++)
+			inArrayValues.append(",?");
+		
+		String sqlIdentical = "SELECT "
+				+ "COUNT(\"value\") AS \"counter\" "
+				+ "FROM \"PointGroupUncertainty\" "
+				+ "WHERE "
+				+ "\"group_id\" IN (" + inArrayValues + ") AND "
+				+ "\"PointGroupUncertainty\".\"type\" = ? AND "
+				+ "CASEWHEN(\"value\" > 0, ABS(\"value\" - ?) / \"value\", 0) < ?";
+		
+		PreparedStatement stmtIdentical = this.dataBase.getPreparedStatement(sqlIdentical);
+		int idx = 1;
+		for (int i = 0; i < selectedPointItemValues.length; i++)
+			stmtIdentical.setInt(idx++, selectedPointItemValues[i].getGroupId());
 
-		stmt.setInt(1, pointItemValue.getGroupId());
+		PreparedStatement stmtUncertainty = this.dataBase.getPreparedStatement(sqlUncertainty);
+		stmtUncertainty.setInt(1, pointItemValue.getGroupId());
 
-		ResultSet rs = stmt.executeQuery();
-		while (rs.next()) {
-			PointGroupUncertaintyType type = PointGroupUncertaintyType.getEnumByValue(rs.getInt("type"));
+		ResultSet rsUncertainty = stmtUncertainty.executeQuery();
+		while (rsUncertainty.next()) {
+			PointGroupUncertaintyType type = PointGroupUncertaintyType.getEnumByValue(rsUncertainty.getInt("type"));
 			if (type != null) {
-				double value = rs.getDouble("value");
-				propertiesPane.setUncertainty(type, value);
+				double value = rsUncertainty.getDouble("value");
+				boolean isIdenticalGroupSetting = false;
+				
+				stmtIdentical.setInt(idx, type.getId());
+				stmtIdentical.setDouble(idx+1, value);
+				stmtIdentical.setDouble(idx+2, EQUAL_VALUE_TRESHOLD);
+
+				ResultSet rsIdentical = stmtIdentical.executeQuery();
+				if (rsIdentical.next()) {
+					int cnt = rsIdentical.getInt("counter");
+					isIdenticalGroupSetting = cnt == selectedPointItemValues.length;
+				}
+				propertiesPane.setUncertainty(type, value, !isIdenticalGroupSetting);
 			}
 		}
 	}
