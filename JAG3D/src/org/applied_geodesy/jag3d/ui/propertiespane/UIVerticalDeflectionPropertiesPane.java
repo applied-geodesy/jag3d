@@ -22,6 +22,7 @@
 package org.applied_geodesy.jag3d.ui.propertiespane;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.applied_geodesy.adjustment.network.VerticalDeflectionGroupUncertaintyType;
@@ -51,7 +52,9 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 public class UIVerticalDeflectionPropertiesPane {
@@ -88,6 +91,7 @@ public class UIVerticalDeflectionPropertiesPane {
 	private UncertaintyTextField uncertaintyDeflectionYField;
 	
 	private Map<Object, ProgressIndicator> databaseTransactionProgressIndicators = new HashMap<Object, ProgressIndicator>(10);
+	private Map<Object, Node> warningIconNodes = new HashMap<Object, Node>(10);
 	private SequentialTransition sequentialTransition = new SequentialTransition();
 
 	private boolean ignoreValueUpdate = false;
@@ -112,6 +116,7 @@ public class UIVerticalDeflectionPropertiesPane {
 	private void reset() {
 		this.sequentialTransition.stop();
 		this.setProgressIndicatorsVisible(false);
+		this.setWarningIconsVisible(false);
 		
 		// set focus to panel to commit text field values and to force db transaction
 		UITreeBuilder.getInstance().getTree().requestFocus();
@@ -147,7 +152,12 @@ public class UIVerticalDeflectionPropertiesPane {
 		return true;
 	}
 	
-	public boolean setUncertainty(VerticalDeflectionGroupUncertaintyType type, Double value) {
+	public boolean setUncertainty(VerticalDeflectionGroupUncertaintyType type, Double value, boolean displayWarningIcon) {
+		if (this.warningIconNodes.containsKey(type)) {
+			this.warningIconNodes.get(type).setVisible(displayWarningIcon);
+			this.warningIconNodes.get(type).setManaged(displayWarningIcon);
+		}
+		
 		switch(type) {
 		case DEFLECTION_X:
 			return this.setUncertaintyDeflectionX(value);
@@ -166,6 +176,9 @@ public class UIVerticalDeflectionPropertiesPane {
 			double sigmaY = VerticalDeflectionTreeItemValue.getDefaultUncertainty(VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y);
 			double sigmaX = VerticalDeflectionTreeItemValue.getDefaultUncertainty(VerticalDeflectionGroupUncertaintyType.DEFLECTION_X);
 
+			Node warningIconUncertaintyTypeYNode = this.createWarningIcon(VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y, i18n.getString("UIVerticalDeflectionPropertiesPane.uncertainty.y.warning.label", "\u26A0"), String.format(Locale.ENGLISH, i18n.getString("UIVerticalDeflectionPropertiesPane.uncertainty.y.warning.tooltip", "Note: The selected groups have different values and \u03C3y differs by more than %.1f \u2030."), SQLManager.EQUAL_VALUE_TRESHOLD * 1000.));
+			Node warningIconUncertaintyTypeXNode = this.createWarningIcon(VerticalDeflectionGroupUncertaintyType.DEFLECTION_X, i18n.getString("UIVerticalDeflectionPropertiesPane.uncertainty.x.warning.label", "\u26A0"), String.format(Locale.ENGLISH, i18n.getString("UIVerticalDeflectionPropertiesPane.uncertainty.x.warning.tooltip", "Note: The selected groups have different values and \u03C3x differs by more than %.1f \u2030."), SQLManager.EQUAL_VALUE_TRESHOLD * 1000.));
+			
 			ProgressIndicator uncertaintyDeflectionYProgressIndicator = this.createDatabaseTransactionProgressIndicator(VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y);
 			ProgressIndicator uncertaintyDeflectionXProgressIndicator = this.createDatabaseTransactionProgressIndicator(VerticalDeflectionGroupUncertaintyType.DEFLECTION_X); 
 									
@@ -199,11 +212,11 @@ public class UIVerticalDeflectionPropertiesPane {
 			
 			gridPane.add(uncertaintyDeflectionYLabel,      0, 0);
 			gridPane.add(this.uncertaintyDeflectionYField, 1, 0);
-			gridPane.add(uncertaintyDeflectionYProgressIndicator, 2, 0);
+			gridPane.add(new HBox(warningIconUncertaintyTypeYNode, uncertaintyDeflectionYProgressIndicator), 2, 0);
 
 			gridPane.add(uncertaintyDeflectionXLabel,      0, 1);
 			gridPane.add(this.uncertaintyDeflectionXField, 1, 1);
-			gridPane.add(uncertaintyDeflectionXProgressIndicator, 2, 1);
+			gridPane.add(new HBox(warningIconUncertaintyTypeXNode, uncertaintyDeflectionXProgressIndicator), 2, 1);
 
 			TitledPane uncertaintiesTitledPane = this.createTitledPane(i18n.getString("UIVerticalDeflectionPropertiesPane.uncertainty.title", "Uncertainties of deflection of the vertical"));
 			uncertaintiesTitledPane.setContent(gridPane);
@@ -222,6 +235,29 @@ public class UIVerticalDeflectionPropertiesPane {
 				
 		this.databaseTransactionProgressIndicators.put(userData, progressIndicator);
 		return progressIndicator;
+	}
+	
+	private Node createWarningIcon(Object userData, String text, String tooltip) {
+		Label label = new Label();
+		
+		// Workaround, da setFont auf den Text und den Tooltip angewandt wird
+		// https://bugs.openjdk.java.net/browse/JDK-8094344
+		Label txtNode = new Label(text);
+		txtNode.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		txtNode.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		txtNode.setTextFill(Color.DARKORANGE);
+		txtNode.setPadding(new Insets(0,0,0,0));
+		
+		label.setGraphic(txtNode);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setTooltip(new Tooltip(tooltip));
+		label.setUserData(userData);
+		label.setVisible(false);
+		label.setManaged(false);
+		label.setPadding(new Insets(0,0,0,0));
+		this.warningIconNodes.put(userData, label);
+		return label;
 	}
 	
 	private GridPane createGridPane() {
@@ -281,6 +317,14 @@ public class UIVerticalDeflectionPropertiesPane {
 			for (ProgressIndicator progressIndicator : this.databaseTransactionProgressIndicators.values())
 				progressIndicator.setVisible(visible);
 	}
+	
+	private void setWarningIconsVisible(boolean visible) {
+		if (this.warningIconNodes != null)
+			for (Node warningIconNode : this.warningIconNodes.values()) {
+				warningIconNode.setVisible(visible);
+				warningIconNode.setManaged(visible);	
+			}
+	}
 
 	private void save(VerticalDeflectionGroupUncertaintyType uncertaintyType) {
 		try {
@@ -299,6 +343,11 @@ public class UIVerticalDeflectionPropertiesPane {
 
 			if (value != null && value.doubleValue() > 0 && this.selectedVerticalDeflectionItemValues != null && this.selectedVerticalDeflectionItemValues.length > 0) {
 				this.setProgressIndicatorsVisible(false);
+				if (this.warningIconNodes.containsKey(uncertaintyType)) {
+					Node warningIconNodes = this.warningIconNodes.get(uncertaintyType);
+					warningIconNodes.setVisible(false);
+					warningIconNodes.setManaged(false);
+				}
 				if (this.databaseTransactionProgressIndicators.containsKey(uncertaintyType)) {
 					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(uncertaintyType);
 					node.setVisible(true);

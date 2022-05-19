@@ -85,7 +85,9 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
@@ -184,6 +186,7 @@ public class UIObservationPropertiesPane {
 	private RadioButton controlEpochRadioButton;
 	
 	private Map<Object, ProgressIndicator> databaseTransactionProgressIndicators = new HashMap<Object, ProgressIndicator>(10);
+	private Map<Object, Node> warningIconNodes = new HashMap<Object, Node>(10);
 	private SequentialTransition sequentialTransition = new SequentialTransition();
 	
 	private boolean ignoreValueUpdate = false;
@@ -227,6 +230,7 @@ public class UIObservationPropertiesPane {
 	private void reset() {
 		this.sequentialTransition.stop();
 		this.setProgressIndicatorsVisible(false);
+		this.setWarningIconsVisible(false);
 		
 		// set focus to panel to commit text field values and to force db transaction
 		UITreeBuilder.getInstance().getTree().requestFocus();
@@ -261,6 +265,7 @@ public class UIObservationPropertiesPane {
 			return false;
 		this.ignoreValueUpdate = true;
 		this.zeroPointOffsetUncertaintyField.setValue(value != null && value > 0 ? value : null);
+		//this.zeroPointOffsetUncertaintyField.setStyle("-fx-border-color: red; -fx-border-width: 2px;");
 		this.updateUncertaintyChart(this.lineChart);
         this.updateTickLabels(this.lineChart);
 		this.ignoreValueUpdate = false;
@@ -299,7 +304,12 @@ public class UIObservationPropertiesPane {
 		return true;
 	}
 	
-	public boolean setUncertainty(ObservationGroupUncertaintyType type, Double value) {
+	public boolean setUncertainty(ObservationGroupUncertaintyType type, Double value, boolean displayWarningIcon) {
+		if (this.warningIconNodes.containsKey(type)) {
+			this.warningIconNodes.get(type).setVisible(displayWarningIcon);
+			this.warningIconNodes.get(type).setManaged(displayWarningIcon);
+		}
+		
 		switch(type) {
 		case ZERO_POINT_OFFSET:
 			return this.setZeroPointOffsetUncertainty(value);
@@ -538,17 +548,20 @@ public class UIObservationPropertiesPane {
 		}
 
 		GridPane gridPane = this.createGridPane();
-
+		
+		Node warningIconUncertaintyTypeANode = this.createWarningIcon(ObservationGroupUncertaintyType.ZERO_POINT_OFFSET, i18n.getString("UIObservationPropertiesPane.uncertainty.ua.warning.label", "\u26A0"), String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.uncertainty.ua.warning.tooltip", "Note: The selected groups have different values and \u03C3a differs by more than %.1f \u2030."), SQLManager.EQUAL_VALUE_TRESHOLD * 1000.));
 		ProgressIndicator databaseTransactionUncertaintyTypeAProgressIndicator = this.createDatabaseTransactionProgressIndicator(ObservationGroupUncertaintyType.ZERO_POINT_OFFSET);
 		Label uncertaintyTypeALabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.ua.label", "\u03C3a"));
 		uncertaintyTypeALabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.zeroPointOffsetUncertaintyField = this.createUncertaintyTextField(sigmaZeroPointOffset, constantUncertaintyCellValueType, true, DoubleTextField.ValueSupport.EXCLUDING_INCLUDING_INTERVAL, i18n.getString("UIObservationPropertiesPane.uncertainty.ua.tooltip", "Set constant part of combined uncertainty"), ObservationGroupUncertaintyType.ZERO_POINT_OFFSET);
 		
+		Node warningIconUncertaintyTypeBNode = this.createWarningIcon(ObservationGroupUncertaintyType.SQUARE_ROOT_DISTANCE_DEPENDENT, i18n.getString("UIObservationPropertiesPane.uncertainty.ub.warning.label", "\u26A0"), String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.uncertainty.ub.warning.tooltip", "Note: The selected groups have different values and \u03C3b differs by more than %.1f \u2030."), SQLManager.EQUAL_VALUE_TRESHOLD * 1000.));
 		ProgressIndicator databaseTransactionUncertaintyTypeBProgressIndicator = this.createDatabaseTransactionProgressIndicator(ObservationGroupUncertaintyType.SQUARE_ROOT_DISTANCE_DEPENDENT);
 		Label uncertaintyTypeBLabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.ub.label", "\u03C3b(\u221Ad)"));
 		uncertaintyTypeBLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		this.squareRootDistanceDependentUncertaintyField = this.createUncertaintyTextField(sigmaSquareRootDistance, squareRootDistanceDependentUncertaintyCellValueType, true, DoubleTextField.ValueSupport.INCLUDING_INCLUDING_INTERVAL, i18n.getString("UIObservationPropertiesPane.uncertainty.ub.tooltip", "Set square-root distance dependent part of combined uncertainty"), ObservationGroupUncertaintyType.SQUARE_ROOT_DISTANCE_DEPENDENT);  
 		
+		Node warningIconUncertaintyTypeCNode = this.createWarningIcon(ObservationGroupUncertaintyType.DISTANCE_DEPENDENT, i18n.getString("UIObservationPropertiesPane.uncertainty.uc.warning.label", "\u26A0"), String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.uncertainty.uc.warning.tooltip", "Note: The selected groups have different values and \u03C3c differs by more than %.1f \u2030."), SQLManager.EQUAL_VALUE_TRESHOLD * 1000.));
 		ProgressIndicator databaseTransactionUncertaintyTypeCProgressIndicator = this.createDatabaseTransactionProgressIndicator(ObservationGroupUncertaintyType.DISTANCE_DEPENDENT);
 		Label uncertaintyTypeCLabel = new Label(i18n.getString("UIObservationPropertiesPane.uncertainty.uc.label", "\u03C3c(d)"));
 		uncertaintyTypeCLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
@@ -572,15 +585,15 @@ public class UIObservationPropertiesPane {
 		
 		gridPane.add(uncertaintyTypeALabel, 0, 0);
 		gridPane.add(this.zeroPointOffsetUncertaintyField, 1, 0);
-		gridPane.add(databaseTransactionUncertaintyTypeAProgressIndicator, 2, 0);
+		gridPane.add(new HBox(warningIconUncertaintyTypeANode, databaseTransactionUncertaintyTypeAProgressIndicator), 2, 0);
 
 		gridPane.add(uncertaintyTypeBLabel, 0, 1);
 		gridPane.add(this.squareRootDistanceDependentUncertaintyField, 1, 1);
-		gridPane.add(databaseTransactionUncertaintyTypeBProgressIndicator, 2, 1);
+		gridPane.add(new HBox(warningIconUncertaintyTypeBNode, databaseTransactionUncertaintyTypeBProgressIndicator), 2, 1);
 
 		gridPane.add(uncertaintyTypeCLabel, 0, 2);
 		gridPane.add(this.distanceDependentUncertaintyField, 1, 2);
-		gridPane.add(databaseTransactionUncertaintyTypeCProgressIndicator, 2, 2);
+		gridPane.add(new HBox(warningIconUncertaintyTypeCNode, databaseTransactionUncertaintyTypeCProgressIndicator), 2, 2);
 
 		TitledPane uncertaintiesTitledPane = this.createTitledPane(i18n.getString("UIObservationPropertiesPane.uncertainty.title", "Uncertainties"));
 		uncertaintiesTitledPane.setContent(gridPane);
@@ -737,10 +750,32 @@ public class UIObservationPropertiesPane {
 		return progressIndicator;
 	}
 	
+	private Node createWarningIcon(Object userData, String text, String tooltip) {
+		Label label = new Label();
+		
+		// Workaround, da setFont auf den Text und den Tooltip angewandt wird
+		// https://bugs.openjdk.java.net/browse/JDK-8094344
+		Label txtNode = new Label(text);
+		txtNode.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		txtNode.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		txtNode.setTextFill(Color.DARKORANGE);
+		txtNode.setPadding(new Insets(0,0,0,0));
+		
+		label.setGraphic(txtNode);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setTooltip(new Tooltip(tooltip));
+		label.setUserData(userData);
+		label.setVisible(false);
+		label.setManaged(false);
+		label.setPadding(new Insets(0,0,0,0));
+		this.warningIconNodes.put(userData, label);
+		return label;
+	}
+	
 	private GridPane createGridPane() {
 		GridPane gridPane = new GridPane();
 		gridPane.setMaxWidth(Double.MAX_VALUE);
-		//gridPane.setGridLinesVisible(true);
 		gridPane.setHgap(10);
 		gridPane.setVgap(10);
 		gridPane.setPadding(new Insets(20, 10, 20, 10)); // oben, links, unten, rechts
@@ -763,6 +798,14 @@ public class UIObservationPropertiesPane {
 				progressIndicator.setVisible(visible);
 	}
 	
+	private void setWarningIconsVisible(boolean visible) {
+		if (this.warningIconNodes != null)
+			for (Node warningIconNode : this.warningIconNodes.values()) {
+				warningIconNode.setVisible(visible);
+				warningIconNode.setManaged(visible);	
+			}
+	}
+	
 	private void save(ObservationGroupUncertaintyType uncertaintyType) {
 		try {
 			Double value = null;
@@ -783,11 +826,16 @@ public class UIObservationPropertiesPane {
 
 			if (value != null && value.doubleValue() >= 0 && this.selectedObservationItemValues != null && this.selectedObservationItemValues.length > 0) {
 				this.setProgressIndicatorsVisible(false);
+				if (this.warningIconNodes.containsKey(uncertaintyType)) {
+					Node warningIconNodes = this.warningIconNodes.get(uncertaintyType);
+					warningIconNodes.setVisible(false);
+					warningIconNodes.setManaged(false);
+				}
 				if (this.databaseTransactionProgressIndicators.containsKey(uncertaintyType)) {
-					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(uncertaintyType);
-					node.setVisible(true);
+					ProgressIndicator progressIndicator = this.databaseTransactionProgressIndicators.get(uncertaintyType);
+					progressIndicator.setVisible(true);
 					this.sequentialTransition.stop();
-					this.sequentialTransition.setNode(node);
+					this.sequentialTransition.setNode(progressIndicator);
 					this.sequentialTransition.playFromStart();
 				}
 				SQLManager.getInstance().saveUncertainty(uncertaintyType, value.doubleValue(), this.selectedObservationItemValues);
