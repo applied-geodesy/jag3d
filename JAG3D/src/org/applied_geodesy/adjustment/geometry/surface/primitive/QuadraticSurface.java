@@ -344,8 +344,8 @@ public class QuadraticSurface extends Surface {
 	public String toLaTex() {
 		return "$\\mathbf{P}^\\mathrm{T}_i \\mathbf{U} \\mathbf{P}_i + \\mathbf{P}^\\mathrm{T}_i \\mathbf{u} + u_0 = 0"
 				+ " \\\\ "
-				+ "\\mathbf{U} = \\left( \\begin{array}{ccc} a & \\frac{d}{\\sqrt{2}} & \\frac{e}{\\sqrt{2}} \\\\ \\frac{d}{\\sqrt{2}} & b & \\frac{f}{\\sqrt{2}} \\\\  \\frac{e}{\\sqrt{2}} & \\frac{f}{\\sqrt{2}} & c \\end{array} \\right);"
+				+ "\\mathbf{U} = \\left( \\begin{array}{ccc} a_1 & \\frac{a_4}{\\sqrt{2}} & \\frac{a_5}{\\sqrt{2}} \\\\ \\frac{a_4}{\\sqrt{2}} & a_2 & \\frac{a_6}{\\sqrt{2}} \\\\  \\frac{a_5}{\\sqrt{2}} & \\frac{a_6}{\\sqrt{2}} & a_3 \\end{array} \\right);"
 				+ " \\\\ "
-				+ "\\mathbf{u} = \\left( \\begin{array}{cc} g \\\\ h \\\\ i \\end{array} \\right)$";
+				+ "\\mathbf{u} = \\left( \\begin{array}{cc} a_7 \\\\ a_8 \\\\ a_9 \\end{array} \\right);\\,u_0 = d$";
 	}
 }

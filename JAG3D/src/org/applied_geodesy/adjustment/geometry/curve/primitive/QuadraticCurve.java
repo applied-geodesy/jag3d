@@ -276,8 +276,8 @@ public class QuadraticCurve extends Curve {
 	public String toLaTex() {
 		return "$\\mathbf{P}^\\mathrm{T}_i \\mathbf{U} \\mathbf{P}_i + \\mathbf{P}^\\mathrm{T}_i \\mathbf{u} + u_0 = 0"
 				+ " \\\\ "
-				+ "\\mathbf{U} = \\left( \\begin{array}{cc} a & \\frac{c}{\\sqrt{2}} \\\\ \\frac{c}{\\sqrt{2}} & b \\end{array} \\right);"
+				+ "\\mathbf{U} = \\left( \\begin{array}{cc} a_1 & \\frac{a_3}{\\sqrt{2}} \\\\ \\frac{a_3}{\\sqrt{2}} & a_2 \\end{array} \\right);"
 				+ " \\\\ "
-				+ "\\mathbf{u} = \\left( \\begin{array}{c} d \\\\ e \\end{array} \\right)$";
+				+ "\\mathbf{u} = \\left( \\begin{array}{c} a_4 \\\\ a_5 \\end{array} \\right);\\,u_0 = d$";
 	}
 }
