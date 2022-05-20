@@ -105,7 +105,7 @@
 		<#else>
 			<td></td>
 			<td><@printFormattedNumber value=group.redundancy format=df_percentage/></td>
-			<#if apply_angle_unit??>
+			<#if apply_angle_unit>
 				<#if sexagesimal_angle_residual??>
 					<#assign signum  = (group.max_residual < 0)?then(-1, 1)>
 					<#assign value   = signum * group.max_residual>
@@ -119,7 +119,7 @@
 			<#else>
 				<td><@printFormattedNumber value=group.max_gross_error format=df_length_residual/></td>
 			</#if>
-			<#if apply_angle_unit??>
+			<#if apply_angle_unit>
 				<#if sexagesimal_angle_residual??>
 					<#assign signum  = (group.max_gross_error < 0)?then(-1, 1)>
 					<#assign value   = signum * group.max_gross_error>
