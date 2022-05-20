@@ -45,12 +45,10 @@
 				<#if group.type == "GNSS1D" || group.type == "GNSS3D">
 					<td><@printFormattedNumber value=observation.z format=df_length/></td>
 				</#if>
+			<#elseif apply_angle_unit>
+				<td><@printFormattedNumber value=observation.value format=df_angle/></td>
 			<#else>
-				<#if apply_angle_unit??>
-					<td><@printFormattedNumber value=observation.value format=df_angle/></td>
-				<#else>
-					<td><@printFormattedNumber value=observation.value format=df_length/></td>
-				</#if>
+				<td><@printFormattedNumber value=observation.value format=df_length/></td>
 			</#if>
 						
 			<#if group.type == "GNSS1D" || group.type == "GNSS2D" || group.type == "GNSS3D">
@@ -112,14 +110,14 @@
 					<td><@printFormattedNumber value=observation.minimal_detectable_bias_z format=df_length_residual/></td>
 				</#if>
 			<#else>
-				<#if apply_angle_unit??>
+				<#if apply_angle_unit>
 					<td><@printFormattedNumber value=observation.sigma format=df_angle_uncertainty/></td>
 				<#else>
 					<td><@printFormattedNumber value=observation.sigma format=df_length_uncertainty/></td>
 				</#if>	
 				<td><@printFormattedNumber value=observation.redundancy format=df_percentage/></td>
 				
-				<#if apply_angle_unit??>
+				<#if apply_angle_unit>
 					<td><@printFormattedNumber value=observation.residual format=df_angle_residual/></td>
 					<td><@printFormattedNumber value=observation.gross_error format=df_angle_residual/></td>
 				<#else>
@@ -130,7 +128,7 @@
 				<td><@printFormattedNumber value=observation.influence_on_position format=df_length_residual/></td>
 				<td><@printFormattedNumber value=observation.influence_on_network_distortion format=df_length_residual/></td>
 				
-				<#if apply_angle_unit??>
+				<#if apply_angle_unit>
 					<td><@printFormattedNumber value=observation.maximum_tolerable_bias format=df_angle_residual/></td>
 					<td><@printFormattedNumber value=observation.minimal_detectable_bias format=df_angle_residual/></td>
 				<#else>
