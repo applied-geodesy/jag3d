@@ -237,23 +237,23 @@ public class UnknownParameterTypeDialog {
 		case ROTATION_COMPONENT_R33:
 			return i18N.getString("UnknownParameterTypeDialog.parameter.type.rotation.r33", "Rotation element r33");
 		case POLYNOMIAL_COEFFICIENT_A:
-			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.a", "Polynomial coefficient A");
+			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.a", "Polynomial coefficient a1");
 		case POLYNOMIAL_COEFFICIENT_B:
-			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.b", "Polynomial coefficient B");
+			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.b", "Polynomial coefficient a2");
 		case POLYNOMIAL_COEFFICIENT_C:
-			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.c", "Polynomial coefficient C");
+			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.c", "Polynomial coefficient a3");
 		case POLYNOMIAL_COEFFICIENT_D:
-			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.d", "Polynomial coefficient D");
+			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.d", "Polynomial coefficient a4");
 		case POLYNOMIAL_COEFFICIENT_E:
-			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.e", "Polynomial coefficient E");
+			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.e", "Polynomial coefficient a5");
 		case POLYNOMIAL_COEFFICIENT_F:
-			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.f", "Polynomial coefficient F");
+			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.f", "Polynomial coefficient a6");
 		case POLYNOMIAL_COEFFICIENT_G:
-			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.g", "Polynomial coefficient G");
+			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.g", "Polynomial coefficient a7");
 		case POLYNOMIAL_COEFFICIENT_H:
-			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.h", "Polynomial coefficient H");
+			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.h", "Polynomial coefficient a8");
 		case POLYNOMIAL_COEFFICIENT_I:
-			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.i", "Polynomial coefficient I");
+			return i18N.getString("UnknownParameterTypeDialog.parameter.type.polynomial.i", "Polynomial coefficient a9");
 		case ANGLE:
 			return i18N.getString("UnknownParameterTypeDialog.parameter.type.angle", "Angle \u03C6");
 		}
