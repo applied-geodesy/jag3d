@@ -1395,6 +1395,21 @@ public class SQLManager {
 
 		for (int i = 0; i < parameterTypes.length; i++) 
 			stmtAdditionalParameter.setInt(idx++, parameterTypes[i].getId());
+		
+		String sqlIdentical = "SELECT "
+				+ "COUNT(\"value_0\") AS \"counter\" "
+				+ "FROM \"AdditionalParameterApriori\" "
+				+ "WHERE "
+				+ "\"group_id\" IN (" + inGroupArrayValues + ") AND "
+				+ "\"type\" = ? AND "
+				+ "\"enable\" = ? AND "
+				+ "CASEWHEN(?, 0, CASEWHEN(GREATEST(ABS(?), ABS(\"value_0\")) > 0, "
+				+ "ABS(\"value_0\" - ?) / GREATEST(ABS(?), ABS(\"value_0\")), 0)) < ?";
+
+		idx = 1;
+		PreparedStatement stmtIdentical = this.dataBase.getPreparedStatement(sqlIdentical);
+		for (int i = 0; i < selectedObservationItemValues.length; i++)
+			stmtIdentical.setInt(idx++, selectedObservationItemValues[i].getGroupId());
 
 		UIAdditionalParameterTableBuilder tableBuilder = UIAdditionalParameterTableBuilder.getInstance();
 		TableView<AdditionalParameterRow> table = tableBuilder.getTable();
@@ -1413,8 +1428,24 @@ public class SQLManager {
 			boolean enable = rsAdditionalParameter.getBoolean("enable");
 
 			// Settings/Properties of selected Item
-			if (observationItemValue.getGroupId() == groupId) 
-				propertiesPane.setAdditionalParameter(paramType, value0, enable);
+			if (observationItemValue.getGroupId() == groupId) {
+				boolean isIdenticalGroupSetting = false;
+				stmtIdentical.setInt(idx, paramType.getId());
+				stmtIdentical.setBoolean(idx+1, enable);
+				stmtIdentical.setBoolean(idx+2, enable);
+				stmtIdentical.setDouble(idx+3, value0);
+				stmtIdentical.setDouble(idx+4, value0);
+				stmtIdentical.setDouble(idx+5, value0);
+				stmtIdentical.setDouble(idx+6, EQUAL_VALUE_TRESHOLD);
+
+				ResultSet rsIdentical = stmtIdentical.executeQuery();
+				if (rsIdentical.next()) {
+					int cnt = rsIdentical.getInt("counter");
+					isIdenticalGroupSetting = cnt == selectedObservationItemValues.length;
+				}
+				propertiesPane.setAdditionalParameter(paramType, value0, enable, !isIdenticalGroupSetting);
+			}
+				
 
 			// Result of all selected Items
 			if (enable) {
@@ -1667,7 +1698,7 @@ public class SQLManager {
 				+ "WHERE "
 				+ "\"group_id\" IN (" + inArrayValues + ") AND "
 				+ "\"VerticalDeflectionGroupUncertainty\".\"type\" = ? AND "
-				+ "CASEWHEN(\"value\" > 0, ABS(\"value\" - ?) / \"value\", 0) < ?";
+				+ "CASEWHEN(GREATEST(?, \"value\") > 0, ABS(\"value\" - ?) / GREATEST(?, \"value\"), 0) < ?";
 		
 		PreparedStatement stmtIdentical = this.dataBase.getPreparedStatement(sqlIdentical);
 		int idx = 1;
@@ -1686,7 +1717,9 @@ public class SQLManager {
 				
 				stmtIdentical.setInt(idx, type.getId());
 				stmtIdentical.setDouble(idx+1, value);
-				stmtIdentical.setDouble(idx+2, EQUAL_VALUE_TRESHOLD);
+				stmtIdentical.setDouble(idx+2, value);
+				stmtIdentical.setDouble(idx+3, value);
+				stmtIdentical.setDouble(idx+4, EQUAL_VALUE_TRESHOLD);
 
 				ResultSet rsIdentical = stmtIdentical.executeQuery();
 				if (rsIdentical.next()) {
@@ -1870,7 +1903,7 @@ public class SQLManager {
 				+ "WHERE "
 				+ "\"group_id\" IN (" + inArrayValues + ") AND "
 				+ "\"ObservationGroupUncertainty\".\"type\" = ? AND "
-				+ "CASEWHEN(\"value\" > 0, ABS(\"value\" - ?) / \"value\", 0) < ?";
+				+ "CASEWHEN(GREATEST(?, \"value\") > 0, ABS(\"value\" - ?) / GREATEST(?, \"value\"), 0) < ?";
 		
 		PreparedStatement stmtIdentical = this.dataBase.getPreparedStatement(sqlIdentical);
 		int idx = 1;
@@ -1879,7 +1912,7 @@ public class SQLManager {
 		
 		PreparedStatement stmtUncertainty = this.dataBase.getPreparedStatement(sqlUncertainty);
 		stmtUncertainty.setInt(1, observationItemValue.getGroupId());
-
+//TODO
 		ResultSet rsUncertainty = stmtUncertainty.executeQuery();
 		while (rsUncertainty.next()) {
 			ObservationGroupUncertaintyType type = ObservationGroupUncertaintyType.getEnumByValue(rsUncertainty.getInt("type"));
@@ -1889,7 +1922,9 @@ public class SQLManager {
 								
 				stmtIdentical.setInt(idx, type.getId());
 				stmtIdentical.setDouble(idx+1, value);
-				stmtIdentical.setDouble(idx+2, EQUAL_VALUE_TRESHOLD);
+				stmtIdentical.setDouble(idx+2, value);
+				stmtIdentical.setDouble(idx+3, value);
+				stmtIdentical.setDouble(idx+4, EQUAL_VALUE_TRESHOLD);
 
 				ResultSet rsIdentical = stmtIdentical.executeQuery();
 				if (rsIdentical.next()) {
@@ -2223,7 +2258,7 @@ public class SQLManager {
 				+ "WHERE "
 				+ "\"group_id\" IN (" + inArrayValues + ") AND "
 				+ "\"PointGroupUncertainty\".\"type\" = ? AND "
-				+ "CASEWHEN(\"value\" > 0, ABS(\"value\" - ?) / \"value\", 0) < ?";
+				+ "CASEWHEN(GREATEST(?, \"value\") > 0, ABS(\"value\" - ?) / GREATEST(?, \"value\"), 0) < ?";
 		
 		PreparedStatement stmtIdentical = this.dataBase.getPreparedStatement(sqlIdentical);
 		int idx = 1;
@@ -2242,7 +2277,9 @@ public class SQLManager {
 				
 				stmtIdentical.setInt(idx, type.getId());
 				stmtIdentical.setDouble(idx+1, value);
-				stmtIdentical.setDouble(idx+2, EQUAL_VALUE_TRESHOLD);
+				stmtIdentical.setDouble(idx+2, value);
+				stmtIdentical.setDouble(idx+3, value);
+				stmtIdentical.setDouble(idx+4, EQUAL_VALUE_TRESHOLD);
 
 				ResultSet rsIdentical = stmtIdentical.executeQuery();
 				if (rsIdentical.next()) {
@@ -4374,7 +4411,7 @@ public class SQLManager {
 				}
 				selectedObservationItemValuesArray = selectedObservationItemValues.toArray(new ObservationTreeItemValue[selectedObservationItemValues.size()]);
 
-				StringBuffer sql = new StringBuffer("UPDATE \"ObservationApriori\" SET ");
+				StringBuilder sql = new StringBuilder("UPDATE \"ObservationApriori\" SET ");
 				
 				if (instrumentHeight != null) {
 					sql.append("\"instrument_height\" = ? ");
