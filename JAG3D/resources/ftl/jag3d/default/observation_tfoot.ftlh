@@ -54,11 +54,11 @@
 			</#if>
 
 			<#if group.type == "GNSS2D" || group.type == "GNSS3D">
-				<td><@printFormattedNumber value=group.redundancy_y format=df_percentage/></td>
-				<td><@printFormattedNumber value=group.redundancy_x format=df_percentage/></td>
+				<td><@printFormattedNumber value=group.redundancy_y format=df_statistic/></td>
+				<td><@printFormattedNumber value=group.redundancy_x format=df_statistic/></td>
 			</#if>
 			<#if group.type == "GNSS1D" || group.type == "GNSS3D">
-				<td><@printFormattedNumber value=group.redundancy_z format=df_percentage/></td>
+				<td><@printFormattedNumber value=group.redundancy_z format=df_statistic/></td>
 			</#if>
 			
 			<#if group.type == "GNSS2D" || group.type == "GNSS3D">
@@ -104,7 +104,7 @@
 			</#if>
 		<#else>
 			<td></td>
-			<td><@printFormattedNumber value=group.redundancy format=df_percentage/></td>
+			<td><@printFormattedNumber value=group.redundancy format=df_statistic/></td>
 			<#if apply_angle_unit>
 				<#if sexagesimal_angle_residual??>
 					<#assign signum  = (group.max_residual < 0)?then(-1, 1)>
@@ -117,7 +117,7 @@
 					<td><@printFormattedNumber value=group.max_residual format=df_angle_residual/></td>
 				</#if>
 			<#else>
-				<td><@printFormattedNumber value=group.max_gross_error format=df_length_residual/></td>
+				<td><@printFormattedNumber value=group.max_residual format=df_length_residual/></td>
 			</#if>
 			<#if apply_angle_unit>
 				<#if sexagesimal_angle_residual??>
