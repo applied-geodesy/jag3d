@@ -975,10 +975,10 @@ public class FTLReport {
 				groupParam.put("dimension",    dim);
 				groupParam.put("type",         pointType.name());
 
-				groupParam.put("redundancy_x",  options.convertPercentToView(redundancyGroupX));
-				groupParam.put("redundancy_y",  options.convertPercentToView(redundancyGroupY));
-				groupParam.put("redundancy_z",  options.convertPercentToView(redundancyGroupZ));
-				groupParam.put("redundancy",    options.convertPercentToView(redundancyGroupX+redundancyGroupY+redundancyGroupZ));
+				groupParam.put("redundancy_x",  redundancyGroupX);
+				groupParam.put("redundancy_y",  redundancyGroupY);
+				groupParam.put("redundancy_z",  redundancyGroupZ);
+				groupParam.put("redundancy",    redundancyGroupX+redundancyGroupY+redundancyGroupZ);
 
 				groupParam.put("max_gross_error_x", options.convertLengthResidualToView(maxGrossErrorGroupX));
 				groupParam.put("max_gross_error_y", options.convertLengthResidualToView(maxGrossErrorGroupY));
@@ -1154,9 +1154,9 @@ public class FTLReport {
 				groupParam.put("significant",  significantGroup);
 				groupParam.put("type",         verticalDeflectionType.name());
 
-				groupParam.put("redundancy_x", options.convertPercentToView(redundancyGroupX));
-				groupParam.put("redundancy_y", options.convertPercentToView(redundancyGroupY));
-				groupParam.put("redundancy",   options.convertPercentToView(redundancyGroupX+redundancyGroupY));
+				groupParam.put("redundancy_x", redundancyGroupX);
+				groupParam.put("redundancy_y", redundancyGroupY);
+				groupParam.put("redundancy",   redundancyGroupX+redundancyGroupY);
 
 				groupParam.put("max_gross_error_x", options.convertAngleResidualToView(maxGrossErrorGroupX));
 				groupParam.put("max_gross_error_y", options.convertAngleResidualToView(maxGrossErrorGroupY));
@@ -1381,7 +1381,7 @@ public class FTLReport {
 				groupParam.put("observations",    observations);
 				groupParam.put("dimension",       1);
 				groupParam.put("omega",           omegaGroup);
-				groupParam.put("redundancy",      options.convertPercentToView(redundancyGroup));
+				groupParam.put("redundancy",      redundancyGroup);
 				groupParam.put("significant",     significantGroup);
 
 				if (groupUncertainties != null && !groupUncertainties.isEmpty())
@@ -1604,10 +1604,10 @@ public class FTLReport {
 					//break;
 				}
 
-				groupParam.put("redundancy_x", options.convertPercentToView(redundancyGroupX));
-				groupParam.put("redundancy_y", options.convertPercentToView(redundancyGroupY));
-				groupParam.put("redundancy_z", options.convertPercentToView(redundancyGroupZ));
-				groupParam.put("redundancy",   options.convertPercentToView(redundancyGroupX+redundancyGroupY+redundancyGroupZ));
+				groupParam.put("redundancy_x", redundancyGroupX);
+				groupParam.put("redundancy_y", redundancyGroupY);
+				groupParam.put("redundancy_z", redundancyGroupZ);
+				groupParam.put("redundancy",   redundancyGroupX+redundancyGroupY+redundancyGroupZ);
 
 				groupParam.put("max_gross_error_x", options.convertLengthResidualToView(maxGrossErrorGroupX));
 				groupParam.put("max_gross_error_y", options.convertLengthResidualToView(maxGrossErrorGroupY));
