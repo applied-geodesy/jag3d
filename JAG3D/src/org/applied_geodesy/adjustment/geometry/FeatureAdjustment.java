@@ -1026,33 +1026,14 @@ public class FeatureAdjustment {
 		int nou = this.numberOfUnknownParameters;
 		int nog = point.getNumberOfGeomtries();
 		int dim = point.getDimension();
-		
+		int dof = (int)this.varianceComponentOfUnitWeight.getRedundancy();
+	
 		// estimate Qll = A*Qxx*AT
 		Matrix QxxJxT = new DenseMatrix(nou,nog);
 		this.Qxx.transBmult(Jx, QxxJxT);
 		UpperSymmPackMatrix JxQxxJxT = new UpperSymmPackMatrix(nog);
 		Jx.mult(QxxJxT, JxQxxJxT);
 		QxxJxT = null;
-		
-//		// estimates Qvv = Qww - Qll;   Qkk = W - W * Qll * W
-//		// !!! overwrite Dw by Qvv !!!
-//		for (MatrixEntry qvv : Dw) {
-//			Dw.set(qvv.row(), qvv.column(), qvv.get() - JxQxxJxT.get(qvv.row(), qvv.column()));
-//		}
-//
-//		// estimates test statistic of the point
-//		// estimates Pnn = W * Qvv * W
-//		Matrix QvvW = new DenseMatrix(nog,nog);
-//		Dw.mult(Ww, QvvW);
-//		UpperSymmPackMatrix WQvvW = new UpperSymmPackMatrix(nog);
-//		Ww.mult(QvvW, WQvvW);
-//
-//		// estimate gross error
-//		Matrix Qnn = MathExtension.pinv(WQvvW, -1.0);
-//		Vector nablaw = new DenseVector(nog);
-//		Qnn.mult(Wvw, nablaw);
-//		Qnn = null;
-//		double T = Wvw.dot(nablaw);
 
 		// derive a-posteriori uncertainties of the point
 		// estimates Qkk = W - W * Qll * W
@@ -1087,22 +1068,24 @@ public class FeatureAdjustment {
 		// estimates redundancies R = P * Qvv
 		Matrix P = point.getInvertedDispersion(false);
 		Matrix R = new DenseMatrix(dim,dim);
-		P.mult(this.varianceComponentOfUnitWeight.getVariance0(), QllJvTWJxQxxJxTWJvQll, R);
 		
 		double redundancy = 0;
-		for (int row = 0; row < dim; row++) {
-			double r = R.get(row, row);
-			if (r > 0) {
-				if (row == 0 && dim != 1)
-					point.setRedundancyX(r);
-				
-				else if (row == 1 && dim != 1)
-					point.setRedundancyY(r);
-				
-				else if (dim != 2)
-					point.setRedundancyZ(r);
-				
-				redundancy += r;
+		if (dof > 0) {
+			P.mult(this.varianceComponentOfUnitWeight.getVariance0(), QllJvTWJxQxxJxTWJvQll, R);
+			for (int row = 0; row < dim; row++) {
+				double r = R.get(row, row);
+				if (r > 0) {
+					if (row == 0 && dim != 1)
+						point.setRedundancyX(r);
+
+					else if (row == 1 && dim != 1)
+						point.setRedundancyY(r);
+
+					else if (dim != 2)
+						point.setRedundancyZ(r);
+
+					redundancy += r;
+				}
 			}
 		}
 
@@ -1122,7 +1105,7 @@ public class FeatureAdjustment {
 		QllJvTWJxQxxJxTWJvQll = null;
 
 		// estimates the gross error if it is an controlled observation, i.e., r >> 0
-		if (redundancy > Math.sqrt(Constant.EPS)) {
+		if (dof > 0 && redundancy > Math.sqrt(Constant.EPS)) {
 			// estimates Qnabla = P * Qvv * P = R * Qvv
 			Matrix PQvvP = new UpperSymmPackMatrix(dim);
 			R.mult(this.varianceComponentOfUnitWeight.getVariance0(), P, PQvvP);
