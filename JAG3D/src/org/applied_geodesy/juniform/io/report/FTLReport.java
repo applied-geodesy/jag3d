@@ -266,15 +266,17 @@ public class FTLReport {
 		List<HashMap<String, Number>> testStatistics = new ArrayList<HashMap<String, Number>>();
 		TestStatisticParameterSet[] testStatisticParameterSets = this.adjustment.getTestStatisticParameters().getTestStatisticParameterSets();
 		for (TestStatisticParameterSet testStatisticParameterSet : testStatisticParameterSets) {
-			HashMap<String, Number> h = new HashMap<String, Number>();
-			h.put("d1", testStatisticParameterSet.getNumeratorDof());
-			h.put("d2", testStatisticParameterSet.getDenominatorDof());
-			h.put("probability_value", options.convertPercentToView(testStatisticParameterSet.getProbabilityValue()));
-			h.put("power_of_test",     options.convertPercentToView(testStatisticParameterSet.getPowerOfTest()));
-			h.put("quantile", testStatisticParameterSet.getQuantile());
-			h.put("p_value", testStatisticParameterSet.getLogarithmicProbabilityValue());
-			h.put("non_centrality_parameter", testStatisticParameterSet.getNoncentralityParameter());
-			testStatistics.add(h);
+			if (testStatisticParameterSet.getNumeratorDof() >= 0 && testStatisticParameterSet.getDenominatorDof() > 0) {
+				HashMap<String, Number> h = new HashMap<String, Number>();
+				h.put("d1", testStatisticParameterSet.getNumeratorDof());
+				h.put("d2", testStatisticParameterSet.getDenominatorDof());
+				h.put("probability_value", options.convertPercentToView(testStatisticParameterSet.getProbabilityValue()));
+				h.put("power_of_test",     options.convertPercentToView(testStatisticParameterSet.getPowerOfTest()));
+				h.put("quantile", testStatisticParameterSet.getQuantile());
+				h.put("p_value", testStatisticParameterSet.getLogarithmicProbabilityValue());
+				h.put("non_centrality_parameter", testStatisticParameterSet.getNoncentralityParameter());
+				testStatistics.add(h);
+			}
 		}
 		
 		if (!testStatistics.isEmpty()) 
