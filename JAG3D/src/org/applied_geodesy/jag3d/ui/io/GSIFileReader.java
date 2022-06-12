@@ -262,7 +262,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 				else if (key == 41 || key > 400 && key/10 == 41)
 					pointCode = this.removeLeadingZeros(data).trim();
-
+				
 				else if (isNumericValue(key) && data.matches("\\d+")) {
 					if (key == 84 || key == 85 || key == 86 || key == 331 || key == 335) //  || key == 88
 						this.isNewStation = true;
@@ -351,7 +351,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		}
 
 		// Speichere die (neue) Standpunktnummer und speichere den bisherigen Richtungssatz des alten Standpunkes
-		if (this.isNewStation && pointName != null && !pointName.trim().isEmpty()) {
+		if (this.isNewStation && pointName != null && !pointName.isBlank()) {
 			this.startPointName = pointName;
 			this.ih = ih==null ? 0.0 : ih;
 			this.th = th==null ? 0.0 : th;
@@ -360,7 +360,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			this.distRb1 = null;
 			this.distRb2 = null;
 			this.distLastRb4Zb = null;
-			
+			//|| this.levelingLineName != null && !this.levelingLineName.isBlank()
 			// Speichere Daten bspw. Richtungen, da diese Satzweise zu halten sind
 			this.saveObservationGroups(false);
 			this.lastStartPointName = null;
@@ -485,7 +485,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				}
 				
 				// ermittle Hoehenunterschied aus R2 und V2
-				if (this.rb2 != null && this.vb2 != null) {
+				if (this.levelingData != null && this.rb2 != null && this.vb2 != null) {
 					this.levelingData.addBackSightReading(this.startPointName, this.rb2, this.distRb2 != null ? this.distRb2 : 0, false);
 					this.levelingData.addForeSightReading(this.endPointName,   this.vb2, this.distVb2 != null ? this.distVb2 : 0, false);
 		
