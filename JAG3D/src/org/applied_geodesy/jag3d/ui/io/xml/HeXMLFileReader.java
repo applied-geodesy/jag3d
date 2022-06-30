@@ -261,8 +261,12 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 			
 			HeXMLNamespaceContext namespaceContext = new HeXMLNamespaceContext(document);
 					
+			// Bestimme Applikation auf dem Instrument
+			String xpathPattern = "//landxml:LandXML/landxml:Application/@name";
+			String applicationName = (String)XMLUtilities.xpathSearch(document, xpathPattern, namespaceContext, XPathConstants.STRING);
+			
 			// Bestimme Einheiten
-			String xpathPattern = "//landxml:LandXML/landxml:Units/*[1]";
+			xpathPattern = "//landxml:LandXML/landxml:Units/*[1]";
 			Node units = (Node)XMLUtilities.xpathSearch(document, xpathPattern, namespaceContext, XPathConstants.NODE);
 			if (units != null) {				
 				NamedNodeMap attr = units.getAttributes();
@@ -380,6 +384,7 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 			}
 			// ermittle Beobachtungen zwischen den Punkten
 			xpathPattern = "//landxml:LandXML/landxml:Survey//landxml:RawObservation[@setupID=\"%s\"]";
+			boolean applyAtmosphericCorrection = applicationName == null || !applicationName.equalsIgnoreCase("LandXML Export");
 			for (String setupId : this.setups.keySet()) {
 				InstrumentSetup setup = this.setups.get(setupId);
 				nodeList = (NodeList)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, setupId), namespaceContext, XPathConstants.NODESET);
@@ -424,7 +429,7 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 //					System.out.println("Polar " +dir+"  "+zenit+"  "+dist2d+"  "+dist3d);
 					double distanceForUncertaintyModel = 0;
 					if (this.dim == DimensionType.SPATIAL && obsDim == 3) {
-						// Bestimme Korrekturparameter fuer 3D-Strecke
+						// Bestimme Korrekturparameter fuer 3D-Strecke, sofern es nicht das 1200er System ist
 						if (dist3d != null) {
 							xpath = "./landxml:Feature[@code=\"observationInfo\"]/landxml:Property[@label=\"TPSCorrectionRef\"]/@value";
 							String tpsCorr = (String)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.STRING);
@@ -447,8 +452,8 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 							add = add == null || Double.isNaN(add) ? (Double)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.NUMBER) : add;
 	
 							// Validiere Korrekturwerte
-							scale = scale == null || Double.isNaN(scale) ? 1.0 : scale;
-							add = add == null || Double.isNaN(add)       ? 0.0 : add;
+							scale = !applyAtmosphericCorrection || scale == null || Double.isNaN(scale) ? 1.0 : scale;
+							add = !applyAtmosphericCorrection || add == null || Double.isNaN(add)       ? 0.0 : add;
 							add = this.convertToMeter(add);
 							
 							// Koorigiere Schraegstrecke
