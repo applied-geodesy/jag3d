@@ -80,10 +80,10 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	}
 
 	private final DimensionType dim;
-	private boolean isNewStation = false;
+	private boolean isNewStation = false, isNewLevelingLine = false;
 	private Set<String> reservedNames = null;
 	private Map<String, PointRow> pointMap = new HashMap<String, PointRow>();
-	private String startPointName = null, endPointName = null, lastStartPointName = null;
+	private String startPointName = null, endPointName = null, lastStartPointName = null, lastLevelingLineName = null;
 	private LevelingData levelingData = null;
 	
 	private double ih = 0.0, th = 0.0;
@@ -127,6 +127,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	@Override
 	public void reset() {
 		this.isNewStation = false;
+		this.isNewLevelingLine = false;
 
 		this.startPointName = null;
 		this.endPointName = null;
@@ -260,8 +261,14 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 						pointName = "0";
 				}
 
-				else if (key == 41 || key > 400 && key/10 == 41)
+				else if (key == 41 || key > 400 && key/10 == 41) {
 					pointCode = this.removeLeadingZeros(data).trim();
+					this.isNewLevelingLine = pointCode.matches("^\\?\\.*\\d$") && this.dim == DimensionType.HEIGHT;
+				}
+				
+				else if (key == 271 && this.dim == DimensionType.HEIGHT) {
+					this.lastLevelingLineName = this.removeLeadingZeros(data).trim();
+				}
 				
 				else if (isNumericValue(key) && data.matches("\\d+")) {
 					if (key == 84 || key == 85 || key == 86 || key == 331 || key == 335) //  || key == 88
@@ -360,13 +367,17 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			this.distRb1 = null;
 			this.distRb2 = null;
 			this.distLastRb4Zb = null;
-			//|| this.levelingLineName != null && !this.levelingLineName.isBlank()
+
 			// Speichere Daten bspw. Richtungen, da diese Satzweise zu halten sind
 			this.saveObservationGroups(false);
 			this.lastStartPointName = null;
 		}
 		else if (pointName != null && !pointName.trim().isEmpty()) {
 			this.endPointName = pointName;
+		}
+		else if (this.isNewLevelingLine) {
+			this.saveObservationGroups(this.dim == DimensionType.HEIGHT);
+			this.lastLevelingLineName = null;
 		}
 
 		// Speichere Punkte aus der GSI
@@ -567,6 +578,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			}			
 		}			
 		this.isNewStation = false;
+		this.isNewLevelingLine = false;
 	}
 
 	private boolean hasZerosCoordinates(PointRow point) {
@@ -686,7 +698,12 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		TreeItem<TreeItemValue> treeItem = null;
 		if (!observations.isEmpty()) {
 			boolean isGroupWithEqualStation = ImportOption.getInstance().isGroupSeparation(TreeItemType.getObservationTypeByTreeItemType(itemType));
-			String itemName = this.createItemName(null, isGroupWithEqualStation && this.lastStartPointName != null ? " (" + this.lastStartPointName + ")" : null); 
+			String groupName = null;
+			if (this.lastLevelingLineName != null && !this.lastLevelingLineName.isBlank())
+				groupName = this.lastLevelingLineName;
+			else if (isGroupWithEqualStation && this.lastStartPointName != null)
+				groupName = this.lastStartPointName;
+			String itemName = this.createItemName(null, groupName != null ? " (" + groupName + ")" : null); 
 			treeItem = this.saveTerrestrialObservations(itemName, itemType, observations);
 		}
 		observations.clear();
