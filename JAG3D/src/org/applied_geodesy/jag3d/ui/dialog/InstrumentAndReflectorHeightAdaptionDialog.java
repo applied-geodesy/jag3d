@@ -33,10 +33,14 @@ import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.ObservableLimitedList;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
@@ -51,18 +55,18 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
-import javafx.util.Pair;
 import javafx.util.StringConverter;
 
 public class InstrumentAndReflectorHeightAdaptionDialog {
 	private I18N i18n = I18N.getInstance();
 	private static InstrumentAndReflectorHeightAdaptionDialog instrumentAndReflectorHeightAdaptionDialog = new InstrumentAndReflectorHeightAdaptionDialog();
-	private Dialog<Pair<String, String>> dialog = null;
+	private Dialog<Void> dialog = null;
 	private Window window;
 	private ComboBox<String> stationNameComboBox  = new ComboBox<String>();
 	private ComboBox<String> targetNameComboBox = new ComboBox<String>();
 	private RadioButton normalModeRadioButton;
 	private RadioButton regularExpressionRadioButton;
+	private CheckBox keepDialogOpenCheckBox;
 	private ComboBox<ScopeType> scopeTypeComboBox;
 	private DoubleTextField instrumentHeightField;
 	private DoubleTextField reflectorHeightField;
@@ -74,7 +78,7 @@ public class InstrumentAndReflectorHeightAdaptionDialog {
 		instrumentAndReflectorHeightAdaptionDialog.window = owner;
 	}
 
-	public static Optional<Pair<String, String>> showAndWait(TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) {
+	public static Optional<Void> showAndWait(TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) {
 		instrumentAndReflectorHeightAdaptionDialog.itemValue = itemValue;
 		instrumentAndReflectorHeightAdaptionDialog.selectedTreeItemValues = selectedTreeItemValues;
 		instrumentAndReflectorHeightAdaptionDialog.init();
@@ -100,22 +104,30 @@ public class InstrumentAndReflectorHeightAdaptionDialog {
 		if (this.dialog != null)
 			return;
 		
-		this.dialog = new Dialog<Pair<String, String>>();
+		this.dialog = new Dialog<Void>();
 		this.dialog.setTitle(i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.title", "Heights of instrument and reflector"));
 		this.dialog.setHeaderText(i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.header", "Adaption of heights of instrument and reflector"));
-		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
 		//		this.dialog.initStyle(StageStyle.UTILITY);
 		this.dialog.initOwner(window);
 		this.dialog.getDialogPane().setContent(this.createPane());
 		this.dialog.setResizable(true);
-		this.dialog.setResultConverter(new Callback<ButtonType, Pair<String, String>>() {
+		Button applyButton = (Button) this.dialog.getDialogPane().lookupButton(ButtonType.OK);
+		applyButton.addEventFilter(ActionEvent.ACTION, new EventHandler<ActionEvent>() {
 			@Override
-			public Pair<String, String> call(ButtonType buttonType) {
-				if (buttonType == ButtonType.OK) {
-					save();
-					return new Pair<String, String>(normalModeRadioButton.getText(), regularExpressionRadioButton.getText());
-				}
+			public void handle(ActionEvent event) {
+				save();
+				if (keepDialogOpenCheckBox.isSelected())
+					event.consume();
+			}
+		});
+		this.dialog.setResultConverter(new Callback<ButtonType, Void>() {
+			@Override
+			public Void call(ButtonType buttonType) {
+//				if (buttonType == ButtonType.OK) {
+//					save();
+//				}
 				return null;
 			}
 		});
@@ -137,6 +149,11 @@ public class InstrumentAndReflectorHeightAdaptionDialog {
 		this.regularExpressionRadioButton = this.createRadioButton(
 				i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.mode.regex.label", "Regular expression"), 
 				i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.mode.regex.tooltip", "If selected, regular expression mode will be applied"));
+		
+		this.keepDialogOpenCheckBox = this.createCheckBox(
+				i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.keep_open.label", "Keep dialog open after modification"), 
+				i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.keep_open.tooltip", "If selected, dialog will be kept open after data modification"));
+		this.keepDialogOpenCheckBox.setSelected(false);
 		
 		this.scopeTypeComboBox = this.createScopeTypeComboBox(ScopeType.SELECTION, i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.scope.tooltip", "Select scope of application"));
 
@@ -184,30 +201,32 @@ public class InstrumentAndReflectorHeightAdaptionDialog {
 		GridPane.setHgrow(targetNameLabel,  Priority.NEVER);
 		GridPane.setHgrow(modeLabel,        Priority.NEVER);
 		
-		GridPane.setHgrow(this.stationNameComboBox, Priority.ALWAYS);
-		GridPane.setHgrow(this.targetNameComboBox,  Priority.ALWAYS);
-		GridPane.setHgrow(hbox,                     Priority.ALWAYS);
-		GridPane.setHgrow(this.scopeTypeComboBox,   Priority.ALWAYS);
+		GridPane.setHgrow(this.stationNameComboBox,    Priority.ALWAYS);
+		GridPane.setHgrow(this.targetNameComboBox,     Priority.ALWAYS);
+		GridPane.setHgrow(hbox,                        Priority.ALWAYS);
+		GridPane.setHgrow(this.scopeTypeComboBox,      Priority.ALWAYS);
+		GridPane.setHgrow(this.keepDialogOpenCheckBox, Priority.ALWAYS);
 				
 		int row = 1;
-		gridPane.add(scopeLabel,                 0, row);
-		gridPane.add(this.scopeTypeComboBox,     1, row++, 1, 1);
+		gridPane.add(scopeLabel,                  0, row);
+		gridPane.add(this.scopeTypeComboBox,      1, row++, 1, 1);
 		
-		gridPane.add(stationNameLabel,           0, row);
-		gridPane.add(this.stationNameComboBox,   1, row++, 1, 1);
+		gridPane.add(stationNameLabel,            0, row);
+		gridPane.add(this.stationNameComboBox,    1, row++, 1, 1);
 
-		gridPane.add(targetNameLabel,            0, row);
-		gridPane.add(this.targetNameComboBox,    1, row++, 1, 1);
+		gridPane.add(targetNameLabel,             0, row);
+		gridPane.add(this.targetNameComboBox,     1, row++, 1, 1);
 		
-		gridPane.add(instrumentHeightLabel,      0, row);
-		gridPane.add(this.instrumentHeightField, 1, row++, 1, 1);
+		gridPane.add(instrumentHeightLabel,       0, row);
+		gridPane.add(this.instrumentHeightField,  1, row++, 1, 1);
 		
-		gridPane.add(reflectorHeightLabel,       0, row);
-		gridPane.add(this.reflectorHeightField,  1, row++, 1, 1);
+		gridPane.add(reflectorHeightLabel,        0, row);
+		gridPane.add(this.reflectorHeightField,   1, row++, 1, 1);
 		
-		gridPane.add(modeLabel,                  0, row);
-		gridPane.add(hbox,                       1, row++, 1, 1);
-
+		gridPane.add(modeLabel,                   0, row);
+		gridPane.add(hbox,                        1, row++, 1, 1);
+		
+		gridPane.add(this.keepDialogOpenCheckBox, 1, row++, 1, 1);
 			
 		Platform.runLater(new Runnable() {
 			@Override public void run() {
@@ -238,6 +257,18 @@ public class InstrumentAndReflectorHeightAdaptionDialog {
 		radioButton.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		radioButton.setMaxWidth(Double.MAX_VALUE);
 		return radioButton;
+	}
+	
+	private CheckBox createCheckBox(String text, String tooltip) {
+		Label label = new Label(text);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setPadding(new Insets(0,0,0,3));
+		CheckBox checkBox = new CheckBox();
+		checkBox.setGraphic(label);
+		checkBox.setTooltip(new Tooltip(tooltip));
+		checkBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		checkBox.setMaxWidth(Double.MAX_VALUE);
+		return checkBox;
 	}
 	
 	private ComboBox<ScopeType> createScopeTypeComboBox(ScopeType item, String tooltip) {
