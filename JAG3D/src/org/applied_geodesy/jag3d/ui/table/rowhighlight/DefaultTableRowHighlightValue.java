@@ -39,10 +39,10 @@ public class DefaultTableRowHighlightValue {
 	
 	static {
 		BufferedInputStream bis = null;
-		final String path = "/properties/tablerowhighlight.default";
+		final String path = "properties/tablerowhighlight.default";
 		try {
-			if (DefaultTableRowHighlightValue.class.getResource(path) != null) {
-				bis = new BufferedInputStream(DefaultTableRowHighlightValue.class.getResourceAsStream(path));
+			if (DefaultTableRowHighlightValue.class.getClassLoader().getResourceAsStream(path) != null) {
+				bis = new BufferedInputStream(DefaultTableRowHighlightValue.class.getClassLoader().getResourceAsStream(path));
 				PROPERTIES.load(bis);
 			}  
 		} catch (Exception e) {

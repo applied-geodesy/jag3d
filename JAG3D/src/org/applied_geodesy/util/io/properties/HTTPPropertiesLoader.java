@@ -33,18 +33,16 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.Properties;
 
-import org.applied_geodesy.adjustment.network.DefaultUncertainty;
-
 public class HTTPPropertiesLoader {
 
 	static {
 		BufferedInputStream bis = null;
-		final String path = "/properties/proxy.default";
+		final String path = "properties/proxy.default";
 
 		try {
-			if (DefaultUncertainty.class.getResource(path) != null) {
+			if (HTTPPropertiesLoader.class.getClassLoader().getResourceAsStream(path) != null) {
 				Properties properties = new Properties();
-				bis = new BufferedInputStream(DefaultUncertainty.class.getResourceAsStream(path));
+				bis = new BufferedInputStream(HTTPPropertiesLoader.class.getClassLoader().getResourceAsStream(path));
 				properties.load(bis);
 
 				String host = properties.getProperty("HOST", null);

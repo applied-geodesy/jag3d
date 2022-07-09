@@ -41,10 +41,10 @@ public class DefaultAverageThreshold {
 	
 	static {
 		BufferedInputStream bis = null;
-		final String path = "/properties/averagethresholds.default";
+		final String path = "properties/averagethresholds.default";
 		try {
-			if (DefaultAverageThreshold.class.getResource(path) != null) {
-				bis = new BufferedInputStream(DefaultAverageThreshold.class.getResourceAsStream(path));
+			if (DefaultAverageThreshold.class.getClassLoader().getResourceAsStream(path) != null) {
+				bis = new BufferedInputStream(DefaultAverageThreshold.class.getClassLoader().getResourceAsStream(path));
 				PROPERTIES.load(bis);
 			}  
 		} catch (Exception e) {

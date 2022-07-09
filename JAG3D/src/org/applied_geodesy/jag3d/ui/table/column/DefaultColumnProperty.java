@@ -36,10 +36,10 @@ public class DefaultColumnProperty {
 	
 	static {
 		BufferedInputStream bis = null;
-		final String path = "/properties/tablecolumns.default";
+		final String path = "properties/tablecolumns.default";
 		try {
-			if (DefaultUncertainty.class.getResource(path) != null) {
-				bis = new BufferedInputStream(DefaultUncertainty.class.getResourceAsStream(path));
+			if (DefaultUncertainty.class.getClassLoader().getResourceAsStream(path) != null) {
+				bis = new BufferedInputStream(DefaultUncertainty.class.getClassLoader().getResourceAsStream(path));
 				PROPERTIES.load(bis);
 			}  
 		} catch (Exception e) {

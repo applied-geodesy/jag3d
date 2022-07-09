@@ -28,17 +28,15 @@ import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-import org.applied_geodesy.jag3d.ui.graphic.layer.Layer;
-
 public class DefaultApplicationProperty {
 
 	private final static Properties PROPERTIES = new Properties();
 	static {
 		BufferedInputStream bis = null;
-		final String path = "/properties/application.default";
+		final String path = "properties/application.default";
 		try {
-			if (Layer.class.getResource(path) != null) {
-				bis = new BufferedInputStream(Layer.class.getResourceAsStream(path));
+			if (DefaultApplicationProperty.class.getClassLoader().getResourceAsStream(path) != null) {
+				bis = new BufferedInputStream(DefaultApplicationProperty.class.getClassLoader().getResourceAsStream(path));
 				PROPERTIES.load(bis);
 			}  
 		} catch (Exception e) {

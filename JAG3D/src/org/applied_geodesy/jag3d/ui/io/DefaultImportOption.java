@@ -42,10 +42,10 @@ public class DefaultImportOption {
 	
 	static {
 		BufferedInputStream bis = null;
-		final String path = "/properties/import.default";
+		final String path = "properties/import.default";
 		try {
-			if (DefaultImportOption.class.getResource(path) != null) {
-				bis = new BufferedInputStream(DefaultImportOption.class.getResourceAsStream(path));
+			if (DefaultImportOption.class.getClassLoader().getResourceAsStream(path) != null) {
+				bis = new BufferedInputStream(DefaultImportOption.class.getClassLoader().getResourceAsStream(path));
 				PROPERTIES.load(bis);
 			}  
 		} catch (Exception e) {

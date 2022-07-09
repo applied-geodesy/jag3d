@@ -72,7 +72,7 @@ public class FTLReport {
 	private Template template = null;
 	private static HostServices hostServices;
 	private Map<String, Object> data = new HashMap<String, Object>();
-	public final static String TEMPLATE_PATH = "/ftl/juniform/";
+	public final static String TEMPLATE_PATH = "ftl/juniform/";
 	private final Configuration cfg = new Configuration(VERSION);
 	private FeatureAdjustment adjustment;
 	public FTLReport(FeatureAdjustment adjustment) {
@@ -82,7 +82,7 @@ public class FTLReport {
 
 	private void init() {
 		try {
-			File path = new File(getClass().getResource(TEMPLATE_PATH).toURI());
+			File path = new File(FTLReport.class.getClassLoader().getResource(TEMPLATE_PATH).toURI());
 
 			this.cfg.setDirectoryForTemplateLoading( path );
 			this.cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
@@ -536,7 +536,7 @@ public class FTLReport {
 	public static List<File> getTemplates() {
 		File root = null;
 		try {
-			root = new File(FTLReport.class.getResource(FTLReport.TEMPLATE_PATH).toURI());
+			root = new File(FTLReport.class.getClassLoader().getResource(FTLReport.TEMPLATE_PATH).toURI());
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
