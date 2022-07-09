@@ -42,10 +42,10 @@ public abstract class Layer implements IdentifiableLayer {
 	final static Properties PROPERTIES = new Properties();
 	static {
 		BufferedInputStream bis = null;
-		final String path = "/properties/layers.default";
+		final String path = "properties/layers.default";
 		try {
-			if (Layer.class.getResource(path) != null) {
-				bis = new BufferedInputStream(Layer.class.getResourceAsStream(path));
+			if (Layer.class.getClassLoader().getResourceAsStream(path) != null) {
+				bis = new BufferedInputStream(Layer.class.getClassLoader().getResourceAsStream(path));
 				PROPERTIES.load(bis);
 			}  
 		} catch (Exception e) {

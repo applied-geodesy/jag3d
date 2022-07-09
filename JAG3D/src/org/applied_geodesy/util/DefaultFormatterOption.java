@@ -80,10 +80,10 @@ public class DefaultFormatterOption {
 	
 	static {
 		BufferedInputStream bis = null;
-		final String path = "/properties/formatteroptions.default";
+		final String path = "properties/formatteroptions.default";
 		try {
-			if (DefaultFormatterOption.class.getResource(path) != null) {
-				bis = new BufferedInputStream(DefaultFormatterOption.class.getResourceAsStream(path));
+			if (DefaultFormatterOption.class.getClassLoader().getResourceAsStream(path) != null) {
+				bis = new BufferedInputStream(DefaultFormatterOption.class.getClassLoader().getResourceAsStream(path));
 				PROPERTIES.load(bis);
 			}  
 		} catch (Exception e) {
