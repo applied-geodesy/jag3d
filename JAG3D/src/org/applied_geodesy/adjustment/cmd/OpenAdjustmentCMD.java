@@ -23,6 +23,10 @@ package org.applied_geodesy.adjustment.cmd;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.logging.LogManager;
 
 import org.applied_geodesy.adjustment.EstimationStateType;
 import org.applied_geodesy.adjustment.network.NetworkAdjustment;
@@ -92,5 +96,41 @@ public class OpenAdjustmentCMD {
 			adjustment.clearMatrices();
 			adjustment = null;
 		}
+	}
+	
+	public static void main(String[] args)  {
+		try {
+			System.setProperty("com.github.fommil.netlib.BLAS",   "com.github.fommil.netlib.F2jBLAS");
+			System.setProperty("com.github.fommil.netlib.LAPACK", "com.github.fommil.netlib.F2jLAPACK");
+			System.setProperty("com.github.fommil.netlib.ARPACK", "com.github.fommil.netlib.F2jARPACK");
+
+			System.setProperty("hsqldb.reconfig_logging", "false");
+
+			LogManager.getLogManager().reset();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		int status = -1;
+
+		if (args.length == 0)
+			throw new IllegalArgumentException("Error, no database specified!");
+
+		String dataBaseName = args[0];
+		boolean displayState = args.length > 1 && args[1].equalsIgnoreCase("TRUE") ? Boolean.TRUE : Boolean.FALSE; 
+		try {
+			if (!Files.isRegularFile(Paths.get(dataBaseName + ".script")) || 
+					!Files.isRegularFile(Paths.get(dataBaseName + ".properties")) ||
+					!Files.isRegularFile(Paths.get(dataBaseName + ".data")))
+				throw new IOException("Error, related database files (e.g. script, properties or data) not found! " + dataBaseName);
+
+			OpenAdjustmentCMD openAdjustment = new OpenAdjustmentCMD(dataBaseName, displayState);
+			status = openAdjustment.process();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.exit(status);
 	}
 }
