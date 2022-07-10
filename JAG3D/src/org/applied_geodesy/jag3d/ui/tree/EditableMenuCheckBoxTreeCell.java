@@ -638,17 +638,21 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		searchAndReplaceItem.setUserData(ContextMenuType.SEARCH_AND_REPLACE);
 		searchAndReplaceItem.setOnAction(listener);
 		
-		this.contextMenu = new ContextMenu(addItem, removeItem, mergeItem, exportItem, searchAndReplaceItem);
+		this.contextMenu = new ContextMenu(
+				addItem, 
+				removeItem, 
+				mergeItem, 
+				exportItem, 
+				new SeparatorMenuItem(), 
+				searchAndReplaceItem
+		);
 		
 		if (TreeItemType.isObservationTypeLeaf(itemType)) {
 			MenuItem instrumentAndReflectorHeightItem = new MenuItem(i18n.getString("EditableMenuCheckBoxTreeCell.contextmenu.instrument_and_reflector_height", "Height adaption"));
 			instrumentAndReflectorHeightItem.setUserData(ContextMenuType.ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT);
 			instrumentAndReflectorHeightItem.setOnAction(listener);
 			
-			this.contextMenu.getItems().addAll(
-					new SeparatorMenuItem(),
-					instrumentAndReflectorHeightItem
-					);
+			this.contextMenu.getItems().addAll(instrumentAndReflectorHeightItem);
 		}
 		
 		else if (TreeItemType.isPointTypeLeaf(itemType)) {
