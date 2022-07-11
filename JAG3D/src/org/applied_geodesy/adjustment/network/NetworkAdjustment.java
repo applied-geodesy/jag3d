@@ -3262,7 +3262,7 @@ public class NetworkAdjustment implements Runnable {
 					double tPost = this.applyAposterioriVarianceOfUnitWeight ? deflectionX.getTpost() : 0.0;
 					double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, dim);
 					double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, dim, dof-dim) : 0.0;
-					// deflectionX strellt stoch. Parameter fuer beide Lotparameter bereit
+					// deflectionX stellt stoch. Parameter fuer beide Lotparameter bereit
 					deflectionX.setPprio(pPrio);
 					deflectionX.setPpost(pPost);
 					deflectionX.setSignificant(tPrio > kPrio || tPost > kPost);
@@ -3357,7 +3357,7 @@ public class NetworkAdjustment implements Runnable {
 				else if (unknownParameter instanceof VerticalDeflection) { 
 					// VerticalDeflectionY is taken from the VerticalDeflectionX Component
 					// --> No need to modify again
-					// Stochastic deflection check for outliers
+					// Stochastic deflection checked for outliers
 					if (unknownParameter instanceof VerticalDeflectionX) {
 						VerticalDeflectionX deflectionX = (VerticalDeflectionX)unknownParameter;
 						VerticalDeflectionY deflectionY = deflectionX.getPoint().getVerticalDeflectionY();

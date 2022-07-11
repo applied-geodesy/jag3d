@@ -51,7 +51,7 @@ public class ConfidenceRegion {
 		for (int i=0; i<covarianceMatrix.numColumns(); i++) {
 			for (int j=0; j<covarianceMatrix.numRows(); j++) {
 				if (Double.isInfinite(covarianceMatrix.get(i,j)) || Double.isNaN(covarianceMatrix.get(i,j)) ) {
-					throw new IllegalArgumentException(this.getClass()+" Matrix contains Inf or NaN Values! " +i+"x"+j+" "+covarianceMatrix.get(i,j));
+					throw new IllegalArgumentException(this.getClass()+" Matrix contains Inf or NaN values! " +i+"x"+j+" "+covarianceMatrix.get(i,j));
 				}
 			}
 		}
