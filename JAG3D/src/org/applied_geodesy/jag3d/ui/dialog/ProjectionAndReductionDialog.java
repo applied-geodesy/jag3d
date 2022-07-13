@@ -476,23 +476,23 @@ public class ProjectionAndReductionDialog {
 		GridPane.setHgrow(this.referenceLongitudeTextField, Priority.ALWAYS);	
 		GridPane.setHgrow(referenceHeightLabel,             Priority.SOMETIMES);	
 		GridPane.setHgrow(this.referenceHeightTextField,    Priority.ALWAYS);	
-		GridPane.setHgrow(principalPointPointX0Label,       Priority.SOMETIMES);	
-		GridPane.setHgrow(this.principalPointX0TextField,   Priority.ALWAYS);	
 		GridPane.setHgrow(principalPointPointY0Label,       Priority.SOMETIMES);	
 		GridPane.setHgrow(this.principalPointY0TextField,   Priority.ALWAYS);	
+		GridPane.setHgrow(principalPointPointX0Label,       Priority.SOMETIMES);	
+		GridPane.setHgrow(this.principalPointX0TextField,   Priority.ALWAYS);	
 		GridPane.setHgrow(principalPointPointZ0Label,       Priority.SOMETIMES);	
 		GridPane.setHgrow(this.principalPointZ0TextField,   Priority.ALWAYS);	
 		
 		int row = 0;
 		gridPane.add(majorAxisLabel,                   0, ++row, 1, 1);
 		//gridPane.add(this.majorAxisTextField,          1,   row, 1, 1);
-		gridPane.add(ellipsoidHbox,          1,   row, 1, 1);
+		gridPane.add(ellipsoidHbox,                    1,   row, 1, 1);
 		gridPane.add(minorAxisLabel,                   0, ++row, 1, 1);
 		gridPane.add(this.minorAxisTextField,          1,   row, 1, 1);
-		gridPane.add(principalPointPointX0Label,       0, ++row, 1, 1);
-		gridPane.add(this.principalPointX0TextField,   1,   row, 1, 1);
 		gridPane.add(principalPointPointY0Label,       0, ++row, 1, 1);
 		gridPane.add(this.principalPointY0TextField,   1,   row, 1, 1);
+		gridPane.add(principalPointPointX0Label,       0, ++row, 1, 1);
+		gridPane.add(this.principalPointX0TextField,   1,   row, 1, 1);
 		gridPane.add(principalPointPointZ0Label,       0, ++row, 1, 1);
 		gridPane.add(this.principalPointZ0TextField,   1,   row, 1, 1);
 		gridPane.add(referenceLatitudeLabel,           0, ++row, 1, 1);
