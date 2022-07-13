@@ -25,6 +25,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -91,6 +96,8 @@ public class M5FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		
 		this.startPointName = null;
 		this.lastPointName = null;
+		
+		this.cnt = 0;
 	}
 
 	@Override
@@ -159,7 +166,7 @@ public class M5FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					// Pruefe, ob der Rueckblick eine Pkt-Id besitzt, 
 					// verwende ansonsten die letzte guelte Bezeichnung
 					// --> Manche M5-Files enthalten keine Pkt fuer Wechselpunkte
-					if (pointName.trim().isEmpty()) {
+					if (pointName.isBlank()) {
 						pointName = this.lastPointName;
 						code      = "JAG3D";
 					}
@@ -192,9 +199,16 @@ public class M5FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					// Pruefe, ob der Vorblick eine Pkt-Id besitzt, 
 					// verwende ansonsten die letzte guelte Bezeichnung
 					// --> Manche M5-Files enthalten keine Pkt fuer Wechselpunkte
-					if (pointName.trim().isEmpty()) {
+					if (pointName.isBlank() && this.levelingData != null && !this.levelingData.hasFirstForeSightReading()) {
+						LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of("UTC"));
+						int doy  = localDateTime.getDayOfYear();
+						int msec = localDateTime.getNano()/1000;
+						int sec  = localDateTime.getSecond();
+						int min  = localDateTime.getMinute();
+						int hour = localDateTime.getHour();
+						int msod = (hour * 3600 + min * 60 + sec) * 1000 + msec;
 						//pointName = "W"+(++cnt)+"_"+this.getFile().getName().substring(0, this.getFile().getName().lastIndexOf('.'));
-						pointName = String.format(Locale.ENGLISH, "%c%07d", 'W', ++this.cnt);
+						pointName = String.format(Locale.ENGLISH, "%c%04d%03d%08d", 'W', ++this.cnt, doy, msod);
 						this.lastPointName = pointName;
 						code               = "JAG3D";
 					}
@@ -247,7 +261,7 @@ public class M5FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					// Pruefe, ob der Punkt eine Pkt-Id besitzt, 
 					// verwende ansonsten die letzte guelte Bezeichnung
 					// --> Manche M5-Files enthalten keine Pkt fuer Wechselpunkte
-					if (pointName.trim().isEmpty()) {
+					if (pointName.isBlank()) {
 						pointName = this.lastPointName;
 						code      = "JAG3D";
 					}
@@ -281,6 +295,7 @@ public class M5FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			String itemName = this.createItemName(prefix, null);
 			this.lastTreeItem = this.saveTerrestrialObservations(itemName, TreeItemType.LEVELING_LEAF, this.leveling);
 			this.leveling.clear();
+			this.cnt = 0;
 		}
 	}
 	

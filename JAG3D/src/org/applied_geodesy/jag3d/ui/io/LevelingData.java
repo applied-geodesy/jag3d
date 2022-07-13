@@ -108,5 +108,19 @@ class LevelingData {
 				+ ", dv2=" + dv2 + "]";
 	}
 	
+	public boolean hasFirstBackSightReading() {
+		return this.r1 != null;
+	}
 	
+	public boolean hasSecondBackSightReading() {
+		return this.r2 != null;
+	}
+	
+	public boolean hasFirstForeSightReading() {
+		return this.v1 != null;
+	}
+	
+	public boolean hasSecondForeSightReading() {
+		return this.v2 != null;
+	}
 }
