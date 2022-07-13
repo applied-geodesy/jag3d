@@ -198,14 +198,14 @@ public class M5FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					// --> Manche M5-Files enthalten keine Pkt fuer Wechselpunkte
 					if (pointName.isBlank() && this.levelingData != null && !this.levelingData.hasFirstForeSightReading()) {
 						LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of("UTC"));
-						int doy  = localDateTime.getDayOfYear();
-						int msec = localDateTime.getNano()/1000;
-						int sec  = localDateTime.getSecond();
-						int min  = localDateTime.getMinute();
-						int hour = localDateTime.getHour();
-						int msod = (hour * 3600 + min * 60 + sec) * 1000 + msec;
+						int doy   = localDateTime.getDayOfYear();
+						int musec = localDateTime.getNano()/1000;
+						int sec   = localDateTime.getSecond();
+						int min   = localDateTime.getMinute();
+						int hour  = localDateTime.getHour();
+						int musod = (hour * 3600 + min * 60 + sec) * 1000000 + musec;
 						//pointName = "W"+(++cnt)+"_"+this.getFile().getName().substring(0, this.getFile().getName().lastIndexOf('.'));
-						pointName = String.format(Locale.ENGLISH, "%c%04d%03d%08d", 'W', ++this.cnt, doy, msod);
+						pointName = String.format(Locale.ENGLISH, "%c%04d%03d%011d", 'W', ++this.cnt, doy, musod);
 						this.lastPointName = pointName;
 						code               = "JAG3D";
 					}
