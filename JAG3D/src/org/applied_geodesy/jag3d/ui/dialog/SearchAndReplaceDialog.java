@@ -21,6 +21,7 @@
 
 package org.applied_geodesy.jag3d.ui.dialog;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import org.applied_geodesy.jag3d.sql.SQLManager;
@@ -61,6 +62,7 @@ public class SearchAndReplaceDialog {
 	private Window window;
 	private ComboBox<String> searchComboBox  = new ComboBox<String>();
 	private ComboBox<String> replaceComboBox = new ComboBox<String>();
+	private Label statusLabel = new Label();
 	private RadioButton normalModeRadioButton;
 	private RadioButton regularExpressionRadioButton;
 	private CheckBox keepDialogOpenCheckBox;
@@ -77,6 +79,7 @@ public class SearchAndReplaceDialog {
 		searchAndReplaceDialog.itemValue = itemValue;
 		searchAndReplaceDialog.selectedTreeItemValues = selectedTreeItemValues;
 		searchAndReplaceDialog.init();
+		searchAndReplaceDialog.statusLabel.setText(null);
 
 		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
 		Platform.runLater(new Runnable() {
@@ -207,6 +210,7 @@ public class SearchAndReplaceDialog {
 		GridPane.setHgrow(hbox,                        Priority.ALWAYS);
 		GridPane.setHgrow(this.scopeTypeComboBox,      Priority.ALWAYS);
 		GridPane.setHgrow(this.keepDialogOpenCheckBox, Priority.ALWAYS);
+		GridPane.setHgrow(this.statusLabel,            Priority.ALWAYS);
 		
 		int row = 1;
 		gridPane.add(scopeLabel,             0, row);
@@ -223,6 +227,7 @@ public class SearchAndReplaceDialog {
 		gridPane.add(hbox,                   1, row++, 2, 1);
 
 		gridPane.add(this.keepDialogOpenCheckBox, 1, row++, 2, 1);
+		gridPane.add(this.statusLabel,            1, row++, 2, 1);
 			
 		Platform.runLater(new Runnable() {
 			@Override public void run() {
@@ -303,6 +308,7 @@ public class SearchAndReplaceDialog {
 
 	private void save() {
 		try {
+			this.statusLabel.setText(null);
 			this.searchComboBox.commitValue();
 			this.replaceComboBox.commitValue();
 			
@@ -328,7 +334,9 @@ public class SearchAndReplaceDialog {
 			if (!regExp)
 				search = "^\\Q"+search+"\\E";
 
-			SQLManager.getInstance().searchAndReplacePointNames(search, replace, scopeType, this.itemValue, this.selectedTreeItemValues);
+			int rows = SQLManager.getInstance().searchAndReplacePointNames(search, replace, scopeType, this.itemValue, this.selectedTreeItemValues);
+			if (this.keepDialogOpenCheckBox.isSelected())
+				this.statusLabel.setText(String.format(Locale.ENGLISH, i18n.getString("SearchAndReplaceDialog.result.label", "%d row(s) edited\u2026"), rows));
 		}
 		catch (Exception e) {
 			e.printStackTrace();
