@@ -21,6 +21,7 @@
 
 package org.applied_geodesy.jag3d.ui.dialog;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import org.applied_geodesy.jag3d.sql.SQLManager;
@@ -64,6 +65,7 @@ public class InstrumentAndReflectorHeightAdaptionDialog {
 	private Window window;
 	private ComboBox<String> stationNameComboBox  = new ComboBox<String>();
 	private ComboBox<String> targetNameComboBox = new ComboBox<String>();
+	private Label statusLabel = new Label();
 	private RadioButton normalModeRadioButton;
 	private RadioButton regularExpressionRadioButton;
 	private CheckBox keepDialogOpenCheckBox;
@@ -82,7 +84,8 @@ public class InstrumentAndReflectorHeightAdaptionDialog {
 		instrumentAndReflectorHeightAdaptionDialog.itemValue = itemValue;
 		instrumentAndReflectorHeightAdaptionDialog.selectedTreeItemValues = selectedTreeItemValues;
 		instrumentAndReflectorHeightAdaptionDialog.init();
-
+		instrumentAndReflectorHeightAdaptionDialog.statusLabel.setText(null);
+		
 		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
 		Platform.runLater(new Runnable() {
 			@Override
@@ -206,6 +209,7 @@ public class InstrumentAndReflectorHeightAdaptionDialog {
 		GridPane.setHgrow(hbox,                        Priority.ALWAYS);
 		GridPane.setHgrow(this.scopeTypeComboBox,      Priority.ALWAYS);
 		GridPane.setHgrow(this.keepDialogOpenCheckBox, Priority.ALWAYS);
+		GridPane.setHgrow(this.statusLabel,            Priority.ALWAYS);
 				
 		int row = 1;
 		gridPane.add(scopeLabel,                  0, row);
@@ -227,6 +231,7 @@ public class InstrumentAndReflectorHeightAdaptionDialog {
 		gridPane.add(hbox,                        1, row++, 1, 1);
 		
 		gridPane.add(this.keepDialogOpenCheckBox, 1, row++, 1, 1);
+		gridPane.add(this.statusLabel,            1, row++, 1, 1);
 			
 		Platform.runLater(new Runnable() {
 			@Override public void run() {
@@ -317,6 +322,7 @@ public class InstrumentAndReflectorHeightAdaptionDialog {
 	
 	private void save() {
 		try {
+			this.statusLabel.setText(null);
 			this.stationNameComboBox.commitValue();
 			this.targetNameComboBox.commitValue();
 			this.instrumentHeightField.commitValue();
@@ -357,7 +363,9 @@ public class InstrumentAndReflectorHeightAdaptionDialog {
 			else if (targetName == null)
 				targetName = ".*";
 
-			SQLManager.getInstance().adaptInstrumentAndReflectorHeights(stationName, targetName, instrumentHeight, reflectorHeight, scopeType, this.itemValue, this.selectedTreeItemValues);
+			int rows = SQLManager.getInstance().adaptInstrumentAndReflectorHeights(stationName, targetName, instrumentHeight, reflectorHeight, scopeType, this.itemValue, this.selectedTreeItemValues);
+			if (this.keepDialogOpenCheckBox.isSelected())
+				this.statusLabel.setText(String.format(Locale.ENGLISH, i18n.getString("InstrumentAndReflectorHeightAdaptionDialog.result.label", "%d row(s) edited\u2026"), rows));
 		}
 		catch (Exception e) {
 			e.printStackTrace();

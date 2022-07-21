@@ -1912,7 +1912,6 @@ public class SQLManager {
 		
 		PreparedStatement stmtUncertainty = this.dataBase.getPreparedStatement(sqlUncertainty);
 		stmtUncertainty.setInt(1, observationItemValue.getGroupId());
-//TODO
 		ResultSet rsUncertainty = stmtUncertainty.executeQuery();
 		while (rsUncertainty.next()) {
 			ObservationGroupUncertaintyType type = ObservationGroupUncertaintyType.getEnumByValue(rsUncertainty.getInt("type"));
@@ -4347,13 +4346,14 @@ public class SQLManager {
 		stmt.execute();
 	}
 	
-	public void adaptInstrumentAndReflectorHeights(String stationNameRegex, String targetNameRegex, Double instrumentHeight, Double reflectorHeight, ScopeType scopeType, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
+	public int adaptInstrumentAndReflectorHeights(String stationNameRegex, String targetNameRegex, Double instrumentHeight, Double reflectorHeight, ScopeType scopeType, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
-			return;
+			return 0;
 		
 		if (instrumentHeight == null && reflectorHeight == null)
-			return;
+			return 0;
 		
+		int cnt = 0;
 		if (scopeType != ScopeType.SELECTION) {
 			UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
 			TreeItemType[] itemTypes = TreeItemType.values();
@@ -4368,7 +4368,7 @@ public class SQLManager {
 						for (int i = 0; i < itemValues.length; i++) 
 							itemValues[i] = items.get(i).getValue();
 						
-						this.scopedInstrumentAndReflectorHeightsAdaption(scopeType, stationNameRegex, targetNameRegex, instrumentHeight, reflectorHeight, itemValues[0], itemValues);
+						cnt += this.scopedInstrumentAndReflectorHeightsAdaption(scopeType, stationNameRegex, targetNameRegex, instrumentHeight, reflectorHeight, itemValues[0], itemValues);
 					}
 				}
 			}
@@ -4381,14 +4381,16 @@ public class SQLManager {
 			}
 		}
 		else {
-			this.scopedInstrumentAndReflectorHeightsAdaption(scopeType, stationNameRegex, targetNameRegex, instrumentHeight, reflectorHeight, itemValue, selectedTreeItemValues);
+			cnt += this.scopedInstrumentAndReflectorHeightsAdaption(scopeType, stationNameRegex, targetNameRegex, instrumentHeight, reflectorHeight, itemValue, selectedTreeItemValues);
 		}
+		return cnt;
 	}
 	
-	private void scopedInstrumentAndReflectorHeightsAdaption(ScopeType scopeType, String stationNameRegex, String targetNameRegex, Double instrumentHeight, Double reflectorHeight, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
+	private int scopedInstrumentAndReflectorHeightsAdaption(ScopeType scopeType, String stationNameRegex, String targetNameRegex, Double instrumentHeight, Double reflectorHeight, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
-			return;
+			return 0;
 		
+		int cnt = 0;
 		TreeItemType treeItemType = itemValue.getItemType();
 		
 		switch(treeItemType) {
@@ -4442,7 +4444,7 @@ public class SQLManager {
 					stmt.setBoolean(idx++, scopeType == ScopeType.REFERENCE_EPOCH);
 					stmt.setBoolean(idx++, scopeType != ScopeType.CONTROL_EPOCH);
 					
-					stmt.execute();
+					cnt += stmt.executeUpdate();
 				}
 				this.loadObservations(observationItemValue, selectedObservationItemValuesArray);
 			}
@@ -4451,12 +4453,14 @@ public class SQLManager {
 		default:
 			break;
 		}
+		return cnt;
 	}
 	
-	public void searchAndReplacePointNames(String searchRegex, String replaceRegex, ScopeType scopeType, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
+	public int searchAndReplacePointNames(String searchRegex, String replaceRegex, ScopeType scopeType, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
-			return;
+			return 0;
 		
+		int cnt = 0;
 		if (scopeType != ScopeType.SELECTION) {
 			UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
 			TreeItemType[] itemTypes = TreeItemType.values();
@@ -4475,7 +4479,7 @@ public class SQLManager {
 						for (int i = 0; i < itemValues.length; i++) 
 							itemValues[i] = items.get(i).getValue();
 						
-						this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, itemValues[0], itemValues);
+						cnt += this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, itemValues[0], itemValues);
 					}
 				}
 			}
@@ -4488,14 +4492,16 @@ public class SQLManager {
 			}
 		}
 		else {
-			this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, itemValue, selectedTreeItemValues);
+			cnt += this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, itemValue, selectedTreeItemValues);
 		}
+		return cnt;
 	}
 		
-	private void scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
+	private int scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, TreeItemValue itemValue, TreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
-			return;
+			return 0;
 		
+		int cnt = 0;
 		TreeItemType treeItemType = itemValue.getItemType();
 
 		switch(treeItemType) {
@@ -4524,7 +4530,7 @@ public class SQLManager {
 					}
 				}
 				selectedPointItemValuesArray = selectedPointItemValues.toArray(new PointTreeItemValue[selectedPointItemValues.size()]);
-				this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, selectedPointItemValuesArray);
+				cnt += this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, selectedPointItemValuesArray);
 				this.loadPoints(pointItemValue, selectedPointItemValuesArray);
 			}
 			break;
@@ -4545,7 +4551,7 @@ public class SQLManager {
 					}
 				}
 				selectedCongruenceAnalysisItemValuesArray = selectedCongruenceAnalysisItemValues.toArray(new CongruenceAnalysisTreeItemValue[selectedCongruenceAnalysisItemValues.size()]);
-				this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, selectedCongruenceAnalysisItemValuesArray);
+				cnt += this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, selectedCongruenceAnalysisItemValuesArray);
 				this.loadCongruenceAnalysisPointPair(congruenceAnalysisTreeItemValue, selectedCongruenceAnalysisItemValuesArray);
 			}
 			break;
@@ -4571,7 +4577,7 @@ public class SQLManager {
 					}
 				}
 				selectedObservationItemValuesArray = selectedObservationItemValues.toArray(new ObservationTreeItemValue[selectedObservationItemValues.size()]);
-				this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, selectedObservationItemValuesArray);
+				cnt += this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, selectedObservationItemValuesArray);
 				if (TreeItemType.isObservationTypeLeaf(treeItemType))
 					this.loadObservations(observationItemValue, selectedObservationItemValuesArray);
 				else if (TreeItemType.isGNSSObservationTypeLeaf(treeItemType))
@@ -4595,7 +4601,7 @@ public class SQLManager {
 					}
 				}
 				selectedVerticalDeflectionItemValuesArray = selectedVerticalDeflectionItemValues.toArray(new VerticalDeflectionTreeItemValue[selectedVerticalDeflectionItemValues.size()]);
-				this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, selectedVerticalDeflectionItemValuesArray);
+				cnt += this.scopedSearchAndReplacePointNames(scopeType, searchRegex, replaceRegex, selectedVerticalDeflectionItemValuesArray);
 				this.loadVerticalDeflections(verticalDeflectionItemValue, selectedVerticalDeflectionItemValuesArray);
 			}
 			break;
@@ -4603,13 +4609,16 @@ public class SQLManager {
 		default:
 			break;
 		}
+		return cnt;
 	}
 
-	private void scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, VerticalDeflectionTreeItemValue... selectedTreeItemValues) throws SQLException {
+	private int scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, VerticalDeflectionTreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
-			return;
+			return 0;
 		
 		String sql = "SELECT \"name\" FROM \"VerticalDeflectionApriori\" WHERE REGEXP_MATCHES(\"name\", ?) AND \"group_id\" = ?";
+		
+		int cnt = 0;
 		for (VerticalDeflectionTreeItemValue verticalDeflectionTreeItemValue : selectedTreeItemValues) {
 			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 			int idx = 1;
@@ -4625,16 +4634,19 @@ public class SQLManager {
 				if (this.isNameCollisions(verticalDeflectionTreeItemValue, newName))
 					continue;
 				
-				this.replacePointName(verticalDeflectionTreeItemValue, oldName, newName);
+				cnt += this.replacePointName(verticalDeflectionTreeItemValue, oldName, newName);
 			}
 		}
+		return cnt;
 	}
 	
-	private void scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, PointTreeItemValue... selectedTreeItemValues) throws SQLException {
+	private int scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, PointTreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
-			return;
+			return 0;
 		
 		String sql = "SELECT \"name\" FROM \"PointApriori\" WHERE REGEXP_MATCHES(\"name\", ?) AND \"group_id\" = ?";
+		
+		int cnt = 0;
 		for (PointTreeItemValue pointTreeItemValue : selectedTreeItemValues) {
 			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 			int idx = 1;
@@ -4650,14 +4662,15 @@ public class SQLManager {
 				if (this.isNameCollisions(pointTreeItemValue, newName))
 					continue;
 				
-				this.replacePointName(pointTreeItemValue, oldName, newName);
+				cnt += this.replacePointName(pointTreeItemValue, oldName, newName);
 			}
 		}
+		return cnt;
 	}
 	
-	private void scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, ObservationTreeItemValue... selectedTreeItemValues) throws SQLException {
+	private int scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, ObservationTreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
-			return;
+			return 0;
 		
 		String sql = "SELECT "
 				+ "DISTINCT \"end_point_name\" AS \"name\" FROM \"%s\" JOIN \"ObservationGroup\" ON \"group_id\" = \"ObservationGroup\".\"id\" WHERE \"reference_epoch\" IN (?,?) AND REGEXP_MATCHES(\"end_point_name\", ?) AND \"group_id\" = ? "
@@ -4665,6 +4678,7 @@ public class SQLManager {
 				+ "SELECT "
 				+ "DISTINCT \"start_point_name\" AS \"name\" FROM \"%s\" JOIN \"ObservationGroup\" ON \"group_id\" = \"ObservationGroup\".\"id\" WHERE \"reference_epoch\" IN (?,?) AND REGEXP_MATCHES(\"start_point_name\", ?) AND \"group_id\" = ?";
 		
+		int cnt = 0;
 		for (ObservationTreeItemValue observationTreeItemValue : selectedTreeItemValues) {
 			String tableName = TreeItemType.isObservationTypeLeaf(observationTreeItemValue.getItemType()) ? "ObservationApriori" : "GNSSObservationApriori";
 			PreparedStatement stmt = this.dataBase.getPreparedStatement(String.format(sql, tableName, tableName));
@@ -4690,14 +4704,15 @@ public class SQLManager {
 				if (this.isNameCollisions(observationTreeItemValue, oldName, newName))
 					continue;
 				
-				this.replacePointName(observationTreeItemValue, oldName, newName);
+				cnt += this.replacePointName(observationTreeItemValue, oldName, newName);
 			}
 		}
+		return cnt;
 	}
 	
-	private void scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, CongruenceAnalysisTreeItemValue... selectedTreeItemValues) throws SQLException {
+	private int scopedSearchAndReplacePointNames(ScopeType scopeType, String searchRegex, String replaceRegex, CongruenceAnalysisTreeItemValue... selectedTreeItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
-			return;
+			return 0;
 		
 		String sql = "SELECT "
 				+ "DISTINCT \"end_point_name\" AS \"name\" FROM \"CongruenceAnalysisPointPairApriori\" WHERE REGEXP_MATCHES(\"end_point_name\", ?) AND \"group_id\" = ? "
@@ -4705,6 +4720,7 @@ public class SQLManager {
 				+ "SELECT "
 				+ "DISTINCT \"start_point_name\" AS \"name\" FROM \"CongruenceAnalysisPointPairApriori\" WHERE REGEXP_MATCHES(\"start_point_name\", ?) AND \"group_id\" = ?";
 		
+		int cnt = 0;
 		for (CongruenceAnalysisTreeItemValue congruenceAnalysisTreeItemValue : selectedTreeItemValues) {
 			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 			int idx = 1;
@@ -4722,36 +4738,38 @@ public class SQLManager {
 				if (this.isNameCollisions(congruenceAnalysisTreeItemValue, oldName, newName))
 					continue;
 				
-				this.replacePointName(congruenceAnalysisTreeItemValue, oldName, newName);
+				cnt += this.replacePointName(congruenceAnalysisTreeItemValue, oldName, newName);
 			}
 		}
+		return cnt;
 	}
 	
-	private void replacePointName(VerticalDeflectionTreeItemValue verticalDeflectionTreeItemValue, String oldName, String newName) throws SQLException {
+	private int replacePointName(VerticalDeflectionTreeItemValue verticalDeflectionTreeItemValue, String oldName, String newName) throws SQLException {
 		String sql = "UPDATE \"VerticalDeflectionApriori\" SET \"name\" = ? WHERE \"name\" = ? AND \"group_id\" = ?";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		int idx = 1;
 		stmt.setString(idx++, newName);
 		stmt.setString(idx++, oldName);
 		stmt.setInt(idx++, verticalDeflectionTreeItemValue.getGroupId());
-		stmt.execute();
+		return stmt.executeUpdate();
 	}
 	
-	private void replacePointName(PointTreeItemValue pointTreeItemValue, String oldName, String newName) throws SQLException {
+	private int replacePointName(PointTreeItemValue pointTreeItemValue, String oldName, String newName) throws SQLException {
 		String sql = "UPDATE \"PointApriori\" SET \"name\" = ? WHERE \"name\" = ? AND \"group_id\" = ?";
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		int idx = 1;
 		stmt.setString(idx++, newName);
 		stmt.setString(idx++, oldName);
 		stmt.setInt(idx++, pointTreeItemValue.getGroupId());
-		stmt.execute();
+		return stmt.executeUpdate();
 	}
 	
-	private void replacePointName(ObservationTreeItemValue observationTreeItemValue, String oldName, String newName) throws SQLException {
+	private int replacePointName(ObservationTreeItemValue observationTreeItemValue, String oldName, String newName) throws SQLException {
 		String sqls[] = new String[] {
 				"UPDATE \"%s\" SET \"start_point_name\" = ? WHERE \"start_point_name\" = ? AND \"group_id\" = ?",
 				"UPDATE \"%s\" SET \"end_point_name\"   = ? WHERE \"end_point_name\"   = ? AND \"group_id\" = ?"
 		};
+		int cnt = 0;
 		String tableName = TreeItemType.isObservationTypeLeaf(observationTreeItemValue.getItemType()) ? "ObservationApriori" : "GNSSObservationApriori";
 		for (String sql : sqls) {
 			PreparedStatement stmt = this.dataBase.getPreparedStatement(String.format(sql, tableName));
@@ -4759,23 +4777,26 @@ public class SQLManager {
 			stmt.setString(idx++, newName);
 			stmt.setString(idx++, oldName);
 			stmt.setInt(idx++, observationTreeItemValue.getGroupId());
-			stmt.execute();
+			cnt += stmt.executeUpdate();
 		}
+		return cnt;
 	}
 	
-	private void replacePointName(CongruenceAnalysisTreeItemValue congruenceAnalysisTreeItemValue, String oldName, String newName) throws SQLException {
+	private int replacePointName(CongruenceAnalysisTreeItemValue congruenceAnalysisTreeItemValue, String oldName, String newName) throws SQLException {
 		String sqls[] = new String[] {
 				"UPDATE \"CongruenceAnalysisPointPairApriori\" SET \"start_point_name\" = ? WHERE \"start_point_name\" = ? AND \"group_id\" = ?",
 				"UPDATE \"CongruenceAnalysisPointPairApriori\" SET \"end_point_name\"   = ? WHERE \"end_point_name\"   = ? AND \"group_id\" = ?"
 		};
+		int cnt = 0;
 		for (String sql : sqls) {
 			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 			int idx = 1;
 			stmt.setString(idx++, newName);
 			stmt.setString(idx++, oldName);
 			stmt.setInt(idx++, congruenceAnalysisTreeItemValue.getGroupId());
-			stmt.execute();
+			cnt += stmt.executeUpdate();
 		}
+		return cnt;
 	}
 	
 	private boolean isNameCollisions(VerticalDeflectionTreeItemValue verticalDeflectionTreeItemValue, String proposedName) throws SQLException {
