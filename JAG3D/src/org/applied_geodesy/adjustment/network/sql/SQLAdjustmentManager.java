@@ -545,44 +545,17 @@ public class SQLAdjustmentManager {
 	}
 	
 	private void addVerticalDeflections() throws SQLException {
-//		String sql = "SELECT \"name\", \"y0\", \"x0\", \"VerticalDeflectionGroup\".\"type\" AS \"vertical_deflection_type\", "
-//				+ "IFNULL(CASEWHEN( \"sigma_y0\" > 0, \"sigma_y0\", (SELECT \"value\" FROM \"VerticalDeflectionGroupUncertainty\" WHERE \"group_id\" = \"VerticalDeflectionApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_y0\", "
-//				+ "IFNULL(CASEWHEN( \"sigma_x0\" > 0, \"sigma_x0\", (SELECT \"value\" FROM \"VerticalDeflectionGroupUncertainty\" WHERE \"group_id\" = \"VerticalDeflectionApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_x0\"  "
-//				+ "FROM \"VerticalDeflectionApriori\" "
-//				+ "JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" "
-//				+ "JOIN \"PointApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"VerticalDeflectionApriori\".\"name\" "
-//				+ "JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" "
-//				+ "WHERE \"VerticalDeflectionGroup\".\"enable\" = TRUE AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
-//				+ "AND \"PointGroup\".\"enable\" = TRUE AND \"PointApriori\".\"enable\" = TRUE AND \"PointGroup\".\"dimension\" IN (1, 3) " // \"PointGroup\".\"dimension\" = 3 
-//				+ "ORDER BY \"VerticalDeflectionGroup\".\"id\" ASC, \"VerticalDeflectionApriori\".\"id\" ASC";
-//
-//		int idx = 1;
-//		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
-//
-//		stmt.setInt(idx++, VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y.getId());
-//		stmt.setDouble(idx++, DefaultUncertainty.getUncertaintyDeflectionY());
-//
-//		stmt.setInt(idx++, VerticalDeflectionGroupUncertaintyType.DEFLECTION_X.getId());
-//		stmt.setDouble(idx++, DefaultUncertainty.getUncertaintyDeflectionX());
-		
-		StringBuilder inNameArrayValues = new StringBuilder();
-		for (Point point : this.completePoints.values()) {
-			if (point.getDimension() != 2)
-				inNameArrayValues.append("?,");
-		}
-		if (!inNameArrayValues.isEmpty() && inNameArrayValues.lastIndexOf(",") >= 0)
-			inNameArrayValues.deleteCharAt(inNameArrayValues.lastIndexOf(","));
-		
 		String sql = "SELECT \"name\", \"y0\", \"x0\", \"VerticalDeflectionGroup\".\"type\" AS \"vertical_deflection_type\", "
 				+ "IFNULL(CASEWHEN( \"sigma_y0\" > 0, \"sigma_y0\", (SELECT \"value\" FROM \"VerticalDeflectionGroupUncertainty\" WHERE \"group_id\" = \"VerticalDeflectionApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_y0\", "
 				+ "IFNULL(CASEWHEN( \"sigma_x0\" > 0, \"sigma_x0\", (SELECT \"value\" FROM \"VerticalDeflectionGroupUncertainty\" WHERE \"group_id\" = \"VerticalDeflectionApriori\".\"group_id\" AND \"type\" = ?)), ?) AS \"sigma_x0\"  "
 				+ "FROM \"VerticalDeflectionApriori\" "
 				+ "JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" "
-				+ "WHERE \"VerticalDeflectionGroup\".\"enable\" = TRUE "
-				+ "AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
-				+ "AND \"VerticalDeflectionApriori\".\"name\" IN (" + inNameArrayValues + ") "
+				+ "JOIN \"PointApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"PointApriori\".\"name\" "
+				+ "JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" "
+				+ "WHERE \"VerticalDeflectionGroup\".\"enable\" = TRUE AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
+				+ "AND \"PointGroup\".\"enable\" = TRUE AND \"PointApriori\".\"enable\" = TRUE AND \"PointGroup\".\"dimension\" IN (1, 3) " // \"PointGroup\".\"dimension\" = 3 
 				+ "ORDER BY \"VerticalDeflectionGroup\".\"id\" ASC, \"VerticalDeflectionApriori\".\"id\" ASC";
-		
+
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
@@ -591,12 +564,7 @@ public class SQLAdjustmentManager {
 
 		stmt.setInt(idx++, VerticalDeflectionGroupUncertaintyType.DEFLECTION_X.getId());
 		stmt.setDouble(idx++, DefaultUncertainty.getUncertaintyDeflectionX());
-		
-		for (Point point : this.completePoints.values()) {
-			if (point.getDimension() != 2)
-				stmt.setString(idx++, point.getName());
-		}
-		
+
 		ResultSet rs = stmt.executeQuery();
 		while (rs.next()) {
 			VerticalDeflectionType type = VerticalDeflectionType.getEnumByValue(rs.getInt("vertical_deflection_type"));
