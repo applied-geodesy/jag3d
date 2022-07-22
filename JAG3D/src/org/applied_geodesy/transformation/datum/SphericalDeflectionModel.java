@@ -65,7 +65,7 @@ public class SphericalDeflectionModel {
 	    this.X0 = (N0 + h0) * r31;
 	    this.Y0 = (N0 + h0) * r32;
 	    this.Z0 = (Math.pow(b/a, 2) * N0 + h0) * r33;
-	    
+	    // Abstand vom Ursprung zur Tangentialebene im Fundamentalpunkt
 	    this.d0 = r31 * this.X0 + r32 * this.Y0 + r33 * this.Z0;
 	}
 	
@@ -120,16 +120,27 @@ public class SphericalDeflectionModel {
 		double rx =  Math.asin(dy);
 		double ry = -Math.atan2(dx, dz);
 		
-		// Abstand zw. Ellipsoid und Ebene
+		// Abstand zw. Ellipsoid und Ebene - Hofmann-Wellenhof et al. 1994, Gl (3.1)
 		double surfX = geographicParameters.N * sx;
 	    double surfY = geographicParameters.N * sy;
 	    double surfZ = (Math.pow(b/a, 2) * geographicParameters.N) * sz;
 
-	    double h = (this.d0 - r31 * surfX - r32 * surfY - r33 * surfZ) / (r31 * sx + r32 * sy + r33 * sz);
+//	    // Abstand zwischen Punkt auf Ellipsoid und Ebene; entlang des geoz. Richtungsvektors des Punktes
+//	    double h = (this.d0 - r31 * surfX - r32 * surfY - r33 * surfZ) / (r31 * sx + r32 * sy + r33 * sz);
+	    // Abstand zwischen Punkt auf Ellipsoid und Ebene; entlang der Normalen des tangentialen Systems
+	    double h = (this.d0 - r31 * surfX - r32 * surfY - r33 * surfZ);
 
 	    point.getSphericalDeflectionParameter().setSphericalDeflectionParameter(rx, ry, h);
 	}
 	
+	/**
+	 * Bestimmt aus den kartesitschen Koordinaten east/north die zugehoerigen
+	 * geographischen Koordinaten, die ellips. Hoehe und den Normalkruemmungsradius
+	 * @param east
+	 * @param north
+	 * @param up
+	 * @return
+	 */
 	private GeographicParameters getGeographicParameters(double east, double north, double up) {
 		double a  = this.reductions.getEllipsoid().getMajorAxis();
 		double b  = this.reductions.getEllipsoid().getMinorAxis();
@@ -149,7 +160,7 @@ public class SphericalDeflectionModel {
 	    double r32 = R[2][1];
 	    double r33 = R[2][2];
 
-		// global XYZ from local ENU -> XYZ = P0 * R'*ENU
+		// global XYZ from local ENU -> XYZ = P0 * R'*ENU - Hofmann-Wellenhof et al. (1994), S. 32f
 		double X = this.X0 + r11 * east + r21 * north + r31 * up;
 		double Y = this.Y0 + r12 * east + r22 * north + r32 * up;
 		double Z = this.Z0 + r13 * east + r23 * north + r33 * up;
