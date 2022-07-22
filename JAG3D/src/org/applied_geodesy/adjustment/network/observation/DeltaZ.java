@@ -33,16 +33,11 @@ public class DeltaZ extends Observation {
 	public DeltaZ(int id, Point startPoint, Point endPoint, double startPointHeight, double endPointHeight, double observation, double sigma, double distanceForUncertaintyModel) {
 		super(id, startPoint, endPoint, startPointHeight, endPointHeight, observation, sigma, distanceForUncertaintyModel);
 	}
-
+		
 	@Override
 	public double diffXs() {
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
-
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
-			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
-			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
-		}
 
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
@@ -55,10 +50,6 @@ public class DeltaZ extends Observation {
 	public double diffYs() {	
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
-			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
-		}
-
 		double srxs = Math.sin(rxs);
 		double scale = this.scale.getValue();
 
@@ -70,17 +61,13 @@ public class DeltaZ extends Observation {
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
-			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
-			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
-		}
-
 		double crys = Math.cos(rys);
 		double crxs = Math.cos(rxs);
 		double scale = this.scale.getValue();
 
 		return -(crxs*crys)/scale;
 	}
+
 
 	@Override
 	public double diffVerticalDeflectionXs() {
@@ -90,11 +77,6 @@ public class DeltaZ extends Observation {
 
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
-
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
-			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
-			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
-		}
 
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
@@ -114,11 +96,6 @@ public class DeltaZ extends Observation {
 		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
 		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
 
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
-			rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
-			rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
-		}
-
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
 		double crys = Math.cos(rys);
@@ -126,6 +103,40 @@ public class DeltaZ extends Observation {
 		double scale = this.scale.getValue();
 
 		return (crxs*(xs*crys + zs*srys))/scale;
+	}
+	
+	@Override
+	public double diffXe() {
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+
+		double srye = Math.sin(rye);
+		double crxe = Math.cos(rxe);
+		double scale = this.scale.getValue();
+
+		return -(crxe*srye)/scale;
+	}
+	
+	@Override
+	public double diffYe() {	
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+
+		double srxe = Math.sin(rxe);
+		double scale = this.scale.getValue();
+
+		return srxe/scale;
+	}
+	
+	@Override
+	public double diffZe() {
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+
+		double crye = Math.cos(rye);
+		double crxe = Math.cos(rxe);
+		double scale = this.scale.getValue();
+
+		return (crxe*crye)/scale;
 	}
 
 	@Override
@@ -188,49 +199,24 @@ public class DeltaZ extends Observation {
 		double ih = this.getStartPointHeight();
 		double th = this.getEndPointHeight();
 
-		if (ih != 0 || th != 0) {
-			double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
-			double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
-
-			double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
-			double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
-
-			if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
-				rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
-				rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
-
-				rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
-				rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
-			}
-
-			double srxs = Math.sin(rxs);
-			double srys = Math.sin(rys);
-			double crxs = Math.cos(rxs);
-			double crys = Math.cos(rys);
-
-			double crxe = Math.cos(rxe);
-			double crye = Math.cos(rye);
-			double srye = Math.sin(rye);
-			double srxe = Math.sin(rxe);
-
-			// Rs' * [0 0 ih]'
-			double dxs = -crxs*srys * ih;
-			double dys =  srxs      * ih;
-			double dzs =  crxs*crys * ih;
-
-			// Re' * [0 0 th]'
-			double dxe = -crxe*srye * th;
-			double dye =  srxe      * th;
-			double dze =  crxe*crye * th;
-
-			xs = xs + dxs;
-			ys = ys + dys;
-			zs = zs + dzs;
-
-			xe = xe + dxe;
-			ye = ye + dye;
-			ze = ze + dze;
-		}
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
+		
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+		
+		double srxs = Math.sin(rxs);
+		double srys = Math.sin(rys);
+		double crxs = Math.cos(rxs);
+		double crys = Math.cos(rys);
+		
+		double crxe = Math.cos(rxe);
+		double crye = Math.cos(rye);
+		double srye = Math.sin(rye);
+		double srxe = Math.sin(rxe);
+		
+		double ws = -xs*crxs*srys + ys*srxs + zs*crxs*crys - ih;
+		double we = -xe*crxe*srye + ye*srxe + ze*crxe*crye - th;
 		
 		double dN = 0;
 		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
@@ -240,7 +226,7 @@ public class DeltaZ extends Observation {
 		}
 
 		double scale = this.scale.getValue();
-		double dh = ze - zs + dN;
+		double dh = we - ws + dN;
 		return -dh/(scale*scale);
 	}
 
@@ -266,59 +252,35 @@ public class DeltaZ extends Observation {
 		double ih = this.getStartPointHeight();
 		double th = this.getEndPointHeight();
 
-		if (ih != 0 || th != 0) {
-			double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
-			double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
-
-			double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
-			double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
-
-			if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
-				rxs += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
-				rys += this.getStartPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
-
-				rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
-				rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
-			}
-
-			double srxs = Math.sin(rxs);
-			double srys = Math.sin(rys);
-			double crxs = Math.cos(rxs);
-			double crys = Math.cos(rys);
-
-			double crxe = Math.cos(rxe);
-			double crye = Math.cos(rye);
-			double srye = Math.sin(rye);
-			double srxe = Math.sin(rxe);
-
-			// Rs' * [0 0 ih]'
-			double dxs = -crxs*srys * ih;
-			double dys =  srxs      * ih;
-			double dzs =  crxs*crys * ih;
-
-			// Re' * [0 0 th]'
-			double dxe = -crxe*srye * th;
-			double dye =  srxe      * th;
-			double dze =  crxe*crye * th;
-
-			xs = xs + dxs;
-			ys = ys + dys;
-			zs = zs + dzs;
-
-			xe = xe + dxe;
-			ye = ye + dye;
-			ze = ze + dze;
-		}
-
+		double rxs = this.getStartPoint().getVerticalDeflectionX().getValue();
+		double rys = this.getStartPoint().getVerticalDeflectionY().getValue();
+		
+		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
+		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
+		
+		double srxs = Math.sin(rxs);
+		double srys = Math.sin(rys);
+		double crxs = Math.cos(rxs);
+		double crys = Math.cos(rys);
+		
+		double crxe = Math.cos(rxe);
+		double crye = Math.cos(rye);
+		double srye = Math.sin(rye);
+		double srxe = Math.sin(rxe);
+		
+		double ws = -xs*crxs*srys + ys*srxs + zs*crxs*crys - ih;
+		double we = -xe*crxe*srye + ye*srxe + ze*crxe*crye - th;
+		
 		double dN = 0;
 		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
 			double hs = this.getStartPoint().getSphericalDeflectionParameter().getFrameIntersectionHeight();
 			double he = this.getEndPoint().getSphericalDeflectionParameter().getFrameIntersectionHeight();
 			dN = he - hs;
 		}
-		
+
 		double scale = this.scale.getValue();
-		double dh = ze - zs + dN;
+//		double dh = ze - zs + dN;
+		double dh = we - ws + dN;
 		return dh / scale;
 	}
 
