@@ -148,11 +148,6 @@ public class DeltaZ extends Observation {
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
 
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
-			rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
-			rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
-		}
-
 		double crxe = Math.cos(rxe);
 		double crye = Math.cos(rye);
 		double srye = Math.sin(rye);
@@ -170,11 +165,6 @@ public class DeltaZ extends Observation {
 
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
-
-		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
-			rxe += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionX();
-			rye += this.getEndPoint().getSphericalDeflectionParameter().getSphericalDeflectionY();
-		}
 
 		double crxe = Math.cos(rxe);
 		double crye = Math.cos(rye);
@@ -204,12 +194,12 @@ public class DeltaZ extends Observation {
 		
 		double rxe = this.getEndPoint().getVerticalDeflectionX().getValue();
 		double rye = this.getEndPoint().getVerticalDeflectionY().getValue();
-		
+
 		double srxs = Math.sin(rxs);
 		double srys = Math.sin(rys);
 		double crxs = Math.cos(rxs);
 		double crys = Math.cos(rys);
-		
+
 		double crxe = Math.cos(rxe);
 		double crye = Math.cos(rye);
 		double srye = Math.sin(rye);
@@ -283,51 +273,6 @@ public class DeltaZ extends Observation {
 		double dh = we - ws + dN;
 		return dh / scale;
 	}
-
-//	private double getApproximatedUndulationDifferenceByAngles(double rxs, double rys, double rxe, double rye) {
-//		Reduction reductions = this.getReductions();
-//		double z0 = reductions.getPivotPoint().getZ0();
-//		double R0 = reductions.getEarthRadius();
-//		double h0 = reductions.getReferenceHeight();
-//		double rs = Math.hypot(rxs, rys);
-//		double re = Math.hypot(rxe, rye);	
-//		double R = R0 + h0 - z0;
-//	
-//		double Ns = R / Math.cos(rs) - R0;
-//		double Ne = R / Math.cos(re) - R0;
-//		
-//		double dist2Ds = R * rs;
-//		double dist2De = R * re;
-//
-//		double Ns = Math.hypot(R, dist2Ds) - R0;
-//		double Ne = Math.hypot(R, dist2De) - R0;
-//		
-//		return Ne - Ns;
-//	}
-//	
-//	private double getApproximatedUndulationDifference(double xs, double ys, double xe, double ye) {
-//		if (this.getReductions() == null || this.getReductions().getProjectionType() != ProjectionType.LOCAL_ELLIPSOIDAL)
-//			return 0.0;
-//		
-//		// Neitzel/Petrovic (2004): Ein verallgemeinertes Feldverfahren zur Überpruefung von Nivelliergeraeten, Gls. (18),(19) 
-//		// N = SQRT(R*R - dist2D*dist2D) - R   bzw. N = dist2D * dist2D / (2*R)
-//		Reduction reductions = this.getReductions();
-//		double x0 = reductions.getPivotPoint().getX0();
-//		double y0 = reductions.getPivotPoint().getY0();
-//		double z0 = reductions.getPivotPoint().getZ0();
-//		double R0 = reductions.getEarthRadius();
-//		double h0 = reductions.getReferenceHeight();
-//
-//		double R = R0 + h0 - z0;
-//
-//		// Approx. undulation
-//		double dist2Ds = Math.hypot(xs - x0, ys - y0);
-//		double dist2De = Math.hypot(xe - x0, ye - y0);
-//		double Ns = Math.hypot(R, dist2Ds) - R0;
-//		double Ne = Math.hypot(R, dist2De) - R0;
-//
-//		return Ne - Ns;
-//	}
 	
 	@Override
 	public ObservationType getObservationType() {
