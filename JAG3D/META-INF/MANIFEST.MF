@@ -6,8 +6,8 @@ Class-Path:
   lib/core-1.1.2.jar 
   lib/mtj-1.0.4.jar    
   lib/freemarker-2.3.31.jar 
-  lib/hsqldb-2.6.1.jar 
-  lib/sqltool-2.6.1.jar 
+  lib/hsqldb-2.7.0.jar 
+  lib/sqltool-2.7.0.jar 
   lib/jdistlib-0.4.5-bin.jar 
   lib/tablelayout.jar 
   lib/jlatexmath-1.0.7.jar 
