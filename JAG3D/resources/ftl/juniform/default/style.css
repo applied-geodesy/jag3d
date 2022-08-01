@@ -50,11 +50,11 @@ table thead th span {
     font-weight: lighter;
     font-size: 0.75em;
 }
-table thead th span.unit:before {
-    content: "[";
+table thead th span.unit:not(:empty):before {
+    content: " in ";
 }
-table thead th span.unit:after {
-	content: "]";
+table thead th span.unit:not(:empty):after {
+	content: "";
 }	
 table thead th:first-child {
     border-top-left-radius: 7px;

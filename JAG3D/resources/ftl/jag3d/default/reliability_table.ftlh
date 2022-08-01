@@ -13,8 +13,8 @@
 				<caption><#outputformat "plainText">${table_caption_map['redundancy']}</#outputformat></caption>
 				<#assign group           = reliability_summary.redundancy>
 				<#assign df_format       = df_statistic>
-				<#assign label_value     = "r<sub>min</sub> [${unit_abbr_percentage}]">
-				<#assign label_avg_value = "r<sub>avg</sub> [${unit_abbr_percentage}]">
+				<#assign label_value     = "r<sub>min</sub><span class=\"unit\">${unit_abbr_percentage}</span>">
+				<#assign label_avg_value = "r<sub>avg</sub><span class=\"unit\">${unit_abbr_percentage}</span>">
 				<#include "reliability_thead.ftlh" parse=true>
 				
 				<#list observation_types as observation_type>
@@ -47,8 +47,8 @@
 				<caption><#outputformat "plainText">${table_caption_map['influence_on_position']}</#outputformat></caption>
 				<#assign group           = reliability_summary.influence_on_position>
 				<#assign df_format       = df_length_residual>
-				<#assign label_value     = "EP<sub>max</sub> [${unit_abbr_length_residual}]">
-				<#assign label_avg_value = "EP<sub>avg</sub> [${unit_abbr_length_residual}]">
+				<#assign label_value     = "EP<sub>max</sub><span class=\"unit\">${unit_abbr_length_residual}</span>">
+				<#assign label_avg_value = "EP<sub>avg</sub><span class=\"unit\">${unit_abbr_length_residual}</span>">
 				<#include "reliability_thead.ftlh" parse=true>
 				
 				<#list observation_types as observation_type>

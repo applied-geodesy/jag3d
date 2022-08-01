@@ -67,13 +67,13 @@
 					</#if>
 						
 					<ul>
-						<#if (projection_type != 'LOCAL_ELLIPSOIDAL' && reduction_earth_curvature?? && reduction_earth_curvature || reduction_height?? && reduction_height || reduction_distance?? && reduction_distance || reduction_direction?? && reduction_direction) && projection_earth_radius??><li>Earth radius: R<sub>0</sub> = ${projection_earth_radius?string[df_length]} ${unit_abbr_length}</li></#if>
-						<#if (reduction_height?? && reduction_height && projection_type != 'LOCAL_ELLIPSOIDAL') && projection_reference_height??><li>Reference height: h<sub>0</sub> = ${projection_reference_height?string[df_length]} ${unit_abbr_length}</li></#if>
+						<#if (projection_type != 'LOCAL_ELLIPSOIDAL' && reduction_earth_curvature?? && reduction_earth_curvature || reduction_height?? && reduction_height || reduction_distance?? && reduction_distance || reduction_direction?? && reduction_direction) && projection_earth_radius??><li>Earth radius: R<sub>0</sub> = ${projection_earth_radius?string[df_length]}&nbsp;${unit_abbr_length}</li></#if>
+						<#if (reduction_height?? && reduction_height && projection_type != 'LOCAL_ELLIPSOIDAL') && projection_reference_height??><li>Reference height: h<sub>0</sub> = ${projection_reference_height?string[df_length]}&nbsp;${unit_abbr_length}</li></#if>
 						
 						<#if projection_type == 'LOCAL_ELLIPSOIDAL'>
-							<#if projection_principal_point_x0?? && projection_principal_point_y0?? && projection_principal_point_z0??><li>Local principal point: y<sub>0</sub> = ${projection_principal_point_y0?string[df_length]} ${unit_abbr_length}, x<sub>0</sub> = ${projection_principal_point_x0?string[df_length]} ${unit_abbr_length}, z<sub>0</sub> = ${projection_principal_point_z0?string[df_length]} ${unit_abbr_length}</li></#if>
-							<#if projection_reference_latitude?? && projection_reference_longitude?? && projection_reference_height??><li>Global principal point: &phi;<sub>0</sub> = ${projection_reference_latitude?string[df_angle]} ${unit_abbr_angle}, &lambda;<sub>0</sub> = ${projection_reference_longitude?string[df_angle]} ${unit_abbr_angle}, h<sub>0</sub> = ${projection_reference_height?string[df_length]} ${unit_abbr_length}</li></#if>
-							<#if projection_major_axis?? && projection_minor_axis??><li>Reference ellipsoid: a = ${projection_major_axis?string[df_length]} ${unit_abbr_length}, b = ${projection_minor_axis?string[df_length]} ${unit_abbr_length}</li></#if>
+							<#if projection_principal_point_x0?? && projection_principal_point_y0?? && projection_principal_point_z0??><li>Local principal point: y<sub>0</sub> = ${projection_principal_point_y0?string[df_length]}&nbsp;${unit_abbr_length}, x<sub>0</sub> = ${projection_principal_point_x0?string[df_length]}&nbsp;${unit_abbr_length}, z<sub>0</sub> = ${projection_principal_point_z0?string[df_length]}&nbsp;${unit_abbr_length}</li></#if>
+							<#if projection_reference_latitude?? && projection_reference_longitude?? && projection_reference_height??><li>Global principal point: &phi;<sub>0</sub> = ${projection_reference_latitude?string[df_angle]}&nbsp;${unit_abbr_angle}, &lambda;<sub>0</sub> = ${projection_reference_longitude?string[df_angle]}&nbsp;${unit_abbr_angle}, h<sub>0</sub> = ${projection_reference_height?string[df_length]}&nbsp;${unit_abbr_length}</li></#if>
+							<#if projection_major_axis?? && projection_minor_axis??><li>Reference ellipsoid: a = ${projection_major_axis?string[df_length]}&nbsp;${unit_abbr_length}, b = ${projection_minor_axis?string[df_length]}&nbsp;${unit_abbr_length}</li></#if>
 						</#if>
 
 						<#if reduction_distance?? && reduction_distance && (projection_type == 'GAUSS_KRUEGER' || projection_type == 'UTM')><li>Distance reduction</li></#if>
@@ -85,8 +85,8 @@
 				</dd>
 			</#if>
 
-			<dt><#outputformat "plainText">Probability Value &alpha; [${unit_abbr_percentage}]</#outputformat></dt><dd>${test_statistic_probability_value?string[df_percentage]}</dd>
-			<dt><#outputformat "plainText">Test Power (1-&beta;) [${unit_abbr_percentage}]</#outputformat></dt><dd>${test_statistic_power_of_test?string[df_percentage]}</dd>
+			<dt><#outputformat "plainText">Probability Value &alpha;</#outputformat></dt><dd>${test_statistic_probability_value?string[df_percentage]}&nbsp;${unit_abbr_percentage}</dd>
+			<dt><#outputformat "plainText">Test Power (1-&beta;)</#outputformat></dt><dd>${test_statistic_power_of_test?string[df_percentage]}&nbsp;${unit_abbr_percentage}</dd>
 		
 			<dt>Description</dt>
 			<dd><pre>${project_description}</pre></dd>
