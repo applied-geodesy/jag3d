@@ -182,6 +182,9 @@ public class UIObservationPropertiesPane {
 	private UncertaintyTextField squareRootDistanceDependentUncertaintyField;
 	private UncertaintyTextField distanceDependentUncertaintyField;
 	
+	private Label selectionInfoLabel = new Label();
+	private TitledPane informationTitledPane;
+	
 	private RadioButton referenceEpochRadioButton;
 	private RadioButton controlEpochRadioButton;
 	
@@ -216,15 +219,34 @@ public class UIObservationPropertiesPane {
 		}
 	}
 	
-	public void setTreeItemValue(ObservationTreeItemValue... selectedObservationItemValues) {
+	public void setTreeItemValue(String name, ObservationTreeItemValue... selectedObservationItemValues) {
 		if (this.selectedObservationItemValues != selectedObservationItemValues) {
 			this.reset();
 			this.selectedObservationItemValues = selectedObservationItemValues;
 		}
+		this.setGroupName(name, this.selectedObservationItemValues != null ? this.selectedObservationItemValues.length : 0);
 	}
 
 	public Node getNode() {
 		return this.propertiesNode;
+	}
+	
+	private void setGroupName(String name, int cnt) {
+		if (this.informationTitledPane != null) {
+			String defaultTitle = this.i18n.getString("UIObservationPropertiesPane.information.title", "Properties");
+			String title = name.isBlank() ? defaultTitle : String.format(Locale.ENGLISH, "%s: %s", defaultTitle, name);
+			if (!this.informationTitledPane.getText().equals(title))
+				this.informationTitledPane.setText(title);
+		}
+		
+		if (this.selectionInfoLabel != null) {
+			String label = String.format(
+					Locale.ENGLISH, 
+					this.i18n.getString("UIObservationPropertiesPane.information.selection.label", "Selection: %d group(s) selected\u2026"), 
+					cnt);
+			if (!this.selectionInfoLabel.getText().equals(label))
+				this.selectionInfoLabel.setText(label);
+		}
 	}
 	
 	private void reset() {
@@ -234,8 +256,6 @@ public class UIObservationPropertiesPane {
 		
 		// set focus to panel to commit text field values and to force db transaction
 		UITreeBuilder.getInstance().getTree().requestFocus();
-//		if (this.propertiesNode != null)
-//			this.propertiesNode.requestFocus();
 		
 		double offset      = 0.0;
 		double scale       = 1.0;
@@ -656,18 +676,29 @@ public class UIObservationPropertiesPane {
 		this.lineChart.setAnimated(false);
 		this.lineChart.setPadding(new Insets(0, 0, 0, 0));
         this.lineChart.setCreateSymbols(false);
+        this.lineChart.setMinHeight(175);
         
         this.updateUncertaintyChart(this.lineChart);
         this.updateTickLabels(this.lineChart);
 
         TitledPane uncertaintyChartTitledPane = this.createTitledPane(i18n.getString("UIObservationPropertiesPane.chart.title", "Combined Uncertainties"));
-		uncertaintyChartTitledPane.setContent(this.lineChart);
+        uncertaintyChartTitledPane.setContent(this.lineChart);
 		return uncertaintyChartTitledPane;
+	}
+	
+	private Node createInformationPane() {
+		GridPane gridPane = this.createGridPane();
+		gridPane.add(this.selectionInfoLabel, 0, 0);
+
+		this.informationTitledPane = this.createTitledPane(i18n.getString("UIObservationPropertiesPane.information.title", "Properties"));
+        this.informationTitledPane.setContent(gridPane);
+		return this.informationTitledPane;
 	}
 
 	private void init() {
 		VBox content = new VBox();
 		content.getChildren().addAll(
+				this.createInformationPane(),
 				this.createUncertaintiesPane(),
 				this.createAdditionalParametersPane(),
 				this.createCongruenceAnalysisPane(),
@@ -991,12 +1022,12 @@ public class UIObservationPropertiesPane {
 		case DIRECTION_LEAF:
 		case ZENITH_ANGLE_LEAF:
 			cellValueType = CellValueType.ANGLE_UNCERTAINTY;
-			yAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.chart.axis.y.label", "\u03C30 %s"), options.getFormatterOptions().get(CellValueType.ANGLE_UNCERTAINTY).getUnit().toFormattedAbbreviation()).trim());
+			yAxis.setLabel(String.format(Locale.ENGLISH, "%s %s", i18n.getString("UIObservationPropertiesPane.chart.axis.y.label", "\u03C30"), options.getFormatterOptions().get(CellValueType.ANGLE_UNCERTAINTY).getUnit().toFormattedAbbreviation()).trim());
 			break;
 
 		default:
 			cellValueType = CellValueType.LENGTH_UNCERTAINTY;
-			yAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.chart.axis.y.label", "\u03C30 %s"), options.getFormatterOptions().get(CellValueType.LENGTH_UNCERTAINTY).getUnit().toFormattedAbbreviation()).trim());
+			yAxis.setLabel(String.format(Locale.ENGLISH, "%s %s", i18n.getString("UIObservationPropertiesPane.chart.axis.y.label", "\u03C30"), options.getFormatterOptions().get(CellValueType.LENGTH_UNCERTAINTY).getUnit().toFormattedAbbreviation()).trim());
 			break;
 		}
 		
@@ -1023,7 +1054,7 @@ public class UIObservationPropertiesPane {
 				return null;
 			}
 		});
-		xAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.chart.axis.x.label", "d0 %s"), options.getFormatterOptions().get(CellValueType.LENGTH).getUnit().toFormattedAbbreviation()).trim());
+		xAxis.setLabel(String.format(Locale.ENGLISH, "%s %s", i18n.getString("UIObservationPropertiesPane.chart.axis.x.label", "d0"), options.getFormatterOptions().get(CellValueType.LENGTH).getUnit().toFormattedAbbreviation()).trim());
 	}
 	
 	private void updateUncertaintyChart(LineChart<Number,Number> lineChart) {

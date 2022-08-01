@@ -1371,7 +1371,7 @@ public class SQLManager {
 		
 		UIObservationPropertiesPaneBuilder propertiesPaneBuilder = UIObservationPropertiesPaneBuilder.getInstance();
 		UIObservationPropertiesPane propertiesPane = propertiesPaneBuilder.getObservationPropertiesPane(observationItemValue.getItemType());
-		propertiesPane.setTreeItemValue(selectedObservationItemValues);
+		propertiesPane.setTreeItemValue(observationItemValue.getName(), selectedObservationItemValues);
 
 		ParameterType[] parameterTypes = ObservationTreeItemValue.getParameterTypes(observationItemValue.getItemType());
 		StringBuilder inTypeArrayValues = new StringBuilder("?");
@@ -1525,7 +1525,7 @@ public class SQLManager {
 		
 		UICongruenceAnalysisPropertiesPaneBuilder propertiesPaneBuilder = UICongruenceAnalysisPropertiesPaneBuilder.getInstance();
 		UICongruenceAnalysisPropertiesPane propertiesPane = propertiesPaneBuilder.getCongruenceAnalysisPropertiesPane(congruenceAnalysisItemValue.getItemType());
-		propertiesPane.setTreeItemValue(selectedCongruenceAnalysisItemValues);
+		propertiesPane.setTreeItemValue(congruenceAnalysisItemValue.getName(), selectedCongruenceAnalysisItemValues);
 		
 		RestrictionType[] restrictionTypes = CongruenceAnalysisTreeItemValue.getRestrictionTypes(congruenceAnalysisItemValue.getItemType());
 		StringBuilder inTypeArrayValues = new StringBuilder("?");
@@ -1563,7 +1563,7 @@ public class SQLManager {
 		
 		UICongruenceAnalysisPropertiesPaneBuilder propertiesPaneBuilder = UICongruenceAnalysisPropertiesPaneBuilder.getInstance();
 		UICongruenceAnalysisPropertiesPane propertiesPane = propertiesPaneBuilder.getCongruenceAnalysisPropertiesPane(congruenceAnalysisItemValue.getItemType());
-		propertiesPane.setTreeItemValue(selectedCongruenceAnalysisItemValues);
+		propertiesPane.setTreeItemValue(congruenceAnalysisItemValue.getName(), selectedCongruenceAnalysisItemValues);
 
 		ParameterType[] parameterTypes = CongruenceAnalysisTreeItemValue.getParameterTypes(congruenceAnalysisItemValue.getItemType());
 		StringBuilder inTypeArrayValues = new StringBuilder("?");
@@ -1659,7 +1659,7 @@ public class SQLManager {
 		
 		UIObservationPropertiesPaneBuilder propertiesPaneBuilder = UIObservationPropertiesPaneBuilder.getInstance();
 		UIObservationPropertiesPane propertiesPane = propertiesPaneBuilder.getObservationPropertiesPane(observationItemValue.getItemType());
-		propertiesPane.setTreeItemValue(selectedObservationItemValues);
+		propertiesPane.setTreeItemValue(observationItemValue.getName(), selectedObservationItemValues);
 
 		boolean referenceEpoch = true;
 		String sql = "SELECT \"reference_epoch\" "
@@ -1682,7 +1682,7 @@ public class SQLManager {
 		
 		UIVerticalDeflectionPropertiesPaneBuilder propertiesPaneBuilder = UIVerticalDeflectionPropertiesPaneBuilder.getInstance();
 		UIVerticalDeflectionPropertiesPane propertiesPane = propertiesPaneBuilder.getVerticalDeflectionPropertiesPane(verticalDeflectionItemValue.getItemType());
-		propertiesPane.setTreeItemValue(selectedVerticalDeflectionItemValues);
+		propertiesPane.setTreeItemValue(verticalDeflectionItemValue.getName(), selectedVerticalDeflectionItemValues);
 
 		String sql = "SELECT \"type\", \"value\" "
 				+ "FROM \"VerticalDeflectionGroupUncertainty\" "
@@ -1887,7 +1887,7 @@ public class SQLManager {
 		
 		UIObservationPropertiesPaneBuilder propertiesPaneBuilder = UIObservationPropertiesPaneBuilder.getInstance();
 		UIObservationPropertiesPane propertiesPane = propertiesPaneBuilder.getObservationPropertiesPane(observationItemValue.getItemType());
-		propertiesPane.setTreeItemValue(selectedObservationItemValues);
+		propertiesPane.setTreeItemValue(observationItemValue.getName(), selectedObservationItemValues);
 
 		String sqlUncertainty = "SELECT \"type\", \"value\" "
 				+ "FROM \"ObservationGroupUncertainty\" "
@@ -2241,7 +2241,7 @@ public class SQLManager {
 		
 		UIPointPropertiesPaneBuilder propertiesPaneBuilder = UIPointPropertiesPaneBuilder.getInstance();
 		UIPointPropertiesPane propertiesPane = propertiesPaneBuilder.getPointPropertiesPane(pointItemValue.getItemType());
-		propertiesPane.setTreeItemValue(selectedPointItemValues);
+		propertiesPane.setTreeItemValue(pointItemValue.getName(), selectedPointItemValues);
 
 		String sqlUncertainty = "SELECT \"type\", \"value\" "
 				+ "FROM \"PointGroupUncertainty\" "
