@@ -22,6 +22,7 @@
 package org.applied_geodesy.jag3d.ui.propertiespane;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.applied_geodesy.adjustment.network.congruence.strain.RestrictionType;
@@ -147,6 +148,9 @@ public class UICongruenceAnalysisPropertiesPane {
 	private CheckBox shearYCheckBox;
 	private CheckBox shearZCheckBox;
 	
+	private Label selectionInfoLabel = new Label();
+	private TitledPane informationTitledPane;
+	
 	private Map<Object, ProgressIndicator> databaseTransactionProgressIndicators = new HashMap<Object, ProgressIndicator>(10);
 	private SequentialTransition sequentialTransition = new SequentialTransition();
 	
@@ -166,10 +170,29 @@ public class UICongruenceAnalysisPropertiesPane {
 		}
 	}
 	
-	public void setTreeItemValue(CongruenceAnalysisTreeItemValue... selectedCongruenceAnalysisItemValues) {
+	public void setTreeItemValue(String name, CongruenceAnalysisTreeItemValue... selectedCongruenceAnalysisItemValues) {
 		if (this.selectedCongruenceAnalysisItemValues != selectedCongruenceAnalysisItemValues) {
 			this.reset();
 			this.selectedCongruenceAnalysisItemValues = selectedCongruenceAnalysisItemValues;
+		}
+		this.setGroupName(name, this.selectedCongruenceAnalysisItemValues != null ? this.selectedCongruenceAnalysisItemValues.length : 0);
+	}
+	
+	private void setGroupName(String name, int cnt) {
+		if (this.informationTitledPane != null) {
+			String defaultTitle = this.i18n.getString("UICongruenceAnalysisPropertiesPane.information.title", "Properties");
+			String title = name.isBlank() ? defaultTitle : String.format(Locale.ENGLISH, "%s: %s", defaultTitle, name);
+			if (!this.informationTitledPane.getText().equals(title))
+				this.informationTitledPane.setText(title);
+		}
+		
+		if (this.selectionInfoLabel != null) {
+			String label = String.format(
+					Locale.ENGLISH, 
+					this.i18n.getString("UICongruenceAnalysisPropertiesPane.information.selection.label", "Selection: %d group(s) selected\u2026"), 
+					cnt);
+			if (!this.selectionInfoLabel.getText().equals(label))
+				this.selectionInfoLabel.setText(label);
 		}
 	}
 
@@ -183,8 +206,6 @@ public class UICongruenceAnalysisPropertiesPane {
 		
 		// set focus to panel to commit text field values and to force db transaction
 		UITreeBuilder.getInstance().getTree().requestFocus();
-//		if (this.propertiesNode != null)
-//			this.propertiesNode.requestFocus();
 		
 		this.setTranslationY(false);
 		this.setTranslationX(false);
@@ -610,6 +631,15 @@ public class UICongruenceAnalysisPropertiesPane {
 		return parametersTitledPane;
 	}
 	
+	private Node createInformationPane() {
+		GridPane gridPane = this.createGridPane();
+		gridPane.add(this.selectionInfoLabel, 0, 0);
+
+		this.informationTitledPane = this.createTitledPane(i18n.getString("UICongruenceAnalysisPropertiesPane.information.title", "Properties"));
+        this.informationTitledPane.setContent(gridPane);
+		return this.informationTitledPane;
+	}
+	
 	
 	private GridPane createGridPane() {
 		GridPane gridPane = new GridPane();
@@ -634,7 +664,7 @@ public class UICongruenceAnalysisPropertiesPane {
 		
 		RestrictionType[] parameterTypes = CongruenceAnalysisTreeItemValue.getRestrictionTypes(this.type);
 		
-		VBox content = new VBox();
+		VBox content = new VBox(this.createInformationPane());
 		
 		Node translationPane      = this.createTranslationPane(parameterTypes);
 		Node rotationPane         = this.createRotationPane(parameterTypes);

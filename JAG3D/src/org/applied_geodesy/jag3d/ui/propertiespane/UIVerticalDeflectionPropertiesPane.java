@@ -90,6 +90,9 @@ public class UIVerticalDeflectionPropertiesPane {
 	private UncertaintyTextField uncertaintyDeflectionXField;
 	private UncertaintyTextField uncertaintyDeflectionYField;
 	
+	private Label selectionInfoLabel = new Label();
+	private TitledPane informationTitledPane;
+	
 	private Map<Object, ProgressIndicator> databaseTransactionProgressIndicators = new HashMap<Object, ProgressIndicator>(10);
 	private Map<Object, Node> warningIconNodes = new HashMap<Object, Node>(10);
 	private SequentialTransition sequentialTransition = new SequentialTransition();
@@ -120,17 +123,34 @@ public class UIVerticalDeflectionPropertiesPane {
 		
 		// set focus to panel to commit text field values and to force db transaction
 		UITreeBuilder.getInstance().getTree().requestFocus();
-//		if (this.propertiesNode != null)
-//			this.propertiesNode.requestFocus();
 		
 		this.setUncertaintyDeflectionY(VerticalDeflectionTreeItemValue.getDefaultUncertainty(VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y));
 		this.setUncertaintyDeflectionX(VerticalDeflectionTreeItemValue.getDefaultUncertainty(VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y));
 	}
 	
-	public void setTreeItemValue(VerticalDeflectionTreeItemValue... selectedVerticalDeflectionItemValues) {
+	public void setTreeItemValue(String name, VerticalDeflectionTreeItemValue... selectedVerticalDeflectionItemValues) {
 		if (this.selectedVerticalDeflectionItemValues != selectedVerticalDeflectionItemValues) {
 			this.reset();
 			this.selectedVerticalDeflectionItemValues = selectedVerticalDeflectionItemValues;
+		}
+		this.setGroupName(name, this.selectedVerticalDeflectionItemValues != null ? this.selectedVerticalDeflectionItemValues.length : 0);
+	}
+	
+	private void setGroupName(String name, int cnt) {
+		if (this.informationTitledPane != null) {
+			String defaultTitle = this.i18n.getString("UIVerticalDeflectionPropertiesPane.information.title", "Properties");
+			String title = name.isBlank() ? defaultTitle : String.format(Locale.ENGLISH, "%s: %s", defaultTitle, name);
+			if (!this.informationTitledPane.getText().equals(title))
+				this.informationTitledPane.setText(title);
+		}
+		
+		if (this.selectionInfoLabel != null) {
+			String label = String.format(
+					Locale.ENGLISH, 
+					this.i18n.getString("UIVerticalDeflectionPropertiesPane.information.selection.label", "Selection: %d group(s) selected\u2026"), 
+					cnt);
+			if (!this.selectionInfoLabel.getText().equals(label))
+				this.selectionInfoLabel.setText(label);
 		}
 	}
 	
@@ -225,6 +245,15 @@ public class UIVerticalDeflectionPropertiesPane {
 		return null;
 	}
 	
+	private Node createInformationPane() {
+		GridPane gridPane = this.createGridPane();
+		gridPane.add(this.selectionInfoLabel, 0, 0);
+
+		this.informationTitledPane = this.createTitledPane(i18n.getString("UIVerticalDeflectionPropertiesPane.information.title", "Properties"));
+        this.informationTitledPane.setContent(gridPane);
+		return this.informationTitledPane;
+	}
+	
 	private ProgressIndicator createDatabaseTransactionProgressIndicator(Object userData) {
 		ProgressIndicator progressIndicator = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
 
@@ -280,8 +309,8 @@ public class UIVerticalDeflectionPropertiesPane {
 	}
 
 	private void init() {
-		VBox content = new VBox();
-
+		VBox content = new VBox(this.createInformationPane());
+		
 		Node uncertainties = this.createUncertaintiesPane();
 		if (uncertainties != null)
 			content.getChildren().add(uncertainties);
