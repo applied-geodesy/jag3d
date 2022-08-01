@@ -134,8 +134,9 @@ public class TestStatisticDialog implements FormatterChangedListener {
 	}
 
 	private Node createPane() {
-		String labelProbabilityValue = String.format(Locale.ENGLISH, i18n.getString("TestStatisticDialog.probability.label", "Probability value \u03B1 [%s]:"), this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation());
-		String labelTestPower        = String.format(Locale.ENGLISH, i18n.getString("TestStatisticDialog.testpower.label", "Power of test 1 - \u03B2 [%s]:"), this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation());
+		String frmPercentUnit        = this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().toFormattedAbbreviation();
+		String labelProbabilityValue = String.format(Locale.ENGLISH, "%s%s:", i18n.getString("TestStatisticDialog.probability.label", "Probability value \u03B1"), frmPercentUnit.isBlank() ? "" : " " + frmPercentUnit);
+		String labelTestPower        = String.format(Locale.ENGLISH, "%s%s:", i18n.getString("TestStatisticDialog.testpower.label", "Power of test 1 - \u03B2"), frmPercentUnit.isBlank() ? "" : " " + frmPercentUnit);
 		
 		String tooltipProbabilityValue = i18n.getString("TestStatisticDialog.probability.tooltip", "Set probability value (type I error)");
 		String tooltipTestPower        = i18n.getString("TestStatisticDialog.testpower.tooltip", "Set power of test (type II error)");
@@ -308,8 +309,9 @@ public class TestStatisticDialog implements FormatterChangedListener {
 	@Override
 	public void formatterChanged(FormatterEvent evt) {
 		if (evt != null && evt.getCellType() == CellValueType.PERCENTAGE && evt.getEventType() == FormatterEventType.UNIT_CHANGED) {
-			String labelProbabilityValue = String.format(Locale.ENGLISH, i18n.getString("TestStatisticDialog.probability.label", "Probability value \u03B1 [%s]:"), this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation());
-			String labelTestPower        = String.format(Locale.ENGLISH, i18n.getString("TestStatisticDialog.testpower.label", "Power of test 1 - \u03B2 [%s]:"), this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation());
+			String frmPercentUnit        = this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().toFormattedAbbreviation();
+			String labelProbabilityValue = String.format(Locale.ENGLISH, "%s%s:", i18n.getString("TestStatisticDialog.probability.label", "Probability value \u03B1"), frmPercentUnit.isBlank() ? "" : " " + frmPercentUnit);
+			String labelTestPower        = String.format(Locale.ENGLISH, "%s%s:", i18n.getString("TestStatisticDialog.testpower.label", "Power of test 1 - \u03B2"), frmPercentUnit.isBlank() ? "" : " " + frmPercentUnit);
 
 			this.probabilityValueLabel.setText(labelProbabilityValue);
 			this.testPowerLabel.setText(labelTestPower);

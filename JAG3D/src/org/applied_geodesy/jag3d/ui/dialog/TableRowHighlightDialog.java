@@ -325,10 +325,10 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 
 		case REDUNDANCY:
 			radioButtonLabelText   = String.format(
-					Locale.ENGLISH, "%s [%s]", 
+					Locale.ENGLISH, "%s %s", 
 					i18n.getString("TableRowHighlightDialog.range.redundancy.label", "Redundancy r"),
-					options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation()
-					);	
+					options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().toFormattedAbbreviation()
+					).trim();	
 			radioButtonToolTipText = i18n.getString("TableRowHighlightDialog.range.redundancy.tooltip", "Highlighting table rows depending on redundancy");
 			leftBoundary    = new Label("0 \u2264 "); 
 			middleBoundaray = new Label(" \u003C ");
@@ -341,10 +341,10 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 
 		case P_PRIO_VALUE:
 			radioButtonLabelText = String.format(
-					Locale.ENGLISH, "%s [%s]", 
+					Locale.ENGLISH, "%s %s", 
 					i18n.getString("TableRowHighlightDialog.range.probability_value.label", "Probability value p"),
-					options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation()
-					);
+					options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().toFormattedAbbreviation()
+					).trim();
 			radioButtonToolTipText = i18n.getString("TableRowHighlightDialog.range.probability_value.tooltip", "Highlighting table rows depending on (a-priori) p-value");
 			leftBoundary    = new Label("0 \u003C "); 
 			middleBoundaray = new Label(" \u003C ");
@@ -357,10 +357,10 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 
 		case INFLUENCE_ON_POSITION:
 			radioButtonLabelText = String.format(
-					Locale.ENGLISH, "%s [%s]", 
+					Locale.ENGLISH, "%s %s", 
 					i18n.getString("TableRowHighlightDialog.range.influenceonposition.label", "Influence on point position EP"),
-					options.getFormatterOptions().get(CellValueType.LENGTH_RESIDUAL).getUnit().getAbbreviation()
-					);
+					options.getFormatterOptions().get(CellValueType.LENGTH_RESIDUAL).getUnit().toFormattedAbbreviation()
+					).trim();
 			radioButtonToolTipText = i18n.getString("TableRowHighlightDialog.range.influenceonposition.tooltip", "Highlighting table rows depending on influence on point position due to an undetected gross-error");
 			leftBoundary    = new Label("0 \u2264 "); 
 			middleBoundaray = new Label(" \u003C ");
@@ -561,15 +561,15 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 					String unitAbbr  = null;
 					if (evt.getCellType() == CellValueType.LENGTH_RESIDUAL && toggleButton.getUserData() == TableRowHighlightType.INFLUENCE_ON_POSITION) {
 						labelText = i18n.getString("TableRowHighlightDialog.range.influenceonposition.label", "Influence on point position");
-						unitAbbr  = options.getFormatterOptions().get(CellValueType.LENGTH_RESIDUAL).getUnit().getAbbreviation();
+						unitAbbr  = options.getFormatterOptions().get(CellValueType.LENGTH_RESIDUAL).getUnit().toFormattedAbbreviation();
 					}
 					else if (evt.getCellType() == CellValueType.PERCENTAGE && toggleButton.getUserData() == TableRowHighlightType.P_PRIO_VALUE) {
 						labelText = i18n.getString("TableRowHighlightDialog.range.probability_value.label", "Probability value p");
-						unitAbbr  = options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation();						
+						unitAbbr  = options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().toFormattedAbbreviation();						
 					}
 					else if (evt.getCellType() == CellValueType.PERCENTAGE && toggleButton.getUserData() == TableRowHighlightType.REDUNDANCY) {
 						labelText = i18n.getString("TableRowHighlightDialog.range.redundancy.label", "Redundancy r");
-						unitAbbr  = options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().getAbbreviation();		
+						unitAbbr  = options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().toFormattedAbbreviation();		
 					}
 					else {
 						continue;
@@ -578,15 +578,15 @@ public class TableRowHighlightDialog implements FormatterChangedListener {
 					if (radioButton.getGraphic() instanceof Label) {
 						((Label)radioButton.getGraphic()).setText(
 								String.format(
-										Locale.ENGLISH, "%s [%s]", 
-										labelText, unitAbbr)
+										Locale.ENGLISH, "%s %s", 
+										labelText, unitAbbr).trim()
 								);
 					}
 					else {
 						radioButton.setText(
 								String.format(
-										Locale.ENGLISH, "%s [%s]", 
-										labelText, unitAbbr)
+										Locale.ENGLISH, "%s %s", 
+										labelText, unitAbbr).trim()
 								);
 					}
 				}

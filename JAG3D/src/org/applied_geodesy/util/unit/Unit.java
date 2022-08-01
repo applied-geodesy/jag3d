@@ -50,4 +50,8 @@ public abstract class Unit {
 	public UnitType getType() {
 		return this.type;
 	}
+	
+	public String toFormattedAbbreviation() {
+		return this.abbreviation.isBlank() ? "" : String.format(Locale.ENGLISH, i18n.getString("Unit.abbreviation.format", "in %s"), this.abbreviation);
+	}
 }

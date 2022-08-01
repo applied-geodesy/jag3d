@@ -25,11 +25,11 @@
 						<#assign has_group_params = true>
 					</#if>
 					<figure>
-						<figcaption><#outputformat "plainText">${chart_figcaption_map['redundancy']}</#outputformat> r (<#outputformat "plainText">${mean_interval}</#outputformat>: {r [${unit_abbr_percentage}] | <@printFormattedNumber value=group.left_boundary format=df_percentage/> &le; r &le; <@printFormattedNumber value=group.right_boundary format=df_percentage/>})</figcaption>
+						<figcaption><#outputformat "plainText">${chart_figcaption_map['redundancy']}</#outputformat> r (<#outputformat "plainText">${mean_interval}</#outputformat>: {r | <@printFormattedNumber value=group.left_boundary format=df_percentage/>&nbsp;${unit_abbr_percentage} &le; r &le; <@printFormattedNumber value=group.right_boundary format=df_percentage/>&nbsp;${unit_abbr_percentage}})</figcaption>
 						<ol class="chart">
-							<li title="${group.absolute_frequency_part_3?string["0"]}"><span style="width: ${group.relative_frequency_part_3?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_3?string["0"]} (${group.relative_frequency_part_3?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%)</span></li>
-							<li title="${group.absolute_frequency_part_2?string["0"]}"><span style="width: ${group.relative_frequency_part_2?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_2?string["0"]} (${group.relative_frequency_part_2?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%)</span></li>
-							<li title="${group.absolute_frequency_part_1?string["0"]}"><span style="width: ${group.relative_frequency_part_1?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_1?string["0"]} (${group.relative_frequency_part_1?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%)</span></li>
+							<li title="${group.absolute_frequency_part_3?string["0"]}"><span style="width: ${group.relative_frequency_part_3?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_3?string["0"]} (${group.relative_frequency_part_3?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}&nbsp;%)</span></li>
+							<li title="${group.absolute_frequency_part_2?string["0"]}"><span style="width: ${group.relative_frequency_part_2?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_2?string["0"]} (${group.relative_frequency_part_2?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}&nbsp;%)</span></li>
+							<li title="${group.absolute_frequency_part_1?string["0"]}"><span style="width: ${group.relative_frequency_part_1?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_1?string["0"]} (${group.relative_frequency_part_1?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}&nbsp;%)</span></li>
 						</ol>
 					</figure>
 				</#if>
@@ -57,11 +57,11 @@
 						<#assign has_group_params = true>
 					</#if>
 					<figure>
-						<figcaption><#outputformat "plainText">${chart_figcaption_map['p_prio']}</#outputformat> p-value (<#outputformat "plainText">${mean_interval}</#outputformat>: {p-value [${unit_abbr_percentage}] | <@printFormattedNumber value=group.left_boundary format=df_percentage/> &le; p-value &le; <@printFormattedNumber value=group.right_boundary format=df_percentage/>})</figcaption>
+						<figcaption><#outputformat "plainText">${chart_figcaption_map['p_prio']}</#outputformat> p-value (<#outputformat "plainText">${mean_interval}</#outputformat>: {p-value | <@printFormattedNumber value=group.left_boundary format=df_percentage/>&nbsp;${unit_abbr_percentage} &le; p-value &le; <@printFormattedNumber value=group.right_boundary format=df_percentage/>&nbsp;${unit_abbr_percentage}})</figcaption>
 						<ol class="chart">
-							<li title="${group.absolute_frequency_part_3?string["0"]}"><span style="width: ${group.relative_frequency_part_3?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_3?string["0"]} (${group.relative_frequency_part_3?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%)</span></li>
-							<li title="${group.absolute_frequency_part_2?string["0"]}"><span style="width: ${group.relative_frequency_part_2?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_2?string["0"]} (${group.relative_frequency_part_2?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%)</span></li>
-							<li title="${group.absolute_frequency_part_1?string["0"]}"><span style="width: ${group.relative_frequency_part_1?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_1?string["0"]} (${group.relative_frequency_part_1?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%)</span></li>
+							<li title="${group.absolute_frequency_part_3?string["0"]}"><span style="width: ${group.relative_frequency_part_3?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_3?string["0"]} (${group.relative_frequency_part_3?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}&nbsp;%)</span></li>
+							<li title="${group.absolute_frequency_part_2?string["0"]}"><span style="width: ${group.relative_frequency_part_2?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_2?string["0"]} (${group.relative_frequency_part_2?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}&nbsp;%)</span></li>
+							<li title="${group.absolute_frequency_part_1?string["0"]}"><span style="width: ${group.relative_frequency_part_1?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_1?string["0"]} (${group.relative_frequency_part_1?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}&nbsp;%)</span></li>
 						</ol>
 					</figure>
 				</#if>
@@ -89,11 +89,11 @@
 						<#assign has_group_params = true>
 					</#if>
 					<figure>
-						<figcaption><#outputformat "plainText">${chart_figcaption_map['influence_on_position']}</#outputformat> EP (<#outputformat "plainText">${mean_interval}</#outputformat>: {EP [${unit_abbr_length_residual}] | <@printFormattedNumber value=group.left_boundary format=df_length_residual/> &le; EP &le; <@printFormattedNumber value=group.right_boundary format=df_length_residual/>})</figcaption>
+						<figcaption><#outputformat "plainText">${chart_figcaption_map['influence_on_position']}</#outputformat> EP (<#outputformat "plainText">${mean_interval}</#outputformat>: {EP | <@printFormattedNumber value=group.left_boundary format=df_length_residual/>&nbsp;${unit_abbr_length_residual} &le; EP &le; <@printFormattedNumber value=group.right_boundary format=df_length_residual/>&nbsp;${unit_abbr_length_residual}})</figcaption>
 						<ol class="chart">
-							<li title="${group.absolute_frequency_part_1?string["0"]}"><span style="width: ${group.relative_frequency_part_1?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_1?string["0"]} (${group.relative_frequency_part_1?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%)</span></li>
-							<li title="${group.absolute_frequency_part_2?string["0"]}"><span style="width: ${group.relative_frequency_part_2?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_2?string["0"]} (${group.relative_frequency_part_2?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%)</span></li>
-							<li title="${group.absolute_frequency_part_3?string["0"]}"><span style="width: ${group.relative_frequency_part_3?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_3?string["0"]} (${group.relative_frequency_part_3?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%)</span></li>
+							<li title="${group.absolute_frequency_part_1?string["0"]}"><span style="width: ${group.relative_frequency_part_1?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_1?string["0"]} (${group.relative_frequency_part_1?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}&nbsp;%)</span></li>
+							<li title="${group.absolute_frequency_part_2?string["0"]}"><span style="width: ${group.relative_frequency_part_2?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_2?string["0"]} (${group.relative_frequency_part_2?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}&nbsp;%)</span></li>
+							<li title="${group.absolute_frequency_part_3?string["0"]}"><span style="width: ${group.relative_frequency_part_3?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}%;">${group.absolute_frequency_part_3?string["0"]} (${group.relative_frequency_part_3?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}&nbsp;%)</span></li>
 						</ol>
 					</figure>
 				</#if>

@@ -44,7 +44,7 @@ public class ScaleUnit extends Unit {
 		switch (type) {
 		case UNITLESS:
 			this.name         = i18n.getString("Unit.unitless.name", "Unitless");
-			this.abbreviation = i18n.getString("Unit.unitless.abbreviation", "\u2014");
+			this.abbreviation = i18n.getString("Unit.unitless.abbreviation", "");
 			this.a = 0.0;
 			this.s = 1.0;
 			break;
