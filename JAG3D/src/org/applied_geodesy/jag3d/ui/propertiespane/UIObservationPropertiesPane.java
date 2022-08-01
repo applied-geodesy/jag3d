@@ -991,12 +991,12 @@ public class UIObservationPropertiesPane {
 		case DIRECTION_LEAF:
 		case ZENITH_ANGLE_LEAF:
 			cellValueType = CellValueType.ANGLE_UNCERTAINTY;
-			yAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.chart.axis.y.label", "\u03C30 [%s]"), options.getFormatterOptions().get(CellValueType.ANGLE_UNCERTAINTY).getUnit().getAbbreviation()));
+			yAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.chart.axis.y.label", "\u03C30 %s"), options.getFormatterOptions().get(CellValueType.ANGLE_UNCERTAINTY).getUnit().toFormattedAbbreviation()).trim());
 			break;
 
 		default:
 			cellValueType = CellValueType.LENGTH_UNCERTAINTY;
-			yAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.chart.axis.y.label", "\u03C30 [%s]"), options.getFormatterOptions().get(CellValueType.LENGTH_UNCERTAINTY).getUnit().getAbbreviation()));
+			yAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.chart.axis.y.label", "\u03C30 %s"), options.getFormatterOptions().get(CellValueType.LENGTH_UNCERTAINTY).getUnit().toFormattedAbbreviation()).trim());
 			break;
 		}
 		
@@ -1023,7 +1023,7 @@ public class UIObservationPropertiesPane {
 				return null;
 			}
 		});
-		xAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.chart.axis.x.label", "d0 [%s]"), options.getFormatterOptions().get(CellValueType.LENGTH).getUnit().getAbbreviation()));
+		xAxis.setLabel(String.format(Locale.ENGLISH, i18n.getString("UIObservationPropertiesPane.chart.axis.x.label", "d0 %s"), options.getFormatterOptions().get(CellValueType.LENGTH).getUnit().toFormattedAbbreviation()).trim());
 	}
 	
 	private void updateUncertaintyChart(LineChart<Number,Number> lineChart) {
