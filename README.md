@@ -29,7 +29,7 @@ It is a very important initiative to ensure the quality of adjustment packages. 
 References
 ----------
 
-- Durand, S., Lösler, M., Jones, M., Cattin, P.-H., Guillaume, S., Morel, L.: Quantification of the dependence of the results on several network adjustment applications. 5th Joint International Symposium on Deformation Monitoring (JISDM), 20-22 June 2022, Polytechnic University of Valencia (UPV), Valencia, Spain, 2022.
+- Durand, S., Lösler, M., Jones, M., Cattin, P.-H., Guillaume, S., Morel, L.: Quantification of the dependence of the results on several network adjustment applications. 5th Joint International Symposium on Deformation Monitoring (JISDM), 20-22 June 2022, Polytechnic University of Valencia (UPV), Valencia, Spain, 2022. [10.4995/JISDM2022.2022.13671](https://doi.org/10.4995/JISDM2022.2022.13671)
 
 - Herrmann, C., Lösler, M., Bähr, H.: Comparison of SpatialAnalyzer and Different Adjustment Programs. In: Kutterer, H., Seitz, F., Schmidt, M. (eds.): Proceedings of the 1st International Workshop on the Quality of Geodetic Observation and Monitoring Systems (QuGOMS'11) International Association of Geodesy Symposia, Vol 140, Springer, pp. 79-84, 2015. DOI: [10.1007/978-3-319-10828-5_12](https://doi.org/10.1007/978-3-319-10828-5_12)
 
