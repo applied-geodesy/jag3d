@@ -53,8 +53,11 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.util.Duration;
 
 public class UIPointPropertiesPane {
@@ -93,7 +96,6 @@ public class UIPointPropertiesPane {
 	private UncertaintyTextField uncertaintyCoordinateZField;
 	
 	private Label selectionInfoLabel = new Label();
-	private TitledPane informationTitledPane;
 	
 	private Map<Object, ProgressIndicator> databaseTransactionProgressIndicators = new HashMap<Object, ProgressIndicator>(10);
 	private Map<Object, Node> warningIconNodes = new HashMap<Object, Node>(10);
@@ -150,18 +152,13 @@ public class UIPointPropertiesPane {
 	}
 	
 	private void setGroupName(String name, int cnt) {
-		if (this.informationTitledPane != null) {
-			String defaultTitle = this.i18n.getString("UIPointPropertiesPane.information.title", "Properties");
-			String title = name.isBlank() ? defaultTitle : String.format(Locale.ENGLISH, "%s: %s", defaultTitle, name);
-			if (!this.informationTitledPane.getText().equals(title))
-				this.informationTitledPane.setText(title);
-		}
-		
 		if (this.selectionInfoLabel != null) {
+			String groupNameTmpl    = this.i18n.getString("UIPointPropertiesPane.status.selection.name.label", "Status:");
+			String selectionCntTmpl = cnt > 1 ? String.format(Locale.ENGLISH, this.i18n.getString("UIPointPropertiesPane.status.selection.counter.label", "and %d more selected group(s)\u2026"), cnt) : "";
 			String label = String.format(
 					Locale.ENGLISH, 
-					this.i18n.getString("UIPointPropertiesPane.information.selection.label", "Selection: %d group(s) selected\u2026"), 
-					cnt);
+					"%s %s %s", 
+					groupNameTmpl, name, selectionCntTmpl);
 			if (!this.selectionInfoLabel.getText().equals(label))
 				this.selectionInfoLabel.setText(label);
 		}
@@ -294,15 +291,6 @@ public class UIPointPropertiesPane {
 		return null;
 	}
 	
-	private Node createInformationPane() {
-		GridPane gridPane = this.createGridPane();
-		gridPane.add(this.selectionInfoLabel, 0, 0);
-
-		this.informationTitledPane = this.createTitledPane(i18n.getString("UIPointPropertiesPane.information.title", "Properties"));
-        this.informationTitledPane.setContent(gridPane);
-		return this.informationTitledPane;
-	}
-	
 	private ProgressIndicator createDatabaseTransactionProgressIndicator(Object userData) {
 		ProgressIndicator progressIndicator = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
 
@@ -358,7 +346,8 @@ public class UIPointPropertiesPane {
 	}
 
 	private void init() {
-		VBox content = new VBox(this.createInformationPane());
+		VBox content = new VBox();
+		
 		Node coordinateUncertainties = this.createCoordinateUncertaintiesPane();
 		if (coordinateUncertainties != null)
 			content.getChildren().add(coordinateUncertainties);
@@ -369,7 +358,14 @@ public class UIPointPropertiesPane {
 		scroller.setPadding(new Insets(20, 50, 20, 50)); // oben, links, unten, rechts
 		scroller.setFitToHeight(true);
 		scroller.setFitToWidth(true);
-		this.propertiesNode = scroller;
+		
+		Region spacer = new Region();
+		spacer.setPrefHeight(0);
+		VBox.setVgrow(spacer, Priority.ALWAYS);
+		this.selectionInfoLabel.setPadding(new Insets(1,5,2,10));
+		this.selectionInfoLabel.setFont(new Font(10.5));
+		this.propertiesNode = new VBox(scroller, spacer, this.selectionInfoLabel);
+//		this.propertiesNode = scroller;
 		
 		FadeTransition fadeIn  = new FadeTransition(Duration.millis(150));
 		FadeTransition fadeOut = new FadeTransition(Duration.millis(150));
