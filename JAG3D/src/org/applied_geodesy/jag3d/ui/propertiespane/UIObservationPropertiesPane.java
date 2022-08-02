@@ -86,8 +86,11 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
@@ -183,7 +186,6 @@ public class UIObservationPropertiesPane {
 	private UncertaintyTextField distanceDependentUncertaintyField;
 	
 	private Label selectionInfoLabel = new Label();
-	private TitledPane informationTitledPane;
 	
 	private RadioButton referenceEpochRadioButton;
 	private RadioButton controlEpochRadioButton;
@@ -232,18 +234,13 @@ public class UIObservationPropertiesPane {
 	}
 	
 	private void setGroupName(String name, int cnt) {
-		if (this.informationTitledPane != null) {
-			String defaultTitle = this.i18n.getString("UIObservationPropertiesPane.information.title", "Properties");
-			String title = name.isBlank() ? defaultTitle : String.format(Locale.ENGLISH, "%s: %s", defaultTitle, name);
-			if (!this.informationTitledPane.getText().equals(title))
-				this.informationTitledPane.setText(title);
-		}
-		
 		if (this.selectionInfoLabel != null) {
+			String groupNameTmpl    = this.i18n.getString("UIObservationPropertiesPane.status.selection.name.label", "Status:");
+			String selectionCntTmpl = cnt > 1 ? String.format(Locale.ENGLISH, this.i18n.getString("UIObservationPropertiesPane.status.selection.counter.label", "and %d more selected group(s)\u2026"), cnt) : "";
 			String label = String.format(
 					Locale.ENGLISH, 
-					this.i18n.getString("UIObservationPropertiesPane.information.selection.label", "Selection: %d group(s) selected\u2026"), 
-					cnt);
+					"%s %s %s", 
+					groupNameTmpl, name, selectionCntTmpl);
 			if (!this.selectionInfoLabel.getText().equals(label))
 				this.selectionInfoLabel.setText(label);
 		}
@@ -685,20 +682,10 @@ public class UIObservationPropertiesPane {
         uncertaintyChartTitledPane.setContent(this.lineChart);
 		return uncertaintyChartTitledPane;
 	}
-	
-	private Node createInformationPane() {
-		GridPane gridPane = this.createGridPane();
-		gridPane.add(this.selectionInfoLabel, 0, 0);
-
-		this.informationTitledPane = this.createTitledPane(i18n.getString("UIObservationPropertiesPane.information.title", "Properties"));
-        this.informationTitledPane.setContent(gridPane);
-		return this.informationTitledPane;
-	}
 
 	private void init() {
 		VBox content = new VBox();
 		content.getChildren().addAll(
-				this.createInformationPane(),
 				this.createUncertaintiesPane(),
 				this.createAdditionalParametersPane(),
 				this.createCongruenceAnalysisPane(),
@@ -711,7 +698,14 @@ public class UIObservationPropertiesPane {
 		scroller.setPadding(new Insets(20, 50, 20, 50)); // oben, links, unten, rechts
 		scroller.setFitToHeight(true);
 		scroller.setFitToWidth(true);
-		this.propertiesNode = scroller;
+		
+		Region spacer = new Region();
+		spacer.setPrefHeight(0);
+		VBox.setVgrow(spacer, Priority.ALWAYS);
+		this.selectionInfoLabel.setPadding(new Insets(1,5,2,10));
+		this.selectionInfoLabel.setFont(new Font(10.5));
+		this.propertiesNode = new VBox(scroller, spacer, this.selectionInfoLabel);
+//		this.propertiesNode = scroller;
 		
 		FadeTransition fadeIn  = new FadeTransition(Duration.millis(150));
 		FadeTransition fadeOut = new FadeTransition(Duration.millis(150));

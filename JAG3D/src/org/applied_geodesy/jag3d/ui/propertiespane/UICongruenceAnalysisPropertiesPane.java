@@ -50,7 +50,10 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.util.Duration;
 
 public class UICongruenceAnalysisPropertiesPane {
@@ -149,7 +152,6 @@ public class UICongruenceAnalysisPropertiesPane {
 	private CheckBox shearZCheckBox;
 	
 	private Label selectionInfoLabel = new Label();
-	private TitledPane informationTitledPane;
 	
 	private Map<Object, ProgressIndicator> databaseTransactionProgressIndicators = new HashMap<Object, ProgressIndicator>(10);
 	private SequentialTransition sequentialTransition = new SequentialTransition();
@@ -177,20 +179,15 @@ public class UICongruenceAnalysisPropertiesPane {
 		}
 		this.setGroupName(name, this.selectedCongruenceAnalysisItemValues != null ? this.selectedCongruenceAnalysisItemValues.length : 0);
 	}
-	
+
 	private void setGroupName(String name, int cnt) {
-		if (this.informationTitledPane != null) {
-			String defaultTitle = this.i18n.getString("UICongruenceAnalysisPropertiesPane.information.title", "Properties");
-			String title = name.isBlank() ? defaultTitle : String.format(Locale.ENGLISH, "%s: %s", defaultTitle, name);
-			if (!this.informationTitledPane.getText().equals(title))
-				this.informationTitledPane.setText(title);
-		}
-		
 		if (this.selectionInfoLabel != null) {
+			String groupNameTmpl    = this.i18n.getString("UICongruenceAnalysisPropertiesPane.status.selection.name.label", "Status:");
+			String selectionCntTmpl = cnt > 1 ? String.format(Locale.ENGLISH, this.i18n.getString("UICongruenceAnalysisPropertiesPane.status.selection.counter.label", "and %d more selected group(s)\u2026"), cnt) : "";
 			String label = String.format(
 					Locale.ENGLISH, 
-					this.i18n.getString("UICongruenceAnalysisPropertiesPane.information.selection.label", "Selection: %d group(s) selected\u2026"), 
-					cnt);
+					"%s %s %s", 
+					groupNameTmpl, name, selectionCntTmpl);
 			if (!this.selectionInfoLabel.getText().equals(label))
 				this.selectionInfoLabel.setText(label);
 		}
@@ -630,17 +627,7 @@ public class UICongruenceAnalysisPropertiesPane {
 		parametersTitledPane.setContent(gridPane);
 		return parametersTitledPane;
 	}
-	
-	private Node createInformationPane() {
-		GridPane gridPane = this.createGridPane();
-		gridPane.add(this.selectionInfoLabel, 0, 0);
 
-		this.informationTitledPane = this.createTitledPane(i18n.getString("UICongruenceAnalysisPropertiesPane.information.title", "Properties"));
-        this.informationTitledPane.setContent(gridPane);
-		return this.informationTitledPane;
-	}
-	
-	
 	private GridPane createGridPane() {
 		GridPane gridPane = new GridPane();
 		gridPane.setMaxWidth(Double.MAX_VALUE);
@@ -664,7 +651,7 @@ public class UICongruenceAnalysisPropertiesPane {
 		
 		RestrictionType[] parameterTypes = CongruenceAnalysisTreeItemValue.getRestrictionTypes(this.type);
 		
-		VBox content = new VBox(this.createInformationPane());
+		VBox content = new VBox();
 		
 		Node translationPane      = this.createTranslationPane(parameterTypes);
 		Node rotationPane         = this.createRotationPane(parameterTypes);
@@ -711,7 +698,14 @@ public class UICongruenceAnalysisPropertiesPane {
 		scroller.setPadding(new Insets(20, 50, 20, 50)); // oben, links, unten, rechts
 		scroller.setFitToHeight(true);
 		scroller.setFitToWidth(true);
-		this.propertiesNode = scroller;
+
+		Region spacer = new Region();
+		spacer.setPrefHeight(0);
+		VBox.setVgrow(spacer, Priority.ALWAYS);
+		this.selectionInfoLabel.setPadding(new Insets(1,5,2,10));
+		this.selectionInfoLabel.setFont(new Font(10.5));
+		this.propertiesNode = new VBox(scroller, spacer, this.selectionInfoLabel);
+//		this.propertiesNode = scroller;
 		
 		FadeTransition fadeIn  = new FadeTransition(Duration.millis(150));
 		FadeTransition fadeOut = new FadeTransition(Duration.millis(150));
