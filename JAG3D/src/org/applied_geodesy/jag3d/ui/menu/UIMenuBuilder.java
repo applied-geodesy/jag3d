@@ -42,6 +42,8 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.SwingUtilities;
 
@@ -1060,12 +1062,23 @@ public class UIMenuBuilder {
 	
 	void createReport(File templateFile) {
 		try {
+			Pattern pattern = Pattern.compile(".*?\\.(\\w+)\\.ftlh$", Pattern.CASE_INSENSITIVE);
+			Matcher matcher = pattern.matcher(templateFile.getName().toLowerCase());
+			String extension = "html";
+			ExtensionFilter extensionFilter = new ExtensionFilter(i18n.getString("UIMenuBuilder.extension.html", "Hypertext Markup Language"), "*.html", "*.htm", "*.HTML", "*.HTM");
+			if (matcher.find() && matcher.groupCount() == 1) {
+				extension = matcher.group(1);
+				extensionFilter = new ExtensionFilter(String.format(Locale.ENGLISH, i18n.getString("UIMenuBuilder.extension.template", "%s-File"), extension), "*." + extension); 
+			}
+
+			String fileNameSuggestion = "report." + extension;
+			
 			FTLReport ftl = SQLManager.getInstance().getFTLReport();
 			File reportFile = DefaultFileChooser.showSaveDialog(
 					JAG3D.getStage(),
 					i18n.getString("UIMenuBuilder.filechooser.report.title", "Save adjustment report"), 
-					"report.html",
-					new ExtensionFilter(i18n.getString("UIMenuBuilder.extension.html", "Hypertext Markup Language"), "*.html", "*.htm", "*.HTML", "*.HTM") 
+					fileNameSuggestion,
+					extensionFilter
 					);
 			if (reportFile != null && ftl != null) {
 				ftl.setTemplate(templateFile.getName());
