@@ -522,7 +522,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 			Pattern pattern = Pattern.compile(".*?\\.(\\w+)\\.ftlh$", Pattern.CASE_INSENSITIVE);
 			Matcher matcher = pattern.matcher(templateFile.getName().toLowerCase());
 			String extension = "html";
-			ExtensionFilter extensionFilter = new ExtensionFilter(i18n.getString("UIMenuBuilder.report.extension.html", "Hypertext Markup Language"), "*.html", "*.htm");
+			ExtensionFilter extensionFilter = new ExtensionFilter(i18n.getString("UIMenuBuilder.report.extension.html", "Hypertext Markup Language"), "*.html", "*.htm", "*.HTML", "*.HTM");
 			if (matcher.find() && matcher.groupCount() == 1) {
 				extension = matcher.group(1);
 				extensionFilter = new ExtensionFilter(String.format(Locale.ENGLISH, i18n.getString("UIMenuBuilder.report.extension.template", "%s-File"), extension), "*." + extension); 
