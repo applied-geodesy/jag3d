@@ -1148,7 +1148,11 @@ public class UIMenuBuilder {
 				try {
 					switch (menuItemType) {
 					case MODULE_JUNIFORM:
-						Stage stage = JUniForm.getStage() == null ? new Stage() : JUniForm.getStage();
+						Stage stage = JUniForm.getStage();
+						if (stage == null) {
+							stage = new Stage();
+							stage.initOwner(JAG3D.getStage());
+						}
 						JUniForm juniform = new JUniForm();
 						juniform.start(stage);
 						break;
