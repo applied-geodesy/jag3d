@@ -168,75 +168,117 @@ public class FTLReport {
 	/******** Datenbankabfragen *************/
 
 	private void initFormatterOptions() throws SQLException {
-		Map<CellValueType, FormatterOption> options = FormatterOptions.getInstance().getFormatterOptions();
+		FormatterOptions options = FormatterOptions.getInstance();
+		Map<CellValueType, FormatterOption> formatterOptions = options.getFormatterOptions();
 
-		for (FormatterOption option : options.values()) {
-			String keyDigits = null;
-			String keyUnit   = null;
-			String keySexagesimal = null;
+		for (FormatterOption option : formatterOptions.values()) {
+			String keyUnitType       = null;
+			String keyUnitConversion = null;
+			String keyUnitDigits     = null;
+			String keyUnitAbbr       = null;
+			String keySexagesimal    = null;
+			double conversionFactor  = 1.0;
 			CellValueType cellValueType = option.getType();
 			switch(cellValueType) {
 			case ANGLE:
-				keyDigits = "digits_angle";
-				keyUnit   = "unit_abbr_angle";
-				keySexagesimal = option.getUnit().getType() == UnitType.DEGREE_SEXAGESIMAL ? "sexagesimal_angle" : null;
+				keyUnitType       = "unit_type_angle";
+				keyUnitConversion = "unit_conversion_angle";
+				keyUnitDigits     = "digits_angle";
+				keyUnitAbbr       = "unit_abbr_angle";
+				conversionFactor  = options.convertAngleToModel(1.0);
+				keySexagesimal    = option.getUnit().getType() == UnitType.DEGREE_SEXAGESIMAL ? "sexagesimal_angle" : null;
 				break;
 			case ANGLE_RESIDUAL:
-				keyDigits = "digits_angle_residual";
-				keyUnit   = "unit_abbr_angle_residual";
-				keySexagesimal = option.getUnit().getType() == UnitType.DEGREE_SEXAGESIMAL ? "sexagesimal_angle_residual" : null;
+				keyUnitType       = "unit_type_angle_residual";
+				keyUnitConversion = "unit_conversion_angle_residual";
+				keyUnitDigits     = "digits_angle_residual";
+				keyUnitAbbr       = "unit_abbr_angle_residual";
+				conversionFactor  = options.convertAngleResidualToModel(1.0);
+				keySexagesimal    = option.getUnit().getType() == UnitType.DEGREE_SEXAGESIMAL ? "sexagesimal_angle_residual" : null;
 				break;
 			case ANGLE_UNCERTAINTY:
-				keyDigits = "digits_angle_uncertainty";
-				keyUnit   = "unit_abbr_angle_uncertainty";
-				keySexagesimal = option.getUnit().getType() == UnitType.DEGREE_SEXAGESIMAL ? "sexagesimal_angle_uncertainty" : null;
+				keyUnitType       = "unit_type_angle_uncertainty";
+				keyUnitConversion = "unit_conversion_angle_uncertainty";
+				keyUnitDigits     = "digits_angle_uncertainty";
+				keyUnitAbbr       = "unit_abbr_angle_uncertainty";
+				conversionFactor  = options.convertAngleUncertaintyToModel(1.0);
+				keySexagesimal    = option.getUnit().getType() == UnitType.DEGREE_SEXAGESIMAL ? "sexagesimal_angle_uncertainty" : null;
 				break;
 
 			case LENGTH:
-				keyDigits = "digits_length";
-				keyUnit   = "unit_abbr_length";
+				keyUnitType       = "unit_type_length";
+				keyUnitConversion = "unit_conversion_length";
+				keyUnitDigits     = "digits_length";
+				keyUnitAbbr       = "unit_abbr_length";
+				conversionFactor  = options.convertLengthToModel(1.0);
 				break;
 			case LENGTH_RESIDUAL:
-				keyDigits = "digits_length_residual";
-				keyUnit   = "unit_abbr_length_residual";
+				keyUnitType       = "unit_type_length_residual";
+				keyUnitConversion = "unit_conversion_length_residual";
+				keyUnitDigits     = "digits_length_residual";
+				keyUnitAbbr       = "unit_abbr_length_residual";
+				conversionFactor  = options.convertLengthResidualToModel(1.0);
 				break;
 			case LENGTH_UNCERTAINTY:
-				keyDigits = "digits_length_uncertainty";
-				keyUnit   = "unit_abbr_length_uncertainty";
+				keyUnitType       = "unit_type_length_uncertainty";
+				keyUnitConversion = "unit_conversion_length_uncertainty";
+				keyUnitDigits     = "digits_length_uncertainty";
+				keyUnitAbbr       = "unit_abbr_length_uncertainty";
+				conversionFactor  = options.convertLengthUncertaintyToModel(1.0);
 				break;
 
 			case SCALE:
-				keyDigits = "digits_scale";
-				keyUnit   = "unit_abbr_scale";
+				keyUnitType       = "unit_type_scale";
+				keyUnitConversion = "unit_conversion_scale";
+				keyUnitDigits     = "digits_scale";
+				keyUnitAbbr       = "unit_abbr_scale";
+				conversionFactor  = options.convertScaleToModel(1.0);
 				break;
 			case SCALE_RESIDUAL:
-				keyDigits = "digits_scale_residual";
-				keyUnit   = "unit_abbr_scale_residual";
+				keyUnitType       = "unit_type_scale_residual";
+				keyUnitConversion = "unit_conversion_scale_residual";
+				keyUnitDigits     = "digits_scale_residual";
+				keyUnitAbbr       = "unit_abbr_scale_residual";
+				conversionFactor  = options.convertScaleResidualToModel(1.0);
 				break;
 			case SCALE_UNCERTAINTY:
-				keyDigits = "digits_scale_uncertainty";
-				keyUnit   = "unit_abbr_scale_uncertainty";
+				keyUnitType       = "unit_type_scale_uncertainty";
+				keyUnitConversion = "unit_conversion_scale_uncertainty";
+				keyUnitDigits     = "digits_scale_uncertainty";
+				keyUnitAbbr       = "unit_abbr_scale_uncertainty";
+				conversionFactor  = options.convertScaleUncertaintyToModel(1.0);
 				break;
 				
 			case PERCENTAGE:
-				keyDigits = "digits_percentage";
-				keyUnit   = "unit_abbr_percentage";
+				keyUnitType       = "unit_type_percentage";
+				keyUnitConversion = "unit_conversion_percentage";
+				keyUnitDigits     = "digits_percentage";
+				keyUnitAbbr       = "unit_abbr_percentage";
+				conversionFactor  = options.convertPercentToModel(1.0);
 				break;
 
 			case STATISTIC:
-				keyDigits = "digits_statistic";
+				keyUnitType       = "unit_type_statistic";
+				keyUnitDigits     = "digits_statistic";
+				keyUnitConversion = "unit_conversion_statistic";
+				conversionFactor  = 1.0;
 				break;
 
 			default:
 				continue;
 				// break;
 			}
-			if (keyDigits != null)
-				this.setParam(keyDigits,      option.getFormatter().format(0.0) );
-			if (keyUnit != null)
-				this.setParam(keyUnit,        option.getUnit().getAbbreviation() );
+			
+			if (keyUnitType != null)
+				this.setParam(keyUnitType,       option.getUnit().getType().name() );
+			if (keyUnitConversion != null)
+				this.setParam(keyUnitConversion, conversionFactor );
+			if (keyUnitDigits != null)
+				this.setParam(keyUnitDigits,     option.getFormatter().format(0.0) );
+			if (keyUnitAbbr != null)
+				this.setParam(keyUnitAbbr,       option.getUnit().getAbbreviation() );
 			if (keySexagesimal != null)
-				this.setParam(keySexagesimal, Boolean.TRUE );
+				this.setParam(keySexagesimal,    Boolean.TRUE );
 		}
 	}
 
