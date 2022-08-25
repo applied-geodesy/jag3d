@@ -73,16 +73,7 @@
 				</#if>
 				
 				<#if group.dimension != 1>
-					<#if sexagesimal_angle??>
-						<#assign signum  = (point.confidence_gamma < 0)?then(-1, 1)>
-						<#assign value   = signum * point.confidence_gamma>
-						<#assign degree  = value?floor>
-						<#assign minutes = ((value - degree) * 60)?floor>
-						<#assign seconds = ((((value - degree) * 60) - minutes) * 60)>
-						<td>${signum * degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[df_angle]?string[1..])}</td>
-					<#else>
-						<td><@printFormattedNumber value=point.confidence_gamma format=df_angle/></td>
-					</#if>
+					<td><@printFormattedNumber value=point.confidence_gamma format=df_angle/></td>
 				</#if>
 			</#if>
 			
