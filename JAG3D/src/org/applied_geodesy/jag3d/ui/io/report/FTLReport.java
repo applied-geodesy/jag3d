@@ -54,6 +54,7 @@ import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
+import org.applied_geodesy.jag3d.ui.graphic.layer.LayerType;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 import org.applied_geodesy.transformation.datum.Ellipsoid;
 import org.applied_geodesy.util.CellValueType;
@@ -145,6 +146,7 @@ public class FTLReport {
 		this.addVerticalDefelctionGroups();
 		
 		this.addChartAndStatisticValues();
+		this.addConfidenceEllipseScale();
 	}
 
 	public String getSuggestedFileName() {
@@ -258,7 +260,6 @@ public class FTLReport {
 				break;
 
 			case STATISTIC:
-				keyUnitType       = "unit_type_statistic";
 				keyUnitDigits     = "digits_statistic";
 				keyUnitConversion = "unit_conversion_statistic";
 				conversionFactor  = 1.0;
@@ -268,14 +269,14 @@ public class FTLReport {
 				continue;
 				// break;
 			}
-			
-			if (keyUnitType != null)
+
+			if (keyUnitType != null && option.getUnit() != null)
 				this.setParam(keyUnitType,       option.getUnit().getType().name() );
 			if (keyUnitConversion != null)
 				this.setParam(keyUnitConversion, conversionFactor );
 			if (keyUnitDigits != null)
 				this.setParam(keyUnitDigits,     option.getFormatter().format(0.0) );
-			if (keyUnitAbbr != null)
+			if (keyUnitAbbr != null && option.getUnit() != null)
 				this.setParam(keyUnitAbbr,       option.getUnit().getAbbreviation() );
 			if (keySexagesimal != null)
 				this.setParam(keySexagesimal,    Boolean.TRUE );
@@ -301,7 +302,6 @@ public class FTLReport {
 			this.setParam("congruence_analysis", rs.getBoolean("congruence_analysis"));
 			this.setParam("number_of_iterations", rs.getBoolean("number_of_iterations"));
 		}
-
 	}
 
 	private void addVersion() throws SQLException {
@@ -627,6 +627,49 @@ public class FTLReport {
 		
 		this.setParam("chart_values", chartValues);
 		this.setParam("reliability_summary", reliabilitySummary);
+	}
+	
+	private void addConfidenceEllipseScale() throws SQLException {
+		String sql = "SELECT "
+				+ "\"value\" "
+				+ "FROM \"LayerEllipseScale\" WHERE \"id\" = 1 LIMIT 1";
+
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+		this.setParam("scale_confidence_ellipse", rs.next() ? rs.getDouble("value") : 1.0);
+	}
+	
+	private boolean isPointDimensionVisibility(PointType pointType, int dim) throws SQLException {
+		LayerType layerType = null;
+		
+		if (pointType == PointType.REFERENCE_POINT)
+			layerType = LayerType.REFERENCE_POINT_APOSTERIORI;
+		else if (pointType == PointType.STOCHASTIC_POINT)
+			layerType = LayerType.STOCHASTIC_POINT_APOSTERIORI;
+		else if (pointType == PointType.DATUM_POINT)
+			layerType = LayerType.DATUM_POINT_APOSTERIORI;
+		else if (pointType == PointType.NEW_POINT)
+			layerType = LayerType.NEW_POINT_APOSTERIORI;
+		
+		if (layerType != null) {
+			String sql = "SELECT "
+					+ "\"point_1d_visible\", \"point_2d_visible\", \"point_3d_visible\" "
+					+ "FROM \"PointLayerProperty\" WHERE \"layer\" = ? LIMIT 1";
+
+			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+			stmt.setInt(1, layerType.getId());
+			ResultSet rs = stmt.executeQuery();
+
+			if (rs.next()) {
+				if (dim == 1)
+					return rs.getBoolean("point_1d_visible");
+				else if (dim == 2)
+					return rs.getBoolean("point_2d_visible");
+				else if (dim == 3)
+					return rs.getBoolean("point_3d_visible");
+			}
+		}
+		return false;
 	}
 	
 	private List<HashMap<String, Object>> getReliabilitySummary(ObservationType observationType, TableRowHighlightType tableRowHighlightType) throws SQLException {
@@ -1032,6 +1075,8 @@ public class FTLReport {
 				
 				if (groupUncertainties != null && !groupUncertainties.isEmpty())
 					groupParam.put("uncertainties", groupUncertainties);
+				
+				groupParam.put("visible", this.isPointDimensionVisibility(pointType, dim));
 
 				groups.add(groupParam);			
 			}
