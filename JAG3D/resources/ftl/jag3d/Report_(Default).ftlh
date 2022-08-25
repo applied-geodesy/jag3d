@@ -35,13 +35,12 @@
 <#macro printFormattedNumber value format>
 	<#if format == df_angle && sexagesimal_angle?? || format == df_angle_residual && sexagesimal_angle_residual?? || format == df_angle_uncertainty && sexagesimal_angle_uncertainty??>
 		<#assign signum  = (value < 0)?then(-1, 1)>
-		<#assign value   = signum * value>
-		<#assign degree  = value?floor>
-		<#assign minutes = ((value - degree) * 60)?floor>
-		<#assign seconds = ((((value - degree) * 60) - minutes) * 60)>
-		${signum * degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[format]?string[1..])}
+		<#assign degree  = (signum * value)?floor>
+		<#assign minutes = (((signum * value) - degree) * 60)?floor>
+		<#assign seconds = (((((signum * value) - degree) * 60) - minutes) * 60)>
+		<#t>${(signum < 0)?then("-","")}${degree} &#x00B7; ${(100 + minutes)?string[1..]} &#x00B7; ${((100 + seconds)?string[format]?string[1..])}<#t>
 	<#else>
-		${value?string[format]}
+		<#t>${value?string[format]}<#t>
 	</#if>
   <#return>
 </#macro>
