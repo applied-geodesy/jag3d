@@ -32,6 +32,16 @@
 
 <#assign unit_abbr_percentage         = "${unit_abbr_percentage???then(unit_abbr_percentage, '\xfffd')}">
 
+<#-- SVG settings -->
+<#assign svg_width  = 900>
+<#assign svg_height = 600> 
+<#assign df_svg     = "0.00000;; roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
+
+<#assign unit_conversion_angle              = unit_conversion_angle???then(unit_conversion_angle, 1.0)>
+<#assign unit_conversion_length             = unit_conversion_length???then(unit_conversion_length, 1.0)>
+<#assign unit_conversion_length_uncertainty = unit_conversion_length_uncertainty???then(unit_conversion_length_uncertainty, 1.0)>
+<#assign scale_confidence_ellipse           = scale_confidence_ellipse???then(scale_confidence_ellipse, 250.0) * unit_conversion_length_uncertainty / unit_conversion_length>
+
 <#macro printFormattedNumber value format>
 	<#if format == df_angle && sexagesimal_angle?? || format == df_angle_residual && sexagesimal_angle_residual?? || format == df_angle_uncertainty && sexagesimal_angle_uncertainty??>
 		<#assign signum  = (value < 0)?then(-1, 1)>
@@ -42,7 +52,7 @@
 	<#else>
 		<#t>${value?string[format]}<#t>
 	</#if>
-  <#return>
+	<#return>
 </#macro>
 
 <#compress>
@@ -72,6 +82,7 @@
 				<#include "default/teststatistic_table.ftlh" parse=true>			
 				<#include "default/variance_component_table.ftlh" parse=true>
 				<#include "default/principal_component_table.ftlh" parse=true>
+				<#include "default/plot.ftlh" parse=true>
 			</article>
 		
 			<article>
