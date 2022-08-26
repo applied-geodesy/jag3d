@@ -27,6 +27,9 @@ import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.WorldCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 import org.applied_geodesy.util.CellValueType;
+import org.applied_geodesy.util.FormatterChangedListener;
+import org.applied_geodesy.util.FormatterEvent;
+import org.applied_geodesy.util.FormatterEventType;
 import org.applied_geodesy.util.FormatterOptions;
 
 import javafx.beans.property.DoubleProperty;
@@ -45,7 +48,7 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
-class MouseNavigationCanvas extends ResizableCanvas {
+class MouseNavigationCanvas extends ResizableCanvas implements FormatterChangedListener {
 
 	private class ScrollEventHandler implements EventHandler<ScrollEvent> {
 		@Override
@@ -190,7 +193,8 @@ class MouseNavigationCanvas extends ResizableCanvas {
 
 	MouseNavigationCanvas(LayerManager layerManager) {
 		super(layerManager.getCurrentGraphicExtent());
-		
+		FormatterOptions.getInstance().addFormatterChangedListener(this);
+
 		this.layerManager = layerManager;
 		this.coordinatePanel = layerManager.getCoordinateLabel();
 
@@ -263,8 +267,8 @@ class MouseNavigationCanvas extends ResizableCanvas {
 			magnitude = Math.pow(10, exponent);
 			ratio = Math.ceil(worldScale/magnitude);
 		}
-		
-		scaleBarWidth = ratio*magnitude/extentScale;
+
+		scaleBarWidth = this.options.convertLengthToModel(ratio*magnitude/extentScale);
 		for (int i = 1; i <= scaleSegments; i++) {
 			double xi = x - scaleBarWidth * i;
 			gc.setFill(i % 2 == 0 ? Color.WHITE : Color.DARKGRAY);
@@ -332,5 +336,11 @@ class MouseNavigationCanvas extends ResizableCanvas {
 	
 	public void setLineWidth(final double lineWidth) {
 		this.lineWidthProperty().set(lineWidth);
+	}
+
+	@Override
+	public void formatterChanged(FormatterEvent evt) {
+		if (evt.getEventType() == FormatterEventType.UNIT_CHANGED && evt.getCellType() == CellValueType.LENGTH) 
+			this.draw();
 	}
 }
