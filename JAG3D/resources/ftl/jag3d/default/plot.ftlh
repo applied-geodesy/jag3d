@@ -50,7 +50,7 @@
 										cy="0" 
 										ry="<@printFormattedNumber value=point.helmert_major_axis*scale_confidence_ellipse format=df_svg/>" 
 										rx="<@printFormattedNumber value=point.helmert_minor_axis*scale_confidence_ellipse format=df_svg/>"
-										transform="translate(<@printFormattedNumber value=point.y format=df_svg/>, <@printFormattedNumber value=point.x format=df_svg/>) scale(1,-1) rotate(<@printFormattedNumber value=point.helmert_alpha*conversion_angle*180/Math.PI format=df_svg/>, 0, 0) " 
+										transform="translate(<@printFormattedNumber value=point.y format=df_svg/>, <@printFormattedNumber value=point.x format=df_svg/>) scale(1,-1) rotate(<@printFormattedNumber value=point.helmert_alpha*unit_conversion_angle*180/Math.PI format=df_svg/>, 0, 0) " 
 										stroke="darkgray" 
 										stroke-width="0.25" 
 										fill="lightgray" 

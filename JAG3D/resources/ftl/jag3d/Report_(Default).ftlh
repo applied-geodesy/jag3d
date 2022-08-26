@@ -37,9 +37,10 @@
 <#assign svg_height = 600> 
 <#assign df_svg     = "0.00000;; roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
 
-<#assign conversion_angle              = unit_conversion_angle???then(unit_conversion_angle, 1.0)>
-<#assign conversion_length_uncertainty = unit_conversion_length_uncertainty???then(unit_conversion_length_uncertainty, 1.0)>
-<#assign scale_confidence_ellipse      = scale_confidence_ellipse???then(scale_confidence_ellipse, 250.0) * conversion_length_uncertainty>
+<#assign unit_conversion_angle              = unit_conversion_angle???then(unit_conversion_angle, 1.0)>
+<#assign unit_conversion_length             = unit_conversion_length???then(unit_conversion_length, 1.0)>
+<#assign unit_conversion_length_uncertainty = unit_conversion_length_uncertainty???then(unit_conversion_length_uncertainty, 1.0)>
+<#assign scale_confidence_ellipse           = scale_confidence_ellipse???then(scale_confidence_ellipse, 250.0) * unit_conversion_length_uncertainty / unit_conversion_length>
 
 <#macro printFormattedNumber value format>
 	<#if format == df_angle && sexagesimal_angle?? || format == df_angle_residual && sexagesimal_angle_residual?? || format == df_angle_uncertainty && sexagesimal_angle_uncertainty??>
