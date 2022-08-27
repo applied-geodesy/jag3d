@@ -243,9 +243,12 @@ public class JAG3D extends Application {
 			
 			// add external style definitions
 			try {
-				URL appStyleURL = JAG3D.class.getResource("/css/jag3d.css");
-				if (appStyleURL != null)
-					scene.getStylesheets().add(appStyleURL.toExternalForm());
+				URL cssURL = null;
+				if ((cssURL = JAG3D.class.getClassLoader().getResource("css/")) != null) {
+					cssURL = cssURL.toURI().resolve("jag3d.css").toURL();
+					if (Files.exists(Paths.get(cssURL.toURI()))) 
+						scene.getStylesheets().add(cssURL.toExternalForm());
+				}
 			}
 			catch(Exception e) {
 				e.printStackTrace();

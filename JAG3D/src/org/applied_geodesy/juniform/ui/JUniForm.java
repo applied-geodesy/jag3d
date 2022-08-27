@@ -22,6 +22,8 @@
 package org.applied_geodesy.juniform.ui;
 
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,6 +32,7 @@ import org.applied_geodesy.adjustment.geometry.FeatureAdjustment;
 import org.applied_geodesy.adjustment.geometry.FeatureChangeListener;
 import org.applied_geodesy.adjustment.geometry.FeatureEvent;
 import org.applied_geodesy.adjustment.geometry.FeatureEvent.FeatureEventType;
+import org.applied_geodesy.jag3d.ui.JAG3D;
 import org.applied_geodesy.juniform.io.report.FTLReport;
 import org.applied_geodesy.juniform.ui.dialog.AboutDialog;
 import org.applied_geodesy.juniform.ui.dialog.AverageRestrictionDialog;
@@ -196,9 +199,12 @@ public class JUniForm extends Application {
 			
 			// add external style definitions
 			try {
-				URL appStyleURL = JUniForm.class.getResource("/css/juniform.css");
-				if (appStyleURL != null)
-					scene.getStylesheets().add(appStyleURL.toExternalForm());
+				URL cssURL = null;
+				if ((cssURL = JAG3D.class.getClassLoader().getResource("css/")) != null) {
+					cssURL = cssURL.toURI().resolve("juniform.css").toURL();
+					if (Files.exists(Paths.get(cssURL.toURI()))) 
+						scene.getStylesheets().add(cssURL.toExternalForm());
+				}
 			}
 			catch(Exception e) {
 				e.printStackTrace();
