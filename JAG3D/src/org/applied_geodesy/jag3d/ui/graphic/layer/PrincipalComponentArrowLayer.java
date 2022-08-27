@@ -258,7 +258,7 @@ public class PrincipalComponentArrowLayer extends ArrowLayer {
 		LayerType layerType = this.getLayerType();
 		
 		for (PointLayer layer : this.referenceLayers) {
-			if (layer.isVisible()) {
+			if (layer.isVisible() && layer.hasContent()) {
 				for (GraphicPoint startPoint : layer.getPoints()) {
 					if (startPoint.isVisible())
 						if ((layerType == LayerType.PRINCIPAL_COMPONENT_HORIZONTAL && startPoint.getDimension() != 1) ||

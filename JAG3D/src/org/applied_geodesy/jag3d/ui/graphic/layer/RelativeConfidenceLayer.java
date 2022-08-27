@@ -126,7 +126,7 @@ public class RelativeConfidenceLayer extends ConfidenceLayer<PointShiftArrowLaye
 		List<PointShiftArrowLayer> referenceLayers = this.getReferenceLayers();
 		
 		for (PointShiftArrowLayer layer : referenceLayers) {
-			if (layer.isVisible()) {
+			if (layer.isVisible() && layer.hasContent()) {
 				for (RelativeConfidence relativeConfidence : layer.getRelativeConfidences()) { 
 					GraphicPoint startPoint = relativeConfidence.getStartPoint();
 					GraphicPoint endPoint   = relativeConfidence.getEndPoint();
