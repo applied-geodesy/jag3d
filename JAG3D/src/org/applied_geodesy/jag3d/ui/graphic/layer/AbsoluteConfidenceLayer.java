@@ -133,7 +133,7 @@ public class AbsoluteConfidenceLayer extends ConfidenceLayer<PointLayer> {
 	public boolean hasContent() {
 		List<PointLayer> referenceLayers = this.getReferenceLayers();
 		for (PointLayer layer : referenceLayers) {
-			if (layer.isVisible()) {
+			if (layer.isVisible() && layer.hasContent()) {
 				for (GraphicPoint point : layer.getPoints()) {
 					if (point.isVisible())
 						return true;

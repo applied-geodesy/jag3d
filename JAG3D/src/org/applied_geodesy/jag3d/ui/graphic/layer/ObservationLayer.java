@@ -561,6 +561,6 @@ public class ObservationLayer extends Layer implements HighlightableLayer {
 
 	@Override
 	public boolean hasContent() {
-		return this.observableMeasurements != null && !this.observableMeasurements.isEmpty();
+		return super.hasContent() && this.observableMeasurements != null && !this.observableMeasurements.isEmpty();
 	}
 }

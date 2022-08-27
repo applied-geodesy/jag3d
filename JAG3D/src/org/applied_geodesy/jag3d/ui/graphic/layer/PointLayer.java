@@ -706,6 +706,6 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 
 	@Override
 	public boolean hasContent() {
-		return this.points != null && !this.points.isEmpty();
+		return super.hasContent() && this.points != null && !this.points.isEmpty();
 	}
 }

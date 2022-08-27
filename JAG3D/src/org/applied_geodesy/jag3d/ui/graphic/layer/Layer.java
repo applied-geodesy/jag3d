@@ -81,7 +81,12 @@ public abstract class Layer implements IdentifiableLayer {
 	
 	public abstract void drawLegendSymbol(GraphicsContext graphicsContext, GraphicExtent graphicExtent, PixelCoordinate pixelCoordinate, double symbolHeight, double symbolWidth);
 	
-	public abstract boolean hasContent();
+	public boolean hasContent() {
+		 return	this.getMaximumGraphicExtent() != null && 
+				 this.getMaximumGraphicExtent().getExtentHeight() > 0 && this.getMaximumGraphicExtent().getExtentWidth() > 0 &&
+				 !Double.isInfinite(this.getMaximumGraphicExtent().getExtentHeight()) && !Double.isInfinite(this.getMaximumGraphicExtent().getExtentWidth()) &&
+				 !Double.isNaN(this.getMaximumGraphicExtent().getExtentHeight()) && !Double.isNaN(this.getMaximumGraphicExtent().getExtentWidth());
+	}
 	
 	public LayerType getLayerType() {
 		return this.layerType;
