@@ -40,39 +40,41 @@
 				<g transform="translate(0,<@printFormattedNumber value=(max_x + min_x) format=df_svg/>) scale(1,-1)">
 	
 				<#-- Draw ellipses -->
-				<#list point_groups as group>
-					<#if group.visible?? && group.visible>
-						<#list group.points as point>
-							<#if group.type != "REFERENCE_POINT">
-								<#if group.dimension != 1>
-									<ellipse 
-										cx="0" 
-										cy="0" 
-										ry="<@printFormattedNumber value=point.helmert_major_axis*scale_confidence_ellipse format=df_svg/>" 
-										rx="<@printFormattedNumber value=point.helmert_minor_axis*scale_confidence_ellipse format=df_svg/>"
-										transform="translate(<@printFormattedNumber value=point.y format=df_svg/>, <@printFormattedNumber value=point.x format=df_svg/>) scale(1,-1) rotate(<@printFormattedNumber value=point.helmert_alpha*unit_conversion_angle*180/Math.PI format=df_svg/>, 0, 0) " 
-										stroke="darkgray" 
-										stroke-width="0.25" 
-										fill="lightgray" 
-										stroke-dasharray="[1 0]" />
-								<#elseif group.dimension == 1>
-									<line 
-										x1="<@printFormattedNumber value=point.y format=df_svg/>"
-										y1="<@printFormattedNumber value=point.x - 0.5*point.helmert_major_axis*scale_confidence_ellipse format=df_svg/>"
-										x2="<@printFormattedNumber value=point.y format=df_svg/>"
-										y2="<@printFormattedNumber value=point.x + 0.5*point.helmert_major_axis*scale_confidence_ellipse format=df_svg/>"
-										stroke="darkgray" 
-										stroke-width="1" 
-										vector-effect="non-scaling-stroke" 
-										stroke-dasharray="[1 0]" /> 
+				<#if layers["ABSOLUTE_CONFIDENCE"]?? && layers["ABSOLUTE_CONFIDENCE"].visible>
+					<#list point_groups as group>
+						<#if group.visible?? && group.visible>
+							<#list group.points as point>
+								<#if group.type != "REFERENCE_POINT">
+									<#if group.dimension != 1>
+										<ellipse 
+											cx="0" 
+											cy="0" 
+											ry="<@printFormattedNumber value=point.helmert_major_axis*scale_confidence_ellipse format=df_svg/>" 
+											rx="<@printFormattedNumber value=point.helmert_minor_axis*scale_confidence_ellipse format=df_svg/>"
+											transform="translate(<@printFormattedNumber value=point.y format=df_svg/>, <@printFormattedNumber value=point.x format=df_svg/>) scale(1,-1) rotate(<@printFormattedNumber value=point.helmert_alpha*unit_conversion_angle*180/Math.PI format=df_svg/>, 0, 0) " 
+											stroke="darkgray" 
+											stroke-width="0.25" 
+											fill="lightgray" 
+											stroke-dasharray="[1 0]" />
+									<#elseif group.dimension == 1>
+										<line 
+											x1="<@printFormattedNumber value=point.y format=df_svg/>"
+											y1="<@printFormattedNumber value=point.x - 0.5*point.helmert_major_axis*scale_confidence_ellipse format=df_svg/>"
+											x2="<@printFormattedNumber value=point.y format=df_svg/>"
+											y2="<@printFormattedNumber value=point.x + 0.5*point.helmert_major_axis*scale_confidence_ellipse format=df_svg/>"
+											stroke="darkgray" 
+											stroke-width="1" 
+											vector-effect="non-scaling-stroke" 
+											stroke-dasharray="[1 0]" /> 
+									</#if>
 								</#if>
-							</#if>
-						</#list>
-					</#if>
-				</#list>
+							</#list>
+						</#if>
+					</#list>
+				</#if>
 				
 				<#-- Draw observation lines -->
-				<#if observation_groups??>
+				<#if layers["OBSERVATION_APOSTERIORI"]?? && layers["OBSERVATION_APOSTERIORI"].visible && observation_groups??>
 					<#assign observation_lines = {}>
 					<#assign backsides = {}>
 					<#list observation_groups as group>
@@ -95,52 +97,64 @@
 							</#if>
 						</#list>
 					</#list>
-				</#if>	
-	
-				<#if observation_lines??>
-					<#list observation_lines as key, line>
-						<#assign dx = (line.point2.x - line.point1.x)>
-						<#assign dy = (line.point2.y - line.point1.y)>
-						<#assign distance = [Math.sqrt(dx*dx + dy*dy), 1]?max>
-						<#assign dx = dx / distance>
-						<#assign dy = dy / distance>
-						<#assign maxLength = 125>
-						<#assign backside  = backsides[key]???then(1,0)>
-						<line 
-							x1="<@printFormattedNumber value=line.point1.y format=df_svg/>"
-							y1="<@printFormattedNumber value=line.point1.x format=df_svg/>"
-							x2="<@printFormattedNumber value=line.point1.y + ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
-							y2="<@printFormattedNumber value=line.point1.x + ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
-							vector-effect="non-scaling-stroke"
-							stroke="grey" 
-							stroke-width="0.25" 
-							stroke-dasharray="[1 0]" /> 
-						<#if backside == 1>
+
+					<#if observation_lines??>
+						<#list observation_lines as key, line>
+							<#assign dx = (line.point2.x - line.point1.x)>
+							<#assign dy = (line.point2.y - line.point1.y)>
+							<#assign distance = [Math.sqrt(dx*dx + dy*dy), 1]?max>
+							<#assign dx = dx / distance>
+							<#assign dy = dy / distance>
+							<#assign maxLength = 125>
+							<#assign backside  = backsides[key]???then(1,0)>
 							<line 
-								x1="<@printFormattedNumber value=line.point2.y format=df_svg/>"
-								y1="<@printFormattedNumber value=line.point2.x format=df_svg/>"
-								x2="<@printFormattedNumber value=line.point2.y - ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
-								y2="<@printFormattedNumber value=line.point2.x - ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
+								x1="<@printFormattedNumber value=line.point1.y format=df_svg/>"
+								y1="<@printFormattedNumber value=line.point1.x format=df_svg/>"
+								x2="<@printFormattedNumber value=line.point1.y + ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
+								y2="<@printFormattedNumber value=line.point1.x + ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
 								vector-effect="non-scaling-stroke"
 								stroke="grey" 
 								stroke-width="0.25" 
 								stroke-dasharray="[1 0]" /> 
-						</#if>
-						<line 
-							x1="<@printFormattedNumber value=line.point1.y + ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
-							y1="<@printFormattedNumber value=line.point1.x + ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
-							x2="<@printFormattedNumber value=line.point2.y - backside * ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
-							y2="<@printFormattedNumber value=line.point2.x - backside * ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
-							vector-effect="non-scaling-stroke" 
-							stroke="grey" 
-							stroke-width="0.25" 
-							stroke-dasharray="2" /> 
-					</#list>
-				</#if>	
+							<#if backside == 1>
+								<line 
+									x1="<@printFormattedNumber value=line.point2.y format=df_svg/>"
+									y1="<@printFormattedNumber value=line.point2.x format=df_svg/>"
+									x2="<@printFormattedNumber value=line.point2.y - ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
+									y2="<@printFormattedNumber value=line.point2.x - ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
+									vector-effect="non-scaling-stroke"
+									stroke="grey" 
+									stroke-width="0.25" 
+									stroke-dasharray="[1 0]" /> 
+							</#if>
+							<line 
+								x1="<@printFormattedNumber value=line.point1.y + ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
+								y1="<@printFormattedNumber value=line.point1.x + ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
+								x2="<@printFormattedNumber value=line.point2.y - backside * ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
+								y2="<@printFormattedNumber value=line.point2.x - backside * ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
+								vector-effect="non-scaling-stroke" 
+								stroke="grey" 
+								stroke-width="0.25" 
+								stroke-dasharray="2" /> 
+						</#list>
+					</#if>	
+				</#if>
 	
 				<#-- Draw points -->
 				<#list point_groups as group>
-					<#if group.visible?? && group.visible>
+					<#if group.type == "NEW_POINT" && layers["NEW_POINT_APOSTERIORI"]?? && layers["NEW_POINT_APOSTERIORI"].visible>
+						<#assign layer_visible = true>
+					<#elseif group.type == "DATUM_POINT" && layers["DATUM_POINT_APOSTERIORI"]?? && layers["DATUM_POINT_APOSTERIORI"].visible>
+						<#assign layer_visible = true>
+					<#elseif group.type == "STOCHASTIC_POINT" && layers["STOCHASTIC_POINT_APOSTERIORI"]?? && layers["STOCHASTIC_POINT_APOSTERIORI"].visible>
+						<#assign layer_visible = true>
+					<#elseif group.type == "REFERENCE_POINT" && layers["REFERENCE_POINT_APOSTERIORI"]?? && layers["REFERENCE_POINT_APOSTERIORI"].visible>
+						<#assign layer_visible = true>
+					<#else>
+						<#assign layer_visible = false>
+					</#if>
+				
+					<#if layer_visible && group.visible?? && group.visible>
 						<#list group.points as point>
 							<#if group.type == "NEW_POINT">
 								<circle 
@@ -168,7 +182,7 @@
 									stroke-width="0.2" 
 									vector-effect="non-scaling-stroke" 
 									transform="translate(<@printFormattedNumber value=point.y format=df_svg/>, <@printFormattedNumber value=point.x format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=scale_to_view format=df_svg/>) " />
-							<#else>
+							<#elseif group.type == "REFERENCE_POINT">
 								<polygon 
 									points="-3,-3 -3,3, 3,3 3,-3" 
 									fill="blue" 
@@ -176,6 +190,8 @@
 									stroke-width="0.2" 
 									vector-effect="non-scaling-stroke" 
 									transform="rotate(45,<@printFormattedNumber value=point.y format=df_svg/>, <@printFormattedNumber value=point.x format=df_svg/>) translate(<@printFormattedNumber value=point.y format=df_svg/>, <@printFormattedNumber value=point.x format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=scale_to_view format=df_svg/>) " />				
+							<#else>
+								<#continue>
 							</#if>
 							<text 
 								x="0" 
