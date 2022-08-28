@@ -38,6 +38,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -146,6 +147,7 @@ public class FTLReport {
 		this.addVerticalDefelctionGroups();
 		
 		this.addChartAndStatisticValues();
+		this.addLayerProperties();
 		this.addConfidenceEllipseScale();
 	}
 
@@ -637,6 +639,35 @@ public class FTLReport {
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		ResultSet rs = stmt.executeQuery();
 		this.setParam("scale_confidence_ellipse", rs.next() ? rs.getDouble("value") : 1.0);
+	}
+	
+	private void addLayerProperties() throws SQLException {
+		LinkedHashMap<String, HashMap<String, Object>> layers = new LinkedHashMap<String, HashMap<String, Object>>();
+		
+		String sql = "SELECT "
+				+ "\"type\", \"visible\", \"order\" "
+				+ "FROM \"Layer\" "
+				+ "ORDER BY \"order\" DESC";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+		
+		while (rs.next()) {
+			LayerType layerType = LayerType.getEnumByValue(rs.getInt("type"));
+			if (layerType == null)
+				continue;
+			
+			boolean visible = rs.getBoolean("visible") && !rs.wasNull();
+			int order = rs.getInt("order");
+			
+			HashMap<String, Object> layer = new HashMap<String, Object>();
+			layer.put("visible", visible);
+			layer.put("order",   order);
+
+			layers.put(layerType.name(), layer);
+		}
+		
+		this.setParam("layers", layers);
 	}
 	
 	private boolean isPointDimensionVisibility(PointType pointType, int dim) throws SQLException {
@@ -1892,6 +1923,8 @@ public class FTLReport {
 				+ "\"sigma_y\",\"sigma_x\",\"sigma_z\","
 				+ "\"confidence_major_axis\",\"confidence_middle_axis\",\"confidence_minor_axis\","
 				+ "\"confidence_alpha\",\"confidence_beta\",\"confidence_gamma\","
+				+ "\"confidence_major_axis_2d\",\"confidence_minor_axis_2d\","
+				+ "\"confidence_alpha_2d\","
 				+ "\"gross_error_y\",\"gross_error_x\",\"gross_error_z\","
 				+ "\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\",\"minimal_detectable_bias_z\","
 				+ "\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\" "
