@@ -50,7 +50,7 @@ public class RelativeConfidenceLayer extends ConfidenceLayer<PointShiftArrowLaye
 		try {
 			strokeColor = Color.web(PROPERTIES.getProperty("RELATIVE_CONFIDENCE_STROKE_COLOR", "#000000"));
 		} catch (Exception e) {
-			strokeColor = Color.web("#999999");
+			strokeColor = Color.web("#000000");
 		}
 
 		try { visible   = PROPERTIES.getProperty("RELATIVE_CONFIDENCE_VISIBLE").equalsIgnoreCase("TRUE"); } catch (Exception e) {}
