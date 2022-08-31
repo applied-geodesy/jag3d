@@ -70,7 +70,7 @@ public class PointShiftArrowLayer extends ArrowLayer {
 			try {
 				color = Color.web(PROPERTIES.getProperty("POINT_SHIFT_VERTICAL_ARROW_COLOR", "#ffaf00"));
 			} catch (Exception e) {
-				color = Color.web("#ff8c00");
+				color = Color.web("#ffaf00");
 			}
 
 			try {

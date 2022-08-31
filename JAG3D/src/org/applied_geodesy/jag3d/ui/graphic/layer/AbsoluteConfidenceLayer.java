@@ -46,13 +46,13 @@ public class AbsoluteConfidenceLayer extends ConfidenceLayer<PointLayer> {
 		try {
 			fillColor = Color.web(PROPERTIES.getProperty("ABSOLUTE_CONFIDENCE_FILL_COLOR", "#cccccc"));
 		} catch (Exception e) {
-			fillColor = Color.web("#999999");
+			fillColor = Color.web("#cccccc");
 		}
 		
 		try {
 			strokeColor = Color.web(PROPERTIES.getProperty("ABSOLUTE_CONFIDENCE_STROKE_COLOR", "#000000"));
 		} catch (Exception e) {
-			strokeColor = Color.web("#e6e6e6");
+			strokeColor = Color.web("#000000");
 		}
 
 		try { visible   = PROPERTIES.getProperty("ABSOLUTE_CONFIDENCE_VISIBLE").equalsIgnoreCase("TRUE"); } catch (Exception e) {}
