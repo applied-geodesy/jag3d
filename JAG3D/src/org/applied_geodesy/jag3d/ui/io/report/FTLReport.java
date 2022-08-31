@@ -148,7 +148,7 @@ public class FTLReport {
 		
 		this.addChartAndStatisticValues();
 		this.addLayerProperties();
-		this.addConfidenceEllipseScale();
+		this.addVectorScale();
 	}
 
 	public String getSuggestedFileName() {
@@ -631,14 +631,14 @@ public class FTLReport {
 		this.setParam("reliability_summary", reliabilitySummary);
 	}
 	
-	private void addConfidenceEllipseScale() throws SQLException {
+	private void addVectorScale() throws SQLException {
 		String sql = "SELECT "
 				+ "\"value\" "
 				+ "FROM \"LayerEllipseScale\" WHERE \"id\" = 1 LIMIT 1";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		ResultSet rs = stmt.executeQuery();
-		this.setParam("scale_confidence_ellipse", rs.next() ? rs.getDouble("value") : 1.0);
+		this.setParam("vector_scale", rs.next() ? rs.getDouble("value") : 1.0);
 	}
 	
 	private void addLayerProperties() throws SQLException {
@@ -647,7 +647,7 @@ public class FTLReport {
 		String sql = "SELECT "
 				+ "\"type\", \"visible\", \"order\" "
 				+ "FROM \"Layer\" "
-				+ "ORDER BY \"order\" DESC";
+				+ "ORDER BY \"order\" ASC";
 		
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		ResultSet rs = stmt.executeQuery();
@@ -1970,12 +1970,15 @@ public class FTLReport {
 					case "confidence_major_axis":
 					case "confidence_middle_axis":
 					case "confidence_minor_axis":
+					case "confidence_major_axis_2d":
+					case "confidence_minor_axis_2d":
 						h.put(key, options.convertLengthUncertaintyToView(pointPairSet.getDouble(i)));
 						break;
 
 					case "confidence_alpha":
 					case "confidence_beta":
 					case "confidence_gamma":
+					case "confidence_alpha_2d":
 						h.put(key, options.convertAngleToView(pointPairSet.getDouble(i)));
 						break;
 
