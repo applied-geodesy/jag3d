@@ -259,3 +259,8 @@ ol.chart li:nth-child(3) span {
 	border-left: 1px solid rgb(238, 44, 44);
     background: rgb(238, 44, 44);
 }
+
+svg {
+	border: 1px solid #023bb0;
+	border-radius: 2px 2px 2px 2px;
+}
