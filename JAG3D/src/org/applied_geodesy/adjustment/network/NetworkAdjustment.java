@@ -3848,7 +3848,7 @@ public class NetworkAdjustment implements Runnable {
 				int dim = gnss.getDimension();
 	
 				TestStatisticParameterSet tsPrio = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, Double.POSITIVE_INFINITY);
-				double lambda = Math.sqrt(Math.abs(tsPrio.getNoncentralityParameter()));
+				double sqrtLambda = Math.sqrt(Math.abs(tsPrio.getNoncentralityParameter()));
 
 				List<Observation> baseline = gnss.getBaselineComponents();
 				
@@ -3897,7 +3897,7 @@ public class NetworkAdjustment implements Runnable {
 						Vector nabla0 = new DenseVector(dim);
 						Vector ep     = new DenseVector(gnss.getDimension());
 						for (int j=0; j<dim; j++)
-							nabla0.set(j, confidenceRegion.getMinimalDetectableBias(j)*lambda);
+							nabla0.set(j, confidenceRegion.getMinimalDetectableBias(j)*sqrtLambda);
 
 						ATQxxBP.mult(nabla0, ep);
 						
@@ -3949,7 +3949,7 @@ public class NetworkAdjustment implements Runnable {
 								mtb = nabla0.get(j)/Math.sqrt(nQn0);
 							
 //							baseline.get(j).setMinimalDetectableBias( nabla0.get(j) );
-							baseline.get(j).setMinimalDetectableBias( mtb * lambda );
+							baseline.get(j).setMinimalDetectableBias( mtb * sqrtLambda );
 							baseline.get(j).setMaximumTolerableBias( mtb );
 							baseline.get(j).setGrossError( nabla.get(j) );	
 							baseline.get(j).setInfluenceOnPointPosition( ep.get(j) );

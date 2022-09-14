@@ -204,7 +204,7 @@ public class ConfidenceRegion {
 		// Spalten == Eigenvektoren
 		this.minimalDetectableBias = new double[this.dimension];
 		for (int i=0; i<this.dimension; i++) {
-			minimalDetectableBias[i] = Math.sqrt(maxEval) * this.eigenvectors.get(i, indexMaxEval);
+			this.minimalDetectableBias[i] = Math.sqrt(maxEval) * this.eigenvectors.get(i, indexMaxEval);
 		}
 	}	
 	
