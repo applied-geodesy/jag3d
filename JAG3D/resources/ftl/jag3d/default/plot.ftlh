@@ -1,4 +1,3 @@
-<#-- Create list of points -->
 <#if point_groups??>
 	<#include "i18n/plot.ftlh" parse=true>
 	
@@ -10,6 +9,7 @@
 	<#assign points = {}>
 	<#assign plot_network = false>
 
+	<#-- Create list of points -->
 	<#list point_groups as group>
 		<#if group.visible>
 			<#assign plot_network = true>
@@ -114,6 +114,7 @@
 													stroke="#000000" 
 													stroke-width="0.25" 
 													fill="#cccccc" 
+													vector-effect="non-scaling-stroke" 
 													stroke-dasharray="[1 0]" />
 											<#elseif group.dimension == 1>
 												<line 
@@ -152,6 +153,7 @@
 														stroke="#000000" 
 														stroke-width="0.25" 
 														fill="#ffffe0" 
+														vector-effect="non-scaling-stroke" 
 														stroke-dasharray="[1 0]" />
 												<#elseif group.dimension == 1 && layers["POINT_SHIFT_VERTICAL"].visible>
 													<line 
