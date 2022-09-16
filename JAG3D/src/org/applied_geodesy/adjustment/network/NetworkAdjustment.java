@@ -752,28 +752,34 @@ public class NetworkAdjustment implements Runnable {
 					deflectionY.setMaximumTolerableBias(nabla0.get(1));
 			    }
 			    else {
-			    	Qnn.mult(Pv, nabla);
-			    	double nablaCoVarNable = Math.abs(nabla.dot(Pv0));
-			    	((VerticalDeflectionX)deflectionX).setNablaCoVarNabla( nablaCoVarNable );
-			    	
-					nabla = nabla.scale(-1.0);
-					deflectionX.setGrossError(nabla.get(0));
-					deflectionY.setGrossError(nabla.get(1));
-					
-					//Qll_P.mult(nabla, ep);
-					
-					Vector subPsubPQvvPNabla = new DenseVector(dim);
-					subPsubPQvvP.mult(nabla, subPsubPQvvPNabla);
+			    	Vector nabla0 = new DenseVector(nabla, true);
+			    	double normNabla = nabla0.norm(Vector.Norm.Two);
+			    	if (normNabla < SQRT_EPS) {
+						for (int j=0; j<dim; j++)
+							nabla0.set(j, confidenceRegion.getMinimalDetectableBias(j));
+					}
+			    	else {
+			    		Qnn.mult(Pv, nabla);
+			    		double nablaCoVarNable = Math.abs(nabla.dot(Pv0));
+			    		((VerticalDeflectionX)deflectionX).setNablaCoVarNabla( nablaCoVarNable );
 
-					// Bestimme Nabla auf der Grenzwertellipse mit nabla0*Pnn*nabla0 == 1
-				    Vector nabla0 = new DenseVector(nabla, true);
-				    Vector PQvvPnabla0 = new DenseVector(nabla0);
-				    PR.mult(nabla0, PQvvPnabla0);
-					double nQn0 = nabla0.dot(PQvvPnabla0);
-					for (int j=0; j<dim; j++)
-						if (nQn0 > 0)
-							nabla0.set(j, nabla0.get(j)/Math.sqrt(nQn0));
-					
+			    		nabla = nabla.scale(-1.0);
+			    		deflectionX.setGrossError(nabla.get(0));
+			    		deflectionY.setGrossError(nabla.get(1));
+
+			    		//Qll_P.mult(nabla, ep);
+
+			    		Vector subPsubPQvvPNabla = new DenseVector(dim);
+			    		subPsubPQvvP.mult(nabla, subPsubPQvvPNabla);
+
+			    		// Bestimme Nabla auf der Grenzwertellipse mit nabla0*Pnn*nabla0 == 1
+			    		Vector PQvvPnabla0 = new DenseVector(nabla0);
+			    		PR.mult(nabla0, PQvvPnabla0);
+			    		double nQn0 = nabla0.dot(PQvvPnabla0);
+			    		for (int j=0; j<dim; j++)
+			    			if (nQn0 > 0)
+			    				nabla0.set(j, nabla0.get(j)/Math.sqrt(nQn0));
+			    	}
 					//deflectionX.setMinimalDetectableBias(nabla0.get(0));
 					//deflectionY.setMinimalDetectableBias(nabla0.get(1));
 					deflectionX.setMaximumTolerableBias(nabla0.get(0));
@@ -957,26 +963,34 @@ public class NetworkAdjustment implements Runnable {
 					point.setInfluenceOnNetworkDistortion(efsp);
 			    }
 			    else {
-			    	Qnn.mult(Pv, nabla);
-					point.setNablaCoVarNabla( Math.abs(nabla.dot(Pv0)) );
-					nabla = nabla.scale(-1.0);
-					point.setGrossErrors( Matrices.getArray(nabla) );
-					Qll_P.mult(nabla, ep);
-					point.setInfluencesOnPointPosition( Matrices.getArray(ep) );
-					
-					Vector subPsubPQvvPNabla = new DenseVector(dim);
-					subPsubPQvvP.mult(nabla, subPsubPQvvPNabla);
-					double efsp = Math.sqrt(Math.abs(subPsubPQvvPNabla.dot(nabla)));	
+			    	double efsp = 0;
+			    	Vector nabla0 = new DenseVector(nabla, true);
+			    	double normNabla = nabla0.norm(Vector.Norm.Two);
+			    	if (normNabla < SQRT_EPS) {
+						for (int j=0; j<dim; j++)
+							nabla0.set(j, confidenceRegion.getMinimalDetectableBias(j));
+					}
+					else {
+			    		Qnn.mult(Pv, nabla);
+						point.setNablaCoVarNabla( Math.abs(nabla.dot(Pv0)) );
+						nabla = nabla.scale(-1.0);
+						point.setGrossErrors( Matrices.getArray(nabla) );
+						Qll_P.mult(nabla, ep);
+						point.setInfluencesOnPointPosition( Matrices.getArray(ep) );
 
-					// Bestimme Nabla auf der Grenzwertellipse mit nabla0*Pnn*nabla0 == 1
-				    Vector nabla0 = new DenseVector(nabla, true);
-				    Vector PQvvPnabla0 = new DenseVector(nabla0);
-				    PR.mult(nabla0, PQvvPnabla0);
-					double nQn0 = nabla0.dot(PQvvPnabla0);
-					for (int j=0; j<dim; j++)
-						if (nQn0 > 0)
-							nabla0.set(j, nabla0.get(j)/Math.sqrt(nQn0));
-					//point.setMinimalDetectableBiases(Matrices.getArray(nabla0));
+						Vector subPsubPQvvPNabla = new DenseVector(dim);
+						subPsubPQvvP.mult(nabla, subPsubPQvvPNabla);
+						efsp = Math.sqrt(Math.abs(subPsubPQvvPNabla.dot(nabla)));	
+
+						// Bestimme Nabla auf der Grenzwertellipse mit nabla0*Pnn*nabla0 == 1
+						Vector PQvvPnabla0 = new DenseVector(nabla0);
+						PR.mult(nabla0, PQvvPnabla0);
+						double nQn0 = nabla0.dot(PQvvPnabla0);
+						for (int j=0; j<dim; j++)
+							if (nQn0 > 0)
+								nabla0.set(j, nabla0.get(j)/Math.sqrt(nQn0));
+					}
+			    	//point.setMinimalDetectableBiases(Matrices.getArray(nabla0));
 					point.setMaximumTolerableBiases( Matrices.getArray(nabla0) );
 					point.setInfluenceOnNetworkDistortion(efsp);
 			    }
@@ -3054,21 +3068,28 @@ public class NetworkAdjustment implements Runnable {
 					point.setMaximumTolerableBiases(Matrices.getArray(nabla0));
 			    }
 			    else {
-			    	Qnn.mult(BTPv, nabla);
-				    point.setNablaCoVarNabla( Math.abs(nabla.dot(BTPv)) );
-				    point.setGrossErrors( Matrices.getArray(nabla.scale(-1.0)) );
-				    
-				    // Bestimme Nabla auf der Grenzwertellipse mit nabla0*Pnn*nabla0 == 1
-				    Vector nabla0 = new DenseVector(nabla, true);
-				    Vector PQvvPnabla0 = new DenseVector(nabla0);
-					BTPQvvPB.mult(nabla0, PQvvPnabla0);
-					double nQn0 = nabla0.dot(PQvvPnabla0);
-					if (nQn0 > 0) {
-						for (int j=0; j<dim; j++)
-							nabla0.set(j, nabla0.get(j)/Math.sqrt(nQn0));
-						//point.setMinimalDetectableBiases(Matrices.getArray(nabla0));
-						point.setMaximumTolerableBiases(Matrices.getArray(nabla0));
-					}
+			    	Vector nabla0 = new DenseVector(nabla, true);
+			    	double normNabla = nabla0.norm(Vector.Norm.Two);
+			    	if (normNabla < SQRT_EPS) {
+			    		for (int j=0; j<dim; j++)
+			    			nabla0.set(j, confidenceRegion.getMinimalDetectableBias(j));
+			    	}
+			    	else {
+			    		Qnn.mult(BTPv, nabla);
+			    		point.setNablaCoVarNabla( Math.abs(nabla.dot(BTPv)) );
+			    		point.setGrossErrors( Matrices.getArray(nabla.scale(-1.0)) );
+
+			    		// Bestimme Nabla auf der Grenzwertellipse mit nabla0*Pnn*nabla0 == 1
+			    		Vector PQvvPnabla0 = new DenseVector(nabla0);
+			    		BTPQvvPB.mult(nabla0, PQvvPnabla0);
+			    		double nQn0 = nabla0.dot(PQvvPnabla0);
+			    		if (nQn0 > 0) {
+			    			for (int j=0; j<dim; j++)
+			    				nabla0.set(j, nabla0.get(j)/Math.sqrt(nQn0));
+			    			//point.setMinimalDetectableBiases(Matrices.getArray(nabla0));
+			    			point.setMaximumTolerableBiases(Matrices.getArray(nabla0));
+			    		}
+			    	}
 			    }
 			}
 			
@@ -3540,6 +3561,7 @@ public class NetworkAdjustment implements Runnable {
 							
 							double nabla[] = new double[dim];
 							double grzw[]  = new double[dim];
+							double normNabla = 0;
 							if (dim != 1) {
 								nabla[0] = p0.getX() - p1.getX();
 								nabla[1] = p0.getY() - p1.getY();
@@ -3547,6 +3569,11 @@ public class NetworkAdjustment implements Runnable {
 							if (dim != 2) {
 								nabla[dim-1] = p0.getZ() - p1.getZ();
 							}
+							
+							for (int r=0; r<dim; r++)
+								normNabla += nabla[r] * nabla[r];
+							normNabla = Math.sqrt(normNabla);
+							
 							Matrix tiePxx = null;
 							try {
 								tiePxx = MathExtension.pinv(tieQxx, -1);
@@ -3555,7 +3582,7 @@ public class NetworkAdjustment implements Runnable {
 								nce.printStackTrace();
 							}
 							
-							if (tiePxx != null) {
+							if (tiePxx != null && normNabla > SQRT_EPS) {
 								double tPost = 0.0;
 								double tPrio = 0.0;
 								for (int r=0; r<dim; r++) {
@@ -3568,15 +3595,13 @@ public class NetworkAdjustment implements Runnable {
 								tPrio /= dim;
 								tPost = this.applyAposterioriVarianceOfUnitWeight && sigma2apost > SQRT_EPS ? tPrio / sigma2apost : 0.0;
 
-								if (this.estimationType != EstimationType.SIMULATION) {
-									Vector nabla0 = new DenseVector(nabla, true);
-									Vector PxxNabla0 = new DenseVector(nabla0, true);
-									tiePxx.mult(nabla0, PxxNabla0);
-									double nPn0 = nabla0.dot(PxxNabla0);
-									for (int j=0; j<dim; j++) {
-										if (nPn0 > 0)
-											grzw[j] = sqrtLambda * nabla0.get(j)/Math.sqrt(nPn0);
-									}
+								Vector nabla0 = new DenseVector(nabla, true);
+								Vector PxxNabla0 = new DenseVector(nabla0, true);
+								tiePxx.mult(nabla0, PxxNabla0);
+								double nPn0 = nabla0.dot(PxxNabla0);
+								for (int j=0; j<dim; j++) {
+									if (nPn0 > 0)
+										grzw[j] = sqrtLambda * nabla0.get(j)/Math.sqrt(nPn0);
 								}
 								tie.setTeststatisticValues(tPrio, tPost);
 							}
@@ -3590,10 +3615,11 @@ public class NetworkAdjustment implements Runnable {
 								ConfidenceRegion confidenceRegion = new ConfidenceRegion(this.significanceTestStatisticParameters, tieQxx);
 								if (confidenceRegion != null) {
 									tie.setConfidenceRegion(confidenceRegion);
-									if (this.estimationType == EstimationType.SIMULATION) {
+									if (normNabla < SQRT_EPS) { // this.estimationType == EstimationType.SIMULATION) {
 										for (int i=0; i<dim; i++) {
-											grzw[i]  = sqrtLambda*confidenceRegion.getMinimalDetectableBias(i);
-											nabla[i] = sqrtLambda*confidenceRegion.getMinimalDetectableBias(i);
+											grzw[i] = sqrtLambda*confidenceRegion.getMinimalDetectableBias(i);
+											if (this.estimationType != EstimationType.SIMULATION) 
+												nabla[i] = grzw[i];
 										}
 									}
 								}
