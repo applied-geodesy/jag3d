@@ -24,7 +24,7 @@ package org.applied_geodesy.adjustment.network.congruence.strain.parameter;
 import org.applied_geodesy.adjustment.network.parameter.UnknownParameter;
 
 public abstract class StrainParameter extends UnknownParameter {
-	private double value, tPrio = 0.0, tPost = 0.0, pPrio = 0.0, pPost = 0.0, nabla = 0.0, grzw = 0.0, confidence = 0.0;
+	private double value, tPrio = 0.0, tPost = 0.0, pPrio = 0.0, pPost = 0.0, nabla = 0.0, mdb = 0.0, confidence = 0.0;
 	
 	private double sigma = -1;
 	private boolean significant = false;
@@ -102,11 +102,11 @@ public abstract class StrainParameter extends UnknownParameter {
 	}
 
 	public double getMinimalDetectableBias() {
-		return grzw;
+		return mdb;
 	}
 
-	public void setMinimalDetectableBias(double grzw) {
-		this.grzw = grzw;
+	public void setMinimalDetectableBias(double mdb) {
+		this.mdb = mdb;
 	}
 
 	public double getConfidence() {

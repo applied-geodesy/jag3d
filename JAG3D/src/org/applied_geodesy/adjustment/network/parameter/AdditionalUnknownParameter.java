@@ -24,7 +24,7 @@ package org.applied_geodesy.adjustment.network.parameter;
 import org.applied_geodesy.adjustment.network.observation.group.ObservationGroup;
 
 public abstract class AdditionalUnknownParameter extends UnknownParameter {
-	private double value, tPrio = 0.0, tPost = 0.0, pPrio = 0.0, pPost = 0.0, nabla = 0.0, grzw = 0.0, confidence = 0.0;
+	private double value, tPrio = 0.0, tPost = 0.0, pPrio = 0.0, pPost = 0.0, nabla = 0.0, mdb = 0.0, confidence = 0.0;
 	
 	// Standardabweichung des Zusatzparameters; -1 == nicht gesetzt
 	private double sigma = -1;
@@ -96,7 +96,7 @@ public abstract class AdditionalUnknownParameter extends UnknownParameter {
 	}
 
 	public double getGrossError() {
-		return nabla;
+		return this.nabla;
 	}
 
 	public void setGrossError(double nabla) {
@@ -104,11 +104,11 @@ public abstract class AdditionalUnknownParameter extends UnknownParameter {
 	}
 
 	public double getMinimalDetectableBias() {
-		return grzw;
+		return this.mdb;
 	}
 
-	public void setMinimalDetectableBias(double grzw) {
-		this.grzw = grzw;
+	public void setMinimalDetectableBias(double mdb) {
+		this.mdb = mdb;
 	}
 
 	public double getConfidence() {
