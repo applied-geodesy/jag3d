@@ -3225,17 +3225,17 @@ public class NetworkAdjustment implements Runnable {
 
 				TestStatisticParameterSet tsPrio = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, Double.POSITIVE_INFINITY);
 				TestStatisticParameterSet tsPost = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, dof-dim);
-				double lamda = Math.sqrt(Math.abs(tsPrio.getNoncentralityParameter()));
+				double sqrtLambda = Math.sqrt(Math.abs(tsPrio.getNoncentralityParameter()));
 				double kPrio = tsPrio.getQuantile();
 				double kPost = tsPost.getQuantile();
 				
 				double mdb[] = new double[dim];
 				if (dim != 1) {
-					mdb[0] = point.getMaximumTolerableBiasX()*lamda;
-					mdb[1] = point.getMaximumTolerableBiasY()*lamda;
+					mdb[0] = point.getMaximumTolerableBiasX()*sqrtLambda;
+					mdb[1] = point.getMaximumTolerableBiasY()*sqrtLambda;
 				}
 				if (dim != 2) {
-					mdb[dim-1] = point.getMaximumTolerableBiasZ()*lamda;
+					mdb[dim-1] = point.getMaximumTolerableBiasZ()*sqrtLambda;
 				}
 				
 				point.setMinimalDetectableBiases(mdb);
@@ -3444,9 +3444,9 @@ public class NetworkAdjustment implements Runnable {
 					
 					TestStatisticParameterSet tsPrio = this.significanceTestStatisticParameters.getTestStatisticParameter(1, Double.POSITIVE_INFINITY);
 					TestStatisticParameterSet tsPost = this.significanceTestStatisticParameters.getTestStatisticParameter(1, dof);
-					double lamda = tsPrio.getNoncentralityParameter();
-					double kPrio = tsPrio.getQuantile();
-					double kPost = tsPost.getQuantile();
+					double lambda = tsPrio.getNoncentralityParameter();
+					double kPrio  = tsPrio.getQuantile();
+					double kPost  = tsPost.getQuantile();
 
 					double value = additionalUnknownParameter.getValue();
 					if (additionalUnknownParameter.getParameterType() == ParameterType.ORIENTATION ||
@@ -3463,7 +3463,7 @@ public class NetworkAdjustment implements Runnable {
 					double tPost = this.applyAposterioriVarianceOfUnitWeight ? (qxxPost < Constant.EPS ? Double.POSITIVE_INFINITY : nabla*nabla/qxxPost) : 0.0;
 					double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, 1);
 					double pPost = this.applyAposterioriVarianceOfUnitWeight ? TestStatistic.getLogarithmicProbabilityValue(tPost, 1, dof) : 0.0;
-					double nabla0 = Math.signum(nabla) * Math.sqrt(Math.abs(lamda * qxxPrio));
+					double nabla0 = Math.signum(nabla) * Math.sqrt(Math.abs(lambda * qxxPrio));
 
 					additionalUnknownParameter.setTprio(tPrio);
 					additionalUnknownParameter.setTpost(tPost);
