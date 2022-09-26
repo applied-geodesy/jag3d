@@ -1446,30 +1446,24 @@ public class NetworkAdjustment implements Runnable {
 					// Berechnet AT*P
 					if (unknownParameterAT.getParameterType() == ParameterType.POINT1D) {
 						Point p = (Point)unknownParameterAT;
-						if (p.equals(observationAT.getStartPoint())) {
+						if (p.equals(observationAT.getStartPoint())) 
 							at = observationAT.diffZs();
-						}
-						else if (p.equals(observationAT.getEndPoint())) {
+						else if (p.equals(observationAT.getEndPoint())) 
 							at = observationAT.diffZe();
-						}
 					}
 					else if (unknownParameterAT.getParameterType() == ParameterType.POINT2D) {
 						Point p = (Point)unknownParameterAT;
 						if (p.equals(observationAT.getStartPoint())) {
-							if (i==0) {
+							if (i==0)
 								at = observationAT.diffXs();
-							}
-							else if (i==1) {
+							else if (i==1)
 								at = observationAT.diffYs();
-							}
 						}
 						else if (p.equals(observationAT.getEndPoint())) {
-							if (i==0) {
+							if (i==0)
 								at = observationAT.diffXe();
-							}
-							else if (i==1) {
+							else if (i==1)
 								at = observationAT.diffYe();
-							}
 						}
 					}
 					else if (unknownParameterAT.getParameterType() == ParameterType.POINT3D) {
@@ -1508,27 +1502,20 @@ public class NetworkAdjustment implements Runnable {
 						else if (p.equals(observationAT.getEndPoint()))
 							at = observationAT.diffVerticalDeflectionYe();
 					}
-					else if (unknownParameterAT.getParameterType() == ParameterType.ORIENTATION) {
+					else if (unknownParameterAT.getParameterType() == ParameterType.ORIENTATION)
 						at = observationAT.diffOri();
-					}
-					else if (unknownParameterAT.getParameterType() == ParameterType.ZERO_POINT_OFFSET) {
+					else if (unknownParameterAT.getParameterType() == ParameterType.ZERO_POINT_OFFSET)
 						at = observationAT.diffAdd();
-					}
-					else if (unknownParameterAT.getParameterType() == ParameterType.SCALE) {
+					else if (unknownParameterAT.getParameterType() == ParameterType.SCALE) 
 						at = observationAT.diffScale();
-					}
-					else if (unknownParameterAT.getParameterType() == ParameterType.REFRACTION_INDEX) {
+					else if (unknownParameterAT.getParameterType() == ParameterType.REFRACTION_INDEX)
 						at = observationAT.diffRefCoeff();
-					}
-					else if (unknownParameterAT.getParameterType() == ParameterType.ROTATION_X) {
+					else if (unknownParameterAT.getParameterType() == ParameterType.ROTATION_X)
 						at = observationAT.diffRotX();
-					}
-					else if (unknownParameterAT.getParameterType() == ParameterType.ROTATION_Y) {
+					else if (unknownParameterAT.getParameterType() == ParameterType.ROTATION_Y)
 						at = observationAT.diffRotY();
-					}
-					else if (unknownParameterAT.getParameterType() == ParameterType.ROTATION_Z) {
+					else if (unknownParameterAT.getParameterType() == ParameterType.ROTATION_Z)
 						at = observationAT.diffRotZ();
-					}
 
 					// Zeile aT*p bestimmen
 					double atp = at / (observationAT.getStdApriori() * observationAT.getStdApriori());
@@ -1630,29 +1617,23 @@ public class NetworkAdjustment implements Runnable {
 								else if (p.equals(observationA.getEndPoint()))
 									a = observationA.diffVerticalDeflectionYe();
 							}
-							else if (unknownParameterA.getParameterType() == ParameterType.ORIENTATION) {
+							else if (unknownParameterA.getParameterType() == ParameterType.ORIENTATION)
 								a = observationA.diffOri();
-							}
-							else if (unknownParameterA.getParameterType() == ParameterType.ZERO_POINT_OFFSET) {
+							else if (unknownParameterA.getParameterType() == ParameterType.ZERO_POINT_OFFSET)
 								a = observationA.diffAdd();
-							}
-							else if (unknownParameterA.getParameterType() == ParameterType.SCALE) {
+							else if (unknownParameterA.getParameterType() == ParameterType.SCALE)
 								a = observationA.diffScale();
-							}
-							else if (unknownParameterA.getParameterType() == ParameterType.REFRACTION_INDEX) {
+							else if (unknownParameterA.getParameterType() == ParameterType.REFRACTION_INDEX)
 								a = observationA.diffRefCoeff();
-							}
-							else if (unknownParameterA.getParameterType() == ParameterType.ROTATION_X) {
+							else if (unknownParameterA.getParameterType() == ParameterType.ROTATION_X)
 								a = observationA.diffRotX();
-							}
-							else if (unknownParameterA.getParameterType() == ParameterType.ROTATION_Y) {
+							else if (unknownParameterA.getParameterType() == ParameterType.ROTATION_Y)
 								a = observationA.diffRotY();
-							}
-							else if (unknownParameterA.getParameterType() == ParameterType.ROTATION_Z) {
+							else if (unknownParameterA.getParameterType() == ParameterType.ROTATION_Z)
 								a = observationA.diffRotZ();
-							}
 							// Berechnung von N = ATP*A 
-							N.set(colAT, colA, N.get(colAT, colA) + aTp.get(rowA)*a);
+							if (a != 0)
+								N.set(colAT, colA, N.get(colAT, colA) + aTp.get(rowA)*a);
 						}
 					}
 				}
