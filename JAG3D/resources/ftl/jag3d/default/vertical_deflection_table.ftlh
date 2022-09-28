@@ -17,8 +17,8 @@
 					${vertical_deflection_table_caption}</#outputformat>: ${group.name}
 					<#if group.uncertainties?? && group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
 						<ul class="group_uncertainties">
-							<#if group.uncertainties.deflection_y??><li>&sigma;<sub>y</sub> = <@printFormattedNumber value=group.uncertainties.deflection_y format=df_angle_uncertainty/><span class="unit">${unit_abbr_angle_uncertainty}</span></li></#if>
-							<#if group.uncertainties.deflection_x??><li>&sigma;<sub>x</sub> = <@printFormattedNumber value=group.uncertainties.deflection_x format=df_angle_uncertainty/><span class="unit">${unit_abbr_angle_uncertainty}</span></li></#if>
+							<#if group.uncertainties.deflection_y??><li>&sigma;<sub>y</sub> = <@printFormattedNumber value=group.uncertainties.deflection_y format=df_angle_uncertainty/>&nbsp;${unit_abbr_angle_uncertainty}</li></#if>
+							<#if group.uncertainties.deflection_x??><li>&sigma;<sub>x</sub> = <@printFormattedNumber value=group.uncertainties.deflection_x format=df_angle_uncertainty/>&nbsp;${unit_abbr_angle_uncertainty}</li></#if>
 						</ul>
 					</#if>	
 				</caption>
