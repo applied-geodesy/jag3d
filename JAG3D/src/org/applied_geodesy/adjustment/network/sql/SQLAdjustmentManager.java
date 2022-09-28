@@ -187,6 +187,10 @@ public class SQLAdjustmentManager {
 
 		if (this.pure1DNetwork)
 			this.applicableHorizontalProjection = false;
+		
+		// Abbildungsreduktionen sind bei einer Diagnoseauswertung unzulaessig, da es keine realen Beobachtungen gibt 
+		if (this.estimationType == EstimationType.SIMULATION && this.reductions.size() > 0) 
+			throw new IllegalProjectionPropertyException("Projection cannot applied to pseudo-observations in diagnosis adjustment (simulation)!");
 
 		// wenn 2D Projektionen nicht moeglich sind, werden keine Reduktionen durchgefuehrt
 		if ((this.reductions.getProjectionType() == ProjectionType.GAUSS_KRUEGER || this.reductions.getProjectionType() == ProjectionType.UTM) && (this.reductions.applyReductionTask(ReductionTaskType.DIRECTION) || this.reductions.applyReductionTask(ReductionTaskType.DISTANCE)) && !this.applicableHorizontalProjection) {
