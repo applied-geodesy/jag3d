@@ -1554,13 +1554,10 @@ public class NetworkAdjustment implements Runnable {
 							if (unknownParameterA.getParameterType() == ParameterType.POINT1D) {
 								Point p = (Point)unknownParameterA;
 								
-								if (p.equals(observationA.getStartPoint())) {
+								if (p.equals(observationA.getStartPoint())) 
 									a = observationA.diffZs();
-								}
-								else if (p.equals(observationA.getEndPoint())) {
+								else if (p.equals(observationA.getEndPoint())) 
 									a = observationA.diffZe();
-								}
-			
 							}
 							else if (unknownParameterA.getParameterType() == ParameterType.POINT2D) {
 								Point p = (Point)unknownParameterA;
@@ -1629,8 +1626,7 @@ public class NetworkAdjustment implements Runnable {
 							else if (unknownParameterA.getParameterType() == ParameterType.ROTATION_Z)
 								a = observationA.diffRotZ();
 							// Berechnung von N = ATP*A 
-							if (a != 0)
-								N.add(colAT, colA, aTp.get(rowA)*a);
+							N.add(colAT, colA, aTp.get(rowA)*a);
 						}
 					}
 				}
