@@ -22,7 +22,6 @@
 package org.applied_geodesy.adjustment.network.point;
 
 import org.applied_geodesy.adjustment.network.ParameterType;
-import org.applied_geodesy.adjustment.network.point.Point;
 
 public class Point2D extends Point{
 

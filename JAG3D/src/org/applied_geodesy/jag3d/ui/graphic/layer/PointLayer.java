@@ -27,7 +27,6 @@ import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
-import org.applied_geodesy.jag3d.ui.graphic.layer.HighlightableLayer;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.PointSymbolType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.sql.GraphicPoint;
