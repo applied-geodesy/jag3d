@@ -2316,9 +2316,7 @@ public class NetworkAdjustment implements Runnable {
 	 * @param index
 	 * @param signum
 	 * @param scale
-	 * @deprecated
 	 */
-	//TODO entfernen
 	private void prepareSphericalSimplexUnscentedTransformationObservation(int estimationStep, Vector SigmaUT, double weight) {
 		int noo = SigmaUT.size();
 		
@@ -2359,6 +2357,12 @@ public class NetworkAdjustment implements Runnable {
 			for (int i = 0; i < verticalDeflectionGroup.size(); i++) {
 				VerticalDeflection deflectionX = verticalDeflectionGroup.getVerticalDeflectionX(i);
 				VerticalDeflection deflectionY = verticalDeflectionGroup.getVerticalDeflectionY(i);
+				
+				// Wird DOV gruppenweise geschaetzt, so nutze die Gruppenwerte und beende Schleife nach einem Durchlauf
+				if (verticalDeflectionGroup.isRestricted(VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS)) {
+					deflectionX = verticalDeflectionGroup.getVerticalDeflectionX();
+					deflectionY = verticalDeflectionGroup.getVerticalDeflectionY();
+				}
 
 				int rowX = deflectionX.getRowInJacobiMatrix();
 				int rowY = deflectionY.getRowInJacobiMatrix();
@@ -2403,6 +2407,9 @@ public class NetworkAdjustment implements Runnable {
 
 				SigmaUT.set(rowX, sigmaUTX);
 				SigmaUT.set(rowY, sigmaUTY);
+				
+				if (verticalDeflectionGroup.isRestricted(VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS)) 
+					break;
 			}
 		}
 
@@ -2481,7 +2488,6 @@ public class NetworkAdjustment implements Runnable {
 	 * @param scale
 	 * @deprecated entfernen
 	 */
-	//TODO entfernen
 	private void prepareModifiedUnscentedTransformationObservation(int index, double scale) {
 		if (index < this.numberOfObservations) {
 			Observation observation = this.projectObservations.get(index);
@@ -2492,32 +2498,52 @@ public class NetworkAdjustment implements Runnable {
 			value = value + scale * std;
 			observation.setValueApriori(value);
 		}
-//		else if (index < this.numberOfObservations + this.numberOfStochasticDeflectionRows) {
-//			int deflectionIdx  = index - this.numberOfObservations;
-//			int deflectionType = deflectionIdx % 2; // 0 == x oder 1 == y
-//			deflectionIdx = deflectionIdx / 2;
-//
-//			Point point = this.pointsWithStochasticDeflection.get(deflectionIdx);
-//			
-//			if (deflectionType == 0) {
-//				VerticalDeflection deflectionX = point.getVerticalDeflectionX();
-//
-//				double std   = deflectionX.getStdApriori();
-//				double value = deflectionX.getValue0();
-//
-//				value = value + scale * std;
-//				deflectionX.setValue0(value);
-//			}
-//			else {
-//				VerticalDeflection deflectionY = point.getVerticalDeflectionY();
-//
-//				double std   = deflectionY.getStdApriori();
-//				double value = deflectionY.getValue0();
-//
-//				value = value + scale * std;
-//				deflectionY.setValue0(value);
-//			}
-//		}
+		else if (index < this.numberOfObservations + this.numberOfStochasticDeflectionRows) {
+			int deflectionIdx  = index - this.numberOfObservations;
+			int deflectionType = deflectionIdx % 2; // 0 == x oder 1 == y
+			deflectionIdx = deflectionIdx / 2;
+			
+			for (VerticalDeflectionGroup verticalDeflectionGroup : this.verticalDeflectionGroups) {
+				if (verticalDeflectionGroup.getVerticalDeflectionType() != VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION)
+					continue;
+				
+				int idx = 0;
+				for (int i = 0; i<verticalDeflectionGroup.size(); i++) {
+					
+					VerticalDeflection deflectionX = verticalDeflectionGroup.getVerticalDeflectionX(i);
+					VerticalDeflection deflectionY = verticalDeflectionGroup.getVerticalDeflectionY(i);
+
+					// Wird DOV gruppenweise geschaetzt, so nutze die Gruppenwerte und beende Schleife nach einem Durchlauf
+					if (verticalDeflectionGroup.isRestricted(VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS)) {
+						deflectionX = verticalDeflectionGroup.getVerticalDeflectionX();
+						deflectionY = verticalDeflectionGroup.getVerticalDeflectionY();
+					}
+					
+					if (idx == deflectionIdx) {
+						if (deflectionType == 0) {
+							double std   = deflectionX.getStdApriori();
+							double value = deflectionX.getValue0();
+
+							value = value + scale * std;
+							deflectionX.setValue0(value);
+						}
+						else {
+							double std   = deflectionY.getStdApriori();
+							double value = deflectionY.getValue0();
+
+							value = value + scale * std;
+							deflectionY.setValue0(value);
+						}
+						break;
+					}
+					
+					idx++;
+					
+					if (verticalDeflectionGroup.isRestricted(VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS)) 
+						break;
+				}
+			}
+		}
 		else if (index < this.numberOfObservations + this.numberOfStochasticDeflectionRows + this.numberOfStochasticPointRows) {
 			int pointIdx = index - this.numberOfObservations - this.numberOfStochasticDeflectionRows;
 			for (int i = 0, j = 0; i < this.stochasticPoints.size(); i++) {
