@@ -25,7 +25,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.adjustment.network.VerticalDeflectionGroupUncertaintyType;
+import org.applied_geodesy.adjustment.network.point.dov.VerticalDeflectionRestrictionType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
@@ -34,6 +36,7 @@ import org.applied_geodesy.jag3d.ui.tree.VerticalDeflectionTreeItemValue;
 import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.ui.textfield.DoubleTextField;
 import org.applied_geodesy.ui.textfield.UncertaintyTextField;
+import org.applied_geodesy.ui.textfield.DoubleTextField.ValueSupport;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.animation.FadeTransition;
@@ -45,6 +48,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.control.ButtonBase;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -61,6 +66,22 @@ import javafx.scene.text.Font;
 import javafx.util.Duration;
 
 public class UIVerticalDeflectionPropertiesPane {
+	private class BooleanChangeListener implements ChangeListener<Boolean> {
+		private final ButtonBase button;
+		
+		private BooleanChangeListener(ButtonBase button) {
+			this.button = button;
+		}
+		
+		@Override
+		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+			if (!ignoreValueUpdate && this.button instanceof CheckBox && this.button.getUserData() != null && this.button.getUserData() instanceof VerticalDeflectionRestrictionType) {
+				VerticalDeflectionRestrictionType verticalDeflectionRestrictionType = (VerticalDeflectionRestrictionType)this.button.getUserData();
+				save(verticalDeflectionRestrictionType, ((CheckBox)this.button).isSelected());
+			}
+		}
+	}
+	
 	private class NumberChangeListener implements ChangeListener<Double> {
 		private final DoubleTextField field;
 
@@ -70,10 +91,17 @@ public class UIVerticalDeflectionPropertiesPane {
 
 		@Override
 		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
-			if (!ignoreValueUpdate && this.field.getUserData() != null && this.field.getUserData() instanceof VerticalDeflectionGroupUncertaintyType) {
-				VerticalDeflectionGroupUncertaintyType uncertaintyType = (VerticalDeflectionGroupUncertaintyType)this.field.getUserData();
-				save(uncertaintyType);
+			if (!ignoreValueUpdate && this.field.getUserData() != null) {
+				if (this.field.getUserData() instanceof ParameterType) {
+					ParameterType parameterType = (ParameterType)this.field.getUserData();
+					save(parameterType);
+				}
+				else if (this.field.getUserData() instanceof VerticalDeflectionGroupUncertaintyType) {
+					VerticalDeflectionGroupUncertaintyType uncertaintyType = (VerticalDeflectionGroupUncertaintyType)this.field.getUserData();
+					save(uncertaintyType);
+				}
 			}
+			
 		}
 	}
 	
@@ -92,6 +120,11 @@ public class UIVerticalDeflectionPropertiesPane {
 
 	private UncertaintyTextField uncertaintyDeflectionXField;
 	private UncertaintyTextField uncertaintyDeflectionYField;
+	
+	private CheckBox restrictionTypeIdenticalCheckBox;
+	
+	private DoubleTextField verticalDeflectionXField;
+	private DoubleTextField verticalDeflectionYField;
 	
 	private Label selectionInfoLabel = new Label();
 	
@@ -126,8 +159,13 @@ public class UIVerticalDeflectionPropertiesPane {
 		// set focus to panel to commit text field values and to force db transaction
 		UITreeBuilder.getInstance().getTree().requestFocus();
 		
+		this.setRestriction(VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS, Boolean.FALSE);
+		
 		this.setUncertaintyDeflectionY(VerticalDeflectionTreeItemValue.getDefaultUncertainty(VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y));
 		this.setUncertaintyDeflectionX(VerticalDeflectionTreeItemValue.getDefaultUncertainty(VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y));
+		
+		this.setVerticalDeflectionY(0.0);
+		this.setVerticalDeflectionX(0.0);
 	}
 	
 	public void setTreeItemValue(String name, VerticalDeflectionTreeItemValue... selectedVerticalDeflectionItemValues) {
@@ -185,11 +223,53 @@ public class UIVerticalDeflectionPropertiesPane {
 		}
 	}
 	
+	public boolean setGroupParameter(ParameterType paramType, Double value, boolean displayWarningIcon) {
+		if (this.warningIconNodes.containsKey(paramType)) {
+			this.warningIconNodes.get(paramType).setVisible(displayWarningIcon);
+			this.warningIconNodes.get(paramType).setManaged(displayWarningIcon);
+		}
+		
+		switch(paramType) {
+		case VERTICAL_DEFLECTION_X:
+			return this.setVerticalDeflectionX(value);
+
+		case VERTICAL_DEFLECTION_Y:
+			return this.setVerticalDeflectionY(value);
+			
+		default:
+			return false;	
+		}
+	}
+	
+	public boolean setVerticalDeflectionX(Double value) {
+		if (this.verticalDeflectionXField == null)
+			return false;
+		this.ignoreValueUpdate = true;
+		this.verticalDeflectionXField.setValue(value);
+		this.ignoreValueUpdate = false;
+		return true;
+	}
+	
+	public boolean setVerticalDeflectionY(Double value) {
+		if (this.verticalDeflectionYField == null)
+			return false;
+		this.ignoreValueUpdate = true;
+		this.verticalDeflectionYField.setValue(value);
+		this.ignoreValueUpdate = false;
+		return true;
+	}
+	
+	public boolean setRestriction(VerticalDeflectionRestrictionType restrictionType, boolean selected) {
+		if (this.restrictionTypeIdenticalCheckBox == null)
+			return false;
+		this.ignoreValueUpdate = true;
+		this.restrictionTypeIdenticalCheckBox.setSelected(selected);
+		this.ignoreValueUpdate = false;
+		return true;
+	}
+	
 	private Node createUncertaintiesPane() {
 		if (this.type == TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_LEAF) {
-			double fieldMinWidth = 200;
-			double fieldMaxWidth = 350;
-			
 			double sigmaY = VerticalDeflectionTreeItemValue.getDefaultUncertainty(VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y);
 			double sigmaX = VerticalDeflectionTreeItemValue.getDefaultUncertainty(VerticalDeflectionGroupUncertaintyType.DEFLECTION_X);
 
@@ -204,19 +284,8 @@ public class UIVerticalDeflectionPropertiesPane {
 			uncertaintyDeflectionYLabel.setMinWidth(Control.USE_PREF_SIZE);
 			uncertaintyDeflectionXLabel.setMinWidth(Control.USE_PREF_SIZE);
 			
-			this.uncertaintyDeflectionYField = new UncertaintyTextField(sigmaY, CellValueType.ANGLE_UNCERTAINTY, true, DoubleTextField.ValueSupport.EXCLUDING_INCLUDING_INTERVAL);
-			this.uncertaintyDeflectionYField.setTooltip(new Tooltip(i18n.getString("UIVerticalDeflectionPropertiesPane.uncertainty.y.tooltip", "Uncertainty of y-component of deflection of the vertical")));
-			this.uncertaintyDeflectionYField.setUserData(VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y);
-			this.uncertaintyDeflectionYField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyDeflectionYField));
-			this.uncertaintyDeflectionYField.setMinWidth(fieldMinWidth);
-			this.uncertaintyDeflectionYField.setMaxWidth(fieldMaxWidth);
-						
-			this.uncertaintyDeflectionXField = new UncertaintyTextField(sigmaX, CellValueType.ANGLE_UNCERTAINTY, true, DoubleTextField.ValueSupport.EXCLUDING_INCLUDING_INTERVAL);
-			this.uncertaintyDeflectionXField.setTooltip(new Tooltip(i18n.getString("UIVerticalDeflectionPropertiesPane.uncertainty.x.tooltip", "Uncertainty of x-component of deflection of the vertical")));
-			this.uncertaintyDeflectionXField.setUserData(VerticalDeflectionGroupUncertaintyType.DEFLECTION_X);
-			this.uncertaintyDeflectionXField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyDeflectionXField));
-			this.uncertaintyDeflectionXField.setMinWidth(fieldMinWidth);
-			this.uncertaintyDeflectionXField.setMaxWidth(fieldMaxWidth);
+			this.uncertaintyDeflectionYField = this.createUncertaintyTextField(sigmaY, CellValueType.ANGLE_UNCERTAINTY, true, ValueSupport.EXCLUDING_INCLUDING_INTERVAL, i18n.getString("UIVerticalDeflectionPropertiesPane.uncertainty.y.tooltip", "Uncertainty of y-component of deflection of the vertical"), VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y); 
+			this.uncertaintyDeflectionXField = this.createUncertaintyTextField(sigmaX, CellValueType.ANGLE_UNCERTAINTY, true, ValueSupport.EXCLUDING_INCLUDING_INTERVAL, i18n.getString("UIVerticalDeflectionPropertiesPane.uncertainty.x.tooltip", "Uncertainty of x-component of deflection of the vertical"), VerticalDeflectionGroupUncertaintyType.DEFLECTION_X);
 			
 			uncertaintyDeflectionYLabel.setLabelFor(this.uncertaintyDeflectionYField);
 			uncertaintyDeflectionXLabel.setLabelFor(this.uncertaintyDeflectionXField);
@@ -238,6 +307,44 @@ public class UIVerticalDeflectionPropertiesPane {
 			TitledPane uncertaintiesTitledPane = this.createTitledPane(i18n.getString("UIVerticalDeflectionPropertiesPane.uncertainty.title", "Uncertainties of deflection of the vertical"));
 			uncertaintiesTitledPane.setContent(gridPane);
 			return uncertaintiesTitledPane;
+		}
+		return null;
+	}
+	
+	private Node createRestrictionTypePane() {
+		if (this.type != TreeItemType.REFERENCE_VERTICAL_DEFLECTION_LEAF) {
+			GridPane gridPane = this.createGridPane();
+
+			this.restrictionTypeIdenticalCheckBox = this.createCheckBox(i18n.getString("UIVerticalDeflectionPropertiesPane.deflection.identical.label", "Identical deflection of the vertical"), i18n.getString("UIVerticalDeflectionPropertiesPane.restriction.identical.tooltip", "Checked, if vertical deflection angles of points within the group are identical."), false, VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS);
+			ProgressIndicator databaseTransactionRestrictionTypeIndividualProgressIndicator = this.createDatabaseTransactionProgressIndicator(VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS);
+			
+			Label deflectionLabelY = new Label(i18n.getString("UIVerticalDeflectionPropertiesPane.deflection.y.label", "Vertical deflection \u03B6y"));
+			this.verticalDeflectionYField = this.createDoubleTextField(0.0, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIVerticalDeflectionPropertiesPane.deflection.y.tooltip", "Set y-component of vertical deflection"), ParameterType.VERTICAL_DEFLECTION_Y);				
+			ProgressIndicator progressIndicatorY = this.createDatabaseTransactionProgressIndicator(ParameterType.VERTICAL_DEFLECTION_Y);
+			Node warningIconY = this.createWarningIcon(ParameterType.VERTICAL_DEFLECTION_Y, i18n.getString("UIVerticalDeflectionPropertiesPane.deflection.y.warning.label", "\u26A0"), String.format(Locale.ENGLISH, i18n.getString("UIVerticalDeflectionPropertiesPane.deflection.y.warning.tooltip", "Note: The selected groups have different values and the \u03B6y of the deflection of the vertical differs by more than %.1f \u2030."), SQLManager.EQUAL_VALUE_TRESHOLD * 1000.));
+			
+			Label deflectionLabelX = new Label(i18n.getString("UIVerticalDeflectionPropertiesPane.deflection.x.label", "Vertical deflection \u03B6x"));
+			this.verticalDeflectionXField = this.createDoubleTextField(0.0, CellValueType.ANGLE_RESIDUAL, true, ValueSupport.NON_NULL_VALUE_SUPPORT, i18n.getString("UIVerticalDeflectionPropertiesPane.deflection.x.tooltip", "Set x-component of vertical deflection"), ParameterType.VERTICAL_DEFLECTION_X);				
+			ProgressIndicator progressIndicatorX = this.createDatabaseTransactionProgressIndicator(ParameterType.VERTICAL_DEFLECTION_X);
+			Node warningIconX = this.createWarningIcon(ParameterType.VERTICAL_DEFLECTION_X, i18n.getString("UIVerticalDeflectionPropertiesPane.deflection.x.warning.label", "\u26A0"), String.format(Locale.ENGLISH, i18n.getString("UIVerticalDeflectionPropertiesPane.deflection.x.warning.tooltip", "Note: The selected groups have different values and the \u03B6x of the deflection of the vertical differs by more than %.1f \u2030."), SQLManager.EQUAL_VALUE_TRESHOLD * 1000.));
+			
+			
+			int row = 0;
+			this.restrictionTypeIdenticalCheckBox.setPadding(new Insets(0,5,0,0));
+			gridPane.add(new HBox(this.restrictionTypeIdenticalCheckBox, databaseTransactionRestrictionTypeIndividualProgressIndicator), 0, row++, 3, 1);
+//			gridPane.add(databaseTransactionRestrictionTypeIndividualProgressIndicator, 2, row++);
+
+			gridPane.add(deflectionLabelY,  0, row);
+			gridPane.add(this.verticalDeflectionYField,  1, row);
+			gridPane.add(new HBox(warningIconY, progressIndicatorY), 2, row++);
+			
+			gridPane.add(deflectionLabelX,  0, row);
+			gridPane.add(this.verticalDeflectionXField,  1, row);
+			gridPane.add(new HBox(warningIconX, progressIndicatorX), 2, row++);
+
+			TitledPane restrictionTitledPane = this.createTitledPane(i18n.getString("UIVerticalDeflectionPropertiesPane.restriction.title", "Estimation Restriction"));
+			restrictionTitledPane.setContent(gridPane);
+			return restrictionTitledPane;
 		}
 		return null;
 	}
@@ -277,6 +384,41 @@ public class UIVerticalDeflectionPropertiesPane {
 		return label;
 	}
 	
+	private DoubleTextField createDoubleTextField(double value, CellValueType type, boolean displayUnit, ValueSupport valueSupport, String tooltipText, ParameterType userData) {
+		DoubleTextField field = new DoubleTextField(value, type, displayUnit, valueSupport);
+		field.setTooltip(new Tooltip(tooltipText));
+		field.setMinWidth(200);
+		field.setMaxWidth(350);
+		field.setUserData(userData);
+		field.numberProperty().addListener(new NumberChangeListener(field));
+		return field;
+	}
+	
+	private UncertaintyTextField createUncertaintyTextField(double value, CellValueType type, boolean displayUnit, ValueSupport valueSupport, String tooltipText, VerticalDeflectionGroupUncertaintyType userData) {
+		UncertaintyTextField field = new UncertaintyTextField(value, type, displayUnit, valueSupport);
+		field.setTooltip(new Tooltip(tooltipText));
+		field.setMinWidth(200);
+		field.setMaxWidth(350);
+		field.setUserData(userData);
+		field.numberProperty().addListener(new NumberChangeListener(field));
+		return field;
+	}
+	
+	private CheckBox createCheckBox(String title, String tooltipText, boolean selected, Object userData) {
+		Label label = new Label(title);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setPadding(new Insets(0,0,0,3));
+		CheckBox checkBox = new CheckBox();
+		checkBox.setGraphic(label);
+		checkBox.setTooltip(new Tooltip(tooltipText));
+		checkBox.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		checkBox.setSelected(selected);
+		checkBox.setUserData(userData);
+		checkBox.selectedProperty().addListener(new BooleanChangeListener(checkBox));
+		return checkBox;
+	}
+	
 	private GridPane createGridPane() {
 		GridPane gridPane = new GridPane();
 		gridPane.setMaxWidth(Double.MAX_VALUE);
@@ -298,6 +440,10 @@ public class UIVerticalDeflectionPropertiesPane {
 
 	private void init() {
 		VBox content = new VBox();
+		
+		Node restrictions = createRestrictionTypePane();
+		if (restrictions != null)
+			content.getChildren().add(restrictions);
 		
 		Node uncertainties = this.createUncertaintiesPane();
 		if (uncertainties != null)
@@ -349,6 +495,37 @@ public class UIVerticalDeflectionPropertiesPane {
 				warningIconNode.setManaged(visible);	
 			}
 	}
+	
+	private void save(VerticalDeflectionRestrictionType restrictionType, boolean enable) {
+		try {
+
+			if (this.databaseTransactionProgressIndicators.containsKey(restrictionType)) {
+				ProgressIndicator node = this.databaseTransactionProgressIndicators.get(restrictionType);
+				node.setVisible(true);
+				this.sequentialTransition.stop();
+				this.sequentialTransition.setNode(node);
+				this.sequentialTransition.playFromStart();
+			}
+			SQLManager.getInstance().saveRestriction(restrictionType, enable, this.selectedVerticalDeflectionItemValues);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			this.setProgressIndicatorsVisible(false);
+			this.sequentialTransition.stop();
+
+			Platform.runLater(new Runnable() {
+				@Override public void run() {
+					OptionDialog.showThrowableDialog (
+							i18n.getString("UIVerticalDeflectionPropertiesPane.message.error.save.restriction.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UIVerticalDeflectionPropertiesPane.message.error.save.restriction.exception.header", "Error, could not save group restriction to database."),
+							i18n.getString("UIVerticalDeflectionPropertiesPane.message.error.save.restriction.exception.message", "An exception has occurred during database transaction."),
+							e
+					);
+				}
+			});
+		}
+	}
 
 	private void save(VerticalDeflectionGroupUncertaintyType uncertaintyType) {
 		try {
@@ -392,8 +569,58 @@ public class UIVerticalDeflectionPropertiesPane {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
 							i18n.getString("UIVerticalDeflectionPropertiesPane.message.error.save.uncertainty.exception.title", "Unexpected SQL-Error"),
-							i18n.getString("UIVerticalDeflectionPropertiesPane.message.error.save.uncertainty.exception.header", "Error, could not save group uncertainties to database."),
+							i18n.getString("UIVerticalDeflectionPropertiesPane.message.error.save.uncertainty.exception.header", "Error, could not save group uncertainty to database."),
 							i18n.getString("UIVerticalDeflectionPropertiesPane.message.error.save.uncertainty.exception.message", "An exception has occurred during database transaction."),
+							e
+					);
+				}
+			});
+		}
+	}
+	
+	private void save(ParameterType parameterType) {
+		try {
+			Double value = null;
+			switch(parameterType) {
+			case VERTICAL_DEFLECTION_X:
+				value = this.verticalDeflectionXField.getNumber();
+				break;
+			case VERTICAL_DEFLECTION_Y:
+				value = this.verticalDeflectionYField.getNumber();
+				break;
+			default:
+				break;
+			}
+			
+			if (value != null && this.selectedVerticalDeflectionItemValues != null && this.selectedVerticalDeflectionItemValues.length > 0) {
+				this.setProgressIndicatorsVisible(false);
+				if (this.warningIconNodes.containsKey(parameterType)) {
+					Node warningIconNodes = this.warningIconNodes.get(parameterType);
+					warningIconNodes.setVisible(false);
+					warningIconNodes.setManaged(false);
+				}
+				if (this.databaseTransactionProgressIndicators.containsKey(parameterType)) {
+					ProgressIndicator node = this.databaseTransactionProgressIndicators.get(parameterType);
+					node.setVisible(true);
+					this.sequentialTransition.stop();
+					this.sequentialTransition.setNode(node);
+					this.sequentialTransition.playFromStart();
+				}
+				SQLManager.getInstance().saveGroupParameter(parameterType, value.doubleValue(), this.selectedVerticalDeflectionItemValues);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+			this.setProgressIndicatorsVisible(false);
+			this.sequentialTransition.stop();
+			
+			Platform.runLater(new Runnable() {
+				@Override public void run() {
+					OptionDialog.showThrowableDialog (
+							i18n.getString("UIVerticalDeflectionPropertiesPane.message.error.save.parameter.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UIVerticalDeflectionPropertiesPane.message.error.save.parameter.exception.header", "Error, could not save group parameter to database."),
+							i18n.getString("UIVerticalDeflectionPropertiesPane.message.error.save.parameter.exception.message", "An exception has occurred during database transaction."),
 							e
 					);
 				}

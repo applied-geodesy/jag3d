@@ -30,11 +30,13 @@ import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.UnscentedTransformationParameter;
 import org.applied_geodesy.adjustment.network.DefaultAverageThreshold;
 import org.applied_geodesy.adjustment.network.ObservationType;
+import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.adjustment.network.VerticalDeflectionGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
+import org.applied_geodesy.adjustment.network.point.dov.VerticalDeflectionRestrictionType;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.io.ImportOption;
@@ -267,6 +269,16 @@ class SQLDatabase {
 
 		// add highlight type
 		sqls.put(20210923.0001, "ALTER TABLE \"HighlightLayerProperty\" ADD \"type\" SMALLINT DEFAULT " + TableRowHighlightType.NONE.getId() + " NOT NULL\r\n");
+		
+		// add new table for group-wise estimation of dov
+		sqls.put(20220930.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"VerticalDeflectionGroupParameterRestriction\"(\"group_id\" INTEGER NOT NULL,\"type\" SMALLINT NOT NULL,\"enable\" BOOLEAN DEFAULT FALSE NOT NULL,PRIMARY KEY(\"group_id\",\"type\"), CONSTRAINT \"VerticalDeflectionGroupParameterRestrictionOnGroupDelete\" FOREIGN KEY(\"group_id\") REFERENCES \"VerticalDeflectionGroup\"(\"id\") ON DELETE CASCADE);\r\n");
+		sqls.put(20220930.0002, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"VerticalDeflectionGroupParameterApriori\"(\"group_id\" INTEGER NOT NULL,\"type\" SMALLINT NOT NULL,\"value_0\" DOUBLE DEFAULT 0 NOT NULL, PRIMARY KEY(\"group_id\",\"type\"), CONSTRAINT \"VerticalDeflectionGroupParameterAprioriOnGroupDelete\" FOREIGN KEY(\"group_id\") REFERENCES \"VerticalDeflectionGroup\"(\"id\") ON DELETE CASCADE);\r\n");;
+		
+		sqls.put(20220930.0003, "INSERT INTO \"VerticalDeflectionGroupParameterRestriction\" (\"group_id\", \"type\", \"enable\")  SELECT \"id\", "+ VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS.getId() +" AS \"type\", FALSE AS \"enable\" FROM \"VerticalDeflectionGroup\"\r\n");
+		sqls.put(20220930.0004, "INSERT INTO \"VerticalDeflectionGroupParameterApriori\" (\"group_id\", \"type\", \"value_0\")  SELECT \"id\", "+ ParameterType.VERTICAL_DEFLECTION_X.getId() +" AS \"type\", 0 AS \"value_0\" FROM \"VerticalDeflectionGroup\"\r\n");
+		sqls.put(20220930.0005, "INSERT INTO \"VerticalDeflectionGroupParameterApriori\" (\"group_id\", \"type\", \"value_0\")  SELECT \"id\", "+ ParameterType.VERTICAL_DEFLECTION_Y.getId() +" AS \"type\", 0 AS \"value_0\" FROM \"VerticalDeflectionGroup\"\r\n");
+
+		
 		return sqls;
 	}
 }
