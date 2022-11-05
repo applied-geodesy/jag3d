@@ -44,6 +44,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.applied_geodesy.adjustment.EstimationType;
+import org.applied_geodesy.adjustment.network.DefaultUncertainty;
 import org.applied_geodesy.adjustment.network.ObservationGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.ParameterType;
@@ -54,6 +55,7 @@ import org.applied_geodesy.adjustment.network.VerticalDeflectionGroupUncertainty
 import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
+import org.applied_geodesy.adjustment.network.point.dov.VerticalDeflectionRestrictionType;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerType;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
@@ -1119,9 +1121,27 @@ public class FTLReport {
 	private List<HashMap<String, Object>> getVerticalDeflectionGroups(VerticalDeflectionType verticalDeflectionType) throws SQLException {
 		List<HashMap<String, Object>> groups = new ArrayList<HashMap<String, Object>>();
 		
-		String sqlGroup = "SELECT \"id\", \"name\" FROM \"VerticalDeflectionGroup\" WHERE \"type\" = ? AND \"enable\" = TRUE";
+//		String sqlGroup = "SELECT \"id\", \"name\" FROM \"VerticalDeflectionGroup\" WHERE \"type\" = ? AND \"enable\" = TRUE";
 		
-		String sqlUncertainty = "SELECT \"type\", \"value\" FROM \"VerticalDeflectionGroupUncertainty\" WHERE \"group_id\" = ?";
+		String sqlGroup = "SELECT "
+				+ "\"id\", \"name\", \"type\", "
+				+ "\"TparamX\".\"value_0\" AS \"x0\", "
+				+ "\"TparamY\".\"value_0\" AS \"y0\", "
+				+ "ISNULL(\"TuncDovX\".\"value\", ?) AS \"sigma_x0\", "
+				+ "ISNULL(\"TuncDovY\".\"value\", ?) AS \"sigma_y0\"  "
+				+ "FROM \"VerticalDeflectionGroup\" "
+				+ "LEFT JOIN \"VerticalDeflectionGroupUncertainty\" AS \"TuncDovX\" ON \"TuncDovX\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"TuncDovX\".\"type\" = ? "
+				+ "LEFT JOIN \"VerticalDeflectionGroupUncertainty\" AS \"TuncDovY\" ON \"TuncDovY\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"TuncDovY\".\"type\" = ? "
+				+ "LEFT JOIN \"VerticalDeflectionGroupParameterApriori\" AS \"TparamX\" ON \"TparamX\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"TparamX\".\"type\" = ? "
+				+ "LEFT JOIN \"VerticalDeflectionGroupParameterApriori\" AS \"TparamY\" ON \"TparamY\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"TparamY\".\"type\" = ? "
+				+ "WHERE \"VerticalDeflectionGroup\".\"enable\" = TRUE "
+				+ "AND \"type\" = ? "
+				+ "ORDER BY \"order\" ASC";
+
+		String sqlRestriction = "SELECT "
+				+ "\"type\", \"enable\" "
+				+ "FROM \"VerticalDeflectionGroupParameterRestriction\" "
+				+ "WHERE \"group_id\" = ?";
 		
 		String sqlDeflection = "SELECT"
 				+ "\"name\", "
@@ -1153,11 +1173,22 @@ public class FTLReport {
 				+ "ORDER BY \"id\" ASC"; 
 		
 
-		PreparedStatement stmtGroup       = this.dataBase.getPreparedStatement(sqlGroup);
-		PreparedStatement stmtDeflection  = this.dataBase.getPreparedStatement(sqlDeflection);
-		PreparedStatement stmtUncertainty = this.dataBase.getPreparedStatement(sqlUncertainty);
 		
-		stmtGroup.setInt(1, verticalDeflectionType.getId());
+		int idx = 1;
+		PreparedStatement stmtGroup = this.dataBase.getPreparedStatement(sqlGroup);
+		stmtGroup.setDouble(idx++, DefaultUncertainty.getUncertaintyDeflectionX());
+		stmtGroup.setDouble(idx++, DefaultUncertainty.getUncertaintyDeflectionY());
+		
+		stmtGroup.setInt(idx++, VerticalDeflectionGroupUncertaintyType.DEFLECTION_X.getId());
+		stmtGroup.setInt(idx++, VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y.getId());
+		
+		stmtGroup.setInt(idx++, ParameterType.VERTICAL_DEFLECTION_X.getId());
+		stmtGroup.setInt(idx++, ParameterType.VERTICAL_DEFLECTION_Y.getId());
+		
+		stmtGroup.setInt(idx++, verticalDeflectionType.getId());
+
+		PreparedStatement stmtDeflection  = this.dataBase.getPreparedStatement(sqlDeflection);
+		PreparedStatement stmtRestriction = this.dataBase.getPreparedStatement(sqlRestriction);
 
 		ResultSet groupSet = stmtGroup.executeQuery();
 		while (groupSet.next()) {
@@ -1166,22 +1197,34 @@ public class FTLReport {
 			double maxResidualGroupX = 0.0, maxResidualGroupY = 0.0;
 			boolean significantGroup = false;
 			int groupId = groupSet.getInt("id");
+			
+			double valueY0 = groupSet.getDouble("y0");	
+			double valueX0 = groupSet.getDouble("x0");
+			
+			double sigmaY0 = groupSet.getDouble("sigma_y0");	
+			double sigmaX0 = groupSet.getDouble("sigma_x0");
+			
 
 			HashMap<String, Object> groupParam         = new HashMap<String, Object>();
 			HashMap<String, Object> groupUncertainties = new HashMap<String, Object>();
 			List<HashMap<String, Object>> deflections  = new ArrayList<HashMap<String, Object>>();
 			
 			stmtDeflection.setInt(1, groupId);
-			stmtUncertainty.setInt(1, groupId);
+			stmtRestriction.setInt(1, groupId);
+			
+			ResultSet restrictionSet = stmtRestriction.executeQuery();
+			VerticalDeflectionRestrictionType restriction = null;
+			while (restrictionSet.next()) {
+				int type = restrictionSet.getInt("type");
+				boolean enable = restrictionSet.getBoolean("enable");
+				restriction = VerticalDeflectionRestrictionType.getEnumByValue(type);
+				if (restriction == null || !enable)
+					restriction = null;
+			}
 			
 			if (verticalDeflectionType == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION) {
-				ResultSet uncertaintySet = stmtUncertainty.executeQuery();
-				while (uncertaintySet.next()) {
-					VerticalDeflectionGroupUncertaintyType uncertaintyType = VerticalDeflectionGroupUncertaintyType.getEnumByValue(uncertaintySet.getInt("type"));
-					double value = uncertaintySet.getDouble("value");
-					if (uncertaintyType != null && value > 0)
-						groupUncertainties.put(uncertaintyType.name().toLowerCase(), options.convertAngleUncertaintyToView(value));
-				}
+				groupUncertainties.put(VerticalDeflectionGroupUncertaintyType.DEFLECTION_X.name().toLowerCase(), options.convertAngleUncertaintyToView(sigmaX0));
+				groupUncertainties.put(VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y.name().toLowerCase(), options.convertAngleUncertaintyToView(sigmaY0));
 			}
 
 			ResultSet verticalDeflectionSet = stmtDeflection.executeQuery();
@@ -1194,7 +1237,18 @@ public class FTLReport {
 					String key = rsmd.getColumnLabel(i);
 					switch(key) {
 					case "sigma_x0":
+						if (restriction == VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS)
+							h.put(key, options.convertAngleUncertaintyToView(sigmaX0));
+						else 
+							h.put(key, options.convertAngleUncertaintyToView(verticalDeflectionSet.getDouble(i)));
+						break;
 					case "sigma_y0":
+						if (restriction == VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS)
+							h.put(key, options.convertAngleUncertaintyToView(sigmaY0));
+						else 
+							h.put(key, options.convertAngleUncertaintyToView(verticalDeflectionSet.getDouble(i)));
+						break;
+						
 					case "sigma_x":
 					case "sigma_y":
 					case "confidence_major_axis":
@@ -1203,7 +1257,18 @@ public class FTLReport {
 						break;
 
 					case "x0":
+						if (restriction == VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS)
+							h.put(key, options.convertAngleResidualToView(valueX0));
+						else 
+							h.put(key, options.convertAngleResidualToView(verticalDeflectionSet.getDouble(i)));
+						break;
 					case "y0":
+						if (restriction == VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS)
+							h.put(key, options.convertAngleResidualToView(valueY0));
+						else 
+							h.put(key, options.convertAngleResidualToView(verticalDeflectionSet.getDouble(i)));
+						break;
+						
 					case "x":
 					case "y":
 					case "residual_y":

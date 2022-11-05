@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.applied_geodesy.adjustment.network.DefaultUncertainty;
+import org.applied_geodesy.adjustment.network.ParameterType;
 import org.applied_geodesy.adjustment.network.VerticalDeflectionGroupUncertaintyType;
 import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 
@@ -74,12 +75,12 @@ public class VerticalDeflectionTreeItemValue extends TreeItemValue implements So
 		tabTyps.add(TabType.RAW_DATA);
 		
 		// Properties 
-		if (type == TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_LEAF)
+		if (type != TreeItemType.REFERENCE_VERTICAL_DEFLECTION_LEAF)
 			tabTyps.add(TabType.PROPERTIES);
 		
 		// Results Point
 		tabTyps.add(TabType.RESULT_DATA);
-		
+	
 		// Variance components estimation 
 		if (type == TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_LEAF)
 			tabTyps.add(TabType.VARIANCE_COMPONENT);
@@ -87,6 +88,13 @@ public class VerticalDeflectionTreeItemValue extends TreeItemValue implements So
 		return tabTyps.toArray(new TabType[tabTyps.size()]);
 	}
 	
+	public static ParameterType[] getParameterTypes() {
+		return new ParameterType[] {
+				ParameterType.VERTICAL_DEFLECTION_Y,
+				ParameterType.VERTICAL_DEFLECTION_X
+		};
+	}
+		
 	public static double getDefaultUncertainty(VerticalDeflectionGroupUncertaintyType uncertaintyType) {
 		switch(uncertaintyType) {
 		case DEFLECTION_X:

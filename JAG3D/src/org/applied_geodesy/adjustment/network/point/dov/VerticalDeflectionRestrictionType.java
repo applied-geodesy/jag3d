@@ -19,37 +19,26 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.adjustment.network.parameter;
+package org.applied_geodesy.adjustment.network.point.dov;
 
-import org.applied_geodesy.adjustment.network.ParameterType;
-import org.applied_geodesy.adjustment.network.point.Point;
+public enum VerticalDeflectionRestrictionType {
+	IDENTICAL_DEFLECTIONS(0),
+	;
+	
+	private int id;
+	private VerticalDeflectionRestrictionType(int id) {
+		this.id = id;
+	}
 
-/**
- * Klasse ist eine Huelle fuer die Y-Komponente. Die statistischen groessen werden 
- * in der X-Komponente abgespeichert, da beide (X und Y) als ein Objekt zu interpretieren sind.
- *
- */
-public class VerticalDeflectionY extends VerticalDeflection {
-	
-	public VerticalDeflectionY(Point point) {
-		super(point);
+	public final int getId() {
+		return id;
 	}
-	
-	public VerticalDeflectionY(Point point, double value) {
-		super(point, value);
-	}
-	
-	public VerticalDeflectionY(Point point, double value, double std) {
-		super(point, value, std);
-	}
-	
-	@Override
-	public ParameterType getParameterType() {
-		return ParameterType.VERTICAL_DEFLECTION_Y;
-	}
-	
-	@Override
-	public String toString() {
-		return "VerticalDeflectionY [point=" + this.getPoint() + ", value0=" + this.getValue0() + ", value=" + this.getValue() + "]";
-	}
+
+	public static VerticalDeflectionRestrictionType getEnumByValue(int value) {
+		for(VerticalDeflectionRestrictionType element : VerticalDeflectionRestrictionType.values()) {
+			if(element.id == value)
+				return element;
+		}
+		return null;
+	} 
 }

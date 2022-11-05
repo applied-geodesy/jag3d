@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.adjustment.network.parameter;
+package org.applied_geodesy.adjustment.network.point.dov;
 
 import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.network.ParameterType;
@@ -89,6 +89,38 @@ public class VerticalDeflectionX extends VerticalDeflection {
 
 	public double getPpost() {
 		return this.pPost;
+	}
+	
+	@Override
+	public void setValue(double value) {
+		if (this.isRestrictedGroupParameter())
+			this.getVerticalDeflectionGroup().getVerticalDeflectionX().setValue(value);
+		else
+			super.setValue(value);
+	}
+	
+	@Override
+	public double getValue() {
+		if (this.isRestrictedGroupParameter())
+			return this.getVerticalDeflectionGroup().getVerticalDeflectionX().getValue();
+		else
+			return super.getValue();
+	}
+
+	@Override
+	public void setColInJacobiMatrix(int col) {
+		if (this.isRestrictedGroupParameter())
+			this.getVerticalDeflectionGroup().getVerticalDeflectionX().setColInJacobiMatrix(col);
+		else 
+			super.setColInJacobiMatrix(col);
+	}
+	
+	@Override
+	public int getColInJacobiMatrix() {
+		if (this.isRestrictedGroupParameter())
+			return this.getVerticalDeflectionGroup().getVerticalDeflectionX().getColInJacobiMatrix();
+		else
+			return super.getColInJacobiMatrix();
 	}
 
 	public void calcStochasticParameters(double sigma2apost, int redundancy, boolean applyAposterioriVarianceOfUnitWeight) {
