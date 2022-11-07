@@ -24,8 +24,8 @@ package org.applied_geodesy.adjustment.network.point;
 import org.applied_geodesy.adjustment.ConfidenceRegion;
 import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.network.parameter.UnknownParameter;
-import org.applied_geodesy.adjustment.network.point.dov.VerticalDeflectionX;
-import org.applied_geodesy.adjustment.network.point.dov.VerticalDeflectionY;
+import org.applied_geodesy.adjustment.network.parameter.VerticalDeflectionX;
+import org.applied_geodesy.adjustment.network.parameter.VerticalDeflectionY;
 import org.applied_geodesy.transformation.datum.SphericalDeflectionParameter;
 
 public abstract class Point extends UnknownParameter {
