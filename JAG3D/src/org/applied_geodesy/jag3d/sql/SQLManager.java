@@ -3798,13 +3798,12 @@ public class SQLManager {
 				
 				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"PointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
 				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
-				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" "
+				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "
 				
 				+ "WHERE \"PointGroup\".\"enable\" = TRUE AND \"PointApriori\".\"enable\" = TRUE "
-				+ "AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "
 				+ "AND \"PointGroup\".\"type\" IN (?, ?) "
 
-				
+
 				+ "UNION ALL "
 
 				// Alle Standpunkte abfragen und terr. Beobachtungen zaehlen
@@ -3825,10 +3824,9 @@ public class SQLManager {
 				
 				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"StartPointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
 				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
-				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" "
+				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "
 				
 				+ "WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE "
-				+ "AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "
 				+ "AND \"StartPointGroup\".\"type\" IN (?, ?) "
 				
 				+ "GROUP BY \"start_point_name\", \"StartPointGroup\".\"dimension\", \"VerticalDeflectionGroup\".\"type\", \"VerticalDeflectionGroupParameterRestriction\".\"enable\" "
@@ -3854,10 +3852,9 @@ public class SQLManager {
 				
 				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"EndPointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
 				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
-				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" "
+				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "
 				
 				+ "WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE "
-				+ "AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "
 				+ "AND \"EndPointGroup\".\"type\" IN (?, ?) "
 				
 				+ "GROUP BY \"end_point_name\", \"EndPointGroup\".\"dimension\", \"VerticalDeflectionGroup\".\"type\", \"VerticalDeflectionGroupParameterRestriction\".\"enable\" "
@@ -3883,10 +3880,9 @@ public class SQLManager {
 				
 				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"StartPointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
 				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
-				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" "
+				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "
 				
 				+ "WHERE \"GNSSObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE "
-				+ "AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "
 				+ "AND \"StartPointGroup\".\"type\" IN (?, ?) "
 				
 				+ "GROUP BY \"start_point_name\", \"StartPointGroup\".\"dimension\", \"ObservationGroup\".\"type\", \"VerticalDeflectionGroup\".\"type\", \"VerticalDeflectionGroupParameterRestriction\".\"enable\" "
@@ -3912,10 +3908,8 @@ public class SQLManager {
 				
 				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"EndPointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
 				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
-				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" "
-				
+				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "				
 				+ "WHERE \"GNSSObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE "
-				+ "AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "
 				+ "AND \"EndPointGroup\".\"type\" IN (?, ?) "
 				
 				+ "GROUP BY \"end_point_name\", \"EndPointGroup\".\"dimension\", \"ObservationGroup\".\"type\", \"VerticalDeflectionGroup\".\"type\", \"VerticalDeflectionGroupParameterRestriction\".\"enable\" "
