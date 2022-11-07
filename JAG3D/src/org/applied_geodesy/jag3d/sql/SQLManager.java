@@ -58,7 +58,6 @@ import org.applied_geodesy.adjustment.network.congruence.strain.RestrictionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.Reduction;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
-import org.applied_geodesy.adjustment.network.point.dov.VerticalDeflectionRestrictionType;
 import org.applied_geodesy.adjustment.network.sql.SQLAdjustmentManager;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
@@ -841,15 +840,10 @@ public class SQLManager {
 				selectedVerticalDeflectionItemValuesArray = selectedVerticalDeflectionTreeItemValues.toArray(new VerticalDeflectionTreeItemValue[selectedVerticalDeflectionTreeItemValues.size()]);
 				
 				this.loadVerticalDeflections(verticalDeflectionTreeItemValue, selectedVerticalDeflectionItemValuesArray);
-
+				
 				if (treeItemType == TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_LEAF) {
 					this.loadUncertainties(verticalDeflectionTreeItemValue, selectedVerticalDeflectionItemValuesArray);
 					this.loadVarianceComponents(verticalDeflectionTreeItemValue, selectedVerticalDeflectionItemValuesArray);
-				}
-				
-				if (treeItemType != TreeItemType.REFERENCE_VERTICAL_DEFLECTION_LEAF) {
-					this.loadVerticalDeflectionRestrictions(verticalDeflectionTreeItemValue, selectedVerticalDeflectionItemValuesArray);
-					this.loadVerticalDeflectionParameters(verticalDeflectionTreeItemValue, selectedVerticalDeflectionItemValuesArray);
 				}
 			}
 		break;
@@ -1388,14 +1382,11 @@ public class SQLManager {
 		for (int i=1; i<selectedObservationItemValues.length; i++)
 			inGroupArrayValues.append(",?");
 
-		String sqlAdditionalParameter = "SELECT "
-				+ "\"AdditionalParameterApriori\".\"id\" AS \"id\", \"enable\", \"group_id\", \"type\", "
-				+ "\"value_0\", \"value\", \"sigma\", \"t_prio\", \"t_post\", \"p_prio\", \"p_post\", "
-				+ "\"confidence\", \"gross_error\", \"minimal_detectable_bias\", \"significant\" "
-				+ "FROM \"AdditionalParameterApriori\" "
-				+ "LEFT JOIN \"AdditionalParameterAposteriori\" ON \"AdditionalParameterApriori\".\"id\" = \"AdditionalParameterAposteriori\".\"id\" "
-				+ "WHERE \"group_id\" IN (" + inGroupArrayValues + ") AND \"type\" IN (" + inTypeArrayValues + ") "
-				+ "ORDER BY \"group_id\" ASC, \"type\" ASC";
+		String sqlAdditionalParameter = "SELECT \"AdditionalParameterApriori\".\"id\" AS \"id\", \"enable\", \"group_id\", \"type\", " +
+				"\"value_0\", \"value\", \"sigma\", \"t_prio\", \"t_post\", \"p_prio\", \"p_post\", \"confidence\", \"gross_error\", \"minimal_detectable_bias\", \"significant\" " +
+				"FROM \"AdditionalParameterApriori\" " +
+				"LEFT JOIN \"AdditionalParameterAposteriori\" ON \"AdditionalParameterApriori\".\"id\" = \"AdditionalParameterAposteriori\".\"id\" " +
+				"WHERE \"group_id\" IN (" + inGroupArrayValues + ") AND \"type\" IN (" + inTypeArrayValues + ") ORDER BY \"group_id\" ASC, \"type\" ASC";
 
 		PreparedStatement stmtAdditionalParameter = this.dataBase.getPreparedStatement(sqlAdditionalParameter);
 		int idx = 1;
@@ -1563,6 +1554,7 @@ public class SQLManager {
 
 			propertiesPane.setStrainParameter(restrictionType, enable);
 		}
+
 	}
 
 	private void loadStrainParameters(CongruenceAnalysisTreeItemValue congruenceAnalysisItemValue, CongruenceAnalysisTreeItemValue... selectedCongruenceAnalysisItemValues) throws SQLException {
@@ -1660,119 +1652,6 @@ public class SQLManager {
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
-	
-	private void loadVerticalDeflectionRestrictions(VerticalDeflectionTreeItemValue verticalDeflectionTreeItemValue, VerticalDeflectionTreeItemValue... selectedVerticalDeflectionTreeItemValues) throws SQLException {
-		if (!this.hasDatabase() || !this.dataBase.isOpen())
-			return;
-		
-		UIVerticalDeflectionPropertiesPaneBuilder propertiesPaneBuilder = UIVerticalDeflectionPropertiesPaneBuilder.getInstance();
-		UIVerticalDeflectionPropertiesPane propertiesPane = propertiesPaneBuilder.getVerticalDeflectionPropertiesPane(verticalDeflectionTreeItemValue.getItemType());
-		propertiesPane.setTreeItemValue(verticalDeflectionTreeItemValue.getName(), selectedVerticalDeflectionTreeItemValues);
-		
-		VerticalDeflectionRestrictionType[] restrictionTypes = VerticalDeflectionRestrictionType.values();
-		StringBuilder inTypeArrayValues = new StringBuilder("?");
-		for (int i=1; i<restrictionTypes.length; i++) 
-			inTypeArrayValues.append(",?");
-
-		String sql = "SELECT "
-				+ "\"type\", \"enable\" "
-				+ "FROM \"VerticalDeflectionGroupParameterRestriction\" "
-				+ "WHERE \"group_id\" = ? AND \"type\" IN (" + inTypeArrayValues + ")";
-
-		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
-		int idx = 1;
-		stmt.setInt(idx++, verticalDeflectionTreeItemValue.getGroupId());
-
-		for (int i=0; i<restrictionTypes.length; i++) 
-			stmt.setInt(idx++, restrictionTypes[i].getId());
-
-
-		ResultSet rs = stmt.executeQuery();
-		while (rs.next()) {
-			VerticalDeflectionRestrictionType restrictionType = null;
-			int type = rs.getInt("type");
-			if (rs.wasNull() || (restrictionType = VerticalDeflectionRestrictionType.getEnumByValue(type)) == null)
-				continue;
-
-			boolean enable = rs.getBoolean("enable");
-			propertiesPane.setRestriction(restrictionType, enable);
-		}
-	}
-	
-	
-	private void loadVerticalDeflectionParameters(VerticalDeflectionTreeItemValue verticalDeflectionTreeItemValue, VerticalDeflectionTreeItemValue... selectedVerticalDeflectionTreeItemValues) throws SQLException {
-		if (!this.hasDatabase() || !this.dataBase.isOpen())
-			return;
-		
-		UIVerticalDeflectionPropertiesPaneBuilder propertiesPaneBuilder = UIVerticalDeflectionPropertiesPaneBuilder.getInstance();
-		UIVerticalDeflectionPropertiesPane propertiesPane = propertiesPaneBuilder.getVerticalDeflectionPropertiesPane(verticalDeflectionTreeItemValue.getItemType());
-		propertiesPane.setTreeItemValue(verticalDeflectionTreeItemValue.getName(), selectedVerticalDeflectionTreeItemValues);
-
-		ParameterType[] parameterTypes = VerticalDeflectionTreeItemValue.getParameterTypes();
-		StringBuilder inTypeArrayValues = new StringBuilder("?");
-		for (int i=1; i<parameterTypes.length; i++) 
-			inTypeArrayValues.append(",?");
-
-		StringBuilder inGroupArrayValues = new StringBuilder("?");
-		for (int i=1; i<selectedVerticalDeflectionTreeItemValues.length; i++)
-			inGroupArrayValues.append(",?");
-
-		String sqlGroupParameter = "SELECT "
-				+ "\"group_id\", \"type\", \"value_0\" "
-				+ "FROM \"VerticalDeflectionGroupParameterApriori\" "
-				//+ "WHERE \"group_id\" IN (" + inGroupArrayValues + ") AND \"type\" IN (" + inTypeArrayValues + ") "
-				+ "WHERE \"group_id\" = ? AND \"type\" IN (" + inTypeArrayValues + ") "
-				+ "ORDER BY \"group_id\" ASC, \"type\" ASC";
-
-		PreparedStatement stmtGroupParameter = this.dataBase.getPreparedStatement(sqlGroupParameter);
-		int idx = 1;
-		stmtGroupParameter.setInt(idx++, verticalDeflectionTreeItemValue.getGroupId());
-//		for (int i = 0; i < selectedVerticalDeflectionTreeItemValues.length; i++)
-//			stmtGroupParameter.setInt(idx++, selectedVerticalDeflectionTreeItemValues[i].getGroupId());
-		
-		for (ParameterType parameterType : parameterTypes) 
-			stmtGroupParameter.setInt(idx++, parameterType.getId());
-
-		String sqlIdentical = "SELECT "
-				+ "COUNT(\"value_0\") AS \"counter\" "
-				+ "FROM \"VerticalDeflectionGroupParameterApriori\" "
-				+ "WHERE "
-				+ "\"group_id\" IN (" + inGroupArrayValues + ") AND "
-				+ "\"type\" = ? AND "
-				+ "CASEWHEN(GREATEST(ABS(?), ABS(\"value_0\")) > 0, "
-				+ "ABS(\"value_0\" - ?) / GREATEST(ABS(?), ABS(\"value_0\")), 0) < ?";
-
-		idx = 1;
-		PreparedStatement stmtIdentical = this.dataBase.getPreparedStatement(sqlIdentical);
-		for (int i = 0; i < selectedVerticalDeflectionTreeItemValues.length; i++) 
-			stmtIdentical.setInt(idx++, selectedVerticalDeflectionTreeItemValues[i].getGroupId());
-
-		ResultSet rsGroupParameter = stmtGroupParameter.executeQuery();
-		while (rsGroupParameter.next()) {
-			ParameterType paramType = null;
-			int type = rsGroupParameter.getInt("type");
-			if (rsGroupParameter.wasNull() || (paramType = ParameterType.getEnumByValue(type)) == null)
-				continue;
-			
-			double value0  = rsGroupParameter.getDouble("value_0");
-
-			// Settings/Properties of selected Item
-			boolean isIdenticalGroupSetting = false;
-			stmtIdentical.setInt(idx, paramType.getId());
-			stmtIdentical.setDouble(idx+1, value0);
-			stmtIdentical.setDouble(idx+2, value0);
-			stmtIdentical.setDouble(idx+3, value0);
-			stmtIdentical.setDouble(idx+4, EQUAL_VALUE_TRESHOLD);
-
-			ResultSet rsIdentical = stmtIdentical.executeQuery();
-			if (rsIdentical.next()) {
-				int cnt = rsIdentical.getInt("counter");
-				isIdenticalGroupSetting = cnt == selectedVerticalDeflectionTreeItemValues.length;
-			}
-			propertiesPane.setGroupParameter(paramType, value0, !isIdenticalGroupSetting);
-			
-		}
-	}
 
 	private void loadEpoch(ObservationTreeItemValue observationItemValue, ObservationTreeItemValue... selectedObservationItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
@@ -1851,7 +1730,7 @@ public class SQLManager {
 			}
 		}
 	}
-
+	
 	private void loadVerticalDeflections(VerticalDeflectionTreeItemValue verticalDeflectionItemValue, VerticalDeflectionTreeItemValue... selectedVerticalDeflectionItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
@@ -3345,12 +3224,8 @@ public class SQLManager {
 
 		// insert new group
 		if (groupId < 0) {
-			groupId = this.dataBase.getLastInsertId();
-			verticalDeflectionTreeItemValue.setGroupId(groupId);
-			
-			ParameterType parameters[] = VerticalDeflectionTreeItemValue.getParameterTypes();
-			for (ParameterType parameterType : parameters)
-				this.saveGroupParameter(parameterType, 0.0, verticalDeflectionTreeItemValue);
+			int id = this.dataBase.getLastInsertId();
+			verticalDeflectionTreeItemValue.setGroupId(id);
 
 			VerticalDeflectionGroupUncertaintyType uncertaintyTypes[] = VerticalDeflectionGroupUncertaintyType.values();
 			for (VerticalDeflectionGroupUncertaintyType uncertaintyType : uncertaintyTypes) {
@@ -3572,38 +3447,6 @@ public class SQLManager {
 
 		stmt.execute();
 	}
-	
-	public void saveRestriction(VerticalDeflectionRestrictionType restrictionType, boolean enable, VerticalDeflectionTreeItemValue... selectedVerticalDeflectionItemValues) throws SQLException {
-		if (!this.hasDatabase() || !this.dataBase.isOpen())
-			return;
-				
-		StringBuilder values = new StringBuilder("(CAST(? AS INT), CAST(? AS INT), CAST(? AS BOOLEAN))");
-		for (int i=1; i<selectedVerticalDeflectionItemValues.length; i++)
-			values.append(",(CAST(? AS INT), CAST(? AS INT), CAST(? AS BOOLEAN))");
-
-		String sql = "MERGE INTO \"VerticalDeflectionGroupParameterRestriction\" USING (VALUES "
-				+ values
-				+ ") AS \"vals\" (\"group_id\",\"type\",\"enable\") ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"vals\".\"group_id\" AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = \"vals\".\"type\" "
-				+ "WHEN MATCHED THEN UPDATE SET "
-				+ "\"VerticalDeflectionGroupParameterRestriction\".\"enable\" = \"vals\".\"enable\" "
-				+ "WHEN NOT MATCHED THEN INSERT VALUES "
-				+ "\"vals\".\"group_id\", "
-				+ "\"vals\".\"type\", "
-				+ "\"vals\".\"enable\" ";
-
-		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
-		int idx = 1;
-		for (int i=0; i<selectedVerticalDeflectionItemValues.length; i++) {
-			int groupId = selectedVerticalDeflectionItemValues[i].getGroupId();
-			if (groupId < 0)
-				continue;
-			stmt.setInt(idx++, groupId);
-			stmt.setInt(idx++, restrictionType.getId());
-			stmt.setBoolean(idx++, enable);
-		}
-
-		stmt.execute();
-	}
 
 	public void saveStrainParameter(RestrictionType parameterType, boolean enable, CongruenceAnalysisTreeItemValue... selectedCongruenceAnalysisItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
@@ -3671,37 +3514,6 @@ public class SQLManager {
 			stmt.setBoolean(idx++, enable);
 		}
 
-		stmt.execute();
-	}
-	
-	public void saveGroupParameter(ParameterType parameterType, double value, VerticalDeflectionTreeItemValue... selectedVerticalDeflectionTreeItemValues) throws SQLException {
-		if (!this.hasDatabase() || !this.dataBase.isOpen())
-			return;
-
-		StringBuilder values = new StringBuilder("(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE))");
-		for (int i=1; i<selectedVerticalDeflectionTreeItemValues.length; i++)
-			values.append(",(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE))");
-
-		String sql = "MERGE INTO \"VerticalDeflectionGroupParameterApriori\" USING (VALUES "
-				+ values
-				+ ") AS \"vals\" (\"group_id\", \"type\", \"value_0\") ON \"VerticalDeflectionGroupParameterApriori\".\"group_id\" = \"vals\".\"group_id\" AND \"VerticalDeflectionGroupParameterApriori\".\"type\" = \"vals\".\"type\" "
-				+ "WHEN MATCHED THEN UPDATE SET "
-				+ "\"VerticalDeflectionGroupParameterApriori\".\"value_0\" = \"vals\".\"value_0\" "
-				+ "WHEN NOT MATCHED THEN INSERT VALUES "
-				+ "\"vals\".\"group_id\", "
-				+ "\"vals\".\"type\", "
-				+ "\"vals\".\"value_0\" ";
-
-		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
-		int idx = 1;
-		for (int i=0; i<selectedVerticalDeflectionTreeItemValues.length; i++) {
-			int groupId = selectedVerticalDeflectionTreeItemValues[i].getGroupId();
-			if (groupId < 0)
-				continue;
-			stmt.setInt(idx++, groupId);
-			stmt.setInt(idx++, parameterType.getId());			
-			stmt.setDouble(idx++, value);
-		}
 		stmt.execute();
 	}
 	
@@ -3787,10 +3599,10 @@ public class SQLManager {
 				+ "\"UnionTable\".\"name\", SUM(\"UnionTable\".\"number_of_observations\") AS \"number_of_observations\", \"UnionTable\".\"dimension\" FROM ( "
 
 				// Alle Punkte abfragen, die bestimmt werden muessen
-				+ "SELECT "
+				+ "SELECT"
 				
 				+ "\"name\", 0 AS \"number_of_observations\", "
-				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? AND \"VerticalDeflectionGroupParameterRestriction\".\"enable\" = FALSE THEN \"PointGroup\".\"dimension\" + 2 ELSE \"PointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
+				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? THEN \"PointGroup\".\"dimension\" + 2 ELSE \"PointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
 				
 				+ "FROM \"PointApriori\" "
 				
@@ -3798,19 +3610,18 @@ public class SQLManager {
 				
 				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"PointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
 				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
-				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "
 				
 				+ "WHERE \"PointGroup\".\"enable\" = TRUE AND \"PointApriori\".\"enable\" = TRUE "
 				+ "AND \"PointGroup\".\"type\" IN (?, ?) "
 
-
+				
 				+ "UNION ALL "
 
 				// Alle Standpunkte abfragen und terr. Beobachtungen zaehlen
 				+ "SELECT "
 				
 				+ "\"start_point_name\" AS \"name\", COUNT(\"start_point_name\") AS \"number_of_observations\", "
-				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? AND \"VerticalDeflectionGroupParameterRestriction\".\"enable\" = FALSE THEN \"StartPointGroup\".\"dimension\" + 2 ELSE \"StartPointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
+				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? THEN \"StartPointGroup\".\"dimension\" + 2 ELSE \"StartPointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
 				
 				+ "FROM \"ObservationApriori\" "
 				
@@ -3824,12 +3635,11 @@ public class SQLManager {
 				
 				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"StartPointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
 				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
-				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "
 				
 				+ "WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE "
 				+ "AND \"StartPointGroup\".\"type\" IN (?, ?) "
 				
-				+ "GROUP BY \"start_point_name\", \"StartPointGroup\".\"dimension\", \"VerticalDeflectionGroup\".\"type\", \"VerticalDeflectionGroupParameterRestriction\".\"enable\" "
+				+ "GROUP BY \"start_point_name\", \"StartPointGroup\".\"dimension\", \"VerticalDeflectionGroup\".\"type\" "
 				
 				
 				+ "UNION ALL "
@@ -3838,7 +3648,7 @@ public class SQLManager {
 				+ "SELECT "
 				
 				+ "\"end_point_name\" AS \"name\", COUNT(\"end_point_name\") AS \"number_of_observations\", "
-				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? AND \"VerticalDeflectionGroupParameterRestriction\".\"enable\" = FALSE THEN \"EndPointGroup\".\"dimension\" + 2 ELSE \"EndPointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
+				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? THEN \"EndPointGroup\".\"dimension\" + 2 ELSE \"EndPointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
 				
 				+ "FROM \"ObservationApriori\" "
 				
@@ -3852,12 +3662,11 @@ public class SQLManager {
 				
 				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"EndPointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
 				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
-				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "
 				
 				+ "WHERE \"ObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE "
 				+ "AND \"EndPointGroup\".\"type\" IN (?, ?) "
 				
-				+ "GROUP BY \"end_point_name\", \"EndPointGroup\".\"dimension\", \"VerticalDeflectionGroup\".\"type\", \"VerticalDeflectionGroupParameterRestriction\".\"enable\" "
+				+ "GROUP BY \"end_point_name\", \"EndPointGroup\".\"dimension\", \"VerticalDeflectionGroup\".\"type\" "
 				
 				
 				+ "UNION ALL "
@@ -3866,7 +3675,7 @@ public class SQLManager {
 				+ "SELECT "
 				
 				+ "\"start_point_name\" AS \"name\", CAST(CASE WHEN \"ObservationGroup\".\"type\" = ? THEN 3*COUNT(\"start_point_name\") WHEN \"ObservationGroup\".\"type\" = ? THEN 2*COUNT(\"start_point_name\") ELSE COUNT(\"start_point_name\") END AS INTEGER) AS \"number_of_observations\", "
-				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? AND \"VerticalDeflectionGroupParameterRestriction\".\"enable\" = FALSE THEN \"StartPointGroup\".\"dimension\" + 2 ELSE \"StartPointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
+				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? THEN \"StartPointGroup\".\"dimension\" + 2 ELSE \"StartPointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
 				
 				+ "FROM \"GNSSObservationApriori\" "
 				
@@ -3880,12 +3689,11 @@ public class SQLManager {
 				
 				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"StartPointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
 				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
-				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "
 				
 				+ "WHERE \"GNSSObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE "
 				+ "AND \"StartPointGroup\".\"type\" IN (?, ?) "
 				
-				+ "GROUP BY \"start_point_name\", \"StartPointGroup\".\"dimension\", \"ObservationGroup\".\"type\", \"VerticalDeflectionGroup\".\"type\", \"VerticalDeflectionGroupParameterRestriction\".\"enable\" "
+				+ "GROUP BY \"start_point_name\", \"StartPointGroup\".\"dimension\", \"ObservationGroup\".\"type\", \"VerticalDeflectionGroup\".\"type\" "
 				
 				
 				+ "UNION ALL "
@@ -3894,7 +3702,7 @@ public class SQLManager {
 				+ "SELECT "
 				
 				+ "\"end_point_name\" AS \"name\", CAST(CASE WHEN \"ObservationGroup\".\"type\" = ? THEN 3*COUNT(\"end_point_name\") WHEN \"ObservationGroup\".\"type\" = ? THEN 2*COUNT(\"end_point_name\") ELSE COUNT(\"end_point_name\") END AS INTEGER) AS \"number_of_observations\", "
-				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? AND \"VerticalDeflectionGroupParameterRestriction\".\"enable\" = FALSE THEN \"EndPointGroup\".\"dimension\" + 2 ELSE \"EndPointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
+				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? THEN \"EndPointGroup\".\"dimension\" + 2 ELSE \"EndPointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
 				
 				+ "FROM \"GNSSObservationApriori\" "
 				
@@ -3908,11 +3716,11 @@ public class SQLManager {
 				
 				+ "LEFT JOIN \"VerticalDeflectionApriori\" ON \"VerticalDeflectionApriori\".\"name\" = \"EndPointApriori\".\"name\" AND \"VerticalDeflectionApriori\".\"enable\" = TRUE "
 				+ "LEFT JOIN \"VerticalDeflectionGroup\" ON \"VerticalDeflectionApriori\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\"  AND \"VerticalDeflectionGroup\".\"enable\" = TRUE "
-				+ "LEFT JOIN \"VerticalDeflectionGroupParameterRestriction\" ON \"VerticalDeflectionGroupParameterRestriction\".\"group_id\" = \"VerticalDeflectionGroup\".\"id\" AND \"VerticalDeflectionGroupParameterRestriction\".\"type\" = ? "				
+				
 				+ "WHERE \"GNSSObservationApriori\".\"enable\" = TRUE AND \"ObservationGroup\".\"enable\" = TRUE AND \"StartPointApriori\".\"enable\" = TRUE AND \"EndPointApriori\".\"enable\" = TRUE AND \"StartPointGroup\".\"enable\" = TRUE AND \"EndPointGroup\".\"enable\" = TRUE "
 				+ "AND \"EndPointGroup\".\"type\" IN (?, ?) "
 				
-				+ "GROUP BY \"end_point_name\", \"EndPointGroup\".\"dimension\", \"ObservationGroup\".\"type\", \"VerticalDeflectionGroup\".\"type\", \"VerticalDeflectionGroupParameterRestriction\".\"enable\" "
+				+ "GROUP BY \"end_point_name\", \"EndPointGroup\".\"dimension\", \"ObservationGroup\".\"type\", \"VerticalDeflectionGroup\".\"type\" "
 				
 				
 				+ ") AS \"UnionTable\" "
@@ -3947,19 +3755,16 @@ public class SQLManager {
 		int idx = 1;
 		// Alle Punkte abfragen, die bestimmt werden muessen
 		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
-		stmt.setInt(idx++, VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS.getId());
 		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
 		stmt.setInt(idx++, PointType.NEW_POINT.getId());
 
 		// Alle Standpunkte abfragen und terr. Beobachtungen zaehlen
 		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
-		stmt.setInt(idx++, VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS.getId());
 		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
 		stmt.setInt(idx++, PointType.NEW_POINT.getId());
 
 		// Alle Zielpunkte abfragen und terr. Beobachtungen zaehlen
 		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
-		stmt.setInt(idx++, VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS.getId());
 		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
 		stmt.setInt(idx++, PointType.NEW_POINT.getId());
 
@@ -3967,7 +3772,6 @@ public class SQLManager {
 		stmt.setInt(idx++, ObservationType.GNSS3D.getId());
 		stmt.setInt(idx++, ObservationType.GNSS2D.getId());
 		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
-		stmt.setInt(idx++, VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS.getId());
 		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
 		stmt.setInt(idx++, PointType.NEW_POINT.getId());
 
@@ -3975,7 +3779,6 @@ public class SQLManager {
 		stmt.setInt(idx++, ObservationType.GNSS3D.getId());
 		stmt.setInt(idx++, ObservationType.GNSS2D.getId());
 		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
-		stmt.setInt(idx++, VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS.getId());
 		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
 		stmt.setInt(idx++, PointType.NEW_POINT.getId());
 

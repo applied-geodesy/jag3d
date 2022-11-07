@@ -55,17 +55,14 @@ public class UnknownParameters {
 					sortedParameters.add(parameter);
 					break;
 				default:
-					parameter.setColInJacobiMatrix(-1); // reset column
 					nonPointParameters.add(parameter);
 					break;
 				}
 			}
 
 			for (UnknownParameter parameter : nonPointParameters) {
-				if (parameter.getColInJacobiMatrix() < 0) { // check, if restricted deflection parameter
-					parameter.setColInJacobiMatrix(this.col);
-					this.increaseColumnCount(parameter.getParameterType());
-				}
+				parameter.setColInJacobiMatrix(this.col);
+				this.increaseColumnCount(parameter.getParameterType());
 				sortedParameters.add(parameter);
 			}
 			this.parameters = sortedParameters;
@@ -74,10 +71,8 @@ public class UnknownParameters {
 
 	public boolean add(UnknownParameter parameter) {
 		if (!this.parameters.contains(parameter)) {
-			if (parameter.getColInJacobiMatrix() < 0) { // check, if restricted deflection parameter
-				parameter.setColInJacobiMatrix(this.col);
-				this.increaseColumnCount(parameter.getParameterType());
-			}
+			parameter.setColInJacobiMatrix(this.col);
+			this.increaseColumnCount(parameter.getParameterType());
 			return this.parameters.add( parameter );
 		}
 		return false;

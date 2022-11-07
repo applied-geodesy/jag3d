@@ -19,16 +19,14 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.adjustment.network.point.dov;
+package org.applied_geodesy.adjustment.network.parameter;
 
 import org.applied_geodesy.adjustment.network.observation.group.ObservationGroup;
-import org.applied_geodesy.adjustment.network.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.network.point.Point;
 
 public abstract class VerticalDeflection extends UnknownParameter {
 	private final Point point;
-	private VerticalDeflectionGroup verticalDeflectionGroup;
-	
+
 	private int rowInJacobiMatrix = -1;
 	
 	private double redundancy      =  0.0,
@@ -80,11 +78,6 @@ public abstract class VerticalDeflection extends UnknownParameter {
 	@Override
 	public ObservationGroup getObservations() {
 		return this.point.getObservations();
-	}
-	
-	boolean isRestrictedGroupParameter() {
-		return this.getVerticalDeflectionGroup() != null && 
-				this.getVerticalDeflectionGroup().isRestricted(VerticalDeflectionRestrictionType.IDENTICAL_DEFLECTIONS);
 	}
 
 	public void setStd(double std) {
@@ -160,14 +153,6 @@ public abstract class VerticalDeflection extends UnknownParameter {
 	public void setConfidence(double confidence) {
 		this.confidence = confidence;
 	}	
-	
-	void setVerticalDeflectionGroup(VerticalDeflectionGroup verticalDeflectionGroup) {
-		this.verticalDeflectionGroup = verticalDeflectionGroup;
-	}
-	
-	public VerticalDeflectionGroup getVerticalDeflectionGroup() {
-		return this.verticalDeflectionGroup;
-	}
 	
 	@Override
 	public String toString() {
