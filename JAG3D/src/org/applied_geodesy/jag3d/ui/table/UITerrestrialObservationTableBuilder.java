@@ -687,7 +687,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				valid = true;
 			}
 			else
-				rowData.setStartPointName(oldValue == null ? null : oldValue.toString().trim());
+				rowData.setEndPointName(oldValue == null ? null : oldValue.toString().trim());
 			break;
 		case 3:
 			if (newValue != null && newValue instanceof Double) {
@@ -703,7 +703,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				valid = true;
 			}
 			else
-				rowData.setInstrumentHeight(0.0);
+				rowData.setReflectorHeight(0.0);
 			break;
 		case 5:
 			if (newValue != null && newValue instanceof Double) {
