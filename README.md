@@ -1,12 +1,14 @@
 Java·Applied·Geodesy·3D
 =======================
-Java·Applied·Geodesy·3D (JAG3D) is one of the most popular open source least-squares software package for geodetic sciences. The Java-based application is distributed under the terms of the GNU General Public License (version 3). JAG3D is designed to combine hybrid terrestrial observations like leveling, directions, distances or vertical angles in a uniform and rigorous mathematical model. Moreover, GNSS baselines that are derived by Global Navigation Satellite System (GNSS) techniques are supported. Some reference projects are the [deformation analysis](https://software.applied-geodesy.org/en/deformation_analysis) at the Onsala Space Observatory, or the adjustment of laser tracker measurements at the [electron accelerator](https://software.applied-geodesy.org/en/electron_accelerator) S-DALINAC. More information about the least-squares software package JAG3D can be found at [software.applied-geodesy.org](https://software.applied-geodesy.org/)</a>. 
+Java·Applied·Geodesy·3D (JAG3D) is one of the most popular open source least-squares software package for geodetic sciences. The Java-based application is distributed under the terms of the GNU General Public License (version 3). JAG3D is designed to combine hybrid terrestrial observations like leveling, directions, distances or vertical angles in a uniform and rigorous mathematical model. Moreover, GNSS baselines that are derived by Global Navigation Satellite System (GNSS) techniques are supported. Some reference projects are the [deformation analysis](https://software.applied-geodesy.org/en/deformation_analysis) at the Onsala Space Observatory, or the adjustment of laser tracker measurements at the [electron accelerator](https://software.applied-geodesy.org/en/electron_accelerator) S-DALINAC. More information about the least-squares software package JAG3D can be found at [software.applied-geodesy.org](https://software.applied-geodesy.org/)</a>.
 
-
-Screenshot
-----------
 ![Java Applied Geodesy 3D (JAG3D)](/.images/jag3d.png?raw=true "Java·Applied·Geodesy·3D (JAG3D)")
 
+International Course on Engineering
+-----------------------------------
+Diagnosis adjustment of planned networks as well as the analysis of existing geodetic networks by means of least-squares adjustment is a principal task in geodetic and metrological sciences such as surveying engineering. The network adjustment yields not only the estimated coordinates and the related fully populated dispersion but also parameters to evaluate the reliability of the network. At the *20th International Course on Engineering*, the principles of geodetic network adjustment are recapitulated within the specific tutorial named *network analysis*. The conference will be held at ETH Zurich from April 11 to 14, 2023. The open source least-squares software package Java·Applied·Geodesy·3D is used to analyse local terrestrial networks, to interpret the adjustment results, and to evaluate network reliability. The principles of Baarda's DIA approach for detection, identification and adaptation of misspecified models are generalised and applied to evaluate network deformations. In complex analysis procedures, the network adjustment is only a cog in the wheel. For that reason, interfaces for data exchange and processing of adjustment results in external applications is addressed. For further information are available at the website of the [Course on Engineering](https://ingenieurvermessungskurs.com).
+
+![International Course on Engineering](/.images/ingenieurvermessung23.png?raw=true "Course on Engineering 2023")
 
 System requirements
 -------------------
