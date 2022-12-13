@@ -378,8 +378,8 @@ public class M5FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		long sec   = localDateTime.getSecond();
 		long min   = localDateTime.getMinute();
 		long hour  = localDateTime.getHour();
-		long musod = (hour * 3600 + min * 60 + sec) * 1000000 + musec;
-		//pointName = "W"+(++cnt)+"_"+this.getFile().getName().substring(0, this.getFile().getName().lastIndexOf('.'));
-		return String.format(Locale.ENGLISH, "%c%04d%03d%011d", 'W', cnt, doy, musod);
+		long musod = (hour * 3600L + min * 60L + sec) * 1000000L + musec;
+		int salt   = (int)Math.abs(Math.random()*1000);
+		return String.format(Locale.ENGLISH, "%c%04d%03d%011d%03d", 'W', cnt, doy, musod, salt);
 	}
 }
