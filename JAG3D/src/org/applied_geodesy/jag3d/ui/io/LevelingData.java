@@ -40,7 +40,7 @@ class LevelingData {
 			this.v1  = v;
 			this.dv1 = d;
 		}
-		else if (!isFirstForeSightReading && (name == null || this.endPointName.equals(name))) {
+		else if (!isFirstForeSightReading && (name == null || name.isBlank() || this.endPointName.equals(name))) {
 			this.v2  = v;
 			this.dv2 = d;
 		}
@@ -52,7 +52,7 @@ class LevelingData {
 			this.r1  = r;
 			this.dr1 = d;
 		}
-		else if (!isFirstBackSightReading && (name == null || this.startPointName.equals(name))) {
+		else if (!isFirstBackSightReading && (name == null || name.isBlank() || this.startPointName.equals(name))) {
 			this.r2  = r;
 			this.dr2 = d;
 		}
