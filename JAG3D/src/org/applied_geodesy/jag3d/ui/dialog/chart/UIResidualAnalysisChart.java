@@ -53,33 +53,7 @@ import javafx.scene.layout.Region;
 import javafx.util.StringConverter;
 
 public class UIResidualAnalysisChart {
-	private enum TerrestrialObservationType {
-		ALL(null),
-		LEVELING(ObservationType.LEVELING),
-		DIRECTION(ObservationType.DIRECTION),
-		HORIZONTAL_DISTANCE(ObservationType.HORIZONTAL_DISTANCE),
-		SLOPE_DISTANCE(ObservationType.SLOPE_DISTANCE),
-		ZENITH_ANGLE(ObservationType.ZENITH_ANGLE),
-		;
 
-		private ObservationType observationType;
-		private TerrestrialObservationType(ObservationType observationType) {
-			this.observationType = observationType;
-		}
-
-		public final ObservationType getObservationType() {
-			return observationType;
-		}
-
-		public static TerrestrialObservationType getEnumByValue(ObservationType observationType) {
-			for(TerrestrialObservationType element : TerrestrialObservationType.values()) {
-				if(element.observationType != null && element.observationType == observationType)
-					return element;
-			}
-			return null;
-		}  
-	}
-	
 	private class TickFormatChangedListener implements FormatterChangedListener {
 		@Override
 		public void formatterChanged(FormatterEvent evt) {
@@ -114,6 +88,7 @@ public class UIResidualAnalysisChart {
 	private AreaChart<Number,Number> histogramChart;
 
 	private UIResidualAnalysisChart() {}
+	private final double X_RANGE_PDF = 3.9; // Plot PDF within -x to x
 
 	public static UIResidualAnalysisChart getInstance() {
 		analysisChart.init();
@@ -145,7 +120,7 @@ public class UIResidualAnalysisChart {
 		this.gaussianProbabilityDensityFunctionCheckBox.selectedProperty().addListener(probabilityDensityFunctionChangeListener);
 		this.kernelDensityEstimationCheckBox.selectedProperty().addListener(probabilityDensityFunctionChangeListener);
 
-		this.terrestrialObservationTypeComboBox = this.createTerrestrialObservationTypeComboBox(TerrestrialObservationType.ALL, i18n.getString("UIResidualAnalysisChart.observationtype.terrestrial.tooltip", "Set observational residual type"));
+		this.terrestrialObservationTypeComboBox = this.createTerrestrialObservationTypeComboBox(TerrestrialObservationType.ALL, i18n.getString("UIResidualAnalysisChart.observationtype.terrestrial.tooltip", "Set observational type"));
 		Region spacer = new Region();
 		HBox hbox = new HBox(10);
 		hbox.setPadding(new Insets(5, 10, 5, 15));
@@ -336,9 +311,9 @@ public class UIResidualAnalysisChart {
 		int numberOfBins = 0;
 
 		if (iqr > 0 || sampleVariance > 0) 
-			binWidth = iqr > 0 ? 2.0 * iqr * Math.pow(length, -1.0/3.0) : 3.49 * Math.sqrt(sampleVariance) * Math.pow(length, -1.0/3.0);
-			else 
-				binWidth = (maxValue - minValue) / Math.round(2.0 * Math.pow(length, 1.0/3.0));
+			binWidth = iqr > 0 ? 2.0 * iqr * Math.pow(length, -1.0/3.0) : (2.0 * Math.pow(3, 1.0/3.0) * Math.pow(Math.PI, 1.0/6.0)) * Math.sqrt(sampleVariance) * Math.pow(length, -1.0/3.0);
+		else 
+			binWidth = (maxValue - minValue) / Math.round(2.0 * Math.pow(length, 1.0/3.0));
 
 		numberOfBins = binWidth > 0 ? Math.max((int)Math.ceil((maxValue - minValue) / binWidth), 1) : 1;
 		int bins[] = new int[numberOfBins];
@@ -387,7 +362,9 @@ public class UIResidualAnalysisChart {
 		}
 
 		double xRange = Math.max(Math.abs(minValue), Math.abs(maxValue + binWidth));
-
+		xRange = Math.max(xRange, X_RANGE_PDF);
+		yRange = Math.max(yRange, this.getStandardGaussian(0));
+		
 		return new double[] {xRange, yRange};
 	}
 
@@ -395,8 +372,8 @@ public class UIResidualAnalysisChart {
 
 		double xRange = 0, yRange = 0;
 		XYChart.Series<Number, Number> probabilityDensity = new XYChart.Series<Number, Number>();
-		for (double x = -3.9; x <= 3.9; x += 0.01) {
-			//double pdf = this.getStandardGaussian(x, sampleMean, sampleVariance);
+		for (double x = -X_RANGE_PDF; x <= X_RANGE_PDF; x += 0.01) {
+			//double pdf = this.getStandardGaussian(x+sampleMean, sampleMean, sampleVariance);
 			double pdf = this.getStandardGaussian(x);
 			probabilityDensity.getData().add(new XYChart.Data<Number, Number>(x,  pdf));
 			xRange = Math.max(xRange, Math.abs(x));
