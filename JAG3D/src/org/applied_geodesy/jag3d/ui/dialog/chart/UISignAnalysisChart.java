@@ -32,9 +32,7 @@ import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
-import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 import org.applied_geodesy.ui.dialog.OptionDialog;
-import org.applied_geodesy.util.FormatterOptions;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -55,7 +53,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
-public class UIRedundancyAnalysisChart {
+public class UISignAnalysisChart {
 
 	private class TerrestrialObservationTypeChangeListener implements ChangeListener<TerrestrialObservationType> {
 		@Override
@@ -64,24 +62,20 @@ public class UIRedundancyAnalysisChart {
 				updateChartData(newValue);
 		}
 	}
-	
+
 	private I18N i18n = I18N.getInstance();
 	private TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
-	
-	private FormatterOptions options = FormatterOptions.getInstance();
-	private static UIRedundancyAnalysisChart analysisChart = new UIRedundancyAnalysisChart();
+
+	private static UISignAnalysisChart analysisChart = new UISignAnalysisChart();
 	private Node analysisChartNode;
-	private Map<TableRowHighlightRangeType, Integer> chartData = new HashMap<TableRowHighlightRangeType, Integer>(0);
-	private final String INADEQUATE   = "INADEQUATE";   // TableRowHighlightRangeType.INADEQUATE.name()
-	private final String SATISFACTORY = "SATISFACTORY";
-	private final String EXCELLENT    = "EXCELLENT";
+	private Map<SignType, Integer> chartData = new HashMap<SignType, Integer>(0);
 	
 	private ComboBox<TerrestrialObservationType> terrestrialObservationTypeComboBox;
 	private PieChart pieChart;
 
-	private UIRedundancyAnalysisChart() {}
+	private UISignAnalysisChart() {}
 
-	public static UIRedundancyAnalysisChart getInstance() {
+	public static UISignAnalysisChart getInstance() {
 		analysisChart.init();
 		return analysisChart;
 	}
@@ -96,7 +90,7 @@ public class UIRedundancyAnalysisChart {
 
 		BorderPane borderPane = new BorderPane();
 
-		this.terrestrialObservationTypeComboBox = this.createTerrestrialObservationTypeComboBox(TerrestrialObservationType.ALL, i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.tooltip", "Set observational type"));
+		this.terrestrialObservationTypeComboBox = this.createTerrestrialObservationTypeComboBox(TerrestrialObservationType.ALL, i18n.getString("UISignAnalysisChart.observationtype.terrestrial.tooltip", "Set observational type"));
 		Region spacer = new Region();
 		HBox hbox = new HBox(10);
 		hbox.setPadding(new Insets(5, 10, 5, 15));
@@ -139,12 +133,12 @@ public class UIRedundancyAnalysisChart {
 	
 	private void setChartLabelText(Text text) {
 		String name = text.getText();
-		if (name.equals(INADEQUATE) || name.equals(SATISFACTORY) || name.equals(EXCELLENT)) {
-			TableRowHighlightRangeType tableRowHighlightRangeType = TableRowHighlightRangeType.valueOf(name);
-			text.setText(String.format(Locale.ENGLISH, "%d", this.chartData.get(tableRowHighlightRangeType)));
+		if (name.equals(SignType.POSITIVE.name()) || name.equals(SignType.NEGATIVE.name())) {
+			SignType signType = SignType.valueOf(name);
+			text.setText(String.format(Locale.ENGLISH, "%d", this.chartData.get(signType)));
 		}
 	}
-	
+
 	private ObservationType[] getSelectedObservationTypes(TerrestrialObservationType terrestrialObservationType) {
 		ObservationType observationTypes[];
 		if (terrestrialObservationType == TerrestrialObservationType.ALL) {
@@ -169,14 +163,11 @@ public class UIRedundancyAnalysisChart {
 			terrestrialObservationType = terrestrialObservationType == null ? TerrestrialObservationType.ALL : terrestrialObservationType;
 			ObservationType[] observationTypes = this.getSelectedObservationTypes(terrestrialObservationType);
 			
-			double leftBoundary  = this.tableRowHighlight.getLeftBoundary(TableRowHighlightType.REDUNDANCY);
-			double rightBoundary = this.tableRowHighlight.getRightBoundary(TableRowHighlightType.REDUNDANCY);
-			
-			this.chartData = SQLManager.getInstance().getChartData(TableRowHighlightType.REDUNDANCY, observationTypes);
+			this.chartData = SQLManager.getInstance().getResidualSigns(observationTypes);
 			this.pieChart.getData().clear();
 
 			List<PieChart.Data> dataList = FXCollections.observableArrayList();
-			for (Map.Entry<TableRowHighlightRangeType, Integer> entry : this.chartData.entrySet()) {
+			for (Map.Entry<SignType, Integer> entry : this.chartData.entrySet()) {
 				if (entry.getValue() > 0) 
 					dataList.add(new PieChart.Data(entry.getKey().name(), entry.getValue()));
 			}
@@ -187,17 +178,22 @@ public class UIRedundancyAnalysisChart {
 			for (PieChart.Data data : this.pieChart.getData()) {
 				try {
 					String name = data.getName();
-					switch (name) {
-					case INADEQUATE:
-					case SATISFACTORY:
-					case EXCELLENT:
-						TableRowHighlightRangeType tableRowHighlightRangeType = TableRowHighlightRangeType.valueOf(name);
+					if (name.equals(SignType.POSITIVE.name()) || name.equals(SignType.NEGATIVE.name())) {
+						SignType signType = SignType.valueOf(name);
+						TableRowHighlightRangeType tableRowHighlightRangeType = TableRowHighlightRangeType.EXCELLENT;
+						switch (signType) {
+						case POSITIVE:
+							tableRowHighlightRangeType = TableRowHighlightRangeType.EXCELLENT;
+							break;
+						case NEGATIVE:
+							tableRowHighlightRangeType = TableRowHighlightRangeType.INADEQUATE;
+							break;
+						}
 
 						Color color = this.tableRowHighlight.getColor(tableRowHighlightRangeType);
 						String rgbColor = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f)", color.getRed()*255, color.getGreen()*255, color.getBlue()*255);
 
 						data.getNode().setStyle(color != null && color != Color.TRANSPARENT ? String.format("-fx-pie-color: %s;", rgbColor) : "");
-						break;
 					}
 				}
 				catch(Exception e) {
@@ -213,24 +209,28 @@ public class UIRedundancyAnalysisChart {
 					Region region = (Region)label.getGraphic();
 
 					String name = label.getText();
-					if (name.equals(INADEQUATE) || name.equals(SATISFACTORY) || name.equals(EXCELLENT)) {
-						TableRowHighlightRangeType tableRowHighlightRangeType = TableRowHighlightRangeType.valueOf(name);
+					if (name.equals(SignType.POSITIVE.name()) || name.equals(SignType.NEGATIVE.name())) {
+						SignType signType = SignType.valueOf(name);
+						TableRowHighlightRangeType tableRowHighlightRangeType = TableRowHighlightRangeType.EXCELLENT;
+						switch (signType) {
+						case POSITIVE:
+							tableRowHighlightRangeType = TableRowHighlightRangeType.EXCELLENT;
+							break;
+						case NEGATIVE:
+							tableRowHighlightRangeType = TableRowHighlightRangeType.INADEQUATE;
+							break;
+						}
+
 						Color color = this.tableRowHighlight.getColor(tableRowHighlightRangeType);
 						String rgbColor = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f)", color.getRed()*255, color.getGreen()*255, color.getBlue()*255);
 						region.setStyle(color != null && color != Color.TRANSPARENT ? String.format("-fx-pie-color: %s;", rgbColor) : "");
 
-						switch (tableRowHighlightRangeType) {
-						case INADEQUATE:
-							label.setText(String.format(Locale.ENGLISH, "%s \u2264 r \u003C %s", 0, options.toPercentFormat(leftBoundary, true)));
+						switch (signType) {
+						case POSITIVE:
+							label.setText(i18n.getString("UISignAnalysisChart.legend.type.positive.label", "Positive residuals (\u03B5 \u2265 0)"));
 							break;
-						case SATISFACTORY:
-							label.setText(String.format(Locale.ENGLISH, "%s \u2264 r \u2264 %s", options.toPercentFormat(leftBoundary, false), options.toPercentFormat(rightBoundary, true)));
-							break;
-						case EXCELLENT:
-							label.setText(String.format(Locale.ENGLISH, "%s \u003C r \u2264 %s", options.toPercentFormat(rightBoundary, false), options.toPercentFormat(1, true)));
-							break;
-						default:
-							System.err.println(this.getClass().getSimpleName() + ": Unsupported table row highlight type" + tableRowHighlightRangeType);
+						case NEGATIVE:
+							label.setText(i18n.getString("UISignAnalysisChart.legend.type.negative.label", "Negative residuals (\u03B5 \u003C 0)"));
 							break;
 						}
 					}
@@ -242,9 +242,9 @@ public class UIRedundancyAnalysisChart {
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("UIRedundancyAnalysisChart.message.error.load.exception.title", "Unexpected SQL-Error"),
-							i18n.getString("UIRedundancyAnalysisChart.message.error.load.exception.header", "Error, could not load data from database."),
-							i18n.getString("UIRedundancyAnalysisChart.message.error.load.exception.message", "An exception has occurred during database transaction."),
+							i18n.getString("UISignAnalysisChart.message.error.load.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UISignAnalysisChart.message.error.load.exception.header", "Error, could not load data from database."),
+							i18n.getString("UISignAnalysisChart.message.error.load.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}
@@ -266,17 +266,17 @@ public class UIRedundancyAnalysisChart {
 					return null;
 				switch(type) {
 				case ALL:
-					return i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.all.label", "All terrestrial observations");
+					return i18n.getString("UISignAnalysisChart.observationtype.terrestrial.all.label", "All terrestrial observations");
 				case LEVELING:
-					return i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.leveling.label", "Leveling");
+					return i18n.getString("UISignAnalysisChart.observationtype.terrestrial.leveling.label", "Leveling");
 				case DIRECTION:
-					return i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.direction.label", "Directions");
+					return i18n.getString("UISignAnalysisChart.observationtype.terrestrial.direction.label", "Directions");
 				case HORIZONTAL_DISTANCE:
-					return i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.horizontal_distance.label", "Horizontal distances");
+					return i18n.getString("UISignAnalysisChart.observationtype.terrestrial.horizontal_distance.label", "Horizontal distances");
 				case SLOPE_DISTANCE:
-					return i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.slope_distance.label", "Slope distances");
+					return i18n.getString("UISignAnalysisChart.observationtype.terrestrial.slope_distance.label", "Slope distances");
 				case ZENITH_ANGLE:
-					return i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.zenith_angle.label", "Zenith angles");
+					return i18n.getString("UISignAnalysisChart.observationtype.terrestrial.zenith_angle.label", "Zenith angles");
 				}
 				return null;
 			}
@@ -324,9 +324,9 @@ public class UIRedundancyAnalysisChart {
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("UIRedundancyAnalysisChart.message.error.load.exception.title", "Unexpected SQL-Error"),
-							i18n.getString("UIRedundancyAnalysisChart.message.error.load.exception.header", "Error, could not load data from database."),
-							i18n.getString("UIRedundancyAnalysisChart.message.error.load.exception.message", "An exception has occurred during database transaction."),
+							i18n.getString("UISignAnalysisChart.message.error.load.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UISignAnalysisChart.message.error.load.exception.header", "Error, could not load data from database."),
+							i18n.getString("UISignAnalysisChart.message.error.load.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}

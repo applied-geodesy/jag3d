@@ -21,9 +21,6 @@
 
 package org.applied_geodesy.jag3d.ui.dialog.chart;
 
-public enum AnalysisChartType {
-	RESIDUALS,
-	REDUNDANCY,
-	SIGN,
-	;
+public enum SignType {
+	POSITIVE, NEGATIVE;
 }

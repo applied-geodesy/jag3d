@@ -27,6 +27,7 @@ import org.applied_geodesy.jag3d.ui.dialog.chart.AnalysisChartType;
 import org.applied_geodesy.jag3d.ui.dialog.chart.AnalysisChartTypeListCell;
 import org.applied_geodesy.jag3d.ui.dialog.chart.UIRedundancyAnalysisChart;
 import org.applied_geodesy.jag3d.ui.dialog.chart.UIResidualAnalysisChart;
+import org.applied_geodesy.jag3d.ui.dialog.chart.UISignAnalysisChart;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.application.Platform;
@@ -123,9 +124,9 @@ public class AnalysisChartsDialog {
 		});
 		
 		this.chartPane.setLeft(this.analysisChartTypeList);
-		
 		Region spacer = new Region();
 		spacer.setPrefWidth(450);
+		spacer.setPrefHeight(400);
 		this.chartPane.setCenter(spacer);
 		
 		return this.chartPane;
@@ -138,10 +139,10 @@ public class AnalysisChartsDialog {
 	}
 	
 	private void loadChart(AnalysisChartType analysisChartType) {
-		Node node = null;
+		final Node node;
 		switch (analysisChartType) {
 		case RESIDUALS:
-			this.dialog.setHeaderText(i18n.getString("AnalysisChartsDialog.chart.type.residuals.header", "Histogram of normalized residuals"));
+			this.dialog.setHeaderText(i18n.getString("AnalysisChartsDialog.chart.type.residual.header", "Histogram of normalized residuals"));
 			node = UIResidualAnalysisChart.getInstance().getNode();
 			this.setChart(node);
 			
@@ -165,7 +166,21 @@ public class AnalysisChartsDialog {
 			});
 
 			break;
+			
+		case SIGN:
+			this.dialog.setHeaderText(i18n.getString("AnalysisChartsDialog.chart.type.sign.header", "Pie chart of sign distribution"));
+			node = UISignAnalysisChart.getInstance().getNode();
+			this.setChart(node);
+			
+			Platform.runLater(new Runnable() {
+				@Override public void run() {
+					UISignAnalysisChart.getInstance().load();
+				}
+			});
+
+			break;
 		}
+
 		this.lastSelectedAnalysisChartType = analysisChartType;
 	}
 }

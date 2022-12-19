@@ -63,6 +63,7 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.ui.dialog.LeastSquaresSettingDialog.LeastSquaresSettings;
 import org.applied_geodesy.jag3d.ui.dialog.ScopeType;
+import org.applied_geodesy.jag3d.ui.dialog.chart.SignType;
 import org.applied_geodesy.jag3d.ui.graphic.UIGraphicPaneBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.sql.SQLGraphicManager;
 import org.applied_geodesy.jag3d.ui.io.ImportOption;
@@ -5340,6 +5341,50 @@ public class SQLManager {
 			if (tableRowHighlightRangeType != null && tableRowHighlightRangeType != TableRowHighlightRangeType.NONE) {
 				chartData.put(tableRowHighlightRangeType, count);
 			}
+		}
+
+		return chartData;
+	}
+	
+	public Map<SignType, Integer> getResidualSigns(ObservationType[] observationTypes) throws SQLException {
+		Map<SignType, Integer> chartData = new LinkedHashMap<SignType, Integer>(2);
+		chartData.put(SignType.POSITIVE, 0);
+		chartData.put(SignType.NEGATIVE, 0);
+		
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return chartData;
+		
+		StringBuilder inArrayValues = new StringBuilder("?");
+		for (int i = 1; i < observationTypes.length; i++)
+			inArrayValues.append(",?");
+		
+		String sql = "SELECT "
+				+ "SUM(CASE WHEN \"residual\" >= 0 THEN 1 ELSE 0 END) AS \"number_of_positive_residuals\", "
+				+ "SUM(CASE WHEN \"residual\" <  0 THEN 1 ELSE 0 END) AS \"number_of_negative_residuals\" "
+				+ "FROM \"ObservationAposteriori\" JOIN \"ObservationApriori\" "
+				+ "ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
+				+ "JOIN \"ObservationGroup\" "
+				+ "ON \"ObservationGroup\".\"id\" = \"ObservationApriori\".\"group_id\" "
+				+ "WHERE \"ObservationGroup\".\"enable\" = TRUE "
+				+ "AND \"ObservationApriori\".\"enable\" = TRUE "
+				+ "AND \"redundancy\" > 0 "
+				+ "AND \"type\" IN (" + inArrayValues + ") ";
+
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		
+		int idx = 1;
+		for (ObservationType type : observationTypes) 
+			stmt.setInt(idx++, type.getId());
+		
+		ResultSet rs = stmt.executeQuery();
+		int negativeResiduals = 0;
+		int positiveResiduals = 0;
+		if (rs.next()) {
+			positiveResiduals = rs.getInt("number_of_positive_residuals");
+			negativeResiduals = rs.getInt("number_of_negative_residuals");
+			
+			chartData.put(SignType.POSITIVE, positiveResiduals);
+			chartData.put(SignType.NEGATIVE, negativeResiduals);
 		}
 
 		return chartData;
