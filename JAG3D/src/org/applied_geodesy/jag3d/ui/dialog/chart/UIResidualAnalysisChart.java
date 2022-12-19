@@ -254,7 +254,7 @@ public class UIResidualAnalysisChart {
 			Collections.sort(normalizedResiduals);
 
 			int length = normalizedResiduals.size();
-			double sampleMean     = length > 1 ? this.getMean(normalizedResiduals) : 0;
+			double sampleMean     = length > 0 ? this.getMean(normalizedResiduals) : 0.0;
 			double sampleVariance = length > 1 ? this.getVariance(normalizedResiduals, sampleMean) : 1.0;	
 
 			double xRange = 0, yRange = 0;
@@ -513,7 +513,7 @@ public class UIResidualAnalysisChart {
 			double res = value.doubleValue() - mean;
 			var += res * res;
 		}
-		return var / n;
+		return n > 1 ? var / (n - 1) : 1.0;
 	}
 
 	private double getMean(List<Double> values) {
@@ -522,7 +522,7 @@ public class UIResidualAnalysisChart {
 		for (Double value : values) {
 			mean += value.doubleValue();
 		}
-		return mean = n > 0 ? mean / n : 0;
+		return n > 0 ? mean / n : mean;
 	}
 	
 	public void load() {
