@@ -23,9 +23,8 @@ package org.applied_geodesy.adjustment.network;
 
 public class VarianceComponent {
 	private final VarianceComponentType type;
-	private int numberOfObservations = 0;
+	private int numberOfObservations = 0, numberOfEffectiveObservations = 0, numberOfNegativeResiduals = 0;
 	private double redundancy = 0, omega = 0;
-	private double kGroup = Double.POSITIVE_INFINITY;
 	
 	VarianceComponent(VarianceComponentType type) {
 		this.type = type;
@@ -55,32 +54,30 @@ public class VarianceComponent {
 		this.numberOfObservations = noo;
 	}
 	
+	public int getNumberOfEffectiveObservations() {
+		return this.numberOfEffectiveObservations;
+	}
+
+	public void setNumberOfEffectiveObservations(int noeo) {
+		this.numberOfEffectiveObservations = noeo;
+	}
+	
+	public int getNumberOfNegativeResiduals() {
+		return this.numberOfNegativeResiduals;
+	}
+	
+	public void setNumberOfNegativeResiduals(int nopr) {
+		this.numberOfNegativeResiduals = nopr;
+	}
+	
 	public VarianceComponentType getVarianceComponentType() {
 		return this.type;
 	}
 	
 	public double getVarianceFactorAposteriori() {
-		if (this.getRedundancy()>0)
-			return this.getOmega()/this.getRedundancy();
-		return 0.0;
-	}
-	
-	public void setKprioGroup(double k) {
-		this.kGroup = k;
+		return this.redundancy > 0 ? this.omega / this.redundancy : 0.0;
 	}
 
-	public double getKprioGroup() {
-		return this.kGroup;
-	}
-	
-	public double getTprioGroup() {
-		return this.redundancy>0?this.omega/this.redundancy:1.0;
-	}
-	
-	public boolean isRejected() {
-		return this.getTprioGroup() > this.kGroup;
-	}
-	
 	public String toString() {
 		return this.type+"\r\nr="+this.getRedundancy()+
 				"\r\nomega="+this.getOmega()+

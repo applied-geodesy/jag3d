@@ -90,6 +90,8 @@ import org.applied_geodesy.adjustment.network.point.Point;
 import org.applied_geodesy.adjustment.network.point.Point1D;
 import org.applied_geodesy.adjustment.network.point.Point2D;
 import org.applied_geodesy.adjustment.network.point.Point3D;
+import org.applied_geodesy.adjustment.statistic.BinomialTestStatisticParameterSet;
+import org.applied_geodesy.adjustment.statistic.BinomialTestStatisticParameters;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameters;
@@ -167,7 +169,7 @@ public class SQLAdjustmentManager {
 		// Definition of test statistic
 		TestStatisticDefinition testStatisticDefinition = this.getTestStatisticDefinition();
 		if (testStatisticDefinition != null)
-			this.networkAdjustment.setSignificanceTestStatisticDefinition(testStatisticDefinition);
+			this.networkAdjustment.setTestStatisticDefinition(testStatisticDefinition);
 
 		Map<String,Point> newPoints   = this.getPointsByType( PointType.NEW_POINT );
 		Map<String,Point> datumPoints = this.getPointsByType( PointType.DATUM_POINT );
@@ -1102,6 +1104,7 @@ public class SQLAdjustmentManager {
 				this.savePrincipalComponentAnalysis(this.networkAdjustment.getPrincipalComponents());
 				this.saveRankDefect(this.networkAdjustment.getRankDefect());
 				this.saveTestStatistic(this.networkAdjustment.getSignificanceTestStatisticParameters());
+				this.saveBinomialTestStatistic(this.networkAdjustment.getBinomialTestStatisticParameters());
 				this.saveVarianceComponents(this.networkAdjustment.getVarianceComponents());
 				
 				this.saveVersion();
@@ -1132,6 +1135,7 @@ public class SQLAdjustmentManager {
 
 		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"VarianceComponent\"").execute();
 		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"TestStatistic\"").execute();
+		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"BinomialTestStatistic\"").execute();
 		this.dataBase.getPreparedStatement("TRUNCATE TABLE \"PrincipalComponent\"").execute();
 	}
 
@@ -1590,13 +1594,46 @@ public class SQLAdjustmentManager {
 			this.dataBase.setAutoCommit(true);
 		}
 	}
+	
+	private void saveBinomialTestStatistic(BinomialTestStatisticParameters binomialTestStatisticParameters) throws SQLException {
+		boolean hasBatch = false;
+
+		String sql = "INSERT INTO \"BinomialTestStatistic\" ("
+				+ "\"number_of_trials\", \"success_probability\", \"probability_value\", \"lower_tail_quantile\""
+				+ ") VALUES (?,?,?,?)";
+
+		try {
+			this.dataBase.setAutoCommit(false);
+
+			BinomialTestStatisticParameterSet[] parameters = binomialTestStatisticParameters.getBinomialTestStatisticParameterSets();
+
+			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+			for ( int i=0; i<parameters.length; i++ ) {
+				int idx = 1;
+				BinomialTestStatisticParameterSet set = parameters[i];
+				stmt.setInt(idx++, set.getNumberOfTrials());
+				stmt.setDouble(idx++, set.getSuccessProbability());
+				stmt.setDouble(idx++, set.getProbabilityValue());
+				stmt.setDouble(idx++, set.getLowerTailQuantile());
+
+				stmt.addBatch();
+				hasBatch = true;
+			}
+			if (hasBatch)
+				stmt.executeLargeBatch();
+
+		}
+		finally {
+			this.dataBase.setAutoCommit(true);
+		}
+	}
 
 	private void saveVarianceComponents(Map<VarianceComponentType, VarianceComponent> varianceComponents) throws SQLException {
 		boolean hasBatch = false;
 
 		String sql = "INSERT INTO \"VarianceComponent\" ("
-				+ "\"type\", \"redundancy\", \"omega\", \"sigma2apost\", \"number_of_observations\""
-				+ ") VALUES (?,?,?,?,?)";
+				+ "\"type\", \"redundancy\", \"omega\", \"sigma2apost\", \"number_of_observations\", \"number_of_effective_observations\", \"number_of_negative_residuals\" "
+				+ ") VALUES (?,?,?,?,?,?,?)";
 
 		try {
 			this.dataBase.setAutoCommit(false);
@@ -1608,6 +1645,8 @@ public class SQLAdjustmentManager {
 				stmt.setDouble(idx++, vc.getOmega());
 				stmt.setDouble(idx++, vc.getVarianceFactorAposteriori());
 				stmt.setInt(idx++,    vc.getNumberOfObservations());
+				stmt.setInt(idx++,    vc.getNumberOfEffectiveObservations());
+				stmt.setInt(idx++,    vc.getNumberOfNegativeResiduals());
 
 				stmt.addBatch();
 				hasBatch = true;

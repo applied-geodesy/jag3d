@@ -73,6 +73,7 @@ import org.applied_geodesy.adjustment.network.parameter.VerticalDeflectionY;
 import org.applied_geodesy.adjustment.network.point.Point;
 import org.applied_geodesy.adjustment.network.point.Point3D;
 import org.applied_geodesy.adjustment.statistic.BaardaMethodTestStatistic;
+import org.applied_geodesy.adjustment.statistic.BinomialTestStatisticParameters;
 import org.applied_geodesy.adjustment.statistic.SidakTestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
@@ -135,8 +136,9 @@ public class NetworkAdjustment implements Runnable {
 	private EstimationStateType currentEstimationStatus = EstimationStateType.BUSY;
 	private double currentMaxAbsDx = maxDx;
 	
-	private TestStatisticDefinition significanceTestStatisticDefinition = new TestStatisticDefinition(TestStatisticType.BAARDA_METHOD, DefaultValue.getProbabilityValue(), DefaultValue.getPowerOfTest(), false);
+	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition(TestStatisticType.BAARDA_METHOD, DefaultValue.getProbabilityValue(), DefaultValue.getPowerOfTest(), false);
 	private TestStatisticParameters significanceTestStatisticParameters = null;
+	private BinomialTestStatisticParameters binomialTestStatisticParameters = null;
 	
 	private Map<String,Point> allPoints = new LinkedHashMap<String,Point>();
 	private List<Point> datumPoints = new ArrayList<Point>();
@@ -717,6 +719,10 @@ public class NetworkAdjustment implements Runnable {
 			vc.setOmega(vc.getOmega() + deflectionX.getOmega() + deflectionY.getOmega());
 			vc.setRedundancy(vc.getRedundancy() + sumDiagR);
 			vc.setNumberOfObservations(vc.getNumberOfObservations() + 2);
+			if (sumDiagR > 0) {
+				vc.setNumberOfNegativeResiduals(vc.getNumberOfNegativeResiduals() + (vx < 0 ? 1 : 0) + (vy < 0 ? 1 : 0));
+				vc.setNumberOfEffectiveObservations(vc.getNumberOfEffectiveObservations() + 2);
+			}
 		}
 
 		if (sumDiagR > SQRT_EPS) {
@@ -817,6 +823,7 @@ public class NetworkAdjustment implements Runnable {
 	public void addSubRedundanceAndCofactor2Point(Point point, boolean restoreUncertainties) {
 		int dim = point.getDimension();
 		int col = point.getColInJacobiMatrix();
+		int negativeSignPoint = 0;
 		double rDiag[] = new double[dim];	
 		double sumDiagR = 0;
 		double omegaPoint = 0.0;
@@ -850,6 +857,9 @@ public class NetworkAdjustment implements Runnable {
 			omegaPoint += (vy*vy/qll0[diag]);
 			Pv0.set(diag, vy/qll0[diag]);
 			Pv.set(diag, vy/qll[diag++]);
+			
+			negativeSignPoint += vx < 0 ? 1 : 0;
+			negativeSignPoint += vy < 0 ? 1 : 0;
 		}
 		if (dim != 2) {
 			double vz = (point.getZ() - point.getZ0());
@@ -859,6 +869,8 @@ public class NetworkAdjustment implements Runnable {
 			omegaPoint += (vz*vz/qll0[diag]);
 			Pv0.set(diag, vz/qll0[diag]);
 			Pv.set(diag, vz/qll[diag++]);
+			
+			negativeSignPoint += vz < 0 ? 1 : 0;
 		}
 
 		for (int i=0; i<dim; i++) {
@@ -922,6 +934,10 @@ public class NetworkAdjustment implements Runnable {
 			vc.setOmega(vc.getOmega() + omegaPoint);
 			vc.setRedundancy(vc.getRedundancy() + sumDiagR);
 			vc.setNumberOfObservations(vc.getNumberOfObservations() + point.getDimension());
+			if (sumDiagR > 0) {
+				vc.setNumberOfNegativeResiduals(vc.getNumberOfNegativeResiduals() + negativeSignPoint);
+				vc.setNumberOfEffectiveObservations(vc.getNumberOfEffectiveObservations() + point.getDimension());
+			}
 		}
 
 		if (sumDiagR > SQRT_EPS) {
@@ -2772,7 +2788,9 @@ public class NetworkAdjustment implements Runnable {
 			}
 		}
 		
-		if (updateCompleteModel || this.estimationType == EstimationType.L1NORM) {		
+		if (updateCompleteModel || this.estimationType == EstimationType.L1NORM) {
+			int totalNumberOfNegativeResiduals     = 0;
+			int totalNumberOfEffectiveObservations = 0;
 			for (int i=0; i<this.numberOfObservations; i++) {
 				if (this.interrupt)
 					return;
@@ -2797,6 +2815,14 @@ public class NetworkAdjustment implements Runnable {
 					vc.setOmega(vc.getOmega() + omegaObs);
 					vc.setRedundancy(vc.getRedundancy() + r);
 					vc.setNumberOfObservations(vc.getNumberOfObservations() + 1);
+					if (r > 0) {
+						
+						vc.setNumberOfNegativeResiduals(vc.getNumberOfNegativeResiduals() + (v < 0 ? 1 : 0));
+						vc.setNumberOfEffectiveObservations(vc.getNumberOfEffectiveObservations() + 1);
+						
+						totalNumberOfNegativeResiduals    += v < 0 ? 1 : 0;
+						totalNumberOfEffectiveObservations++;
+					}
 				}
 				
 				// Bestimme die erweitere Varianzkomponenten der Beobachtungen
@@ -2837,6 +2863,10 @@ public class NetworkAdjustment implements Runnable {
 						vc.setOmega(vc.getOmega() + omegaA);
 						vc.setRedundancy(vc.getRedundancy() + redundancyA);
 						vc.setNumberOfObservations(vc.getNumberOfObservations() + 1);
+						if (r > 0) {
+							vc.setNumberOfNegativeResiduals(vc.getNumberOfNegativeResiduals() + (v < 0 ? 1 : 0));
+							vc.setNumberOfEffectiveObservations(vc.getNumberOfEffectiveObservations() + 1);
+						}
 					}
 					
 					vcType = VarianceComponentType.getSquareRootDistanceDependentVarianceComponentTypeByObservationType(observationType);
@@ -2848,6 +2878,10 @@ public class NetworkAdjustment implements Runnable {
 						vc.setOmega(vc.getOmega() + omegaB);
 						vc.setRedundancy(vc.getRedundancy() + redundancyB);
 						vc.setNumberOfObservations(vc.getNumberOfObservations() + 1);
+						if (r > 0) {
+							vc.setNumberOfNegativeResiduals(vc.getNumberOfNegativeResiduals() + (v < 0 ? 1 : 0));
+							vc.setNumberOfEffectiveObservations(vc.getNumberOfEffectiveObservations() + 1);
+						}
 					}
 					
 					vcType = VarianceComponentType.getDistanceDependentVarianceComponentTypeByObservationType(observationType);
@@ -2859,6 +2893,10 @@ public class NetworkAdjustment implements Runnable {
 						vc.setOmega(vc.getOmega() + omegaC);
 						vc.setRedundancy(vc.getRedundancy() + redundancyC);
 						vc.setNumberOfObservations(vc.getNumberOfObservations() + 1);
+						if (r > 0) {
+							vc.setNumberOfNegativeResiduals(vc.getNumberOfNegativeResiduals() + (v < 0 ? 1 : 0));
+							vc.setNumberOfEffectiveObservations(vc.getNumberOfEffectiveObservations() + 1);
+						}
 					}
 				}
 				if (updateCompleteModel && this.estimationType != EstimationType.SIMULATION) {
@@ -2872,7 +2910,7 @@ public class NetworkAdjustment implements Runnable {
 			int dof = this.degreeOfFreedom();
 			double sigma2apost = this.getVarianceFactorAposteriori();
 			
-			if (this.estimationType != EstimationType.SIMULATION && this.significanceTestStatisticDefinition.getTestStatisticType() == TestStatisticType.SIDAK) {
+			if (this.estimationType != EstimationType.SIMULATION && this.testStatisticDefinition.getTestStatisticType() == TestStatisticType.SIDAK) {
 				this.numberOfHypotesis += this.referencePoints.size();
 				this.numberOfHypotesis += this.pointsWithReferenceDeflection.size();
 				
@@ -2883,11 +2921,6 @@ public class NetworkAdjustment implements Runnable {
 				}
 			}
 
-			this.significanceTestStatisticParameters = this.getSignificanceTestStatisticParameters();
-
-			// Bestimme die kritischen Werte der Standardteststatistiken
-			TestStatisticParameterSet tsGlobal = this.significanceTestStatisticParameters.getTestStatisticParameter(dof, Double.POSITIVE_INFINITY, Boolean.TRUE);
-			
 			// Bestimme maximalen Helmert'schen Punktfehler sigmaPointMax zur Ableitung von EF*SP
 			double sigma2PointMax = 0.0;
 			for (Point point : this.allPoints.values()) {
@@ -2900,15 +2933,25 @@ public class NetworkAdjustment implements Runnable {
 					sigma2PointMaxi += sigma2apost * this.Qxx.get(col + d, col + d);
 				sigma2PointMax = Math.max(sigma2PointMaxi, sigma2PointMax);
 			}
-			
+
 			// Fuege globales Modell zu VCE hinzu
 			VarianceComponent vc = new VarianceComponent(VarianceComponentType.GLOBAL);
 			vc.setRedundancy(dof);
 			vc.setNumberOfObservations(this.numberOfObservations + this.numberOfStochasticPointRows + this.numberOfStochasticDeflectionRows);
-			vc.setKprioGroup(tsGlobal.getQuantile());
+			vc.setNumberOfNegativeResiduals(totalNumberOfNegativeResiduals);
+			vc.setNumberOfEffectiveObservations(totalNumberOfEffectiveObservations);
 			vc.setOmega(this.omega);
 			this.varianceComponents.put(vc.getVarianceComponentType(), vc);
-	
+
+			// ermittle kritische Werte zur Bewertung der VCE
+			this.significanceTestStatisticParameters = this.getSignificanceTestStatisticParameters();
+			this.binomialTestStatisticParameters     = this.getBinomialTestStatisticParameters();
+
+			for (VarianceComponent varianceEstimation : this.varianceComponents.values()) {
+				this.significanceTestStatisticParameters.getTestStatisticParameter(varianceEstimation.getRedundancy(), Double.POSITIVE_INFINITY, varianceEstimation.getVarianceComponentType() == VarianceComponentType.GLOBAL);
+				this.binomialTestStatisticParameters.getTestStatisticParameter(varianceEstimation.getNumberOfEffectiveObservations(), 0.5);
+			}
+
 			List<Point> points = null;
 			if (this.congruenceAnalysis && this.freeNetwork) {
 				// Pruefung der Stabilpunkte
@@ -3797,17 +3840,6 @@ public class NetworkAdjustment implements Runnable {
 			}
 			else {
 				this.congruenceAnalysisGroup = new ArrayList<CongruenceAnalysisGroup>(0);
-			}
-
-			if (this.estimationType != EstimationType.SIMULATION) {
-				for (VarianceComponent varianceEstimation : this.varianceComponents.values()) {
-					double r = Math.round(varianceEstimation.getRedundancy() * 1.0E5) / 1.0E5;
-					if (r > 0) {
-						TestStatisticParameterSet tsPrio = this.significanceTestStatisticParameters.getTestStatisticParameter(varianceEstimation.getRedundancy(), Double.POSITIVE_INFINITY);
-						double Kprio = tsPrio.getQuantile();		
-						varianceEstimation.setKprioGroup(Kprio);
-					}
-				}
 			}
 		}
 	}
@@ -4780,14 +4812,25 @@ public class NetworkAdjustment implements Runnable {
 		if (this.significanceTestStatisticParameters != null)
 			return this.significanceTestStatisticParameters;
 		
-		return this.significanceTestStatisticParameters = this.getTestStatisticParameters(this.significanceTestStatisticDefinition);
+		return this.significanceTestStatisticParameters = new TestStatisticParameters(this.getTestStatistic(this.testStatisticDefinition));
 	}
-		
+	
 	/**
-	 * Liefert die Teststatitikparameter
-	 * @return testStatiticParams
+	 * Liefert die Teststatitikparameter fuer den Signifikanztest (Modellstoerungen)
+	 * @return significanceTestStatisticParameters
 	 */
-	TestStatisticParameters getTestStatisticParameters(TestStatisticDefinition testStatisticDefinition) {
+	public BinomialTestStatisticParameters getBinomialTestStatisticParameters() {
+		if (this.binomialTestStatisticParameters != null)
+			return this.binomialTestStatisticParameters;
+		
+		return this.binomialTestStatisticParameters = new BinomialTestStatisticParameters(this.getTestStatistic(this.testStatisticDefinition));
+	}
+			
+	/**
+	 * Liefert die Parameter der Teststatistic
+	 * @return testStatistic
+	 */
+	TestStatistic getTestStatistic(TestStatisticDefinition testStatisticDefinition) {
 		double alpha = testStatisticDefinition.getProbabilityValue();
 		double beta  = testStatisticDefinition.getPowerOfTest();
 		int dof = this.degreeOfFreedom();
@@ -4807,7 +4850,7 @@ public class NetworkAdjustment implements Runnable {
 		default:
 			throw new IllegalArgumentException(this.getClass().getSimpleName() + " Error, unknown test statistic method " + testStatisticDefinition.getTestStatisticType());
 		}
-		return new TestStatisticParameters(testStatistic);
+		return testStatistic;
 	}
 		
 	/**
@@ -4861,10 +4904,10 @@ public class NetworkAdjustment implements Runnable {
 	}
 	
 	/**
-	 * Setzt die Teststatistik fuer Signifikanztests
+	 * Setzt die Teststatistik fuer Hypothesentests
 	 */
-	public void setSignificanceTestStatisticDefinition(TestStatisticDefinition significanceTestStatisticDefinition) {
-		this.significanceTestStatisticDefinition = significanceTestStatisticDefinition;		
+	public void setTestStatisticDefinition(TestStatisticDefinition testStatisticDefinition) {
+		this.testStatisticDefinition = testStatisticDefinition;		
 	}
 	
 	/**
