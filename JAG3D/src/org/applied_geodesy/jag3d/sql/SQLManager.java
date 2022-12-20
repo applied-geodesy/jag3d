@@ -83,6 +83,7 @@ import org.applied_geodesy.jag3d.ui.table.UICongruenceAnalysisTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIGNSSObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIPointTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIPrincipalComponentTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.UIResidualSignDistributionTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITerrestrialObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITestStatisticTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIVarianceComponentTableBuilder;
@@ -96,6 +97,7 @@ import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.PrincipalComponentRow;
+import org.applied_geodesy.jag3d.ui.table.row.ResidualSignDistributionRow;
 import org.applied_geodesy.jag3d.ui.table.row.Row;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.TestStatisticRow;
@@ -700,6 +702,7 @@ public class SQLManager {
 			this.loadTestStatistics();
 			this.loadVarianceComponents();
 			this.loadPrincipalComponents();
+			this.loadResidualSignDistributions();
 			break;
 		case CONGRUENCE_ANALYSIS_1D_LEAF:
 		case CONGRUENCE_ANALYSIS_2D_LEAF:
@@ -1310,6 +1313,88 @@ public class SQLManager {
 		if (!tableModel.isEmpty())
 			table.getItems().setAll(tableModel);
 		else
+			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
+	}
+	
+	//TODO
+	private void loadResidualSignDistributions() throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
+		UIResidualSignDistributionTableBuilder tableBuilder = UIResidualSignDistributionTableBuilder.getInstance();		
+		TableView<ResidualSignDistributionRow> table = tableBuilder.getTable();
+		List<ResidualSignDistributionRow> tableModel = FXCollections.observableArrayList();
+		
+		VarianceComponentType varianceComponentTypes[] = new VarianceComponentType[] {
+				VarianceComponentType.GLOBAL,
+		
+				VarianceComponentType.STOCHASTIC_POINT_1D_COMPONENT,
+				VarianceComponentType.STOCHASTIC_POINT_2D_COMPONENT,
+				VarianceComponentType.STOCHASTIC_POINT_3D_COMPONENT,
+
+				VarianceComponentType.STOCHASTIC_DEFLECTION_COMPONENT,
+
+				VarianceComponentType.LEVELING_COMPONENT,
+
+				VarianceComponentType.DIRECTION_COMPONENT,
+				VarianceComponentType.HORIZONTAL_DISTANCE_COMPONENT,
+
+				VarianceComponentType.SLOPE_DISTANCE_COMPONENT,
+				VarianceComponentType.ZENITH_ANGLE_COMPONENT,
+
+				VarianceComponentType.GNSS1D_COMPONENT,
+				VarianceComponentType.GNSS2D_COMPONENT,
+				VarianceComponentType.GNSS3D_COMPONENT
+		};
+		
+		StringBuilder inTypeArray = new StringBuilder(String.valueOf(varianceComponentTypes[0].getId()));
+		for (int i=1; i<varianceComponentTypes.length; i++) 
+			inTypeArray.append(",").append(String.valueOf(varianceComponentTypes[i].getId()));
+		
+		String sql = "SELECT "
+				+ "\"type\", \"redundancy\", "
+				+ "\"number_of_observations\", \"number_of_effective_observations\", \"number_of_negative_residuals\", "
+				+ "\"number_of_negative_residuals\" < \"lower_tail_quantile\" OR \"number_of_negative_residuals\" > (\"number_of_effective_observations\" - \"lower_tail_quantile\") AS \"significant\" "
+				+ "FROM \"VarianceComponent\" "
+				+ "JOIN \"BinomialTestStatistic\" ON "
+				+ "\"VarianceComponent\".\"number_of_effective_observations\" = \"BinomialTestStatistic\".\"number_of_trials\" "
+				+ "WHERE \"number_of_trials\" > 0 "
+				+ "AND \"type\" IN (" + inTypeArray + ") "
+				+ "ORDER BY \"type\" ASC";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+
+		while (rs.next()) {
+			VarianceComponentType varianceComponentType = VarianceComponentType.getEnumByValue(rs.getInt("type"));
+
+			if (varianceComponentType == null)
+				continue;
+			
+			int numberOfObservations          = rs.getInt("number_of_observations");
+			int numberOfEffectiveObservations = rs.getInt("number_of_effective_observations");
+			int numberOfNegativeResiduals     = rs.getInt("number_of_negative_residuals");
+			
+			double redundancy = rs.getDouble("redundancy");
+
+			boolean significant = rs.getBoolean("significant");
+			
+			ResidualSignDistributionRow row = new ResidualSignDistributionRow();
+
+			row.setId(varianceComponentType.getId());
+			row.setVarianceComponentType(varianceComponentType);
+			row.setNumberOfObservations(numberOfObservations);
+			row.setNumberOfEffectiveObservations(numberOfEffectiveObservations);
+			row.setNumberOfNegativeResiduals(numberOfNegativeResiduals);
+			row.setRedundancy(redundancy);
+			row.setSignificant(significant);
+			
+			tableModel.add(row);
+		}
+
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
