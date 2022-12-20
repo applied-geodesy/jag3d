@@ -21,7 +21,6 @@
 
 package org.applied_geodesy.adjustment.statistic;
 
-import jdistlib.Binomial;
 import jdistlib.ChiSquare;
 import jdistlib.F;
 import jdistlib.NonCentralChiSquare;
@@ -56,37 +55,11 @@ public abstract class TestStatistic {
 	}
 	
 	/**
-	 * Bestimmt die Parameter der Teststatistik bezogen auf die F-Verteilung
+	 * Bestimmt die Parameter der Teststatistik
 	 * @param testStatisticParameterSet
 	 * @return testStatisticParameterSet
 	 */
 	public abstract TestStatisticParameterSet[] adjustTestStatisticParameters (TestStatisticParameterSet testStatisticParameterSet[]);
-	
-	
-	public BinomialTestStatisticParameterSet adjustTestStatisticParameter (BinomialTestStatisticParameterSet binomialTestStatisticParameterSet) {
-		BinomialTestStatisticParameterSet[] set = new BinomialTestStatisticParameterSet[] { binomialTestStatisticParameterSet };
-		this.adjustTestStatisticParameters(set);
-		return set[0];
-	}
-	
-	/**
-	 * Bestimmt die Parameter der Teststatistik bezogen auf die Binomialverteilung
-	 * @param testStatisticParameterSet
-	 * @return testStatisticParameterSet
-	 */
-	public BinomialTestStatisticParameterSet[] adjustTestStatisticParameters (BinomialTestStatisticParameterSet binomialTestStatisticParameterSet[]) {
-		int l = binomialTestStatisticParameterSet.length;
-
-		for (int i=0; i<l; i++) {
-			BinomialTestStatisticParameterSet parameter = binomialTestStatisticParameterSet[i];
-			int numberOfTrials        = parameter.getNumberOfTrials();
-			double successProbability = parameter.getSuccessProbability();
-			
-			parameter.setProbabilityValue(this.alpha);
-			parameter.setQuantile(TestStatistic.getQuantile(numberOfTrials, successProbability, 0.5 * this.alpha));
-		}
-		return binomialTestStatisticParameterSet;
-	}
 
 	/**
 	 * Liefert das F-Quantil fuer F'(n2, &infin;, ncp, &beta;)
@@ -477,15 +450,5 @@ public abstract class TestStatistic {
 		if (Double.isInfinite(m1))
 			return TestStatistic.getLogarithmicPowerOfTest(x, n1, ncp);
 		return NonCentralF.cumulative(x, n1, m1, ncp, false, true);
-	}
-	
-	/**
-	 * Liefert das Quantil der Binomialverteilung fuer Bin(n, p0, &alpha;)
-	 * @param n1
-	 * @param alpha
-	 * @return q
-	 */
-	public static double getQuantile(int numberOfTrials, double successProbability, double alpha) {
-		return Binomial.quantile(alpha, numberOfTrials, successProbability, Boolean.TRUE, Boolean.FALSE);
 	}
 }
