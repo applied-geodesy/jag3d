@@ -1599,8 +1599,8 @@ public class SQLAdjustmentManager {
 		boolean hasBatch = false;
 
 		String sql = "INSERT INTO \"BinomialTestStatistic\" ("
-				+ "\"number_of_trials\", \"success_probability\", \"probability_value\", \"lower_tail_quantile\""
-				+ ") VALUES (?,?,?,?)";
+				+ "\"number_of_trials\", \"success_probability\", \"probability_value\", \"lower_tail_quantile\", \"upper_tail_quantile\" "
+				+ ") VALUES (?,?,?,?,?)";
 
 		try {
 			this.dataBase.setAutoCommit(false);
@@ -1615,6 +1615,7 @@ public class SQLAdjustmentManager {
 				stmt.setDouble(idx++, set.getSuccessProbability());
 				stmt.setDouble(idx++, set.getProbabilityValue());
 				stmt.setDouble(idx++, set.getLowerTailQuantile());
+				stmt.setDouble(idx++, set.getUpperTailQuantile());
 
 				stmt.addBatch();
 				hasBatch = true;

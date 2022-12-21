@@ -22,6 +22,7 @@
 package org.applied_geodesy.jag3d.ui.dialog.chart;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
+import org.applied_geodesy.adjustment.network.VarianceComponentType;
 
 enum TerrestrialObservationType {
 	ALL(null),
@@ -32,13 +33,19 @@ enum TerrestrialObservationType {
 	ZENITH_ANGLE(ObservationType.ZENITH_ANGLE),
 	;
 
-	private ObservationType observationType;
+	private final ObservationType observationType;
+	private final VarianceComponentType varianceComponentType;
 	private TerrestrialObservationType(ObservationType observationType) {
-		this.observationType = observationType;
+		this.observationType       = observationType;
+		this.varianceComponentType = VarianceComponentType.getVarianceComponentTypeByObservationType(observationType);
 	}
 
 	public final ObservationType getObservationType() {
 		return observationType;
+	}
+	
+	public final VarianceComponentType getVarianceComponentType() {
+		return varianceComponentType;
 	}
 
 	public static TerrestrialObservationType getEnumByValue(ObservationType observationType) {
@@ -47,5 +54,13 @@ enum TerrestrialObservationType {
 				return element;
 		}
 		return null;
-	}  
+	} 
+	
+	public static TerrestrialObservationType getEnumByValue(VarianceComponentType varianceComponentType) {
+		for(TerrestrialObservationType element : TerrestrialObservationType.values()) {
+			if(element.varianceComponentType != null && element.varianceComponentType == varianceComponentType)
+				return element;
+		}
+		return null;
+	}
 }

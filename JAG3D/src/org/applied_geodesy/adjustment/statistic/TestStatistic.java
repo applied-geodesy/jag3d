@@ -79,11 +79,29 @@ public abstract class TestStatistic {
 
 		for (int i=0; i<l; i++) {
 			BinomialTestStatisticParameterSet parameter = binomialTestStatisticParameterSet[i];
-			int numberOfTrials        = parameter.getNumberOfTrials();
-			double successProbability = parameter.getSuccessProbability();
+			int numberOfTrials         = parameter.getNumberOfTrials();
+			double successProbability0 = parameter.getSuccessProbability();
+
+//			int numberOfSuccesses      = 50;
+//			
+//			double successProbability  = numberOfTrials > 0 ? (double)numberOfSuccesses / (double)numberOfTrials : 0.0; 
 			
-			parameter.setProbabilityValue(this.alpha);
-			parameter.setQuantile(TestStatistic.getQuantile(numberOfTrials, successProbability, 0.5 * this.alpha));
+			int lowerQuantile = (int)TestStatistic.getQuantile(numberOfTrials, successProbability0,       0.5 * this.alpha);
+			int upperQuantile = (int)TestStatistic.getQuantile(numberOfTrials, successProbability0, 1.0 - 0.5 * this.alpha);
+			
+			double alphaL = TestStatistic.getProbabilityValue(lowerQuantile, numberOfTrials, successProbability0);
+			double alphaU = 1.0 - TestStatistic.getProbabilityValue(upperQuantile, numberOfTrials, successProbability0);
+
+//			// binocdf(lowerQuantile, numberOfTrials, successProbability) + (1 - binocdf(upperQuantile, n, p0), numberOfTrials, successProbability))
+//			System.out.println(lowerQuantile+"    "+upperQuantile);
+//			double betaL = Binomial.cumulative(lowerQuantile, numberOfTrials, successProbability, true, false);
+//			double betaU = Binomial.cumulative(upperQuantile, numberOfTrials, successProbability, false, false);
+//			// https://predictivehacks.com/how-to-get-the-power-of-test-in-hypothesis-testing-with-binomial-distribution/
+//			System.out.println(betaL+"   "+betaU+"    "+(alphaL + alphaU));
+			
+			parameter.setProbabilityValue(alphaL + alphaU);
+			parameter.setLowerTailQuantile(lowerQuantile);
+			parameter.setUpperTailQuantile(upperQuantile);
 		}
 		return binomialTestStatisticParameterSet;
 	}
@@ -358,12 +376,12 @@ public abstract class TestStatistic {
 	}
 	
 	/**
-	 * Liefert die zum kritischen Wert gehoehrende Irrtumswahrscheinlichkeit &alpha; [%] der <em>F</em>-Verteilung.
+	 * Liefert die zum kritischen Wert gehoehrende Irrtumswahrscheinlichkeit &alpha; der <em>F</em>-Verteilung.
 	 * 
 	 * Die Dimension des Nenners ist &infin;
 	 * @param x    kritischen Wert (Quantil)
 	 * @param n1  Dimension des Zaehlers
-	 * @return &alpha;(n1, &infin;) [%]
+	 * @return &alpha;(n1, &infin;)
 	 */
 	public static double getProbabilityValue(double x, double n1) {
 		if (Double.isNaN(x) || Double.isInfinite(x) || x < 0 || n1 <= 0)
@@ -372,12 +390,12 @@ public abstract class TestStatistic {
 	}
 	
 	/**
-	 * Liefert die zum kritischen Wert gehoehrende Irrtumswahrscheinlichkeit &alpha; [%] der <em>F</em>-Verteilung
+	 * Liefert die zum kritischen Wert gehoehrende Irrtumswahrscheinlichkeit &alpha; der <em>F</em>-Verteilung
 	 * 
 	 * @param x   kritischen Wert (Quantil)
 	 * @param n1  Dimension des Zaehlers
 	 * @param m1  Dimension des Nenners
-	 * @return &alpha;(n1, m1) [%]
+	 * @return &alpha;(n1, m1)
 	 */
 	public static double getProbabilityValue(double x, double n1, double m1) {
 		if (Double.isNaN(x) || Double.isInfinite(x) || x < 0 || n1 <= 0 || m1 <= 0)
@@ -388,13 +406,13 @@ public abstract class TestStatistic {
 	}
 	
 	/**
-	 * Liefert die Teststaerke &beta; [%] zurueck.
+	 * Liefert die Teststaerke &beta; zurueck.
 	 * 
 	 * Die Dimension des Nenners ist &infin;
 	 * @param x   kritischen Wert (Quantil)
 	 * @param n1  Dimension des Zaehlers
 	 * @param ncp Nicht-Zentralitaetsparameter
-	 * @return &beta;(n1, &infin;, ncp) [%]
+	 * @return &beta;(n1, &infin;, ncp)
 	 */
 	public static double getPowerOfTest(double x, double n1, double ncp) {
 		if (Double.isNaN(x) || Double.isInfinite(x) || x < 0 || n1 <= 0)
@@ -403,12 +421,12 @@ public abstract class TestStatistic {
 	}
 	
 	/**
-	 * Liefert die Teststaerke &beta; [%] zurueck.
+	 * Liefert die Teststaerke &beta; zurueck.
 	 * 
 	 * @param x   kritischen Wert (Quantil)
 	 * @param n1  Dimension des Zaehlers
 	 * @param m1  Dimension des Nenners
-	 * @return &beta;(n1, m1, ncp) [%]
+	 * @return &beta;(n1, m1, ncp)
 	 */
 	public static double getPowerOfTest(double x, double n1, double m1, double ncp) {
 		if (Double.isNaN(x) || Double.isInfinite(x) || x < 0 || n1 <= 0 || m1 <= 0)
@@ -481,11 +499,28 @@ public abstract class TestStatistic {
 	
 	/**
 	 * Liefert das Quantil der Binomialverteilung fuer Bin(n, p0, &alpha;)
-	 * @param n1
-	 * @param alpha
-	 * @return q
+	 * @param numberOfTrials Stichprobenumfang n
+	 * @param successProbability Wahrscheinlichkeit, dass das Ereingnis eintritt p0
+	 * @param alpha Irrtumswahrscheinlichkeit
+	 * @return q Quantil
 	 */
 	public static double getQuantile(int numberOfTrials, double successProbability, double alpha) {
 		return Binomial.quantile(alpha, numberOfTrials, successProbability, Boolean.TRUE, Boolean.FALSE);
+	}
+	
+	/**
+	 * Liefert die zum kritischen Wert gehoehrende Irrtumswahrscheinlichkeit &alpha;(x; n,p0) der Binomialverteilung
+	 * 
+	 * @param x   kritischen Wert (Quantil)
+	 * @param numberOfTrials  Stichprobenumfang n
+	 * @param successProbability  Wahrscheinlichkeit, dass das Ereingnis eintritt p0
+	 * @return &alpha;(x; n,p0)
+	 */
+	public static double getProbabilityValue(int x, int numberOfTrials, double successProbability) {
+		if (Double.isNaN(x) || Double.isInfinite(x) || x < 0 || numberOfTrials <= 0 || successProbability <= 0)
+			return 1.0;
+		if (successProbability >= 1)
+			return 0.0;
+		return Binomial.cumulative(x, numberOfTrials, successProbability, true, false);
 	}
 }

@@ -26,11 +26,12 @@ public class BinomialTestStatisticParameterSet {
 	private double alpha;
 	private final double successProbability;
 	private final int numberOfTrials;
-	private double lowerTailQuantile = 0;
+	private double lowerTailQuantile = 0, upperTailQuantile;
 	
 	public BinomialTestStatisticParameterSet(int numberOfTrials, double successProbability) {
 		this.numberOfTrials     = numberOfTrials;
 		this.successProbability = successProbability > 0 && successProbability < 1.0 ? successProbability : 0.5;
+		this.upperTailQuantile  = numberOfTrials;
 	}
 	
 	public int getNumberOfTrials() {
@@ -49,8 +50,12 @@ public class BinomialTestStatisticParameterSet {
 		this.alpha = alpha;
 	}
 	
-	public void setQuantile(double lowerTailQuantile) {
+	public void setLowerTailQuantile(double lowerTailQuantile) {
 		this.lowerTailQuantile = lowerTailQuantile >= 0 && lowerTailQuantile <= this.numberOfTrials ? lowerTailQuantile : 0;
+	}
+	
+	public void setUpperTailQuantile(double upperTailQuantile) {
+		this.upperTailQuantile = upperTailQuantile >= 0 && upperTailQuantile <= this.numberOfTrials ? upperTailQuantile : 0;
 	}
 	
 	public double getLowerTailQuantile() {
@@ -58,6 +63,6 @@ public class BinomialTestStatisticParameterSet {
 	}
 	
 	public double getUpperTailQuantile() {
-		return this.numberOfTrials - this.lowerTailQuantile;
+		return this.upperTailQuantile;
 	}
 }
