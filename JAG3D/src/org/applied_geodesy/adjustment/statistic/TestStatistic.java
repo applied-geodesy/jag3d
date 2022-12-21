@@ -79,26 +79,15 @@ public abstract class TestStatistic {
 
 		for (int i=0; i<l; i++) {
 			BinomialTestStatisticParameterSet parameter = binomialTestStatisticParameterSet[i];
-			int numberOfTrials         = parameter.getNumberOfTrials();
-			double successProbability0 = parameter.getSuccessProbability();
+			int numberOfTrials        = parameter.getNumberOfTrials();
+			double successProbability = parameter.getSuccessProbability();
 
-//			int numberOfSuccesses      = 50;
-//			
-//			double successProbability  = numberOfTrials > 0 ? (double)numberOfSuccesses / (double)numberOfTrials : 0.0; 
+			int lowerQuantile = (int)TestStatistic.getQuantile(numberOfTrials, successProbability,       0.5 * this.alpha);
+			int upperQuantile = (int)TestStatistic.getQuantile(numberOfTrials, successProbability, 1.0 - 0.5 * this.alpha);
 			
-			int lowerQuantile = (int)TestStatistic.getQuantile(numberOfTrials, successProbability0,       0.5 * this.alpha);
-			int upperQuantile = (int)TestStatistic.getQuantile(numberOfTrials, successProbability0, 1.0 - 0.5 * this.alpha);
-			
-			double alphaL = TestStatistic.getProbabilityValue(lowerQuantile, numberOfTrials, successProbability0);
-			double alphaU = 1.0 - TestStatistic.getProbabilityValue(upperQuantile, numberOfTrials, successProbability0);
+			double alphaL = TestStatistic.getProbabilityValue(lowerQuantile, numberOfTrials, successProbability);
+			double alphaU = 1.0 - TestStatistic.getProbabilityValue(upperQuantile, numberOfTrials, successProbability);
 
-//			// binocdf(lowerQuantile, numberOfTrials, successProbability) + (1 - binocdf(upperQuantile, n, p0), numberOfTrials, successProbability))
-//			System.out.println(lowerQuantile+"    "+upperQuantile);
-//			double betaL = Binomial.cumulative(lowerQuantile, numberOfTrials, successProbability, true, false);
-//			double betaU = Binomial.cumulative(upperQuantile, numberOfTrials, successProbability, false, false);
-//			// https://predictivehacks.com/how-to-get-the-power-of-test-in-hypothesis-testing-with-binomial-distribution/
-//			System.out.println(betaL+"   "+betaU+"    "+(alphaL + alphaU));
-			
 			parameter.setProbabilityValue(alphaL + alphaU);
 			parameter.setLowerTailQuantile(lowerQuantile);
 			parameter.setUpperTailQuantile(upperQuantile);
