@@ -1317,7 +1317,6 @@ public class SQLManager {
 		table.sort();
 	}
 	
-	//TODO
 	private void loadResidualSignDistributions() throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
@@ -5431,45 +5430,61 @@ public class SQLManager {
 		return chartData;
 	}
 	
-	public Map<SignType, Integer> getResidualSigns(ObservationType[] observationTypes) throws SQLException {
-		Map<SignType, Integer> chartData = new LinkedHashMap<SignType, Integer>(2);
+	// TODO loadResidualSignDistributions
+	public Map<SignType, Integer> getResidualSigns(VarianceComponentType[] varianceComponentTypes) throws SQLException {
+		Map<SignType, Integer> chartData = new LinkedHashMap<SignType, Integer>(SignType.values().length);
 		chartData.put(SignType.POSITIVE, 0);
 		chartData.put(SignType.NEGATIVE, 0);
+		chartData.put(SignType.ZERO,     0);
 		
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return chartData;
 		
-		StringBuilder inArrayValues = new StringBuilder("?");
-		for (int i = 1; i < observationTypes.length; i++)
-			inArrayValues.append(",?");
+		StringBuilder inTypeArray = new StringBuilder("?");
+		for (int i = 1; i < varianceComponentTypes.length; i++)
+			inTypeArray.append(",?");
 		
 		String sql = "SELECT "
-				+ "SUM(CASE WHEN \"residual\" >= 0 THEN 1 ELSE 0 END) AS \"number_of_positive_residuals\", "
-				+ "SUM(CASE WHEN \"residual\" <  0 THEN 1 ELSE 0 END) AS \"number_of_negative_residuals\" "
-				+ "FROM \"ObservationAposteriori\" JOIN \"ObservationApriori\" "
-				+ "ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
-				+ "JOIN \"ObservationGroup\" "
-				+ "ON \"ObservationGroup\".\"id\" = \"ObservationApriori\".\"group_id\" "
-				+ "WHERE \"ObservationGroup\".\"enable\" = TRUE "
-				+ "AND \"ObservationApriori\".\"enable\" = TRUE "
-				+ "AND \"redundancy\" > 0 "
-				+ "AND \"type\" IN (" + inArrayValues + ") ";
+				+ "\"type\", "
+				+ "(\"number_of_observations\" - \"number_of_effective_observations\") AS \"number_of_uncontrolled_residuals\", "
+				+ "\"number_of_negative_residuals\", "
+				+ "(\"number_of_effective_observations\" - \"number_of_negative_residuals\") AS \"number_of_positive_residuals\" "
+				+ "FROM \"VarianceComponent\" "
+				+ "WHERE \"number_of_observations\" > 0 "
+				+ "AND \"type\" IN (" + inTypeArray + ") "
+				+ "ORDER BY \"type\" ASC";
+		
+		
+//		String sql = "SELECT "
+//				+ "SUM(CASE WHEN \"residual\" >= 0 THEN 1 ELSE 0 END) AS \"number_of_positive_residuals\", "
+//				+ "SUM(CASE WHEN \"residual\" <  0 THEN 1 ELSE 0 END) AS \"number_of_negative_residuals\" "
+//				+ "FROM \"ObservationAposteriori\" JOIN \"ObservationApriori\" "
+//				+ "ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
+//				+ "JOIN \"ObservationGroup\" "
+//				+ "ON \"ObservationGroup\".\"id\" = \"ObservationApriori\".\"group_id\" "
+//				+ "WHERE \"ObservationGroup\".\"enable\" = TRUE "
+//				+ "AND \"ObservationApriori\".\"enable\" = TRUE "
+//				+ "AND \"redundancy\" > 0 "
+//				+ "AND \"type\" IN (" + inTypeArray + ") ";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		
 		int idx = 1;
-		for (ObservationType type : observationTypes) 
+		for (VarianceComponentType type : varianceComponentTypes) 
 			stmt.setInt(idx++, type.getId());
 		
 		ResultSet rs = stmt.executeQuery();
-		int negativeResiduals = 0;
-		int positiveResiduals = 0;
+		int negativeResiduals     = 0;
+		int positiveResiduals     = 0;
+		int uncontrolledResiduals = 0;
 		if (rs.next()) {
-			positiveResiduals = rs.getInt("number_of_positive_residuals");
-			negativeResiduals = rs.getInt("number_of_negative_residuals");
+			positiveResiduals     = rs.getInt("number_of_positive_residuals");
+			negativeResiduals     = rs.getInt("number_of_negative_residuals");
+			uncontrolledResiduals = rs.getInt("number_of_uncontrolled_residuals");
 			
 			chartData.put(SignType.POSITIVE, positiveResiduals);
 			chartData.put(SignType.NEGATIVE, negativeResiduals);
+			chartData.put(SignType.ZERO, uncontrolledResiduals);
 		}
 
 		return chartData;

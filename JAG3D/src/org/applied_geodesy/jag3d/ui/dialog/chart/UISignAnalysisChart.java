@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.applied_geodesy.adjustment.network.ObservationType;
+import org.applied_geodesy.adjustment.network.VarianceComponentType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
@@ -133,37 +134,37 @@ public class UISignAnalysisChart {
 	
 	private void setChartLabelText(Text text) {
 		String name = text.getText();
-		if (name.equals(SignType.POSITIVE.name()) || name.equals(SignType.NEGATIVE.name())) {
+		if (name.equals(SignType.POSITIVE.name()) || name.equals(SignType.NEGATIVE.name()) || name.equals(SignType.ZERO.name())) {
 			SignType signType = SignType.valueOf(name);
 			text.setText(String.format(Locale.ENGLISH, "%d", this.chartData.get(signType)));
 		}
 	}
 
-	private ObservationType[] getSelectedObservationTypes(TerrestrialObservationType terrestrialObservationType) {
-		ObservationType observationTypes[];
+	private VarianceComponentType[] getSelectedObservationTypes(TerrestrialObservationType terrestrialObservationType) {
+		VarianceComponentType varianceComponentTypes[];
 		if (terrestrialObservationType == TerrestrialObservationType.ALL) {
-			observationTypes = new ObservationType[] {
-					ObservationType.LEVELING,
-					ObservationType.DIRECTION,
-					ObservationType.HORIZONTAL_DISTANCE,
-					ObservationType.SLOPE_DISTANCE,
-					ObservationType.ZENITH_ANGLE
+			varianceComponentTypes = new VarianceComponentType[] {
+					VarianceComponentType.getVarianceComponentTypeByObservationType(ObservationType.LEVELING),
+					VarianceComponentType.getVarianceComponentTypeByObservationType(ObservationType.DIRECTION),
+					VarianceComponentType.getVarianceComponentTypeByObservationType(ObservationType.HORIZONTAL_DISTANCE),
+					VarianceComponentType.getVarianceComponentTypeByObservationType(ObservationType.SLOPE_DISTANCE),
+					VarianceComponentType.getVarianceComponentTypeByObservationType(ObservationType.ZENITH_ANGLE)
 			};
 		}
 		else {
-			observationTypes = new ObservationType[] {
-					terrestrialObservationType.getObservationType()	
+			varianceComponentTypes = new VarianceComponentType[] {
+					terrestrialObservationType.getVarianceComponentType()
 			};
 		}
-		return observationTypes;
+		return varianceComponentTypes;
 	}
 
 	private void updateChartData(TerrestrialObservationType terrestrialObservationType) {
 		try {
 			terrestrialObservationType = terrestrialObservationType == null ? TerrestrialObservationType.ALL : terrestrialObservationType;
-			ObservationType[] observationTypes = this.getSelectedObservationTypes(terrestrialObservationType);
+			VarianceComponentType[] varianceComponentTypes = this.getSelectedObservationTypes(terrestrialObservationType);
 			
-			this.chartData = SQLManager.getInstance().getResidualSigns(observationTypes);
+			this.chartData = SQLManager.getInstance().getResidualSigns(varianceComponentTypes);
 			this.pieChart.getData().clear();
 
 			List<PieChart.Data> dataList = FXCollections.observableArrayList();
@@ -178,7 +179,7 @@ public class UISignAnalysisChart {
 			for (PieChart.Data data : this.pieChart.getData()) {
 				try {
 					String name = data.getName();
-					if (name.equals(SignType.POSITIVE.name()) || name.equals(SignType.NEGATIVE.name())) {
+					if (name.equals(SignType.POSITIVE.name()) || name.equals(SignType.NEGATIVE.name()) || name.equals(SignType.ZERO.name())) {
 						SignType signType = SignType.valueOf(name);
 						TableRowHighlightRangeType tableRowHighlightRangeType = TableRowHighlightRangeType.EXCELLENT;
 						switch (signType) {
@@ -186,6 +187,9 @@ public class UISignAnalysisChart {
 							tableRowHighlightRangeType = TableRowHighlightRangeType.EXCELLENT;
 							break;
 						case NEGATIVE:
+							tableRowHighlightRangeType = TableRowHighlightRangeType.SATISFACTORY;
+							break;
+						case ZERO:
 							tableRowHighlightRangeType = TableRowHighlightRangeType.INADEQUATE;
 							break;
 						}
@@ -209,7 +213,7 @@ public class UISignAnalysisChart {
 					Region region = (Region)label.getGraphic();
 
 					String name = label.getText();
-					if (name.equals(SignType.POSITIVE.name()) || name.equals(SignType.NEGATIVE.name())) {
+					if (name.equals(SignType.POSITIVE.name()) || name.equals(SignType.NEGATIVE.name()) || name.equals(SignType.ZERO.name())) {
 						SignType signType = SignType.valueOf(name);
 						TableRowHighlightRangeType tableRowHighlightRangeType = TableRowHighlightRangeType.EXCELLENT;
 						switch (signType) {
@@ -217,6 +221,9 @@ public class UISignAnalysisChart {
 							tableRowHighlightRangeType = TableRowHighlightRangeType.EXCELLENT;
 							break;
 						case NEGATIVE:
+							tableRowHighlightRangeType = TableRowHighlightRangeType.SATISFACTORY;
+							break;
+						case ZERO:
 							tableRowHighlightRangeType = TableRowHighlightRangeType.INADEQUATE;
 							break;
 						}
@@ -227,10 +234,13 @@ public class UISignAnalysisChart {
 
 						switch (signType) {
 						case POSITIVE:
-							label.setText(i18n.getString("UISignAnalysisChart.legend.type.positive.label", "Positive residuals (\u03B5 \u2265 0)"));
+							label.setText(i18n.getString("UISignAnalysisChart.legend.type.positive.label", "Positive (\u03B5 \u2265 0)"));
 							break;
 						case NEGATIVE:
-							label.setText(i18n.getString("UISignAnalysisChart.legend.type.negative.label", "Negative residuals (\u03B5 \u003C 0)"));
+							label.setText(i18n.getString("UISignAnalysisChart.legend.type.negative.label", "Negative (\u03B5 \u003C 0)"));
+							break;
+						case ZERO:
+							label.setText(i18n.getString("UISignAnalysisChart.legend.type.uncontrolled.label", "Uncontrolled (r = 0)"));
 							break;
 						}
 					}

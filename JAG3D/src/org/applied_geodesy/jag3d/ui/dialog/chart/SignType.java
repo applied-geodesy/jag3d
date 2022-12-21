@@ -22,5 +22,5 @@
 package org.applied_geodesy.jag3d.ui.dialog.chart;
 
 public enum SignType {
-	POSITIVE, NEGATIVE;
+	POSITIVE, NEGATIVE, ZERO;
 }
