@@ -48,6 +48,8 @@ public class GlobalResultTypeListCell extends ListCell<Node> {
 			return i18n.getString("GlobalResultTableListCell.variance_component.label", "Variance components estimation");
 		case PRINCIPAL_COMPONENT:
 			return i18n.getString("GlobalResultTableListCell.principal_component.label", "Principal component analysis");
+		case RESIDUAL_SIGN_DISTRIBUTION:
+			return i18n.getString("GlobalResultTableListCell.residual_sign_distribution.label", "Sign distribution analysis");
 		}
 		return null;
 	}

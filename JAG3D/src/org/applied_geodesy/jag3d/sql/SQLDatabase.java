@@ -266,7 +266,14 @@ class SQLDatabase {
 		sqls.put(20210629.0032, "ALTER TABLE \"VerticalDeflectionAposteriori\" ADD \"maximum_tolerable_bias_y\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
 
 		// add highlight type
-		sqls.put(20210923.0001, "ALTER TABLE \"HighlightLayerProperty\" ADD \"type\" SMALLINT DEFAULT " + TableRowHighlightType.NONE.getId() + " NOT NULL\r\n");
+		sqls.put(20210923.0001, "ALTER TABLE \"HighlightLayerProperty\" ADD \"type\" SMALLINT DEFAULT " + TableRowHighlightType.NONE.getId() + " NOT NULL;\r\n");
+		
+		// add sign analysis
+		sqls.put(20220512.0001, "ALTER TABLE \"VarianceComponent\" ADD \"number_of_effective_observations\" INTEGER DEFAULT 0 NOT NULL;\r\n");
+		sqls.put(20220512.0002, "ALTER TABLE \"VarianceComponent\" ADD \"number_of_negative_residuals\" INTEGER DEFAULT 0 NOT NULL;\r\n");
+		
+		sqls.put(20220512.0010, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"BinomialTestStatistic\"(\"number_of_trials\" INTEGER NOT NULL PRIMARY KEY, \"success_probability\" DOUBLE NOT NULL, \"probability_value\" DOUBLE NOT NULL, \"lower_tail_quantile\" DOUBLE NOT NULL, \"upper_tail_quantile\" DOUBLE NOT NULL);\r\n");
+		
 		return sqls;
 	}
 }

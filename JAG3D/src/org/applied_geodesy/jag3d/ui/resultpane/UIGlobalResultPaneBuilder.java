@@ -26,9 +26,11 @@ import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.table.UIPrincipalComponentTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.UIResidualSignDistributionTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITestStatisticTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIVarianceComponentTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.row.PrincipalComponentRow;
+import org.applied_geodesy.jag3d.ui.table.row.ResidualSignDistributionRow;
 import org.applied_geodesy.jag3d.ui.table.row.Row;
 import org.applied_geodesy.jag3d.ui.table.row.TestStatisticRow;
 import org.applied_geodesy.jag3d.ui.table.row.VarianceComponentRow;
@@ -62,6 +64,7 @@ public class UIGlobalResultPaneBuilder {
 				UITestStatisticTableBuilder.getInstance().getTable().getItems().setAll(UITestStatisticTableBuilder.getInstance().getEmptyRow());
 				UIVarianceComponentTableBuilder.getInstance().getTable(UIVarianceComponentTableBuilder.VarianceComponentDisplayType.OVERALL_COMPONENTS).getItems().setAll(UIVarianceComponentTableBuilder.getInstance().getEmptyRow());
 				UIPrincipalComponentTableBuilder.getInstance().getTable().getItems().setAll(UIPrincipalComponentTableBuilder.getInstance().getEmptyRow());
+				UIResidualSignDistributionTableBuilder.getInstance().getTable().getItems().setAll(UIResidualSignDistributionTableBuilder.getInstance().getEmptyRow());
 			}
 		}
 	}
@@ -100,12 +103,17 @@ public class UIGlobalResultPaneBuilder {
 		TableView<PrincipalComponentRow> principalComponentTable = UIPrincipalComponentTableBuilder.getInstance().getTable();
 		principalComponentTable.setUserData(GlobalResultType.PRINCIPAL_COMPONENT);
 		principalComponentTable.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		
+		TableView<ResidualSignDistributionRow> residualSignDistributionTable = UIResidualSignDistributionTableBuilder.getInstance().getTable();
+		residualSignDistributionTable.setUserData(GlobalResultType.RESIDUAL_SIGN_DISTRIBUTION);
+		residualSignDistributionTable.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
 		StackPane contenPane = new StackPane();
 		contenPane.setPadding(new Insets(10, 30, 10, 30)); // oben, rechts, unten, links
-		contenPane.getChildren().addAll(testStatisticTable, varianceComponentTable, principalComponentTable);
+		contenPane.getChildren().addAll(testStatisticTable, varianceComponentTable, residualSignDistributionTable, principalComponentTable);
 		varianceComponentTable.setVisible(false);
 		principalComponentTable.setVisible(false);
+		residualSignDistributionTable.setVisible(false);
 
 		ComboBox<Node> paneSwitcherComboBox = new ComboBox<Node>();
 		paneSwitcherComboBox.setCellFactory(new Callback<ListView<Node>, ListCell<Node>>() {
@@ -115,7 +123,7 @@ public class UIGlobalResultPaneBuilder {
             }
 		});
 		paneSwitcherComboBox.setButtonCell(new GlobalResultTypeListCell());
-		paneSwitcherComboBox.getItems().addAll(testStatisticTable, varianceComponentTable, principalComponentTable);
+		paneSwitcherComboBox.getItems().addAll(testStatisticTable, varianceComponentTable, residualSignDistributionTable, principalComponentTable);
 		paneSwitcherComboBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Node>() {
 
 			@Override

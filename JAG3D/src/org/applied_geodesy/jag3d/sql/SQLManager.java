@@ -83,6 +83,7 @@ import org.applied_geodesy.jag3d.ui.table.UICongruenceAnalysisTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIGNSSObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIPointTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIPrincipalComponentTableBuilder;
+import org.applied_geodesy.jag3d.ui.table.UIResidualSignDistributionTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITerrestrialObservationTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UITestStatisticTableBuilder;
 import org.applied_geodesy.jag3d.ui.table.UIVarianceComponentTableBuilder;
@@ -96,6 +97,7 @@ import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.PrincipalComponentRow;
+import org.applied_geodesy.jag3d.ui.table.row.ResidualSignDistributionRow;
 import org.applied_geodesy.jag3d.ui.table.row.Row;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.TestStatisticRow;
@@ -700,6 +702,7 @@ public class SQLManager {
 			this.loadTestStatistics();
 			this.loadVarianceComponents();
 			this.loadPrincipalComponents();
+			this.loadResidualSignDistributions();
 			break;
 		case CONGRUENCE_ANALYSIS_1D_LEAF:
 		case CONGRUENCE_ANALYSIS_2D_LEAF:
@@ -1310,6 +1313,87 @@ public class SQLManager {
 		if (!tableModel.isEmpty())
 			table.getItems().setAll(tableModel);
 		else
+			table.getItems().setAll(tableBuilder.getEmptyRow());
+		table.sort();
+	}
+	
+	private void loadResidualSignDistributions() throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
+		UIResidualSignDistributionTableBuilder tableBuilder = UIResidualSignDistributionTableBuilder.getInstance();		
+		TableView<ResidualSignDistributionRow> table = tableBuilder.getTable();
+		List<ResidualSignDistributionRow> tableModel = FXCollections.observableArrayList();
+		
+		VarianceComponentType varianceComponentTypes[] = new VarianceComponentType[] {
+				VarianceComponentType.GLOBAL,
+		
+				VarianceComponentType.STOCHASTIC_POINT_1D_COMPONENT,
+				VarianceComponentType.STOCHASTIC_POINT_2D_COMPONENT,
+				VarianceComponentType.STOCHASTIC_POINT_3D_COMPONENT,
+
+				VarianceComponentType.STOCHASTIC_DEFLECTION_COMPONENT,
+
+				VarianceComponentType.LEVELING_COMPONENT,
+
+				VarianceComponentType.DIRECTION_COMPONENT,
+				VarianceComponentType.HORIZONTAL_DISTANCE_COMPONENT,
+
+				VarianceComponentType.SLOPE_DISTANCE_COMPONENT,
+				VarianceComponentType.ZENITH_ANGLE_COMPONENT,
+
+				VarianceComponentType.GNSS1D_COMPONENT,
+				VarianceComponentType.GNSS2D_COMPONENT,
+				VarianceComponentType.GNSS3D_COMPONENT
+		};
+		
+		StringBuilder inTypeArray = new StringBuilder(String.valueOf(varianceComponentTypes[0].getId()));
+		for (int i=1; i<varianceComponentTypes.length; i++) 
+			inTypeArray.append(",").append(String.valueOf(varianceComponentTypes[i].getId()));
+		
+		String sql = "SELECT "
+				+ "\"type\", \"redundancy\", "
+				+ "\"number_of_observations\", \"number_of_effective_observations\", \"number_of_negative_residuals\", "
+				+ "\"number_of_negative_residuals\" < \"lower_tail_quantile\" OR \"number_of_negative_residuals\" > (\"number_of_effective_observations\" - \"lower_tail_quantile\") AS \"significant\" "
+				+ "FROM \"VarianceComponent\" "
+				+ "JOIN \"BinomialTestStatistic\" ON "
+				+ "\"VarianceComponent\".\"number_of_effective_observations\" = \"BinomialTestStatistic\".\"number_of_trials\" "
+				+ "WHERE \"number_of_trials\" > 0 "
+				+ "AND \"type\" IN (" + inTypeArray + ") "
+				+ "ORDER BY \"type\" ASC";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+
+		while (rs.next()) {
+			VarianceComponentType varianceComponentType = VarianceComponentType.getEnumByValue(rs.getInt("type"));
+
+			if (varianceComponentType == null)
+				continue;
+			
+			int numberOfObservations          = rs.getInt("number_of_observations");
+			int numberOfEffectiveObservations = rs.getInt("number_of_effective_observations");
+			int numberOfNegativeResiduals     = rs.getInt("number_of_negative_residuals");
+			
+			double redundancy = rs.getDouble("redundancy");
+
+			boolean significant = rs.getBoolean("significant");
+			
+			ResidualSignDistributionRow row = new ResidualSignDistributionRow();
+
+			row.setId(varianceComponentType.getId());
+			row.setVarianceComponentType(varianceComponentType);
+			row.setNumberOfObservations(numberOfObservations);
+			row.setNumberOfEffectiveObservations(numberOfEffectiveObservations);
+			row.setNumberOfNegativeResiduals(numberOfNegativeResiduals);
+			row.setRedundancy(redundancy);
+			row.setSignificant(significant);
+			
+			tableModel.add(row);
+		}
+
+		table.getItems().setAll(tableModel);
+		if (tableModel.isEmpty())
 			table.getItems().setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
@@ -5346,45 +5430,61 @@ public class SQLManager {
 		return chartData;
 	}
 	
-	public Map<SignType, Integer> getResidualSigns(ObservationType[] observationTypes) throws SQLException {
-		Map<SignType, Integer> chartData = new LinkedHashMap<SignType, Integer>(2);
+	// TODO loadResidualSignDistributions
+	public Map<SignType, Integer> getResidualSigns(VarianceComponentType[] varianceComponentTypes) throws SQLException {
+		Map<SignType, Integer> chartData = new LinkedHashMap<SignType, Integer>(SignType.values().length);
 		chartData.put(SignType.POSITIVE, 0);
 		chartData.put(SignType.NEGATIVE, 0);
+		chartData.put(SignType.ZERO,     0);
 		
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return chartData;
 		
-		StringBuilder inArrayValues = new StringBuilder("?");
-		for (int i = 1; i < observationTypes.length; i++)
-			inArrayValues.append(",?");
+		StringBuilder inTypeArray = new StringBuilder("?");
+		for (int i = 1; i < varianceComponentTypes.length; i++)
+			inTypeArray.append(",?");
 		
 		String sql = "SELECT "
-				+ "SUM(CASE WHEN \"residual\" >= 0 THEN 1 ELSE 0 END) AS \"number_of_positive_residuals\", "
-				+ "SUM(CASE WHEN \"residual\" <  0 THEN 1 ELSE 0 END) AS \"number_of_negative_residuals\" "
-				+ "FROM \"ObservationAposteriori\" JOIN \"ObservationApriori\" "
-				+ "ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
-				+ "JOIN \"ObservationGroup\" "
-				+ "ON \"ObservationGroup\".\"id\" = \"ObservationApriori\".\"group_id\" "
-				+ "WHERE \"ObservationGroup\".\"enable\" = TRUE "
-				+ "AND \"ObservationApriori\".\"enable\" = TRUE "
-				+ "AND \"redundancy\" > 0 "
-				+ "AND \"type\" IN (" + inArrayValues + ") ";
+				+ "\"type\", "
+				+ "(\"number_of_observations\" - \"number_of_effective_observations\") AS \"number_of_uncontrolled_residuals\", "
+				+ "\"number_of_negative_residuals\", "
+				+ "(\"number_of_effective_observations\" - \"number_of_negative_residuals\") AS \"number_of_positive_residuals\" "
+				+ "FROM \"VarianceComponent\" "
+				+ "WHERE \"number_of_observations\" > 0 "
+				+ "AND \"type\" IN (" + inTypeArray + ") "
+				+ "ORDER BY \"type\" ASC";
+		
+		
+//		String sql = "SELECT "
+//				+ "SUM(CASE WHEN \"residual\" >= 0 THEN 1 ELSE 0 END) AS \"number_of_positive_residuals\", "
+//				+ "SUM(CASE WHEN \"residual\" <  0 THEN 1 ELSE 0 END) AS \"number_of_negative_residuals\" "
+//				+ "FROM \"ObservationAposteriori\" JOIN \"ObservationApriori\" "
+//				+ "ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
+//				+ "JOIN \"ObservationGroup\" "
+//				+ "ON \"ObservationGroup\".\"id\" = \"ObservationApriori\".\"group_id\" "
+//				+ "WHERE \"ObservationGroup\".\"enable\" = TRUE "
+//				+ "AND \"ObservationApriori\".\"enable\" = TRUE "
+//				+ "AND \"redundancy\" > 0 "
+//				+ "AND \"type\" IN (" + inTypeArray + ") ";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		
 		int idx = 1;
-		for (ObservationType type : observationTypes) 
+		for (VarianceComponentType type : varianceComponentTypes) 
 			stmt.setInt(idx++, type.getId());
 		
 		ResultSet rs = stmt.executeQuery();
-		int negativeResiduals = 0;
-		int positiveResiduals = 0;
+		int negativeResiduals     = 0;
+		int positiveResiduals     = 0;
+		int uncontrolledResiduals = 0;
 		if (rs.next()) {
-			positiveResiduals = rs.getInt("number_of_positive_residuals");
-			negativeResiduals = rs.getInt("number_of_negative_residuals");
+			positiveResiduals     = rs.getInt("number_of_positive_residuals");
+			negativeResiduals     = rs.getInt("number_of_negative_residuals");
+			uncontrolledResiduals = rs.getInt("number_of_uncontrolled_residuals");
 			
 			chartData.put(SignType.POSITIVE, positiveResiduals);
 			chartData.put(SignType.NEGATIVE, negativeResiduals);
+			chartData.put(SignType.ZERO, uncontrolledResiduals);
 		}
 
 		return chartData;

@@ -19,8 +19,50 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.dialog.chart;
+package org.applied_geodesy.adjustment.statistic;
 
-public enum SignType {
-	POSITIVE, NEGATIVE, ZERO;
+public class BinomialTestStatisticParameterSet {
+
+	private double alpha;
+	private final double successProbability;
+	private final int numberOfTrials;
+	private double lowerTailQuantile = 0, upperTailQuantile;
+	
+	public BinomialTestStatisticParameterSet(int numberOfTrials, double successProbability) {
+		this.numberOfTrials     = numberOfTrials;
+		this.successProbability = successProbability > 0 && successProbability < 1.0 ? successProbability : 0.5;
+		this.upperTailQuantile  = numberOfTrials;
+	}
+	
+	public int getNumberOfTrials() {
+		return this.numberOfTrials;
+	}
+	
+	public double getSuccessProbability() {
+		return this.successProbability;
+	}
+	
+	public double getProbabilityValue() {
+		return this.alpha;
+	}
+	
+	public void setProbabilityValue(double alpha) {
+		this.alpha = alpha;
+	}
+	
+	public void setLowerTailQuantile(double lowerTailQuantile) {
+		this.lowerTailQuantile = lowerTailQuantile >= 0 && lowerTailQuantile <= this.numberOfTrials ? lowerTailQuantile : 0;
+	}
+	
+	public void setUpperTailQuantile(double upperTailQuantile) {
+		this.upperTailQuantile = upperTailQuantile >= 0 && upperTailQuantile <= this.numberOfTrials ? upperTailQuantile : 0;
+	}
+	
+	public double getLowerTailQuantile() {
+		return this.lowerTailQuantile;
+	}
+	
+	public double getUpperTailQuantile() {
+		return this.upperTailQuantile;
+	}
 }
