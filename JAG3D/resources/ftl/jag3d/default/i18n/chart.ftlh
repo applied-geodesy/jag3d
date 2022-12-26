@@ -5,3 +5,4 @@
 }>
 
 <#assign mean_interval = "Mean interval">
+<#assign plot_svg_support = "Scalable Vector Graphics (SVG) are unsupported by your browser.">
