@@ -184,7 +184,7 @@ caption {
     margin: 5px 0px 6px 3px;
     text-align: left;
     caption-side: bottom;
-    font: normal 0.8em Georgia, Times, 'Times New Roman', serif;
+    font: normal 0.9em Georgia, Times, 'Times New Roman', serif;
     min-height: 0.2em;
 }
 dt,
@@ -214,53 +214,51 @@ footer a {
 footer:hover, footer:hover a {
 	color: #666;
 }
-
-
+figure {
+	margin: 7px 0px 10px 0px;
+}
 figcaption {
-	font-size: 0.7em;
+	font: normal 0.9em Georgia, Times, 'Times New Roman', serif;
+	font-size: 0.9em;
+	text-align: left;
 }
-ol.chart {
-    border-left: 5px solid #3f64b0;
-    background: none;
-    list-style: none;
-    padding: 0;
-    margin: 0 10px 15px 10px;
-    border-radius: 3px;
-}
-ol.chart li {
-    display: block;
-    border: 1px solid #3f64b0;
-    width: 500px;
-    margin: 5px 0 5px 3px;
-    box-shadow: 2px 2px 5px #e4ebf2;
-    border-radius: 3px;
-}
-ol.chart li span {
-    display: block;
-    white-space: nowrap;
-    background: #d5d5d5;
-    box-sizing: border-box;
-    padding: 2px 0px;
-    line-height: 1.5;
-    font-size: 0.8em;
-}
-ol.chart li:hover {
-    background: #d3dde7;
-}
-ol.chart li:nth-child(1) span {
-	border-left: 1px solid rgb(162, 205, 90);
-    background: rgb(162, 205, 90);
-}
-ol.chart li:nth-child(2) span {
-	border-left: 1px solid rgb(238, 220, 130);
-    background: rgb(238, 220, 130);
-}
-ol.chart li:nth-child(3) span {
-	border-left: 1px solid rgb(238, 44, 44);
-    background: rgb(238, 44, 44);
-}
-
 svg {
 	border: 1px solid #023bb0;
 	border-radius: 2px 2px 2px 2px;
+}
+figure .piechart {
+  width: 350px;
+  background: none;
+  padding: 5px;
+}
+figure .piechart circle {
+  fill: none;
+  stroke-width: 50;
+}
+figure .piechart rect {
+	width:  15px;
+	height: 10px;
+	stroke: none;
+}
+figure .piechart text {
+	font-size: 0.6em;
+	color: #fefefe;
+}
+figure .piechart circle:nth-child(1) {
+    stroke: rgb(162, 205, 90);
+}
+figure .piechart circle:nth-of-type(2) {
+    stroke: rgb(238, 220, 130);
+}
+figure .piechart circle:nth-of-type(3) {
+    stroke: rgb(238, 44, 44);
+}
+figure .piechart rect:nth-of-type(1) {
+    fill: rgb(162, 205, 90);
+}
+figure .piechart rect:nth-of-type(2) {
+    fill: rgb(238, 220, 130);
+}
+figure .piechart rect:nth-of-type(3) {
+    fill: rgb(238, 44, 44);
 }
