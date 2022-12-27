@@ -26,23 +26,23 @@
 					</#if>
 					<figure>
 						<svg class="piechart" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<#assign total        = (Math.PI * 50.0)>
-							<#assign excellent    = (group.relative_frequency_part_3 * total / 100.0)>
-							<#assign satisfactory = (group.relative_frequency_part_2 * total / 100.0)>
-							<#assign inadequate   = (group.relative_frequency_part_1 * total / 100.0)>
+							<#assign perimeter    = (Math.PI * 50.0)>
+							<#assign excellent    = (group.relative_frequency_part_3 * perimeter / 100.0)>
+							<#assign satisfactory = (group.relative_frequency_part_2 * perimeter / 100.0)>
+							<#assign inadequate   = (group.relative_frequency_part_1 * perimeter / 100.0)>
 							
 							<circle r="25" cx="50" cy="50"
-								style="stroke-dasharray: ${excellent?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${total?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
+								style="stroke-dasharray: ${excellent?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${perimeter?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
 								stroke-dashoffset: 0; ">
 							</circle>
 							
 							<circle r="25" cx="50" cy="50"
-								style="stroke-dasharray: ${satisfactory?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${total?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
+								style="stroke-dasharray: ${satisfactory?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${perimeter?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
 								stroke-dashoffset: ${(-excellent)?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; ">
 							</circle>
 							
 							<circle r="25" cx="50" cy="50"
-								style="stroke-dasharray: ${inadequate?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${total?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
+								style="stroke-dasharray: ${inadequate?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${perimeter?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
 								stroke-dashoffset: ${(-excellent - satisfactory)?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; ">
 							</circle>
 	
@@ -84,23 +84,23 @@
 					</#if>
 					<figure>
 						<svg class="piechart" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<#assign total        = (Math.PI * 50.0)>
-							<#assign excellent    = (group.relative_frequency_part_3 * total / 100.0)>
-							<#assign satisfactory = (group.relative_frequency_part_2 * total / 100.0)>
-							<#assign inadequate   = (group.relative_frequency_part_1 * total / 100.0)>
+							<#assign perimeter    = (Math.PI * 50.0)>
+							<#assign excellent    = (group.relative_frequency_part_3 * perimeter / 100.0)>
+							<#assign satisfactory = (group.relative_frequency_part_2 * perimeter / 100.0)>
+							<#assign inadequate   = (group.relative_frequency_part_1 * perimeter / 100.0)>
 							
 							<circle r="25" cx="50" cy="50"
-								style="stroke-dasharray: ${excellent?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${total?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
+								style="stroke-dasharray: ${excellent?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${perimeter?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
 								stroke-dashoffset: 0; ">
 							</circle>
 							
 							<circle r="25" cx="50" cy="50"
-								style="stroke-dasharray: ${satisfactory?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${total?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
+								style="stroke-dasharray: ${satisfactory?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${perimeter?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
 								stroke-dashoffset: ${(-excellent)?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; ">
 							</circle>
 							
 							<circle r="25" cx="50" cy="50"
-								style="stroke-dasharray: ${inadequate?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${total?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
+								style="stroke-dasharray: ${inadequate?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${perimeter?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
 								stroke-dashoffset: ${(-excellent - satisfactory)?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; ">
 							</circle>
 
@@ -142,23 +142,23 @@
 					</#if>
 					<figure>
 						<svg class="piechart" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<#assign total        = (Math.PI * 50.0)>
-							<#assign excellent    = (group.relative_frequency_part_1 * total / 100.0)>
-							<#assign satisfactory = (group.relative_frequency_part_2 * total / 100.0)>
-							<#assign inadequate   = (group.relative_frequency_part_3 * total / 100.0)>
+							<#assign perimeter    = (Math.PI * 50.0)>
+							<#assign excellent    = (group.relative_frequency_part_1 * perimeter / 100.0)>
+							<#assign satisfactory = (group.relative_frequency_part_2 * perimeter / 100.0)>
+							<#assign inadequate   = (group.relative_frequency_part_3 * perimeter / 100.0)>
 							
 							<circle r="25" cx="50" cy="50"
-								style="stroke-dasharray: ${excellent?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${total?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
+								style="stroke-dasharray: ${excellent?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${perimeter?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
 								stroke-dashoffset: 0; ">
 							</circle>
 							
 							<circle r="25" cx="50" cy="50"
-								style="stroke-dasharray: ${satisfactory?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${total?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
+								style="stroke-dasharray: ${satisfactory?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${perimeter?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
 								stroke-dashoffset: ${(-excellent)?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; ">
 							</circle>
 							
 							<circle r="25" cx="50" cy="50"
-								style="stroke-dasharray: ${inadequate?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${total?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
+								style="stroke-dasharray: ${inadequate?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]} ${perimeter?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; 
 								stroke-dashoffset: ${(-excellent - satisfactory)?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}; ">
 							</circle>
 							
