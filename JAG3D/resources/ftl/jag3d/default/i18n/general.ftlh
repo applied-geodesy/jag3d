@@ -6,7 +6,8 @@
 			<dt>Project Id</dt><dd>${project_project_id}</dd>
 			<dt>Customer Id</dt><dd>${project_customer_id}</dd>
 			<dt>Person in Charge</dt><dd>${project_operator}</dd>
-			<dt>Date of Calculation</dt><dd>${project_date?date?string("dd.MM.yyyy")}</dd>
+			<dt>Date of Calculation</dt><dd><time datetime="${project_date?date?string("yyyy-MM-dd")}">${project_date?date?string("yyyy-MM-dd")}</time></dd>
+			<dt>Date of Report</dt><dd><time datetime="${report_creation_date?date?string("yyyy-MM-dd")}">${report_creation_date?date?string("yyyy-MM-dd")}</time></dd>
 			
 			
 			<dt>Kind of network</dt>

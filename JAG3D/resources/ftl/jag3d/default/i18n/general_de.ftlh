@@ -6,7 +6,8 @@
 			<dt>Projektnummer</dt><dd>${project_project_id}</dd>
 			<dt>Auftraggeber</dt><dd>${project_customer_id}</dd>
 			<dt>Projektbearbeiter</dt><dd>${project_operator}</dd>
-			<dt>Bearbeitungsdatum</dt><dd>${project_date?date?string("dd.MM.yyyy")}</dd>
+			<dt>Bearbeitungsdatum</dt><dd><time datetime="${project_date?date?string("yyyy-MM-dd")}">${project_date?date?string("dd.MM.yyyy")}</time></dd>
+			<dt>Reportdatum</dt><dd><time datetime="${report_creation_date?date?string("yyyy-MM-dd")}">${report_creation_date?date?string("dd.MM.yyyy")}</time></dd>
 			
 			<dt>Art des Netzanschlu&szlig;es</dt>
 			<dd>
