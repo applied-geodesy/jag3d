@@ -58,7 +58,7 @@
 			<title><#if project_name?has_content>${project_name} :: </#if>Report &mdash; Java Applied Geodesy 3D</title>
 			<meta charset="UTF-8">
 			<meta name="generator" content="JAG3D - Java Applied Geodesy 3D v${version?string["#"]}">
-			<meta name="application-name" content="JAG3D - Java Applied Geodesy 3D - (c) by Michael Loesler - https://software.applied-geodesy.org">
+			<meta name="application-name" content="JAG3D - Java Applied Geodesy 3D - (c) Michael Loesler - https://software.applied-geodesy.org">
 			<meta name="author" content="${project_operator}">
 			<meta name="description" content="${project_description}">
 			<meta name="date" content="${report_creation_date?datetime?string("yyyy-MM-dd'T'HH:mm:ss")}">
@@ -100,6 +100,10 @@
 				<#include "default/reliability_table.ftlh" parse=true>
 				<#include "default/chart.ftlh" parse=true>
 			</article>
+			
+			<footer>
+				<p>Java&middot;Applied&middot;Geodesy&middot;3D &mdash; &copy; Michael L&ouml;sler &mdash; <a href="https://software.applied-geodesy.org">software.applied-geodesy.org</a><br>..:: Least-Squares Adjustment Software for Geodetic Sciences ::..</p>
+			</footer>
 			
 		</body>
 	</html>

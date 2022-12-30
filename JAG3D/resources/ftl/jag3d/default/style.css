@@ -204,14 +204,14 @@ footer {
 	margin: 10px auto;
 	padding: 5px 0;
 	border-top: 1px solid #bebebe;
-	font: normal 0.9em Georgia, Times, 'Times New Roman', serif;
+	font: normal 0.8em Georgia, Times, 'Times New Roman', serif;
 	color: #bebebe;
 	text-align: center;
 }
-footer a {
+footer a, footer a:visited, footer p {
 	color: #bebebe;
 }
-footer:hover, footer:hover a {
+footer:hover, footer p:hover, footer a:hover {
 	color: #666;
 }
 figure {
