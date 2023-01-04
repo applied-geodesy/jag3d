@@ -55,6 +55,7 @@ import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
+import org.applied_geodesy.jag3d.ui.graphic.layer.LayerManager;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerType;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightType;
 import org.applied_geodesy.transformation.datum.Ellipsoid;
@@ -638,7 +639,7 @@ public class FTLReport {
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		ResultSet rs = stmt.executeQuery();
-		this.setParam("vector_scale", rs.next() ? rs.getDouble("value") : 1.0);
+		this.setParam("vector_scale", rs.next() ? rs.getDouble("value") : LayerManager.DEFAULT_ELLIPSE_SCALE);
 	}
 	
 	private void addLayerProperties() throws SQLException {

@@ -177,6 +177,7 @@ public class LayerManager {
 //	private ObjectProperty<Color> color = new SimpleObjectProperty<Color>(Color.rgb(255, 255, 255, 1.0)); //0-255
 	private VisiblePropertyChangeListener visibleChangeListener = new VisiblePropertyChangeListener();
 	private boolean ignoreChangeEvent = false;
+	public static double DEFAULT_ELLIPSE_SCALE = 5000.0;
 	
 	private Spinner<Double> scaleSpinner;
 	public LayerManager() {
@@ -481,7 +482,7 @@ public class LayerManager {
 				toolbarActionEventHandler
 				);
 				
-		this.scaleSpinner = this.createDoubleSpinner(1, Double.MAX_VALUE, 5000, 250, i18n.getString("LayerManager.toolbar.scale.tooltip", "Scale of arrows and confidences"), 0);
+		this.scaleSpinner = this.createDoubleSpinner(1, Double.MAX_VALUE, DEFAULT_ELLIPSE_SCALE, 250, i18n.getString("LayerManager.toolbar.scale.tooltip", "Scale of arrows and confidences"), 0);
 		this.scaleSpinner.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		Label scaleLabel = new Label(" : 1");
 		scaleLabel.setGraphic(this.scaleSpinner);
