@@ -194,7 +194,7 @@ public class UIRedundancyAnalysisChart {
 						TableRowHighlightRangeType tableRowHighlightRangeType = TableRowHighlightRangeType.valueOf(name);
 
 						Color color = this.tableRowHighlight.getColor(tableRowHighlightRangeType);
-						String rgbColor = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f)", color.getRed()*255, color.getGreen()*255, color.getBlue()*255);
+						String rgbColor = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f, %.7f)", color.getRed()*255, color.getGreen()*255, color.getBlue()*255, color.getOpacity());
 
 						data.getNode().setStyle(color != null && color != Color.TRANSPARENT ? String.format("-fx-pie-color: %s;", rgbColor) : "");
 						break;
@@ -216,7 +216,7 @@ public class UIRedundancyAnalysisChart {
 					if (name.equals(INADEQUATE) || name.equals(SATISFACTORY) || name.equals(EXCELLENT)) {
 						TableRowHighlightRangeType tableRowHighlightRangeType = TableRowHighlightRangeType.valueOf(name);
 						Color color = this.tableRowHighlight.getColor(tableRowHighlightRangeType);
-						String rgbColor = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f)", color.getRed()*255, color.getGreen()*255, color.getBlue()*255);
+						String rgbColor = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f, %.7f)", color.getRed()*255, color.getGreen()*255, color.getBlue()*255, color.getOpacity());
 						region.setStyle(color != null && color != Color.TRANSPARENT ? String.format("-fx-pie-color: %s;", rgbColor) : "");
 
 						switch (tableRowHighlightRangeType) {

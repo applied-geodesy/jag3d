@@ -5130,7 +5130,7 @@ public class SQLManager {
 			return;
 		
 		String sql = "SELECT "
-				+ "\"red\", \"green\", \"blue\" "
+				+ "\"red\", \"green\", \"blue\", \"opacity\" "
 				+ "FROM \"TableRowHighlightProperty\" "
 				+ "WHERE \"type\" = ? LIMIT 1";
 		
@@ -5140,8 +5140,6 @@ public class SQLManager {
 			stmt.setInt(idx++, tableRowHighlightRangeType.getId());
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
-				double opacity = 1.0;
-
 				double red = rs.getDouble("red");
 				red = Math.min(Math.max(0, red), 1);
 
@@ -5150,6 +5148,9 @@ public class SQLManager {
 
 				double blue = rs.getDouble("blue");
 				blue = Math.min(Math.max(0, blue), 1);
+				
+				double opacity = rs.getDouble("opacity");
+				opacity = Math.min(Math.max(0, opacity), 1);
 				
 				tableRowHighlight.setColor(tableRowHighlightRangeType, new Color(red, green, blue, opacity));
 			}
@@ -5218,17 +5219,19 @@ public class SQLManager {
 			return;
 		
 		String sql = "MERGE INTO \"TableRowHighlightProperty\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
-				+ ") AS \"vals\" (\"type\", \"red\", \"green\", \"blue\") ON \"TableRowHighlightProperty\".\"type\" = \"vals\".\"type\" "
+				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"type\", \"red\", \"green\", \"blue\", \"opacity\") ON \"TableRowHighlightProperty\".\"type\" = \"vals\".\"type\" "
 				+ "WHEN MATCHED THEN UPDATE SET "
-				+ "\"TableRowHighlightProperty\".\"red\"   = \"vals\".\"red\", "
-				+ "\"TableRowHighlightProperty\".\"green\" = \"vals\".\"green\", "
-				+ "\"TableRowHighlightProperty\".\"blue\"  = \"vals\".\"blue\" "
+				+ "\"TableRowHighlightProperty\".\"red\"     = \"vals\".\"red\", "
+				+ "\"TableRowHighlightProperty\".\"green\"   = \"vals\".\"green\", "
+				+ "\"TableRowHighlightProperty\".\"blue\"    = \"vals\".\"blue\", "
+				+ "\"TableRowHighlightProperty\".\"opacity\" = \"vals\".\"opacity\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"type\", "
 				+ "\"vals\".\"red\", "
 				+ "\"vals\".\"green\", "
-				+ "\"vals\".\"blue\"";
+				+ "\"vals\".\"blue\", "
+				+ "\"vals\".\"opacity\" ";
 		
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -5236,6 +5239,7 @@ public class SQLManager {
 		stmt.setDouble(idx++, color.getRed());
 		stmt.setDouble(idx++, color.getGreen());
 		stmt.setDouble(idx++, color.getBlue());
+		stmt.setDouble(idx++, color.getOpacity());
 		stmt.execute();
 	}
 	

@@ -380,9 +380,8 @@ public abstract class UITableBuilder<T> {
 		Color color       = TableRowHighlight.getInstance().getColor(type);
 		Color darkerColor = color.darker();
 		
-		String rgbColor       = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f)", color.getRed()*255, color.getGreen()*255, color.getBlue()*255);
-		String rgbDarkerColor = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f)", darkerColor.getRed()*255, darkerColor.getGreen()*255, darkerColor.getBlue()*255);
-		
+		String rgbColor       = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f, %.7f)", color.getRed()*255, color.getGreen()*255, color.getBlue()*255, color.getOpacity());
+		String rgbDarkerColor = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f, %.7f)", darkerColor.getRed()*255, darkerColor.getGreen()*255, darkerColor.getBlue()*255, color.getOpacity());
 		row.setStyle(color != null && color != Color.TRANSPARENT ? String.format("-fx-background-color: %s;", row.getIndex() % 2 == 0 ? rgbColor : rgbDarkerColor) : "");
 	}
 	

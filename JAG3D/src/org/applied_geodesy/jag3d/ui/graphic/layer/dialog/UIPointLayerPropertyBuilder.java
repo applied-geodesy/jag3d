@@ -110,6 +110,16 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		}
 	}
 	
+	private class FontBackgroundColorChangeListener implements ChangeListener<Color> {
+		@Override
+		public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+			if (currentLayer != null && newValue != null && layerManager != null) {
+				currentLayer.setFontBackgroundColor(newValue);
+				layerManager.draw();
+			}
+		}
+	}
+	
 	private class FontSizeChangeListener implements ChangeListener<Double> {
 		@Override
 		public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
@@ -187,6 +197,7 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 	private ComboBox<String> fontFamilyComboBox;
 	private ComboBox<Double> fontSizeComboBox;
 	private ColorPicker fontColorPicker;
+	private ColorPicker fontBackgroundColorPicker;
 	
 	private Node highlightPane = null;
 	private ComboBox<Double> highlightLineWidthComboBox;
@@ -263,6 +274,7 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		this.fontFamilyComboBox.getSelectionModel().select(this.currentLayer.getFontFamily());
 		this.fontSizeComboBox.getSelectionModel().select(this.currentLayer.getFontSize());
 		this.fontColorPicker.setValue(this.currentLayer.getFontColor());
+		this.fontBackgroundColorPicker.setValue(this.currentLayer.getFontBackgroundColor());
 		
 		// Visibility properties w.r.t. dimension
 		this.point1DVisibleCheckBox.setSelected(this.currentLayer.isPoint1DVisible());
@@ -282,29 +294,37 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		Label fontColorLabel = new Label(i18n.getString("UIPointLayerPropertyBuilder.font.color.label", "Font color:"));
 		fontColorLabel.setMinWidth(Control.USE_PREF_SIZE);
 		
+		Label fontBackgroundColorLabel = new Label(i18n.getString("UIPointLayerPropertyBuilder.font.background_color.label", "Background color:"));
+		fontBackgroundColorLabel.setMinWidth(Control.USE_PREF_SIZE);
+		
 		Double fontSizes[] = new Double[10];
 		for (int i = 0; i < fontSizes.length; i++)
 			fontSizes[i] = 6.0 + 2*i; //fontSizes[i] = 5 + 0.5 * i;
 		
-		this.fontFamilyComboBox = this.createFontFamliyComboBox(i18n.getString("UIPointLayerPropertyBuilder.font.family.tooltip", "Set font familiy"));
-		this.fontSizeComboBox   = this.createSizeComboBox(i18n.getString("UIPointLayerPropertyBuilder.font.size.tooltip", "Set font size"), fontSizes, 1);
-		this.fontColorPicker    = this.createColorPicker(Color.BLACK, i18n.getString("UIPointLayerPropertyBuilder.font.color.tooltip", "Set font color"));
+		this.fontFamilyComboBox        = this.createFontFamliyComboBox(i18n.getString("UIPointLayerPropertyBuilder.font.family.tooltip", "Set font familiy"));
+		this.fontSizeComboBox          = this.createSizeComboBox(i18n.getString("UIPointLayerPropertyBuilder.font.size.tooltip", "Set font size"), fontSizes, 1);
+		this.fontColorPicker           = this.createColorPicker(Color.BLACK, i18n.getString("UIPointLayerPropertyBuilder.font.color.tooltip", "Set font color"));
+		this.fontBackgroundColorPicker = this.createColorPicker(new Color(1, 1, 1, 0.25), i18n.getString("UIPointLayerPropertyBuilder.font.background_color.tooltip", "Set background color"));
 		
 		this.fontFamilyComboBox.getSelectionModel().selectedItemProperty().addListener(new FontFamilyChangeListener());
 		this.fontSizeComboBox.getSelectionModel().selectedItemProperty().addListener(new FontSizeChangeListener());
 		this.fontColorPicker.valueProperty().addListener(new FontColorChangeListener());
+		this.fontBackgroundColorPicker.valueProperty().addListener(new FontBackgroundColorChangeListener());
 		
 		fontFamilyLabel.setLabelFor(this.fontFamilyComboBox);
 		fontSizeLabel.setLabelFor(this.fontSizeComboBox);
 		fontColorLabel.setLabelFor(this.fontColorPicker);
+		fontBackgroundColorLabel.setLabelFor(this.fontBackgroundColorPicker);
 		
-		GridPane.setHgrow(fontFamilyLabel, Priority.NEVER);
-		GridPane.setHgrow(fontSizeLabel,   Priority.NEVER);
-		GridPane.setHgrow(fontColorLabel,   Priority.NEVER);
+		GridPane.setHgrow(fontFamilyLabel,          Priority.NEVER);
+		GridPane.setHgrow(fontSizeLabel,            Priority.NEVER);
+		GridPane.setHgrow(fontColorLabel,           Priority.NEVER);
+		GridPane.setHgrow(fontBackgroundColorLabel, Priority.NEVER);
 		
-		GridPane.setHgrow(this.fontFamilyComboBox, Priority.ALWAYS);
-		GridPane.setHgrow(this.fontSizeComboBox,   Priority.ALWAYS);
-		GridPane.setHgrow(this.fontColorPicker,    Priority.ALWAYS);
+		GridPane.setHgrow(this.fontFamilyComboBox,        Priority.ALWAYS);
+		GridPane.setHgrow(this.fontSizeComboBox,          Priority.ALWAYS);
+		GridPane.setHgrow(this.fontColorPicker,           Priority.ALWAYS);
+		GridPane.setHgrow(this.fontBackgroundColorPicker, Priority.ALWAYS);
 
 		int row = 0;
 		gridPane.add(fontFamilyLabel,         0, row);
@@ -315,6 +335,9 @@ public class UIPointLayerPropertyBuilder extends UILayerPropertyBuilder {
 		
 		gridPane.add(fontColorLabel,       0, row);
 		gridPane.add(this.fontColorPicker, 1, row++);
+		
+		gridPane.add(fontBackgroundColorLabel,       0, row);
+		gridPane.add(this.fontBackgroundColorPicker, 1, row++);
 
 		return this.createTitledPane(i18n.getString("UIPointLayerPropertyBuilder.font.title", "Font properties"), gridPane);
 	}

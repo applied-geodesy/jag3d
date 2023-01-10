@@ -37,6 +37,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.EventHandler;
+import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
@@ -47,6 +48,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 class MouseNavigationCanvas extends ResizableCanvas implements FormatterChangedListener {
 
@@ -289,6 +291,8 @@ class MouseNavigationCanvas extends ResizableCanvas implements FormatterChangedL
 		scaleLabel.setFont(gc.getFont());
 		double scaleLabelWidth = scaleLabel.getBoundsInLocal().getWidth();
 
+		gc.setTextBaseline(VPos.BASELINE);
+		gc.setTextAlign(TextAlignment.LEFT);
 		gc.setFill(Color.BLACK);
 		gc.fillText("0", x - scaleBarWidth * scaleSegments, y - scaleBarHeight);
 		gc.fillText(scaleLabel.getText(), x - scaleLabelWidth, y - scaleBarHeight);
