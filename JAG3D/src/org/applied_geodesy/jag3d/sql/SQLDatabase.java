@@ -36,6 +36,7 @@ import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
+import org.applied_geodesy.jag3d.ui.graphic.layer.LayerType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.io.ImportOption;
 import org.applied_geodesy.jag3d.ui.table.column.TableContentType;
@@ -274,6 +275,21 @@ class SQLDatabase {
 		
 		sqls.put(20220512.0010, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"BinomialTestStatistic\"(\"number_of_trials\" INTEGER NOT NULL PRIMARY KEY, \"success_probability\" DOUBLE NOT NULL, \"probability_value\" DOUBLE NOT NULL, \"lower_tail_quantile\" DOUBLE NOT NULL, \"upper_tail_quantile\" DOUBLE NOT NULL);\r\n");
 		
+		sqls.put(20221220.0001, "ALTER TABLE \"Layer\"                     ADD \"opacity\" DOUBLE DEFAULT 1.0 NOT NULL;\r\n");
+		sqls.put(20221220.0002, "ALTER TABLE \"ConfidenceLayerProperty\"   ADD \"opacity\" DOUBLE DEFAULT 1.0 NOT NULL;\r\n");
+		sqls.put(20221220.0003, "ALTER TABLE \"ObservationLayerProperty\"  ADD \"opacity\" DOUBLE DEFAULT 1.0 NOT NULL;\r\n");
+		sqls.put(20221220.0004, "ALTER TABLE \"HighlightLayerProperty\"    ADD \"opacity\" DOUBLE DEFAULT 1.0 NOT NULL;\r\n");
+		sqls.put(20221220.0005, "ALTER TABLE \"LayerFont\"                 ADD \"opacity\" DOUBLE DEFAULT 1.0 NOT NULL;\r\n");
+		sqls.put(20221220.0006, "ALTER TABLE \"TableRowHighlightProperty\" ADD \"opacity\" DOUBLE DEFAULT 1.0 NOT NULL;\r\n");
+
+		sqls.put(20221220.0011, "ALTER TABLE \"LayerFont\" ADD \"background_red\"     DOUBLE DEFAULT 1.0 NOT NULL;\r\n");
+		sqls.put(20221220.0012, "ALTER TABLE \"LayerFont\" ADD \"background_green\"   DOUBLE DEFAULT 1.0 NOT NULL;\r\n");
+		sqls.put(20221220.0013, "ALTER TABLE \"LayerFont\" ADD \"background_blue\"    DOUBLE DEFAULT 1.0 NOT NULL;\r\n");
+		sqls.put(20221220.0014, "ALTER TABLE \"LayerFont\" ADD \"background_opacity\" DOUBLE DEFAULT 0.0 NOT NULL;\r\n");
+		
+		sqls.put(20221220.0015, "UPDATE \"LayerFont\" SET \"background_opacity\" = 0.9  WHERE \"layer\" = " + LayerType.LEGEND.getId() + ";\r\n");
+		sqls.put(20221220.0016, "UPDATE \"LayerFont\" SET \"background_opacity\" = 0.25 WHERE \"layer\" IN (" + LayerType.REFERENCE_POINT_APRIORI.getId() + "," + LayerType.STOCHASTIC_POINT_APRIORI.getId() + "," + LayerType.DATUM_POINT_APRIORI.getId() + "," + LayerType.NEW_POINT_APRIORI.getId() + "," + LayerType.REFERENCE_POINT_APOSTERIORI.getId() + "," + LayerType.STOCHASTIC_POINT_APOSTERIORI.getId() + "," + LayerType.DATUM_POINT_APOSTERIORI.getId() + "," + LayerType.NEW_POINT_APOSTERIORI.getId() + ");\r\n");
+
 		return sqls;
 	}
 }

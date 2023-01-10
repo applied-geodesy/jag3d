@@ -53,7 +53,7 @@ public class LegendLayer extends Layer implements FontLayer {
 	private DoubleProperty fontSize   = new SimpleDoubleProperty(10);
 	private StringProperty fontFamily = new SimpleStringProperty(Font.getDefault().getFamily());
 	private ObjectProperty<Color> fontColor = new SimpleObjectProperty<Color>(Color.SLATEGREY);
-	private ObjectProperty<Color> fontBackgroundColor = new SimpleObjectProperty<Color>(Color.rgb(255, 255, 255, 0.0));
+	private ObjectProperty<Color> fontBackgroundColor = new SimpleObjectProperty<Color>(Color.rgb(255, 255, 255, 0.9));
 	private ObjectProperty<LegendPositionType> legendPositionType = new SimpleObjectProperty<LegendPositionType>(LegendPositionType.NORTH_EAST);
 	
 	LegendLayer(LayerType layerType, ObservableList<Layer> layers) {
@@ -108,11 +108,12 @@ public class LegendLayer extends Layer implements FontLayer {
 	
 	@Override
 	public void draw(GraphicsContext graphicsContext, GraphicExtent graphicExtent) {
-		Color fontColor   = this.getFontColor();
-		String fontFamily = this.getFontFamily();
-		double fontSize   = this.getFontSize();
-		double lineWidth  = this.getLineWidth();
-		Color lineColor   = this.getColor();
+		Color fontColor           = this.getFontColor();
+		String fontFamily         = this.getFontFamily();
+		double fontSize           = this.getFontSize();
+		double lineWidth          = this.getLineWidth();
+		Color lineColor           = this.getColor();
+		Color fontBackgroundColor = this.getFontBackgroundColor();
 		
 		Font font = Font.font(fontFamily, FontWeight.NORMAL, FontPosture.REGULAR, fontSize);
 		
@@ -153,8 +154,8 @@ public class LegendLayer extends Layer implements FontLayer {
 		
 		// Draw legend box
 		graphicsContext.setLineWidth(lineWidth);
-		graphicsContext.setStroke(new Color(1, 1, 1, 0.9));
-		graphicsContext.setFill(new Color(1, 1, 1, 0.9));
+		graphicsContext.setStroke(fontBackgroundColor);
+		graphicsContext.setFill(fontBackgroundColor);
 		
 		PixelCoordinate leftCorner = this.getLeftUpperCorner(graphicExtent, legendWidth, legendHeight, xMargin, yMargin);
 		double xLeftUpperCorner = leftCorner.getX(); 

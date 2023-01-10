@@ -485,15 +485,17 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 	    Shape intersection = Shape.intersect(text, stencil);
 	    textBounds = intersection.getBoundsInLocal();
 		
-		double textWidth  = textBounds.getWidth();  // text.getLayoutBounds().getWidth();
-		double textHeight = textBounds.getHeight(); // text.getLayoutBounds().getHeight();
+		double textWidth  = textBounds.getWidth() + 4; // text.getLayoutBounds().getWidth();
+		double textHeight = textBounds.getHeight()+ 4; // text.getLayoutBounds().getHeight();
 		
 		double x0 = pixelCoordinate.getX() + 0.5 * (symbolSize + lineWidth);
 		double y0 = pixelCoordinate.getY() + 0.5 * (symbolSize + lineWidth);
 		
+		graphicsContext.setLineCap(StrokeLineCap.BUTT);
+		graphicsContext.setLineDashes(null);
 		graphicsContext.setStroke(backgroundColor);
 		graphicsContext.setFill(backgroundColor);
-        graphicsContext.fillRect(x0, y0, textWidth, textHeight);
+        graphicsContext.fillRoundRect(x0, y0, textWidth, textHeight, 1, 1);
 
 		graphicsContext.setStroke(color);
 		graphicsContext.setFill(color);

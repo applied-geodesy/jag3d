@@ -829,12 +829,13 @@ public class SQLGraphicManager {
 	
 	private void save(HighlightableLayer layer) throws SQLException {
 		String sql = "MERGE INTO \"HighlightLayerProperty\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS INT)) "
-				+ ") AS \"vals\" (\"layer\", \"red\", \"green\", \"blue\", \"line_width\", \"type\") ON \"HighlightLayerProperty\".\"layer\" = \"vals\".\"layer\" "
+				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS INT)) "
+				+ ") AS \"vals\" (\"layer\", \"red\", \"green\", \"blue\", \"opacity\", \"line_width\", \"type\") ON \"HighlightLayerProperty\".\"layer\" = \"vals\".\"layer\" "
 				+ "WHEN MATCHED THEN UPDATE SET "
 				+ "\"HighlightLayerProperty\".\"red\"        = \"vals\".\"red\", "
 				+ "\"HighlightLayerProperty\".\"green\"      = \"vals\".\"green\", "
 				+ "\"HighlightLayerProperty\".\"blue\"       = \"vals\".\"blue\", "
+				+ "\"HighlightLayerProperty\".\"opacity\"    = \"vals\".\"opacity\", "
 				+ "\"HighlightLayerProperty\".\"line_width\" = \"vals\".\"line_width\", "
 				+ "\"HighlightLayerProperty\".\"type\"       = \"vals\".\"type\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
@@ -842,6 +843,7 @@ public class SQLGraphicManager {
 				+ "\"vals\".\"red\", "
 				+ "\"vals\".\"green\", "
 				+ "\"vals\".\"blue\","
+				+ "\"vals\".\"opacity\","
 				+ "\"vals\".\"line_width\", "
 				+ "\"vals\".\"type\" ";
 		
@@ -851,6 +853,7 @@ public class SQLGraphicManager {
 		stmt.setDouble(idx++,  layer.getHighlightColor().getRed());
 		stmt.setDouble(idx++,  layer.getHighlightColor().getGreen());
 		stmt.setDouble(idx++,  layer.getHighlightColor().getBlue());
+		stmt.setDouble(idx++,  layer.getHighlightColor().getOpacity());
 		stmt.setDouble(idx++,  layer.getHighlightLineWidth());
 		stmt.setInt(idx++,     layer.getHighlightType().getId());
 		stmt.execute();
@@ -867,17 +870,19 @@ public class SQLGraphicManager {
 	
 	private void saveStrokeColor(ConfidenceLayer<?> confidenceLayer) throws SQLException {
 		String sql = "MERGE INTO \"ConfidenceLayerProperty\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
-				+ ") AS \"vals\" (\"layer\", \"red\", \"green\", \"blue\") ON \"ConfidenceLayerProperty\".\"layer\" = \"vals\".\"layer\" "
+				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"layer\", \"red\", \"green\", \"blue\", \"opacity\") ON \"ConfidenceLayerProperty\".\"layer\" = \"vals\".\"layer\" "
 				+ "WHEN MATCHED THEN UPDATE SET "
-				+ "\"ConfidenceLayerProperty\".\"red\"   = \"vals\".\"red\", "
-				+ "\"ConfidenceLayerProperty\".\"green\" = \"vals\".\"green\", "
-				+ "\"ConfidenceLayerProperty\".\"blue\"  = \"vals\".\"blue\" "
+				+ "\"ConfidenceLayerProperty\".\"red\"     = \"vals\".\"red\", "
+				+ "\"ConfidenceLayerProperty\".\"green\"   = \"vals\".\"green\", "
+				+ "\"ConfidenceLayerProperty\".\"blue\"    = \"vals\".\"blue\", "
+				+ "\"ConfidenceLayerProperty\".\"opacity\" = \"vals\".\"opacity\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"layer\", "
 				+ "\"vals\".\"red\", "
 				+ "\"vals\".\"green\", "
-				+ "\"vals\".\"blue\" ";
+				+ "\"vals\".\"blue\", "
+				+ "\"vals\".\"opacity\" ";
 		
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -885,6 +890,7 @@ public class SQLGraphicManager {
 		stmt.setDouble(idx++,  confidenceLayer.getStrokeColor().getRed());
 		stmt.setDouble(idx++,  confidenceLayer.getStrokeColor().getGreen());
 		stmt.setDouble(idx++,  confidenceLayer.getStrokeColor().getBlue());
+		stmt.setDouble(idx++,  confidenceLayer.getStrokeColor().getOpacity());
 		stmt.execute();
 	}
 
@@ -893,13 +899,14 @@ public class SQLGraphicManager {
 		try {
 			this.dataBase.setAutoCommit(false);
 			String sql = "MERGE INTO \"ObservationLayerProperty\" USING (VALUES "
-					+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS BOOLEAN)) "
-					+ ") AS \"vals\" (\"layer\", \"observation_type\", \"red\", \"green\", \"blue\", \"visible\") "
+					+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS BOOLEAN)) "
+					+ ") AS \"vals\" (\"layer\", \"observation_type\", \"red\", \"green\", \"blue\", \"opacity\", \"visible\") "
 					+ "ON \"ObservationLayerProperty\".\"layer\" = \"vals\".\"layer\" AND \"ObservationLayerProperty\".\"observation_type\" = \"vals\".\"observation_type\" "
 					+ "WHEN MATCHED THEN UPDATE SET "
 					+ "\"ObservationLayerProperty\".\"red\"     = \"vals\".\"red\", "
 					+ "\"ObservationLayerProperty\".\"green\"   = \"vals\".\"green\", "
 					+ "\"ObservationLayerProperty\".\"blue\"    = \"vals\".\"blue\", "
+					+ "\"ObservationLayerProperty\".\"opacity\" = \"vals\".\"opacity\", "
 					+ "\"ObservationLayerProperty\".\"visible\" = \"vals\".\"visible\" "
 					+ "WHEN NOT MATCHED THEN INSERT VALUES "
 					+ "\"vals\".\"layer\", "
@@ -907,6 +914,7 @@ public class SQLGraphicManager {
 					+ "\"vals\".\"red\", "
 					+ "\"vals\".\"green\", "
 					+ "\"vals\".\"blue\", "
+					+ "\"vals\".\"opacity\", "
 					+ "\"vals\".\"visible\" ";
 
 			int idx = 1;
@@ -922,6 +930,7 @@ public class SQLGraphicManager {
 				stmt.setDouble(idx++,  properties.getColor().getRed());
 				stmt.setDouble(idx++,  properties.getColor().getGreen());
 				stmt.setDouble(idx++,  properties.getColor().getBlue());
+				stmt.setDouble(idx++,  properties.getColor().getOpacity());
 				stmt.setBoolean(idx++, properties.isVisible());
 				stmt.addBatch();
 				hasBatch = true;
@@ -936,12 +945,13 @@ public class SQLGraphicManager {
 
 	private void saveLayer(Layer layer) throws SQLException {
 		String sql = "MERGE INTO \"Layer\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS BOOLEAN)) "
-				+ ") AS \"vals\" (\"type\", \"red\", \"green\", \"blue\", \"symbol_size\", \"line_width\", \"order\", \"visible\") ON \"Layer\".\"type\" = \"vals\".\"type\" "
+				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS BOOLEAN)) "
+				+ ") AS \"vals\" (\"type\", \"red\", \"green\", \"blue\", \"opacity\", \"symbol_size\", \"line_width\", \"order\", \"visible\") ON \"Layer\".\"type\" = \"vals\".\"type\" "
 				+ "WHEN MATCHED THEN UPDATE SET "
 				+ "\"Layer\".\"red\"         = \"vals\".\"red\", "
 				+ "\"Layer\".\"green\"       = \"vals\".\"green\", "
 				+ "\"Layer\".\"blue\"        = \"vals\".\"blue\", "
+				+ "\"Layer\".\"opacity\"     = \"vals\".\"opacity\", "
 				+ "\"Layer\".\"symbol_size\" = \"vals\".\"symbol_size\", "
 				+ "\"Layer\".\"line_width\"  = \"vals\".\"line_width\", "
 				+ "\"Layer\".\"order\"       = \"vals\".\"order\", "
@@ -951,6 +961,7 @@ public class SQLGraphicManager {
 				+ "\"vals\".\"red\", "
 				+ "\"vals\".\"green\", "
 				+ "\"vals\".\"blue\", "
+				+ "\"vals\".\"opacity\", "
 				+ "\"vals\".\"symbol_size\", "
 				+ "\"vals\".\"line_width\", "
 				+ "\"vals\".\"order\", "
@@ -962,6 +973,7 @@ public class SQLGraphicManager {
 		stmt.setDouble(idx++,  layer.getColor().getRed());
 		stmt.setDouble(idx++,  layer.getColor().getGreen());
 		stmt.setDouble(idx++,  layer.getColor().getBlue());
+		stmt.setDouble(idx++,  layer.getColor().getOpacity());
 		stmt.setDouble(idx++,  layer.getSymbolSize());
 		stmt.setDouble(idx++,  layer.getLineWidth());
 		stmt.setInt(idx++,     -1);
@@ -1031,21 +1043,32 @@ public class SQLGraphicManager {
 	
 	private void saveFont(FontLayer fontLayer) throws SQLException {
 		String sql = "MERGE INTO \"LayerFont\" USING (VALUES "
-				+ "(CAST(? AS INT), ?, CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
-				+ ") AS \"vals\" (\"layer\", \"family\", \"size\", \"red\", \"green\", \"blue\") ON \"LayerFont\".\"layer\" = \"vals\".\"layer\" "
+				+ "(CAST(? AS INT), ?, CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"layer\", \"family\", \"size\", \"red\", \"green\", \"blue\", \"opacity\", \"background_red\", \"background_green\", \"background_blue\", \"background_opacity\") ON \"LayerFont\".\"layer\" = \"vals\".\"layer\" "
 				+ "WHEN MATCHED THEN UPDATE SET "
-				+ "\"LayerFont\".\"family\" = \"vals\".\"family\", "
-				+ "\"LayerFont\".\"size\"   = \"vals\".\"size\", "
-				+ "\"LayerFont\".\"red\"    = \"vals\".\"red\", "
-				+ "\"LayerFont\".\"green\"  = \"vals\".\"green\", "
-				+ "\"LayerFont\".\"blue\"   = \"vals\".\"blue\" "
+				+ "\"LayerFont\".\"family\"  = \"vals\".\"family\", "
+				+ "\"LayerFont\".\"size\"    = \"vals\".\"size\", "
+				+ "\"LayerFont\".\"red\"     = \"vals\".\"red\", "
+				+ "\"LayerFont\".\"green\"   = \"vals\".\"green\", "
+				+ "\"LayerFont\".\"blue\"    = \"vals\".\"blue\", "
+				+ "\"LayerFont\".\"opacity\" = \"vals\".\"opacity\", "
+				+ "\"LayerFont\".\"background_red\"     = \"vals\".\"background_red\", "
+				+ "\"LayerFont\".\"background_green\"   = \"vals\".\"background_green\", "
+				+ "\"LayerFont\".\"background_blue\"    = \"vals\".\"background_blue\", "
+				+ "\"LayerFont\".\"background_opacity\" = \"vals\".\"background_opacity\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"layer\", "
 				+ "\"vals\".\"family\", "
 				+ "\"vals\".\"size\", "
 				+ "\"vals\".\"red\", "
 				+ "\"vals\".\"green\", "
-				+ "\"vals\".\"blue\" ";
+				+ "\"vals\".\"blue\", "
+				+ "\"vals\".\"opacity\", "
+				+ "\"vals\".\"background_red\", "
+				+ "\"vals\".\"background_green\", "
+				+ "\"vals\".\"background_blue\", "
+				+ "\"vals\".\"background_opacity\" ";
+		
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		stmt.setInt(idx++, fontLayer.getLayerType().getId());
@@ -1054,6 +1077,11 @@ public class SQLGraphicManager {
 		stmt.setDouble(idx++, fontLayer.getFontColor().getRed());
 		stmt.setDouble(idx++, fontLayer.getFontColor().getGreen());
 		stmt.setDouble(idx++, fontLayer.getFontColor().getBlue());
+		stmt.setDouble(idx++, fontLayer.getFontColor().getOpacity());
+		stmt.setDouble(idx++, fontLayer.getFontBackgroundColor().getRed());
+		stmt.setDouble(idx++, fontLayer.getFontBackgroundColor().getGreen());
+		stmt.setDouble(idx++, fontLayer.getFontBackgroundColor().getBlue());
+		stmt.setDouble(idx++, fontLayer.getFontBackgroundColor().getOpacity());
 		stmt.execute();
 	}
 	
@@ -1084,7 +1112,7 @@ public class SQLGraphicManager {
 	
 	private void loadHighlightProperties(HighlightableLayer layer) throws SQLException {
 		String sql = "SELECT "
-				+ "\"red\", \"green\", \"blue\", \"line_width\", \"type\" "
+				+ "\"red\", \"green\", \"blue\", \"opacity\", \"line_width\", \"type\" "
 				+ "FROM \"HighlightLayerProperty\" "
 				+ "WHERE \"layer\" = ? LIMIT 1";
 
@@ -1100,8 +1128,6 @@ public class SQLGraphicManager {
 				layer.setHighlightType(type);
 			else
 				layer.setHighlightType(TableRowHighlightType.NONE);
-			
-			double opacity = 1.0;
 
 			double red = rs.getDouble("red");
 			red = Math.min(Math.max(0, red), 1);
@@ -1111,6 +1137,9 @@ public class SQLGraphicManager {
 
 			double blue = rs.getDouble("blue");
 			blue = Math.min(Math.max(0, blue), 1);
+			
+			double opacity = rs.getDouble("opacity");
+			opacity = Math.min(Math.max(0, opacity), 1);
 
 			double lineWidth = rs.getDouble("line_width");
 			
@@ -1160,7 +1189,7 @@ public class SQLGraphicManager {
 	
 	private void loadStrokeColor(ConfidenceLayer<?> confidenceLayer) throws SQLException {
 		String sql = "SELECT "
-				+ "\"red\", \"green\", \"blue\" "
+				+ "\"red\", \"green\", \"blue\", \"opacity\" "
 				+ "FROM \"ConfidenceLayerProperty\" "
 				+ "WHERE \"layer\" = ? LIMIT 1";
 		
@@ -1170,8 +1199,6 @@ public class SQLGraphicManager {
 		ResultSet rs = stmt.executeQuery();
 		
 		if (rs.next()) {
-			double opacity = 1.0;
-			
 			double red = rs.getDouble("red");
 			red = Math.min(Math.max(0, red), 1);
 			
@@ -1180,6 +1207,9 @@ public class SQLGraphicManager {
 			
 			double blue = rs.getDouble("blue");
 			blue = Math.min(Math.max(0, blue), 1);
+			
+			double opacity = rs.getDouble("opacity");
+			opacity = Math.min(Math.max(0, opacity), 1);
 			
 			confidenceLayer.setStrokeColor(new Color(red, green, blue, opacity));
 		}
@@ -1228,7 +1258,8 @@ public class SQLGraphicManager {
 	private void loadFont(FontLayer layer) throws SQLException {
 		String sql = " SELECT "
 				+ "\"family\", \"size\", "
-				+ "\"red\", \"green\", \"blue\" "
+				+ "\"red\", \"green\", \"blue\", \"opacity\", "
+				+ "\"background_red\", \"background_green\", \"background_blue\", \"background_opacity\" "
 				+ "FROM \"LayerFont\" "
 				+ "WHERE \"layer\" = ? LIMIT 1";
 		
@@ -1241,8 +1272,6 @@ public class SQLGraphicManager {
 			String fontFamily = rs.getString("family");
 			double fontSize   = rs.getDouble("size");
 			
-			double opacity = 1.0;
-			
 			double red = rs.getDouble("red");
 			red = Math.min(Math.max(0, red), 1);
 			
@@ -1252,7 +1281,23 @@ public class SQLGraphicManager {
 			double blue = rs.getDouble("blue");
 			blue = Math.min(Math.max(0, blue), 1);
 			
+			double opacity = rs.getDouble("opacity");
+			opacity = Math.min(Math.max(0, opacity), 1);
+			
+			double backgroundRed = rs.getDouble("background_red");
+			backgroundRed = Math.min(Math.max(0, backgroundRed), 1);
+			
+			double backgroundGreen = rs.getDouble("background_green");
+			backgroundGreen = Math.min(Math.max(0, backgroundGreen), 1);
+			
+			double backgroundBlue = rs.getDouble("background_blue");
+			backgroundBlue = Math.min(Math.max(0, backgroundBlue), 1);
+			
+			double backgroundOpacity = rs.getDouble("background_opacity");
+			backgroundOpacity = Math.min(Math.max(0, backgroundOpacity), 1);
+			
 			layer.setFontColor(new Color(red, green, blue, opacity));
+			layer.setFontBackgroundColor(new Color(backgroundRed, backgroundGreen, backgroundBlue, backgroundOpacity));
 			layer.setFontFamily(fontFamily);
 			layer.setFontSize(fontSize);
 		}
@@ -1260,7 +1305,7 @@ public class SQLGraphicManager {
 	
 	private void loadLayer(Layer layer) throws SQLException {
 		String sql = "SELECT "
-				+ "\"red\", \"green\", \"blue\", \"symbol_size\", \"line_width\", \"visible\" "
+				+ "\"red\", \"green\", \"blue\", \"opacity\", \"symbol_size\", \"line_width\", \"visible\" "
 				+ "FROM \"Layer\" "
 				+ "WHERE \"type\" = ? LIMIT 1";
 		
@@ -1270,8 +1315,6 @@ public class SQLGraphicManager {
 		ResultSet rs = stmt.executeQuery();
 
 		if (rs.next()) {
-			double opacity = 1.0;
-			
 			double red = rs.getDouble("red");
 			red = Math.min(Math.max(0, red), 1);
 			
@@ -1280,6 +1323,9 @@ public class SQLGraphicManager {
 			
 			double blue = rs.getDouble("blue");
 			blue = Math.min(Math.max(0, blue), 1);
+			
+			double opacity = rs.getDouble("opacity");
+			opacity = Math.min(Math.max(0, opacity), 1);
 			
 			double symbolSize = rs.getDouble("symbol_size");
 			symbolSize = Math.max(0, symbolSize);
@@ -1299,7 +1345,7 @@ public class SQLGraphicManager {
 	private void loadObservationColors(ObservationLayer observationLayer) throws SQLException {
 		String sql = "SELECT "
 				+ "\"observation_type\", "
-				+ "\"red\", \"green\", \"blue\", \"visible\" "
+				+ "\"red\", \"green\", \"blue\", \"opacity\", \"visible\" "
 				+ "FROM \"ObservationLayerProperty\" "
 				+ "WHERE \"layer\" = ? AND \"observation_type\" = ? LIMIT 1";
 		
@@ -1313,8 +1359,6 @@ public class SQLGraphicManager {
 			ObservationSymbolProperties properties = observationLayer.getObservationSymbolProperties(observationType);
 			
 			if (rs.next() && properties != null) {
-				double opacity = 1.0;
-				
 				double red = rs.getDouble("red");
 				red = Math.min(Math.max(0, red), 1);
 				
@@ -1323,6 +1367,9 @@ public class SQLGraphicManager {
 				
 				double blue = rs.getDouble("blue");
 				blue = Math.min(Math.max(0, blue), 1);
+				
+				double opacity = rs.getDouble("opacity");
+				opacity = Math.min(Math.max(0, opacity), 1);
 				
 				boolean visible = rs.getBoolean("visible");
 
