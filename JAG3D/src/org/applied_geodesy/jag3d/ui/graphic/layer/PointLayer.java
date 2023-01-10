@@ -40,17 +40,24 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.geometry.Bounds;
+import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 	private DoubleProperty fontSize   = new SimpleDoubleProperty(10);
 	private StringProperty fontFamily = new SimpleStringProperty(Font.getDefault().getFamily());
 	private ObjectProperty<Color> fontColor = new SimpleObjectProperty<Color>(Color.DIMGREY);
+	private ObjectProperty<Color> fontBackgroundColor = new SimpleObjectProperty<Color>(Color.rgb(255, 255, 255, 0.25));
 	private ObjectProperty<PointSymbolType> pointSymbolType = new SimpleObjectProperty<PointSymbolType>(PointSymbolType.STROKED_CIRCLE);
 	private List<GraphicPoint> points = FXCollections.observableArrayList();
 
@@ -387,6 +394,7 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 		double symbolSize = this.getSymbolSize();
 		double fontSize   = this.getFontSize();
 		String fontFamily = this.getFontFamily();
+		Color fontBackgroundColor = this.getFontBackgroundColor();
 
 		// draw points
 		for (GraphicPoint point : this.points) {
@@ -449,7 +457,7 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 				}
 
 				this.drawPointSymbol(graphicsContext, pixelCoordinate, symbolColor, symbolType, symbolSize, lineWidth);
-				this.drawPointText(graphicsContext, pixelCoordinate, point.getName().trim(), fontColor, fontFamily, symbolSize, lineWidth, fontSize);
+				this.drawPointText(graphicsContext, pixelCoordinate, point.getName().trim(), fontColor, fontBackgroundColor, fontFamily, symbolSize, lineWidth, fontSize);
 			}
 		}
 	}
@@ -465,14 +473,36 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 		SymbolBuilder.drawSymbol(graphicsContext, pixelCoordinate, symbolType, symbolSize);
 	}
 	
-	private void drawPointText(GraphicsContext graphicsContext, PixelCoordinate pixelCoordinate, String name, Color color, String fontFamily, double symbolSize, double lineWidth, double fontSize) {
-		// set text color
+	private void drawPointText(GraphicsContext graphicsContext, PixelCoordinate pixelCoordinate, String name, Color color, Color backgroundColor, String fontFamily, double symbolSize, double lineWidth, double fontSize) {
+		// estimate text size
+		Font font = Font.font(fontFamily, FontWeight.NORMAL, FontPosture.REGULAR, fontSize);
+		Text text = new Text(name);
+		text.setFont(font);
+		text.setWrappingWidth(0);
+	    text.setLineSpacing(0);
+	    Bounds textBounds = text.getBoundsInLocal();
+	    Rectangle stencil = new Rectangle(textBounds.getMinX(), textBounds.getMinY(), textBounds.getWidth(), textBounds.getHeight());
+	    Shape intersection = Shape.intersect(text, stencil);
+	    textBounds = intersection.getBoundsInLocal();
+		
+		double textWidth  = textBounds.getWidth();  // text.getLayoutBounds().getWidth();
+		double textHeight = textBounds.getHeight(); // text.getLayoutBounds().getHeight();
+		
+		double x0 = pixelCoordinate.getX() + 0.5 * (symbolSize + lineWidth);
+		double y0 = pixelCoordinate.getY() + 0.5 * (symbolSize + lineWidth);
+		
+		graphicsContext.setStroke(backgroundColor);
+		graphicsContext.setFill(backgroundColor);
+        graphicsContext.fillRect(x0, y0, textWidth, textHeight);
+
 		graphicsContext.setStroke(color);
 		graphicsContext.setFill(color);
-		graphicsContext.setFont(Font.font(fontFamily, FontWeight.NORMAL, FontPosture.REGULAR, fontSize));		
+		graphicsContext.setFont(font);
+		graphicsContext.setTextBaseline(VPos.CENTER);
+		graphicsContext.setTextAlign(TextAlignment.CENTER);
 		graphicsContext.fillText(name, 
-				pixelCoordinate.getX() + 0.5 * (symbolSize + lineWidth + 1), 
-				pixelCoordinate.getY() + 0.5 * (symbolSize + fontSize + lineWidth + 1));
+				x0 + 0.5 * textWidth, 
+				y0 + 0.5 * textHeight);
 	}
 
 	@Override
@@ -551,6 +581,21 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 	@Override
 	public final void setFontColor(final Color textColor) {
 		this.fontColorProperty().set(textColor);
+	}
+	
+	@Override
+	public final ObjectProperty<Color> fontBackgroundColorProperty() {
+		return this.fontBackgroundColor;
+	}
+
+	@Override
+	public final Color getFontBackgroundColor() {
+		return this.fontBackgroundColorProperty().get();
+	}
+
+	@Override
+	public final void setFontBackgroundColor(final Color fontBackgroundColor) {
+		this.fontBackgroundColorProperty().set(fontBackgroundColor);
 	}
 
 	@Override

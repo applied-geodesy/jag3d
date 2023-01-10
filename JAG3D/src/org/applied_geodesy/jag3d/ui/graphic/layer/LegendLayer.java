@@ -35,6 +35,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
+import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -44,6 +45,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 public class LegendLayer extends Layer implements FontLayer {
 	private ObservableList<Layer> layers;
@@ -51,6 +53,7 @@ public class LegendLayer extends Layer implements FontLayer {
 	private DoubleProperty fontSize   = new SimpleDoubleProperty(10);
 	private StringProperty fontFamily = new SimpleStringProperty(Font.getDefault().getFamily());
 	private ObjectProperty<Color> fontColor = new SimpleObjectProperty<Color>(Color.SLATEGREY);
+	private ObjectProperty<Color> fontBackgroundColor = new SimpleObjectProperty<Color>(Color.rgb(255, 255, 255, 0.0));
 	private ObjectProperty<LegendPositionType> legendPositionType = new SimpleObjectProperty<LegendPositionType>(LegendPositionType.NORTH_EAST);
 	
 	LegendLayer(LayerType layerType, ObservableList<Layer> layers) {
@@ -181,6 +184,8 @@ public class LegendLayer extends Layer implements FontLayer {
 			graphicsContext.setStroke(fontColor);
 			graphicsContext.setFill(fontColor);
 			graphicsContext.setFont(font);
+			graphicsContext.setTextBaseline(VPos.BASELINE);
+			graphicsContext.setTextAlign(TextAlignment.LEFT);
 			graphicsContext.fillText(layer.toString(), x, y);
 			
 			y += textHeight;
@@ -300,6 +305,21 @@ public class LegendLayer extends Layer implements FontLayer {
 	@Override
 	public final void setFontColor(final Color textColor) {
 		this.fontColorProperty().set(textColor);
+	}
+	
+	@Override
+	public final ObjectProperty<Color> fontBackgroundColorProperty() {
+		return this.fontBackgroundColor;
+	}
+
+	@Override
+	public final Color getFontBackgroundColor() {
+		return this.fontBackgroundColorProperty().get();
+	}
+
+	@Override
+	public final void setFontBackgroundColor(final Color fontBackgroundColor) {
+		this.fontBackgroundColorProperty().set(fontBackgroundColor);
 	}
 
 	@Override

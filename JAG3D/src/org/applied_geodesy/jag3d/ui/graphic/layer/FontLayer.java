@@ -39,4 +39,8 @@ public interface FontLayer extends IdentifiableLayer {
 	public StringProperty fontFamilyProperty();
 	public String getFontFamily();
 	public void setFontFamily(final String fontFamily);
+
+	public ObjectProperty<Color> fontBackgroundColorProperty();
+	public Color getFontBackgroundColor();
+	public void setFontBackgroundColor(final Color fontBackgroundColor);
 }
