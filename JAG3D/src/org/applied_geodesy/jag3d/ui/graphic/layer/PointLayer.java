@@ -480,13 +480,17 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 		text.setFont(font);
 		text.setWrappingWidth(0);
 	    text.setLineSpacing(0);
-	    Bounds textBounds = text.getBoundsInLocal();
-	    Rectangle stencil = new Rectangle(textBounds.getMinX(), textBounds.getMinY(), textBounds.getWidth(), textBounds.getHeight());
-	    Shape intersection = Shape.intersect(text, stencil);
-	    textBounds = intersection.getBoundsInLocal();
+//	    Bounds textBounds = text.getBoundsInLocal();
+//	    Rectangle stencil = new Rectangle(textBounds.getMinX(), textBounds.getMinY(), textBounds.getWidth(), textBounds.getHeight());
+//	    Shape intersection = Shape.intersect(text, stencil);
+//	    textBounds = intersection.getBoundsInLocal();
+//		
+//		double textWidth  = textBounds.getWidth() + 4; // text.getLayoutBounds().getWidth();
+//		double textHeight = textBounds.getHeight()+ 4; // text.getLayoutBounds().getHeight();
 		
-		double textWidth  = textBounds.getWidth() + 4; // text.getLayoutBounds().getWidth();
-		double textHeight = textBounds.getHeight()+ 4; // text.getLayoutBounds().getHeight();
+	    // faster approach
+		double textWidth  = text.getLayoutBounds().getWidth();
+		double textHeight = text.getLayoutBounds().getHeight();
 		
 		double x0 = pixelCoordinate.getX() + 0.5 * (symbolSize + lineWidth);
 		double y0 = pixelCoordinate.getY() + 0.5 * (symbolSize + lineWidth);
@@ -495,7 +499,7 @@ public class PointLayer extends Layer implements HighlightableLayer, FontLayer {
 		graphicsContext.setLineDashes(null);
 		graphicsContext.setStroke(backgroundColor);
 		graphicsContext.setFill(backgroundColor);
-        graphicsContext.fillRoundRect(x0, y0, textWidth, textHeight, 1, 1);
+        graphicsContext.fillRoundRect(x0, y0, textWidth, textHeight, 2, 2);
 
 		graphicsContext.setStroke(color);
 		graphicsContext.setFill(color);
