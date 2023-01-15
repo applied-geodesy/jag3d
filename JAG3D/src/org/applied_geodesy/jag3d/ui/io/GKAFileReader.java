@@ -161,6 +161,7 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			}
 
 			double distance = 0;
+			double zenithAngle = 0.5 * Math.PI;
 			try {
 				TerrestrialObservationRow obs = new TerrestrialObservationRow();
 				obs.setStartPointName(this.startPointName);
@@ -185,7 +186,7 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				obs.setEndPointName(endPointName);
 				obs.setInstrumentHeight(this.ih);
 				obs.setReflectorHeight(th);
-				double zenithAngle = Double.parseDouble(columns[12].trim()) * Constant.RHO_GRAD2RAD; 
+				zenithAngle = Double.parseDouble(columns[12].trim()) * Constant.RHO_GRAD2RAD; 
 				isFaceII = isFaceII || zenithAngle > Math.PI;
 				if (isFaceII)
 					zenithAngle = MathExtension.MOD(2.0*Math.PI - zenithAngle, 2.0*Math.PI);
@@ -206,7 +207,7 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					direction = MathExtension.MOD(direction + Math.PI, 2.0*Math.PI);
 				obs.setValueApriori(direction);
 				if (distance > 0)
-					obs.setDistanceApriori(distance);
+					obs.setDistanceApriori(Math.abs(zenithAngle) > SQRT_EPS ? distance * Math.sin(zenithAngle) : distance * Math.sin(SQRT_EPS));
 				this.directions.add(obs);
 			} catch(NumberFormatException e) { };
 						

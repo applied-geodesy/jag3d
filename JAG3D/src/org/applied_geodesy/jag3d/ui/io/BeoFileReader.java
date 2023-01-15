@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.applied_geodesy.adjustment.Constant;
+import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
@@ -162,6 +163,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			if (this.lastStartPointName == null)
 				this.lastStartPointName = this.startPointName;
 
+			boolean isFaceI = true;
 			// Strecke3D
 			String value = line.substring(33, 49).trim();
 			double distance = 0;
@@ -181,6 +183,27 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				} 
 				catch(NumberFormatException e) { };
 			}
+			// Zenitwinkel
+			value = line.substring(64, 79).trim();
+			double zenith = 0.5 * Math.PI;
+			if (!value.isEmpty() && !value.startsWith("-1000.")) {
+				try { 
+					TerrestrialObservationRow obs = new TerrestrialObservationRow();
+					obs.setStartPointName(this.startPointName);
+					obs.setEndPointName(endPointName);
+					obs.setInstrumentHeight(this.ih);
+					obs.setReflectorHeight(th);
+					zenith = Double.parseDouble(value) * Constant.RHO_GRAD2RAD;
+					isFaceI = (zenith <= Math.PI);
+					if (!isFaceI)
+						zenith = MathExtension.MOD(2.0*Math.PI - zenith, 2.0*Math.PI);
+					obs.setValueApriori(zenith);
+					if (distance > 0)
+						obs.setDistanceApriori(distance);
+					this.zenithAngles.add(obs);
+				} 
+				catch(NumberFormatException e) { };
+			}
 			// Richtung
 			value = line.substring(49, 64).trim();
 			if (!value.isEmpty() && !value.startsWith("-1000.")) {
@@ -190,28 +213,13 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					obs.setEndPointName(endPointName);
 					obs.setInstrumentHeight(this.ih);
 					obs.setReflectorHeight(th);
-					double dir = Double.parseDouble(value) * Constant.RHO_GRAD2RAD; 
+					double dir = Double.parseDouble(value) * Constant.RHO_GRAD2RAD;
+					if (!isFaceI)
+						dir = MathExtension.MOD(dir + Math.PI, 2.0*Math.PI);
 					obs.setValueApriori(dir);
 					if (distance > 0)
-						obs.setDistanceApriori(distance);
+						obs.setDistanceApriori(Math.abs(zenith) > SQRT_EPS ? distance * Math.sin(zenith) : distance * Math.sin(SQRT_EPS));
 					this.directions.add(obs);
-				} 
-				catch(NumberFormatException e) { };
-			}
-			// Zenitwinkel
-			value = line.substring(64, 79).trim();
-			if (!value.isEmpty() && !value.startsWith("-1000.")) {
-				try { 
-					TerrestrialObservationRow obs = new TerrestrialObservationRow();
-					obs.setStartPointName(this.startPointName);
-					obs.setEndPointName(endPointName);
-					obs.setInstrumentHeight(this.ih);
-					obs.setReflectorHeight(th);
-					double zenith = Double.parseDouble(value) * Constant.RHO_GRAD2RAD; 
-					obs.setValueApriori(zenith);
-					if (distance > 0)
-						obs.setDistanceApriori(distance);
-					this.zenithAngles.add(obs);
 				} 
 				catch(NumberFormatException e) { };
 			}

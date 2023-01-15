@@ -48,24 +48,16 @@ public class DirectionGroup extends ObservationGroup {
 	@Override
 	public double getStdB(Observation observation) {
 		double dist = observation.getDistanceForUncertaintyModel();
-		if (dist < Constant.EPS) {
-			if (observation.getStartPoint().getDimension() == 3 && observation.getEndPoint().getDimension() == 3)
-				dist = observation.getApproximatedCalculatedDistance3D();
-			else
-				dist = observation.getApproximatedCalculatedDistance2D();
-		}
+		dist = dist < Constant.EPS ? observation.getApproximatedCalculatedDistance2D() : -1;
+		
 		return dist > 0 ? this.getStdB()/Math.sqrt(dist) : 0.0;
 	}
 	
 	@Override
 	public double getStdC(Observation observation) {
 		double dist = observation.getDistanceForUncertaintyModel();
-		if (dist < Constant.EPS) {
-			if (observation.getStartPoint().getDimension() == 3 && observation.getEndPoint().getDimension() == 3)
-				dist = observation.getApproximatedCalculatedDistance3D();
-			else
-				dist = observation.getApproximatedCalculatedDistance2D();
-		}
+		dist = dist < Constant.EPS ? observation.getApproximatedCalculatedDistance2D() : -1;
+		
 		return dist > 0 ? this.getStdC()/dist : 0.0;
 	}
 
