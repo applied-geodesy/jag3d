@@ -24,7 +24,10 @@ package org.applied_geodesy.util.io;
 import java.io.File;
 import java.nio.file.Path;
 
+import org.applied_geodesy.adjustment.Constant;
+
 public abstract class SourceFileReader<T> extends LockFileReader {
+	public final static double SQRT_EPS = Math.sqrt(Constant.EPS);
 	protected SourceFileReader() {
 		super();
 	}

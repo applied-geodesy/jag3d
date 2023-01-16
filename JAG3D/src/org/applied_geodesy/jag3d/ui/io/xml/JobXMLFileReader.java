@@ -397,8 +397,11 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 							zenithAnglesRow.setReflectorHeight(targetHeight);
 							zenithAnglesRow.setEndPointName(targetName);
 							zenithAnglesRow.setValueApriori(zenithAngle);
-							if (distanceForUncertaintyModel > 0)
+							if (distanceForUncertaintyModel > 0) {
 								zenithAnglesRow.setDistanceApriori(distanceForUncertaintyModel);
+								// Bestimme Horizontalstrecke fuer Richtungsunsicherheit
+								distanceForUncertaintyModel = Math.abs(zenithAngle) > SQRT_EPS ? distanceForUncertaintyModel * Math.sin(zenithAngle) : distanceForUncertaintyModel * Math.sin(SQRT_EPS);	
+							}
 							this.zenithAngles.add(zenithAnglesRow);
 						}
 					}

@@ -535,10 +535,10 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					obs.setInstrumentHeight(this.ih);
 					obs.setReflectorHeight(this.th);				
 					obs.setValueApriori(dir);
-					if (this.dim == DimensionType.SPATIAL && dist3d != null && dist3d > 0) 
-						obs.setDistanceApriori(dist3d);
-					else if ((this.dim == DimensionType.PLAN || this.dim == DimensionType.PLAN_AND_HEIGHT) && dist2d != null && dist2d > 0)
+					if (dist2d != null && dist2d > 0)
 						obs.setDistanceApriori(dist2d);
+					else if (dist3d != null && dist3d > 0) 
+					    obs.setDistanceApriori(zenith != null && Math.abs(zenith) > SQRT_EPS ? dist3d * Math.sin(zenith) : zenith != null ? dist3d * Math.sin(SQRT_EPS) : dist3d);
 					this.directions.add(obs);
 				}
 
