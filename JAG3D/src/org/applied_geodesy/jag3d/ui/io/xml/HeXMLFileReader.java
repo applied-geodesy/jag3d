@@ -477,9 +477,12 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 							zenithAngles.setReflectorHeight(th);
 							zenithAngles.setEndPointName(endPointName);
 							zenithAngles.setValueApriori(zenith);
-							if (distanceForUncertaintyModel > 0)
+							if (distanceForUncertaintyModel > 0) {
 								zenithAngles.setDistanceApriori(distanceForUncertaintyModel);
-							this.zenithAngles.add(zenithAngles);
+								// Bestimme Horizontalstrecke fuer Richtungsunsicherheit
+								distanceForUncertaintyModel = Math.abs(zenith) > SQRT_EPS ? distanceForUncertaintyModel * Math.sin(zenith) : distanceForUncertaintyModel * Math.sin(SQRT_EPS);
+							}
+							this.zenithAngles.add(zenithAngles);							
 						}
 					}
 					else if (dist2d != null){
@@ -496,6 +499,7 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 					}
 					
 					if (dir != null) {
+						distanceForUncertaintyModel = dist2d != null && dist2d > 0 ? dist2d : distanceForUncertaintyModel;
 						TerrestrialObservationRow directions = new TerrestrialObservationRow();
 						directions.setInstrumentHeight(setup.getInstrumentHeight());
 						directions.setStartPointName(setup.getSetupPointName());
