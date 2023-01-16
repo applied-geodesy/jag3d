@@ -379,18 +379,19 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 					double distanceForUncertaintyModel = 0;
 					if (this.dim == DimensionType.SPATIAL) {
 						if (distance3d != null && !Double.isNaN(distance3d) && !Double.isInfinite(distance3d) && distance3d > 0) {
+							distanceForUncertaintyModel = (distance3d * (1.0 + ppm*1E-6)) + prismConstant;
 							TerrestrialObservationRow distanceRow = new TerrestrialObservationRow();
 							distanceRow.setInstrumentHeight(station.getInstrumentHeight());
 							distanceRow.setStartPointName(station.getStationName());
 							distanceRow.setReflectorHeight(targetHeight);
 							distanceRow.setEndPointName(targetName);
-							distanceRow.setValueApriori( (distance3d * (1.0 + ppm*1E-6)) + prismConstant );
-							distanceForUncertaintyModel = (distance3d * (1.0 + ppm*1E-6)) + prismConstant;
+							distanceRow.setValueApriori(distanceForUncertaintyModel);
 							distanceRow.setDistanceApriori(distanceForUncertaintyModel);
 							this.slopeDistances.add(distanceRow);
 						}
 						
 						if (zenithAngle != null && !Double.isNaN(zenithAngle) && !Double.isInfinite(zenithAngle)) {
+							zenithAngle = zenithAngle - (((applyEarthCurve ? 1.0 : 0.0) - refraction) * distanceForUncertaintyModel) / 2.0 / earthRadius;
 							TerrestrialObservationRow zenithAnglesRow = new TerrestrialObservationRow();
 							zenithAnglesRow.setInstrumentHeight(station.getInstrumentHeight());
 							zenithAnglesRow.setStartPointName(station.getStationName());
