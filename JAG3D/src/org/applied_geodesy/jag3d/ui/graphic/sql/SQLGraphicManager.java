@@ -829,23 +829,23 @@ public class SQLGraphicManager {
 	
 	private void save(HighlightableLayer layer) throws SQLException {
 		String sql = "MERGE INTO \"HighlightLayerProperty\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS INT)) "
-				+ ") AS \"vals\" (\"layer\", \"red\", \"green\", \"blue\", \"opacity\", \"line_width\", \"type\") ON \"HighlightLayerProperty\".\"layer\" = \"vals\".\"layer\" "
+				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"layer\", \"red\", \"green\", \"blue\", \"line_width\", \"type\", \"opacity\") ON \"HighlightLayerProperty\".\"layer\" = \"vals\".\"layer\" "
 				+ "WHEN MATCHED THEN UPDATE SET "
 				+ "\"HighlightLayerProperty\".\"red\"        = \"vals\".\"red\", "
 				+ "\"HighlightLayerProperty\".\"green\"      = \"vals\".\"green\", "
 				+ "\"HighlightLayerProperty\".\"blue\"       = \"vals\".\"blue\", "
-				+ "\"HighlightLayerProperty\".\"opacity\"    = \"vals\".\"opacity\", "
 				+ "\"HighlightLayerProperty\".\"line_width\" = \"vals\".\"line_width\", "
-				+ "\"HighlightLayerProperty\".\"type\"       = \"vals\".\"type\" "
+				+ "\"HighlightLayerProperty\".\"type\"       = \"vals\".\"type\", "
+				+ "\"HighlightLayerProperty\".\"opacity\"    = \"vals\".\"opacity\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"layer\", "
 				+ "\"vals\".\"red\", "
 				+ "\"vals\".\"green\", "
-				+ "\"vals\".\"blue\","
-				+ "\"vals\".\"opacity\","
+				+ "\"vals\".\"blue\", "
 				+ "\"vals\".\"line_width\", "
-				+ "\"vals\".\"type\" ";
+				+ "\"vals\".\"type\", "
+				+ "\"vals\".\"opacity\" ";
 		
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -853,9 +853,9 @@ public class SQLGraphicManager {
 		stmt.setDouble(idx++,  layer.getHighlightColor().getRed());
 		stmt.setDouble(idx++,  layer.getHighlightColor().getGreen());
 		stmt.setDouble(idx++,  layer.getHighlightColor().getBlue());
-		stmt.setDouble(idx++,  layer.getHighlightColor().getOpacity());
 		stmt.setDouble(idx++,  layer.getHighlightLineWidth());
 		stmt.setInt(idx++,     layer.getHighlightType().getId());
+		stmt.setDouble(idx++,  layer.getHighlightColor().getOpacity());
 		stmt.execute();
 	}
 	
@@ -899,23 +899,23 @@ public class SQLGraphicManager {
 		try {
 			this.dataBase.setAutoCommit(false);
 			String sql = "MERGE INTO \"ObservationLayerProperty\" USING (VALUES "
-					+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS BOOLEAN)) "
-					+ ") AS \"vals\" (\"layer\", \"observation_type\", \"red\", \"green\", \"blue\", \"opacity\", \"visible\") "
+					+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS BOOLEAN), CAST(? AS DOUBLE)) "
+					+ ") AS \"vals\" (\"layer\", \"observation_type\", \"red\", \"green\", \"blue\", \"visible\", \"opacity\") "
 					+ "ON \"ObservationLayerProperty\".\"layer\" = \"vals\".\"layer\" AND \"ObservationLayerProperty\".\"observation_type\" = \"vals\".\"observation_type\" "
 					+ "WHEN MATCHED THEN UPDATE SET "
 					+ "\"ObservationLayerProperty\".\"red\"     = \"vals\".\"red\", "
 					+ "\"ObservationLayerProperty\".\"green\"   = \"vals\".\"green\", "
 					+ "\"ObservationLayerProperty\".\"blue\"    = \"vals\".\"blue\", "
-					+ "\"ObservationLayerProperty\".\"opacity\" = \"vals\".\"opacity\", "
-					+ "\"ObservationLayerProperty\".\"visible\" = \"vals\".\"visible\" "
+					+ "\"ObservationLayerProperty\".\"visible\" = \"vals\".\"visible\", "
+					+ "\"ObservationLayerProperty\".\"opacity\" = \"vals\".\"opacity\" "
 					+ "WHEN NOT MATCHED THEN INSERT VALUES "
 					+ "\"vals\".\"layer\", "
 					+ "\"vals\".\"observation_type\", "
 					+ "\"vals\".\"red\", "
 					+ "\"vals\".\"green\", "
 					+ "\"vals\".\"blue\", "
-					+ "\"vals\".\"opacity\", "
-					+ "\"vals\".\"visible\" ";
+					+ "\"vals\".\"visible\", "
+					+ "\"vals\".\"opacity\" ";
 
 			int idx = 1;
 			PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -930,8 +930,8 @@ public class SQLGraphicManager {
 				stmt.setDouble(idx++,  properties.getColor().getRed());
 				stmt.setDouble(idx++,  properties.getColor().getGreen());
 				stmt.setDouble(idx++,  properties.getColor().getBlue());
-				stmt.setDouble(idx++,  properties.getColor().getOpacity());
 				stmt.setBoolean(idx++, properties.isVisible());
+				stmt.setDouble(idx++,  properties.getColor().getOpacity());
 				stmt.addBatch();
 				hasBatch = true;
 			}
@@ -945,27 +945,27 @@ public class SQLGraphicManager {
 
 	private void saveLayer(Layer layer) throws SQLException {
 		String sql = "MERGE INTO \"Layer\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS BOOLEAN)) "
-				+ ") AS \"vals\" (\"type\", \"red\", \"green\", \"blue\", \"opacity\", \"symbol_size\", \"line_width\", \"order\", \"visible\") ON \"Layer\".\"type\" = \"vals\".\"type\" "
+				+ "(CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS BOOLEAN), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"type\", \"red\", \"green\", \"blue\", \"symbol_size\", \"line_width\", \"order\", \"visible\", \"opacity\") ON \"Layer\".\"type\" = \"vals\".\"type\" "
 				+ "WHEN MATCHED THEN UPDATE SET "
 				+ "\"Layer\".\"red\"         = \"vals\".\"red\", "
 				+ "\"Layer\".\"green\"       = \"vals\".\"green\", "
 				+ "\"Layer\".\"blue\"        = \"vals\".\"blue\", "
-				+ "\"Layer\".\"opacity\"     = \"vals\".\"opacity\", "
 				+ "\"Layer\".\"symbol_size\" = \"vals\".\"symbol_size\", "
 				+ "\"Layer\".\"line_width\"  = \"vals\".\"line_width\", "
 				+ "\"Layer\".\"order\"       = \"vals\".\"order\", "
-				+ "\"Layer\".\"visible\"     = \"vals\".\"visible\" "
+				+ "\"Layer\".\"visible\"     = \"vals\".\"visible\", "
+				+ "\"Layer\".\"opacity\"     = \"vals\".\"opacity\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"type\", "
 				+ "\"vals\".\"red\", "
 				+ "\"vals\".\"green\", "
 				+ "\"vals\".\"blue\", "
-				+ "\"vals\".\"opacity\", "
 				+ "\"vals\".\"symbol_size\", "
 				+ "\"vals\".\"line_width\", "
 				+ "\"vals\".\"order\", "
-				+ "\"vals\".\"visible\" ";
+				+ "\"vals\".\"visible\", "
+				+ "\"vals\".\"opacity\" ";
 		
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -973,11 +973,11 @@ public class SQLGraphicManager {
 		stmt.setDouble(idx++,  layer.getColor().getRed());
 		stmt.setDouble(idx++,  layer.getColor().getGreen());
 		stmt.setDouble(idx++,  layer.getColor().getBlue());
-		stmt.setDouble(idx++,  layer.getColor().getOpacity());
 		stmt.setDouble(idx++,  layer.getSymbolSize());
 		stmt.setDouble(idx++,  layer.getLineWidth());
 		stmt.setInt(idx++,     -1);
 		stmt.setBoolean(idx++, layer.isVisible());
+		stmt.setDouble(idx++,  layer.getColor().getOpacity());
 		stmt.execute();
 	}
 	
