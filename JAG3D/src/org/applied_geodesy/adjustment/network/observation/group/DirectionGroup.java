@@ -48,7 +48,7 @@ public class DirectionGroup extends ObservationGroup {
 	@Override
 	public double getStdB(Observation observation) {
 		double dist = observation.getDistanceForUncertaintyModel();
-		dist = dist < Constant.EPS ? observation.getApproximatedCalculatedDistance2D() : -1;
+		dist = dist > Constant.EPS ? dist : observation.getApproximatedCalculatedDistance2D();
 		
 		return dist > 0 ? this.getStdB()/Math.sqrt(dist) : 0.0;
 	}
@@ -56,8 +56,8 @@ public class DirectionGroup extends ObservationGroup {
 	@Override
 	public double getStdC(Observation observation) {
 		double dist = observation.getDistanceForUncertaintyModel();
-		dist = dist < Constant.EPS ? observation.getApproximatedCalculatedDistance2D() : -1;
-		
+		dist = dist > Constant.EPS ? dist : observation.getApproximatedCalculatedDistance2D();
+
 		return dist > 0 ? this.getStdC()/dist : 0.0;
 	}
 
