@@ -10,5 +10,5 @@
 <#assign table_caption_map = {
 		"redundancy"            : "Zusammenfassung der Redundanzanteile r",
 		"p_prio"                : "Zusammenfassung der (a-priori) &Uuml;berschreitungswahrscheinlichkeit p",
-		"influence_on_position" : "Zusammenfassung des Einflusses einer unentdecken Modellst&ouml;rung auf die Punktlage EP"
+		"influence_on_position" : "Zusammenfassung des Einflusses einer unentdeckten Modellst&ouml;rung auf die Punktlage EP"
 }>
