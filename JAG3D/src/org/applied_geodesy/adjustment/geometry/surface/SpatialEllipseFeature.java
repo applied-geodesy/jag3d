@@ -36,6 +36,7 @@ import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
 import org.applied_geodesy.adjustment.geometry.restriction.AverageRestriction;
 import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction;
+import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction.SignType;
 import org.applied_geodesy.adjustment.geometry.surface.primitive.Cylinder;
 import org.applied_geodesy.adjustment.geometry.surface.primitive.Plane;
 
@@ -72,7 +73,7 @@ public class SpatialEllipseFeature extends SurfaceFeature {
 		UnknownParameter vy = this.cylinder.getUnknownParameter(ParameterType.VECTOR_Y);
 		UnknownParameter vz = this.cylinder.getUnknownParameter(ParameterType.VECTOR_Z);
 		UnknownParameter v  = this.cylinder.getUnknownParameter(ParameterType.VECTOR_LENGTH);
-		v.setProcessingType(ProcessingType.ADJUSTMENT); // because |v| and |u| are a redundant restrictions define by the plane and the cylinder
+		v.setProcessingType(ProcessingType.ADJUSTMENT); // because |v| and |u| are redundant restrictions defined by the plane and the cylinder
 		
 		xFocal1.setVisible(false);
 		yFocal1.setVisible(false);
@@ -108,7 +109,7 @@ public class SpatialEllipseFeature extends SurfaceFeature {
 		
 		UnknownParameter minorAxis = new UnknownParameter(ParameterType.MINOR_AXIS_COEFFICIENT, false, 0.0, true, ProcessingType.POSTPROCESSING);
 		
-		UnknownParameter one = new UnknownParameter(ParameterType.CONSTANT, false, 1.0, false, ProcessingType.FIXED);
+		UnknownParameter one     = new UnknownParameter(ParameterType.CONSTANT, false, 1.0, false, ProcessingType.FIXED);
 		UnknownParameter oneHalf = new UnknownParameter(ParameterType.CONSTANT, false, 0.5, false, ProcessingType.FIXED);
 		
 		// normal vector of the plane is identical to the main axis of the cylinder
@@ -131,13 +132,14 @@ public class SpatialEllipseFeature extends SurfaceFeature {
 		ProductSumRestriction zOriginRestriction = new ProductSumRestriction(false, List.of(zFocal1, zFocal2, du), List.of(oneHalf, oneHalf, uz), zOrigin);
 		
 		// estimate minor semi-axis, i.e., b = sqrt(a*a - e*e)
-		ProductSumRestriction xEccentricityRestriction = new ProductSumRestriction(false, List.of(xFocal1, xFocal2), List.of(oneHalf, oneHalf), Boolean.FALSE, xEccentricity);
-		ProductSumRestriction yEccentricityRestriction = new ProductSumRestriction(false, List.of(yFocal1, yFocal2), List.of(oneHalf, oneHalf), Boolean.FALSE, yEccentricity);
-		ProductSumRestriction zEccentricityRestriction = new ProductSumRestriction(false, List.of(zFocal1, zFocal2), List.of(oneHalf, oneHalf), Boolean.FALSE, zEccentricity);
+		List<SignType> signs = List.of(SignType.PLUS, SignType.MINUS);
+		ProductSumRestriction xEccentricityRestriction = new ProductSumRestriction(false, List.of(xFocal1, xFocal2), List.of(oneHalf, oneHalf), signs, xEccentricity);
+		ProductSumRestriction yEccentricityRestriction = new ProductSumRestriction(false, List.of(yFocal1, yFocal2), List.of(oneHalf, oneHalf), signs, yEccentricity);
+		ProductSumRestriction zEccentricityRestriction = new ProductSumRestriction(false, List.of(zFocal1, zFocal2), List.of(oneHalf, oneHalf), signs, zEccentricity);
 			
 		List<UnknownParameter> eccentricityVector     = List.of(xEccentricity, yEccentricity, zEccentricity);
 		ProductSumRestriction eccentricityRestriction = new ProductSumRestriction(false, eccentricityVector, eccentricityVector, 0.5, eccentricity);
-		ProductSumRestriction minorAxisRestriction    = new ProductSumRestriction(false, List.of(majorAxis, eccentricity), List.of(majorAxis, eccentricity), 0.5, Boolean.FALSE, minorAxis);
+		ProductSumRestriction minorAxisRestriction    = new ProductSumRestriction(false, List.of(majorAxis, eccentricity), List.of(majorAxis, eccentricity), 0.5, signs, minorAxis);
 
 		
 		this.add(this.cylinder);

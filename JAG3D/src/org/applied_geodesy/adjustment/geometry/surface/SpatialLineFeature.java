@@ -33,6 +33,7 @@ import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
 import org.applied_geodesy.adjustment.geometry.point.Point;
 import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction;
+import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction.SignType;
 import org.applied_geodesy.adjustment.geometry.surface.primitive.Plane;
 
 import no.uib.cipr.matrix.Matrix;
@@ -128,9 +129,10 @@ public class SpatialLineFeature extends SurfaceFeature {
 		
 		// derive direction vector of the line
 		// cross product single equation: A1 * B2 - A2 * B1  ==  C
-		ProductSumRestriction crossProductX = new ProductSumRestriction(false, List.of(uy, uz), List.of(vz, vy), Boolean.FALSE, xNormal);
-		ProductSumRestriction crossProductY = new ProductSumRestriction(false, List.of(uz, ux), List.of(vx, vz), Boolean.FALSE, yNormal);
-		ProductSumRestriction crossProductZ = new ProductSumRestriction(false, List.of(ux, uy), List.of(vy, vx), Boolean.FALSE, zNormal);
+		List<SignType> signs = List.of(SignType.PLUS, SignType.MINUS);
+		ProductSumRestriction crossProductX = new ProductSumRestriction(false, List.of(uy, uz), List.of(vz, vy), signs, xNormal);
+		ProductSumRestriction crossProductY = new ProductSumRestriction(false, List.of(uz, ux), List.of(vx, vz), signs, yNormal);
+		ProductSumRestriction crossProductZ = new ProductSumRestriction(false, List.of(ux, uy), List.of(vy, vx), signs, zNormal);
 		
 		this.getPostProcessingCalculations().addAll(
 				multAddX, multAddY, multAddZ,

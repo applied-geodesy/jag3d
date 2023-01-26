@@ -35,6 +35,7 @@ import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
 import org.applied_geodesy.adjustment.geometry.restriction.AverageRestriction;
 import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction;
+import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction.SignType;
 import org.applied_geodesy.adjustment.geometry.surface.primitive.Cylinder;
 
 import javafx.util.Pair;
@@ -82,13 +83,14 @@ public class CylinderFeature extends SurfaceFeature {
 		AverageRestriction yOriginRestriction = new AverageRestriction(false, List.of(yFocal1, yFocal2), yOrigin);
 		AverageRestriction zOriginRestriction = new AverageRestriction(false, List.of(zFocal1, zFocal2), zOrigin);
 		
-		ProductSumRestriction xEccentricityRestriction = new ProductSumRestriction(false, List.of(xFocal1, xFocal2), List.of(oneHalf, oneHalf), Boolean.FALSE, xEccentricity);
-		ProductSumRestriction yEccentricityRestriction = new ProductSumRestriction(false, List.of(yFocal1, yFocal2), List.of(oneHalf, oneHalf), Boolean.FALSE, yEccentricity);
-		ProductSumRestriction zEccentricityRestriction = new ProductSumRestriction(false, List.of(zFocal1, zFocal2), List.of(oneHalf, oneHalf), Boolean.FALSE, zEccentricity);
+		List<SignType> signs = List.of(SignType.PLUS, SignType.MINUS);
+		ProductSumRestriction xEccentricityRestriction = new ProductSumRestriction(false, List.of(xFocal1, xFocal2), List.of(oneHalf, oneHalf), signs, xEccentricity);
+		ProductSumRestriction yEccentricityRestriction = new ProductSumRestriction(false, List.of(yFocal1, yFocal2), List.of(oneHalf, oneHalf), signs, yEccentricity);
+		ProductSumRestriction zEccentricityRestriction = new ProductSumRestriction(false, List.of(zFocal1, zFocal2), List.of(oneHalf, oneHalf), signs, zEccentricity);
 			
 		List<UnknownParameter> eccentricityVector = List.of(xEccentricity, yEccentricity, zEccentricity);
 		ProductSumRestriction eccentricityRestriction = new ProductSumRestriction(false, eccentricityVector, eccentricityVector, 0.5, eccentricity);
-		ProductSumRestriction minorAxisRestriction    = new ProductSumRestriction(false, List.of(majorAxis, eccentricity), List.of(majorAxis, eccentricity), 0.5, Boolean.FALSE, minorAxis);
+		ProductSumRestriction minorAxisRestriction    = new ProductSumRestriction(false, List.of(majorAxis, eccentricity), List.of(majorAxis, eccentricity), 0.5, signs, minorAxis);
 
 		this.add(this.cylinder);
 		

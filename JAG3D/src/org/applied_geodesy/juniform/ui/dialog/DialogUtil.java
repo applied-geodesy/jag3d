@@ -32,6 +32,7 @@ import org.applied_geodesy.adjustment.geometry.parameter.ParameterType;
 import org.applied_geodesy.adjustment.geometry.parameter.ProcessingType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
+import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction.SignType;
 import org.applied_geodesy.adjustment.geometry.restriction.RestrictionType;
 import org.applied_geodesy.adjustment.geometry.restriction.TrigonometricRestriction.TrigonometricFunctionType;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
@@ -61,6 +62,7 @@ import javafx.scene.control.TextFormatter;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.cell.ComboBoxListCell;
 import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -181,6 +183,19 @@ class DialogUtil {
 		ListView<GeometricPrimitive> list = new ListView<GeometricPrimitive>();
 		list.setCellFactory(geometricPrimitiveCellFactory);
 		list.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+		ListView<String> placeholderList = new ListView<String>();
+		placeholderList.getItems().add(new String());
+		placeholderList.setDisable(true);
+		list.setPlaceholder(placeholderList);
+		
+		return list;
+	}
+	
+	static ListView<SignType> createSignTypeListView(StringConverter<SignType> signTypeStringConverter) {
+		ListView<SignType> list = new ListView<SignType>();
+		list.setCellFactory(ComboBoxListCell.forListView(signTypeStringConverter, SignType.values()));
+		list.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+		list.setEditable(true);
 		ListView<String> placeholderList = new ListView<String>();
 		placeholderList.getItems().add(new String());
 		placeholderList.setDisable(true);

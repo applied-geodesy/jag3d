@@ -34,6 +34,7 @@ import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
 import org.applied_geodesy.adjustment.geometry.restriction.AverageRestriction;
 import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction;
+import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction.SignType;
 
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.DenseVector;
@@ -72,11 +73,12 @@ public class EllipseFeature extends CurveFeature {
 		AverageRestriction xOriginRestriction = new AverageRestriction(false, List.of(xFocal1, xFocal2), xOrigin);
 		AverageRestriction yOriginRestriction = new AverageRestriction(false, List.of(yFocal1, yFocal2), yOrigin);
 		
-		ProductSumRestriction xEccentricityRestriction = new ProductSumRestriction(false, List.of(xFocal1, xOrigin), List.of(one, one), Boolean.FALSE, xEccentricity);
-		ProductSumRestriction yEccentricityRestriction = new ProductSumRestriction(false, List.of(yFocal1, yOrigin), List.of(one, one), Boolean.FALSE, yEccentricity);
+		List<SignType> signs = List.of(SignType.PLUS, SignType.MINUS);
+		ProductSumRestriction xEccentricityRestriction = new ProductSumRestriction(false, List.of(xFocal1, xOrigin), List.of(one, one), signs, xEccentricity);
+		ProductSumRestriction yEccentricityRestriction = new ProductSumRestriction(false, List.of(yFocal1, yOrigin), List.of(one, one), signs, yEccentricity);
 			
 		ProductSumRestriction eccentricityRestriction = new ProductSumRestriction(false, List.of(xEccentricity, yEccentricity), List.of(xEccentricity, yEccentricity), 0.5, eccentricity);
-		ProductSumRestriction minorAxisRestriction    = new ProductSumRestriction(false, List.of(majorAxis, eccentricity), List.of(majorAxis, eccentricity), 0.5, Boolean.FALSE, minorAxis);
+		ProductSumRestriction minorAxisRestriction    = new ProductSumRestriction(false, List.of(majorAxis, eccentricity), List.of(majorAxis, eccentricity), 0.5, signs, minorAxis);
 		
 		this.add(this.ellipse);
 		

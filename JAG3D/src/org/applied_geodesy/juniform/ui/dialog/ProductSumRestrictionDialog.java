@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction;
+import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction.SignType;
 import org.applied_geodesy.ui.tex.LaTexLabel;
 import org.applied_geodesy.ui.textfield.DoubleTextField;
 import org.applied_geodesy.ui.textfield.DoubleTextField.ValueSupport;
@@ -53,7 +54,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -114,6 +114,12 @@ public class ProductSumRestrictionDialog {
 					Collections.swap(regressorBListView.getItems(), index, index+1);
 				}
 			}
+			
+			if (regressorAListView.getItems().size() > signTypeListView.getItems().size() || regressorBListView.getItems().size() > signTypeListView.getItems().size())
+				signTypeListView.getItems().add(SignType.PLUS);
+			
+			if (signTypeListView.getItems().size() > regressorAListView.getItems().size() && regressorAListView.getItems().size() > regressorBListView.getItems().size())
+				signTypeListView.getItems().remove(0);
 		}
 	}
 	
@@ -123,7 +129,7 @@ public class ProductSumRestrictionDialog {
 	private LaTexLabel latexLabel;
 	private ComboBox<UnknownParameter> regressorAComboBox;
 	private ComboBox<UnknownParameter> regressorBComboBox;
-	private ComboBox<Boolean> arithmeticComboBox;
+	private ListView<SignType> signTypeListView;
 	private ListView<UnknownParameter> regressorAListView;
 	private ListView<UnknownParameter> regressorBListView;
 	private Button addParameterAButtom, removeParameterAButtom, moveUpParameterAButtom, moveDownParameterAButtom;
@@ -177,27 +183,27 @@ public class ProductSumRestrictionDialog {
 		this.moveDownParameterBButtom.setDisable(true);
 		
 		if (this.restriction != null) {
-			this.arithmeticComboBox.valueProperty().unbindBidirectional(this.restriction.sumArithmeticProperty());
 			this.exponentTextField.numberProperty().unbindBidirectional(this.restriction.exponentProperty());
 			this.descriptionTextField.textProperty().unbindBidirectional(this.restriction.descriptionProperty());
 			this.regressandComboBox.valueProperty().unbindBidirectional(this.restriction.regressandProperty());
+			this.signTypeListView.setItems(FXCollections.emptyObservableList());
 			this.regressorAListView.setItems(FXCollections.emptyObservableList());
 			this.regressorBListView.setItems(FXCollections.emptyObservableList());
 		}
 		
 		this.restriction = restriction;
-		this.arithmeticComboBox.valueProperty().bindBidirectional(this.restriction.sumArithmeticProperty());
 		this.descriptionTextField.textProperty().bindBidirectional(this.restriction.descriptionProperty());
 		this.exponentTextField.numberProperty().bindBidirectional(this.restriction.exponentProperty());
 		this.regressandComboBox.valueProperty().bindBidirectional(this.restriction.regressandProperty());
+		this.signTypeListView.setItems(this.restriction.getCoefficientSigns());
 		this.regressorAListView.setItems(this.restriction.getRegressorsA());
 		this.regressorBListView.setItems(this.restriction.getRegressorsB());
 		this.latexLabel.setTex(this.restriction.toLaTex());
 		this.exponentTextField.setValue(this.restriction.getExponent());
 		
 		this.exponentTextField.setDisable(restriction.isIndispensable());
-		this.arithmeticComboBox.setDisable(restriction.isIndispensable());
-		
+
+		this.signTypeListView.setDisable(restriction.isIndispensable());
 		this.regressorAListView.setDisable(restriction.isIndispensable());
 		this.regressorBListView.setDisable(restriction.isIndispensable());
 		
@@ -259,17 +265,12 @@ public class ProductSumRestrictionDialog {
 		Label regressandLabel  = new Label(i18N.getString("ProductSumRestrictionDialog.regressand.label",   "Regressand c:"));
 		Label regressorALabel  = new Label(i18N.getString("ProductSumRestrictionDialog.regressor.a.label",  "Regressor a:"));
 		Label regressorBLabel  = new Label(i18N.getString("ProductSumRestrictionDialog.regressor.b.label",  "Regressor b:"));
-		Label arithmeticLabel  = new Label(i18N.getString("ProductSumRestrictionDialog.arithmetic.label",   "Arithmetic operation:"));
-		
+
 		regressorALabel.setPrefSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		regressorALabel.setMaxWidth(Double.MAX_VALUE);
 		
 		regressorBLabel.setPrefSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		regressorBLabel.setMaxWidth(Double.MAX_VALUE);
-		
-		this.arithmeticComboBox = DialogUtil.createBooleanComboBox(
-				createArithmeticOperationTypeStringConverter(), 
-				i18N.getString("ProductSumRestrictionDialog.arithmetic.tooltip", "Select arithmetic operation"));
 
 		this.exponentTextField = DialogUtil.createDoubleTextField(
 				CellValueType.DOUBLE, 1.0, Boolean.FALSE, 
@@ -279,6 +280,10 @@ public class ProductSumRestrictionDialog {
 		this.descriptionTextField = DialogUtil.createTextField(
 				i18N.getString("ProductSumRestrictionDialog.description.tooltip", "Description of parameter restriction"),
 				i18N.getString("ProductSumRestrictionDialog.description.prompt", "Restriction description"));
+		
+		this.signTypeListView = DialogUtil.createSignTypeListView(
+				ProductSumRestrictionDialog.createSignTypeStringConverter());
+		this.signTypeListView.setPrefWidth(50);
 		
 		this.regressorAComboBox = DialogUtil.createUnknownParameterComboBox(
 				UnknownParameterDialog.createUnknownParameterCellFactory(), 
@@ -385,7 +390,6 @@ public class ProductSumRestrictionDialog {
 			}	
 		});
 		
-		arithmeticLabel.setLabelFor(this.arithmeticComboBox);
 		exponentLabel.setLabelFor(this.exponentTextField);
 		equationLabel.setLabelFor(this.latexLabel);
 		descriptionLabel.setLabelFor(this.descriptionTextField);
@@ -396,58 +400,62 @@ public class ProductSumRestrictionDialog {
 		regressorALabel.setAlignment(Pos.TOP_CENTER);
 		regressorBLabel.setAlignment(Pos.TOP_CENTER);
 		
-		HBox regressorsBox = new HBox(10);
-		VBox regressorABox = new VBox(5);
-		VBox regressorBBox = new VBox(5);
-		regressorsBox.setPrefHeight(200);
-		
-		HBox.setHgrow(regressorABox, Priority.ALWAYS);
-		HBox.setHgrow(regressorBBox, Priority.ALWAYS);
-		
-		VBox.setVgrow(regressorALabel, Priority.NEVER);
-		VBox.setVgrow(regressorBLabel, Priority.NEVER);
-		VBox.setVgrow(this.regressorAComboBox, Priority.NEVER);
-		VBox.setVgrow(this.regressorBComboBox, Priority.NEVER);
-		VBox.setVgrow(this.regressorAListView, Priority.ALWAYS);
-		VBox.setVgrow(this.regressorBListView, Priority.ALWAYS);
-		
-		regressorABox.getChildren().addAll(regressorALabel, this.regressorAComboBox, this.regressorAListView, buttonBoxA);
-		regressorBBox.getChildren().addAll(regressorBLabel, this.regressorBComboBox, this.regressorBListView, buttonBoxB);
-		regressorsBox.getChildren().addAll(regressorABox, regressorBBox);
-		
-		GridPane.setHgrow(arithmeticLabel,  Priority.NEVER);
 		GridPane.setHgrow(exponentLabel,    Priority.NEVER);
 		GridPane.setHgrow(equationLabel,    Priority.NEVER);
 		GridPane.setHgrow(descriptionLabel, Priority.NEVER);
 		GridPane.setHgrow(regressandLabel,  Priority.NEVER);
+		GridPane.setVgrow(regressorALabel,  Priority.NEVER);
+		GridPane.setVgrow(regressorBLabel,  Priority.NEVER);
 		GridPane.setHgrow(this.latexLabel,  Priority.ALWAYS);
 		
-		GridPane.setHgrow(this.arithmeticComboBox,   Priority.ALWAYS);
+		GridPane.setHgrow(this.regressorAComboBox,   Priority.ALWAYS);
+		GridPane.setHgrow(this.regressorBComboBox,   Priority.ALWAYS);
+		GridPane.setVgrow(this.regressorAComboBox,   Priority.NEVER);
+		GridPane.setVgrow(this.regressorBComboBox,   Priority.NEVER);
 		GridPane.setHgrow(this.exponentTextField,    Priority.ALWAYS);
 		GridPane.setHgrow(this.descriptionTextField, Priority.ALWAYS);
 		GridPane.setHgrow(this.regressandComboBox,   Priority.ALWAYS);
-		GridPane.setHgrow(regressorsBox,             Priority.ALWAYS);
-		GridPane.setVgrow(regressorsBox,             Priority.ALWAYS);
-						
+		GridPane.setHgrow(this.regressorAListView,   Priority.ALWAYS);
+		GridPane.setVgrow(this.regressorAListView,   Priority.ALWAYS);
+		GridPane.setHgrow(this.regressorBListView,   Priority.ALWAYS);
+		GridPane.setVgrow(this.regressorBListView,   Priority.ALWAYS);
+		GridPane.setHgrow(this.signTypeListView,     Priority.NEVER);
+		GridPane.setVgrow(this.signTypeListView,     Priority.ALWAYS);
+
+		GridPane regressorsPane = DialogUtil.createGridPane();
+		regressorsPane.setPrefHeight(200);
+		regressorsPane.setHgap(10);
+		regressorsPane.setVgap( 5);
+		regressorsPane.setPadding(new Insets(0,0,0,0)); // oben, recht, unten, links
+
+		int row = 0;
+		regressorsPane.add(regressorALabel,          1, row); // column, row, columnspan, rowspan,
+		regressorsPane.add(regressorBLabel,          2, row++); 
+		regressorsPane.add(this.regressorAComboBox,  1, row); 
+		regressorsPane.add(this.regressorBComboBox,  2, row++);
+		regressorsPane.add(this.signTypeListView,    0, row); 
+		regressorsPane.add(this.regressorAListView,  1, row); 
+		regressorsPane.add(this.regressorBListView,  2, row++); 
+		regressorsPane.add(buttonBoxA,               1, row); 
+		regressorsPane.add(buttonBoxB,               2, row); 
+		
 		// https://stackoverflow.com/questions/50479384/gridpane-with-gaps-inside-scrollpane-rendering-wrong
 		Insets insetsLeft   = new Insets(5, 7, 5, 5);
 		Insets insetsRight  = new Insets(5, 0, 5, 7);
 
-		GridPane.setMargin(arithmeticLabel,  insetsLeft);
 		GridPane.setMargin(exponentLabel,    insetsLeft);
 		GridPane.setMargin(equationLabel,    insetsLeft);
 		GridPane.setMargin(regressandLabel,  insetsLeft);
 		GridPane.setMargin(descriptionLabel, insetsLeft);
 
-		GridPane.setMargin(this.arithmeticComboBox,   insetsRight);
 		GridPane.setMargin(this.exponentTextField,    insetsRight);
 		GridPane.setMargin(this.latexLabel,           insetsRight);
 		GridPane.setMargin(this.regressandComboBox,   insetsRight);
 		GridPane.setMargin(this.descriptionTextField, insetsRight);
 		
-		GridPane.setMargin(regressorsBox, new Insets(10, 5, 5, 5));
+		GridPane.setMargin(regressorsPane, new Insets(10, 5, 5, 5));
 		
-		int row = 0;
+		row = 0;
 		
 		gridPane.add(equationLabel,             0, row); // column, row, columnspan, rowspan,
 		gridPane.add(this.latexLabel,           1, row++);
@@ -461,31 +469,25 @@ public class ProductSumRestrictionDialog {
 		gridPane.add(exponentLabel,             0, row);
 		gridPane.add(this.exponentTextField,    1, row++);
 		
-		gridPane.add(arithmeticLabel,           0, row);
-		gridPane.add(this.arithmeticComboBox,   1, row++);
-		
-		gridPane.add(regressorsBox,             0, row++, 2, 1); 
+		gridPane.add(regressorsPane,            0, row++, 2, 1); 
 
 		return gridPane;
 	}
 	
-	static StringConverter<Boolean> createArithmeticOperationTypeStringConverter() {
-		return new StringConverter<Boolean>() {
+	static StringConverter<SignType> createSignTypeStringConverter() {
+		return new StringConverter<SignType>() {
 
 			@Override
-			public String toString(Boolean type) {
-				if (type == null)
+			public String toString(SignType signType) {
+				if (signType == null)
 					return null;
 
-				if (type != null && type == Boolean.TRUE)
-					return i18N.getString("ProductSumRestrictionDialog.arithmetic.type.addition", "Addition");
-
-				return i18N.getString("ProductSumRestrictionDialog.arithmetic.type.subtraction", "Subtraction");
+				return signType.toString();
 			}
 
 			@Override
-			public Boolean fromString(String string) {
-				return Boolean.valueOf(string);
+			public SignType fromString(String string) {
+				return string != null && string.equals("-") ? SignType.MINUS : SignType.PLUS; 
 			}
 		};
 	}

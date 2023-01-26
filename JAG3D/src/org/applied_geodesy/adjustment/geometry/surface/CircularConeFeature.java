@@ -73,7 +73,7 @@ public class CircularConeFeature extends SurfaceFeature {
 		UnknownParameter phi     = new UnknownParameter(ParameterType.ANGLE,                   false, 0.0, true,  ProcessingType.POSTPROCESSING);
 
 		AverageRestriction AequalsCRestriction            = new AverageRestriction(true, List.of(A), C);
-		ProductSumRestriction invertedBRestriction        = new ProductSumRestriction(false, List.of(A, C), List.of(oneHalf, oneHalf), -1.0, Boolean.TRUE, invB);
+		ProductSumRestriction invertedBRestriction        = new ProductSumRestriction(false, List.of(A, C), List.of(oneHalf, oneHalf), -1.0, invB);
 		TrigonometricRestriction trigonometricRestriction = new TrigonometricRestriction(false, TrigonometricFunctionType.TANGENT, Boolean.TRUE, invB, phi);
 		
 		this.add(this.cone);
