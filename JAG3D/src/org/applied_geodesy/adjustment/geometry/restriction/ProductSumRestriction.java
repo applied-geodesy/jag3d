@@ -33,41 +33,65 @@ import javafx.collections.ObservableList;
 import no.uib.cipr.matrix.Matrix;
 
 public class ProductSumRestriction extends Restriction {
+	public enum SignType {
+		PLUS('+'), 
+		MINUS('-');
+		
+		private final char label;
+		private SignType(char label) {
+			this.label = label;
+		}
+		
+		public final double getSign() {
+			return this.label == '-' ? -1.0 : 1.0;
+		}
+		
+		@Override
+		public String toString() {
+			return String.valueOf(this.label);
+		}
+	}
 	
 	private ObservableList<UnknownParameter> regressorsA = FXCollections.<UnknownParameter>observableArrayList();
 	private ObservableList<UnknownParameter> regressorsB = FXCollections.<UnknownParameter>observableArrayList();
 	private ObjectProperty<Double> exponent = new SimpleObjectProperty<Double>(this, "exponent", 1.0);
-	private ObjectProperty<Boolean> sumArithmetic = new SimpleObjectProperty<Boolean>(this, "sumArithmetic", Boolean.TRUE);
+	private ObservableList<SignType> coefficientSigns = FXCollections.<SignType>observableArrayList();
 	
 	public ProductSumRestriction() {
-		this(false, new ArrayList<UnknownParameter>(0), new ArrayList<UnknownParameter>(0), 1.0, Boolean.TRUE, null);
+		this(false, new ArrayList<UnknownParameter>(0), new ArrayList<UnknownParameter>(0), new ArrayList<SignType>(0), null);
 	}
 	
 	public ProductSumRestriction(boolean indispensable, List<UnknownParameter> regressorsA, List<UnknownParameter> regressorsB, UnknownParameter regressand) {
-		this(indispensable, regressorsA, regressorsB, 1.0, Boolean.TRUE, regressand);
+		this(indispensable, regressorsA, regressorsB, 1.0, createSignTypeList(regressorsA.size()), regressand);
+	}
+	
+	public ProductSumRestriction(boolean indispensable, List<UnknownParameter> regressorsA, List<UnknownParameter> regressorsB, List<SignType> coefficientSigns, UnknownParameter regressand) {
+		this(indispensable, regressorsA, regressorsB, 1.0, coefficientSigns, regressand);
 	}
 	
 	public ProductSumRestriction(boolean indispensable, List<UnknownParameter> regressorsA, List<UnknownParameter> regressorsB, double exponent, UnknownParameter regressand) {
-		this(indispensable, regressorsA, regressorsB, exponent, Boolean.TRUE, regressand);
-	}
-	
-	public ProductSumRestriction(boolean indispensable, List<UnknownParameter> regressorsA, List<UnknownParameter> regressorsB, boolean sumArithmetic, UnknownParameter regressand) {
-		this(indispensable, regressorsA, regressorsB, 1.0, sumArithmetic, regressand);
+		this(indispensable, regressorsA, regressorsB, exponent, createSignTypeList(regressorsA.size()), regressand);
 	}
 	
 	/**
-	 * (A1 * B1 +/- A2 * B2 +/- ... +/- An * Bn) ^ (EXP)  ==  C
+	 * (+/- A1 * B1 +/- A2 * B2 +/- ... +/- An * Bn) ^ (EXP)  ==  C
 	 */
-	public ProductSumRestriction(boolean indispensable, List<UnknownParameter> regressorsA, List<UnknownParameter> regressorsB, double exponent, boolean sumArithmetic, UnknownParameter regressand) {
+	public ProductSumRestriction(boolean indispensable, List<UnknownParameter> regressorsA, List<UnknownParameter> regressorsB, double exponent, List<SignType> coefficientSigns, UnknownParameter regressand) {
 		super(RestrictionType.PRODUCT_SUM, indispensable);
-
 		this.setRegressand(regressand);
 		this.regressorsA.setAll(regressorsA);
 		this.regressorsB.setAll(regressorsB);
 		this.setExponent(exponent);
-		this.setSumArithmetic(sumArithmetic);
+		this.coefficientSigns.setAll(coefficientSigns);
 		
 		this.check();
+	}
+	
+	private static List<SignType> createSignTypeList(int size) {
+		List<SignType> signTypeList = new ArrayList<SignType>(size);
+		for (int i=0; i<size; i++)
+			signTypeList.add(SignType.PLUS);
+		return signTypeList;
 	}
 	
 	public void setExponent(double exponent) {
@@ -82,18 +106,6 @@ public class ProductSumRestriction extends Restriction {
 		return this.exponent;
 	}
 	
-	public void setSumArithmetic(boolean sumArithmetic) {
-		this.sumArithmetic.set(sumArithmetic);
-	}
-	
-	public boolean isSumArithmetic() {
-		return this.sumArithmetic.get();
-	}
-	
-	public ObjectProperty<Boolean> sumArithmeticProperty() {
-		return this.sumArithmetic;
-	}
-	
 	public ObservableList<UnknownParameter> getRegressorsA() {
 		return this.regressorsA;
 	}
@@ -102,15 +114,18 @@ public class ProductSumRestriction extends Restriction {
 		return this.regressorsB;
 	}
 	
+	public ObservableList<SignType> getCoefficientSigns() {
+		return this.coefficientSigns;
+	}
+	
 	@Override
 	public double getMisclosure() {
 		this.check();
 		
-		double sign = this.isSumArithmetic() ? +1.0 : -1.0;
 		double d = 0;
-		int length = this.regressorsA.size();
-		for (int i = 0; i < length; i++)
-			d += (i == 0 ? +1.0 : sign) * this.regressorsA.get(i).getValue() * this.regressorsB.get(i).getValue();
+		int length = this.coefficientSigns.size();
+		for (int i = 0; i < length; i++) 
+			d += this.coefficientSigns.get(i).getSign() * this.regressorsA.get(i).getValue() * this.regressorsB.get(i).getValue();
 
 		return Math.pow(d, this.exponent.get()) - this.regressand.get().getValue();
 	}
@@ -120,17 +135,16 @@ public class ProductSumRestriction extends Restriction {
 		this.check();
 		
 		int rowIndex = this.getRow();
-		double sign = this.isSumArithmetic() ? +1.0 : -1.0;
-		int length = this.regressorsA.size();
+		int length = this.coefficientSigns.size();
 		
 		// inner part
 		for (int i = 0; i < length; i++) {
 			// (A1 * B1 +/- A2 * B2 +/- ... +/- An * Bn) ^ (EXP)  ==  C
 			if (this.regressorsA.get(i).getColumn() >= 0) 
-				JrT.add(this.regressorsA.get(i).getColumn(), rowIndex, (i == 0 ? +1.0 : sign) * this.regressorsB.get(i).getValue());
+				JrT.add(this.regressorsA.get(i).getColumn(), rowIndex, this.coefficientSigns.get(i).getSign() * this.regressorsB.get(i).getValue());
 			
 			if (this.regressorsB.get(i).getColumn() >= 0) 
-				JrT.add(this.regressorsB.get(i).getColumn(), rowIndex, (i == 0 ? +1.0 : sign) * this.regressorsA.get(i).getValue());
+				JrT.add(this.regressorsB.get(i).getColumn(), rowIndex, this.coefficientSigns.get(i).getSign() * this.regressorsA.get(i).getValue());
 		}
 		
 		if (this.regressand.get().getColumn() >= 0)
@@ -140,14 +154,21 @@ public class ProductSumRestriction extends Restriction {
 		if (this.exponent.get() != 1) {
 			// outer part
 			double outer = 0;
-			for (int i = 0; i < length; i++)
-				outer += (i == 0 ? +1.0 : sign) * this.regressorsA.get(i).getValue() * this.regressorsB.get(i).getValue();
+			for (int i = 0; i < length; i++) 
+				outer += this.coefficientSigns.get(i).getSign() * this.regressorsA.get(i).getValue() * this.regressorsB.get(i).getValue();
 			outer = this.exponent.get() * Math.pow(outer, this.exponent.get() - 1.0);
 
 			// inner * outer
 			for (int columnIndex = 0; columnIndex < JrT.numRows(); columnIndex++) 
 				JrT.set(columnIndex, rowIndex, JrT.get(columnIndex, rowIndex) * outer);
 		}
+	}
+	
+	private void check() {
+		if (this.regressorsA.size() != this.regressorsB.size())
+			throw new IllegalArgumentException("Error, unequal size of factorsA and factorsB " + regressorsA.size() + " != " + regressorsB.size());
+		if (this.regressorsA.size() != this.coefficientSigns.size())
+			throw new IllegalArgumentException("Error, unequal size of factors and signs " + regressorsA.size() + " != " + coefficientSigns.size());
 	}
 
 	@Override
@@ -159,11 +180,6 @@ public class ProductSumRestriction extends Restriction {
 	
 	@Override
 	public String toLaTex() {
-		return "$\\left(a_1 b_1 \\pm a_i b_i \\pm \\cdots \\pm a_n b_n\\right)^{k} = c$";
-	}
-	
-	private void check() {
-		if (this.regressorsA.size() != this.regressorsB.size())
-			throw new IllegalArgumentException("Error, unequal size of factorsA and factorsB " + this.regressorsA.size() + " != " + this.regressorsB.size());
+		return "$\\left(\\pm a_1 b_1 \\pm a_i b_i \\pm \\cdots \\pm a_n b_n\\right)^{k} = c$";
 	}
 }
