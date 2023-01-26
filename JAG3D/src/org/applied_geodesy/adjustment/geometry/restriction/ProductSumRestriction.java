@@ -60,15 +60,14 @@ public class ProductSumRestriction extends Restriction {
 	 */
 	public ProductSumRestriction(boolean indispensable, List<UnknownParameter> regressorsA, List<UnknownParameter> regressorsB, double exponent, boolean sumArithmetic, UnknownParameter regressand) {
 		super(RestrictionType.PRODUCT_SUM, indispensable);
-		
-		if (regressorsA.size() != regressorsB.size())
-			throw new IllegalArgumentException("Error, unequal size of factorsA and factorsB " + regressorsA.size() + " != " + regressorsB.size());
-		
+
 		this.setRegressand(regressand);
 		this.regressorsA.setAll(regressorsA);
 		this.regressorsB.setAll(regressorsB);
 		this.setExponent(exponent);
 		this.setSumArithmetic(sumArithmetic);
+		
+		this.check();
 	}
 	
 	public void setExponent(double exponent) {
@@ -105,9 +104,11 @@ public class ProductSumRestriction extends Restriction {
 	
 	@Override
 	public double getMisclosure() {
+		this.check();
+		
 		double sign = this.isSumArithmetic() ? +1.0 : -1.0;
 		double d = 0;
-		int length = Math.min(this.regressorsA.size(), this.regressorsB.size());
+		int length = this.regressorsA.size();
 		for (int i = 0; i < length; i++)
 			d += (i == 0 ? +1.0 : sign) * this.regressorsA.get(i).getValue() * this.regressorsB.get(i).getValue();
 
@@ -116,9 +117,11 @@ public class ProductSumRestriction extends Restriction {
 
 	@Override
 	public void transposedJacobianElements(Matrix JrT) {
+		this.check();
+		
 		int rowIndex = this.getRow();
 		double sign = this.isSumArithmetic() ? +1.0 : -1.0;
-		int length = Math.min(this.regressorsA.size(), this.regressorsB.size());
+		int length = this.regressorsA.size();
 		
 		// inner part
 		for (int i = 0; i < length; i++) {
@@ -157,5 +160,10 @@ public class ProductSumRestriction extends Restriction {
 	@Override
 	public String toLaTex() {
 		return "$\\left(a_1 b_1 \\pm a_i b_i \\pm \\cdots \\pm a_n b_n\\right)^{k} = c$";
+	}
+	
+	private void check() {
+		if (this.regressorsA.size() != this.regressorsB.size())
+			throw new IllegalArgumentException("Error, unequal size of factorsA and factorsB " + this.regressorsA.size() + " != " + this.regressorsB.size());
 	}
 }
