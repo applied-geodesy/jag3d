@@ -41,12 +41,11 @@ public class VectorAngleRestriction extends Restriction {
 	public VectorAngleRestriction(boolean indispensable, List<UnknownParameter> regressorsA, List<UnknownParameter> regressorsB, UnknownParameter regressand) {
 		super(RestrictionType.VECTOR_ANGLE, indispensable);
 		this.setRegressand(regressand);
-		
-		if (regressorsA.size() != regressorsB.size())
-			throw new IllegalArgumentException("Error, unequal size of factorsA and factorsB " + regressorsA.size() + " != " + regressorsB.size());
-		
+
 		this.regressorsA.setAll(regressorsA);
 		this.regressorsB.setAll(regressorsB);
+		
+		this.check();
 	}
 	
 	public ObservableList<UnknownParameter> getRegressorsA() {
@@ -59,11 +58,13 @@ public class VectorAngleRestriction extends Restriction {
 	
 	@Override
 	public double getMisclosure() {
+		this.check();
+		
 		double dotAB = 0;
 		double dotAA = 0;
 		double dotBB = 0;
 		
-		int length = Math.min(this.regressorsA.size(), this.regressorsB.size());
+		int length = this.regressorsA.size();
 		
 		for (int i = 0; i < length; i++) {
 			double ai = this.regressorsA.get(i).getValue();
@@ -79,13 +80,15 @@ public class VectorAngleRestriction extends Restriction {
 	
 	@Override
 	public void transposedJacobianElements(Matrix JrT) {
+		this.check();
+		
 		int rowIndex = this.getRow();
 		
 		double dotAB = 0;
 		double dotAA = 0;
 		double dotBB = 0;
 		
-		int length = Math.min(this.regressorsA.size(), this.regressorsB.size());
+		int length = this.regressorsA.size();
 		
 		for (int i = 0; i < length; i++) {
 			double ai = this.regressorsA.get(i).getValue();
@@ -121,5 +124,10 @@ public class VectorAngleRestriction extends Restriction {
 	@Override
 	public String toLaTex() {
 		return "$\\arccos{\\left(\\frac{\\mathbf a^{\\mathrm T} \\mathbf b} {\\vert \\mathbf a \\vert \\vert \\mathbf b \\vert}\\right)} = c$";
+	}
+	
+	private void check() {
+		if (this.regressorsA.size() != this.regressorsB.size())
+			throw new IllegalArgumentException("Error, unequal size of factorsA and factorsB " + this.regressorsA.size() + " != " + this.regressorsB.size());
 	}
 }
