@@ -71,7 +71,7 @@ public class DefaultColumnProperty {
 		case REDUNDANCY_X:
 		case REDUNDANCY_Y:
 		case REDUNDANCY_Z:
-		case NUMBER_OF_OBSERVATION:
+		case NUMBER_OF_OBSERVATIONS:
 			
 		case P_VALUE_APRIORI:
 		case P_VALUE_APOSTERIORI:

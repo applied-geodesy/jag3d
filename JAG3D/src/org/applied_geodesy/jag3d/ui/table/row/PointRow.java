@@ -96,6 +96,7 @@ public class PointRow extends GroupRow {
 	private ObjectProperty<Double> influenceOnPointPositionZ = new SimpleObjectProperty<Double>(this, "influenceOnPointPositionZ");
 	
 	private ObjectProperty<Double> influenceOnNetworkDistortion = new SimpleObjectProperty<Double>(this, "influenceOnNetworkDistortion");
+	private ObjectProperty<Integer> numberOfObservations = new SimpleObjectProperty<Integer>(this, "numberOfObservations", 0);
 	
 	public BooleanProperty enableProperty() {
 		return this.enable;
@@ -673,6 +674,18 @@ public class PointRow extends GroupRow {
 		this.influenceOnNetworkDistortionProperty().set(influenceOnNetworkDistortion);
 	}
 	
+	public ObjectProperty<Integer> numberOfObservationsProperty() {
+		return this.numberOfObservations;
+	}
+	
+	public Integer getNumberOfObservations() {
+		return this.numberOfObservationsProperty().get();
+	}
+	
+	public void setNumberOfObservations(final Integer numberOfObservations) {
+		this.numberOfObservationsProperty().set(numberOfObservations);
+	}
+
 	public final BooleanProperty significantProperty() {
 		return this.significant;
 	}

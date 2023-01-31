@@ -178,6 +178,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		TableColumn<PointRow, Boolean> booleanColumn = null;
 		TableColumn<PointRow, String> stringColumn   = null;
 		TableColumn<PointRow, Double> doubleColumn   = null;
+		TableColumn<PointRow, Integer> integerColumn = null; 
 		
 		TableContentType tableContentType = this.getTableContentType();
 
@@ -455,6 +456,16 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::redundancyZProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT && this.dimension != 2 ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
+		
+		// number of observations
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.number_of_observations.label", "n");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.number_of_observations.tooltip", "Number of observations involving point");
+		cellValueType = CellValueType.INTEGER;
+		columnContentType = ColumnContentType.NUMBER_OF_OBSERVATIONS;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		integerColumn = this.<Integer>getColumn(tableContentType, columnContentType, header, PointRow::numberOfObservationsProperty, getIntegerCallback(), ColumnType.VISIBLE, columnIndex, false, true);
+		table.getColumns().add(integerColumn);
 		
 		// Residual 
 		// y-Comp

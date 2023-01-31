@@ -1157,9 +1157,9 @@ public class SQLAdjustmentManager {
 				+ "\"influence_on_position_y\",\"influence_on_position_x\",\"influence_on_position_z\"," 
 				+ "\"influence_on_network_distortion\", " 
 				+ "\"first_principal_component_y\",\"first_principal_component_x\",\"first_principal_component_z\","
-				+ "\"omega\",\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\",\"covar_index\") VALUES (" 
+				+ "\"omega\",\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\",\"covar_index\",\"number_of_observations\") VALUES (" 
 				+ "(SELECT \"id\" FROM \"PointApriori\" WHERE \"name\" = ?), "
-				+ "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		try {
 			this.dataBase.setAutoCommit(false);
@@ -1235,6 +1235,7 @@ public class SQLAdjustmentManager {
 				stmt.setBoolean(idx++, point.isSignificant());
 
 				stmt.setInt(idx++, point.getColInJacobiMatrix());
+				stmt.setInt(idx++, point.numberOfObservations());
 
 				stmt.addBatch();
 				hasBatch = true;
