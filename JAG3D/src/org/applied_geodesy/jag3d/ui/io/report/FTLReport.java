@@ -920,7 +920,7 @@ public class FTLReport {
 				"\"helmert_major_axis\", \"helmert_minor_axis\", \"helmert_alpha\", " + 
 				"\"confidence_major_axis\", \"confidence_middle_axis\", \"confidence_minor_axis\", " +
 				"\"confidence_alpha\", \"confidence_beta\", \"confidence_gamma\", " +
-				"\"redundancy_x\", \"redundancy_y\", \"redundancy_z\", " +
+				"\"redundancy_x\", \"redundancy_y\", \"redundancy_z\", \"number_of_observations\", " +
 				"\"residual_y\", \"residual_x\", \"residual_z\", " + 
 				"\"gross_error_x\", \"gross_error_y\", \"gross_error_z\", " +
 				"\"influence_on_position_x\", \"influence_on_position_y\", \"influence_on_position_z\", \"influence_on_network_distortion\", " +

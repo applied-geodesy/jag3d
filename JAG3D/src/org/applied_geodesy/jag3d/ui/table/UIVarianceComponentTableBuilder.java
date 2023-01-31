@@ -124,7 +124,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.number_of_observations.tooltip", "Number of observations");
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		cellValueType = CellValueType.INTEGER;
-		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.NUMBER_OF_OBSERVATION;
+		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.NUMBER_OF_OBSERVATIONS;
 		integerColumn = this.<Integer>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::numberOfObservationsProperty, getIntegerCallback(), ColumnType.VISIBLE, columnIndex, false, this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS); 
 		table.getColumns().add(integerColumn);
 

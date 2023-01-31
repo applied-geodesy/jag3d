@@ -2402,7 +2402,7 @@ public class SQLManager {
 				"\"maximum_tolerable_bias_y\", \"maximum_tolerable_bias_x\", \"maximum_tolerable_bias_z\", " +
 				"\"first_principal_component_y\", \"first_principal_component_x\", \"first_principal_component_z\", " + 
 				"\"omega\", \"significant\", " + 
-				"\"t_prio\", \"t_post\", \"p_prio\", \"p_post\", " + 
+				"\"t_prio\", \"t_post\", \"p_prio\", \"p_post\", \"number_of_observations\", " + 
 				// Part: group
 				"\"group_id\", \"type\", \"dimension\" " + 
 				// Part: deflection
@@ -2457,6 +2457,8 @@ public class SQLManager {
 
 
 			// Aposteriori
+			row.setNumberOfObservations(rs.getInt("number_of_observations"));
+
 			value = rs.getDouble("x");
 			row.setXAposteriori(rs.wasNull() ? 0 : value);
 
