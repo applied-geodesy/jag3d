@@ -464,7 +464,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		cellValueType = CellValueType.INTEGER;
 		columnContentType = ColumnContentType.NUMBER_OF_OBSERVATIONS;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		integerColumn = this.<Integer>getColumn(tableContentType, columnContentType, header, PointRow::numberOfObservationsProperty, getIntegerCallback(), ColumnType.VISIBLE, columnIndex, false, true);
+		integerColumn = this.<Integer>getColumn(tableContentType, columnContentType, header, PointRow::numberOfObservationsProperty, getIntegerCallback(), ColumnType.APOSTERIORI_POINT, columnIndex, false, true);
 		table.getColumns().add(integerColumn);
 		
 		// Residual 
