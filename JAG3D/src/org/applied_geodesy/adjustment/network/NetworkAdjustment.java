@@ -2948,8 +2948,10 @@ public class NetworkAdjustment implements Runnable {
 			this.binomialTestStatisticParameters     = this.getBinomialTestStatisticParameters();
 
 			for (VarianceComponent varianceEstimation : this.varianceComponents.values()) {
-				this.significanceTestStatisticParameters.getTestStatisticParameter(varianceEstimation.getRedundancy(), Double.POSITIVE_INFINITY, varianceEstimation.getVarianceComponentType() == VarianceComponentType.GLOBAL);
-				this.binomialTestStatisticParameters.getTestStatisticParameter(varianceEstimation.getNumberOfEffectiveObservations(), 0.5);
+				if (varianceEstimation.getRedundancy() > 0) {
+					this.significanceTestStatisticParameters.getTestStatisticParameter(varianceEstimation.getRedundancy(), Double.POSITIVE_INFINITY, varianceEstimation.getVarianceComponentType() == VarianceComponentType.GLOBAL);
+					this.binomialTestStatisticParameters.getTestStatisticParameter(varianceEstimation.getNumberOfEffectiveObservations(), 0.5);
+				}
 			}
 
 			List<Point> points = null;
