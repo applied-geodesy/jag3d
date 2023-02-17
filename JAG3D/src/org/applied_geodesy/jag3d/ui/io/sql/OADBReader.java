@@ -38,6 +38,7 @@ import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.adjustment.network.VerticalDeflectionGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.adjustment.network.congruence.strain.RestrictionType;
+import org.applied_geodesy.jag3d.sql.ParameterModificationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.table.row.CongruenceAnalysisRow;
@@ -593,7 +594,7 @@ public class OADBReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			
 			boolean enable = rs.getBoolean("enable");
 			double value   = rs.getDouble("value_0");
-			SQLManager.getInstance().saveAdditionalParameter(parameterType, enable, value, destObservationItemValue);
+			SQLManager.getInstance().saveAdditionalParameter(parameterType, enable, value, ParameterModificationType.FULL, destObservationItemValue);
 		}
 	}
 	

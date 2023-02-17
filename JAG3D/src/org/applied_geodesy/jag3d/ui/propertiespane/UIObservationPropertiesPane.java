@@ -48,6 +48,7 @@ import org.applied_geodesy.adjustment.network.observation.group.SlopeDistanceGro
 import org.applied_geodesy.adjustment.network.observation.group.ZenithAngleGroup;
 import org.applied_geodesy.adjustment.network.point.Point;
 import org.applied_geodesy.adjustment.network.point.Point3D;
+import org.applied_geodesy.jag3d.sql.ParameterModificationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.tree.ObservationTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
@@ -116,7 +117,7 @@ public class UIObservationPropertiesPane {
 			if (!ignoreValueUpdate && this.field.getUserData() != null) {
 				if (this.field.getUserData() instanceof ParameterType) {
 					ParameterType paramType = (ParameterType)this.field.getUserData();
-					save(paramType);
+					save(paramType, ParameterModificationType.VALUE);
 				}
 				else if (this.field.getUserData() instanceof ObservationGroupUncertaintyType) {
 					ObservationGroupUncertaintyType uncertaintyType = (ObservationGroupUncertaintyType)this.field.getUserData();
@@ -141,7 +142,7 @@ public class UIObservationPropertiesPane {
 				}
 				else if (this.button.getUserData() instanceof ParameterType) {
 					ParameterType paramType = (ParameterType)this.button.getUserData();
-					save(paramType);
+					save(paramType, ParameterModificationType.ENABLE);
 				}
 			}
 		}
@@ -900,7 +901,7 @@ public class UIObservationPropertiesPane {
 		}
 	}
 	
-	private void save(ParameterType parameterType) {
+	private void save(ParameterType parameterType, ParameterModificationType modificationType) {
 		try {
 			boolean enable = false;
 			Double value = null;
@@ -952,7 +953,7 @@ public class UIObservationPropertiesPane {
 					this.sequentialTransition.setNode(node);
 					this.sequentialTransition.playFromStart();
 				}
-				SQLManager.getInstance().saveAdditionalParameter(parameterType, enable, value.doubleValue(), this.selectedObservationItemValues);
+				SQLManager.getInstance().saveAdditionalParameter(parameterType, enable, value.doubleValue(), modificationType, this.selectedObservationItemValues);				
 			}
 			
 		} catch (Exception e) {

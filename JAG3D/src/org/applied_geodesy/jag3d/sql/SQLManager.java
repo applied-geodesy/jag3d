@@ -1450,6 +1450,49 @@ public class SQLManager {
 		table.sort();
 	}
 	
+	private boolean isIdenticalAdditionalGroupParameterDefinition(ParameterType paramType, double value0, boolean enable, ObservationTreeItemValue... selectedObservationItemValues) throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return false;
+		
+		if (selectedObservationItemValues.length <= 1)
+			return true;
+		
+		StringBuilder inGroupArrayValues = new StringBuilder("?");
+		for (int i=1; i<selectedObservationItemValues.length; i++)
+			inGroupArrayValues.append(",?");
+		
+		String sqlIdentical = "SELECT "
+				+ "COUNT(\"value_0\") AS \"counter\" "
+				+ "FROM \"AdditionalParameterApriori\" "
+				+ "WHERE "
+				+ "\"group_id\" IN (" + inGroupArrayValues + ") AND "
+				+ "\"type\" = ? AND "
+				+ "\"enable\" = ? AND "
+				+ "CASEWHEN(?, 0, CASEWHEN(GREATEST(ABS(?), ABS(\"value_0\")) > 0, "
+				+ "ABS(\"value_0\" - ?) / GREATEST(ABS(?), ABS(\"value_0\")), 0)) < ?";
+		
+		int idx = 1;
+		PreparedStatement stmtIdentical = this.dataBase.getPreparedStatement(sqlIdentical);
+		for (int i = 0; i < selectedObservationItemValues.length; i++)
+			stmtIdentical.setInt(idx++, selectedObservationItemValues[i].getGroupId());
+		
+		boolean isIdenticalGroupSetting = false;
+		stmtIdentical.setInt(idx++, paramType.getId());
+		stmtIdentical.setBoolean(idx++, enable);
+		stmtIdentical.setBoolean(idx++, enable);
+		stmtIdentical.setDouble(idx++, value0);
+		stmtIdentical.setDouble(idx++, value0);
+		stmtIdentical.setDouble(idx++, value0);
+		stmtIdentical.setDouble(idx++, EQUAL_VALUE_TRESHOLD);
+
+		ResultSet rsIdentical = stmtIdentical.executeQuery();
+		if (rsIdentical.next()) {
+			int cnt = rsIdentical.getInt("counter");
+			isIdenticalGroupSetting = cnt == selectedObservationItemValues.length;
+		}
+		return isIdenticalGroupSetting;
+	}
+	
 	private void loadAdditionalParameters(ObservationTreeItemValue observationItemValue, ObservationTreeItemValue... selectedObservationItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
@@ -1480,21 +1523,6 @@ public class SQLManager {
 
 		for (int i = 0; i < parameterTypes.length; i++) 
 			stmtAdditionalParameter.setInt(idx++, parameterTypes[i].getId());
-		
-		String sqlIdentical = "SELECT "
-				+ "COUNT(\"value_0\") AS \"counter\" "
-				+ "FROM \"AdditionalParameterApriori\" "
-				+ "WHERE "
-				+ "\"group_id\" IN (" + inGroupArrayValues + ") AND "
-				+ "\"type\" = ? AND "
-				+ "\"enable\" = ? AND "
-				+ "CASEWHEN(?, 0, CASEWHEN(GREATEST(ABS(?), ABS(\"value_0\")) > 0, "
-				+ "ABS(\"value_0\" - ?) / GREATEST(ABS(?), ABS(\"value_0\")), 0)) < ?";
-
-		idx = 1;
-		PreparedStatement stmtIdentical = this.dataBase.getPreparedStatement(sqlIdentical);
-		for (int i = 0; i < selectedObservationItemValues.length; i++)
-			stmtIdentical.setInt(idx++, selectedObservationItemValues[i].getGroupId());
 
 		UIAdditionalParameterTableBuilder tableBuilder = UIAdditionalParameterTableBuilder.getInstance();
 		TableView<AdditionalParameterRow> table = tableBuilder.getTable();
@@ -1514,23 +1542,9 @@ public class SQLManager {
 
 			// Settings/Properties of selected Item
 			if (observationItemValue.getGroupId() == groupId) {
-				boolean isIdenticalGroupSetting = false;
-				stmtIdentical.setInt(idx, paramType.getId());
-				stmtIdentical.setBoolean(idx+1, enable);
-				stmtIdentical.setBoolean(idx+2, enable);
-				stmtIdentical.setDouble(idx+3, value0);
-				stmtIdentical.setDouble(idx+4, value0);
-				stmtIdentical.setDouble(idx+5, value0);
-				stmtIdentical.setDouble(idx+6, EQUAL_VALUE_TRESHOLD);
-
-				ResultSet rsIdentical = stmtIdentical.executeQuery();
-				if (rsIdentical.next()) {
-					int cnt = rsIdentical.getInt("counter");
-					isIdenticalGroupSetting = cnt == selectedObservationItemValues.length;
-				}
+				boolean isIdenticalGroupSetting = this.isIdenticalAdditionalGroupParameterDefinition(paramType, value0, enable, selectedObservationItemValues);
 				propertiesPane.setAdditionalParameter(paramType, value0, enable, !isIdenticalGroupSetting);
 			}
-				
 
 			// Result of all selected Items
 			if (enable) {
@@ -3249,9 +3263,10 @@ public class SQLManager {
 				this.saveAdditionalParameter(
 						parameterType, 
 						parameterType == ParameterType.ORIENTATION ? true : false, 
-								parameterType == ParameterType.SCALE ? 1.0 : 0.0, 
-										observationTreeItemValue
-						);
+						parameterType == ParameterType.SCALE ? 1.0 : 0.0, 
+						ParameterModificationType.FULL,
+						observationTreeItemValue
+					);
 			}
 
 			ObservationGroupUncertaintyType uncertaintyTypes[] = ObservationGroupUncertaintyType.values();
@@ -3567,7 +3582,7 @@ public class SQLManager {
 		stmt.execute();
 	}
 
-	public void saveAdditionalParameter(ParameterType parameterType, boolean enable, double value, ObservationTreeItemValue... selectedObservationItemValues) throws SQLException {
+	public void saveAdditionalParameter(ParameterType parameterType, boolean enable, double value, ParameterModificationType modificationType, ObservationTreeItemValue... selectedObservationItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
@@ -3575,12 +3590,21 @@ public class SQLManager {
 		for (int i=1; i<selectedObservationItemValues.length; i++)
 			values.append(",(CAST(? AS INT), CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS BOOLEAN))");
 
+		String updateStmValue  = "\"AdditionalParameterApriori\".\"value_0\" = \"vals\".\"value_0\" ";
+		String updateStmEnable = "\"AdditionalParameterApriori\".\"enable\"  = \"vals\".\"enable\" ";
+		String updateStm = "";
+		if (modificationType == ParameterModificationType.VALUE) 
+			updateStm = updateStmValue;
+		else if (modificationType == ParameterModificationType.ENABLE)
+			updateStm = updateStmEnable;
+		else // if (modificationType == ParameterModificationType.FULL)
+			updateStm = updateStmValue + ", " + updateStmEnable;
+		
 		String sql = "MERGE INTO \"AdditionalParameterApriori\" USING (VALUES "
 				+ values
 				+ ") AS \"vals\" (\"id\",\"group_id\",\"type\",\"value_0\",\"enable\") ON \"AdditionalParameterApriori\".\"group_id\" = \"vals\".\"group_id\" AND \"AdditionalParameterApriori\".\"type\" = \"vals\".\"type\" "
 				+ "WHEN MATCHED THEN UPDATE SET "
-				+ "\"AdditionalParameterApriori\".\"value_0\" = \"vals\".\"value_0\", "
-				+ "\"AdditionalParameterApriori\".\"enable\" = \"vals\".\"enable\" "
+				+ updateStm
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"group_id\", "
@@ -3602,6 +3626,14 @@ public class SQLManager {
 		}
 
 		stmt.execute();
+		
+		// Check whether additional group parameter of selected observations groups are identical defined
+		if (modificationType != ParameterModificationType.FULL && selectedObservationItemValues.length > 1) {
+			UIObservationPropertiesPaneBuilder propertiesPaneBuilder = UIObservationPropertiesPaneBuilder.getInstance();
+			UIObservationPropertiesPane propertiesPane = propertiesPaneBuilder.getObservationPropertiesPane(selectedObservationItemValues[0].getItemType());
+			boolean isIdenticalGroupSetting = this.isIdenticalAdditionalGroupParameterDefinition(parameterType, value, enable, selectedObservationItemValues);
+			propertiesPane.setAdditionalParameter(parameterType, value, enable, !isIdenticalGroupSetting);
+		}
 	}
 	
 	public String getNextValidVerticalDeflectionName(String name) throws SQLException {
