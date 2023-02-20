@@ -287,21 +287,18 @@ public class FeatureAdjustment {
 				this.prepareIterationProcess(new Point(centerOfMass));
 
 				this.adaptedDampingValue = this.dampingValue;
-				int runs = this.maximalNumberOfIterations-1;
+				int runs = this.maximalNumberOfIterations - 1;
 				boolean isEstimated = false, estimateCompleteModel = false, isFirstIteration = true;
+				
+				this.maxAbsDx          = 0.0;
+				this.maxAbsRestriction = 0.0;
+				this.lastValidmaxAbsDx = 0.0;
 
 				if (this.maximalNumberOfIterations == 0) {
 					estimateCompleteModel = isEstimated = true;
 					isFirstIteration = false;
 					this.adaptedDampingValue = 0;
 				}
-
-				this.maxAbsDx = 0.0;
-				this.maxAbsRestriction = 0.0;
-				this.lastValidmaxAbsDx = 0.0;
-				runs = this.maximalNumberOfIterations-1;
-				isEstimated = false;
-				estimateCompleteModel = false;
 
 				double sigma2apriori = this.getEstimateVarianceOfUnitWeightApriori();
 				this.varianceComponentOfUnitWeight.setVariance0(1.0);
@@ -333,7 +330,7 @@ public class FeatureAdjustment {
 						return this.currentEstimationStatus;
 					}
 
-					// apply pre-conditioning to archive a stable normal equation
+					// apply pre-conditioning to achieve a stable normal equation
 					if (this.preconditioning)
 						this.applyPrecondition(neq);
 
@@ -683,14 +680,13 @@ public class FeatureAdjustment {
 		}
 		
 		if (this.preconditioning) {
-			// Vorkonditionierer == Wurzel der Hauptdiagonale von AT*P*A
+			// Pre-conditioning == Just the square root of the main diagonal of AT*P*A
 			for (int column = 0; column < N.numColumns(); column++) {
 				if (this.interrupt)
 					return null;
 				
 				double value = N.get(column, column);
 				V.set(column, column, value > Constant.EPS ? 1.0 / Math.sqrt(value) : 1.0);
-				//V.set(column, column, 1.0);
 			}
 		}
 		if (this.estimationType == EstimationType.SIMULATION)
@@ -742,7 +738,7 @@ public class FeatureAdjustment {
 			double prevOmega = this.varianceComponentOfUnitWeight.getOmega();
 			double curOmega = this.getOmega(dx);
 			prevOmega = prevOmega <= 0 ? Double.MAX_VALUE : prevOmega;
-			// Pruefe aktuelle Loesung - wenn keine Konvergenz, dann verwerfen.
+			// Check if the current solution converts - if not, reject
 			boolean lmaConverge = prevOmega >= curOmega;
 			this.varianceComponentOfUnitWeight.setOmega(curOmega);
 			
@@ -752,7 +748,7 @@ public class FeatureAdjustment {
 			else {
 				this.adaptedDampingValue *= 5.0;
 				
-				// Um unendlich zu vermeiden
+				// To avoid infinity
 				if (this.adaptedDampingValue > 1.0/SQRT_EPS) {
 					this.adaptedDampingValue = 1.0/SQRT_EPS;
 					
@@ -760,7 +756,7 @@ public class FeatureAdjustment {
 					this.varianceComponentOfUnitWeight.setOmega(0.0);
 				}
 
-				// Aktuelle Lösung ist schlechter als die letzte --> abbrechen
+				// Current solution is NOT an improvement --> cancel procedure
 				this.maxAbsDx = this.lastValidmaxAbsDx;
 				dxk.zero();
 				return;
