@@ -128,6 +128,7 @@ public class SQLAdjustmentManager {
 	private boolean freeNetwork = false,
 			congruenceAnalysis = false,
 			pure1DNetwork = true,
+			containsSpatialObservations = false,
 			estimateOrientationApproximation = true,
 			applicableHorizontalProjection = true;
 
@@ -192,14 +193,14 @@ public class SQLAdjustmentManager {
 		
 		// Abbildungsreduktionen sind bei einer Diagnoseauswertung unzulaessig, da es keine realen Beobachtungen gibt 
 		if (this.estimationType == EstimationType.SIMULATION && this.reductions.size() > 0) 
-			throw new IllegalProjectionPropertyException("Projection cannot applied to pseudo-observations in diagnosis adjustment (simulation)!");
+			throw new IllegalProjectionPropertyException("Projection cannot be applied to pseudo-observations in diagnosis adjustment (simulation)!");
 
 		// wenn 2D Projektionen nicht moeglich sind, werden keine Reduktionen durchgefuehrt
-		if ((this.reductions.getProjectionType() == ProjectionType.GAUSS_KRUEGER || this.reductions.getProjectionType() == ProjectionType.UTM) && (this.reductions.applyReductionTask(ReductionTaskType.DIRECTION) || this.reductions.applyReductionTask(ReductionTaskType.DISTANCE)) && !this.applicableHorizontalProjection) {
+		if (!this.applicableHorizontalProjection && (this.reductions.getProjectionType() == ProjectionType.GAUSS_KRUEGER || this.reductions.getProjectionType() == ProjectionType.UTM) && (this.reductions.applyReductionTask(ReductionTaskType.DIRECTION) || this.reductions.applyReductionTask(ReductionTaskType.DISTANCE))) {
 			if (this.pure1DNetwork)
-				throw new IllegalProjectionPropertyException("Projection cannot applied to observations of leveling network! " + this.reductions.getProjectionType());
+				throw new IllegalProjectionPropertyException("Projection cannot be applied to observations of leveling network! " + this.reductions.getProjectionType());
 			else
-				throw new IllegalProjectionPropertyException("Projection cannot applied to observations because the coordinates are invalid, e.g. missing zone number! " + this.reductions.getProjectionType());
+				throw new IllegalProjectionPropertyException("Projection cannot be applied to observations because the coordinates are invalid, e.g. missing zone number! " + this.reductions.getProjectionType());
 		}
 		
 		if (this.reductions.getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
@@ -211,6 +212,9 @@ public class SQLAdjustmentManager {
 
 		// Fuege Beobachtungen zu den Punkten hinzu
 		this.completeObservationGroups.addAll(this.getObservationGroups());
+		// wenn 2D Projektionen nicht moeglich sind, werden keine Reduktionen durchgefuehrt
+		if (this.containsSpatialObservations && (this.reductions.getProjectionType() == ProjectionType.GAUSS_KRUEGER || this.reductions.getProjectionType() == ProjectionType.UTM) && (this.reductions.applyReductionTask(ReductionTaskType.DIRECTION) || this.reductions.applyReductionTask(ReductionTaskType.DISTANCE) || this.reductions.applyReductionTask(ReductionTaskType.HEIGHT) || this.reductions.applyReductionTask(ReductionTaskType.EARTH_CURVATURE)))
+			throw new IllegalProjectionPropertyException("Projection defined for horizontal networks cannot be applied to spatial observations such as slope distances or zenith angles! " + this.reductions.getProjectionType());
 
 		// Fuege Punkt der Netzausgleichung zu
 		for ( Point point : newPoints.values() ) {
@@ -634,10 +638,11 @@ public class SQLAdjustmentManager {
 
 		while (rs.next()) {
 			ObservationType type = ObservationType.getEnumByValue(rs.getInt("type"));
-
+			
 			if (type == null)
 				continue;
 
+			boolean containsSpatialObservations = false;
 			int groupId = rs.getInt("id");
 			Epoch epoch = rs.getBoolean("reference_epoch") ? Epoch.REFERENCE : Epoch.CONTROL;
 
@@ -682,8 +687,10 @@ public class SQLAdjustmentManager {
 
 				if (type == ObservationType.DIRECTION)
 					group = new DirectionGroup(groupId, sigmaZeroPointOffset, sigmaSquareRootDistance, sigmaDistance, epoch); 
-				else 
+				else {
 					group = new ZenithAngleGroup(groupId, sigmaZeroPointOffset, sigmaSquareRootDistance, sigmaDistance, epoch);
+					containsSpatialObservations = true;
+				}
 
 				this.addAdditionalGroupParameters(group);
 				this.addTerrestrialObservations(group);
@@ -705,11 +712,13 @@ public class SQLAdjustmentManager {
 
 				if (type == ObservationType.HORIZONTAL_DISTANCE)
 					group = new HorizontalDistanceGroup(groupId, sigmaZeroPointOffset, sigmaSquareRootDistance, sigmaDistance, epoch); 
-				else
+				else {
 					group = new SlopeDistanceGroup(groupId, sigmaZeroPointOffset, sigmaSquareRootDistance, sigmaDistance, epoch);
+					containsSpatialObservations = true;
+				}
 
 				this.addAdditionalGroupParameters(group);
-				this.addTerrestrialObservations(group);
+				this.addTerrestrialObservations(group);		
 				break;
 
 			case GNSS1D:
@@ -739,8 +748,11 @@ public class SQLAdjustmentManager {
 				break;
 			}
 
-			if (group != null && !group.isEmpty())
+			if (group != null && !group.isEmpty()) {
 				observationGroups.add(group);
+				if (containsSpatialObservations)
+					this.containsSpatialObservations = true;
+			}
 		}
 
 		return observationGroups;
