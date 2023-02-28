@@ -72,7 +72,7 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 		private boolean applyEarthCurveCorrection = false;
 		public StationRecord(String stationName, double ih, double ppm, double refraction, boolean applyEarthCurveCorrection) {
 			this.stationName = stationName;
-			this.ih = ih;
+			this.ih  = ih;
 			this.ppm = ppm;
 			this.refraction = refraction;
 			this.applyEarthCurveCorrection = applyEarthCurveCorrection;
