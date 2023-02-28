@@ -205,8 +205,8 @@ public class DeltaZ extends Observation {
 		double srye = Math.sin(rye);
 		double srxe = Math.sin(rxe);
 		
-		double ws = -xs*crxs*srys + ys*srxs + zs*crxs*crys - ih;
-		double we = -xe*crxe*srye + ye*srxe + ze*crxe*crye - th;
+		double ws = -xs*crxs*srys + ys*srxs + zs*crxs*crys + ih;
+		double we = -xe*crxe*srye + ye*srxe + ze*crxe*crye + th;
 		
 		double dN = 0;
 		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
@@ -258,8 +258,8 @@ public class DeltaZ extends Observation {
 		double srye = Math.sin(rye);
 		double srxe = Math.sin(rxe);
 		
-		double ws = -xs*crxs*srys + ys*srxs + zs*crxs*crys - ih;
-		double we = -xe*crxe*srye + ye*srxe + ze*crxe*crye - th;
+		double ws = -xs*crxs*srys + ys*srxs + zs*crxs*crys + ih;
+		double we = -xe*crxe*srye + ye*srxe + ze*crxe*crye + th;
 		
 		double dN = 0;
 		if (this.getReductions().getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
@@ -271,6 +271,7 @@ public class DeltaZ extends Observation {
 		double scale = this.scale.getValue();
 //		double dh = ze - zs + dN;
 		double dh = we - ws + dN;
+		
 		return dh / scale;
 	}
 	
