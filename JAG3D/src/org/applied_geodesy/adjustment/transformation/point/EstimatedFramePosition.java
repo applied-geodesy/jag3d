@@ -336,6 +336,7 @@ public class EstimatedFramePosition extends Position implements AdjustablePositi
 		return this.varianceComponent;
 	}
 	
+	@Override
 	public void reset() {
 		super.reset();
 		

@@ -638,4 +638,8 @@ public class AffinTransformation extends Transformation {
 		spatialAffinEquations.setInitialGuess(tx, ty, tz, q0, q1, q2, q3, s11, s12, s13, s22,  s23,  s33);					
 	}
 
+	@Override
+	public TransformationType getTransformationType() {
+		return TransformationType.SPATIAL;
+	}
 }

@@ -26,7 +26,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.applied_geodesy.adjustment.transformation.TransformationType;
 import org.applied_geodesy.adjustment.transformation.equation.TransformationEquations;
 import org.applied_geodesy.adjustment.transformation.parameter.ParameterType;
 import org.applied_geodesy.adjustment.transformation.parameter.ProcessingType;
@@ -519,10 +518,5 @@ public class SpatialAffinEquations extends TransformationEquations {
 	@Override
 	public final int getDimension() {
 		return 3;
-	}
-
-	@Override
-	public TransformationType getTransformationType() {
-		return TransformationType.AFFIN;
 	}
 }

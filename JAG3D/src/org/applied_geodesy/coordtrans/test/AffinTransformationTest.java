@@ -76,6 +76,7 @@ public class AffinTransformationTest {
 			}
 			
 			for (HomologousFramePositionPair homologousPointPair : homologousPointPairs) {
+				homologousPointPair.getSourceSystemPosition().reset();
 				homologousPointPair.getTargetSystemPosition().reset();
 				homologousPointPair.getTargetSystemPosition().setX0(0);
 				homologousPointPair.getTargetSystemPosition().setY0(0);
@@ -85,7 +86,11 @@ public class AffinTransformationTest {
 				System.out.print(homologousPointPair.getName()+"  ");
 				System.out.print(homologousPointPair.getTargetSystemPosition().getX0()+"  ");
 				System.out.print(homologousPointPair.getTargetSystemPosition().getY0()+"  ");
-				System.out.println(homologousPointPair.getTargetSystemPosition().getZ0()+"  ");
+				System.out.print(homologousPointPair.getTargetSystemPosition().getZ0()+"  ");
+				
+				System.out.print(homologousPointPair.getTargetSystemPosition().getUncertaintyX()+"  ");
+				System.out.print(homologousPointPair.getTargetSystemPosition().getUncertaintyY()+"  ");
+				System.out.println(homologousPointPair.getTargetSystemPosition().getUncertaintyZ()+"  ");
 			}
 
 		} catch (MatrixSingularException | IllegalArgumentException | UnsupportedOperationException | NotConvergedException e) {

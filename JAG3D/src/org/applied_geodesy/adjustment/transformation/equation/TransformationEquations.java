@@ -60,8 +60,6 @@ public abstract class TransformationEquations implements Iterable<HomologousFram
 	public boolean contains(Object object) {
 		return this.getUnknownParameters().contains(object);
 	}
-		
-	public abstract TransformationType getTransformationType();
 	
 	public abstract void reverseCenterOfMasses(UpperSymmPackMatrix Dp);
 	
@@ -160,11 +158,11 @@ public abstract class TransformationEquations implements Iterable<HomologousFram
 			pointTrg.setY0(w.get(1));
 			
 			pointTrg.setCofactorX(JDJT.get(0, 0));
-			pointTrg.setCofactorX(JDJT.get(1, 1));
+			pointTrg.setCofactorY(JDJT.get(1, 1));
 		}
 		if (dim != 2) {
 			pointTrg.setZ0(w.get(dim - 1));
-			pointTrg.setCofactorX(JDJT.get(dim - 1, dim - 1));
+			pointTrg.setCofactorZ(JDJT.get(dim - 1, dim - 1));
 		}
 	}
 }

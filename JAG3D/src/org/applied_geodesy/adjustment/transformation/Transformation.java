@@ -36,7 +36,7 @@ public abstract class Transformation {
 	
 	Transformation() {}
 	
-//	public abstract TransformationType getTransformationType();
+	public abstract TransformationType getTransformationType();
 	
 	public void prepareIteration() {}
 	
