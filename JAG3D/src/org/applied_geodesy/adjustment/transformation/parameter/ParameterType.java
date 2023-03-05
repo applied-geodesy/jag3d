@@ -52,7 +52,6 @@ public enum ParameterType {
 	
 	SCALE_SHEAR_COMPONENT_S33,
 	
-	LENGTH,
 	VECTOR_LENGTH,
 	
 	CONSTANT,

@@ -19,28 +19,17 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.ui.table;
+package org.applied_geodesy.coordtrans.ui.table;
 
-public enum ColumnType {
-	APRIORI_TERRESTRIAL_OBSERVATION,
-	APOSTERIORI_TERRESTRIAL_OBSERVATION,
-	
-	APRIORI_GNSS_OBSERVATION,
-	APOSTERIORI_GNSS_OBSERVATION,
-	
-	APRIORI_POINT,
-	APOSTERIORI_POINT,
-	
-	APRIORI_DEFLECTION,
-	APOSTERIORI_DEFLECTION,
-	
-	APRIORI_POINT_CONGRUENCE,
-	APOSTERIORI_POINT_CONGRUENCE,
-	
-	SOURCE_SYSTEM,
-	TARGET_SYSTEM,
-	
-	VISIBLE,
-	HIDDEN
-	;
+import javafx.scene.control.TableView;
+
+public abstract class UIEditableTableBuilder<T> extends UITableBuilder<T> {
+
+	@Override
+	TableView<T> createTable() {
+		this.table = super.createTable();
+		this.table.setEditable(true);
+
+		return this.table;
+	}
 }

@@ -21,8 +21,12 @@
 
 package org.applied_geodesy.coordtrans.ui.tabpane;
 
+import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositionPair;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
+import org.applied_geodesy.coordtrans.ui.table.UIHomologousFramePositionPairTableBuilder;
+import org.applied_geodesy.coordtrans.ui.tree.TreeItemType;
 import org.applied_geodesy.coordtrans.ui.tree.TreeItemValue;
+import org.applied_geodesy.ui.table.ColumnType;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -34,6 +38,8 @@ import javafx.scene.Node;
 import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 
 public class UITabPaneBuilder {
@@ -48,8 +54,7 @@ public class UITabPaneBuilder {
 
 			if (newTab != null && newTab.getUserData() instanceof TabType) {
 				TabType tabType = (TabType)newTab.getUserData();
-				//TODO
-				//newTab.setContent(getNode(tabType));
+				newTab.setContent(getNode(tabType));
 			}
 		}
 	}
@@ -58,6 +63,8 @@ public class UITabPaneBuilder {
 	private static UITabPaneBuilder tabPaneBuilder = new UITabPaneBuilder();
 	private I18N i18n = I18N.getInstance();
 	private TabSelectionChangeListener tabSelectionChangeListener = new TabSelectionChangeListener();
+	
+	private UIHomologousFramePositionPairTableBuilder observationTableBuilder = UIHomologousFramePositionPairTableBuilder.getInstance();
 	
 	private ObservableMap<TabType, Tab> tapMap = FXCollections.observableHashMap();
 	private TreeItemValue<?> lastTreeItemValue = null;
@@ -120,6 +127,74 @@ public class UITabPaneBuilder {
 		return tab;
 	}
 
+	private Node getNode(TabType tabType) {
+		if (this.lastTreeItemValue == null || tabType == null)
+			return null;
+
+		Node node = null;
+		TreeItemType treeItemType = this.lastTreeItemValue.getTreeItemType();
+		switch(treeItemType) {
+		case ADJUSTMENT:
+			
+			break;
+			
+		case OBSERVATIPON:
+			TableView<HomologousFramePositionPair> observationTableView = this.observationTableBuilder.getTable();
+			this.setTableColumnView(tabType, observationTableView);
+			node = observationTableView;
+
+			break;
+		case PARAMETER:
+			break;
+		case TRANSFORMATION:
+			break;
+		case UNSPECIFIC:
+			break;
+		default:
+			break;
+		
+		}
+		return node;
+	}
+	
+	private void setTableColumnView(TabType tabType, TableView<?> tableView) {
+		int columnCount = tableView.getColumns().size();
+
+		for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+			TableColumn<?, ?> column = tableView.getColumns().get(columnIndex);
+			if (column.getUserData() instanceof ColumnType) {
+				ColumnType columnType = (ColumnType)column.getUserData();
+				switch(columnType) {
+				case VISIBLE:
+					column.setVisible(true);
+					break;
+					
+				case HIDDEN:
+					column.setVisible(false);
+					break;
+
+				case APRIORI_POINT:
+					column.setVisible(tabType == TabType.HOMOLOGOUS_PAIRS);
+					break;
+					
+				case SOURCE_SYSTEM:
+					column.setVisible(tabType == TabType.SOURCE_SYSTEM_POINTS);
+					break;
+					
+				case TARGET_SYSTEM:
+					column.setVisible(tabType == TabType.TARGET_SYSTEM_POINTS);
+					break;
+
+				case APOSTERIORI_POINT:
+					column.setVisible(tabType == TabType.OUTLIERS);
+					break;
+
+				default:
+					throw new IllegalArgumentException("Error, unsupported column type " + columnType + "!");
+				}
+			}
+		}
+	}
 	
 	public void setTreeItemValue(TreeItemValue<?> treeItemValue) {
 		if (this.tabPane == null)
@@ -127,7 +202,6 @@ public class UITabPaneBuilder {
 		
 		SingleSelectionModel<Tab> selectionModel = this.tabPane.getSelectionModel();
 		try {
-			//selectionModel.selectedItemProperty().removeListener(this.tabSelectionChangeListener);
 			this.lastSelectedTab = this.lastSelectedTab != null ? this.lastSelectedTab : selectionModel.getSelectedItem();
 			selectionModel.clearSelection();
 
@@ -194,7 +268,6 @@ public class UITabPaneBuilder {
 			}
 		}
 		finally {
-			//selectionModel.selectedItemProperty().addListener(this.tabSelectionChangeListener);
 		}
 	}
 }

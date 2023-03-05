@@ -23,6 +23,7 @@ package org.applied_geodesy.adjustment.transformation.point;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableObjectValue;
 
 public abstract class PositionPair<T1 extends Positionable, T2 extends Positionable> {
 	private T1 sourcePosition;
@@ -48,6 +49,30 @@ public abstract class PositionPair<T1 extends Positionable, T2 extends Positiona
 		return this.targetPosition;
 	}
 	
+	public ObservableObjectValue<Double> sourceXProperty() {
+		return this.sourcePosition.xProperty();
+	}
+	
+	public ObservableObjectValue<Double> sourceYProperty() {
+		return this.sourcePosition.yProperty();
+	}
+	
+	public ObservableObjectValue<Double> sourceZProperty() {
+		return this.sourcePosition.zProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetXProperty() {
+		return this.targetPosition.xProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetYProperty() {
+		return this.targetPosition.yProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetZProperty() {
+		return this.targetPosition.zProperty();
+	}
+	
 	public String getName() {
 		return this.name.get();
 	}
@@ -61,8 +86,8 @@ public abstract class PositionPair<T1 extends Positionable, T2 extends Positiona
 	}
 	
 	public boolean equalsCoordinateComponents(PositionPair<?,?> positionPair) {
-		return this.sourcePosition.equalsPosition(positionPair.getSourceSystemPosition()) && 
-		this.targetPosition.equalsPosition(positionPair.getTargetSystemPosition());
+		return this.getSourceSystemPosition().equalsPosition(positionPair.getSourceSystemPosition()) && 
+		this.getTargetSystemPosition().equalsPosition(positionPair.getTargetSystemPosition());
 	}
 
 	public boolean isEnable() {

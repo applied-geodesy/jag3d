@@ -1,3 +1,24 @@
+/***********************************************************************
+ * Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+ *                                                                      *
+ * This program is free software; you can redistribute it and/or modify *
+ * it under the terms of the GNU General Public License as published by *
+ * the Free Software Foundation; either version 3 of the License, or    *
+ * at your option any later version.                                    *
+ *                                                                      *
+ * This program is distributed in the hope that it will be useful,      *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ * GNU General Public License for more details.                         *
+ *                                                                      *
+ * You should have received a copy of the GNU General Public License    *
+ * along with this program; if not, see <http://www.gnu.org/licenses/>  *
+ * or write to the                                                      *
+ * Free Software Foundation, Inc.,                                      *
+ * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+ *                                                                      *
+ ***********************************************************************/
+
 package org.applied_geodesy.adjustment.transformation.point;
 
 import java.util.Iterator;
@@ -10,6 +31,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableObjectValue;
 import no.uib.cipr.matrix.Matrix;
 
 public class HomologousFramePositionPair extends PositionPair<HomologousFramePosition, HomologousFramePosition> implements Iterable<HomologousFramePosition> {
@@ -39,6 +61,7 @@ public class HomologousFramePositionPair extends PositionPair<HomologousFramePos
 	private ObjectProperty<Double> fisherQuantileApriori     = new SimpleObjectProperty<Double>(this, "fisherQuantileApriori", Double.MAX_VALUE);
 	private ObjectProperty<Double> fisherQuantileAposteriori = new SimpleObjectProperty<Double>(this, "fisherQuantileAposteriori", Double.MAX_VALUE);
 
+	
 	
 //	public HomologousFramePositionPair(HomologousFramePositionPair positionPair) {
 //		this(positionPair.getSourceSystem(), positionPair.getTargetSystem());
@@ -281,6 +304,120 @@ public class HomologousFramePositionPair extends PositionPair<HomologousFramePos
 		return this.fisherQuantileAposteriori;
 	}
 	
+	public ObservableObjectValue<Double> sourceX0Property() {
+		return this.getSourceSystemPosition().x0Property();
+	}
+	
+	public ObservableObjectValue<Double> sourceY0Property() {
+		return this.getSourceSystemPosition().y0Property();
+	}
+	
+	public ObservableObjectValue<Double> sourceZ0Property() {
+		return this.getSourceSystemPosition().z0Property();
+	}
+	
+	public ObservableObjectValue<Double> targetX0Property() {
+		return this.getTargetSystemPosition().x0Property();
+	}
+	
+	public ObservableObjectValue<Double> targetY0Property() {
+		return this.getTargetSystemPosition().y0Property();
+	}
+	
+	public ObservableObjectValue<Double> targetZ0Property() {
+		return this.getTargetSystemPosition().z0Property();
+	}
+	
+	public ObservableObjectValue<Double> sourceUncertaintyXProperty() {
+		return this.getSourceSystemPosition().uncertaintyXProperty();
+	}
+	
+	public ObservableObjectValue<Double> sourceUncertaintyYProperty() {
+		return this.getSourceSystemPosition().uncertaintyYProperty();
+	}
+	
+	public ObservableObjectValue<Double> sourceUncertaintyZProperty() {
+		return this.getSourceSystemPosition().uncertaintyZProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetUncertaintyXProperty() {
+		return this.getTargetSystemPosition().uncertaintyXProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetUncertaintyYProperty() {
+		return this.getTargetSystemPosition().uncertaintyYProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetUncertaintyZProperty() {
+		return this.getTargetSystemPosition().uncertaintyZProperty();
+	}
+	
+	public ObservableObjectValue<Double> sourceRedundancyXProperty() {
+		return this.getSourceSystemPosition().redundancyXProperty();
+	}
+	
+	public ObservableObjectValue<Double> sourceRedundancyYProperty() {
+		return this.getSourceSystemPosition().redundancyYProperty();
+	}
+	
+	public ObservableObjectValue<Double> sourceRedundancyZProperty() {
+		return this.getSourceSystemPosition().redundancyZProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetRedundancyXProperty() {
+		return this.getTargetSystemPosition().redundancyXProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetRedundancyYProperty() {
+		return this.getTargetSystemPosition().redundancyYProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetRedundancyZProperty() {
+		return this.getTargetSystemPosition().redundancyZProperty();
+	}
+	
+	public ObservableObjectValue<Double> sourceResidualXProperty() {
+		return this.getSourceSystemPosition().residualXProperty();
+	}
+	
+	public ObservableObjectValue<Double> sourceResidualYProperty() {
+		return this.getSourceSystemPosition().residualYProperty();
+	}
+	
+	public ObservableObjectValue<Double> sourceResidualZProperty() {
+		return this.getSourceSystemPosition().residualZProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetResidualXProperty() {
+		return this.getTargetSystemPosition().residualXProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetResidualYProperty() {
+		return this.getTargetSystemPosition().residualYProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetResidualZProperty() {
+		return this.getTargetSystemPosition().residualZProperty();
+	}
+	
+//	public ObservableObjectValue<Matrix> dispersionAprioriProperty() {
+//		return new ReadOnlyObjectWrapper<Matrix>(
+//				new DualBlockDiagonalMatrix(
+//						this.getSourceSystemPosition().getDispersionApriori(), 
+//						this.getTargetSystemPosition().getDispersionApriori())
+//				);
+//	}
+	
+
+	public ObservableObjectValue<Matrix[]> dispersionAprioriProperty() {
+		return new ReadOnlyObjectWrapper<Matrix[]>(
+				new Matrix[] {
+						this.getSourceSystemPosition().getDispersionApriori(), 
+						this.getTargetSystemPosition().getDispersionApriori()
+				}
+		);
+	}
+
 	@Override
 	public void reset() {
 		super.reset();

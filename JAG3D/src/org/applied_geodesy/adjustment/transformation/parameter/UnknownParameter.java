@@ -30,9 +30,10 @@ public class UnknownParameter extends Parameter {
 	/** Value: -1 == not set, Integer.MIN_VALUE == fixed, else column in normal equation system **/
 	private ObjectProperty<ProcessingType> processingType = new SimpleObjectProperty<ProcessingType>(ProcessingType.ADJUSTMENT);
 	
-	private ObjectProperty<Integer> column     = new SimpleObjectProperty<Integer>(this, "column", -1);
-	private ObjectProperty<Double> value       = new SimpleObjectProperty<Double>(this, "value", 0.0);
-	private ObjectProperty<Double> uncertainty = new SimpleObjectProperty<Double>(this, "uncertainty", 0.0);
+	private ObjectProperty<Integer> column      = new SimpleObjectProperty<Integer>(this, "column", -1);
+	private ObjectProperty<Double> value        = new SimpleObjectProperty<Double>(this, "value", 0.0);
+	private ObjectProperty<Double> uncertainty  = new SimpleObjectProperty<Double>(this, "uncertainty", 0.0);
+	private ObjectProperty<Boolean> significant = new SimpleObjectProperty<Boolean>(this, "significant", Boolean.FALSE);
 	private ReadOnlyObjectProperty<Boolean> indispensable;
 	
 	public UnknownParameter(ParameterType parameterType, boolean indispensable) {
@@ -120,6 +121,18 @@ public class UnknownParameter extends Parameter {
 	
 	public ObjectProperty<Double> uncertaintyProperty() {
 		return this.uncertainty;
+	}
+	
+	public void setSignificant(boolean significant) {
+		this.significant.set(significant);
+	}
+	
+	public boolean isSignificant() {
+		return this.significant.get();
+	}
+	
+	public ObjectProperty<Boolean> significantProperty() {
+		return this.significant;
 	}
 
 	@Override
