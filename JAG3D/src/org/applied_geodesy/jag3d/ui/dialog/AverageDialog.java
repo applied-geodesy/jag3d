@@ -394,7 +394,7 @@ public class AverageDialog {
 						averagedObservationRows.add(new AveragedObservationRow(observation));
 
 					TableView<AveragedObservationRow> table = tableBuilder.getTable();
-					table.getItems().setAll(averagedObservationRows);
+					tableBuilder.getTableModel(table).setAll(averagedObservationRows);
 					table.setPrefHeight(200);
 					table.setPrefWidth(250);
 					table.sort();

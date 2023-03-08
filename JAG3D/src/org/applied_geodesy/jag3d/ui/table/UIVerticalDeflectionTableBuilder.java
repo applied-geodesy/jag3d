@@ -49,13 +49,14 @@ import org.applied_geodesy.jag3d.ui.tree.VerticalDeflectionTreeItemValue;
 import org.applied_geodesy.ui.table.AbsoluteValueComparator;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
-import org.applied_geodesy.ui.table.NaturalOrderComparator;
+import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -151,7 +152,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		columnContentType = ColumnContentType.POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true); 
-		stringColumn.setComparator(new NaturalOrderComparator<String>());
+		stringColumn.setComparator(new NaturalOrderTableColumnComparator<String>(stringColumn));
 		table.getColumns().add(stringColumn);
 		
 		// A-priori Deflection params
@@ -518,11 +519,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 				e.printStackTrace();
 			}
 		}
-//		this.table.refresh();
-//		this.table.requestFocus();
-//		this.table.getSelectionModel().clearSelection();
-//		this.table.getSelectionModel().select(rowData);
-		
+
 		if (!valid) {
 			Platform.runLater(new Runnable() {
 				@Override
@@ -534,6 +531,8 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 				}
 			});
 		}
+		else if (this.isComplete(rowData))
+			this.table.sort();
 	}
 	
 	private boolean isComplete(VerticalDeflectionRow row) {
@@ -542,7 +541,6 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 				row.getYApriori() != null;
 	}
 	
-
 	@Override
 	void enableDragSupport() {
 		this.table.setOnDragDetected(new EventHandler<MouseEvent>() {
@@ -598,7 +596,8 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		}
 
 		if (clonedRows != null && !clonedRows.isEmpty()) {
-			this.table.getItems().addAll(clonedRows);
+			ObservableList<VerticalDeflectionRow> tableModel = this.getTableModel(this.table);
+			tableModel.addAll(clonedRows);
 			this.table.getSelectionModel().clearSelection();
 			for (VerticalDeflectionRow clonedRow : clonedRows)
 				this.table.getSelectionModel().select(clonedRow);
@@ -626,10 +625,11 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 			removedRows.add(row);
 		}
 		if (removedRows != null && !removedRows.isEmpty()) {
+			ObservableList<VerticalDeflectionRow> tableModel = this.getTableModel(this.table);
 			this.table.getSelectionModel().clearSelection();
-			this.table.getItems().removeAll(removedRows);
-			if (this.table.getItems().isEmpty())
-				this.table.getItems().setAll(getEmptyRow());
+			tableModel.removeAll(removedRows);
+			if (tableModel.isEmpty())
+				tableModel.setAll(getEmptyRow());
 		}
 	}
 	

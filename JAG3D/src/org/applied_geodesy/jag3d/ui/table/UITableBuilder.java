@@ -33,6 +33,7 @@ import org.applied_geodesy.jag3d.ui.table.column.ColumnPropertiesManager;
 import org.applied_geodesy.jag3d.ui.table.column.ColumnProperty;
 import org.applied_geodesy.jag3d.ui.table.column.ContentColumn;
 import org.applied_geodesy.jag3d.ui.table.column.TableContentType;
+import org.applied_geodesy.jag3d.ui.table.row.Row;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
@@ -53,6 +54,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.ContextMenu;
@@ -77,7 +79,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
-public abstract class UITableBuilder<T> {
+public abstract class UITableBuilder<T extends Row> {
 	
 	class NumberAndUnitFormatterChangedListener implements FormatterChangedListener {
 
@@ -216,14 +218,16 @@ public abstract class UITableBuilder<T> {
 	TableView<T> createTable() {
 		this.table = new TableView<T>();
 		ObservableList<T> tableModel = FXCollections.observableArrayList();
-		this.table.setItems(tableModel);
+		SortedList<T> sortedList = new SortedList<T>(tableModel);
+		sortedList.comparatorProperty().bind(this.table.comparatorProperty());
+		this.table.setItems(sortedList);
 		this.table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
 		this.table.setTableMenuButtonVisible(false);
 		//		this.table.setPlaceholder(new Text(i18n.getString("UITableBuilder.emptytable", "No content in table.")));
 		this.table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		this.table.setOnKeyPressed(new TableKeyEventHandler());
 		tableModel.add(this.getEmptyRow());
-		return table;
+		return this.table;
 	}
 
 	static <T> Callback<TableColumn<T,Integer>, TableCell<T,Integer>> getIntegerCallback() {
@@ -312,13 +316,10 @@ public abstract class UITableBuilder<T> {
 						table.getSelectionModel().clearAndSelect(table.getItems().size() - 1);
 					}
 					else if (event.getTarget() instanceof TableCell && table.getItems() != null && table.getItems().size() == table.getSelectionModel().getSelectedIndex() + 1) {
-						table.getItems().add(getEmptyRow());
-						//						table.scrollTo(emptyRow);
-						//						table.getSelectionModel().clearAndSelect(table.getItems().size() - 1);
-						//						table.getSelectionModel().select(emptyRow);
-
+						getTableModel(table).add(getEmptyRow());
 					}
 				}
+				
 			}
 		});
 	}
@@ -391,6 +392,15 @@ public abstract class UITableBuilder<T> {
 
 	public TableView<T> getTable() {
 		return this.table;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ObservableList<T> getTableModel(TableView<T> tableView) {
+		if (tableView.getItems() instanceof SortedList) {
+			SortedList<T> sortedList = (SortedList<T>)tableView.getItems();
+			return (ObservableList<T>)sortedList.getSource();
+		}
+		return tableView.getItems();
 	}
 
 	public static void copySelectionToClipboard(TableView<?> table) {

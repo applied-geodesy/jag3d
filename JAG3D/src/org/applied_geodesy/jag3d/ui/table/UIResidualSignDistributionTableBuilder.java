@@ -25,7 +25,7 @@ import org.applied_geodesy.adjustment.network.VarianceComponentType;
 import org.applied_geodesy.jag3d.ui.table.row.ResidualSignDistributionRow;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
-import org.applied_geodesy.ui.table.NaturalOrderComparator;
+import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.beans.property.BooleanProperty;
@@ -74,7 +74,7 @@ public class UIResidualSignDistributionTableBuilder extends UITableBuilder<Resid
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		varianceComponentTypeColumn = this.<VarianceComponentType>getColumn(header, ResidualSignDistributionRow::varianceComponentTypeProperty, getVarianceComponentTypeCallback(), ColumnType.VISIBLE, columnIndex, false); 
 		varianceComponentTypeColumn.setMinWidth(150);
-		varianceComponentTypeColumn.setComparator(new NaturalOrderComparator<VarianceComponentType>());
+		varianceComponentTypeColumn.setComparator(new NaturalOrderTableColumnComparator<VarianceComponentType>(varianceComponentTypeColumn));
 		table.getColumns().add(varianceComponentTypeColumn);
 
 		// number of observations

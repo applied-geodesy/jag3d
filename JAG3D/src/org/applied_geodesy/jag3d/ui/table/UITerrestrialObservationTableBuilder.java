@@ -49,13 +49,14 @@ import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.ui.table.AbsoluteValueComparator;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
-import org.applied_geodesy.ui.table.NaturalOrderComparator;
+import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -157,7 +158,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		columnContentType = ColumnContentType.START_POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::startPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true); 
-		stringColumn.setComparator(new NaturalOrderComparator<String>());
+		stringColumn.setComparator(new NaturalOrderTableColumnComparator<String>(stringColumn));
 		table.getColumns().add(stringColumn);
 
 		// Target-ID
@@ -168,7 +169,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		columnContentType = ColumnContentType.END_POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, TerrestrialObservationRow::endPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true);
-		stringColumn.setComparator(new NaturalOrderComparator<String>());
+		stringColumn.setComparator(new NaturalOrderTableColumnComparator<String>(stringColumn));
 		table.getColumns().add(stringColumn);
 
 		// Station height
@@ -766,6 +767,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				}
 			});
 		}
+		else if (this.isComplete(rowData))
+			this.table.sort();
 	}
 	
 	private boolean isComplete(TerrestrialObservationRow row) {
@@ -852,7 +855,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		}
 
 		if (clonedRows != null && !clonedRows.isEmpty()) {
-			this.table.getItems().addAll(clonedRows);
+			ObservableList<TerrestrialObservationRow> tableModel = this.getTableModel(this.table);
+			tableModel.addAll(clonedRows);
 			this.table.getSelectionModel().clearSelection();
 			for (TerrestrialObservationRow clonedRow : clonedRows)
 				this.table.getSelectionModel().select(clonedRow);
@@ -881,9 +885,10 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		}
 		if (removedRows != null && !removedRows.isEmpty()) {
 			this.table.getSelectionModel().clearSelection();
-			this.table.getItems().removeAll(removedRows);
-			if (this.table.getItems().isEmpty())
-				this.table.getItems().setAll(getEmptyRow());
+			ObservableList<TerrestrialObservationRow> tableModel = this.getTableModel(this.table);
+			tableModel.removeAll(removedRows);
+			if (tableModel.isEmpty())
+				tableModel.setAll(getEmptyRow());
 		}
 	}
 	
@@ -1088,25 +1093,4 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 		}
 	}
-	
-//	private static void setSortOrder(TableView<TerrestrialObservationRow> table, List<ColumnContentType> columnTypes) {
-//		ObservableList<TableColumn<TerrestrialObservationRow, ?>> sortOrder = FXCollections.observableArrayList();
-//		
-//		ObservableList<TableColumn<TerrestrialObservationRow, ?>> columns = table.getColumns();
-//		int idx = 0;
-//		for (ColumnContentType columnType : columnTypes) {
-//			for (TableColumn<TerrestrialObservationRow, ?> column : columns) {
-//				if (column instanceof ContentColumn) {
-//					ColumnContentType currentColumnType = ((ContentColumn<TerrestrialObservationRow,?>)column).getColumnProperty().getColumnContentType();
-//					if (currentColumnType == columnType) {
-//						sortOrder.add(column);
-//						((ContentColumn<TerrestrialObservationRow,?>)column).getColumnProperty().setSortType(idx++);
-//						break;
-//					}
-//				}
-//			}
-//		}
-//		
-//		table.getSortOrder().setAll(sortOrder);
-//	}
 }
