@@ -214,11 +214,16 @@ public class ObservableUniqueList<T> extends ModifiableObservableListBase<T> imp
 			throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
 		}
 	}
+	
+	@Override
+	public boolean addAll(Collection<? extends T> c) {
+		return this.addAll(0, c);
+	}
 
 	@Override
 	public boolean addAll(int index, Collection<? extends T> c) {
+		beginChange();
 		try {
-			beginChange();
 			boolean modified = false;
 			ListIterator<T> e1 = this.listIterator(index);
 			Iterator<? extends T> e2 = c.iterator();
@@ -238,13 +243,15 @@ public class ObservableUniqueList<T> extends ModifiableObservableListBase<T> imp
 	
 	@Override
 	public boolean removeAll(Collection<?> c) {
+		beginChange();
 		try {
 			Objects.requireNonNull(c);
-			beginChange();
 			boolean modified = false;
 			if (size() > c.size()) {
-				for (Iterator<?> i = c.iterator(); i.hasNext(); )
-					modified |= this.remove(i.next());
+				Iterator<?> e = c.iterator();
+				while(e.hasNext()) {
+					modified |= this.remove(e.next());
+				}
 			} 
 			else {
 				Collection<?> removals = null;
@@ -253,9 +260,10 @@ public class ObservableUniqueList<T> extends ModifiableObservableListBase<T> imp
 				else
 					removals = new HashSet<>(c);
 
-				for (Iterator<?> i = iterator(); i.hasNext(); ) {
-					if (removals.contains(i.next())) {
-						i.remove();
+				Iterator<?> e = this.iterator();
+				while(e.hasNext()) {
+					if (removals.contains(e.next())) {
+						e.remove();
 						modified = true;
 					}
 				}
