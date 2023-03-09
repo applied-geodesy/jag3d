@@ -30,7 +30,7 @@ import org.applied_geodesy.jag3d.ui.table.column.TableContentType;
 import org.applied_geodesy.jag3d.ui.table.row.VarianceComponentRow;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
-import org.applied_geodesy.ui.table.NaturalOrderComparator;
+import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.beans.property.BooleanProperty;
@@ -53,7 +53,8 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 
 	private static UIVarianceComponentTableBuilder tableBuilder = new UIVarianceComponentTableBuilder();
 	private VarianceComponentDisplayType type;
-	private Map<VarianceComponentDisplayType, TableView<VarianceComponentRow>> tables = new HashMap<VarianceComponentDisplayType, TableView<VarianceComponentRow>>();
+	private Map<VarianceComponentDisplayType, TableView<VarianceComponentRow>> tables = new HashMap<VarianceComponentDisplayType, TableView<VarianceComponentRow>>(VarianceComponentDisplayType.values().length);
+
 	private UIVarianceComponentTableBuilder() {
 		super();
 	}
@@ -94,7 +95,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		TableView<VarianceComponentRow> table = this.createTable();
 
 		// Overall component type
-		int columnIndex = table.getColumns().size(); 
+		int columnIndex    = table.getColumns().size(); 
 		String labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.label", "Component");
 		String tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.tooltip", "Type of estimated variance component");
 		CellValueType cellValueType = CellValueType.STRING;
@@ -104,7 +105,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS) {
 			varianceComponentTypeColumn.setMinWidth(150);
 		}
-		varianceComponentTypeColumn.setComparator(new NaturalOrderComparator<VarianceComponentType>());
+		varianceComponentTypeColumn.setComparator(new NaturalOrderTableColumnComparator<VarianceComponentType>(varianceComponentTypeColumn));
 		table.getColumns().add(varianceComponentTypeColumn);
 		
 		// Selected component type
@@ -115,7 +116,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		columnContentType = this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS ? ColumnContentType.DEFAULT : ColumnContentType.VARIANCE_COMPONENT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, VarianceComponentRow::nameProperty, getStringCallback(), this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS ? ColumnType.VISIBLE : ColumnType.HIDDEN, columnIndex, false, this.type == VarianceComponentDisplayType.SELECTED_GROUP_COMPONENTS); 
-		stringColumn.setComparator(new NaturalOrderComparator<String>());
+		stringColumn.setComparator(new NaturalOrderTableColumnComparator<String>(stringColumn));
 		table.getColumns().add(stringColumn);
 
 		// number of observations

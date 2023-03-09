@@ -61,10 +61,18 @@ public class UIGlobalResultPaneBuilder {
 		public void projectDatabaseStateChanged(ProjectDatabaseStateEvent evt) {
 			if (evt.getEventType() == ProjectDatabaseStateType.CLOSED) {
 				// clear all global result tables
-				UITestStatisticTableBuilder.getInstance().getTable().getItems().setAll(UITestStatisticTableBuilder.getInstance().getEmptyRow());
-				UIVarianceComponentTableBuilder.getInstance().getTable(UIVarianceComponentTableBuilder.VarianceComponentDisplayType.OVERALL_COMPONENTS).getItems().setAll(UIVarianceComponentTableBuilder.getInstance().getEmptyRow());
-				UIPrincipalComponentTableBuilder.getInstance().getTable().getItems().setAll(UIPrincipalComponentTableBuilder.getInstance().getEmptyRow());
-				UIResidualSignDistributionTableBuilder.getInstance().getTable().getItems().setAll(UIResidualSignDistributionTableBuilder.getInstance().getEmptyRow());
+				UITestStatisticTableBuilder.getInstance().getTableModel(
+						UITestStatisticTableBuilder.getInstance().getTable()
+						).setAll(UITestStatisticTableBuilder.getInstance().getEmptyRow());
+				UIPrincipalComponentTableBuilder.getInstance().getTableModel(
+						UIPrincipalComponentTableBuilder.getInstance().getTable()
+						).setAll(UIPrincipalComponentTableBuilder.getInstance().getEmptyRow());
+				UIResidualSignDistributionTableBuilder.getInstance().getTableModel(
+						UIResidualSignDistributionTableBuilder.getInstance().getTable()
+						).setAll(UIResidualSignDistributionTableBuilder.getInstance().getEmptyRow());
+				UIVarianceComponentTableBuilder.getInstance().getTableModel(
+						UIVarianceComponentTableBuilder.getInstance().getTable(UIVarianceComponentTableBuilder.VarianceComponentDisplayType.OVERALL_COMPONENTS)
+						).setAll(UIVarianceComponentTableBuilder.getInstance().getEmptyRow());
 			}
 		}
 	}

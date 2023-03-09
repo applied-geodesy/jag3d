@@ -41,6 +41,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -141,7 +142,9 @@ public abstract class UITableBuilder<T> {
 	TableView<T> createTable() {
 		this.table = new TableView<T>();
 		ObservableList<T> tableModel = FXCollections.observableArrayList();
-		this.table.setItems(tableModel);
+		SortedList<T> sortedList = new SortedList<T>(tableModel);
+		sortedList.comparatorProperty().bind(this.table.comparatorProperty());
+		this.table.setItems(sortedList);
 		this.table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
 		this.table.setTableMenuButtonVisible(false);
 		this.table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -244,6 +247,15 @@ public abstract class UITableBuilder<T> {
 
 	public TableView<T> getTable() {
 		return this.table;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ObservableList<T> getTableModel(TableView<T> tableView) {
+		if (tableView.getItems() instanceof SortedList) {
+			SortedList<T> sortedList = (SortedList<T>)tableView.getItems();
+			return (ObservableList<T>)sortedList.getSource();
+		}
+		return tableView.getItems();
 	}
 
 	public static void copySelectionToClipboard(TableView<?> table) {

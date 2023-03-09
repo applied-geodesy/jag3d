@@ -49,13 +49,14 @@ import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.ui.table.AbsoluteValueComparator;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
-import org.applied_geodesy.ui.table.NaturalOrderComparator;
+import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -149,7 +150,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		columnContentType = ColumnContentType.START_POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, GNSSObservationRow::startPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true); 
-		stringColumn.setComparator(new NaturalOrderComparator<String>());
+		stringColumn.setComparator(new NaturalOrderTableColumnComparator<String>(stringColumn));
 		table.getColumns().add(stringColumn);
 
 		// Target-ID
@@ -160,7 +161,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		columnContentType = ColumnContentType.END_POINT_NAME;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(tableContentType, columnContentType, header, GNSSObservationRow::endPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true, true);
-		stringColumn.setComparator(new NaturalOrderComparator<String>());
+		stringColumn.setComparator(new NaturalOrderTableColumnComparator<String>(stringColumn));
 		table.getColumns().add(stringColumn);
 		
 		
@@ -685,10 +686,6 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 				e.printStackTrace();
 			}
 		}
-//		this.table.refresh();
-//		this.table.requestFocus();
-//		this.table.getSelectionModel().clearSelection();
-//		this.table.getSelectionModel().select(rowData);
 		
 		if (!valid) {
 			Platform.runLater(new Runnable() {
@@ -701,6 +698,8 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 				}
 			});
 		}
+		else if (this.isComplete(rowData))
+			this.table.sort();
 	}
 
 	@Override
@@ -770,7 +769,8 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		}
 
 		if (clonedRows != null && !clonedRows.isEmpty()) {
-			this.table.getItems().addAll(clonedRows);
+			ObservableList<GNSSObservationRow> tableModel = this.getTableModel(this.table);
+			tableModel.addAll(clonedRows);
 			this.table.getSelectionModel().clearSelection();
 			for (GNSSObservationRow clonedRow : clonedRows)
 				this.table.getSelectionModel().select(clonedRow);
@@ -799,9 +799,10 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		}
 		if (removedRows != null && !removedRows.isEmpty()) {
 			this.table.getSelectionModel().clearSelection();
-			this.table.getItems().removeAll(removedRows);
-			if (this.table.getItems().isEmpty())
-				this.table.getItems().setAll(getEmptyRow());
+			ObservableList<GNSSObservationRow> tableModel = this.getTableModel(this.table);
+			tableModel.removeAll(removedRows);
+			if (tableModel.isEmpty())
+				tableModel.setAll(getEmptyRow());
 		}
 	}
 	

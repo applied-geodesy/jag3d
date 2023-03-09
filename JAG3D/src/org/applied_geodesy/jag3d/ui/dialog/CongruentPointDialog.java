@@ -37,6 +37,7 @@ import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
@@ -74,7 +75,6 @@ public class CongruentPointDialog {
 		}
 	}
 
-	
 	private class DimensionChangeListener implements ChangeListener<Boolean> {		
 		@Override
 		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
@@ -138,16 +138,20 @@ public class CongruentPointDialog {
 		congruentPointDialog.init();
 		congruentPointDialog.reset();
 		TableView<TerrestrialObservationRow> table = tableBuilder.getTable();
-		table.getItems().clear();
-		table.getItems().add(tableBuilder.getEmptyRow());
+		ObservableList<TerrestrialObservationRow> tableModel = tableBuilder.getTableModel(table);
+		tableModel.clear();
+		tableModel.setAll(tableBuilder.getEmptyRow());
+		
 		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
 				try {
 					congruentPointDialog.reset();
-					tableBuilder.getTable().getItems().clear();
-					tableBuilder.getTable().getItems().add(tableBuilder.getEmptyRow());
+					TableView<TerrestrialObservationRow> table = tableBuilder.getTable();
+					ObservableList<TerrestrialObservationRow> tableModel = tableBuilder.getTableModel(table);
+					tableModel.clear();
+					tableModel.setAll(tableBuilder.getEmptyRow());
 					congruentPointDialog.dialog.getDialogPane().requestLayout();
 					Stage stage = (Stage) congruentPointDialog.dialog.getDialogPane().getScene().getWindow();
 					stage.sizeToScene();
@@ -287,11 +291,11 @@ public class CongruentPointDialog {
 				List<TerrestrialObservationRow> rows = processSQLTask.getValue();
 				TableView<TerrestrialObservationRow> table = tableBuilder.getTable();
 				if (rows != null && !rows.isEmpty()) {
-					table.getItems().setAll(rows);
+					tableBuilder.getTableModel(table).setAll(rows);
 					table.sort();
 				}
 				else {
-					table.getItems().setAll(tableBuilder.getEmptyRow());
+					tableBuilder.getTableModel(table).setAll(tableBuilder.getEmptyRow());
 				}
 			}
 		});
