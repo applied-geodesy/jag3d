@@ -99,15 +99,15 @@ public class UIPointSelectionPaneBuilder {
 				switch (selectionEventType) {
 				case ADD:
 					Collection<FeaturePoint> selectedSourceItems = new LinkedHashSet<FeaturePoint>(sourceListView.getSelectionModel().getSelectedItems());
-					targetPointList.addAll(selectedSourceItems);
 					sourcePointList.removeAll(selectedSourceItems);
+					targetPointList.addAll(selectedSourceItems);
 					targetListView.getSelectionModel().clearSelection();
 					break;
 					
 				case ADD_ALL:
 					Collection<FeaturePoint> filteredSourceItems = new LinkedHashSet<FeaturePoint>(filteredSourcePointList);
-					targetPointList.addAll(filteredSourceItems);
 					sourcePointList.removeAll(new HashSet<>(filteredSourceItems));
+					targetPointList.addAll(filteredSourceItems);
 					break;
 					
 				case REMOVE:
@@ -119,8 +119,8 @@ public class UIPointSelectionPaneBuilder {
 					
 				case REMOVE_ALL:
 					Collection<FeaturePoint> filteredTargetItems = new LinkedHashSet<FeaturePoint>(filteredTargetPointList);
+					targetPointList.removeAll(new HashSet<>(filteredTargetItems));
 					sourcePointList.addAll(filteredTargetItems);
-					targetPointList.removeAll(filteredTargetItems);
 					break;				
 				}
 			}

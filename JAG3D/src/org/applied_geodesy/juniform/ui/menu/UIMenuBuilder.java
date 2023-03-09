@@ -483,7 +483,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 			Toggle toggle = this.featureToggleGroup.getSelectedToggle();
 			
 			this.fireFeatureTypeChanged(fileReader.getFeatureType());
-			UIPointTableBuilder.getInstance().getTable().setItems(points);
+			UIPointTableBuilder.getInstance().getTableModel(UIPointTableBuilder.getInstance().getTable()).setAll(points);
 			
 			// re-select last feature (create a new instance because file has changed)
 			if (prevFeatureType == fileReader.getFeatureType() && toggle != null && toggle instanceof MenuItem) {

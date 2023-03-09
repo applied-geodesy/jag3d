@@ -25,7 +25,7 @@ import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.ui.table.row.AveragedObservationRow;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
-import org.applied_geodesy.ui.table.NaturalOrderComparator;
+import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.geometry.Pos;
@@ -73,7 +73,7 @@ public class UIAverageObservationTableBuilder extends UITableBuilder<AveragedObs
 		tooltipText = i18n.getString("UIAverageObservationTableBuilder.tableheader.station.name.tooltip", "Id of station");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(header, AveragedObservationRow::startPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, false); 
-		stringColumn.setComparator(new NaturalOrderComparator<String>());
+		stringColumn.setComparator(new NaturalOrderTableColumnComparator<String>(stringColumn));
 		table.getColumns().add(stringColumn);
 
 		// Target-ID
@@ -82,7 +82,7 @@ public class UIAverageObservationTableBuilder extends UITableBuilder<AveragedObs
 		tooltipText = i18n.getString("UIAverageObservationTableBuilder.tableheader.target.name.tooltip", "Id of target point");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(header, AveragedObservationRow::endPointNameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, false);
-		stringColumn.setComparator(new NaturalOrderComparator<String>());
+		stringColumn.setComparator(new NaturalOrderTableColumnComparator<String>(stringColumn));
 		table.getColumns().add(stringColumn);
 
 		// Parameter value

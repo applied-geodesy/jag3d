@@ -29,7 +29,7 @@ import org.applied_geodesy.ui.table.AbsoluteValueComparator;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
 import org.applied_geodesy.ui.table.DisplayCellFormatType;
-import org.applied_geodesy.ui.table.NaturalOrderComparator;
+import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.beans.property.BooleanProperty;
@@ -79,7 +79,7 @@ public class UIAdditionalParameterTableBuilder extends UITableBuilder<Additional
 		ColumnTooltipHeader header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		ColumnContentType columnContentType = ColumnContentType.PARAMETER_NAME;
 		parameterTypeColumn = this.<ParameterType>getColumn(tableContentType, columnContentType, header, AdditionalParameterRow::parameterTypeProperty, getParameterTypeCallback(), ColumnType.VISIBLE, columnIndex, false, true); 
-		parameterTypeColumn.setComparator(new NaturalOrderComparator<ParameterType>());
+		parameterTypeColumn.setComparator(new NaturalOrderTableColumnComparator<ParameterType>(parameterTypeColumn));
 		table.getColumns().add(parameterTypeColumn);
 		
 		// Parameter value

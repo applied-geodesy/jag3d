@@ -36,13 +36,14 @@ import org.applied_geodesy.juniform.ui.dialog.MatrixDialog;
 import org.applied_geodesy.ui.table.AbsoluteValueComparator;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
-import org.applied_geodesy.ui.table.NaturalOrderComparator;
+import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -73,7 +74,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 	
 	public void setFeatureType(FeatureType featureType) {
 		if (this.featureType != featureType) {
-			this.table.getItems().clear();
+			this.getTableModel(this.table).clear();
 			this.table.refresh();
 			this.featureType = featureType;
 		}
@@ -123,7 +124,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 		cellValueType = CellValueType.STRING;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(header, FeaturePoint::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
-		stringColumn.setComparator(new NaturalOrderComparator<String>());
+		stringColumn.setComparator(new NaturalOrderTableColumnComparator<String>(stringColumn));
 		table.getColumns().add(stringColumn);
 
 		// A-priori Components
@@ -504,11 +505,12 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 	}
 	
 	private void setPointsToFeature(Feature feature) {
-		for (FeaturePoint featurePoint : this.table.getItems())
+		ObservableList<FeaturePoint> tableModel = this.getTableModel(this.table);
+		for (FeaturePoint featurePoint : tableModel)
 			featurePoint.clear();
 		if (feature != null) {
 			for (GeometricPrimitive geometricPrimitive : feature) 
-				geometricPrimitive.getFeaturePoints().setAll(this.table.getItems());
+				geometricPrimitive.getFeaturePoints().setAll(tableModel);
 		}
 	}
 	

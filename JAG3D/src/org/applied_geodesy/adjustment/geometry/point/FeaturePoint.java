@@ -624,6 +624,10 @@ public class FeaturePoint extends Point implements Iterable<GeometricPrimitive> 
 		this.setMinimalDetectableBiasY(0);
 		this.setMinimalDetectableBiasZ(0);
 		
+		this.setMaximumTolerableBiasX(0);
+		this.setMaximumTolerableBiasY(0);
+		this.setMaximumTolerableBiasZ(0);
+		
 		this.setCofactorX(0);
 		this.setCofactorY(0);
 		this.setCofactorZ(0);
