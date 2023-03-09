@@ -148,12 +148,16 @@ public class ObservableUniqueList<T> extends ModifiableObservableListBase<T> imp
 
 			@Override
 			public void remove() {
-				beginChange();
-				int idx = previousIndex();
-				this.backingIt.remove();
-				nextRemove(idx, this.lastReturned);
-				set.remove(this.lastReturned);
-				endChange();
+				try {
+					beginChange();
+					int idx = previousIndex();
+					this.backingIt.remove();
+					nextRemove(idx, this.lastReturned);
+					set.remove(this.lastReturned);
+				}
+				finally {
+					endChange();
+				}
 			}
 
 			@Override
@@ -163,12 +167,16 @@ public class ObservableUniqueList<T> extends ModifiableObservableListBase<T> imp
 				if (set.contains(e))
 					throw new IllegalArgumentException("Error, list elements must be unique but element already exists " + e + "!");
 
-				beginChange();
-				int idx = previousIndex();
-				this.backingIt.set(e);
-				set.add(e);
-				nextSet(idx, this.lastReturned);
-				endChange();
+				try {
+					beginChange();
+					int idx = previousIndex();
+					this.backingIt.set(e);
+					set.add(e);
+					nextSet(idx, this.lastReturned);
+				}
+				finally {
+					endChange();
+				}
 			}
 
 			@Override
@@ -178,12 +186,16 @@ public class ObservableUniqueList<T> extends ModifiableObservableListBase<T> imp
 				if (set.contains(e))
 					throw new IllegalArgumentException("Error, list elements must be unique but element already exists " + e + "!");
 
-				beginChange();
-				int idx = nextIndex();
-				this.backingIt.add(e);
-				set.add(e);
-				nextAdd(idx, idx + 1);
-				endChange();
+				try {
+					beginChange();
+					int idx = nextIndex();
+					this.backingIt.add(e);
+					set.add(e);
+					nextAdd(idx, idx + 1);
+				}
+				finally {
+					endChange();
+				}
 			}
 		};
 	}
@@ -199,7 +211,7 @@ public class ObservableUniqueList<T> extends ModifiableObservableListBase<T> imp
 			return this.list.listIterator(index).next();
 		} 
 		catch (NoSuchElementException exc) {
-			throw new IndexOutOfBoundsException("Index: " + index);
+			throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
 		}
 	}
 
@@ -214,39 +226,45 @@ public class ObservableUniqueList<T> extends ModifiableObservableListBase<T> imp
 				e1.add(e2.next());
 				modified = true;
 			}
-			endChange();
 			return modified;
 		} 
 		catch (NoSuchElementException exc) {
-			throw new IndexOutOfBoundsException("Index: " + index);
+			throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
+		}
+		finally {
+			endChange();
 		}
 	}
 	
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		Objects.requireNonNull(c);
-		beginChange();
-		boolean modified = false;
-		if (size() > c.size()) {
-			for (Iterator<?> i = c.iterator(); i.hasNext(); )
-				modified |= remove(i.next());
-		} 
-		else {
-			Collection<?> removals = null;
-			if (c instanceof ObservableUniqueList)
-				removals = c;
-			else
-				removals = new HashSet<>(c);
-			
-			for (Iterator<?> i = iterator(); i.hasNext(); ) {
-				if (removals.contains(i.next())) {
-					i.remove();
-					modified = true;
+		try {
+			Objects.requireNonNull(c);
+			beginChange();
+			boolean modified = false;
+			if (size() > c.size()) {
+				for (Iterator<?> i = c.iterator(); i.hasNext(); )
+					modified |= this.remove(i.next());
+			} 
+			else {
+				Collection<?> removals = null;
+				if (c instanceof ObservableUniqueList)
+					removals = c;
+				else
+					removals = new HashSet<>(c);
+
+				for (Iterator<?> i = iterator(); i.hasNext(); ) {
+					if (removals.contains(i.next())) {
+						i.remove();
+						modified = true;
+					}
 				}
 			}
+			return modified;
 		}
-		endChange();
-		return modified;
+		finally {
+			endChange();
+		}
 	}
 
 	@Override
@@ -265,7 +283,7 @@ public class ObservableUniqueList<T> extends ModifiableObservableListBase<T> imp
 			this.list.listIterator(index).add(element);
 			this.set.add(element);
 		} catch (NoSuchElementException exc) {
-			throw new IndexOutOfBoundsException("Index: " + index);
+			throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
 		}
 	}
 
@@ -280,12 +298,12 @@ public class ObservableUniqueList<T> extends ModifiableObservableListBase<T> imp
 			ListIterator<T> e = this.list.listIterator(index);
 			T oldVal = e.next();
 			this.set.remove(oldVal);
-			e.set(element);
 			this.set.add(element);
+			e.set(element);
 			return oldVal;
 		} 
 		catch (NoSuchElementException exc) {
-			throw new IndexOutOfBoundsException("Index: " + index);
+			throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
 		}
 	}
 
@@ -294,12 +312,12 @@ public class ObservableUniqueList<T> extends ModifiableObservableListBase<T> imp
 		try {
 			ListIterator<T> e = this.list.listIterator(index);
 			T element = e.next();
-			e.remove();
 			this.set.remove(element);
+			e.remove();
 			return element;
 		} 
 		catch (NoSuchElementException exc) {
-			throw new IndexOutOfBoundsException("Index: " + index);
+			throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
 		}
 	}
 }

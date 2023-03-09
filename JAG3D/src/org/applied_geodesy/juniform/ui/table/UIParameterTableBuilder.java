@@ -34,7 +34,7 @@ import org.applied_geodesy.juniform.ui.dialog.UnknownParameterTypeDialog;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
 import org.applied_geodesy.ui.table.DisplayCellFormatType;
-import org.applied_geodesy.ui.table.NaturalOrderComparator;
+import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.util.ObservableUniqueList;
 
@@ -77,11 +77,11 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		if (geometry == null) {
 			if (this.unknownFeatureParameters != null) {
 				FilteredList<UnknownParameter> filteredFeatureParameters = new FilteredList<UnknownParameter>(this.unknownFeatureParameters, this.visiblePredicate);
-				this.table.setItems(filteredFeatureParameters);
+				this.getTableModel(this.table).setAll(filteredFeatureParameters);
 			}
 		}
 		else 
-			this.table.setItems(FXCollections.observableArrayList(geometry.getUnknownParameters()));
+			this.getTableModel(this.table).setAll(FXCollections.observableArrayList(geometry.getUnknownParameters()));
 
 		return this.table;
 	}
@@ -103,7 +103,7 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		String tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.name.tooltip", "Name of the model parameter");
 		ColumnTooltipHeader header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(header, UnknownParameter::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
-		stringColumn.setComparator(new NaturalOrderComparator<String>());
+		stringColumn.setComparator(new NaturalOrderTableColumnComparator<String>(stringColumn));
 		table.getColumns().add(stringColumn);
 		
 		// Parameter type
@@ -112,7 +112,7 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.type.tooltip", "Type of the model parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		parameterTypeColumn = this.<ParameterType>getColumn(header, UnknownParameter::parameterTypeProperty, getParameterTypeCallback(), ColumnType.VISIBLE, columnIndex, false); 
-		parameterTypeColumn.setComparator(new NaturalOrderComparator<ParameterType>());
+		parameterTypeColumn.setComparator(new NaturalOrderTableColumnComparator<ParameterType>(parameterTypeColumn));
 		table.getColumns().add(parameterTypeColumn);
 			
 		///////////////// A-POSTERIORI VALUES /////////////////////////////
@@ -138,7 +138,7 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.description.tooltip", "User-defined description of the parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText); 
 		stringColumn = this.<String>getColumn(header, UnknownParameter::descriptionProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
-		stringColumn.setComparator(new NaturalOrderComparator<String>());
+		stringColumn.setComparator(new NaturalOrderTableColumnComparator<String>(stringColumn));
 		table.getColumns().add(stringColumn);
 		
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);

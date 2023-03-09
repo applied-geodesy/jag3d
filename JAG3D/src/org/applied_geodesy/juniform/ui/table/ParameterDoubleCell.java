@@ -141,13 +141,6 @@ class ParameterDoubleCell extends EditableCell<UnknownParameter, Double> impleme
 	
 	@Override
 	public void formatterChanged(FormatterEvent evt) {
-//		int idx = this.getTableRow().getIndex();
-//		int itemSize = this.getTableView().getItems().size();
-//		if (idx >= 0 && idx < itemSize) {
-//			UnknownParameter paramRow = this.getTableView().getItems().get(idx);
-//			this.setCellValueTypeOfUnknownParameter(paramRow);
-//		}
-		
 		TableRow<UnknownParameter> tableRow = this.getTableRow();
 		if (tableRow == null || tableRow.isEmpty() || this.getTableRow().getItem() == null)
 			return;

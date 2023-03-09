@@ -223,7 +223,6 @@ public abstract class UITableBuilder<T extends Row> {
 		this.table.setItems(sortedList);
 		this.table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
 		this.table.setTableMenuButtonVisible(false);
-		//		this.table.setPlaceholder(new Text(i18n.getString("UITableBuilder.emptytable", "No content in table.")));
 		this.table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		this.table.setOnKeyPressed(new TableKeyEventHandler());
 		tableModel.add(this.getEmptyRow());
