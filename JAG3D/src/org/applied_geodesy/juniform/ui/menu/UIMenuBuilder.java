@@ -275,7 +275,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 	}
 	
 	private void createHelpMenu(Menu parentMenu) {
-		MenuItem aboutItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.help.about.label", "A_bout JAG3D"), true, MenuItemType.ABOUT, new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
+		MenuItem aboutItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.help.about.label", "A_bout JUniForm"), true, MenuItemType.ABOUT, new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, false);
 		parentMenu.getItems().addAll(
 				aboutItem
 		);
