@@ -97,11 +97,27 @@ import javafx.util.StringConverter;
 
 public class UIObservationPropertiesPane {
 	private class TickFormatChangedListener implements FormatterChangedListener {
-
 		@Override
 		public void formatterChanged(FormatterEvent evt) {
 			updateUncertaintyChart(lineChart);
 			updateTickLabels(lineChart);
+		}
+	}
+	
+	private class CommitTextFieldActionListener implements EventHandler<ActionEvent> {
+		@Override
+		public void handle(ActionEvent event) {
+			if (!ignoreValueUpdate && event.getSource() != null && event.getSource() instanceof DoubleTextField && ((DoubleTextField)event.getSource()).getUserData() != null) {
+				DoubleTextField field = (DoubleTextField)event.getSource();
+				if (field.getUserData() instanceof ParameterType) {
+					ParameterType paramType = (ParameterType)field.getUserData();
+					save(paramType, ParameterModificationType.VALUE);
+				}
+				else if (field.getUserData() instanceof ObservationGroupUncertaintyType) {
+					ObservationGroupUncertaintyType uncertaintyType = (ObservationGroupUncertaintyType)field.getUserData();
+					save(uncertaintyType);
+				}
+			}
 		}
 	}
 	
@@ -734,6 +750,7 @@ public class UIObservationPropertiesPane {
 		field.setMaxWidth(350);
 		field.setUserData(userData);
 		field.numberProperty().addListener(new NumberChangeListener(field));
+		field.setOnAction(new CommitTextFieldActionListener());
 		return field;
 	}
 	
@@ -744,6 +761,7 @@ public class UIObservationPropertiesPane {
 		field.setMaxWidth(350);
 		field.setUserData(userData);
 		field.numberProperty().addListener(new NumberChangeListener(field));
+		field.setOnAction(new CommitTextFieldActionListener());
 		return field;
 	}
 

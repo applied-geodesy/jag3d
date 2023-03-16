@@ -61,6 +61,17 @@ import javafx.scene.text.Font;
 import javafx.util.Duration;
 
 public class UIVerticalDeflectionPropertiesPane {
+	private class CommitTextFieldActionListener implements EventHandler<ActionEvent> {
+		@Override
+		public void handle(ActionEvent event) {
+			if (!ignoreValueUpdate && event.getSource() != null && event.getSource() instanceof DoubleTextField && ((DoubleTextField)event.getSource()).getUserData() != null && ((DoubleTextField)event.getSource()).getUserData() instanceof VerticalDeflectionGroupUncertaintyType) {
+				DoubleTextField field = (DoubleTextField)event.getSource();
+				VerticalDeflectionGroupUncertaintyType uncertaintyType = (VerticalDeflectionGroupUncertaintyType)field.getUserData();
+				save(uncertaintyType);
+			}
+		}
+	}
+	
 	private class NumberChangeListener implements ChangeListener<Double> {
 		private final DoubleTextField field;
 
@@ -208,6 +219,7 @@ public class UIVerticalDeflectionPropertiesPane {
 			this.uncertaintyDeflectionYField.setTooltip(new Tooltip(i18n.getString("UIVerticalDeflectionPropertiesPane.uncertainty.y.tooltip", "Uncertainty of y-component of deflection of the vertical")));
 			this.uncertaintyDeflectionYField.setUserData(VerticalDeflectionGroupUncertaintyType.DEFLECTION_Y);
 			this.uncertaintyDeflectionYField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyDeflectionYField));
+			this.uncertaintyDeflectionYField.setOnAction(new CommitTextFieldActionListener());
 			this.uncertaintyDeflectionYField.setMinWidth(fieldMinWidth);
 			this.uncertaintyDeflectionYField.setMaxWidth(fieldMaxWidth);
 						
@@ -215,6 +227,7 @@ public class UIVerticalDeflectionPropertiesPane {
 			this.uncertaintyDeflectionXField.setTooltip(new Tooltip(i18n.getString("UIVerticalDeflectionPropertiesPane.uncertainty.x.tooltip", "Uncertainty of x-component of deflection of the vertical")));
 			this.uncertaintyDeflectionXField.setUserData(VerticalDeflectionGroupUncertaintyType.DEFLECTION_X);
 			this.uncertaintyDeflectionXField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyDeflectionXField));
+			this.uncertaintyDeflectionXField.setOnAction(new CommitTextFieldActionListener());
 			this.uncertaintyDeflectionXField.setMinWidth(fieldMinWidth);
 			this.uncertaintyDeflectionXField.setMaxWidth(fieldMaxWidth);
 			
