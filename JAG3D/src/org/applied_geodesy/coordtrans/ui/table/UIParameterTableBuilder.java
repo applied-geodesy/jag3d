@@ -95,25 +95,25 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		TableColumn<UnknownParameter, ParameterType> parameterTypeColumn = null;
 //		TableColumn<UnknownParameter, ProcessingType> processingTypeColumn = null;
 		TableColumn<UnknownParameter, Double> doubleColumn   = null; 
-		TableColumn<UnknownParameter, String> stringColumn   = null; 
+//		TableColumn<UnknownParameter, String> stringColumn   = null; 
 		TableColumn<UnknownParameter, Boolean> booleanColumn = null;
 
 		TableView<UnknownParameter> table = this.createTable();
 		
 		// Parameter name
-		int columnIndex = table.getColumns().size(); 
-		String labelText   = i18n.getString("UIParameterTableBuilder.tableheader.name.label", "Name");
-		String tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.name.tooltip", "Name of the model parameter");
-		ColumnTooltipHeader header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
-		stringColumn = this.<String>getColumn(header, UnknownParameter::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
-		stringColumn.setComparator(new NaturalOrderComparator<String>());
-		table.getColumns().add(stringColumn);
+//		int columnIndex = table.getColumns().size(); 
+//		String labelText   = i18n.getString("UIParameterTableBuilder.tableheader.name.label", "Name");
+//		String tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.name.tooltip", "Name of the model parameter");
+//		ColumnTooltipHeader header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
+//		stringColumn = this.<String>getColumn(header, UnknownParameter::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
+//		stringColumn.setComparator(new NaturalOrderComparator<String>());
+//		table.getColumns().add(stringColumn);
 		
 		// Parameter type
-		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIParameterTableBuilder.tableheader.type.label", "Type");
-		tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.type.tooltip", "Type of the model parameter");
-		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
+		int columnIndex = table.getColumns().size(); 
+		String labelText   = i18n.getString("UIParameterTableBuilder.tableheader.type.label", "Type");
+		String tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.type.tooltip", "Type of the model parameter");
+		ColumnTooltipHeader header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		parameterTypeColumn = this.<ParameterType>getColumn(header, UnknownParameter::parameterTypeProperty, getParameterTypeCallback(), ColumnType.VISIBLE, columnIndex, false); 
 		parameterTypeColumn.setComparator(new NaturalOrderComparator<ParameterType>());
 		table.getColumns().add(parameterTypeColumn);
@@ -135,14 +135,14 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		doubleColumn = this.<Double>getColumn(header, UnknownParameter::uncertaintyProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.UNCERTAINTY), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 		
-		// description text
-		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIParameterTableBuilder.tableheader.description.label", "Description");
-		tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.description.tooltip", "User-defined description of the parameter");
-		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText); 
-		stringColumn = this.<String>getColumn(header, UnknownParameter::descriptionProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
-		stringColumn.setComparator(new NaturalOrderComparator<String>());
-		table.getColumns().add(stringColumn);
+//		// description text
+//		columnIndex = table.getColumns().size(); 
+//		labelText   = i18n.getString("UIParameterTableBuilder.tableheader.description.label", "Description");
+//		tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.description.tooltip", "User-defined description of the parameter");
+//		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText); 
+//		stringColumn = this.<String>getColumn(header, UnknownParameter::descriptionProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
+//		stringColumn.setComparator(new NaturalOrderComparator<String>());
+//		table.getColumns().add(stringColumn);
 		
 		// Decision of test statistic
 		columnIndex = table.getColumns().size(); 

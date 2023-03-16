@@ -21,6 +21,9 @@
 
 package org.applied_geodesy.adjustment.transformation.parameter;
 
+import org.applied_geodesy.adjustment.transformation.TestStatistic;
+
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -28,12 +31,25 @@ import javafx.beans.property.SimpleObjectProperty;
 
 public class UnknownParameter extends Parameter {
 	/** Value: -1 == not set, Integer.MIN_VALUE == fixed, else column in normal equation system **/
-	private ObjectProperty<ProcessingType> processingType = new SimpleObjectProperty<ProcessingType>(ProcessingType.ADJUSTMENT);
+	private ObjectProperty<ProcessingType> processingType       = new SimpleObjectProperty<ProcessingType>(ProcessingType.ADJUSTMENT);
+	private ReadOnlyObjectProperty<TestStatistic> testStatistic = new ReadOnlyObjectWrapper<TestStatistic>(this, "testStatistic", new TestStatistic());
 	
 	private ObjectProperty<Integer> column      = new SimpleObjectProperty<Integer>(this, "column", -1);
 	private ObjectProperty<Double> value        = new SimpleObjectProperty<Double>(this, "value", 0.0);
 	private ObjectProperty<Double> uncertainty  = new SimpleObjectProperty<Double>(this, "uncertainty", 0.0);
-	private ObjectProperty<Boolean> significant = new SimpleObjectProperty<Boolean>(this, "significant", Boolean.FALSE);
+
+	private ReadOnlyObjectWrapper<Double> testStatisticApriori     = new ReadOnlyObjectWrapper<Double>(this, "testStatisticApriori", 0.0);
+	private ReadOnlyObjectWrapper<Double> testStatisticAposteriori = new ReadOnlyObjectWrapper<Double>(this, "testStatisticAposteriori", 0.0);
+	
+	private ReadOnlyObjectWrapper<Double> pValueApriori     = new ReadOnlyObjectWrapper<Double>(this, "pValueApriori", 0.0);
+	private ReadOnlyObjectWrapper<Double> pValueAposteriori = new ReadOnlyObjectWrapper<Double>(this, "pValueAposteriori", 0.0);
+	
+	private ObjectBinding<Boolean> significant;
+
+	private ObjectProperty<Double> fisherQuantileApriori     = new SimpleObjectProperty<Double>(this, "fisherQuantileApriori", Double.MAX_VALUE);
+	private ObjectProperty<Double> fisherQuantileAposteriori = new SimpleObjectProperty<Double>(this, "fisherQuantileAposteriori", Double.MAX_VALUE);
+
+	
 	private ReadOnlyObjectProperty<Boolean> indispensable;
 	
 	public UnknownParameter(ParameterType parameterType, boolean indispensable) {
@@ -59,10 +75,34 @@ public class UnknownParameter extends Parameter {
 	public UnknownParameter(ParameterType parameterType, boolean indispensable, double value, boolean visible, int column, ProcessingType processingType) {
 		super(parameterType);
 		this.setValue0(value);
+		this.setValue(value);
 		this.setColumn(column);
 		this.setProcessingType(processingType);
 		this.setVisible(visible);
 		this.indispensable = new ReadOnlyObjectWrapper<Boolean>(this, "indispensable", indispensable);
+		
+		this.testStatisticApriori.bind(this.testStatistic.get().testStatisticAprioriProperty());
+        this.testStatisticAposteriori.bind(this.testStatistic.get().testStatisticAposterioriProperty());
+        
+        this.pValueApriori.bind(this.testStatistic.get().pValueAprioriProperty());
+        this.pValueAposteriori.bind(this.testStatistic.get().pValueAposterioriProperty());
+		
+		this.significant = new ObjectBinding<Boolean>() {
+        	{
+                super.bind(fisherQuantileApriori, testStatisticApriori, fisherQuantileAposteriori, testStatisticAposteriori);
+            }
+        	
+        	@Override
+            protected Boolean computeValue() {
+        		boolean significant = testStatisticApriori.get() > fisherQuantileApriori.get();
+
+        		if (testStatistic.get().varianceComponentProperty().get().isApplyAposterioriVarianceOfUnitWeight())
+        			return significant || testStatisticAposteriori.get() > fisherQuantileAposteriori.get();
+
+        		return significant;
+        	}
+        };
+		
 	}
 	
 	public ReadOnlyObjectProperty<Boolean> indispensableProperty() {
@@ -123,16 +163,20 @@ public class UnknownParameter extends Parameter {
 		return this.uncertainty;
 	}
 	
-	public void setSignificant(boolean significant) {
-		this.significant.set(significant);
+	public ObjectBinding<Boolean> significantProperty() {
+		return this.significant;
 	}
 	
 	public boolean isSignificant() {
 		return this.significant.get();
 	}
 	
-	public ObjectProperty<Boolean> significantProperty() {
-		return this.significant;
+	public TestStatistic getTestStatistic() {
+		return this.testStatistic.get();
+	}
+
+	public ReadOnlyObjectProperty<TestStatistic> testStatisticProperty() {
+		return this.testStatistic;
 	}
 
 	@Override

@@ -244,7 +244,7 @@ public class TransformationAdjustmentDialog {
 			
 			switch(state) {
 			case BUSY:
-				this.updateMessage(i18n.getString("TransformationAdjustmentDialog.busy.label", "Feature adjustment in process\u2026"));
+				this.updateMessage(i18n.getString("TransformationAdjustmentDialog.busy.label", "Parameter adjustment in process\u2026"));
 				this.updateIterationProgressMessage(null);
 				this.updateConvergenceProgressMessage(null);
 				break;
@@ -300,7 +300,7 @@ public class TransformationAdjustmentDialog {
 
 			case ERROR_FREE_ESTIMATION:
 				this.updateProgress(ProgressIndicator.INDETERMINATE_PROGRESS, ProgressIndicator.INDETERMINATE_PROGRESS);
-				this.updateMessage(i18n.getString("TransformationAdjustmentDialog.error_free_estimation.label", "Feature adjustment finished\u2026"));
+				this.updateMessage(i18n.getString("TransformationAdjustmentDialog.error_free_estimation.label", "Parameter adjustment finished\u2026"));
 				break;
 
 			case INTERRUPT:
@@ -373,8 +373,8 @@ public class TransformationAdjustmentDialog {
 
 		this.dialog = new Dialog<EstimationStateType>();
 		this.dialog.initOwner(window);
-		this.dialog.setTitle(i18n.getString("TransformationAdjustmentDialog.title", "Feature adjustment"));
-		this.dialog.setHeaderText(i18n.getString("TransformationAdjustmentDialog.header", "Feature adjustment is processing\u2026"));
+		this.dialog.setTitle(i18n.getString("TransformationAdjustmentDialog.title", "Parameter adjustment"));
+		this.dialog.setHeaderText(i18n.getString("TransformationAdjustmentDialog.header", "Transformation parameter adjustment is processing\u2026"));
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
 		VBox vbox = new VBox();
@@ -461,7 +461,7 @@ public class TransformationAdjustmentDialog {
 						Platform.runLater(new Runnable() {
 							@Override public void run() {
 								OptionDialog.showThrowableDialog (
-								i18n.getString("TransformationAdjustmentDialog.message.error.failed.noconvergence.title",  "Feature adjustment failed"),
+								i18n.getString("TransformationAdjustmentDialog.message.error.failed.noconvergence.title",  "Parameter adjustment failed"),
 								i18n.getString("TransformationAdjustmentDialog.message.error.failed.noconvergence.header", "Iteration process diverges"),
 								i18n.getString("TransformationAdjustmentDialog.message.error.failed.noconvergence.message", "Error, iteration limit of adjustment process reached but without satisfactory convergence."),
 								throwable
@@ -474,7 +474,7 @@ public class TransformationAdjustmentDialog {
 						Platform.runLater(new Runnable() {
 							@Override public void run() {
 								OptionDialog.showThrowableDialog (
-								i18n.getString("TransformationAdjustmentDialog.message.error.failed.singularmatrix.title",  "Feature adjustment failed"),
+								i18n.getString("TransformationAdjustmentDialog.message.error.failed.singularmatrix.title",  "Parameter adjustment failed"),
 								i18n.getString("TransformationAdjustmentDialog.message.error.failed.singularmatrix.header", "Singular normal euqation matrix"),
 								i18n.getString("TransformationAdjustmentDialog.message.error.failed.singularmatrix.message", "Error, could not invert normal equation matrix."),
 								throwable
@@ -487,9 +487,9 @@ public class TransformationAdjustmentDialog {
 						Platform.runLater(new Runnable() {
 							@Override public void run() {
 								OptionDialog.showThrowableDialog (
-										i18n.getString("TransformationAdjustmentDialog.message.error.failed.outofmemory.title",  "Feature adjustment failed"),
+										i18n.getString("TransformationAdjustmentDialog.message.error.failed.outofmemory.title",  "Parameter adjustment failed"),
 										i18n.getString("TransformationAdjustmentDialog.message.error.failed.outofmemory.header", "Out of memory"),
-										i18n.getString("TransformationAdjustmentDialog.message.error.failed.outofmemory.message", "Error, not enough memory to adjust feature. Please allocate more memory."),
+										i18n.getString("TransformationAdjustmentDialog.message.error.failed.outofmemory.message", "Error, not enough memory to adjust transformtion parameters. Please allocate more memory."),
 								throwable
 								);
 							}
@@ -500,9 +500,9 @@ public class TransformationAdjustmentDialog {
 						Platform.runLater(new Runnable() {
 							@Override public void run() {
 								OptionDialog.showThrowableDialog (
-										i18n.getString("TransformationAdjustmentDialog.message.error.failed.exception.title", "Feature adjustment failed"),
-										i18n.getString("TransformationAdjustmentDialog.message.error.failed.exception.header", "Error, could not adjust feature."),
-										i18n.getString("TransformationAdjustmentDialog.message.error.failed.exception.message", "An exception has occurred during feature adjustment."),
+										i18n.getString("TransformationAdjustmentDialog.message.error.failed.exception.title", "Parameter adjustment failed"),
+										i18n.getString("TransformationAdjustmentDialog.message.error.failed.exception.header", "Error, could not adjust transformation parameters."),
+										i18n.getString("TransformationAdjustmentDialog.message.error.failed.exception.message", "An exception has occurred during parameter adjustment."),
 										throwable
 										);
 							}

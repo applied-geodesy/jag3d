@@ -40,6 +40,7 @@ import org.applied_geodesy.coordtrans.ui.dialog.TransformationAdjustmentDialog;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.menu.UIMenuBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIHomologousFramePositionPairTableBuilder;
+import org.applied_geodesy.coordtrans.ui.table.UIParameterTableBuilder;
 import org.applied_geodesy.coordtrans.ui.tabpane.UITabPaneBuilder;
 import org.applied_geodesy.coordtrans.ui.tree.TreeItemValue;
 import org.applied_geodesy.coordtrans.ui.tree.UITreeBuilder;
@@ -203,7 +204,7 @@ public class CoordTrans extends Application {
 			// add listener to UI components
 			TransformationAdjustment adjustment = treeBuilder.getTransformationAdjustment();
 			adjustment.addTransformationChangeListener(treeBuilder);
-//			adjustment.addTransformationChangeListener(UIParameterTableBuilder.getInstance());
+			adjustment.addTransformationChangeListener(UIParameterTableBuilder.getInstance());
 			adjustment.addTransformationChangeListener(UIHomologousFramePositionPairTableBuilder.getInstance());
 			adjustment.addTransformationChangeListener(new AdjustmentTransformationChangedListener());
 			

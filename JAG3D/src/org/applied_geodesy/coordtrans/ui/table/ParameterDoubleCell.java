@@ -72,7 +72,7 @@ class ParameterDoubleCell extends EditableCell<UnknownParameter, Double> impleme
 					this.editableDoubleCellConverter.setCellValueType(CellValueType.LENGTH_RESIDUAL);
 				
 				break;
-			
+
 			case QUATERNION_Q0:
 			case QUATERNION_Q1:
 			case QUATERNION_Q2:
@@ -117,6 +117,7 @@ class ParameterDoubleCell extends EditableCell<UnknownParameter, Double> impleme
 
 				break;
 				
+			
 			case SCALE_SHEAR_COMPONENT_S11:
 			case SCALE_SHEAR_COMPONENT_S12:
 			case SCALE_SHEAR_COMPONENT_S13:

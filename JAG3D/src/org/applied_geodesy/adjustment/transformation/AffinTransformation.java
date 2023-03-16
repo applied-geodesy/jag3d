@@ -100,7 +100,7 @@ public class AffinTransformation extends Transformation {
 		Restriction eulerAngleXRestriction = new QuaternionEulerAngleRestriction(false, EulerAxisType.X_AXIS, q0, q1, q2, q3, eulerAngleX);
 		Restriction eulerAngleYRestriction = new QuaternionEulerAngleRestriction(false, EulerAxisType.Y_AXIS, q0, q1, q2, q3, eulerAngleY);
 		Restriction eulerAngleZRestriction = new QuaternionEulerAngleRestriction(false, EulerAxisType.Z_AXIS, q0, q1, q2, q3, eulerAngleZ);
-		
+
 		// Derive scale
 		Restriction scaleXRestriction = new ProductSumRestriction(false, List.of(s11), List.of(s11), 0.5, List.of(SignType.PLUS), scaleX);
 		Restriction scaleYRestriction = new ProductSumRestriction(false, List.of(s12, s22), List.of(s12, s22), 0.5, List.of(SignType.PLUS, SignType.PLUS), scaleY);

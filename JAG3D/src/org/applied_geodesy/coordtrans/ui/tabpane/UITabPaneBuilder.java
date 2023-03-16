@@ -21,9 +21,11 @@
 
 package org.applied_geodesy.coordtrans.ui.tabpane;
 
+import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositionPair;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.table.UIHomologousFramePositionPairTableBuilder;
+import org.applied_geodesy.coordtrans.ui.table.UIParameterTableBuilder;
 import org.applied_geodesy.coordtrans.ui.tree.TreeItemType;
 import org.applied_geodesy.coordtrans.ui.tree.TreeItemValue;
 import org.applied_geodesy.ui.table.ColumnType;
@@ -65,6 +67,7 @@ public class UITabPaneBuilder {
 	private TabSelectionChangeListener tabSelectionChangeListener = new TabSelectionChangeListener();
 	
 	private UIHomologousFramePositionPairTableBuilder observationTableBuilder = UIHomologousFramePositionPairTableBuilder.getInstance();
+	private UIParameterTableBuilder parameterTableBuilder = UIParameterTableBuilder.getInstance();
 	
 	private ObservableMap<TabType, Tab> tapMap = FXCollections.observableHashMap();
 	private TreeItemValue<?> lastTreeItemValue = null;
@@ -145,6 +148,10 @@ public class UITabPaneBuilder {
 
 			break;
 		case TRANSFORMATION_PARAMETERS:
+			TableView<UnknownParameter> parameterTableView = this.parameterTableBuilder.getTable();
+			this.setTableColumnView(tabType, parameterTableView);
+			node = parameterTableView;
+
 			break;
 		case TRANSFORMED_POSITIONS:
 			break;

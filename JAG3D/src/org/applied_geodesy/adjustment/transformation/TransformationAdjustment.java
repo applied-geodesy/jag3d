@@ -120,6 +120,10 @@ public class TransformationAdjustment {
 		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs)  {
 			homologousPointPair.getTestStatistic().setVarianceComponent(this.varianceComponentOfUnitWeight);
 		}
+		
+		for (UnknownParameter unknownParameter : this.parameters) {
+			unknownParameter.getTestStatistic().setVarianceComponent(this.varianceComponentOfUnitWeight);
+		}
 
 		this.testStatisticParameters = this.getTestStatisticParameters(this.testStatisticDefinition);
 
@@ -478,7 +482,15 @@ public class TransformationAdjustment {
 			if (this.Qxx != null) {
 				for (UnknownParameter unknownParameter : this.parameters) {
 					int column = unknownParameter.getColumn();
-					unknownParameter.setUncertainty( column >= 0 ? Math.sqrt(Math.abs(varianceOfUnitWeight * this.Qxx.get(column, column))) : 0.0 );
+					double value0   = column >= 0 ? unknownParameter.getValue0() : 0;
+					double value    = column >= 0 ? unknownParameter.getValue() : 0;
+					double cofactor = column >= 0 ? Math.max(0, this.Qxx.get(column, column)) : 0;
+					double dVal = value - value0;
+					double T = cofactor > 0 ? dVal * dVal / cofactor : 0;
+					
+					unknownParameter.setUncertainty( column >= 0 ? Math.sqrt(Math.abs(varianceOfUnitWeight * cofactor)) : 0.0 );
+					unknownParameter.getTestStatistic().setFisherTestNumerator(T);
+					unknownParameter.getTestStatistic().setDegreeOfFreedom(1);
 				}
 			}
 		}

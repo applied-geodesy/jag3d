@@ -474,21 +474,21 @@ public class SpatialAffinEquations extends TransformationEquations {
 		this.parameters.put(ParameterType.SHIFT_Y, new UnknownParameter(ParameterType.SHIFT_Y, true));
 		this.parameters.put(ParameterType.SHIFT_Z, new UnknownParameter(ParameterType.SHIFT_Z, true));
 		
-		this.parameters.put(ParameterType.QUATERNION_Q0, new UnknownParameter(ParameterType.QUATERNION_Q0, true));
+		this.parameters.put(ParameterType.QUATERNION_Q0, new UnknownParameter(ParameterType.QUATERNION_Q0, true, 1.0));
 		this.parameters.put(ParameterType.QUATERNION_Q1, new UnknownParameter(ParameterType.QUATERNION_Q1, true));
 		this.parameters.put(ParameterType.QUATERNION_Q2, new UnknownParameter(ParameterType.QUATERNION_Q2, true));
 		this.parameters.put(ParameterType.QUATERNION_Q3, new UnknownParameter(ParameterType.QUATERNION_Q3, true));
 		
-		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S11, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S11, true));
+		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S11, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S11, true, 1.0));
 		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S12, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S12, true));
 		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S13, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S13, true));
 		
-		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S22, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S22, true));
+		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S22, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S22, true, 1.0));
 		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S23, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S23, true));
 		
-		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S33, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S33, true));
+		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S33, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S33, true, 1.0));
 		
-		this.parameters.put(ParameterType.VECTOR_LENGTH, new UnknownParameter(ParameterType.VECTOR_LENGTH, true, 1.0, true, ProcessingType.FIXED));
+		this.parameters.put(ParameterType.VECTOR_LENGTH, new UnknownParameter(ParameterType.VECTOR_LENGTH, true, 1.0, false, ProcessingType.FIXED));
 		
 		UnknownParameter q0 = this.parameters.get(ParameterType.QUATERNION_Q0);
 		UnknownParameter q1 = this.parameters.get(ParameterType.QUATERNION_Q1);
