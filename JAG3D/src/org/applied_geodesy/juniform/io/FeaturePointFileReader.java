@@ -85,20 +85,27 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 	public void parse(String line) {
 		line = line.trim();
 		FeaturePoint point = null;
-		switch(this.featureType) {
-		case CURVE:
-			point = scanCurvePoint(line);
-			break;
-		case SURFACE:
-			point = scanSurfacePoint(line);
-			break;		
+		
+		try {
+			switch(this.featureType) {
+			case CURVE:
+				point = scanCurvePoint(line);
+				break;
+			case SURFACE:
+				point = scanSurfacePoint(line);
+				break;		
+			}
+		}
+		catch (NumberFormatException e) {
+			e.printStackTrace();
+			return;
 		}
 
 		if (point != null)
 			this.points.add(point);
 	}
 	
-	private static FeaturePoint scanCurvePoint(String str) {
+	private static FeaturePoint scanCurvePoint(String str) throws NumberFormatException {
 		FormatterOptions options = FormatterOptions.getInstance();
 		String columns[] = str.trim().split("[\\s;]+");
 
@@ -157,7 +164,7 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 		return point;
 	}
 	
-	private static FeaturePoint scanSurfacePoint(String str) {
+	private static FeaturePoint scanSurfacePoint(String str) throws NumberFormatException {
 		FormatterOptions options = FormatterOptions.getInstance();
 		String columns[] = str.trim().split("[\\s;]+");
 		
@@ -239,197 +246,6 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 		point.setDispersionApriori(dispersion);
 		return point;
 	}
-	
-//	private static FeaturePoint scanCurvePoint(String str) {
-//		FormatterOptions options = FormatterOptions.getInstance();
-//		Scanner scanner = new Scanner( str.trim() );
-//		try {
-//			scanner.useLocale( Locale.ENGLISH );
-//			String name; 
-//			double y = 0.0, x = 0.0;
-//			double sigmaY = 0.0, sigmaX = 0.0;
-//
-//			// Name of point
-//			if (!scanner.hasNext())
-//				return null;
-//			name = scanner.next();
-//			
-//			// x-component 		
-//			if (!scanner.hasNextDouble())
-//				return null;
-//			x = options.convertLengthToModel(scanner.nextDouble());
-//
-//			// y-component 		
-//			if (!scanner.hasNextDouble())
-//				return null;
-//			y = options.convertLengthToModel(scanner.nextDouble());
-//			
-//			FeaturePoint point = new FeaturePoint(name, x, y);
-//
-//			// uncertainty: sigma X (or sigmaX/Y)
-//			if (!scanner.hasNextDouble()) 
-//				return point;
-//			
-//			sigmaY = sigmaX = options.convertLengthToModel(scanner.nextDouble());
-//
-//			// uncertainty: sigma Y
-//			if (!scanner.hasNextDouble()) {
-//				if (sigmaX <= 0 || sigmaY <= 0)
-//					return point;
-//				
-//				Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
-//				dispersion.set(0, 0, sigmaX * sigmaX);
-//				dispersion.set(1, 1, sigmaY * sigmaY);
-//				point.setDispersionApriori(dispersion);
-//				return point;
-//			}
-//			
-//			sigmaY = options.convertLengthToModel(scanner.nextDouble());
-//			
-//			// fully populated co-variance: varX covXY varY
-//			// correlation: XY
-//			if (!scanner.hasNextDouble()) {
-//				if (sigmaX <= 0 || sigmaY <= 0)
-//					return point;
-//				
-//				Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
-//				dispersion.set(0, 0, sigmaX * sigmaX);
-//				dispersion.set(1, 1, sigmaY * sigmaY);
-//				point.setDispersionApriori(dispersion);
-//				return point;
-//			}
-//			
-//			// first two values == first row/column
-//			double varX  = options.convertLengthToModel(sigmaX);
-//			double covXY = options.convertLengthToModel(sigmaY);
-//
-//			double varY  = options.convertLengthToModel(options.convertLengthToModel(scanner.nextDouble()));
-//			
-//			if (varX <= 0 || varY <= 0)
-//				return point;
-//			
-//			Matrix dispersion = new UpperSymmPackMatrix(point.getDimension());
-//			dispersion.set(0, 0, varX);
-//			dispersion.set(0, 1, covXY);
-//			dispersion.set(1, 1, varY);
-//			point.setDispersionApriori(dispersion);
-//			return point;
-//			
-//		}
-//		finally {
-//			scanner.close();
-//		}
-//	}
-	
-//	private static FeaturePoint scanSurfacePoint(String str) {
-//		FormatterOptions options = FormatterOptions.getInstance();
-//		Scanner scanner = new Scanner( str.trim() );
-//		try {
-//			scanner.useLocale( Locale.ENGLISH );
-//			String name; 
-//			double y = 0.0, x = 0.0, z = 0.0;
-//			double sigmaY = 0.0, sigmaX = 0.0, sigmaZ = 0.0;
-//
-//			// Name of point
-//			if (!scanner.hasNext())
-//				return null;
-//			name = scanner.next();
-//			
-//			// x-component 		
-//			if (!scanner.hasNextDouble())
-//				return null;
-//			x = options.convertLengthToModel(scanner.nextDouble());
-//
-//			// y-component		
-//			if (!scanner.hasNextDouble())
-//				return null;
-//			y = options.convertLengthToModel(scanner.nextDouble());
-//
-//			// z-component 		
-//			if (!scanner.hasNextDouble())
-//				return null;
-//			z = options.convertLengthToModel(scanner.nextDouble());
-//
-//			FeaturePoint point = new FeaturePoint(name, x, y, z);
-//			
-//			// uncertainty: sigma X (or sigma x/y/z)
-//			if (!scanner.hasNextDouble()) 
-//				return point;
-//
-//			sigmaX = sigmaY = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
-//			
-//			// uncertainty: sigma Y (or sigma Z)
-//			if (!scanner.hasNextDouble()) {
-//				if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
-//					return point;
-//
-//				Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
-//				dispersion.set(0, 0, sigmaX * sigmaX);
-//				dispersion.set(1, 1, sigmaY * sigmaY);
-//				dispersion.set(2, 2, sigmaZ * sigmaZ);
-//				point.setDispersionApriori(dispersion);
-//				return point;
-//			}
-//
-//			sigmaY = sigmaZ = options.convertLengthToModel(scanner.nextDouble());
-//
-//			// uncertainty: sigma Z
-//			if (!scanner.hasNextDouble()) {
-//				if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
-//					return point;
-//				
-//				Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
-//				dispersion.set(0, 0, sigmaX * sigmaX);
-//				dispersion.set(1, 1, sigmaX * sigmaX);
-//				dispersion.set(2, 2, sigmaZ * sigmaZ);
-//				point.setDispersionApriori(dispersion);
-//				return point;
-//			}
-//
-//			sigmaZ = options.convertLengthToModel(scanner.nextDouble());
-//
-//			// fully populated co-variance: varX covXY covXZ varY covYZ varZ
-//			// correlation: XYZ
-//			if (!scanner.hasNextDouble()) {
-//				if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
-//					return point;
-//				
-//				Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
-//				dispersion.set(0, 0, sigmaX * sigmaX);
-//				dispersion.set(1, 1, sigmaY * sigmaY);
-//				dispersion.set(2, 2, sigmaZ * sigmaZ);
-//				point.setDispersionApriori(dispersion);
-//				return point;
-//			}
-//			
-//			// first three values == first row/column
-//			double varX  = options.convertLengthToModel(sigmaX);
-//			double covXY = options.convertLengthToModel(sigmaY);
-//			double covXZ = options.convertLengthToModel(sigmaZ);
-//			
-//			double varY  = options.convertLengthToModel(options.convertLengthToModel(scanner.nextDouble()));
-//			double covYZ = options.convertLengthToModel(options.convertLengthToModel(scanner.nextDouble()));
-//			
-//			double varZ  = options.convertLengthToModel(options.convertLengthToModel(scanner.nextDouble()));
-//
-//			if (varX <= 0 || varY <= 0 || varZ <= 0)
-//				return point;
-//			
-//			Matrix dispersion = new UpperSymmPackMatrix(point.getDimension());
-//			dispersion.set(0, 0, varX);
-//			dispersion.set(0, 1, covXY);
-//			dispersion.set(0, 2, covXZ);
-//			dispersion.set(1, 1, varY);
-//			dispersion.set(1, 2, covYZ);
-//			dispersion.set(2, 2, varZ);
-//			point.setDispersionApriori(dispersion);
-//			return point;
-//
-//		}
-//		finally {
-//			scanner.close();
-//		}
-//	}
 	
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
