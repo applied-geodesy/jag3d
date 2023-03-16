@@ -61,7 +61,17 @@ import javafx.scene.text.Font;
 import javafx.util.Duration;
 
 public class UIPointPropertiesPane {
-
+	private class CommitTextFieldActionListener implements EventHandler<ActionEvent> {
+		@Override
+		public void handle(ActionEvent event) {
+			if (!ignoreValueUpdate && event.getSource() != null && event.getSource() instanceof DoubleTextField && ((DoubleTextField)event.getSource()).getUserData() != null && ((DoubleTextField)event.getSource()).getUserData() instanceof PointGroupUncertaintyType) {
+				DoubleTextField field = (DoubleTextField)event.getSource();
+				PointGroupUncertaintyType uncertaintyType = (PointGroupUncertaintyType)field.getUserData();
+				save(uncertaintyType);
+			}
+		}
+	}
+	
 	private class NumberChangeListener implements ChangeListener<Double> {
 		private final DoubleTextField field;
 
@@ -230,6 +240,7 @@ public class UIPointPropertiesPane {
 				this.uncertaintyCoordinateYField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.y.tooltip", "Uncertainty of y-component of stochastic points")));
 				this.uncertaintyCoordinateYField.setUserData(PointGroupUncertaintyType.COMPONENT_Y);
 				this.uncertaintyCoordinateYField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateYField));
+				this.uncertaintyCoordinateYField.setOnAction(new CommitTextFieldActionListener());
 				this.uncertaintyCoordinateYField.setMinWidth(fieldMinWidth);
 				this.uncertaintyCoordinateYField.setMaxWidth(fieldMaxWidth);
 				
@@ -240,6 +251,7 @@ public class UIPointPropertiesPane {
 				this.uncertaintyCoordinateXField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.x.tooltip", "Uncertainty of x-component of stochastic points")));
 				this.uncertaintyCoordinateXField.setUserData(PointGroupUncertaintyType.COMPONENT_X);
 				this.uncertaintyCoordinateXField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateXField));
+				this.uncertaintyCoordinateXField.setOnAction(new CommitTextFieldActionListener());
 				this.uncertaintyCoordinateXField.setMinWidth(fieldMinWidth);
 				this.uncertaintyCoordinateXField.setMaxWidth(fieldMaxWidth);
 				
@@ -271,6 +283,7 @@ public class UIPointPropertiesPane {
 				this.uncertaintyCoordinateZField.setTooltip(new Tooltip(i18n.getString("UIPointPropertiesPane.uncertainty.point.z.tooltip", "Uncertainty of z-component of stochastic points")));
 				this.uncertaintyCoordinateZField.setUserData(PointGroupUncertaintyType.COMPONENT_Z);
 				this.uncertaintyCoordinateZField.numberProperty().addListener(new NumberChangeListener(this.uncertaintyCoordinateZField));
+				this.uncertaintyCoordinateZField.setOnAction(new CommitTextFieldActionListener());
 				this.uncertaintyCoordinateZField.setMinWidth(fieldMinWidth);
 				this.uncertaintyCoordinateZField.setMaxWidth(fieldMaxWidth);
 				
