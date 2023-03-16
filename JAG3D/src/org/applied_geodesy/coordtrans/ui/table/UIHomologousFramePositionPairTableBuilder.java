@@ -31,6 +31,7 @@ import org.applied_geodesy.adjustment.transformation.TransformationEvent;
 import org.applied_geodesy.adjustment.transformation.TransformationEvent.TransformationEventType;
 import org.applied_geodesy.adjustment.transformation.TransformationType;
 import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositionPair;
+import org.applied_geodesy.coordtrans.ui.dialog.MatrixDialog;
 import org.applied_geodesy.ui.table.AbsoluteValueComparator;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
@@ -52,6 +53,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.util.Callback;
 import no.uib.cipr.matrix.Matrix;
@@ -71,7 +73,7 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 	
 	public void setTransformationType(TransformationType transformationType) {
 		if (this.transformationType != transformationType) {
-			this.table.getItems().clear();
+			this.getTableModel(this.table).clear();
 			this.table.refresh();
 			this.transformationType = transformationType;
 		}
@@ -680,7 +682,7 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		}
 	}
 	
-	private void setPointsToFeature(Transformation transformation) {
+	private void setPositionsToTransformation(Transformation transformation) {
 		for (HomologousFramePositionPair positionPair : this.table.getItems())
 			positionPair.reset();
 		if (transformation != null) {
@@ -691,9 +693,9 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 	@Override
 	public void transformationChanged(TransformationEvent evt) {
 		if (evt.getEventType() == TransformationEventType.TRANSFORMATION_MODEL_ADDED)
-			this.setPointsToFeature(evt.getSource());
+			this.setPositionsToTransformation(evt.getSource());
 		else if (evt.getEventType() == TransformationEventType.TRANSFORMATION_MODEL_REMOVED)
-			this.setPointsToFeature(null);
+			this.setPositionsToTransformation(null);
 	}
 
 	private static Callback<TableColumn<HomologousFramePositionPair, Matrix[]>, TableCell<HomologousFramePositionPair, Matrix[]>> getMatrixCallback() {
@@ -714,13 +716,20 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 							this.button.getTooltip().setText(String.format(
 									Locale.ENGLISH, 
 									i18n.getString("UIPointTableBuilder.dispersion.button.tooltip", "Show dispersion of point %s"),
-									getTableView().getItems().get(getIndex()).getName()));
+									getTableRow().getItem().getName()));
+
+							this.button.setOnMousePressed(new EventHandler<MouseEvent>() {
+								@Override
+								public void handle(MouseEvent event) {
+									getTableView().getSelectionModel().clearAndSelect(getTableRow().getIndex());
+								}
+							});
 							this.button.setOnAction(new EventHandler<ActionEvent>() {
 								@Override
 								public void handle(ActionEvent event) {
 									HomologousFramePositionPair positionPair = getTableRow().getItem();
-									//TODO
-									//MatrixDialog.showAndWait(positionPair);
+									getTableView().getSelectionModel().clearAndSelect(getTableRow().getIndex());
+									MatrixDialog.showAndWait(positionPair);
 								}
 								
 							});
@@ -729,6 +738,7 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 						}
 					}
 				};
+
 				tableCell.setAlignment(Pos.CENTER);
 				return tableCell;
 			}

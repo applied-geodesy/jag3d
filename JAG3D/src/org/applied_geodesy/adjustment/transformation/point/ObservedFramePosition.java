@@ -34,29 +34,29 @@ import no.uib.cipr.matrix.UpperSymmPackMatrix;
 public class ObservedFramePosition extends Position implements DispersionablePosition {
 	private ObjectProperty<Matrix> dispersionApriori = new SimpleObjectProperty<Matrix>(this, "dispersionApriori");
 	
-	ObservedFramePosition(double z0) throws IllegalArgumentException {
+	public ObservedFramePosition(double z0) throws IllegalArgumentException {
 		this(z0, MathExtension.identity(1));
 	}
 	
-	ObservedFramePosition(double z0, Matrix dispersion) throws IllegalArgumentException {
+	public ObservedFramePosition(double z0, Matrix dispersion) throws IllegalArgumentException {
 		super(z0);
 		this.setDispersionApriori(dispersion);
 	}
 
-	ObservedFramePosition(double x0, double y0) throws IllegalArgumentException {
+	public ObservedFramePosition(double x0, double y0) throws IllegalArgumentException {
 		this(x0, y0, MathExtension.identity(2));
 	}
 	
-	ObservedFramePosition(double x0, double y0, Matrix dispersion) throws IllegalArgumentException {
+	public ObservedFramePosition(double x0, double y0, Matrix dispersion) throws IllegalArgumentException {
 		super(x0, y0);
 		this.setDispersionApriori(dispersion);
 	}
 	
-	ObservedFramePosition(double x0, double y0, double z0) throws IllegalArgumentException {
+	public ObservedFramePosition(double x0, double y0, double z0) throws IllegalArgumentException {
 		this(x0, y0, z0, MathExtension.identity(3));
 	}
 	
-	ObservedFramePosition(double x0, double y0, double z0, Matrix dispersion) throws IllegalArgumentException {
+	public ObservedFramePosition(double x0, double y0, double z0, Matrix dispersion) throws IllegalArgumentException {
 		super(x0, y0, z0);
 		this.setDispersionApriori(dispersion);
 	}

@@ -19,20 +19,17 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.coordtrans.ui.tree;
+package org.applied_geodesy.coordtrans.ui.menu;
 
-import org.applied_geodesy.coordtrans.ui.tabpane.TabType;
-
-public class TransformationParameterTreeItemValue extends TreeItemValue<Void> {
-
-	TransformationParameterTreeItemValue(String name) {
-		super(name, TreeItemType.TRANSFORMATION_PARAMETERS);
-	}
-
-	@Override
-	public TabType[] getTabTypes() {
-		return new  TabType[] {
-				TabType.APOSTERIORI_PARAMETERS
-		};
-	}
+enum MenuItemType {
+	
+	IMPORT_POSITIONS,
+	
+	TEST_STATISTIC,
+	LEAST_SQUARES,
+	PREFERENCES,
+	
+	REPORT,
+	ABOUT,
+	EXIT;
 }

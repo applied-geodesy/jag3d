@@ -19,20 +19,9 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.coordtrans.ui.tree;
 
-import org.applied_geodesy.coordtrans.ui.tabpane.TabType;
+package org.applied_geodesy.coordtrans.ui.dialog;
 
-public class TransformationParameterTreeItemValue extends TreeItemValue<Void> {
-
-	TransformationParameterTreeItemValue(String name) {
-		super(name, TreeItemType.TRANSFORMATION_PARAMETERS);
-	}
-
-	@Override
-	public TabType[] getTabTypes() {
-		return new  TabType[] {
-				TabType.APOSTERIORI_PARAMETERS
-		};
-	}
+enum FrameType {
+	SOURCE, TARGET
 }

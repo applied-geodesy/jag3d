@@ -138,15 +138,15 @@ public class UITabPaneBuilder {
 			
 			break;
 			
-		case OBSERVATIPON:
+		case OBSERVED_POSITIONS:
 			TableView<HomologousFramePositionPair> observationTableView = this.observationTableBuilder.getTable();
 			this.setTableColumnView(tabType, observationTableView);
 			node = observationTableView;
 
 			break;
-		case PARAMETER:
+		case TRANSFORMATION_PARAMETERS:
 			break;
-		case TRANSFORMATION:
+		case TRANSFORMED_POSITIONS:
 			break;
 		case UNSPECIFIC:
 			break;

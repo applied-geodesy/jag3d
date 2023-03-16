@@ -61,13 +61,7 @@ public class HomologousFramePositionPair extends PositionPair<HomologousFramePos
 	private ObjectProperty<Double> fisherQuantileApriori     = new SimpleObjectProperty<Double>(this, "fisherQuantileApriori", Double.MAX_VALUE);
 	private ObjectProperty<Double> fisherQuantileAposteriori = new SimpleObjectProperty<Double>(this, "fisherQuantileAposteriori", Double.MAX_VALUE);
 
-	
-	
-//	public HomologousFramePositionPair(HomologousFramePositionPair positionPair) {
-//		this(positionPair.getSourceSystem(), positionPair.getTargetSystem());
-//		this.setEnable(positionPair.isEnable());
-//	}
-	
+
 	public HomologousFramePositionPair(String name, double zSrc, double zTrg) {
 		this(name, new HomologousFramePosition(zSrc), new HomologousFramePosition(zTrg));
 	}
@@ -400,16 +394,7 @@ public class HomologousFramePositionPair extends PositionPair<HomologousFramePos
 		return this.getTargetSystemPosition().residualZProperty();
 	}
 	
-//	public ObservableObjectValue<Matrix> dispersionAprioriProperty() {
-//		return new ReadOnlyObjectWrapper<Matrix>(
-//				new DualBlockDiagonalMatrix(
-//						this.getSourceSystemPosition().getDispersionApriori(), 
-//						this.getTargetSystemPosition().getDispersionApriori())
-//				);
-//	}
-	
-
-	public ObservableObjectValue<Matrix[]> dispersionAprioriProperty() {
+	public ReadOnlyObjectWrapper<Matrix[]> dispersionAprioriProperty() {
 		return new ReadOnlyObjectWrapper<Matrix[]>(
 				new Matrix[] {
 						this.getSourceSystemPosition().getDispersionApriori(), 
@@ -428,6 +413,10 @@ public class HomologousFramePositionPair extends PositionPair<HomologousFramePos
 		this.setGrossErrorX(0);
 		this.setGrossErrorY(0);
 		this.setGrossErrorZ(0);
+		
+		this.setMaximumTolerableBiasX(0);
+		this.setMaximumTolerableBiasY(0);
+		this.setMaximumTolerableBiasZ(0);
 		
 		this.setMinimalDetectableBiasX(0);
 		this.setMinimalDetectableBiasY(0);

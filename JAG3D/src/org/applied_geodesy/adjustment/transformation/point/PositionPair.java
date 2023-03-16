@@ -38,7 +38,8 @@ public abstract class PositionPair<T1 extends Positionable, T2 extends Positiona
 					+ "points having different dimensions " + sourcePosition.getDimension() + " vs. " + targetPosition.getDimension());
 		
 		this.sourcePosition = sourcePosition;
-		this.targetPosition = targetPosition;	
+		this.targetPosition = targetPosition;
+		this.setName(name);
 	}
 	
 	public T1 getSourceSystemPosition() {

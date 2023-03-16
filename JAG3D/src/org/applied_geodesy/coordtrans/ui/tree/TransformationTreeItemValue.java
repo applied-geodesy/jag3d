@@ -27,7 +27,7 @@ import org.applied_geodesy.coordtrans.ui.tabpane.TabType;
 public class TransformationTreeItemValue extends TreeItemValue<Void> {
 
 	TransformationTreeItemValue(String name) {
-		super(name, TreeItemType.TRANSFORMATION);
+		super(name, TreeItemType.TRANSFORMED_POSITIONS);
 	}
 
 	@Override

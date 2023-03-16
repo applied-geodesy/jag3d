@@ -14,6 +14,7 @@ import org.applied_geodesy.adjustment.EstimationStateType;
 import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.NormalEquationSystem;
+import org.applied_geodesy.adjustment.geometry.FeatureChangeListener;
 import org.applied_geodesy.adjustment.statistic.BaardaMethodTestStatistic;
 import org.applied_geodesy.adjustment.statistic.SidakTestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatistic;
@@ -1161,6 +1162,22 @@ public class TransformationAdjustment {
 		return new TestStatisticParameters(testStatistic);
 	}
 	
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		this.change.addPropertyChangeListener(listener);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+		this.change.removePropertyChangeListener(listener);
+	}
+	
+	public void addTransformationChangeListener(TransformationChangeListener l) {
+		this.listenerList.add(l);
+	}
+	
+	public void removeTransformationChangeListener(TransformationChangeListener l) {
+		this.listenerList.remove(l);
+	}
+	
 	private void fireTransformationChanged(Transformation transformation, TransformationEventType eventType) {
 		TransformationEvent evt = new TransformationEvent(transformation, eventType);
 		Object listeners[] = this.listenerList.toArray();
@@ -1169,7 +1186,7 @@ public class TransformationAdjustment {
 				((TransformationChangeListener)listeners[i]).transformationChanged(evt);
 		}
 	}
-	
+
 	public void setLevenbergMarquardtDampingValue(double lambda) {
 		this.dampingValue = Math.abs(lambda);
 	}
@@ -1186,11 +1203,42 @@ public class TransformationAdjustment {
 		this.maximalNumberOfIterations = maximalNumberOfIterations;
 	}
 	
-	public void addPropertyChangeListener(PropertyChangeListener listener) {
-		this.change.addPropertyChangeListener(listener);
+	public boolean isAdjustModelParametersOnly() {
+		return this.adjustModelParametersOnly;
 	}
-
-	public void removePropertyChangeListener(PropertyChangeListener listener) {
-		this.change.removePropertyChangeListener(listener);
+	
+	public void setAdjustModelParametersOnly(boolean adjustModelParametersOnly) {
+		this.adjustModelParametersOnly = adjustModelParametersOnly;
+	}
+	
+	public boolean isPreconditioning() {
+		return this.preconditioning;
+	}
+	
+	public void setPreconditioning(boolean preconditioning) {
+		this.preconditioning = preconditioning;
+	}
+	
+	public void addFeatureChangeListener(FeatureChangeListener l) {
+		this.listenerList.add(l);
+	}
+	
+	public void removeFeatureChangeListener(FeatureChangeListener l) {
+		this.listenerList.remove(l);
+	}
+	
+	public void interrupt() {
+		this.interrupt = true;
+	}
+	
+	public EstimationType getEstimationType() {
+		return this.estimationType;
+	}
+	
+	public void setEstimationType(EstimationType estimationType) throws IllegalArgumentException {
+		if (estimationType == EstimationType.L2NORM)
+			this.estimationType = estimationType;
+		else
+			throw new IllegalArgumentException("Error, unsupported estimation type " + estimationType + "!");
 	}
 }

@@ -52,8 +52,23 @@ public class FramePositionPair extends PositionPair<ObservedFramePosition, Estim
 		this(name, new ObservedFramePosition(xSrc, ySrc, zSrc, dispersionSrc), new EstimatedFramePosition(xTrg, yTrg, zTrg));
 	}
 	
+	public FramePositionPair(String name, ObservedFramePosition pointSrc) {
+		super(name, pointSrc, defaultEstimatedFramePosition(pointSrc.getDimension()));
+	}
+	
 	private FramePositionPair(String name, ObservedFramePosition pointSrc, EstimatedFramePosition pointTrg) {
 		super(name, pointSrc, pointTrg);
+	}
+	
+	private static EstimatedFramePosition defaultEstimatedFramePosition(int dim) {
+		switch(dim) {
+		case 1:
+			return new EstimatedFramePosition(0);
+		case 2:
+			return new EstimatedFramePosition(0,0);
+		default:
+			return new EstimatedFramePosition(0,0,0);
+		}
 	}
 	
 	@Override

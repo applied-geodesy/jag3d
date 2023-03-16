@@ -26,7 +26,7 @@ import org.applied_geodesy.coordtrans.ui.tabpane.TabType;
 public class ObservationTreeItemValue extends TreeItemValue<Void> {
 
 	ObservationTreeItemValue(String name) {
-		super(name, TreeItemType.OBSERVATIPON);
+		super(name, TreeItemType.OBSERVED_POSITIONS);
 	}
 
 	@Override

@@ -146,19 +146,11 @@ public class UITreeBuilder implements TransformationChangeListener {
 		return null;
 	}
 	
-	public void setTransformationType(TransformationType transformationType) {
-		this.setTransformation(null);
-		TreeItem<TreeItemValue<?>> observationItem = this.searchTreeItem(this.treeView.getRoot(), TreeItemType.OBSERVATIPON);
-		if (observationItem != null)
-			observationItem.getValue().setName(i18n.getString("UITreeBuilder.transformation.type.height", "Height Transformation"));
-
-		this.getTransformationAdjustment().setTransformation(null);
-	}
-	
 	private void setTransformation(Transformation transformation) {
+
 		this.treeView.getSelectionModel().select(0);
 		TreeItem<TreeItemValue<?>> observationItem = null;
-		observationItem = this.searchTreeItem(this.treeView.getRoot(), TreeItemType.OBSERVATIPON);
+		observationItem = this.searchTreeItem(this.treeView.getRoot(), TreeItemType.OBSERVED_POSITIONS);
 		
 		// TODO clean if null?
 
