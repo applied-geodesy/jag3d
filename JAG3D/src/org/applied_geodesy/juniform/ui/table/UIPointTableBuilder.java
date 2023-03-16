@@ -56,6 +56,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 import no.uib.cipr.matrix.Matrix;
 
@@ -541,10 +542,19 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 									Locale.ENGLISH, 
 									i18n.getString("UIPointTableBuilder.dispersion.button.tooltip", "Show dispersion of point %s"),
 									getTableView().getItems().get(getIndex()).getName()));
+							
+							this.button.setOnMousePressed(new EventHandler<MouseEvent>() {
+								@Override
+								public void handle(MouseEvent event) {
+									getTableView().getSelectionModel().clearAndSelect(getTableRow().getIndex());
+								}
+							});
+							
 							this.button.setOnAction(new EventHandler<ActionEvent>() {
 								@Override
 								public void handle(ActionEvent event) {
 									FeaturePoint featurePoint = getTableRow().getItem();
+									getTableView().getSelectionModel().clearAndSelect(getTableRow().getIndex());
 									MatrixDialog.showAndWait(featurePoint);
 								}
 								
