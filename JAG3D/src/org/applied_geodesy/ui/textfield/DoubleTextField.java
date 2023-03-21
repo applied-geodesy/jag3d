@@ -165,7 +165,15 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 
 	private void initHandlers() {
 
-		this.setOnAction(new EventHandler<ActionEvent>() {
+//		this.setOnAction(new EventHandler<ActionEvent>() {
+//			@Override
+//			public void handle(ActionEvent event) {
+//				parseAndFormatInput();
+//			}
+//		});
+		// https://docs.oracle.com/javase/8/javafx/api/javafx/scene/Node.html#setEventHandler-javafx.event.EventType-javafx.event.EventHandler-
+		// ActionEvent is called before setOnAction()
+		this.addEventHandler(ActionEvent.ACTION, new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				parseAndFormatInput();
