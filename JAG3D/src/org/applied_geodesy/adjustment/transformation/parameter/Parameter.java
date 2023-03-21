@@ -30,7 +30,7 @@ public class Parameter {
 	private ObjectProperty<String> description = new SimpleObjectProperty<String>(this, "description", "");
 	private ObjectProperty<String> name = new SimpleObjectProperty<String>(this, "name", "");
 	private ObjectProperty<Boolean> visible = new SimpleObjectProperty<Boolean>(this, "visible", Boolean.TRUE);
-	
+		
 	public Parameter(ParameterType parameterType) {
 		this(parameterType, Boolean.TRUE);
 	}

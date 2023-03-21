@@ -23,6 +23,7 @@ package org.applied_geodesy.coordtrans.ui.dialog;
 
 import java.util.Optional;
 
+import org.applied_geodesy.coordtrans.ui.utils.UiUtil;
 import org.applied_geodesy.version.VersionType;
 import org.applied_geodesy.version.coordtrans.Version;
 
@@ -101,12 +102,11 @@ public class AboutDialog {
 	}
 
 	private Node createPane() {
-		GridPane gridPane = new GridPane();
+		GridPane gridPane = UiUtil.createGridPane();
 		gridPane.setMaxWidth(Double.MAX_VALUE);
 		gridPane.setHgap(15);
 		gridPane.setVgap(10);
 		gridPane.setAlignment(Pos.CENTER);
-		gridPane.setPadding(new Insets(7,7,7,7)); // oben, recht, unten, links
 //		gridPane.setGridLinesVisible(true);
 		
 		Text applicationText = new Text("Least-Squares Adjustment of Transformation Parameters");

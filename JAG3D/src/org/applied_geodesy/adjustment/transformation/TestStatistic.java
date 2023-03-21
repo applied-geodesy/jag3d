@@ -30,8 +30,9 @@ import javafx.beans.property.SimpleObjectProperty;
 public class TestStatistic {
 	private ObjectProperty<VarianceComponent> varianceComponent = new SimpleObjectProperty<VarianceComponent>(this, "varianceComponent", new VarianceComponent());
 	
-	private ObjectProperty<Double> fisherTestNumerator = new SimpleObjectProperty<Double>(this, "fisherTestNumerator", 0.0);
-	private ObjectProperty<Integer> degreeOfFreedom    = new SimpleObjectProperty<Integer>(this, "degreeOfFreedom", 0);
+	private ObjectProperty<Double> fisherTestNumerator  = new SimpleObjectProperty<Double>(this, "fisherTestNumerator", 0.0);
+	private ObjectProperty<Integer> degreeOfFreedom     = new SimpleObjectProperty<Integer>(this, "degreeOfFreedom", 0);
+	private ObjectProperty<Boolean> applyBiasCorrection = new SimpleObjectProperty<Boolean>(this, "applyBiasCorrection", Boolean.TRUE);
 	
 	private ObjectBinding<Double> testStatisticApriori;
 	private ObjectBinding<Double> testStatisticAposteriori;
@@ -65,7 +66,7 @@ public class TestStatistic {
         
         this.testStatisticAposteriori = new ObjectBinding<Double>() {
 			{
-                super.bind(fisherTestNumerator, degreeOfFreedom, varianceComponent);
+                super.bind(applyBiasCorrection, fisherTestNumerator, degreeOfFreedom, varianceComponent);
             }
  
             @Override
@@ -73,11 +74,21 @@ public class TestStatistic {
             	if (degreeOfFreedom.get() == 0 || fisherTestNumerator.get() == 0 ||	!varianceComponent.get().isApplyAposterioriVarianceOfUnitWeight())
         			return 0.0;
 
-            	double omega       = varianceComponent.get().getOmega();
-        		double redundancy  = varianceComponent.get().getRedundancy();
-        		
-        		double unbiasedVariance = (omega - fisherTestNumerator.get()) / (redundancy - (double)degreeOfFreedom.get());
-        		if (unbiasedVariance < Math.sqrt(Constant.EPS) || redundancy - (double)degreeOfFreedom.get() <= 0)
+            	double unbiasedVariance = 0.0;
+            	
+            	if (applyBiasCorrection.get()) {
+            		double omega       = varianceComponent.get().getOmega();
+            		double redundancy  = varianceComponent.get().getRedundancy();
+
+            		if (redundancy - (double)degreeOfFreedom.get() <= 0)
+            			return 0.0;
+            		
+            		unbiasedVariance = (omega - fisherTestNumerator.get()) / (redundancy - (double)degreeOfFreedom.get());
+            	}
+            	else
+            		unbiasedVariance = varianceComponent.get().getVariance();
+            	
+        		if (unbiasedVariance < Math.sqrt(Constant.EPS))
         			return 0.0;
         		
         		return degreeOfFreedom.get() > 0 ? Math.abs(fisherTestNumerator.get() / (unbiasedVariance * (double)degreeOfFreedom.get())) : 0.0; 
@@ -110,6 +121,10 @@ public class TestStatistic {
 	
 	public void setDegreeOfFreedom(int degreeOfFreedom) {
 		this.degreeOfFreedom.set(degreeOfFreedom);
+	}
+	
+	public void setApplyBiasCorrection(boolean applyBiasCorrection) {
+		this.applyBiasCorrection.set(applyBiasCorrection);
 	}
 	
 	public double getPValueApriori() {
@@ -149,6 +164,10 @@ public class TestStatistic {
 		return this.degreeOfFreedom;
 	}
 	
+	public ObjectProperty<Boolean> applyBiasCorrectionProperty() {
+		return this.applyBiasCorrection;
+	}
+		
 	public ObjectProperty<VarianceComponent> varianceComponentProperty() {
 		return this.varianceComponent;
 	}

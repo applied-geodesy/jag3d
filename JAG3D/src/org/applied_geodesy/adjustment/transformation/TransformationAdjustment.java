@@ -208,7 +208,7 @@ public class TransformationAdjustment {
 	public EstimationStateType estimateModel() throws NotConvergedException, MatrixSingularException, OutOfMemoryError {
 		
 		try {
-			SimplePositionPair centerOfMasses = Transformation.deriveCenterOfMasses(this.transformation.getHomologousFramePositionPairs());
+			SimplePositionPair centerOfMasses = Transformation.deriveCenterOfMasses(this.transformation.getHomologousFramePositionPairs(), this.transformation.getRestrictions(), this.transformation.getSupportedParameterRestrictions());
 			this.prepareIterationProcess(centerOfMasses);
 			
 			this.adaptedDampingValue = this.dampingValue;
@@ -480,17 +480,29 @@ public class TransformationAdjustment {
 			this.varianceComponentOfUnitWeight.setSignificant(significant);
 
 			if (this.Qxx != null) {
+				int dim = 1;
+				int dof = (int)this.varianceComponentOfUnitWeight.getRedundancy();
+
+				TestStatisticParameterSet testStatisticParametersAprio = this.testStatisticParameters.getTestStatisticParameter(dim, Double.POSITIVE_INFINITY);
+				TestStatisticParameterSet testStatisticParametersApost = this.testStatisticParameters.getTestStatisticParameter(dim, dof-dim);
+
 				for (UnknownParameter unknownParameter : this.parameters) {
+					boolean isFixedParameter = this.transformation.isFixedParameter(unknownParameter);
+
 					int column = unknownParameter.getColumn();
-					double value0   = column >= 0 ? unknownParameter.getValue0() : 0;
-					double value    = column >= 0 ? unknownParameter.getValue() : 0;
-					double cofactor = column >= 0 ? Math.max(0, this.Qxx.get(column, column)) : 0;
-					double dVal = value - value0;
-					double T = cofactor > 0 ? dVal * dVal / cofactor : 0;
-					
-					unknownParameter.setUncertainty( column >= 0 ? Math.sqrt(Math.abs(varianceOfUnitWeight * cofactor)) : 0.0 );
+					double expValue    = !isFixedParameter && column >= 0 ? unknownParameter.getExpectedValue() : 0;
+					double value       = !isFixedParameter && column >= 0 ? unknownParameter.getValue() : 0;
+					double cofactor    = !isFixedParameter && column >= 0 ? Math.max(0, this.Qxx.get(column, column)) : 0;
+					double dVal        = !isFixedParameter ? value - expValue : 0;
+					double uncertainty = !isFixedParameter && column >= 0 ? Math.sqrt(Math.abs(varianceOfUnitWeight * cofactor)) : 0.0;
+					double T           = !isFixedParameter && uncertainty > SQRT_EPS & Math.abs(dVal) > SQRT_EPS ? dVal * dVal / cofactor : 0;
+
+					unknownParameter.setUncertainty(uncertainty );
 					unknownParameter.getTestStatistic().setFisherTestNumerator(T);
-					unknownParameter.getTestStatistic().setDegreeOfFreedom(1);
+					unknownParameter.getTestStatistic().setDegreeOfFreedom(dim);
+
+					unknownParameter.setFisherQuantileApriori(testStatisticParametersAprio.getQuantile());
+					unknownParameter.setFisherQuantileAposteriori(testStatisticParametersApost.getQuantile());
 				}
 			}
 		}

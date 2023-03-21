@@ -253,11 +253,11 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 
 		switch (parameterType) {
 		case SHIFT_X:
-			return i18n.getString("UIParameterTableBuilder.parameter.type.shift.x", "Shift x");
+			return i18n.getString("UIParameterTableBuilder.parameter.type.shift.x", "Shift tx");
 		case SHIFT_Y:
-			return i18n.getString("UIParameterTableBuilder.parameter.type.shift.y", "Shift y");
+			return i18n.getString("UIParameterTableBuilder.parameter.type.shift.y", "Shift ty");
 		case SHIFT_Z:
-			return i18n.getString("UIParameterTableBuilder.parameter.type.shift.z", "Shift z");
+			return i18n.getString("UIParameterTableBuilder.parameter.type.shift.z", "Shift tz");
 			
 		case QUATERNION_Q0:
 			return i18n.getString("UIParameterTableBuilder.parameter.type.quaternion.q0", "Quaternion q0");

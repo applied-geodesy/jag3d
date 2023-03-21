@@ -28,6 +28,7 @@ import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.transformation.point.HomologousFramePosition;
 import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositionPair;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
+import org.applied_geodesy.coordtrans.ui.utils.UiUtil;
 import org.applied_geodesy.ui.textfield.DoubleTextField;
 import org.applied_geodesy.util.CellValueType;
 
@@ -215,11 +216,11 @@ public class MatrixDialog {
 	private Node createPane() {
 		this.accordion = new Accordion();
 		this.accordion.getPanes().addAll(
-				DialogUtil.createTitledPane(
+				UiUtil.createTitledPane(
 						i18n.getString("MatrixDialog.matrix.frame.source.title", "Source System"), 
 						i18n.getString("MatrixDialog.matrix.frame.source.tooltip", "Define source system dispersion matrix of point"),
 						this.createMatrixPane(FrameType.SOURCE)),
-				DialogUtil.createTitledPane(
+				UiUtil.createTitledPane(
 						i18n.getString("MatrixDialog.matrix.frame.target.title", "Target System"), 
 						i18n.getString("MatrixDialog.matrix.frame.target.tooltip", "Define target system dispersion matrix of point"),
 						this.createMatrixPane(FrameType.TARGET))
@@ -229,16 +230,16 @@ public class MatrixDialog {
 	}
 	
 	private Node createMatrixPane(FrameType frameType) {
-		GridPane gridPane = DialogUtil.createGridPane();
+		GridPane gridPane = UiUtil.createGridPane();
 		
 		ToggleGroup matrixTypeToggleGroup = new ToggleGroup();
-		RadioButton identityRadioButton = DialogUtil.createRadioButton(i18n.getString("MatrixDialog.matrix.type.identity.label", "Identiy matrix"), 
+		RadioButton identityRadioButton = UiUtil.createRadioButton(i18n.getString("MatrixDialog.matrix.type.identity.label", "Identiy matrix"), 
 				i18n.getString("MatrixDialog.matrix.type.identity.tooltip", "If selected, the matrix type is set to the identity type"),
 				matrixTypeToggleGroup);
-		RadioButton diagonalRadioButton = DialogUtil.createRadioButton(i18n.getString("MatrixDialog.matrix.type.diagonal.label", "Diagonal matrix"), 
+		RadioButton diagonalRadioButton = UiUtil.createRadioButton(i18n.getString("MatrixDialog.matrix.type.diagonal.label", "Diagonal matrix"), 
 				i18n.getString("MatrixDialog.matrix.type.diagonal.tooltip", "If selected, the matrix type is set to the diagonal type"),
 				matrixTypeToggleGroup);
-		RadioButton denseRadioButton = DialogUtil.createRadioButton(i18n.getString("MatrixDialog.matrix.type.dense.label", "Dense matrix"), 
+		RadioButton denseRadioButton = UiUtil.createRadioButton(i18n.getString("MatrixDialog.matrix.type.dense.label", "Dense matrix"), 
 				i18n.getString("MatrixDialog.matrix.type.dense.tooltip", "If selected, the matrix type is set to the symmetric dense type"),
 				matrixTypeToggleGroup);
 		identityRadioButton.setUserData(MatrixType.IDENTITY);
@@ -258,7 +259,7 @@ public class MatrixDialog {
 		DoubleTextField[][] matrixElements = new DoubleTextField[3][3];
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
-				matrixElements[i][j] = DialogUtil.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("MatrixDialog.matrix.element.tooltip", "Element"));
+				matrixElements[i][j] = UiUtil.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("MatrixDialog.matrix.element.tooltip", "Element"));
 				if (i > j)
 					matrixElements[i][j].numberProperty().bind(matrixElements[j][i].numberProperty());
 				

@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.applied_geodesy.adjustment.transformation.AffinTransformation;
 import org.applied_geodesy.adjustment.transformation.TransformationAdjustment;
 import org.applied_geodesy.adjustment.transformation.TransformationChangeListener;
 import org.applied_geodesy.adjustment.transformation.TransformationEvent;
@@ -39,6 +40,7 @@ import org.applied_geodesy.coordtrans.ui.dialog.MatrixDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.TransformationAdjustmentDialog;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.menu.UIMenuBuilder;
+import org.applied_geodesy.coordtrans.ui.pane.UIRestrictionPaneBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIHomologousFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIParameterTableBuilder;
 import org.applied_geodesy.coordtrans.ui.tabpane.UITabPaneBuilder;
@@ -204,6 +206,7 @@ public class CoordTrans extends Application {
 			// add listener to UI components
 			TransformationAdjustment adjustment = treeBuilder.getTransformationAdjustment();
 			adjustment.addTransformationChangeListener(treeBuilder);
+			adjustment.addTransformationChangeListener(UIRestrictionPaneBuilder.getInstance());
 			adjustment.addTransformationChangeListener(UIParameterTableBuilder.getInstance());
 			adjustment.addTransformationChangeListener(UIHomologousFramePositionPairTableBuilder.getInstance());
 			adjustment.addTransformationChangeListener(new AdjustmentTransformationChangedListener());
@@ -224,13 +227,15 @@ public class CoordTrans extends Application {
 //			new HomologousFramePositionPair("1", 585.435,  755.475, 102.520, 929.580, 422.800, -0.210),
 //			new HomologousFramePositionPair("2", 553.175,  988.105, 104.190, 575.360, 480.900,  2.370),
 //			new HomologousFramePositionPair("3", 424.045,  785.635, 106.125, 812.370, 200.820, -0.240),
-//			new HomologousFramePositionPair("4", 394.950, 1061.700, 106.070, 396.280, 283.240,  0.410),
+//			new HomologousFramePositionPair("4", 394.950, 1061.700, 106.070, 396.280, 283.240,  0.410)
 			
 //			new HomologousFramePositionPair("1", 1094.883,  820.085, 109.821, 10037.81, 5262.09, 772.04),
 //			new HomologousFramePositionPair("2",  503.891, 1598.698, 117.685, 10956.68, 5128.17, 783.00),
 //			new HomologousFramePositionPair("3", 2349.343,  207.658, 151.387,  8780.08, 4840.29, 782.62),
 //			new HomologousFramePositionPair("4", 1395.320, 1348.853, 215.261, 10185.80, 4700.21, 851.32)
 			);
+			
+			adjustment.setTransformation(new AffinTransformation());
 		}
 	}
 

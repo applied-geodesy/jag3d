@@ -34,6 +34,7 @@ import org.applied_geodesy.adjustment.transformation.TransformationType;
 import org.applied_geodesy.coordtrans.ui.CoordTrans;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.io.PositionFileReader;
+import org.applied_geodesy.coordtrans.ui.utils.UiUtil;
 import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.ui.io.DefaultFileChooser;
 
@@ -168,7 +169,7 @@ public class FilePathsSelectionDialog {
 	}
 	
 	private Node createPane() {
-		GridPane gridPane = DialogUtil.createGridPane();
+		GridPane gridPane = UiUtil.createGridPane();
 	
 		Label sourceSystemPathLabel   = new Label(i18n.getString("FilePathsSelectionDialog.frame.source.file.path.label",  "Source system:"));
 		Label targetSystemPathLabel   = new Label(i18n.getString("FilePathsSelectionDialog.frame.target.file.path.label",  "Target system:"));
@@ -177,43 +178,43 @@ public class FilePathsSelectionDialog {
 		targetSystemPathLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		transformationTypeLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 
-		this.sourceSystemPathTextField = DialogUtil.createTextField(
+		this.sourceSystemPathTextField = UiUtil.createTextField(
 				i18n.getString("FilePathsSelectionDialog.frame.source.file.path.tooltip", "Selected path to source system file"),
 				i18n.getString("FilePathsSelectionDialog.frame.source.file.path.prompt",  "Source system file path")
 		);
 		
-		this.targetSystemPathTextField = DialogUtil.createTextField(
+		this.targetSystemPathTextField = UiUtil.createTextField(
 				i18n.getString("FilePathsSelectionDialog.frame.target.file.path.tooltip", "Selected path to target system file"),
 				i18n.getString("FilePathsSelectionDialog.frame.target.file.path.prompt",  "Target system file path")
 		);
 		
-		Button sourceSystemPathButton = DialogUtil.createButton(
+		Button sourceSystemPathButton = UiUtil.createButton(
 				i18n.getString("FilePathsSelectionDialog.frame.source.file.button.label",   "Browse"),
 				i18n.getString("FilePathsSelectionDialog.frame.source.file.button.tooltip",  "Select path to source system file")
 		);
 		
-		Button targetSystemPathButton = DialogUtil.createButton(
+		Button targetSystemPathButton = UiUtil.createButton(
 				i18n.getString("FilePathsSelectionDialog.frame.target.file.button.label",   "Browse"),
 				i18n.getString("FilePathsSelectionDialog.frame.target.file.button.tooltip",  "Select path to target system file")
 		);
 		
 		ToggleGroup group = new ToggleGroup();
 		
-		RadioButton heightTransformationRadioButton = DialogUtil.createRadioButton(
+		RadioButton heightTransformationRadioButton = UiUtil.createRadioButton(
 				i18n.getString("FilePathsSelectionDialog.transformation.type.height.label",   "Height"),
 				i18n.getString("FilePathsSelectionDialog.transformation.type.height.tooltip", "If selected, a height transformation using one-dimensional points is performed"),
 				group
 		);
 		heightTransformationRadioButton.setUserData(TransformationType.HEIGHT);
 		
-		RadioButton planarTransformationRadioButton = DialogUtil.createRadioButton(
+		RadioButton planarTransformationRadioButton = UiUtil.createRadioButton(
 				i18n.getString("FilePathsSelectionDialog.transformation.type.planar.label",   "Planar"),
 				i18n.getString("FilePathsSelectionDialog.transformation.type.planar.tooltip", "If selected, a planar transformation using two-dimensional points is performed"),
 				group
 		);
 		planarTransformationRadioButton.setUserData(TransformationType.PLANAR);
 		
-		RadioButton spatialTransformationRadioButton = DialogUtil.createRadioButton(
+		RadioButton spatialTransformationRadioButton = UiUtil.createRadioButton(
 				i18n.getString("FilePathsSelectionDialog.transformation.type.spatial.label",   "Spatial"),
 				i18n.getString("FilePathsSelectionDialog.transformation.type.spatial.tooltip", "If selected, a spatial transformation using three-dimensional points is performed"),
 				group
@@ -239,6 +240,9 @@ public class FilePathsSelectionDialog {
 		BrowseActionEventHandler browseActionEventHandler = new BrowseActionEventHandler();
 		sourceSystemPathButton.setOnAction(browseActionEventHandler);
 		targetSystemPathButton.setOnAction(browseActionEventHandler);
+		
+		this.sourceSystemPathTextField.setPrefWidth(250);
+		this.targetSystemPathTextField.setPrefWidth(250);
 		
 		sourceSystemPathLabel.setLabelFor(this.sourceSystemPathTextField);
 		targetSystemPathLabel.setLabelFor(this.targetSystemPathTextField);

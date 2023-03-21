@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.coordtrans.ui.dialog;
+package org.applied_geodesy.coordtrans.ui.utils;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -58,10 +58,10 @@ import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 
-class DialogUtil {
-	private DialogUtil() {}
+public final class UiUtil {
+	private UiUtil() {}
 	
-	static ComboBox<EstimationType> createEstimationTypeComboBox(StringConverter<EstimationType> estimationTypeStringConverter, String tooltip) {
+	public static ComboBox<EstimationType> createEstimationTypeComboBox(StringConverter<EstimationType> estimationTypeStringConverter, String tooltip) {
 		ComboBox<EstimationType> typeComboBox = new ComboBox<EstimationType>();
 		typeComboBox.getItems().setAll(EstimationType.values());
 		typeComboBox.setConverter(estimationTypeStringConverter);
@@ -71,7 +71,7 @@ class DialogUtil {
 		return typeComboBox;
 	}
 	
-	static ComboBox<UnknownParameter> createUnknownParameterComboBox(Callback<ListView<UnknownParameter>, ListCell<UnknownParameter>> unknownParameterCellFactory, String tooltip) {
+	public static ComboBox<UnknownParameter> createUnknownParameterComboBox(Callback<ListView<UnknownParameter>, ListCell<UnknownParameter>> unknownParameterCellFactory, String tooltip) {
 		ComboBox<UnknownParameter> comboBox = new ComboBox<UnknownParameter>();
 		comboBox.setCellFactory(unknownParameterCellFactory);
 		comboBox.setButtonCell(unknownParameterCellFactory.call(null));
@@ -82,7 +82,7 @@ class DialogUtil {
 		return comboBox;
 	}
 	
-	static GridPane createGridPane() {
+	public static GridPane createGridPane() {
 		GridPane gridPane = new GridPane();
 		gridPane.setMaxWidth(Double.MAX_VALUE);
 		gridPane.setMinWidth(Control.USE_PREF_SIZE); // 300
@@ -93,7 +93,7 @@ class DialogUtil {
 		return gridPane;
 	}
 	
-	static Button createButton(String title, String tooltip) {
+	public static Button createButton(String title, String tooltip) {
 		Label label = new Label(title);
 		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -106,7 +106,7 @@ class DialogUtil {
 		return button;
 	}
 	
-	static ListView<UnknownParameter> createParameterListView(Callback<ListView<UnknownParameter>, ListCell<UnknownParameter>> unknownParameterCellFactory) {
+	public static ListView<UnknownParameter> createParameterListView(Callback<ListView<UnknownParameter>, ListCell<UnknownParameter>> unknownParameterCellFactory) {
 		ListView<UnknownParameter> list = new ListView<UnknownParameter>();
 		list.setCellFactory(unknownParameterCellFactory);
 		list.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -118,7 +118,7 @@ class DialogUtil {
 		return list;
 	}
 	
-	static TextField createTextField(String tooltip, String prompt) {
+	public static TextField createTextField(String tooltip, String prompt) {
 		TextField textField = new TextField();
 		textField.setTooltip(new Tooltip(tooltip));
 		textField.setPromptText(prompt);
@@ -130,7 +130,7 @@ class DialogUtil {
 		return textField;
 	}
 	
-	static DoubleTextField createDoubleTextField(CellValueType cellValueType, double value, String tooltip) {
+	public static DoubleTextField createDoubleTextField(CellValueType cellValueType, double value, String tooltip) {
 		DoubleTextField textField = new DoubleTextField(value, cellValueType, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
 		textField.setTooltip(new Tooltip(tooltip));
 		textField.setAlignment(Pos.CENTER_RIGHT);
@@ -140,7 +140,7 @@ class DialogUtil {
 		return textField;
 	}
 	
-	static DoubleTextField createDoubleTextField(CellValueType cellValueType, double value, boolean displayUnit, ValueSupport valueSupport, double lowerBoundary, double upperBoundary, String tooltip) {
+	public static DoubleTextField createDoubleTextField(CellValueType cellValueType, double value, boolean displayUnit, ValueSupport valueSupport, double lowerBoundary, double upperBoundary, String tooltip) {
 		DoubleTextField textField = new DoubleTextField(value, cellValueType, displayUnit, valueSupport, lowerBoundary, upperBoundary);
 		textField.setTooltip(new Tooltip(tooltip));
 		textField.setAlignment(Pos.CENTER_RIGHT);
@@ -149,7 +149,7 @@ class DialogUtil {
 		return textField;
 	}
 	
-	static ComboBox<Boolean> createBooleanComboBox(StringConverter<Boolean> booleanTypeStringConverter, String tooltip) {
+	public static ComboBox<Boolean> createBooleanComboBox(StringConverter<Boolean> booleanTypeStringConverter, String tooltip) {
 		ComboBox<Boolean> typeComboBox = new ComboBox<Boolean>();
 		typeComboBox.getItems().setAll(List.of(Boolean.TRUE, Boolean.FALSE));
 		typeComboBox.setConverter(booleanTypeStringConverter);			
@@ -161,7 +161,7 @@ class DialogUtil {
 		return typeComboBox;
 	}
 	
-	static CheckBox createCheckBox(String title, String tooltip) {
+	public static CheckBox createCheckBox(String title, String tooltip) {
 		Label label = new Label(title);
 		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -174,7 +174,7 @@ class DialogUtil {
 		return checkBox;
 	}
 	
-	static RadioButton createRadioButton(String title, String tooltip, ToggleGroup toggleGroup) {
+	public static RadioButton createRadioButton(String title, String tooltip, ToggleGroup toggleGroup) {
 		Label label = new Label(title);
 		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -189,7 +189,7 @@ class DialogUtil {
 		return radioButton;
 	}
 	
-	static ComboBox<TestStatisticType> createTestStatisticTypeComboBox(StringConverter<TestStatisticType> testStatisticTypeStringConverter, String tooltip) {
+	public static ComboBox<TestStatisticType> createTestStatisticTypeComboBox(StringConverter<TestStatisticType> testStatisticTypeStringConverter, String tooltip) {
 		ComboBox<TestStatisticType> typeComboBox = new ComboBox<TestStatisticType>();
 		typeComboBox.getItems().setAll(TestStatisticType.values());
 		typeComboBox.setConverter(testStatisticTypeStringConverter);
@@ -203,7 +203,7 @@ class DialogUtil {
 		return typeComboBox;
 	}
 	
-	static DoubleSpinner createDoubleSpinner(CellValueType cellValueType, double min, double max, double amountToStepBy, String tooltip) {
+	public static DoubleSpinner createDoubleSpinner(CellValueType cellValueType, double min, double max, double amountToStepBy, String tooltip) {
 		DoubleSpinner doubleSpinner = new DoubleSpinner(cellValueType, min, max, amountToStepBy);
 		doubleSpinner.setMinWidth(75);
 		doubleSpinner.setPrefWidth(100);
@@ -212,7 +212,7 @@ class DialogUtil {
 		return doubleSpinner;
 	}
 		
-	static Spinner<Integer> createIntegerSpinner(int min, int max, int amountToStepBy, String tooltip) {
+	public static Spinner<Integer> createIntegerSpinner(int min, int max, int amountToStepBy, String tooltip) {
 		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
 		numberFormat.setMaximumFractionDigits(0);
 		numberFormat.setMinimumFractionDigits(0);
@@ -270,7 +270,7 @@ class DialogUtil {
 		return integerSpinner;
 	}
 	
-	static TitledPane createTitledPane(String title, String tooltip, Node content) {
+	public static TitledPane createTitledPane(String title, String tooltip, Node content) {
 		Label label = new Label(title);
 		label.setTooltip(new Tooltip(tooltip));
 		TitledPane titledPane = new TitledPane();

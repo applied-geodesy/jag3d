@@ -28,7 +28,6 @@ import org.applied_geodesy.adjustment.transformation.TransformationAdjustment;
 import org.applied_geodesy.adjustment.transformation.TransformationChangeListener;
 import org.applied_geodesy.adjustment.transformation.TransformationEvent;
 import org.applied_geodesy.adjustment.transformation.TransformationEvent.TransformationEventType;
-import org.applied_geodesy.adjustment.transformation.TransformationType;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.tabpane.UITabPaneBuilder;
 
@@ -92,7 +91,7 @@ public class UITreeBuilder implements TransformationChangeListener {
 		this.treeView = new TreeView<TreeItemValue<?>>();
 		this.treeView.setEditable(false);
 
-		AdjustmentTreeItemValue adjustmentTreeItemValue   = new AdjustmentTreeItemValue(i18n.getString("UITreeBuilder.root", "CoordTrans"));
+		AdjustmentTreeItemValue adjustmentTreeItemValue   = new AdjustmentTreeItemValue(i18n.getString("UITreeBuilder.root.label", "CoordTrans"));
 		ObservationTreeItemValue observationTreeItemValue = new ObservationTreeItemValue(i18n.getString("UITreeBuilder.observation.label", "Homologous Points"));
 		TransformationParameterTreeItemValue parameterTreeItemValue = new TransformationParameterTreeItemValue(i18n.getString("UITreeBuilder.parameter.label", "Parameters"));
 		TransformationTreeItemValue transformationTreeItemValue     = new TransformationTreeItemValue(i18n.getString("UITreeBuilder.transformation.label", "Transformation"));
@@ -105,7 +104,7 @@ public class UITreeBuilder implements TransformationChangeListener {
 		rootItem.getChildren().addAll(Arrays.asList(observationItem, parameterItem, transformationItem));
 		this.treeView.setRoot(rootItem);
 
-		this.treeView.setShowRoot(false);
+		this.treeView.setShowRoot(true);
 
 		this.treeView.getSelectionModel().getSelectedItems().addListener(this.treeListSelectionChangeListener);
 		this.treeView.getSelectionModel().select(0);
@@ -147,15 +146,12 @@ public class UITreeBuilder implements TransformationChangeListener {
 	}
 	
 	private void setTransformation(Transformation transformation) {
-
 		this.treeView.getSelectionModel().select(0);
-		TreeItem<TreeItemValue<?>> observationItem = null;
-		observationItem = this.searchTreeItem(this.treeView.getRoot(), TreeItemType.OBSERVED_POSITIONS);
-		
-		// TODO clean if null?
-
-		if (observationItem != null && transformation != null)
-			this.treeView.getSelectionModel().select(observationItem);
+		if (transformation != null) {
+			TreeItem<TreeItemValue<?>> observationItem = this.searchTreeItem(this.treeView.getRoot(), TreeItemType.OBSERVED_POSITIONS);
+			if (observationItem != null)
+				this.treeView.getSelectionModel().select(observationItem);
+		}
 	}
 	
 	

@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.applied_geodesy.adjustment.MathExtension;
@@ -54,7 +56,25 @@ import no.uib.cipr.matrix.UpperSymmPackMatrix;
 import no.uib.cipr.matrix.Vector;
 
 public class AffinTransformation extends Transformation {
-
+	private Set<ParameterType> fixedUnknownParameterTypes = new HashSet<ParameterType>();
+	private final Map<ParameterRestrictionType, ParameterType> restrictionToParameterMap = Map.ofEntries(
+			Map.entry(ParameterRestrictionType.FIXED_SHIFT_X, ParameterType.SHIFT_X),
+			Map.entry(ParameterRestrictionType.FIXED_SHIFT_Y, ParameterType.SHIFT_Y),
+			Map.entry(ParameterRestrictionType.FIXED_SHIFT_Z, ParameterType.SHIFT_Z),
+			
+			Map.entry(ParameterRestrictionType.FIXED_SCALE_X, ParameterType.SCALE_X),
+			Map.entry(ParameterRestrictionType.FIXED_SCALE_Y, ParameterType.SCALE_Y),
+			Map.entry(ParameterRestrictionType.FIXED_SCALE_Z, ParameterType.SCALE_Z),
+			
+			Map.entry(ParameterRestrictionType.FIXED_SHEAR_X, ParameterType.SHEAR_X),
+			Map.entry(ParameterRestrictionType.FIXED_SHEAR_Y, ParameterType.SHEAR_Y),
+			Map.entry(ParameterRestrictionType.FIXED_SHEAR_Z, ParameterType.SHEAR_Z),
+			
+			Map.entry(ParameterRestrictionType.FIXED_ROTATION_X, ParameterType.EULER_ANGLE_X),
+			Map.entry(ParameterRestrictionType.FIXED_ROTATION_Y, ParameterType.EULER_ANGLE_Y),
+			Map.entry(ParameterRestrictionType.FIXED_ROTATION_Z, ParameterType.EULER_ANGLE_Z)
+	);
+	
 	private final SpatialAffinEquations spatialAffinEquations;
 	
 	public AffinTransformation() {
@@ -84,9 +104,13 @@ public class AffinTransformation extends Transformation {
 		UnknownParameter eulerAngleY = new UnknownParameter(ParameterType.EULER_ANGLE_Y, false, 0.0, true, ProcessingType.POSTPROCESSING);
 		UnknownParameter eulerAngleZ = new UnknownParameter(ParameterType.EULER_ANGLE_Z, false, 0.0, true, ProcessingType.POSTPROCESSING);
 		
-		UnknownParameter scaleX = new UnknownParameter(ParameterType.SCALE_X, false, 0.0, true, ProcessingType.POSTPROCESSING);
-		UnknownParameter scaleY = new UnknownParameter(ParameterType.SCALE_Y, false, 0.0, true, ProcessingType.POSTPROCESSING);
-		UnknownParameter scaleZ = new UnknownParameter(ParameterType.SCALE_Z, false, 0.0, true, ProcessingType.POSTPROCESSING);
+		UnknownParameter tmpScaleX = new UnknownParameter(ParameterType.CONSTANT, false, 0.0, 0.0, false, ProcessingType.POSTPROCESSING);
+		UnknownParameter tmpScaleY = new UnknownParameter(ParameterType.CONSTANT, false, 0.0, 0.0, false, ProcessingType.POSTPROCESSING);
+		UnknownParameter tmpScaleZ = new UnknownParameter(ParameterType.CONSTANT, false, 0.0, 0.0, false, ProcessingType.POSTPROCESSING);
+		
+		UnknownParameter scaleX = new UnknownParameter(ParameterType.SCALE_X, false, 1.0, 1.0, true, ProcessingType.POSTPROCESSING);
+		UnknownParameter scaleY = new UnknownParameter(ParameterType.SCALE_Y, false, 1.0, 1.0, true, ProcessingType.POSTPROCESSING);
+		UnknownParameter scaleZ = new UnknownParameter(ParameterType.SCALE_Z, false, 1.0, 1.0, true, ProcessingType.POSTPROCESSING);
 		
 		UnknownParameter shearX = new UnknownParameter(ParameterType.SHEAR_X, false, 0.0, true, ProcessingType.POSTPROCESSING);
 		UnknownParameter shearY = new UnknownParameter(ParameterType.SHEAR_Y, false, 0.0, true, ProcessingType.POSTPROCESSING);
@@ -102,9 +126,13 @@ public class AffinTransformation extends Transformation {
 		Restriction eulerAngleZRestriction = new QuaternionEulerAngleRestriction(false, EulerAxisType.Z_AXIS, q0, q1, q2, q3, eulerAngleZ);
 
 		// Derive scale
-		Restriction scaleXRestriction = new ProductSumRestriction(false, List.of(s11), List.of(s11), 0.5, List.of(SignType.PLUS), scaleX);
-		Restriction scaleYRestriction = new ProductSumRestriction(false, List.of(s12, s22), List.of(s12, s22), 0.5, List.of(SignType.PLUS, SignType.PLUS), scaleY);
-		Restriction scaleZRestriction = new ProductSumRestriction(false, List.of(s13, s23, s33), List.of(s13, s23, s33), 0.5, List.of(SignType.PLUS, SignType.PLUS, SignType.PLUS), scaleZ);
+		Restriction tmpScaleXRestriction = new ProductSumRestriction(false, List.of(s11), List.of(s11), 0.5, List.of(SignType.PLUS), tmpScaleX);
+		Restriction tmpScaleYRestriction = new ProductSumRestriction(false, List.of(s12, s22), List.of(s12, s22), 0.5, List.of(SignType.PLUS, SignType.PLUS), tmpScaleY);
+		Restriction tmpScaleZRestriction = new ProductSumRestriction(false, List.of(s13, s23, s33), List.of(s13, s23, s33), 0.5, List.of(SignType.PLUS, SignType.PLUS, SignType.PLUS), tmpScaleZ);
+		
+		Restriction scaleXRestriction = new ProductSumRestriction(false, List.of(tmpScaleX, one), List.of(one, one), 1.0, List.of(SignType.PLUS, SignType.PLUS), scaleX);
+		Restriction scaleYRestriction = new ProductSumRestriction(false, List.of(tmpScaleY, one), List.of(one, one), 1.0, List.of(SignType.PLUS, SignType.PLUS), scaleY);
+		Restriction scaleZRestriction = new ProductSumRestriction(false, List.of(tmpScaleZ, one), List.of(one, one), 1.0, List.of(SignType.PLUS, SignType.PLUS), scaleZ);
 		
 		// Derive shear
 		Restriction shearXRestriction = new ShearAngleRestriction(false, EulerAxisType.X_AXIS, s12, s13, s22, s23, s33, shearX);
@@ -132,7 +160,7 @@ public class AffinTransformation extends Transformation {
 		Restriction fixedRotationYRestriction = new ProductSumRestriction(false, List.of(q1, q0), List.of(q3, q2), List.of(SignType.PLUS, SignType.MINUS), zero);
 		Restriction fixedRotationZRestriction = new ProductSumRestriction(false, List.of(q1, q0), List.of(q2, q3), List.of(SignType.PLUS, SignType.MINUS), zero);
 		
-		// Identical scales x == y
+		// Identical scales x == y, x == z, y == z
 		Restriction identicalScalesXYRestriction = new ProductSumRestriction(false, List.of(s12, s22, s11), List.of(s12, s22, s11), List.of(SignType.PLUS, SignType.PLUS, SignType.MINUS), zero);
 		Restriction identicalScalesXZRestriction = new ProductSumRestriction(false, List.of(s13, s23, s33, s11), List.of(s13, s23, s33, s11), List.of(SignType.PLUS, SignType.PLUS, SignType.PLUS, SignType.MINUS), zero);
 		Restriction identicalScalesYZRestriction = new ProductSumRestriction(false, List.of(s13, s23, s33, s12, s22), List.of(s13, s23, s33, s12, s22), List.of(SignType.PLUS, SignType.PLUS, SignType.PLUS, SignType.MINUS, SignType.MINUS), zero);
@@ -141,6 +169,10 @@ public class AffinTransformation extends Transformation {
 		unknownParameters.add(shiftX);
 		unknownParameters.add(shiftY);
 		unknownParameters.add(shiftZ);
+		
+		unknownParameters.add(tmpScaleX);
+		unknownParameters.add(tmpScaleY);
+		unknownParameters.add(tmpScaleZ);
 		
 		unknownParameters.add(scaleX);
 		unknownParameters.add(scaleY);
@@ -200,6 +232,10 @@ public class AffinTransformation extends Transformation {
 				eulerAngleXRestriction,
 				eulerAngleYRestriction,
 				eulerAngleZRestriction,
+				
+				tmpScaleXRestriction,
+				tmpScaleYRestriction,
+				tmpScaleZRestriction,
 				
 				scaleXRestriction,
 				scaleYRestriction,
@@ -641,5 +677,40 @@ public class AffinTransformation extends Transformation {
 	@Override
 	public TransformationType getTransformationType() {
 		return TransformationType.SPATIAL;
+	}
+
+	@Override
+	public boolean addRestriction(ParameterRestrictionType parameterRestrictionType) {
+		Map<ParameterRestrictionType, Restriction> supportedRestrictions = this.getSupportedParameterRestrictions();
+		if (!supportedRestrictions.containsKey(parameterRestrictionType)) 
+			return false;
+		
+		Restriction restriction = supportedRestrictions.get(parameterRestrictionType);
+		
+		if (this.getRestrictions().contains(restriction))
+			return false;
+		
+		if (this.restrictionToParameterMap.containsKey(parameterRestrictionType))
+			this.fixedUnknownParameterTypes.add(this.restrictionToParameterMap.get(parameterRestrictionType));
+		
+		return this.getRestrictions().add(restriction);
+	}
+
+	@Override
+	public boolean removeRestriction(ParameterRestrictionType parameterRestrictionType) {
+		Map<ParameterRestrictionType, Restriction> supportedRestrictions = this.getSupportedParameterRestrictions();
+		if (!supportedRestrictions.containsKey(parameterRestrictionType)) 
+			return false;
+		
+		if (this.restrictionToParameterMap.containsKey(parameterRestrictionType))
+			this.fixedUnknownParameterTypes.remove(this.restrictionToParameterMap.get(parameterRestrictionType));
+		
+		Restriction restriction = supportedRestrictions.get(parameterRestrictionType);
+		return this.getRestrictions().remove(restriction);
+	}
+	
+	@Override
+	public boolean isFixedParameter(UnknownParameter parameter) {
+		return this.fixedUnknownParameterTypes.contains(parameter.getParameterType());
 	}
 }

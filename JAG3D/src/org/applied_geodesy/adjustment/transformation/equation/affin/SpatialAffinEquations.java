@@ -74,7 +74,9 @@ public class SpatialAffinEquations extends TransformationEquations {
 		this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S33).setValue0(s33);
 	}
 	
+	@Override
 	public void setCenterOfMasses(SimplePositionPair centerOfMasses) {
+		
 		// get previous center of mass
 		SimplePositionPair prevCenterOfMasses = this.getCenterOfMasses();
 		
@@ -249,7 +251,7 @@ public class SpatialAffinEquations extends TransformationEquations {
 	@Override
 	public void normalEquationElements(PositionPair<? extends DispersionablePosition, ? extends AdjustablePosition> positionPair, Matrix Jx, Matrix JvSrc, Matrix JvTrg, Vector w) {
 		SimplePositionPair centerOfMasses = this.getCenterOfMasses();
-		
+
 		DispersionablePosition pointSourceCRS = positionPair.getSourceSystemPosition();
 		AdjustablePosition pointTargetCRS = positionPair.getTargetSystemPosition();
 		
@@ -470,21 +472,21 @@ public class SpatialAffinEquations extends TransformationEquations {
 
 	private void init() {
 		this.parameters = new LinkedHashMap<ParameterType, UnknownParameter>();
-		this.parameters.put(ParameterType.SHIFT_X, new UnknownParameter(ParameterType.SHIFT_X, true));
-		this.parameters.put(ParameterType.SHIFT_Y, new UnknownParameter(ParameterType.SHIFT_Y, true));
-		this.parameters.put(ParameterType.SHIFT_Z, new UnknownParameter(ParameterType.SHIFT_Z, true));
+		this.parameters.put(ParameterType.SHIFT_X, new UnknownParameter(ParameterType.SHIFT_X, true, 0.0));
+		this.parameters.put(ParameterType.SHIFT_Y, new UnknownParameter(ParameterType.SHIFT_Y, true, 0.0));
+		this.parameters.put(ParameterType.SHIFT_Z, new UnknownParameter(ParameterType.SHIFT_Z, true, 0.0));
 		
 		this.parameters.put(ParameterType.QUATERNION_Q0, new UnknownParameter(ParameterType.QUATERNION_Q0, true, 1.0));
-		this.parameters.put(ParameterType.QUATERNION_Q1, new UnknownParameter(ParameterType.QUATERNION_Q1, true));
-		this.parameters.put(ParameterType.QUATERNION_Q2, new UnknownParameter(ParameterType.QUATERNION_Q2, true));
-		this.parameters.put(ParameterType.QUATERNION_Q3, new UnknownParameter(ParameterType.QUATERNION_Q3, true));
+		this.parameters.put(ParameterType.QUATERNION_Q1, new UnknownParameter(ParameterType.QUATERNION_Q1, true, 0.0));
+		this.parameters.put(ParameterType.QUATERNION_Q2, new UnknownParameter(ParameterType.QUATERNION_Q2, true, 0.0));
+		this.parameters.put(ParameterType.QUATERNION_Q3, new UnknownParameter(ParameterType.QUATERNION_Q3, true, 0.0));
 		
 		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S11, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S11, true, 1.0));
-		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S12, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S12, true));
-		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S13, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S13, true));
+		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S12, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S12, true, 0.0));
+		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S13, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S13, true, 0.0));
 		
 		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S22, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S22, true, 1.0));
-		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S23, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S23, true));
+		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S23, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S23, true, 0.0));
 		
 		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S33, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S33, true, 1.0));
 		

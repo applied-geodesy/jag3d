@@ -79,7 +79,7 @@ public class ShearAngleRestriction extends Restriction {
 		double s33 = this.shearParameters.get(4).getValue(); //s33
 
 	    EulerAxisType eulerAxisType = this.eulerAxisType.get();
-	    double c = this.regressand.get().getValue();
+	    double c = MathExtension.MOD(this.regressand.get().getValue(), Math.PI); 
 	    double angle = 0;
 	    switch (eulerAxisType) {
 		case X_AXIS:
@@ -95,7 +95,7 @@ public class ShearAngleRestriction extends Restriction {
 			throw new IllegalArgumentException("Error, unsupported angle type " + this.getEulerAngleAxisType() + "!");
 		}
 	    
-	    return angle - c; 
+	    return MathExtension.MOD(angle - c, Math.PI); 
 	}
 
 	@Override

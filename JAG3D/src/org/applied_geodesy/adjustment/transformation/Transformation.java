@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.adjustment.transformation;
 
 import java.util.ArrayList;
@@ -33,7 +54,7 @@ public abstract class Transformation {
 	private ObservableUniqueList<Restriction> postprocessingCalculations = new ObservableUniqueList<Restriction>();
 	private ObjectProperty<Boolean> estimateInitialGuess                 = new SimpleObjectProperty<Boolean>(this, "estimateInitialGuess", Boolean.TRUE);
 	private ObjectProperty<Boolean> estimateCenterOfMasses               = new SimpleObjectProperty<Boolean>(this, "estimateCenterOfMasses", Boolean.TRUE);
-	
+
 	Transformation() {}
 	
 	public abstract TransformationType getTransformationType();
@@ -114,7 +135,7 @@ public abstract class Transformation {
 	}
 	
 	public abstract void deriveInitialGuess() throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException;
-	
+
 	public void applyInitialGuess() {
 		for (UnknownParameter unknownParameter : this.unknownParameters) {
 			// set initial guess x <-- x0 because adjustment process works with x (not with x0)
@@ -122,7 +143,7 @@ public abstract class Transformation {
 		}
 	}
 	
-	public static SimplePositionPair deriveCenterOfMasses(Collection<? extends PositionPair<?,?>> positionPairs) {
+	public static SimplePositionPair deriveCenterOfMasses(Collection<? extends PositionPair<?,?>> positionPairs, Collection<Restriction> restrictions, Map<ParameterRestrictionType, Restriction> supportedRestrictions) {
 		int nop = 0;
 		double x0 = 0, y0 = 0, z0 = 0;
 		double X0 = 0, Y0 = 0, Z0 = 0;
@@ -131,7 +152,7 @@ public abstract class Transformation {
 				continue;
 			
 			Positionable source = positionPair.getSourceSystemPosition();
-			Positionable target = positionPair.getSourceSystemPosition();
+			Positionable target = positionPair.getTargetSystemPosition();
 			
 			nop++;
 			x0 += source.getX();
@@ -145,14 +166,29 @@ public abstract class Transformation {
 		
 		if (nop == 0)
 			throw new IllegalArgumentException("Error, could not estimate center of mass because of an empty point list!");
-		
+
 		x0 /= nop;
 		y0 /= nop;
 		z0 /= nop;
-		
+
 		X0 /= nop;
 		Y0 /= nop;
 		Z0 /= nop;
+
+		if (restrictions != null && supportedRestrictions != null && 
+				(restrictions.contains(supportedRestrictions.get(ParameterRestrictionType.FIXED_SHIFT_X)) ||
+						restrictions.contains(supportedRestrictions.get(ParameterRestrictionType.FIXED_SHIFT_Y)) ||
+						restrictions.contains(supportedRestrictions.get(ParameterRestrictionType.FIXED_SHIFT_Z)))) {
+
+			x0 = 0;
+			X0 = 0;
+
+			y0 = 0;
+			Y0 = 0;
+
+			z0 = 0;
+			Z0 = 0;
+		}
 				
 		return new SimplePositionPair(
 				"CENTER_OF_MASSES",
@@ -160,4 +196,10 @@ public abstract class Transformation {
 				X0, Y0, Z0
 		);
 	}
+	
+	public abstract boolean addRestriction(ParameterRestrictionType parameterRestrictionType);
+	
+	public abstract boolean removeRestriction(ParameterRestrictionType parameterRestrictionType);
+	
+	public abstract boolean isFixedParameter(UnknownParameter parameter);
 }

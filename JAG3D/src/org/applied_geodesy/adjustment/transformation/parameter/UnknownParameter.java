@@ -28,6 +28,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 
 public class UnknownParameter extends Parameter {
 	/** Value: -1 == not set, Integer.MIN_VALUE == fixed, else column in normal equation system **/
@@ -37,6 +38,8 @@ public class UnknownParameter extends Parameter {
 	private ObjectProperty<Integer> column      = new SimpleObjectProperty<Integer>(this, "column", -1);
 	private ObjectProperty<Double> value        = new SimpleObjectProperty<Double>(this, "value", 0.0);
 	private ObjectProperty<Double> uncertainty  = new SimpleObjectProperty<Double>(this, "uncertainty", 0.0);
+	
+	private ReadOnlyObjectProperty<Double> expectedValue = null;
 
 	private ReadOnlyObjectWrapper<Double> testStatisticApriori     = new ReadOnlyObjectWrapper<Double>(this, "testStatisticApriori", 0.0);
 	private ReadOnlyObjectWrapper<Double> testStatisticAposteriori = new ReadOnlyObjectWrapper<Double>(this, "testStatisticAposteriori", 0.0);
@@ -65,22 +68,33 @@ public class UnknownParameter extends Parameter {
 	}
 	
 	public UnknownParameter(ParameterType parameterType, boolean indispensable, double value, boolean visible) {
-		this(parameterType, indispensable, value, visible, -1, ProcessingType.ADJUSTMENT);
+		this(parameterType, indispensable, value, value, visible, -1, ProcessingType.ADJUSTMENT);
+	}
+	
+	public UnknownParameter(ParameterType parameterType, boolean indispensable, double value, double expectedValue, boolean visible) {
+		this(parameterType, indispensable, value, expectedValue, visible, -1, ProcessingType.ADJUSTMENT);
 	}
 	
 	public UnknownParameter(ParameterType parameterType, boolean indispensable, double value, boolean visible, ProcessingType processingType) {
-		this(parameterType, indispensable, value, visible, -1, processingType);
+		this(parameterType, indispensable, value, value, visible, -1, processingType);
 	}
 	
-	public UnknownParameter(ParameterType parameterType, boolean indispensable, double value, boolean visible, int column, ProcessingType processingType) {
+	public UnknownParameter(ParameterType parameterType, boolean indispensable, double value, double expectedValue, boolean visible, ProcessingType processingType) {
+		this(parameterType, indispensable, value, expectedValue, visible, -1, processingType);
+	}
+	
+	public UnknownParameter(ParameterType parameterType, boolean indispensable, double value, double expectedValue, boolean visible, int column, ProcessingType processingType) {
 		super(parameterType);
 		this.setValue0(value);
 		this.setValue(value);
 		this.setColumn(column);
 		this.setProcessingType(processingType);
 		this.setVisible(visible);
+		
+		this.expectedValue = new ReadOnlyObjectWrapper<Double>(this, "expectedValue",  expectedValue);
 		this.indispensable = new ReadOnlyObjectWrapper<Boolean>(this, "indispensable", indispensable);
 		
+		this.testStatistic.get().setApplyBiasCorrection(false);
 		this.testStatisticApriori.bind(this.testStatistic.get().testStatisticAprioriProperty());
         this.testStatisticAposteriori.bind(this.testStatistic.get().testStatisticAposterioriProperty());
         
@@ -102,9 +116,8 @@ public class UnknownParameter extends Parameter {
         		return significant;
         	}
         };
-		
 	}
-	
+		
 	public ReadOnlyObjectProperty<Boolean> indispensableProperty() {
 		return this.indispensable;
 	}
@@ -151,6 +164,14 @@ public class UnknownParameter extends Parameter {
 		return this.value;
 	}
 	
+	public double getExpectedValue() {
+		return this.expectedValue.get();
+	}
+	
+	public ObservableValue<Double> expectedValueProperty() {
+		return this.expectedValue;
+	}
+	
 	public void setUncertainty(double uncertainty) {
 		this.uncertainty.set(uncertainty);
 	}
@@ -177,6 +198,30 @@ public class UnknownParameter extends Parameter {
 
 	public ReadOnlyObjectProperty<TestStatistic> testStatisticProperty() {
 		return this.testStatistic;
+	}
+	
+	public void setFisherQuantileApriori(double fisherQuantileApriori) {
+		this.fisherQuantileApriori.set(fisherQuantileApriori);
+	}
+	
+	public double getFisherQuantileApriori() {
+		return this.fisherQuantileApriori.get();
+	}
+	
+	public ObjectProperty<Double> fisherQuantileAprioriProperty() {
+		return this.fisherQuantileApriori;
+	}
+	
+	public void setFisherQuantileAposteriori(double fisherQuantileAposteriori) {
+		this.fisherQuantileAposteriori.set(fisherQuantileAposteriori);
+	}
+	
+	public double getFisherQuantileAposteriori() {
+		return this.fisherQuantileAposteriori.get();
+	}
+	
+	public ObjectProperty<Double> fisherQuantileAposterioriProperty() {
+		return this.fisherQuantileAposteriori;
 	}
 
 	@Override

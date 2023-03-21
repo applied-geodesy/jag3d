@@ -86,7 +86,7 @@ public class QuaternionEulerAngleRestriction extends Restriction {
 	    double r33 = 2.0*(q0*q0+q3*q3)-1.0;
 	    
 	    EulerAxisType eulerAxisType = this.eulerAxisType.get();
-	    double c = this.regressand.get().getValue();
+	    double c = MathExtension.MOD(this.regressand.get().getValue(), 2.0*Math.PI);
 	    double angle = 0;
 	    switch (eulerAxisType) {
 		case X_AXIS:
@@ -103,7 +103,7 @@ public class QuaternionEulerAngleRestriction extends Restriction {
 		}
 	    
 	    //return Math.abs(angle - c) < Math.abs((2.0*Math.PI - angle) - c) ? angle - c : (2.0*Math.PI - angle) - c; 
-	    return angle - c;
+	    return MathExtension.MOD(angle - c, 2.0*Math.PI);
 	}
 
 	@Override

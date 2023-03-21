@@ -22,6 +22,7 @@
 package org.applied_geodesy.coordtrans.ui.tabpane;
 
 public enum TabType {
+	RESTRICTIONS,
 	HOMOLOGOUS_PAIRS,
 	OUTLIERS,
 //	APOSTERIORI_SOURCE_SYSTEM_POINT,

@@ -24,6 +24,7 @@ package org.applied_geodesy.coordtrans.ui.tabpane;
 import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositionPair;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
+import org.applied_geodesy.coordtrans.ui.pane.UIRestrictionPaneBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIHomologousFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIParameterTableBuilder;
 import org.applied_geodesy.coordtrans.ui.tree.TreeItemType;
@@ -66,6 +67,7 @@ public class UITabPaneBuilder {
 	private I18N i18n = I18N.getInstance();
 	private TabSelectionChangeListener tabSelectionChangeListener = new TabSelectionChangeListener();
 	
+	private UIRestrictionPaneBuilder restrictionPaneBuilder = UIRestrictionPaneBuilder.getInstance();
 	private UIHomologousFramePositionPairTableBuilder observationTableBuilder = UIHomologousFramePositionPairTableBuilder.getInstance();
 	private UIParameterTableBuilder parameterTableBuilder = UIParameterTableBuilder.getInstance();
 	
@@ -84,6 +86,12 @@ public class UITabPaneBuilder {
 	}
 
 	private void init() {
+		
+		this.createTab(
+				i18n.getString("UITabPaneBuilder.tab.restriction.label", "Restriction"), 
+				i18n.getString("UITabPaneBuilder.tab.restriction.title", "Parameter restrictions of transformation"), 
+				TabType.RESTRICTIONS, null
+		);
 		
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.homologous_pair.apriori.label", "Point pairs"), 
@@ -138,9 +146,10 @@ public class UITabPaneBuilder {
 		TreeItemType treeItemType = this.lastTreeItemValue.getTreeItemType();
 		switch(treeItemType) {
 		case ADJUSTMENT:
-			
+			Node restrictionPane = this.restrictionPaneBuilder.getNode();
+			node = restrictionPane;
+
 			break;
-			
 		case OBSERVED_POSITIONS:
 			TableView<HomologousFramePositionPair> observationTableView = this.observationTableBuilder.getTable();
 			this.setTableColumnView(tabType, observationTableView);
