@@ -25,8 +25,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 import org.applied_geodesy.adjustment.MathExtension;
-import org.applied_geodesy.adjustment.transformation.point.HomologousFramePosition;
-import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositionPair;
+import org.applied_geodesy.adjustment.transformation.point.DispersionablePosition;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.utils.UiUtil;
 import org.applied_geodesy.ui.textfield.DoubleTextField;
@@ -42,6 +41,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
@@ -82,11 +82,12 @@ public class MatrixDialog {
 	
 	private I18N i18n = I18N.getInstance();
 	private static MatrixDialog matrixDialog = new MatrixDialog();
-	private Dialog<HomologousFramePositionPair> dialog = null;
+	private Dialog<Void> dialog = null;
 	private Window window;
 	private DoubleTextField[][] matrixElementsSourceSystem, matrixElementsTargetSystem;
+	private TitledPane sourceDispersionTitledPane, targetDispersionTitledPane;
 	private Accordion accordion = null;
-	private HomologousFramePositionPair homologousFramePositionPair;
+	private DispersionablePosition sourcePosition, targetPosition;
 	private ToggleGroup matrixTypeSourceSystemToggleGroup, matrixTypeTargetSystemToggleGroup;
 	private MatrixType matrixTypeSourceSystem = null, matrixTypeTargetSystem = null;
 	private MatrixDialog() {}
@@ -95,9 +96,10 @@ public class MatrixDialog {
 		matrixDialog.window = owner;
 	}
 
-	public static Optional<HomologousFramePositionPair> showAndWait(HomologousFramePositionPair homologousFramePositionPair) {
+	public static Optional<Void> showAndWait(String name, DispersionablePosition sourcePosition, DispersionablePosition targetPosition) {
 		matrixDialog.init();
-		matrixDialog.setHomologousFramePositionPair(homologousFramePositionPair);
+		matrixDialog.setName(name);
+		matrixDialog.setDispersionablePositions(sourcePosition, targetPosition);
 		if (matrixDialog.accordion.getExpandedPane() == null)
 			matrixDialog.accordion.setExpandedPane(matrixDialog.accordion.getPanes().get(0));
 		
@@ -124,7 +126,7 @@ public class MatrixDialog {
 		if (this.dialog != null)
 			return;
 		
-		this.dialog = new Dialog<HomologousFramePositionPair>();
+		this.dialog = new Dialog<Void>();
 		this.dialog.setTitle(i18n.getString("MatrixDialog.title", "Dispersion matrix"));
 		this.dialog.setHeaderText(String.format(Locale.ENGLISH, i18n.getString("MatrixDialog.header", "Dispersion of point %s"), ""));
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK);
@@ -133,31 +135,41 @@ public class MatrixDialog {
 		this.dialog.getDialogPane().setContent(this.createPane());
 		this.dialog.setResizable(true);
 
-		this.dialog.setResultConverter(new Callback<ButtonType, HomologousFramePositionPair>() {
+		this.dialog.setResultConverter(new Callback<ButtonType, Void>() {
 			@Override
-			public HomologousFramePositionPair call(ButtonType buttonType) {
+			public Void call(ButtonType buttonType) {
 				if (buttonType == ButtonType.OK) {
-					setMatrix(homologousFramePositionPair.getSourceSystemPosition(), FrameType.SOURCE);
-					setMatrix(homologousFramePositionPair.getTargetSystemPosition(), FrameType.TARGET);
+					setMatrix(sourcePosition, FrameType.SOURCE);
+					setMatrix(targetPosition, FrameType.TARGET);
 					
 					if (accordion.getExpandedPane() == null)
 						accordion.setExpandedPane(accordion.getPanes().get(0));
-					
-					return homologousFramePositionPair;
 				}
 				return null;
 			}
 		});
 	}
 	
-	private void setHomologousFramePositionPair(HomologousFramePositionPair homologousFramePositionPair) {
-		this.homologousFramePositionPair = homologousFramePositionPair;
-		this.setHomologousFramePosition(this.homologousFramePositionPair.getSourceSystemPosition(), FrameType.SOURCE);
-		this.setHomologousFramePosition(this.homologousFramePositionPair.getTargetSystemPosition(), FrameType.TARGET);
+	private void setDispersionablePositions(DispersionablePosition sourcePosition, DispersionablePosition targetPosition) {
+		this.sourcePosition = sourcePosition;
+		this.targetPosition = targetPosition;
+		
+		this.sourceDispersionTitledPane.setCollapsible(sourcePosition != null);
+		this.targetDispersionTitledPane.setCollapsible(targetPosition != null);
+		this.sourceDispersionTitledPane.setVisible(sourcePosition != null);
+		this.targetDispersionTitledPane.setVisible(targetPosition != null);
+		
+		this.setDispersionablePosition(this.sourcePosition, FrameType.SOURCE);
+		this.setDispersionablePosition(this.targetPosition, FrameType.TARGET);
 	}
 	
-	private void setHomologousFramePosition(HomologousFramePosition position, FrameType frameType) {
-		this.dialog.setHeaderText(String.format(Locale.ENGLISH, i18n.getString("MatrixDialog.header", "Dispersion of point %s"), this.homologousFramePositionPair.getName()));
+	private void setName(String name) {
+		this.dialog.setHeaderText(String.format(Locale.ENGLISH, i18n.getString("MatrixDialog.header", "Dispersion of point %s"), name));
+	}
+	
+	private void setDispersionablePosition(DispersionablePosition position, FrameType frameType) {
+		if (position == null)
+			return;
 		
 		Matrix matrix = position.getDispersionApriori();
 		MatrixType matrixType = null;
@@ -214,16 +226,23 @@ public class MatrixDialog {
 	}
 	
 	private Node createPane() {
+		
+		this.sourceDispersionTitledPane = UiUtil.createTitledPane(
+				i18n.getString("MatrixDialog.matrix.frame.source.title", "Source System"), 
+				i18n.getString("MatrixDialog.matrix.frame.source.tooltip", "Define source system dispersion matrix of point"),
+				this.createMatrixPane(FrameType.SOURCE));
+		
+		this.targetDispersionTitledPane = UiUtil.createTitledPane(
+				i18n.getString("MatrixDialog.matrix.frame.target.title", "Target System"), 
+				i18n.getString("MatrixDialog.matrix.frame.target.tooltip", "Define target system dispersion matrix of point"),
+				this.createMatrixPane(FrameType.TARGET));
+		
+		
+		
 		this.accordion = new Accordion();
 		this.accordion.getPanes().addAll(
-				UiUtil.createTitledPane(
-						i18n.getString("MatrixDialog.matrix.frame.source.title", "Source System"), 
-						i18n.getString("MatrixDialog.matrix.frame.source.tooltip", "Define source system dispersion matrix of point"),
-						this.createMatrixPane(FrameType.SOURCE)),
-				UiUtil.createTitledPane(
-						i18n.getString("MatrixDialog.matrix.frame.target.title", "Target System"), 
-						i18n.getString("MatrixDialog.matrix.frame.target.tooltip", "Define target system dispersion matrix of point"),
-						this.createMatrixPane(FrameType.TARGET))
+				sourceDispersionTitledPane,
+				targetDispersionTitledPane
 		);
 	
 		return this.accordion;
@@ -319,7 +338,7 @@ public class MatrixDialog {
 		}
 	}
 	
-	private void setMatrix(HomologousFramePosition position, FrameType frameType) {
+	private void setMatrix(DispersionablePosition position, FrameType frameType) {
 		int dimension = position.getDimension();
 		MatrixType matrixType = null;
 		Matrix matrix = null;

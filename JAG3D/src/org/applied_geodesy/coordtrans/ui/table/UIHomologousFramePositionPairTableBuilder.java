@@ -32,6 +32,7 @@ import org.applied_geodesy.adjustment.transformation.TransformationEvent.Transfo
 import org.applied_geodesy.adjustment.transformation.TransformationType;
 import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositionPair;
 import org.applied_geodesy.coordtrans.ui.dialog.MatrixDialog;
+import org.applied_geodesy.coordtrans.ui.utils.UiUtil;
 import org.applied_geodesy.ui.table.AbsoluteValueComparator;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
@@ -44,19 +45,15 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
-import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.util.Callback;
-import no.uib.cipr.matrix.Matrix;
 
 public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBuilder<HomologousFramePositionPair> implements TransformationChangeListener {	
 	private TransformationType transformationType = TransformationType.SPATIAL;
@@ -93,7 +90,7 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		TableColumn<HomologousFramePositionPair, Boolean> booleanColumn = null;
 		TableColumn<HomologousFramePositionPair, String> stringColumn   = null;
 		TableColumn<HomologousFramePositionPair, Double> doubleColumn   = null;
-		TableColumn<HomologousFramePositionPair, Matrix[]> matrixColumn   = null;
+		TableColumn<HomologousFramePositionPair, Boolean> matrixColumn   = null;
 
 		TableView<HomologousFramePositionPair> table = this.createTable();
 		///////////////// A-PRIORI VALUES /////////////////////////////
@@ -190,7 +187,7 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.covariance.tooltip", "A-priori variance-covariance matrix");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		matrixColumn = this.<Matrix[]>getColumn(header, HomologousFramePositionPair::dispersionAprioriProperty, getMatrixCallback(), ColumnType.APRIORI_POINT, columnIndex, true);
+		matrixColumn = this.<Boolean>getColumn(header, HomologousFramePositionPair::containsDispersionablePositionProperty, getMatrixCallback(), ColumnType.APRIORI_POINT, columnIndex, true);
 		table.getColumns().add(matrixColumn);
 
 
@@ -599,68 +596,68 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 	}
 
 	@Override
-	void setValue(HomologousFramePositionPair featurePoint, int columnIndex, Object oldValue, Object newValue) {
+	void setValue(HomologousFramePositionPair framePositionPair, int columnIndex, Object oldValue, Object newValue) {
 		boolean valid = (oldValue == null || oldValue.toString().trim().isEmpty()) && (newValue == null || newValue.toString().trim().isEmpty());
 		switch (columnIndex) {
 		case 0:
-			featurePoint.setEnable(newValue != null && newValue instanceof Boolean && (Boolean)newValue);
+			framePositionPair.setEnable(newValue != null && newValue instanceof Boolean && (Boolean)newValue);
 			valid = true;
 			break;
 		case 1:
 			if (newValue != null && !newValue.toString().trim().isEmpty()) {
-				featurePoint.setName(newValue.toString().trim());
+				framePositionPair.setName(newValue.toString().trim());
 				valid = true;
 			}
 			else
-				featurePoint.setName(oldValue == null ? null : oldValue.toString().trim());
+				framePositionPair.setName(oldValue == null ? null : oldValue.toString().trim());
 			break;
 		case 2:
 			if (newValue != null && newValue instanceof Double) {
-				featurePoint.getSourceSystemPosition().setX0((Double)newValue);	
+				framePositionPair.getSourceSystemPosition().setX0((Double)newValue);	
 				valid = true;
 			}
 			else
-				featurePoint.getSourceSystemPosition().setX0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
+				framePositionPair.getSourceSystemPosition().setX0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		case 3:
 			if (newValue != null && newValue instanceof Double) {
-				featurePoint.getSourceSystemPosition().setY0((Double)newValue);	
+				framePositionPair.getSourceSystemPosition().setY0((Double)newValue);	
 				valid = true;
 			}
 			else
-				featurePoint.getSourceSystemPosition().setY0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
+				framePositionPair.getSourceSystemPosition().setY0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		case 4:
 			if (newValue != null && newValue instanceof Double) {
-				featurePoint.getSourceSystemPosition().setZ0((Double)newValue);	
+				framePositionPair.getSourceSystemPosition().setZ0((Double)newValue);	
 				valid = true;
 			}
 			else
-				featurePoint.getSourceSystemPosition().setZ0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
+				framePositionPair.getSourceSystemPosition().setZ0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		case 5:
 			if (newValue != null && newValue instanceof Double) {
-				featurePoint.getTargetSystemPosition().setX0((Double)newValue);	
+				framePositionPair.getTargetSystemPosition().setX0((Double)newValue);	
 				valid = true;
 			}
 			else
-				featurePoint.getTargetSystemPosition().setX0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
+				framePositionPair.getTargetSystemPosition().setX0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		case 6:
 			if (newValue != null && newValue instanceof Double) {
-				featurePoint.getTargetSystemPosition().setY0((Double)newValue);	
+				framePositionPair.getTargetSystemPosition().setY0((Double)newValue);	
 				valid = true;
 			}
 			else
-				featurePoint.getTargetSystemPosition().setY0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
+				framePositionPair.getTargetSystemPosition().setY0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		case 7:
 			if (newValue != null && newValue instanceof Double) {
-				featurePoint.getTargetSystemPosition().setZ0((Double)newValue);	
+				framePositionPair.getTargetSystemPosition().setZ0((Double)newValue);	
 				valid = true;
 			}
 			else
-				featurePoint.getTargetSystemPosition().setZ0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
+				framePositionPair.getTargetSystemPosition().setZ0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 			
 		default:
@@ -676,7 +673,7 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 					table.refresh();
 					table.requestFocus();
 					table.getSelectionModel().clearSelection();
-					table.getSelectionModel().select(featurePoint);
+					table.getSelectionModel().select(framePositionPair);
 				}
 			});
 		}
@@ -698,16 +695,16 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 			this.setPositionsToTransformation(null);
 	}
 
-	private static Callback<TableColumn<HomologousFramePositionPair, Matrix[]>, TableCell<HomologousFramePositionPair, Matrix[]>> getMatrixCallback() {
-		return new Callback<TableColumn<HomologousFramePositionPair, Matrix[]>, TableCell<HomologousFramePositionPair, Matrix[]>>() {
+	private static Callback<TableColumn<HomologousFramePositionPair, Boolean>, TableCell<HomologousFramePositionPair, Boolean>> getMatrixCallback() {
+		return new Callback<TableColumn<HomologousFramePositionPair, Boolean>, TableCell<HomologousFramePositionPair, Boolean>>() {
 			@Override
-			public TableCell<HomologousFramePositionPair, Matrix[]> call(TableColumn<HomologousFramePositionPair, Matrix[]> cell) {
-				final TableCell<HomologousFramePositionPair, Matrix[]> tableCell = new TableCell<HomologousFramePositionPair, Matrix[]>() {
+			public TableCell<HomologousFramePositionPair, Boolean> call(TableColumn<HomologousFramePositionPair, Boolean> cell) {
+				final TableCell<HomologousFramePositionPair, Boolean> tableCell = new TableCell<HomologousFramePositionPair, Boolean>() {
 
-					final Button button = createButton(i18n.getString("UIPointTableBuilder.dispersion.button.label", "Dispersion"),"");
-					
+					final Button button = getDispersionButton();
+										
 					@Override
-					public void updateItem(Matrix[] item, boolean empty) {
+					public void updateItem(Boolean item, boolean empty) {
 						super.updateItem(item, empty);
 						if (empty) {
 							setGraphic(null);
@@ -729,7 +726,7 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 								public void handle(ActionEvent event) {
 									HomologousFramePositionPair positionPair = getTableRow().getItem();
 									getTableView().getSelectionModel().clearAndSelect(getTableRow().getIndex());
-									MatrixDialog.showAndWait(positionPair);
+									MatrixDialog.showAndWait(positionPair.getName(), positionPair.getSourceSystemPosition(), positionPair.getTargetSystemPosition());
 								}
 								
 							});
@@ -744,18 +741,10 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 			}
 		};
 	}
-
-	static Button createButton(String title, String tooltip) {
-		Label label = new Label(title);
-		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		label.setAlignment(Pos.CENTER);
-		label.setPadding(new Insets(0,0,0,0));
-		Button button = new Button();
-		button.setGraphic(label);
-		button.setTooltip(new Tooltip(tooltip));
-//		button.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-//		button.setMaxSize(Double.MAX_VALUE, Control.USE_PREF_SIZE); // width, height
+	
+	private static Button getDispersionButton() {
+		Button button = UiUtil.createButton(i18n.getString("UIPointTableBuilder.dispersion.button.label", "Dispersion"),"");
+		button.setMaxWidth(Control.USE_PREF_SIZE);
 		return button;
 	}
 }

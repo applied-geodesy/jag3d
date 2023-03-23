@@ -34,7 +34,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableObjectValue;
 import no.uib.cipr.matrix.Matrix;
 
-public class HomologousFramePositionPair extends PositionPair<HomologousFramePosition, HomologousFramePosition> implements Iterable<HomologousFramePosition> {
+public class HomologousFramePositionPair extends PositionPair<HomologousFramePosition, HomologousFramePosition> implements Iterable<HomologousFramePosition>, DispersionablePositionPair<HomologousFramePosition, HomologousFramePosition> {
 
 	private ReadOnlyObjectProperty<TestStatistic> testStatistic = new ReadOnlyObjectWrapper<TestStatistic>(this, "testStatistic", new TestStatistic());
 		
@@ -392,15 +392,6 @@ public class HomologousFramePositionPair extends PositionPair<HomologousFramePos
 	
 	public ObservableObjectValue<Double> targetResidualZProperty() {
 		return this.getTargetSystemPosition().residualZProperty();
-	}
-	
-	public ReadOnlyObjectWrapper<Matrix[]> dispersionAprioriProperty() {
-		return new ReadOnlyObjectWrapper<Matrix[]>(
-				new Matrix[] {
-						this.getSourceSystemPosition().getDispersionApriori(), 
-						this.getTargetSystemPosition().getDispersionApriori()
-				}
-		);
 	}
 
 	@Override

@@ -31,6 +31,7 @@ import org.applied_geodesy.adjustment.transformation.Transformation;
 import org.applied_geodesy.adjustment.transformation.TransformationAdjustment;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.menu.UIMenuBuilder;
+import org.applied_geodesy.coordtrans.ui.table.UIFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIHomologousFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIParameterTableBuilder;
 import org.applied_geodesy.coordtrans.ui.tree.UITreeBuilder;
@@ -122,10 +123,13 @@ public class TransformationAdjustmentDialog {
 							UIHomologousFramePositionPairTableBuilder.getInstance().getTable().refresh();
 							UIHomologousFramePositionPairTableBuilder.getInstance().getTable().sort();
 							
-							// TODO
 							UIParameterTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
 							UIParameterTableBuilder.getInstance().getTable().refresh();
 							UIParameterTableBuilder.getInstance().getTable().sort();
+							
+							UIFramePositionPairTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
+							UIFramePositionPairTableBuilder.getInstance().getTable().refresh();
+							UIFramePositionPairTableBuilder.getInstance().getTable().sort();
 						}
 						catch (Exception e) {
 							e.printStackTrace();
@@ -516,10 +520,13 @@ public class TransformationAdjustmentDialog {
 					UIHomologousFramePositionPairTableBuilder.getInstance().getTable().refresh();
 					UIHomologousFramePositionPairTableBuilder.getInstance().getTable().sort();
 
-					// TODO
 					UIParameterTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
 					UIParameterTableBuilder.getInstance().getTable().refresh();
 					UIParameterTableBuilder.getInstance().getTable().sort();
+					
+					UIFramePositionPairTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
+					UIFramePositionPairTableBuilder.getInstance().getTable().refresh();
+					UIFramePositionPairTableBuilder.getInstance().getTable().sort();
 				}
 				catch (Exception e) {
 					e.printStackTrace();

@@ -22,56 +22,66 @@
 package org.applied_geodesy.adjustment.transformation.point;
 
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableObjectValue;
 
-public abstract class PositionPair<T1 extends Positionable, T2 extends Positionable> {
-	private T1 sourcePosition;
-	private T2 targetPosition;
-
+public abstract class PositionPair<T1 extends Positionable, T2 extends Positionable> implements Pairable<T1,T2> {
 	private ObjectProperty<String> name    = new SimpleObjectProperty<String>(this, "name", "");
 	private ObjectProperty<Boolean> enable = new SimpleObjectProperty<Boolean>(this, "enable", Boolean.TRUE);
+	
+	private ReadOnlyObjectProperty<T1> sourcePosition;
+	private ReadOnlyObjectProperty<T2> targetPosition;
 		
 	PositionPair(String name, T1 sourcePosition, T2 targetPosition) {
 		if (sourcePosition.getDimension() != targetPosition.getDimension())
 			throw new IllegalArgumentException("Error, cannot create point pair from "
 					+ "points having different dimensions " + sourcePosition.getDimension() + " vs. " + targetPosition.getDimension());
 		
-		this.sourcePosition = sourcePosition;
-		this.targetPosition = targetPosition;
+		this.sourcePosition = new ReadOnlyObjectWrapper<T1>(this, "sourcePosition", sourcePosition);
+		this.targetPosition = new ReadOnlyObjectWrapper<T2>(this, "targetPosition", targetPosition);
 		this.setName(name);
 	}
 	
-	public T1 getSourceSystemPosition() {
+	public ObservableObjectValue<T1> sourceSystemPositionProperty() {
 		return this.sourcePosition;
 	}
 	
-	public T2 getTargetSystemPosition() {
+	public ObservableObjectValue<T2> targetSystemPositionProperty() {
 		return this.targetPosition;
 	}
 	
+	public T1 getSourceSystemPosition() {
+		return this.sourcePosition.get();
+	}
+	
+	public T2 getTargetSystemPosition() {
+		return this.targetPosition.get();
+	}
+	
 	public ObservableObjectValue<Double> sourceXProperty() {
-		return this.sourcePosition.xProperty();
+		return this.sourcePosition.get().xProperty();
 	}
 	
 	public ObservableObjectValue<Double> sourceYProperty() {
-		return this.sourcePosition.yProperty();
+		return this.sourcePosition.get().yProperty();
 	}
 	
 	public ObservableObjectValue<Double> sourceZProperty() {
-		return this.sourcePosition.zProperty();
+		return this.sourcePosition.get().zProperty();
 	}
 	
 	public ObservableObjectValue<Double> targetXProperty() {
-		return this.targetPosition.xProperty();
+		return this.targetPosition.get().xProperty();
 	}
 	
 	public ObservableObjectValue<Double> targetYProperty() {
-		return this.targetPosition.yProperty();
+		return this.targetPosition.get().yProperty();
 	}
 	
 	public ObservableObjectValue<Double> targetZProperty() {
-		return this.targetPosition.zProperty();
+		return this.targetPosition.get().zProperty();
 	}
 	
 	public String getName() {

@@ -22,9 +22,11 @@
 package org.applied_geodesy.coordtrans.ui.tabpane;
 
 import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
+import org.applied_geodesy.adjustment.transformation.point.FramePositionPair;
 import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositionPair;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.pane.UIRestrictionPaneBuilder;
+import org.applied_geodesy.coordtrans.ui.table.UIFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIHomologousFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIParameterTableBuilder;
 import org.applied_geodesy.coordtrans.ui.tree.TreeItemType;
@@ -68,8 +70,9 @@ public class UITabPaneBuilder {
 	private TabSelectionChangeListener tabSelectionChangeListener = new TabSelectionChangeListener();
 	
 	private UIRestrictionPaneBuilder restrictionPaneBuilder = UIRestrictionPaneBuilder.getInstance();
-	private UIHomologousFramePositionPairTableBuilder observationTableBuilder = UIHomologousFramePositionPairTableBuilder.getInstance();
+	private UIHomologousFramePositionPairTableBuilder homologousFramePositionPairTableBuilder = UIHomologousFramePositionPairTableBuilder.getInstance();
 	private UIParameterTableBuilder parameterTableBuilder = UIParameterTableBuilder.getInstance();
+	private UIFramePositionPairTableBuilder framePositionPairTableBuilder = UIFramePositionPairTableBuilder.getInstance();
 	
 	private ObservableMap<TabType, Tab> tapMap = FXCollections.observableHashMap();
 	private TreeItemValue<?> lastTreeItemValue = null;
@@ -151,9 +154,9 @@ public class UITabPaneBuilder {
 
 			break;
 		case OBSERVED_POSITIONS:
-			TableView<HomologousFramePositionPair> observationTableView = this.observationTableBuilder.getTable();
-			this.setTableColumnView(tabType, observationTableView);
-			node = observationTableView;
+			TableView<HomologousFramePositionPair> homologousFramePositionPairTableView = this.homologousFramePositionPairTableBuilder.getTable();
+			this.setTableColumnView(tabType, homologousFramePositionPairTableView);
+			node = homologousFramePositionPairTableView;
 
 			break;
 		case TRANSFORMATION_PARAMETERS:
@@ -163,6 +166,10 @@ public class UITabPaneBuilder {
 
 			break;
 		case TRANSFORMED_POSITIONS:
+			TableView<FramePositionPair> framePositionPairTableBuilder = this.framePositionPairTableBuilder.getTable();
+			this.setTableColumnView(tabType, framePositionPairTableBuilder);
+			node = framePositionPairTableBuilder;
+			
 			break;
 		case UNSPECIFIC:
 			break;

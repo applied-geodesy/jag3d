@@ -32,7 +32,6 @@ import org.applied_geodesy.adjustment.transformation.TransformationChangeListene
 import org.applied_geodesy.adjustment.transformation.TransformationEvent;
 import org.applied_geodesy.adjustment.transformation.TransformationEvent.TransformationEventType;
 import org.applied_geodesy.adjustment.transformation.TransformationType;
-import org.applied_geodesy.adjustment.transformation.restriction.Restriction;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.utils.UiUtil;
 
@@ -43,7 +42,6 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
@@ -85,7 +83,6 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 					}
 				}
 			}
-			
 		}
 	}
 	
@@ -111,6 +108,7 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 	
 	private Node restrictionNode = null;
 	private Map<ParameterRestrictionType, CheckBox> parameterRestrictionCheckboxes = new HashMap<ParameterRestrictionType, CheckBox>();
+	private TransformationType lastTransformationType = null;
 	
 	private UIRestrictionPaneBuilder() {
 		this.init();
@@ -125,7 +123,6 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 			return;
 		
 		this.restrictionNode = this.createPane();
-
 		this.setDisable();
 	}
 	
@@ -328,14 +325,23 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 
 	@Override
 	public void transformationChanged(TransformationEvent evt) {
+		if (this.transformation != null)
+			this.lastTransformationType = this.transformation.getTransformationType();
+		
 		if (evt.getEventType() == TransformationEventType.TRANSFORMATION_MODEL_REMOVED) {
 			this.transformation = null;
 		}
 		else if (evt.getEventType() == TransformationEventType.TRANSFORMATION_MODEL_ADDED) {
-			this.transformation = evt.getSource();
+			this.transformation = evt.getSource();	
 		}
 		this.setDisable();
-		this.setSimilarProperty();
+		
+		if (lastTransformationType == null || this.transformation == null || lastTransformationType != this.transformation.getTransformationType())
+			this.setSimilarProperty();
+		else if(this.transformation != null && lastTransformationType == this.transformation.getTransformationType()) {
+			for (CheckBox checkBox : this.parameterRestrictionCheckboxes.values())
+				handleSelection((ParameterRestrictionType)checkBox.getUserData(), checkBox.isSelected());
+		}
 	}
 	
 	private void setAffineProperty() {
@@ -417,13 +423,6 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		if (this.transformation == null)
 			return;
 
-//		Map<ParameterRestrictionType, Restriction> supportedRestrictions = this.transformation.getSupportedParameterRestrictions();
-//		Restriction restriction = supportedRestrictions.get(parameterRestrictionType);
-//		
-//		if (restriction == null)
-//			return;
-		
-//		this.transformation.getRestrictions().remove(restriction);
 		this.transformation.removeRestriction(parameterRestrictionType);
 		
 		switch (parameterRestrictionType) {
@@ -459,7 +458,6 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 				this.parameterRestrictionCheckboxes.get(ParameterRestrictionType.IDENTICAL_SCALE_XZ).setSelected(false);
 				
 				this.transformation.addRestriction(parameterRestrictionType);
-				//this.transformation.getRestrictions().add(restriction);
 			}
 				
 			break;
@@ -470,7 +468,6 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 				this.parameterRestrictionCheckboxes.get(ParameterRestrictionType.IDENTICAL_SCALE_YZ).setSelected(false);
 				
 				this.transformation.addRestriction(parameterRestrictionType);
-//				this.transformation.getRestrictions().add(restriction);
 			}
 				
 			break;
@@ -482,7 +479,6 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 				this.parameterRestrictionCheckboxes.get(ParameterRestrictionType.IDENTICAL_SCALE_YZ).setSelected(false);
 				
 				this.transformation.addRestriction(parameterRestrictionType);
-//				this.transformation.getRestrictions().add(restriction);
 			}
 				
 			break;
@@ -491,7 +487,6 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 			
 			if (!selected) 
 				this.transformation.addRestriction(parameterRestrictionType);
-//				this.transformation.getRestrictions().add(restriction);
 			
 			break;
 		}
@@ -511,17 +506,9 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 				
 				this.transformation.addRestriction(ParameterRestrictionType.IDENTICAL_SCALE_XY);
 				this.transformation.addRestriction(ParameterRestrictionType.IDENTICAL_SCALE_XZ);
-				
-//				this.transformation.getRestrictions().remove(supportedRestrictions.get(ParameterRestrictionType.IDENTICAL_SCALE_XY));
-//				this.transformation.getRestrictions().remove(supportedRestrictions.get(ParameterRestrictionType.IDENTICAL_SCALE_XZ));
-//				this.transformation.getRestrictions().remove(supportedRestrictions.get(ParameterRestrictionType.IDENTICAL_SCALE_YZ));
-//
-//				this.transformation.getRestrictions().add(supportedRestrictions.get(ParameterRestrictionType.IDENTICAL_SCALE_XY));
-//				this.transformation.getRestrictions().add(supportedRestrictions.get(ParameterRestrictionType.IDENTICAL_SCALE_XZ));
 			}
 			else if (selected) {
 				this.transformation.addRestriction(parameterRestrictionType);
-//				this.transformation.getRestrictions().add(restriction);
 			}
 		}
 		

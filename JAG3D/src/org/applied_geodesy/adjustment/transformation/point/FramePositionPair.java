@@ -24,9 +24,10 @@ package org.applied_geodesy.adjustment.transformation.point;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import javafx.beans.value.ObservableObjectValue;
 import no.uib.cipr.matrix.Matrix;
 
-public class FramePositionPair extends PositionPair<ObservedFramePosition, EstimatedFramePosition> implements Iterable<Position> {
+public class FramePositionPair extends PositionPair<ObservedFramePosition, EstimatedFramePosition> implements Iterable<Position>, DispersionablePositionPair<ObservedFramePosition, EstimatedFramePosition> {
 
 	public FramePositionPair(String name, double zSrc, double zTrg) {
 		this(name, new ObservedFramePosition(zSrc), new EstimatedFramePosition(zTrg));
@@ -98,6 +99,30 @@ public class FramePositionPair extends PositionPair<ObservedFramePosition, Estim
 	            return null;
 		    }
 		};
+	}
+		
+	public ObservableObjectValue<Double> targetUncertaintyXProperty() {
+		return this.getTargetSystemPosition().uncertaintyXProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetUncertaintyYProperty() {
+		return this.getTargetSystemPosition().uncertaintyYProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetUncertaintyZProperty() {
+		return this.getTargetSystemPosition().uncertaintyZProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetResidualXProperty() {
+		return this.getTargetSystemPosition().residualXProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetResidualYProperty() {
+		return this.getTargetSystemPosition().residualYProperty();
+	}
+	
+	public ObservableObjectValue<Double> targetResidualZProperty() {
+		return this.getTargetSystemPosition().residualZProperty();
 	}
 	
 	@Override
