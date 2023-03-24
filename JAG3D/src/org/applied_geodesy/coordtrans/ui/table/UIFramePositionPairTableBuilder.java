@@ -322,10 +322,9 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 	private void setPositionsToTransformation(Transformation transformation) {
 		for (FramePositionPair positionPair : this.table.getItems())
 			positionPair.reset();
-		//TODO
-//		if (transformation != null) {
-//			transformation.getTransformationEquations().getHomologousFramePositionPairs().setAll(this.table.getItems());
-//		}
+
+		if (transformation != null)
+			transformation.getFramePositionPairs().setAll(this.table.getItems());
 	}
 	
 	@Override

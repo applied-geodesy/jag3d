@@ -131,7 +131,7 @@ public abstract class TransformationEquations implements Iterable<HomologousFram
 	public void transform(PositionPair<? extends DispersionablePosition, ? extends AdjustablePosition> positionPair, UpperSymmPackMatrix Dp) {
 		DispersionablePosition pointSrc = positionPair.getSourceSystemPosition();
 		AdjustablePosition pointTrg     = positionPair.getTargetSystemPosition();
-		
+				
 		int dim = this.getDimension();
 		int nop = Dp.numColumns();
 		

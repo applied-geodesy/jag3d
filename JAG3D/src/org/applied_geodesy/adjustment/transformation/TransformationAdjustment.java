@@ -4,8 +4,10 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.EventListener;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import org.applied_geodesy.adjustment.Constant;
@@ -27,11 +29,14 @@ import org.applied_geodesy.adjustment.transformation.TransformationEvent.Transfo
 import org.applied_geodesy.adjustment.transformation.equation.TransformationEquations;
 import org.applied_geodesy.adjustment.transformation.parameter.ProcessingType;
 import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
+import org.applied_geodesy.adjustment.transformation.point.EstimatedFramePosition;
+import org.applied_geodesy.adjustment.transformation.point.FramePositionPair;
 import org.applied_geodesy.adjustment.transformation.point.HomologousFramePosition;
 import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositionPair;
 import org.applied_geodesy.adjustment.transformation.point.Position;
 import org.applied_geodesy.adjustment.transformation.point.SimplePositionPair;
 import org.applied_geodesy.adjustment.transformation.restriction.Restriction;
+import org.applied_geodesy.util.ObservableUniqueList;
 
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
@@ -99,6 +104,17 @@ public class TransformationAdjustment {
 		// reset points
 		for (HomologousFramePositionPair homologousPointPair : uniqueHomologousFramePositionPairs) {
 			homologousPointPair.reset();
+			homologousPointPair.getTestStatistic().setVarianceComponent(this.varianceComponentOfUnitWeight);
+		}
+		
+		for (FramePositionPair framePositionPair : this.transformation.getFramePositionPairs()) {
+			framePositionPair.reset();
+			EstimatedFramePosition targetPosition = framePositionPair.getTargetSystemPosition();
+			// reset residuals and prior estimated values
+			targetPosition.setX0(0);
+			targetPosition.setY0(0);
+			targetPosition.setZ0(0);
+			targetPosition.setVarianceComponent(this.varianceComponentOfUnitWeight);
 		}
 
 		// filter enabled points
@@ -117,9 +133,6 @@ public class TransformationAdjustment {
 
 		// number of equations rows in Jacobian A, B
 		this.numberOfModelEquations = dim * this.homologousPointPairs.size();
-		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs)  {
-			homologousPointPair.getTestStatistic().setVarianceComponent(this.varianceComponentOfUnitWeight);
-		}
 		
 		for (UnknownParameter unknownParameter : this.parameters) {
 			unknownParameter.getTestStatistic().setVarianceComponent(this.varianceComponentOfUnitWeight);
@@ -199,7 +212,7 @@ public class TransformationAdjustment {
 		for (Restriction restriction : calculations)
 			restriction.setRow(-1);
 
-		// reset feature points
+		// reset points
 		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs) {
 			homologousPointPair.reset();
 		}
@@ -504,6 +517,41 @@ public class TransformationAdjustment {
 					unknownParameter.setFisherQuantileApriori(testStatisticParametersAprio.getQuantile());
 					unknownParameter.setFisherQuantileAposteriori(testStatisticParametersApost.getQuantile());
 				}
+
+				this.transformFramePositionPairs();
+			}
+		}
+	}
+	
+	private void transformFramePositionPairs() {
+		ObservableUniqueList<FramePositionPair> framePositionPairs = this.transformation.getFramePositionPairs();
+		
+		Map<String, HomologousFramePositionPair> homologousFramePositionPairs = new HashMap<String, HomologousFramePositionPair>(this.homologousPointPairs.size());
+		for (HomologousFramePositionPair homologousFramePositionPair : this.homologousPointPairs)
+			homologousFramePositionPairs.put(homologousFramePositionPair.getName(), homologousFramePositionPair);
+		
+		for (FramePositionPair framePositionPair : framePositionPairs) {
+			if (!framePositionPair.isEnable())
+				continue;
+
+			this.transformationEquations.transform(framePositionPair, this.Qxx);
+			
+			if (homologousFramePositionPairs.containsKey(framePositionPair.getName())) {
+				HomologousFramePositionPair homologousFramePositionPair = homologousFramePositionPairs.get(framePositionPair.getName());
+				HomologousFramePosition targetPosition0 = homologousFramePositionPair.getTargetSystemPosition();
+				EstimatedFramePosition transformedTargetPosition = framePositionPair.getTargetSystemPosition();
+				
+				double vx = transformedTargetPosition.getX0() - targetPosition0.getX0();
+				double vy = transformedTargetPosition.getY0() - targetPosition0.getY0();
+				double vz = transformedTargetPosition.getZ0() - targetPosition0.getZ0();
+				
+				transformedTargetPosition.setX0(targetPosition0.getX0());
+				transformedTargetPosition.setY0(targetPosition0.getY0());
+				transformedTargetPosition.setZ0(targetPosition0.getZ0());
+				
+				transformedTargetPosition.setResidualX(vx);
+				transformedTargetPosition.setResidualY(vy);
+				transformedTargetPosition.setResidualZ(vz);
 			}
 		}
 	}

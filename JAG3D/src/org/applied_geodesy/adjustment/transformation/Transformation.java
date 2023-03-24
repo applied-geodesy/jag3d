@@ -31,6 +31,7 @@ import java.util.function.Predicate;
 
 import org.applied_geodesy.adjustment.transformation.equation.TransformationEquations;
 import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
+import org.applied_geodesy.adjustment.transformation.point.FramePositionPair;
 import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositionPair;
 import org.applied_geodesy.adjustment.transformation.point.PositionPair;
 import org.applied_geodesy.adjustment.transformation.point.Positionable;
@@ -45,6 +46,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import no.uib.cipr.matrix.MatrixSingularException;
 import no.uib.cipr.matrix.NotConvergedException;
+import no.uib.cipr.matrix.UpperSymmPackMatrix;
 
 public abstract class Transformation {
 	private Map<ParameterRestrictionType, Restriction> supportedParameterRestrictions = new HashMap<ParameterRestrictionType, Restriction>();
@@ -54,7 +56,7 @@ public abstract class Transformation {
 	private ObservableUniqueList<Restriction> postprocessingCalculations = new ObservableUniqueList<Restriction>();
 	private ObjectProperty<Boolean> estimateInitialGuess                 = new SimpleObjectProperty<Boolean>(this, "estimateInitialGuess", Boolean.TRUE);
 	private ObjectProperty<Boolean> estimateCenterOfMasses               = new SimpleObjectProperty<Boolean>(this, "estimateCenterOfMasses", Boolean.TRUE);
-
+	private ObservableUniqueList<FramePositionPair> framePositionPairs   = new ObservableUniqueList<FramePositionPair>();
 	Transformation() {}
 	
 	public abstract TransformationType getTransformationType();
@@ -115,6 +117,19 @@ public abstract class Transformation {
 	
 	public TransformationEquations getTransformationEquations() {
 		return this.transformationEquations;
+	}
+	
+	public ObservableUniqueList<FramePositionPair> getFramePositionPairs() {
+		return this.framePositionPairs;
+	}
+	
+	public void transformFramePositionPairs(UpperSymmPackMatrix Dp) {
+		TransformationEquations transformationEquations = this.getTransformationEquations();
+		if (transformationEquations != null) {
+			for (FramePositionPair framePositionPair : this.framePositionPairs) {
+				transformationEquations.transform(framePositionPair, Dp);
+			}
+		}
 	}
 	
 	public List<HomologousFramePositionPair> getHomologousFramePositionPairs() {
