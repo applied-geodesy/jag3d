@@ -59,26 +59,25 @@ import javafx.util.Callback;
 public class UITreeBuilder {
 	
 	private class TreeCheckBoxChangeListener implements ChangeListener<Boolean> {
-		private final TreeItemValue treeItemValue;
-
-		private TreeCheckBoxChangeListener(TreeItemValue treeItemValue) {
-			this.treeItemValue = treeItemValue;
+		private final CheckBoxTreeItem<TreeItemValue> item;
+		private TreeCheckBoxChangeListener(CheckBoxTreeItem<TreeItemValue> item) {
+			this.item = item;
 		}
 
 		@Override
 		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-			boolean isSaved = false;
 			if (!isIgnoreEvent()) {
-				List<TreeItem<TreeItemValue>> treeItems = treeView.getSelectionModel().getSelectedItems();
+				TreeItemValue treeItemValue = this.item.getValue();
+				MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = treeView.getSelectionModel();
+				selectionModel.select(this.item);
+				List<TreeItem<TreeItemValue>> treeItems = selectionModel.getSelectedItems();
+				
 				for (TreeItem<TreeItemValue> treeItem : treeItems) {
-					if (treeItem.isLeaf() && treeItem.getValue().getItemType() == this.treeItemValue.getItemType()) {
+					if (treeItem.isLeaf() && treeItem.getValue().getItemType() == treeItemValue.getItemType()) {
 						treeItem.getValue().setEnable(newValue);
-						isSaved = treeItem.getValue() == this.treeItemValue;
 						save(treeItem.getValue());
 					}
 				}
-				if (!isSaved)
-					save(this.treeItemValue);
 			
 				// refresh network plot, if visibility of group has changed
 				Tab selectedTab = UITabPaneBuilder.getInstance().getTabPane().getSelectionModel().getSelectedItem();
@@ -355,7 +354,7 @@ public class UITreeBuilder {
 			this.treeView.getSelectionModel().select(newItem);
 		
 		newItem.selectedProperty().bindBidirectional(itemValue.enableProperty());
-		newItem.selectedProperty().addListener(new TreeCheckBoxChangeListener(newItem.getValue()));
+		newItem.selectedProperty().addListener(new TreeCheckBoxChangeListener(newItem));
 		newItem.getValue().nameProperty().addListener(new TreeItemNameChangeListener(newItem.getValue()));
 
 		return newItem;
