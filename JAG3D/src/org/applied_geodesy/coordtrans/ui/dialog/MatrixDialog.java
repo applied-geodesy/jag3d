@@ -100,7 +100,7 @@ public class MatrixDialog {
 		matrixDialog.init();
 		matrixDialog.setName(name);
 		matrixDialog.setDispersionablePositions(sourcePosition, targetPosition);
-		if (matrixDialog.accordion.getExpandedPane() == null)
+		if (matrixDialog.accordion.getExpandedPane() == null || targetPosition == null)
 			matrixDialog.accordion.setExpandedPane(matrixDialog.accordion.getPanes().get(0));
 		
 		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
@@ -153,11 +153,11 @@ public class MatrixDialog {
 	private void setDispersionablePositions(DispersionablePosition sourcePosition, DispersionablePosition targetPosition) {
 		this.sourcePosition = sourcePosition;
 		this.targetPosition = targetPosition;
-		
-		this.sourceDispersionTitledPane.setCollapsible(sourcePosition != null);
-		this.targetDispersionTitledPane.setCollapsible(targetPosition != null);
-		this.sourceDispersionTitledPane.setVisible(sourcePosition != null);
-		this.targetDispersionTitledPane.setVisible(targetPosition != null);
+
+//		this.sourceDispersionTitledPane.setCollapsible(targetPosition != null);
+//		this.targetDispersionTitledPane.setCollapsible(sourcePosition != null);
+//		this.sourceDispersionTitledPane.setVisible(sourcePosition != null);
+//		this.targetDispersionTitledPane.setVisible(targetPosition != null);
 		
 		this.setDispersionablePosition(this.sourcePosition, FrameType.SOURCE);
 		this.setDispersionablePosition(this.targetPosition, FrameType.TARGET);
@@ -339,6 +339,9 @@ public class MatrixDialog {
 	}
 	
 	private void setMatrix(DispersionablePosition position, FrameType frameType) {
+		if (position == null)
+			return;
+		
 		int dimension = position.getDimension();
 		MatrixType matrixType = null;
 		Matrix matrix = null;

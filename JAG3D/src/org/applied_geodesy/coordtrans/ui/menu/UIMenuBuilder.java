@@ -38,6 +38,7 @@ import org.applied_geodesy.coordtrans.ui.dialog.FilePathsSelectionDialog.FilePat
 import org.applied_geodesy.coordtrans.ui.dialog.ReadFileProgressDialog;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.io.PositionFileReader;
+import org.applied_geodesy.coordtrans.ui.table.UIFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIHomologousFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.ObservableUniqueList;
@@ -224,7 +225,7 @@ public class UIMenuBuilder {
 			return;
 		
 		ObservableUniqueList<HomologousFramePositionPair> homologousFramePositionPairs = new ObservableUniqueList<HomologousFramePositionPair>(Math.min(sourceSystemPositions.size(), targetSystemPositions.size()));
-		ObservableUniqueList<FramePositionPair> framePositionPairs = new ObservableUniqueList(sourceSystemPositions.size());
+		ObservableUniqueList<FramePositionPair> framePositionPairs = new ObservableUniqueList<FramePositionPair>(sourceSystemPositions.size());
 		
 		for (Map.Entry<String, ObservedFramePosition> point : sourceSystemPositions.entrySet()) {
 			String name = point.getKey();
@@ -281,11 +282,18 @@ public class UIMenuBuilder {
 				}
 			}
 		}
+		UIHomologousFramePositionPairTableBuilder homologousFramePositionPairTableBuilder = UIHomologousFramePositionPairTableBuilder.getInstance();
+		homologousFramePositionPairTableBuilder.setTransformationType(transformationType);
+		TableView<HomologousFramePositionPair> homologousPositionPairTable = homologousFramePositionPairTableBuilder.getTable();
+		ObservableList<HomologousFramePositionPair> homologousPositionPairTableModel = homologousFramePositionPairTableBuilder.getTableModel(homologousPositionPairTable);
+		homologousPositionPairTableModel.setAll(homologousFramePositionPairs);
 
-		UIHomologousFramePositionPairTableBuilder.getInstance().setTransformationType(transformationType);
-		TableView<HomologousFramePositionPair> homologousPositionPairTable = UIHomologousFramePositionPairTableBuilder.getInstance().getTable();
-		ObservableList<HomologousFramePositionPair> tableModel = UIHomologousFramePositionPairTableBuilder.getInstance().getTableModel(homologousPositionPairTable);
-		tableModel.setAll(homologousFramePositionPairs);
+		UIFramePositionPairTableBuilder framePositionPairTableBuilder = UIFramePositionPairTableBuilder.getInstance();
+		framePositionPairTableBuilder.setTransformationType(transformationType);
+		TableView<FramePositionPair> positionPairTable = framePositionPairTableBuilder.getTable();
+		ObservableList<FramePositionPair> positionPairTableModel = framePositionPairTableBuilder.getTableModel(positionPairTable);
+		positionPairTableModel.setAll(framePositionPairs);
+		
 				
 		Transformation transformation = null;
 		switch(transformationType) {
