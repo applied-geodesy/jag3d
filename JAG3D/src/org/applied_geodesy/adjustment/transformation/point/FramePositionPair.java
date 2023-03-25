@@ -62,14 +62,7 @@ public class FramePositionPair extends PositionPair<ObservedFramePosition, Estim
 	}
 	
 	private static EstimatedFramePosition defaultEstimatedFramePosition(int dim) {
-		switch(dim) {
-		case 1:
-			return new EstimatedFramePosition(0);
-		case 2:
-			return new EstimatedFramePosition(0,0);
-		default:
-			return new EstimatedFramePosition(0,0,0);
-		}
+		return EstimatedFramePosition.create(dim);
 	}
 	
 	@Override

@@ -62,6 +62,17 @@ public class EstimatedFramePosition extends Position implements AdjustablePositi
 		this.init();
 	}
 	
+	public static EstimatedFramePosition create(int dim) {
+		switch(dim) {
+		case 1:
+			return new EstimatedFramePosition(0);
+		case 2:
+			return new EstimatedFramePosition(0,0);
+		default:
+			return new EstimatedFramePosition(0,0,0);
+		}
+	}
+	
 	private void init() {
 		this.setX0(super.getX());
 		this.setY0(super.getY());

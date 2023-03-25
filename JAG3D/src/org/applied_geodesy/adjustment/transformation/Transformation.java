@@ -30,7 +30,9 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import org.applied_geodesy.adjustment.transformation.equation.TransformationEquations;
+import org.applied_geodesy.adjustment.transformation.interpolation.Interpolation;
 import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
+import org.applied_geodesy.adjustment.transformation.point.EstimatedFramePosition;
 import org.applied_geodesy.adjustment.transformation.point.FramePositionPair;
 import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositionPair;
 import org.applied_geodesy.adjustment.transformation.point.PositionPair;
@@ -56,7 +58,9 @@ public abstract class Transformation {
 	private ObservableUniqueList<Restriction> postprocessingCalculations = new ObservableUniqueList<Restriction>();
 	private ObjectProperty<Boolean> estimateInitialGuess                 = new SimpleObjectProperty<Boolean>(this, "estimateInitialGuess", Boolean.TRUE);
 	private ObjectProperty<Boolean> estimateCenterOfMasses               = new SimpleObjectProperty<Boolean>(this, "estimateCenterOfMasses", Boolean.TRUE);
+	private ObjectProperty<Interpolation> interpolation                  = new SimpleObjectProperty<Interpolation>(this, "interpolation");
 	private ObservableUniqueList<FramePositionPair> framePositionPairs   = new ObservableUniqueList<FramePositionPair>();
+	
 	Transformation() {}
 	
 	public abstract TransformationType getTransformationType();
@@ -79,6 +83,18 @@ public abstract class Transformation {
 		this.estimateCenterOfMasses.set(estimateCenterOfMasses);
 	}
 	
+	public Interpolation getInterpolation() {
+		return this.interpolation.get();
+	}
+	
+	public ObjectProperty<Interpolation> interpolationProperty() {
+		return this.interpolation;
+	}
+	
+	public void setInterpolation(Interpolation interpolation) {
+		this.interpolation.set(interpolation);
+	}
+
 	public boolean isEstimateCenterOfMasses() {
 		return this.estimateCenterOfMasses.get();
 	}
@@ -126,8 +142,37 @@ public abstract class Transformation {
 	public void transformFramePositionPairs(UpperSymmPackMatrix Dp) {
 		TransformationEquations transformationEquations = this.getTransformationEquations();
 		if (transformationEquations != null) {
+			int dim = transformationEquations.getDimension();
+			Map<String, EstimatedFramePosition> estimatedTargetPositions = new HashMap<String,EstimatedFramePosition>();
+			ObservableUniqueList<HomologousFramePositionPair> homologousFramePositionPairs = transformationEquations.getHomologousFramePositionPairs();
+
+			if (this.interpolation.get() != null) {
+				for (HomologousFramePositionPair homologousFramePositionPair : homologousFramePositionPairs) {
+					if (homologousFramePositionPair.isEnable()) {
+						EstimatedFramePosition estimatedTargetPosition = EstimatedFramePosition.create(dim);
+						estimatedTargetPosition.setX0(homologousFramePositionPair.getTargetSystemPosition().getX0());
+						estimatedTargetPosition.setY0(homologousFramePositionPair.getTargetSystemPosition().getY0());
+						estimatedTargetPosition.setZ0(homologousFramePositionPair.getTargetSystemPosition().getZ0());
+						estimatedTargetPositions.put(homologousFramePositionPair.getName(), estimatedTargetPosition);
+					}
+				}
+			}
+			
 			for (FramePositionPair framePositionPair : this.framePositionPairs) {
-				transformationEquations.transform(framePositionPair, Dp);
+				if (framePositionPair.isEnable()) {
+					transformationEquations.transform(framePositionPair, Dp);
+
+					if (this.interpolation.get() != null && estimatedTargetPositions.containsKey(framePositionPair.getName())) {
+						EstimatedFramePosition estimatedTargetPosition = estimatedTargetPositions.get(framePositionPair.getName());
+						estimatedTargetPosition.setResidualX(framePositionPair.getTargetSystemPosition().getX() - estimatedTargetPosition.getX());
+						estimatedTargetPosition.setResidualY(framePositionPair.getTargetSystemPosition().getY() - estimatedTargetPosition.getY());
+						estimatedTargetPosition.setResidualZ(framePositionPair.getTargetSystemPosition().getZ() - estimatedTargetPosition.getZ());
+					}
+				}
+			}
+			
+			if (this.interpolation.get() != null) {
+				this.interpolation.get().interpolate(estimatedTargetPositions.values(), this.framePositionPairs);
 			}
 		}
 	}

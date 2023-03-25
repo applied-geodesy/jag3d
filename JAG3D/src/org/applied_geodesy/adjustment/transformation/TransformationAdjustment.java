@@ -524,36 +524,37 @@ public class TransformationAdjustment {
 	}
 	
 	private void transformFramePositionPairs() {
-		ObservableUniqueList<FramePositionPair> framePositionPairs = this.transformation.getFramePositionPairs();
-		
-		Map<String, HomologousFramePositionPair> homologousFramePositionPairs = new HashMap<String, HomologousFramePositionPair>(this.homologousPointPairs.size());
-		for (HomologousFramePositionPair homologousFramePositionPair : this.homologousPointPairs)
-			homologousFramePositionPairs.put(homologousFramePositionPair.getName(), homologousFramePositionPair);
-		
-		for (FramePositionPair framePositionPair : framePositionPairs) {
-			if (!framePositionPair.isEnable())
-				continue;
-
-			this.transformationEquations.transform(framePositionPair, this.Qxx);
-			
-			if (homologousFramePositionPairs.containsKey(framePositionPair.getName())) {
-				HomologousFramePositionPair homologousFramePositionPair = homologousFramePositionPairs.get(framePositionPair.getName());
-				HomologousFramePosition targetPosition0 = homologousFramePositionPair.getTargetSystemPosition();
-				EstimatedFramePosition transformedTargetPosition = framePositionPair.getTargetSystemPosition();
-				
-				double vx = transformedTargetPosition.getX0() - targetPosition0.getX0();
-				double vy = transformedTargetPosition.getY0() - targetPosition0.getY0();
-				double vz = transformedTargetPosition.getZ0() - targetPosition0.getZ0();
-				
-				transformedTargetPosition.setX0(targetPosition0.getX0());
-				transformedTargetPosition.setY0(targetPosition0.getY0());
-				transformedTargetPosition.setZ0(targetPosition0.getZ0());
-				
-				transformedTargetPosition.setResidualX(vx);
-				transformedTargetPosition.setResidualY(vy);
-				transformedTargetPosition.setResidualZ(vz);
-			}
-		}
+		this.transformation.transformFramePositionPairs(this.Qxx);
+//		ObservableUniqueList<FramePositionPair> framePositionPairs = this.transformation.getFramePositionPairs();
+//		
+//		Map<String, HomologousFramePositionPair> homologousFramePositionPairs = new HashMap<String, HomologousFramePositionPair>(this.homologousPointPairs.size());
+//		for (HomologousFramePositionPair homologousFramePositionPair : this.homologousPointPairs)
+//			homologousFramePositionPairs.put(homologousFramePositionPair.getName(), homologousFramePositionPair);
+//		
+//		for (FramePositionPair framePositionPair : framePositionPairs) {
+//			if (!framePositionPair.isEnable())
+//				continue;
+//
+//			this.transformationEquations.transform(framePositionPair, this.Qxx);
+//			
+//			if (homologousFramePositionPairs.containsKey(framePositionPair.getName())) {
+//				HomologousFramePositionPair homologousFramePositionPair = homologousFramePositionPairs.get(framePositionPair.getName());
+//				HomologousFramePosition targetPosition0 = homologousFramePositionPair.getTargetSystemPosition();
+//				EstimatedFramePosition transformedTargetPosition = framePositionPair.getTargetSystemPosition();
+//				
+//				double vx = transformedTargetPosition.getX0() - targetPosition0.getX0();
+//				double vy = transformedTargetPosition.getY0() - targetPosition0.getY0();
+//				double vz = transformedTargetPosition.getZ0() - targetPosition0.getZ0();
+//				
+//				transformedTargetPosition.setX0(targetPosition0.getX0());
+//				transformedTargetPosition.setY0(targetPosition0.getY0());
+//				transformedTargetPosition.setZ0(targetPosition0.getZ0());
+//				
+//				transformedTargetPosition.setResidualX(vx);
+//				transformedTargetPosition.setResidualY(vy);
+//				transformedTargetPosition.setResidualZ(vz);
+//			}
+//		}
 	}
 	
 	private double getEstimateVarianceOfUnitWeightApriori() {
