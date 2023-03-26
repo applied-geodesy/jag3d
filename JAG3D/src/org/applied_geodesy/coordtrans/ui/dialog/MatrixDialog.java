@@ -58,6 +58,23 @@ import no.uib.cipr.matrix.UpperSymmBandMatrix;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
 
 public class MatrixDialog {
+	
+	private class ExpandedPaneChangeListener implements ChangeListener<TitledPane> {
+		@Override
+		public void changed(ObservableValue<? extends TitledPane> abservable, TitledPane oldValue, TitledPane newValue) {
+			if (!sourceDispersionTitledPane.isExpanded() && !targetDispersionTitledPane.isExpanded()) {
+				if (oldValue == sourceDispersionTitledPane) {
+					targetDispersionTitledPane.setExpanded(true);
+					accordion.setExpandedPane(targetDispersionTitledPane);
+				}
+				else if (oldValue == targetDispersionTitledPane) {
+					sourceDispersionTitledPane.setExpanded(true);
+					accordion.setExpandedPane(sourceDispersionTitledPane);
+				}
+			}
+		}
+	}
+	
 	private class MatrixTypeChangeListener implements ChangeListener<Toggle> {
 		private final FrameType frameType;
 		MatrixTypeChangeListener(FrameType frameType) {
@@ -100,9 +117,6 @@ public class MatrixDialog {
 		matrixDialog.init();
 		matrixDialog.setName(name);
 		matrixDialog.setDispersionablePositions(sourcePosition, targetPosition);
-		if (matrixDialog.accordion.getExpandedPane() == null || targetPosition == null)
-			matrixDialog.accordion.setExpandedPane(matrixDialog.accordion.getPanes().get(0));
-		
 		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
 		Platform.runLater(new Runnable() {
 			@Override
@@ -141,9 +155,6 @@ public class MatrixDialog {
 				if (buttonType == ButtonType.OK) {
 					setMatrix(sourcePosition, FrameType.SOURCE);
 					setMatrix(targetPosition, FrameType.TARGET);
-					
-					if (accordion.getExpandedPane() == null)
-						accordion.setExpandedPane(accordion.getPanes().get(0));
 				}
 				return null;
 			}
@@ -151,16 +162,35 @@ public class MatrixDialog {
 	}
 	
 	private void setDispersionablePositions(DispersionablePosition sourcePosition, DispersionablePosition targetPosition) {
-		this.sourcePosition = sourcePosition;
-		this.targetPosition = targetPosition;
+		try {
+			this.sourcePosition = sourcePosition;
+			this.targetPosition = targetPosition;
 
-//		this.sourceDispersionTitledPane.setCollapsible(targetPosition != null);
-//		this.targetDispersionTitledPane.setCollapsible(sourcePosition != null);
-//		this.sourceDispersionTitledPane.setVisible(sourcePosition != null);
-//		this.targetDispersionTitledPane.setVisible(targetPosition != null);
-		
-		this.setDispersionablePosition(this.sourcePosition, FrameType.SOURCE);
-		this.setDispersionablePosition(this.targetPosition, FrameType.TARGET);
+			this.sourceDispersionTitledPane.setAnimated(false);
+			this.targetDispersionTitledPane.setAnimated(false);
+
+			if (targetPosition == null || this.accordion.getExpandedPane() == null){
+				this.targetDispersionTitledPane.setExpanded(targetPosition != null);
+				this.accordion.setExpandedPane(this.sourceDispersionTitledPane);
+			}
+
+			else if (sourcePosition == null || this.accordion.getExpandedPane() == null) {
+				this.sourceDispersionTitledPane.setExpanded(sourcePosition != null);
+				this.accordion.setExpandedPane(this.targetDispersionTitledPane);
+			}
+			this.sourceDispersionTitledPane.setCollapsible(sourcePosition != null && targetPosition != null);
+			this.targetDispersionTitledPane.setCollapsible(targetPosition != null && sourcePosition != null);
+
+			this.sourceDispersionTitledPane.setVisible(sourcePosition != null);
+			this.targetDispersionTitledPane.setVisible(targetPosition != null);
+
+			this.setDispersionablePosition(this.sourcePosition, FrameType.SOURCE);
+			this.setDispersionablePosition(this.targetPosition, FrameType.TARGET);
+		}
+		finally {
+			this.sourceDispersionTitledPane.setAnimated(true);
+			this.targetDispersionTitledPane.setAnimated(true);
+		}
 	}
 	
 	private void setName(String name) {
@@ -244,7 +274,9 @@ public class MatrixDialog {
 				sourceDispersionTitledPane,
 				targetDispersionTitledPane
 		);
-	
+		
+		this.accordion.expandedPaneProperty().addListener(new ExpandedPaneChangeListener());
+
 		return this.accordion;
 	}
 	

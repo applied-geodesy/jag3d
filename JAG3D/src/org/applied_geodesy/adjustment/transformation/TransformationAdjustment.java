@@ -4,10 +4,8 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.EventListener;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import org.applied_geodesy.adjustment.Constant;
@@ -16,7 +14,6 @@ import org.applied_geodesy.adjustment.EstimationStateType;
 import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.NormalEquationSystem;
-import org.applied_geodesy.adjustment.geometry.FeatureChangeListener;
 import org.applied_geodesy.adjustment.statistic.BaardaMethodTestStatistic;
 import org.applied_geodesy.adjustment.statistic.SidakTestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatistic;
@@ -36,7 +33,6 @@ import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositi
 import org.applied_geodesy.adjustment.transformation.point.Position;
 import org.applied_geodesy.adjustment.transformation.point.SimplePositionPair;
 import org.applied_geodesy.adjustment.transformation.restriction.Restriction;
-import org.applied_geodesy.util.ObservableUniqueList;
 
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
@@ -1209,6 +1205,13 @@ public class TransformationAdjustment {
 		return corr;
 	}
 
+	public TestStatisticParameters getTestStatisticParameters() {
+		return this.testStatisticParameters;
+	}
+	
+	public TestStatisticDefinition getTestStatisticDefinition() {
+		return this.testStatisticDefinition;
+	}
 	
 	TestStatisticParameters getTestStatisticParameters(TestStatisticDefinition testStatisticDefinition) {
 		double alpha = testStatisticDefinition.getProbabilityValue();
@@ -1259,6 +1262,10 @@ public class TransformationAdjustment {
 				((TransformationChangeListener)listeners[i]).transformationChanged(evt);
 		}
 	}
+	
+	public VarianceComponent getVarianceComponentOfUnitWeight() {
+		return this.varianceComponentOfUnitWeight;
+	}
 
 	public void setLevenbergMarquardtDampingValue(double lambda) {
 		this.dampingValue = Math.abs(lambda);
@@ -1290,14 +1297,6 @@ public class TransformationAdjustment {
 	
 	public void setPreconditioning(boolean preconditioning) {
 		this.preconditioning = preconditioning;
-	}
-	
-	public void addFeatureChangeListener(FeatureChangeListener l) {
-		this.listenerList.add(l);
-	}
-	
-	public void removeFeatureChangeListener(FeatureChangeListener l) {
-		this.listenerList.remove(l);
 	}
 	
 	public void interrupt() {

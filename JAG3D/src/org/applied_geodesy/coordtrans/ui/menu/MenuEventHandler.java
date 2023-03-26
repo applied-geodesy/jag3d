@@ -23,10 +23,11 @@ package org.applied_geodesy.coordtrans.ui.menu;
 
 import java.io.File;
 
-import org.applied_geodesy.adjustment.transformation.Transformation;
-import org.applied_geodesy.adjustment.transformation.TransformationType;
 import org.applied_geodesy.coordtrans.ui.CoordTrans;
 import org.applied_geodesy.coordtrans.ui.dialog.AboutDialog;
+import org.applied_geodesy.coordtrans.ui.dialog.FormatterOptionDialog;
+import org.applied_geodesy.coordtrans.ui.dialog.LeastSquaresSettingDialog;
+import org.applied_geodesy.coordtrans.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.tree.UITreeBuilder;
 
@@ -69,15 +70,15 @@ class MenuEventHandler implements EventHandler<ActionEvent> {
 			break;
 			
 		case TEST_STATISTIC:
-//			TestStatisticDialog.showAndWait(this.treeBuilder.getFeatureAdjustment().getTestStatisticDefinition());
+			TestStatisticDialog.showAndWait(this.treeBuilder.getTransformationAdjustment().getTestStatisticDefinition());
 			break;
 			
 		case LEAST_SQUARES:
-//			LeastSquaresSettingDialog.showAndWait(this.treeBuilder.getFeatureAdjustment());
+			LeastSquaresSettingDialog.showAndWait(this.treeBuilder.getTransformationAdjustment());
 			break;
 			
 		case PREFERENCES:
-//			FormatterOptionDialog.showAndWait();
+			FormatterOptionDialog.showAndWait();
 			break;
 			
 		case EXIT:

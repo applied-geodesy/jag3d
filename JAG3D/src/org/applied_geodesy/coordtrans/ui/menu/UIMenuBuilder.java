@@ -28,6 +28,9 @@ import java.util.Optional;
 
 import org.applied_geodesy.adjustment.transformation.AffinTransformation;
 import org.applied_geodesy.adjustment.transformation.Transformation;
+import org.applied_geodesy.adjustment.transformation.TransformationChangeListener;
+import org.applied_geodesy.adjustment.transformation.TransformationEvent;
+import org.applied_geodesy.adjustment.transformation.TransformationEvent.TransformationEventType;
 import org.applied_geodesy.adjustment.transformation.TransformationType;
 import org.applied_geodesy.adjustment.transformation.point.FramePositionPair;
 import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositionPair;
@@ -54,7 +57,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 
-public class UIMenuBuilder {
+public class UIMenuBuilder implements TransformationChangeListener {
 
 	private static UIMenuBuilder menuBuilder = new UIMenuBuilder();
 	private I18N i18n = I18N.getInstance();
@@ -109,15 +112,15 @@ public class UIMenuBuilder {
 	}
 	
 	private void createAdjustmentMenu(Menu parentMenu) {
-//		MenuItem leastSquaresItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.leastsquares.label", "_Least-squares"), true, MenuItemType.LEAST_SQUARES, new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-//		MenuItem teststatisticItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.teststatistic.label", "Test st_atistic"), true, MenuItemType.TEST_STATISTIC, new KeyCodeCombination(KeyCode.T, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-//		MenuItem preferencesItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.preferences.label", "Preferen_ces"), true, MenuItemType.PREFERENCES, new KeyCodeCombination(KeyCode.ENTER, KeyCombination.ALT_DOWN), this.menuEventHandler, false);
-//		parentMenu.getItems().addAll(
-//				leastSquaresItem,
-//				teststatisticItem,
-//				new SeparatorMenuItem(),
-//				preferencesItem
-//		);
+		MenuItem leastSquaresItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.leastsquares.label", "_Least-squares"), true, MenuItemType.LEAST_SQUARES, new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem teststatisticItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.teststatistic.label", "Test st_atistic"), true, MenuItemType.TEST_STATISTIC, new KeyCodeCombination(KeyCode.T, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem preferencesItem   = createMenuItem(i18n.getString("UIMenuBuilder.menu.adjustment.preferences.label", "Preferen_ces"), true, MenuItemType.PREFERENCES, new KeyCodeCombination(KeyCode.ENTER, KeyCombination.ALT_DOWN), this.menuEventHandler, false);
+		parentMenu.getItems().addAll(
+				leastSquaresItem,
+				teststatisticItem,
+				new SeparatorMenuItem(),
+				preferencesItem
+		);
 	}
 	
 	private void createPropertiesMenu(Menu parentMenu) {
@@ -312,12 +315,9 @@ public class UIMenuBuilder {
 		
 		}
 		
-		if (transformation != null) {
-			UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
-			treeBuilder.getTransformationAdjustment().setTransformation(transformation);
-			treeBuilder.handleTreeSelections();
-		}
-		else
+		this.fireTransformationChanged(transformation);
+		
+		if (transformation == null)
 			CoordTrans.setTitle(null);
 	}
 	
@@ -362,5 +362,52 @@ public class UIMenuBuilder {
 	public void setReportMenuDisable(boolean disable) {
 		for (MenuItem item : this.reportMenu.getItems())
 			item.setDisable(disable);
+	}
+	
+	private void fireTransformationChanged(Transformation transformation) {
+//		this.setTransformation(transformation);
+		UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
+		treeBuilder.getTransformationAdjustment().setTransformation(transformation);
+		treeBuilder.handleTreeSelections();
+	}
+	
+	void disableMenu(boolean disable) {
+		List<Menu> menus = this.menuBar.getMenus();
+		for (Menu menu : menus)
+			this.disableMenu(menu, disable);
+	}
+	
+	private void disableMenu(Menu menu, boolean disable) {
+		List<MenuItem> items = menu.getItems();
+		for (MenuItem item : items) {
+			if (item instanceof Menu)
+				this.disableMenu((Menu)item, disable);
+			else if (item.getUserData() != null && item.getUserData() instanceof MenuItemType) { 
+				MenuItemType itemType = (MenuItemType)item.getUserData();
+				switch(itemType) {
+
+				case TEST_STATISTIC:
+				case LEAST_SQUARES:
+					item.setDisable(disable);
+					break;
+					
+				case REPORT:
+					this.setReportMenuDisable(true);
+					break;
+					
+				case EXIT:
+				case ABOUT:
+				case PREFERENCES:
+				case IMPORT_POSITIONS:
+					// do nothing
+					break;
+				}
+			}
+		}
+	}
+
+	@Override
+	public void transformationChanged(TransformationEvent evt) {
+		this.disableMenu(evt.getEventType() != TransformationEventType.TRANSFORMATION_MODEL_ADDED);
 	}
 }
