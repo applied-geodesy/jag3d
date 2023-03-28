@@ -32,10 +32,10 @@ public class ObservationTreeItemValue extends TreeItemValue<Void> {
 	@Override
 	public TabType[] getTabTypes() {
 		return new  TabType[] {
-				TabType.HOMOLOGOUS_PAIRS,
-				TabType.SOURCE_SYSTEM_POINTS,
-				TabType.TARGET_SYSTEM_POINTS,
-				TabType.OUTLIERS
+				TabType.APRIORI_HOMOLOGOUS_PAIRS,
+				TabType.APOSTERIORI_SOURCE_SYSTEM_POINTS,
+				TabType.APOSTERIORI_TARGET_SYSTEM_POINTS,
+				TabType.APOSTERIORI_OUTLIERS
 		};
 	}
 }

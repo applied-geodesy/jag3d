@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.applied_geodesy.adjustment.transformation.AffinTransformation;
+import org.applied_geodesy.adjustment.transformation.PlanarAffineTransformation;
+import org.applied_geodesy.adjustment.transformation.SpatialAffineTransformation;
 import org.applied_geodesy.adjustment.transformation.Transformation;
 import org.applied_geodesy.adjustment.transformation.TransformationChangeListener;
 import org.applied_geodesy.adjustment.transformation.TransformationEvent;
@@ -50,7 +51,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
@@ -80,22 +80,19 @@ public class UIMenuBuilder implements TransformationChangeListener {
 		this.menuBar = new MenuBar();
 		Menu fileMenu       = createMenu(i18n.getString("UIMenuBuilder.menu.file.label", "_File"),  true);
 		
-		Menu propertiesMenu = createMenu(i18n.getString("UIMenuBuilder.menu.properties.label", "Propert_ies"), true);
 		Menu adjustmentMenu = createMenu(i18n.getString("UIMenuBuilder.menu.adjustment.label", "Ad_justment"), true);
 		this.reportMenu     = createMenu(i18n.getString("UIMenuBuilder.menu.report.label", "Repor_t"), true);
 		Menu helpMenu       = createMenu(i18n.getString("UIMenuBuilder.menu.help.label", "_?"), true);
 		
 		this.createFileMenu(fileMenu);
-		this.createPropertiesMenu(propertiesMenu);
 		this.createAdjustmentMenu(adjustmentMenu);
 		this.createReportMenu(this.reportMenu);
 		this.createHelpMenu(helpMenu);
 		
 		this.menuBar.getMenus().addAll(
 				fileMenu,
-				propertiesMenu,
 				adjustmentMenu,
-				reportMenu,
+				this.reportMenu,
 				helpMenu
 		);
 	}
@@ -121,21 +118,6 @@ public class UIMenuBuilder implements TransformationChangeListener {
 				new SeparatorMenuItem(),
 				preferencesItem
 		);
-	}
-	
-	private void createPropertiesMenu(Menu parentMenu) {
-//
-//		MenuItem featurePropertiesItem        = createMenuItem(i18n.getString("UIMenuBuilder.menu.setting.feature.label", "_Feature"), true, MenuItemType.FEATURE_PROPERTIES, new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-//		MenuItem paramameterPropertiesItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.setting.parameter.label", "P_arameter"), true, MenuItemType.PARAMETER_PROPERTIES, new KeyCodeCombination(KeyCode.P, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-//		MenuItem restrictionPropertiesItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.setting.restriction.label", "_Restriction"), true, MenuItemType.RESTRICTION_PROPERTIES, new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-//		MenuItem postprocessingPropertiesItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.setting.postprocessing.label", "_Post processing"), true, MenuItemType.POSTPROCESSING_PROPERTIES, new KeyCodeCombination(KeyCode.G, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
-//			
-//		parentMenu.getItems().addAll(
-//				featurePropertiesItem,
-//				paramameterPropertiesItem,
-//				restrictionPropertiesItem,
-//				postprocessingPropertiesItem
-//		);
 	}
 	
 	private void createReportMenu(Menu parentMenu) {
@@ -174,12 +156,6 @@ public class UIMenuBuilder implements TransformationChangeListener {
 
 	private static MenuItem createMenuItem(String label, boolean mnemonicParsing, MenuItemType menuItemType, KeyCodeCombination keyCodeCombination, MenuEventHandler menuEventHandler, boolean disable) {
 		MenuItem menuItem = createMenuItem(new MenuItem(label), mnemonicParsing, menuItemType, keyCodeCombination, menuEventHandler, disable);
-
-		return menuItem;
-	}
-	
-	private static RadioMenuItem createRadioMenuItem(String label, boolean mnemonicParsing, MenuItemType menuItemType, KeyCodeCombination keyCodeCombination, MenuEventHandler menuEventHandler, boolean disable) {
-		RadioMenuItem menuItem = (RadioMenuItem)createMenuItem(new RadioMenuItem(label), mnemonicParsing, menuItemType, keyCodeCombination, menuEventHandler, disable);
 
 		return menuItem;
 	}
@@ -304,10 +280,11 @@ public class UIMenuBuilder implements TransformationChangeListener {
 			CoordTrans.setTitle(i18n.getString("CoordTrans.transformation.type.height.title", "Height transformation"));
 			break;
 		case PLANAR:
+			transformation = new PlanarAffineTransformation();
 			CoordTrans.setTitle(i18n.getString("CoordTrans.transformation.type.planar.title", "Planar transformation"));
 			break;
 		case SPATIAL:
-			transformation = new AffinTransformation();
+			transformation = new SpatialAffineTransformation();
 			CoordTrans.setTitle(i18n.getString("CoordTrans.transformation.type.spatial.title", "Spatial transformation"));
 			break;
 		default:

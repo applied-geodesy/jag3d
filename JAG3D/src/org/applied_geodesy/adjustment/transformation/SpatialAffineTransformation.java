@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.applied_geodesy.adjustment.MathExtension;
-import org.applied_geodesy.adjustment.transformation.equation.affin.SpatialAffinEquations;
+import org.applied_geodesy.adjustment.transformation.equation.SpatialAffineEquations;
 import org.applied_geodesy.adjustment.transformation.parameter.ParameterType;
 import org.applied_geodesy.adjustment.transformation.parameter.ProcessingType;
 import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
@@ -54,8 +54,8 @@ import no.uib.cipr.matrix.SymmPackEVD;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
 import no.uib.cipr.matrix.Vector;
 
-public class AffinTransformation extends Transformation {
-	private Set<ParameterType> fixedUnknownParameterTypes = new HashSet<ParameterType>();
+public class SpatialAffineTransformation extends Transformation {
+	
 	private final Map<ParameterRestrictionType, ParameterType> restrictionToParameterMap = Map.ofEntries(
 			Map.entry(ParameterRestrictionType.FIXED_SHIFT_X, ParameterType.SHIFT_X),
 			Map.entry(ParameterRestrictionType.FIXED_SHIFT_Y, ParameterType.SHIFT_Y),
@@ -74,38 +74,38 @@ public class AffinTransformation extends Transformation {
 			Map.entry(ParameterRestrictionType.FIXED_ROTATION_Z, ParameterType.EULER_ANGLE_Z)
 	);
 	
-	private final SpatialAffinEquations spatialAffinEquations;
+	private final SpatialAffineEquations spatialAffineEquations;
 	
-	public AffinTransformation() {
-		this.spatialAffinEquations = new SpatialAffinEquations();
+	public SpatialAffineTransformation() {
+		this.spatialAffineEquations = new SpatialAffineEquations();
 		
-		UnknownParameter shiftX = this.spatialAffinEquations.getUnknownParameter(ParameterType.SHIFT_X);
-		UnknownParameter shiftY = this.spatialAffinEquations.getUnknownParameter(ParameterType.SHIFT_Y);
-		UnknownParameter shiftZ = this.spatialAffinEquations.getUnknownParameter(ParameterType.SHIFT_Z);
+		UnknownParameter shiftX = this.spatialAffineEquations.getUnknownParameter(ParameterType.SHIFT_X);
+		UnknownParameter shiftY = this.spatialAffineEquations.getUnknownParameter(ParameterType.SHIFT_Y);
+		UnknownParameter shiftZ = this.spatialAffineEquations.getUnknownParameter(ParameterType.SHIFT_Z);
 		
-		UnknownParameter q0 = this.spatialAffinEquations.getUnknownParameter(ParameterType.QUATERNION_Q0);
-		UnknownParameter q1 = this.spatialAffinEquations.getUnknownParameter(ParameterType.QUATERNION_Q1);
-		UnknownParameter q2 = this.spatialAffinEquations.getUnknownParameter(ParameterType.QUATERNION_Q2);
-		UnknownParameter q3 = this.spatialAffinEquations.getUnknownParameter(ParameterType.QUATERNION_Q3);
+		UnknownParameter q0 = this.spatialAffineEquations.getUnknownParameter(ParameterType.QUATERNION_Q0);
+		UnknownParameter q1 = this.spatialAffineEquations.getUnknownParameter(ParameterType.QUATERNION_Q1);
+		UnknownParameter q2 = this.spatialAffineEquations.getUnknownParameter(ParameterType.QUATERNION_Q2);
+		UnknownParameter q3 = this.spatialAffineEquations.getUnknownParameter(ParameterType.QUATERNION_Q3);
 		
-		UnknownParameter s11 = this.spatialAffinEquations.getUnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S11);
-		UnknownParameter s12 = this.spatialAffinEquations.getUnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S12);
-		UnknownParameter s13 = this.spatialAffinEquations.getUnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S13);
+		UnknownParameter s11 = this.spatialAffineEquations.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_11);
+		UnknownParameter s12 = this.spatialAffineEquations.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_12);
+		UnknownParameter s13 = this.spatialAffineEquations.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_13);
 
-		UnknownParameter s22 = this.spatialAffinEquations.getUnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S22);
-		UnknownParameter s23 = this.spatialAffinEquations.getUnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S23);
+		UnknownParameter s22 = this.spatialAffineEquations.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_22);
+		UnknownParameter s23 = this.spatialAffineEquations.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_23);
 
-		UnknownParameter s33 = this.spatialAffinEquations.getUnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S33);
+		UnknownParameter s33 = this.spatialAffineEquations.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_33);
 		
-		UnknownParameter quaternionLength = this.spatialAffinEquations.getUnknownParameter(ParameterType.VECTOR_LENGTH);
+		UnknownParameter quaternionLength = this.spatialAffineEquations.getUnknownParameter(ParameterType.VECTOR_LENGTH);
 		
 		UnknownParameter eulerAngleX = new UnknownParameter(ParameterType.EULER_ANGLE_X, false, 0.0, true, ProcessingType.POSTPROCESSING);
 		UnknownParameter eulerAngleY = new UnknownParameter(ParameterType.EULER_ANGLE_Y, false, 0.0, true, ProcessingType.POSTPROCESSING);
 		UnknownParameter eulerAngleZ = new UnknownParameter(ParameterType.EULER_ANGLE_Z, false, 0.0, true, ProcessingType.POSTPROCESSING);
 		
-		UnknownParameter tmpScaleX = new UnknownParameter(ParameterType.CONSTANT, false, 0.0, 0.0, false, ProcessingType.POSTPROCESSING);
-		UnknownParameter tmpScaleY = new UnknownParameter(ParameterType.CONSTANT, false, 0.0, 0.0, false, ProcessingType.POSTPROCESSING);
-		UnknownParameter tmpScaleZ = new UnknownParameter(ParameterType.CONSTANT, false, 0.0, 0.0, false, ProcessingType.POSTPROCESSING);
+		UnknownParameter tmpScaleX = new UnknownParameter(ParameterType.CONSTANT, false, 0.0, 1.0, false, ProcessingType.POSTPROCESSING);
+		UnknownParameter tmpScaleY = new UnknownParameter(ParameterType.CONSTANT, false, 0.0, 1.0, false, ProcessingType.POSTPROCESSING);
+		UnknownParameter tmpScaleZ = new UnknownParameter(ParameterType.CONSTANT, false, 0.0, 1.0, false, ProcessingType.POSTPROCESSING);
 		
 		UnknownParameter scaleX = new UnknownParameter(ParameterType.SCALE_X, false, 1.0, 1.0, true, ProcessingType.POSTPROCESSING);
 		UnknownParameter scaleY = new UnknownParameter(ParameterType.SCALE_Y, false, 1.0, 1.0, true, ProcessingType.POSTPROCESSING);
@@ -204,7 +204,7 @@ public class AffinTransformation extends Transformation {
 		unknownParameters.add(zero);
 		unknownParameters.add(one);
 				
-		this.set(this.spatialAffinEquations);
+		this.set(this.spatialAffineEquations);
 		this.getUnknownParameters().setAll(unknownParameters);
 		
 		this.getSupportedParameterRestrictions().put(ParameterRestrictionType.FIXED_SHIFT_X, fixedShiftXRestriction);
@@ -246,8 +246,8 @@ public class AffinTransformation extends Transformation {
 		);
 	}
 	
-	public static void deriveInitialGuess(Collection<HomologousFramePositionPair> points, AffinTransformation transformation, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
-		deriveInitialGuess(points, transformation.spatialAffinEquations, parameterRestrictions);
+	public static void deriveInitialGuess(Collection<HomologousFramePositionPair> points, SpatialAffineTransformation transformation, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
+		deriveInitialGuess(points, transformation.spatialAffineEquations, parameterRestrictions);
 	}
 	
 	@Override
@@ -291,18 +291,17 @@ public class AffinTransformation extends Transformation {
 		if (restrictions.contains(this.getSupportedParameterRestrictions().get(ParameterRestrictionType.IDENTICAL_SCALE_YZ)))
 			parameterRestrictions.add(ParameterRestrictionType.IDENTICAL_SCALE_YZ);
 		
-		deriveInitialGuess(this.spatialAffinEquations.getHomologousFramePositionPairs(), this.spatialAffinEquations, parameterRestrictions);
+		deriveInitialGuess(this.spatialAffineEquations.getHomologousFramePositionPairs(), this.spatialAffineEquations, parameterRestrictions);
 	}
 	
-	public static void deriveInitialGuess(Collection<HomologousFramePositionPair> points, SpatialAffinEquations spatialAffinEquations, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
-//		deriveInitialGuessViaEigendecomposition(points, spatialAffinEquations, parameterRestrictions);
+	public static void deriveInitialGuess(Collection<HomologousFramePositionPair> points, SpatialAffineEquations spatialAffineEquations, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
 		if (parameterRestrictions == null || (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHEAR_X) && !parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHEAR_Y) && !parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHEAR_Z)))
-			deriveInitialGuessViaQRdecomposition(points, spatialAffinEquations, parameterRestrictions);
+			deriveInitialGuessViaQRdecomposition(points, spatialAffineEquations, parameterRestrictions);
 		else
-			deriveInitialGuessViaEigendecomposition(points, spatialAffinEquations, parameterRestrictions);
+			deriveInitialGuessViaEigendecomposition(points, spatialAffineEquations, parameterRestrictions);
 	}
 	
-	private static void deriveInitialGuessViaQRdecomposition(Collection<HomologousFramePositionPair> points, SpatialAffinEquations spatialAffinEquations, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
+	private static void deriveInitialGuessViaQRdecomposition(Collection<HomologousFramePositionPair> points, SpatialAffineEquations spatialAffineEquations, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
 		double tx = 0;
 		double ty = 0;
 		double tz = 0;
@@ -346,8 +345,8 @@ public class AffinTransformation extends Transformation {
 			nop++;
 		}
 		
-//		if (nop < 4)
-//			throw new IllegalArgumentException("Error, the number of points is not sufficient; at least 4 points are needed. " + nop);
+		if (nop <= 0)
+			throw new IllegalArgumentException("Error, the number of points zero.");
 		
 		x0 /= nop;
 		y0 /= nop;
@@ -402,12 +401,8 @@ public class AffinTransformation extends Transformation {
 			N.solve(n, t);
 		}
 		catch (Exception e) {
-			try {
-				N = MathExtension.pinv(N, -1);
-				N.mult(n, t);
-			} catch (NotConvergedException exc) {
-				exc.printStackTrace();
-			}
+			N = MathExtension.pinv(N, -1);
+			N.mult(n, t);
 		}
 
 		DenseMatrix T = new DenseMatrix(3,3);
@@ -468,10 +463,10 @@ public class AffinTransformation extends Transformation {
 			tz = Z0 - (r31*smxP + r32*smyP + r33*smzP);
 		}
 
-		spatialAffinEquations.setInitialGuess(tx, ty, tz, q0, q1, q2, q3, s11, s12, s13, s22,  s23,  s33);	
+		spatialAffineEquations.setInitialGuess(tx, ty, tz, q0, q1, q2, q3, s11, s12, s13, s22,  s23,  s33);	
 	}
 	
-	private static void deriveInitialGuessViaEigendecomposition(Collection<HomologousFramePositionPair> points, SpatialAffinEquations spatialAffinEquations, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
+	private static void deriveInitialGuessViaEigendecomposition(Collection<HomologousFramePositionPair> points, SpatialAffineEquations spatialAffineEquations, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
 		double tx = 0;
 		double ty = 0;
 		double tz = 0;
@@ -670,46 +665,11 @@ public class AffinTransformation extends Transformation {
 		if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_Z))
 			tz = Z0 - m*(        2.0*(q1*q3-q0*q2)*x0 +         2.0*(q2*q3+q0*q1)*y0 + (2.0*q0*q0-1.0+2.0*q3*q3)*z0);
 
-		spatialAffinEquations.setInitialGuess(tx, ty, tz, q0, q1, q2, q3, s11, s12, s13, s22,  s23,  s33);					
+		spatialAffineEquations.setInitialGuess(tx, ty, tz, q0, q1, q2, q3, s11, s12, s13, s22,  s23,  s33);					
 	}
 
 	@Override
-	public TransformationType getTransformationType() {
-		return TransformationType.SPATIAL;
-	}
-
-	@Override
-	public boolean addRestriction(ParameterRestrictionType parameterRestrictionType) {
-		Map<ParameterRestrictionType, Restriction> supportedRestrictions = this.getSupportedParameterRestrictions();
-		if (!supportedRestrictions.containsKey(parameterRestrictionType)) 
-			return false;
-		
-		Restriction restriction = supportedRestrictions.get(parameterRestrictionType);
-		
-		if (this.getRestrictions().contains(restriction))
-			return false;
-		
-		if (this.restrictionToParameterMap.containsKey(parameterRestrictionType))
-			this.fixedUnknownParameterTypes.add(this.restrictionToParameterMap.get(parameterRestrictionType));
-		
-		return this.getRestrictions().add(restriction);
-	}
-
-	@Override
-	public boolean removeRestriction(ParameterRestrictionType parameterRestrictionType) {
-		Map<ParameterRestrictionType, Restriction> supportedRestrictions = this.getSupportedParameterRestrictions();
-		if (!supportedRestrictions.containsKey(parameterRestrictionType)) 
-			return false;
-		
-		if (this.restrictionToParameterMap.containsKey(parameterRestrictionType))
-			this.fixedUnknownParameterTypes.remove(this.restrictionToParameterMap.get(parameterRestrictionType));
-		
-		Restriction restriction = supportedRestrictions.get(parameterRestrictionType);
-		return this.getRestrictions().remove(restriction);
-	}
-	
-	@Override
-	public boolean isFixedParameter(UnknownParameter parameter) {
-		return this.fixedUnknownParameterTypes.contains(parameter.getParameterType());
+	Map<ParameterRestrictionType, ParameterType> getRestrictionToParameterMap() {
+		return this.restrictionToParameterMap;
 	}
 }

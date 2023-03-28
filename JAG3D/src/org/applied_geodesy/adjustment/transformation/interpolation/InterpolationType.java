@@ -22,6 +22,7 @@
 package org.applied_geodesy.adjustment.transformation.interpolation;
 
 public enum InterpolationType {
+	NONE,
 	INVERSE_DISTANCE_WEIGHTING,
 	MULTI_QUADRATIC,
 	SECTOR

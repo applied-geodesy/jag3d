@@ -25,6 +25,7 @@ import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.transformation.point.FramePositionPair;
 import org.applied_geodesy.adjustment.transformation.point.HomologousFramePositionPair;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
+import org.applied_geodesy.coordtrans.ui.pane.UIInterpolationPaneBuilder;
 import org.applied_geodesy.coordtrans.ui.pane.UIRestrictionPaneBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIHomologousFramePositionPairTableBuilder;
@@ -70,6 +71,7 @@ public class UITabPaneBuilder {
 	private TabSelectionChangeListener tabSelectionChangeListener = new TabSelectionChangeListener();
 	
 	private UIRestrictionPaneBuilder restrictionPaneBuilder = UIRestrictionPaneBuilder.getInstance();
+	private UIInterpolationPaneBuilder interpolationPaneBuilder = UIInterpolationPaneBuilder.getInstance();
 	private UIHomologousFramePositionPairTableBuilder homologousFramePositionPairTableBuilder = UIHomologousFramePositionPairTableBuilder.getInstance();
 	private UIParameterTableBuilder parameterTableBuilder = UIParameterTableBuilder.getInstance();
 	private UIFramePositionPairTableBuilder framePositionPairTableBuilder = UIFramePositionPairTableBuilder.getInstance();
@@ -97,32 +99,44 @@ public class UITabPaneBuilder {
 		);
 		
 		this.createTab(
-				i18n.getString("UITabPaneBuilder.tab.homologous_pair.apriori.label", "Point pairs"), 
-				i18n.getString("UITabPaneBuilder.tab.homologous_pair.apriori.title", "Table of observed homologous point pairs"), 
-				TabType.HOMOLOGOUS_PAIRS, null
+				i18n.getString("UITabPaneBuilder.tab.interpolation.label", "Interpolation"), 
+				i18n.getString("UITabPaneBuilder.tab.interpolation.title", "Interpolation approaches for residual gaps"), 
+				TabType.INTERPOLATION, null
+		);
+		
+		this.createTab(
+				i18n.getString("UITabPaneBuilder.tab.homologous_pair.apriori.label", "Position pairs"), 
+				i18n.getString("UITabPaneBuilder.tab.homologous_pair.apriori.title", "Table of observed homologous position pairs"), 
+				TabType.APRIORI_HOMOLOGOUS_PAIRS, null
+		);
+		
+		this.createTab(
+				i18n.getString("UITabPaneBuilder.tab.position.apriori.label", "Source system"), 
+				i18n.getString("UITabPaneBuilder.tab.position.apriori.title", "Table of source system positions"), 
+				TabType.APRIORI_SOURCE_SYSTEM_POINTS, null
 		);
 
 		this.createTab(
-				i18n.getString("UITabPaneBuilder.tab.point.aposteriori.label", "Source system"), 
-				i18n.getString("UITabPaneBuilder.tab.point.aposteriori.title", "Table of source system points"), 
-				TabType.SOURCE_SYSTEM_POINTS, null
+				i18n.getString("UITabPaneBuilder.tab.position.aposteriori.label", "Source system"), 
+				i18n.getString("UITabPaneBuilder.tab.position.aposteriori.title", "Table of estimated source system positions"), 
+				TabType.APOSTERIORI_SOURCE_SYSTEM_POINTS, null
 		);
 		
 		this.createTab(
-				i18n.getString("UITabPaneBuilder.tab.point.aposteriori.label", "Target system"), 
-				i18n.getString("UITabPaneBuilder.tab.point.aposteriori.title", "Table of estimated source system points"), 
-				TabType.TARGET_SYSTEM_POINTS, null
+				i18n.getString("UITabPaneBuilder.tab.position.aposteriori.label", "Target system"), 
+				i18n.getString("UITabPaneBuilder.tab.position.aposteriori.title", "Table of estimated target system positions"), 
+				TabType.APOSTERIORI_TARGET_SYSTEM_POINTS, null
 				);
 		
 		this.createTab(
-				i18n.getString("UITabPaneBuilder.tab.parameter.aposteriori.label", "Outliers"), 
-				i18n.getString("UITabPaneBuilder.tab.parameter.aposteriori.title", "Table of stochastic parameters"), 
-				TabType.OUTLIERS, null
+				i18n.getString("UITabPaneBuilder.tab.position.outlier.label", "Outliers"), 
+				i18n.getString("UITabPaneBuilder.tab.position.outlier.title", "Table of estimated stochastic parameters"), 
+				TabType.APOSTERIORI_OUTLIERS, null
 				);
 		
 		this.createTab(
 				i18n.getString("UITabPaneBuilder.tab.parameter.aposteriori.label", "Parameters"), 
-				i18n.getString("UITabPaneBuilder.tab.parameter.aposteriori.title", "Table of estimated parameters"), 
+				i18n.getString("UITabPaneBuilder.tab.parameter.aposteriori.title", "Table of estimated transformation parameters"), 
 				TabType.APOSTERIORI_PARAMETERS, null
 				);
 				
@@ -149,8 +163,8 @@ public class UITabPaneBuilder {
 		TreeItemType treeItemType = this.lastTreeItemValue.getTreeItemType();
 		switch(treeItemType) {
 		case ADJUSTMENT:
-			Node restrictionPane = this.restrictionPaneBuilder.getNode();
-			node = restrictionPane;
+			Node propertyPane = (tabType == TabType.INTERPOLATION) ? this.interpolationPaneBuilder.getNode() : this.restrictionPaneBuilder.getNode();
+			node = propertyPane;
 
 			break;
 		case OBSERVED_POSITIONS:
@@ -195,21 +209,21 @@ public class UITabPaneBuilder {
 				case HIDDEN:
 					column.setVisible(false);
 					break;
-
+					
 				case APRIORI_POINT:
-					column.setVisible(tabType == TabType.HOMOLOGOUS_PAIRS);
+					column.setVisible(tabType == TabType.APRIORI_SOURCE_SYSTEM_POINTS || tabType == TabType.APRIORI_HOMOLOGOUS_PAIRS);
 					break;
 					
-				case SOURCE_SYSTEM:
-					column.setVisible(tabType == TabType.SOURCE_SYSTEM_POINTS);
+				case APOSTERIORI_SOURCE_SYSTEM:
+					column.setVisible(tabType == TabType.APOSTERIORI_SOURCE_SYSTEM_POINTS);
 					break;
 					
-				case TARGET_SYSTEM:
-					column.setVisible(tabType == TabType.TARGET_SYSTEM_POINTS);
+				case APOSTERIORI_TARGET_SYSTEM:
+					column.setVisible(tabType == TabType.APOSTERIORI_TARGET_SYSTEM_POINTS);
 					break;
 
 				case APOSTERIORI_POINT:
-					column.setVisible(tabType == TabType.OUTLIERS);
+					column.setVisible(tabType == TabType.APOSTERIORI_OUTLIERS);
 					break;
 
 				default:

@@ -19,14 +19,14 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.adjustment.transformation.equation.affin;
+package org.applied_geodesy.adjustment.transformation.equation;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.applied_geodesy.adjustment.transformation.equation.TransformationEquations;
+import org.applied_geodesy.adjustment.transformation.TransformationType;
 import org.applied_geodesy.adjustment.transformation.parameter.ParameterType;
 import org.applied_geodesy.adjustment.transformation.parameter.ProcessingType;
 import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
@@ -45,12 +45,12 @@ import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
 import no.uib.cipr.matrix.Vector;
 
-public class SpatialAffinEquations extends TransformationEquations {
+public class SpatialAffineEquations extends TransformationEquations {
 	private Map<ParameterType, UnknownParameter> parameters = null;
 	
 	private ProductSumRestriction quaternionLengthRestriction;
 
-	public SpatialAffinEquations() {
+	public SpatialAffineEquations() {
 		this.init();
 	}
 	
@@ -64,14 +64,14 @@ public class SpatialAffinEquations extends TransformationEquations {
 		this.parameters.get(ParameterType.QUATERNION_Q2).setValue0(q2);
 		this.parameters.get(ParameterType.QUATERNION_Q3).setValue0(q3);
 		
-		this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S11).setValue0(s11);
-		this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S12).setValue0(s12);
-		this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S13).setValue0(s13);
+		this.parameters.get(ParameterType.AUXILIARY_ELEMENT_11).setValue0(s11);
+		this.parameters.get(ParameterType.AUXILIARY_ELEMENT_12).setValue0(s12);
+		this.parameters.get(ParameterType.AUXILIARY_ELEMENT_13).setValue0(s13);
 		
-		this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S22).setValue0(s22);
-		this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S23).setValue0(s23);
+		this.parameters.get(ParameterType.AUXILIARY_ELEMENT_22).setValue0(s22);
+		this.parameters.get(ParameterType.AUXILIARY_ELEMENT_23).setValue0(s23);
 		
-		this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S33).setValue0(s33);
+		this.parameters.get(ParameterType.AUXILIARY_ELEMENT_33).setValue0(s33);
 	}
 	
 	@Override
@@ -96,14 +96,14 @@ public class SpatialAffinEquations extends TransformationEquations {
 		UnknownParameter Q2 = this.parameters.get(ParameterType.QUATERNION_Q2);
 		UnknownParameter Q3 = this.parameters.get(ParameterType.QUATERNION_Q3);
 		
-		UnknownParameter S11 = this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S11);
-		UnknownParameter S12 = this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S12);
-		UnknownParameter S13 = this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S13);
+		UnknownParameter S11 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_11);
+		UnknownParameter S12 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_12);
+		UnknownParameter S13 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_13);
 		
-		UnknownParameter S22 = this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S22);
-		UnknownParameter S23 = this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S23);
+		UnknownParameter S22 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_22);
+		UnknownParameter S23 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_23);
 		
-		UnknownParameter S33 = this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S33);
+		UnknownParameter S33 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_33);
 
 		// Shift vector
 		double tx = Tx.getValue();
@@ -178,14 +178,14 @@ public class SpatialAffinEquations extends TransformationEquations {
 		UnknownParameter Q2 = this.parameters.get(ParameterType.QUATERNION_Q2);
 		UnknownParameter Q3 = this.parameters.get(ParameterType.QUATERNION_Q3);
 		
-		UnknownParameter S11 = this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S11);
-		UnknownParameter S12 = this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S12);
-		UnknownParameter S13 = this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S13);
+		UnknownParameter S11 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_11);
+		UnknownParameter S12 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_12);
+		UnknownParameter S13 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_13);
 		
-		UnknownParameter S22 = this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S22);
-		UnknownParameter S23 = this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S23);
+		UnknownParameter S22 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_22);
+		UnknownParameter S23 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_23);
 		
-		UnknownParameter S33 = this.parameters.get(ParameterType.SCALE_SHEAR_COMPONENT_S33);
+		UnknownParameter S33 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_33);
 
 		// Shift vector
 		double tx = Tx.getValue();
@@ -272,14 +272,14 @@ public class SpatialAffinEquations extends TransformationEquations {
 		UnknownParameter Q2 = this.getUnknownParameter(ParameterType.QUATERNION_Q2);
 		UnknownParameter Q3 = this.getUnknownParameter(ParameterType.QUATERNION_Q3);
 		
-		UnknownParameter S11 = this.getUnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S11);
-		UnknownParameter S12 = this.getUnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S12);
-		UnknownParameter S13 = this.getUnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S13);
+		UnknownParameter S11 = this.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_11);
+		UnknownParameter S12 = this.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_12);
+		UnknownParameter S13 = this.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_13);
 		
-		UnknownParameter S22 = this.getUnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S22);
-		UnknownParameter S23 = this.getUnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S23);
+		UnknownParameter S22 = this.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_22);
+		UnknownParameter S23 = this.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_23);
 		
-		UnknownParameter S33 = this.getUnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S33);
+		UnknownParameter S33 = this.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_33);
 
 		// Shift vector
 		double tx = Tx.getValue();
@@ -481,14 +481,14 @@ public class SpatialAffinEquations extends TransformationEquations {
 		this.parameters.put(ParameterType.QUATERNION_Q2, new UnknownParameter(ParameterType.QUATERNION_Q2, true, 0.0));
 		this.parameters.put(ParameterType.QUATERNION_Q3, new UnknownParameter(ParameterType.QUATERNION_Q3, true, 0.0));
 		
-		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S11, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S11, true, 1.0));
-		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S12, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S12, true, 0.0));
-		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S13, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S13, true, 0.0));
+		this.parameters.put(ParameterType.AUXILIARY_ELEMENT_11, new UnknownParameter(ParameterType.AUXILIARY_ELEMENT_11, true, 1.0));
+		this.parameters.put(ParameterType.AUXILIARY_ELEMENT_12, new UnknownParameter(ParameterType.AUXILIARY_ELEMENT_12, true, 0.0));
+		this.parameters.put(ParameterType.AUXILIARY_ELEMENT_13, new UnknownParameter(ParameterType.AUXILIARY_ELEMENT_13, true, 0.0));
 		
-		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S22, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S22, true, 1.0));
-		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S23, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S23, true, 0.0));
+		this.parameters.put(ParameterType.AUXILIARY_ELEMENT_22, new UnknownParameter(ParameterType.AUXILIARY_ELEMENT_22, true, 1.0));
+		this.parameters.put(ParameterType.AUXILIARY_ELEMENT_23, new UnknownParameter(ParameterType.AUXILIARY_ELEMENT_23, true, 0.0));
 		
-		this.parameters.put(ParameterType.SCALE_SHEAR_COMPONENT_S33, new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S33, true, 1.0));
+		this.parameters.put(ParameterType.AUXILIARY_ELEMENT_33, new UnknownParameter(ParameterType.AUXILIARY_ELEMENT_33, true, 1.0));
 		
 		this.parameters.put(ParameterType.VECTOR_LENGTH, new UnknownParameter(ParameterType.VECTOR_LENGTH, true, 1.0, false, ProcessingType.FIXED));
 		
@@ -518,7 +518,7 @@ public class SpatialAffinEquations extends TransformationEquations {
 	}
 	
 	@Override
-	public final int getDimension() {
-		return 3;
+	public TransformationType getTransformationType() {
+		return TransformationType.SPATIAL;
 	}
 }

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.applied_geodesy.adjustment.EstimationStateType;
-import org.applied_geodesy.adjustment.transformation.AffinTransformation;
 import org.applied_geodesy.adjustment.transformation.ParameterRestrictionType;
+import org.applied_geodesy.adjustment.transformation.SpatialAffineTransformation;
 import org.applied_geodesy.adjustment.transformation.Transformation;
 import org.applied_geodesy.adjustment.transformation.TransformationAdjustment;
 import org.applied_geodesy.adjustment.transformation.parameter.ProcessingType;
@@ -46,7 +46,7 @@ public class AffinTransformationTest {
 		try {
 			TransformationAdjustment adjustment = new TransformationAdjustment();
 			adjustment.setMaximalNumberOfIterations(500);
-			AffinTransformation transformation = new AffinTransformation();
+			SpatialAffineTransformation transformation = new SpatialAffineTransformation();
 			
 			transformation.getRestrictions().add(transformation.getSupportedParameterRestrictions().get(ParameterRestrictionType.FIXED_SHEAR_X));
 			transformation.getRestrictions().add(transformation.getSupportedParameterRestrictions().get(ParameterRestrictionType.FIXED_SHEAR_Y));

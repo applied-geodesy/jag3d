@@ -41,6 +41,7 @@ import org.applied_geodesy.coordtrans.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.TransformationAdjustmentDialog;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.menu.UIMenuBuilder;
+import org.applied_geodesy.coordtrans.ui.pane.UIInterpolationPaneBuilder;
 import org.applied_geodesy.coordtrans.ui.pane.UIRestrictionPaneBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIHomologousFramePositionPairTableBuilder;
@@ -213,6 +214,7 @@ public class CoordTrans extends Application {
 			adjustment.addTransformationChangeListener(menuBuilder);
 			adjustment.addTransformationChangeListener(treeBuilder);
 			adjustment.addTransformationChangeListener(UIRestrictionPaneBuilder.getInstance());
+			adjustment.addTransformationChangeListener(UIInterpolationPaneBuilder.getInstance());
 			adjustment.addTransformationChangeListener(UIParameterTableBuilder.getInstance());
 			adjustment.addTransformationChangeListener(UIHomologousFramePositionPairTableBuilder.getInstance());
 			adjustment.addTransformationChangeListener(UIFramePositionPairTableBuilder.getInstance());

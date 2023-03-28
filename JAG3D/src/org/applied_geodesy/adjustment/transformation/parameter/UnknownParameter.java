@@ -227,7 +227,7 @@ public class UnknownParameter extends Parameter {
 	@Override
 	public String toString() {
 		return "UnknownParameter [Name=" + getName() + ", ParameterType=" + getParameterType()
-			+ ", Value0=" + getValue0() + ", Column=" + getColumn()
+			+ ", Value0=" + getValue0() + ", ExpectedValue=" + getExpectedValue() + ", Column=" + getColumn()
 			+ ", ProcessingType="	+ getProcessingType() + ", Value=" + getValue() + "]";
 	}	
 }

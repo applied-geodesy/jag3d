@@ -33,8 +33,8 @@ public class TransformationTreeItemValue extends TreeItemValue<Void> {
 	@Override
 	public TabType[] getTabTypes() {
 		return new  TabType[] {
-				TabType.SOURCE_SYSTEM_POINTS,
-				TabType.TARGET_SYSTEM_POINTS,
+				TabType.APRIORI_SOURCE_SYSTEM_POINTS,
+				TabType.APOSTERIORI_TARGET_SYSTEM_POINTS,
 		};
 	}
 }

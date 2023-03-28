@@ -38,11 +38,11 @@ public class ShearAngleRestriction extends Restriction {
 		this(
 				false,
 				EulerAxisType.Z_AXIS,
-				new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S12, Boolean.FALSE, Boolean.FALSE),
-				new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S13, Boolean.FALSE, Boolean.FALSE),
-				new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S22, Boolean.FALSE, Boolean.FALSE),
-				new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S23, Boolean.FALSE, Boolean.FALSE),
-				new UnknownParameter(ParameterType.SCALE_SHEAR_COMPONENT_S33, Boolean.FALSE, Boolean.FALSE),
+				new UnknownParameter(ParameterType.AUXILIARY_ELEMENT_12, Boolean.FALSE, Boolean.FALSE),
+				new UnknownParameter(ParameterType.AUXILIARY_ELEMENT_13, Boolean.FALSE, Boolean.FALSE),
+				new UnknownParameter(ParameterType.AUXILIARY_ELEMENT_22, Boolean.FALSE, Boolean.FALSE),
+				new UnknownParameter(ParameterType.AUXILIARY_ELEMENT_23, Boolean.FALSE, Boolean.FALSE),
+				new UnknownParameter(ParameterType.AUXILIARY_ELEMENT_33, Boolean.FALSE, Boolean.FALSE),
 				null);
 	}
 	

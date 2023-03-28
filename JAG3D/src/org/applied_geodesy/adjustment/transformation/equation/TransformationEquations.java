@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
+import org.applied_geodesy.adjustment.transformation.TransformationType;
 import org.applied_geodesy.adjustment.transformation.parameter.ParameterType;
 import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.transformation.point.AdjustablePosition;
@@ -64,7 +65,7 @@ public abstract class TransformationEquations implements Iterable<HomologousFram
 	
 	public abstract void normalEquationElements(PositionPair<? extends DispersionablePosition, ? extends AdjustablePosition> positionPair, Matrix Jx, Matrix JvSrc, Matrix JvTrg, Vector w);
 	
-	public abstract int getDimension();
+	public abstract TransformationType getTransformationType();
 	
 	public abstract Collection<UnknownParameter> getUnknownParameters();
 	
@@ -88,12 +89,17 @@ public abstract class TransformationEquations implements Iterable<HomologousFram
 		
 	public SimplePositionPair getCenterOfMasses() {
 		if (this.centerOfMasses == null) {
-			if (this.getDimension() == 1)
+			switch(this.getTransformationType()) {
+			case HEIGHT:
 				this.centerOfMasses = new SimplePositionPair("CENTER_OF_MASSES",      0,      0);
-			else if (this.getDimension() == 2)
+				break;
+			case PLANAR:
 				this.centerOfMasses = new SimplePositionPair("CENTER_OF_MASSES",    0,0,    0,0);
-			else if (this.getDimension() == 3)
+				break;
+			case SPATIAL:
 				this.centerOfMasses = new SimplePositionPair("CENTER_OF_MASSES",  0,0,0,  0,0,0);
+				break;			
+			}				
 		}
 		return this.centerOfMasses;
 	}
@@ -132,7 +138,7 @@ public abstract class TransformationEquations implements Iterable<HomologousFram
 		DispersionablePosition pointSrc = positionPair.getSourceSystemPosition();
 		AdjustablePosition pointTrg     = positionPair.getTargetSystemPosition();
 				
-		int dim = this.getDimension();
+		int dim = this.getTransformationType().getDimension();
 		int nop = Dp.numColumns();
 		
 		Matrix Jx = new DenseMatrix(dim, nop);

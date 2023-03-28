@@ -131,7 +131,7 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.source.x0.tooltip", "A-priori x-component of the point in source system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, FramePositionPair::sourceXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, true);
+		doubleColumn = this.<Double>getColumn(header, FramePositionPair::sourceXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APRIORI_POINT : ColumnType.HIDDEN, columnIndex, true);
 		table.getColumns().add(doubleColumn);
 
 		// y0-Comp.
@@ -140,7 +140,7 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.source.y0.tooltip", "A-priori y-component of the point in source system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, FramePositionPair::sourceYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, true);
+		doubleColumn = this.<Double>getColumn(header, FramePositionPair::sourceYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APRIORI_POINT : ColumnType.HIDDEN, columnIndex, true);
 		table.getColumns().add(doubleColumn);
 
 		// z0-Comp.
@@ -149,7 +149,7 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.source.z0.tooltip", "A-priori z-component of the point in source system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, FramePositionPair::sourceZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, true);
+		doubleColumn = this.<Double>getColumn(header, FramePositionPair::sourceZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APRIORI_POINT : ColumnType.HIDDEN, columnIndex, true);
 		table.getColumns().add(doubleColumn);
 		
 		// Covariance of both positions
@@ -158,7 +158,7 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.covariance.tooltip", "A-priori variance-covariance matrix");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		matrixColumn = this.<Boolean>getColumn(header, FramePositionPair::containsDispersionablePositionProperty, getMatrixCallback(), ColumnType.SOURCE_SYSTEM, columnIndex, true);
+		matrixColumn = this.<Boolean>getColumn(header, FramePositionPair::containsDispersionablePositionProperty, getMatrixCallback(), ColumnType.APRIORI_POINT, columnIndex, true);
 		table.getColumns().add(matrixColumn);
 
 
@@ -171,7 +171,7 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.target.x.tooltip", "A-posteriori x-component of the point in target system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
 		// Y-Comp.
@@ -180,7 +180,7 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.target.y.tooltip", "A-posteriori y-component of the point in target system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
 		// Z-Comp.
@@ -189,7 +189,7 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.target.z.tooltip", "A-posteriori z-component of the point in target system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
 		
@@ -200,7 +200,7 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.x.tooltip", "A-posteriori uncertainty of x-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetUncertaintyXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetUncertaintyXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -210,7 +210,7 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.y.tooltip", "A-posteriori uncertainty of y-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetUncertaintyYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetUncertaintyYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -220,38 +220,38 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.z.tooltip", "A-posteriori uncertainty of z-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetUncertaintyZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetUncertaintyZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 		
 		// Residual 
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.x.label", "\u03B5x");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component");
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residualgap.x.label", "\u03B4x");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residualgap.x.tooltip", "Residual gap of x-component applied by selected interpolation approach");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetResidualXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetResidualXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 		
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.y.label", "\u03B5y");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component");
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residualgap.y.label", "\u03B4y");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residualgap.y.tooltip", "Residual gap of y-component applied by selected interpolation approach");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetResidualYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetResidualYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.z.label", "\u03B5z");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component");
+		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residualgap.z.label", "\u03B4z");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residualgap.z.tooltip", "Residual gap of z-component applied by selected interpolation approach");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetResidualZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetResidualZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 

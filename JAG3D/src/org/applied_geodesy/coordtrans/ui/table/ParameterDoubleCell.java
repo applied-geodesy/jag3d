@@ -118,12 +118,13 @@ class ParameterDoubleCell extends EditableCell<UnknownParameter, Double> impleme
 				break;
 				
 			
-			case SCALE_SHEAR_COMPONENT_S11:
-			case SCALE_SHEAR_COMPONENT_S12:
-			case SCALE_SHEAR_COMPONENT_S13:
-			case SCALE_SHEAR_COMPONENT_S22:
-			case SCALE_SHEAR_COMPONENT_S23:
-			case SCALE_SHEAR_COMPONENT_S33:
+			case AUXILIARY_ELEMENT_11:
+			case AUXILIARY_ELEMENT_12:
+			case AUXILIARY_ELEMENT_13:
+			case AUXILIARY_ELEMENT_21:
+			case AUXILIARY_ELEMENT_22:
+			case AUXILIARY_ELEMENT_23:
+			case AUXILIARY_ELEMENT_33:
 			case CONSTANT:
 				
 				this.editableDoubleCellConverter.setCellValueType(CellValueType.DOUBLE);

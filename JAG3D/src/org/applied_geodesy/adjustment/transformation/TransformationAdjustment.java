@@ -1,3 +1,24 @@
+/***********************************************************************
+* Copyright by Michael Loesler, https://software.applied-geodesy.org   *
+*                                                                      *
+* This program is free software; you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation; either version 3 of the License, or    *
+* at your option any later version.                                    *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+* GNU General Public License for more details.                         *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program; if not, see <http://www.gnu.org/licenses/>  *
+* or write to the                                                      *
+* Free Software Foundation, Inc.,                                      *
+* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+*                                                                      *
+***********************************************************************/
+
 package org.applied_geodesy.adjustment.transformation;
 
 import java.beans.PropertyChangeListener;
@@ -24,6 +45,7 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.adjustment.statistic.UnadjustedTestStatitic;
 import org.applied_geodesy.adjustment.transformation.TransformationEvent.TransformationEventType;
 import org.applied_geodesy.adjustment.transformation.equation.TransformationEquations;
+import org.applied_geodesy.adjustment.transformation.parameter.ParameterType;
 import org.applied_geodesy.adjustment.transformation.parameter.ProcessingType;
 import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.transformation.point.EstimatedFramePosition;
@@ -89,7 +111,7 @@ public class TransformationAdjustment {
 	
 	
 	public void init() {
-		int dim = this.transformationEquations.getDimension();
+		int dim = this.transformationEquations.getTransformationType().getDimension();
 
 		List<HomologousFramePositionPair> nonUniqueHomologousFramePositionPairs = new ArrayList<HomologousFramePositionPair>(this.transformationEquations.getHomologousFramePositionPairs());
 
@@ -150,8 +172,8 @@ public class TransformationAdjustment {
 		this.transformation = transformation;
 				
 		if (this.transformation != null) {
-			this.parameters                = this.transformation.getUnknownParameters();
-			this.restrictions              = this.transformation.getRestrictions();
+			this.parameters              = this.transformation.getUnknownParameters();
+			this.restrictions            = this.transformation.getRestrictions();
 			this.transformationEquations = this.transformation.getTransformationEquations();
 			this.fireTransformationChanged(this.transformation, TransformationEventType.TRANSFORMATION_MODEL_ADDED);
 		}
@@ -219,6 +241,13 @@ public class TransformationAdjustment {
 		try {
 			SimplePositionPair centerOfMasses = Transformation.deriveCenterOfMasses(this.transformation.getHomologousFramePositionPairs(), this.transformation.getRestrictions(), this.transformation.getSupportedParameterRestrictions());
 			this.prepareIterationProcess(centerOfMasses);
+			
+			int nou = this.numberOfUnknownParameters;
+			int nor = this.restrictions.size();
+			int noe = this.numberOfModelEquations;
+			
+			if (noe < (nou-nor))
+				throw new MatrixSingularException("Error, the number of equations is less than the number of parameters to be estimated, " + noe + " < " + (nou - nor) + "! The system of equations is underestimated. Please add further equations." );
 			
 			this.adaptedDampingValue = this.dampingValue;
 			int runs = this.maximalNumberOfIterations - 1;
@@ -295,7 +324,13 @@ public class TransformationAdjustment {
 									int column = parameterCol.getColumn();
 									if (column < 0)
 										continue;
-									this.Qxx.set(row, column, N.get(row, column));
+									double qxx = N.get(row, column);
+									if (!Double.isFinite(qxx)) {
+										this.currentEstimationStatus = EstimationStateType.SINGULAR_MATRIX;
+										this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+										throw new MatrixSingularException("Error, normal equation matrix is singular!");
+									}
+									this.Qxx.set(row, column, qxx);
 								}
 							}
 						}
@@ -496,16 +531,28 @@ public class TransformationAdjustment {
 				TestStatisticParameterSet testStatisticParametersApost = this.testStatisticParameters.getTestStatisticParameter(dim, dof-dim);
 
 				for (UnknownParameter unknownParameter : this.parameters) {
+					ParameterType parameterType = unknownParameter.getParameterType();
 					boolean isFixedParameter = this.transformation.isFixedParameter(unknownParameter);
-
 					int column = unknownParameter.getColumn();
-					double expValue    = !isFixedParameter && column >= 0 ? unknownParameter.getExpectedValue() : 0;
-					double value       = !isFixedParameter && column >= 0 ? unknownParameter.getValue() : 0;
+					double expValue    = unknownParameter.getExpectedValue();
+					double value       = !isFixedParameter && column >= 0 ? unknownParameter.getValue() : expValue;
 					double cofactor    = !isFixedParameter && column >= 0 ? Math.max(0, this.Qxx.get(column, column)) : 0;
 					double dVal        = !isFixedParameter ? value - expValue : 0;
+					
+					if (!isFixedParameter && 
+							(parameterType == ParameterType.EULER_ANGLE_X || parameterType == ParameterType.EULER_ANGLE_Y || parameterType == ParameterType.EULER_ANGLE_Z) && 
+							Math.abs( 2.0*Math.PI - dVal ) < Math.abs(dVal))
+						dVal = 2.0*Math.PI - dVal;
+					
+					if (!isFixedParameter && 
+							(parameterType == ParameterType.SHEAR_X || parameterType == ParameterType.SHEAR_Y || parameterType == ParameterType.SHEAR_Z) && 
+							Math.abs( Math.PI - dVal ) < Math.abs(dVal))
+						dVal = Math.PI - dVal;
+					
 					double uncertainty = !isFixedParameter && column >= 0 ? Math.sqrt(Math.abs(varianceOfUnitWeight * cofactor)) : 0.0;
 					double T           = !isFixedParameter && uncertainty > SQRT_EPS & Math.abs(dVal) > SQRT_EPS ? dVal * dVal / cofactor : 0;
 
+					unknownParameter.setValue(value);
 					unknownParameter.setUncertainty(uncertainty );
 					unknownParameter.getTestStatistic().setFisherTestNumerator(T);
 					unknownParameter.getTestStatistic().setDegreeOfFreedom(dim);
@@ -513,8 +560,9 @@ public class TransformationAdjustment {
 					unknownParameter.setFisherQuantileApriori(testStatisticParametersAprio.getQuantile());
 					unknownParameter.setFisherQuantileAposteriori(testStatisticParametersApost.getQuantile());
 				}
-
-				this.transformFramePositionPairs();
+				
+				if (!this.adjustModelParametersOnly)
+					this.transformFramePositionPairs();
 			}
 		}
 	}
@@ -554,7 +602,7 @@ public class TransformationAdjustment {
 	}
 	
 	private double getEstimateVarianceOfUnitWeightApriori() {
-		int dim = this.transformationEquations.getDimension();
+		int dim = this.transformationEquations.getTransformationType().getDimension();
 		double vari = 0;
 		int cnt = 0;
 		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs) {
@@ -682,7 +730,7 @@ public class TransformationAdjustment {
 			if (this.interrupt)
 				return 0;
 
-			int dim = this.transformationEquations.getDimension();
+			int dim = this.transformationEquations.getTransformationType().getDimension();
 
 			// Derive Jacobians A, B and vector of misclosures
 			Matrix Jx = new DenseMatrix(dim, nou);
@@ -746,7 +794,7 @@ public class TransformationAdjustment {
 			if (this.interrupt)
 				return 0;
 			
-			int dim = this.transformationEquations.getDimension();
+			int dim = this.transformationEquations.getTransformationType().getDimension();
 			
 			// Derive Jacobians A, B and vector of misclosures
 			Matrix Jx = new DenseMatrix(dim, nou);
@@ -848,7 +896,7 @@ public class TransformationAdjustment {
 	
 	private void addStochasticParameters(HomologousFramePositionPair homologousPointPair, Matrix Jx, Matrix JvSrc, Matrix JvTrg, UpperSymmPackMatrix Dw, UpperSymmPackMatrix Ww, Vector weightedResidualsOfMisclosures, double nonCentralityParameter) throws NotConvergedException, MatrixSingularException, IllegalArgumentException {
 		int nou = this.numberOfUnknownParameters;
-		int dim = this.transformationEquations.getDimension();
+		int dim = this.transformationEquations.getTransformationType().getDimension();
 		int dof = (int)this.varianceComponentOfUnitWeight.getRedundancy();
 
 		// estimate Qll = A*Qxx*AT
@@ -999,7 +1047,7 @@ public class TransformationAdjustment {
 		UpperSymmBandMatrix V = this.preconditioning ? new UpperSymmBandMatrix(nou + nor, 0) : null;
 		DenseVector n = new DenseVector(nou + nor);
 
-		int dim = this.transformationEquations.getDimension();
+		int dim = this.transformationEquations.getTransformationType().getDimension();
 		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs) {
 			if (this.interrupt)
 				return null;
@@ -1125,7 +1173,7 @@ public class TransformationAdjustment {
 	}
 
 	private UpperSymmPackMatrix getDispersionOfMisclosures(HomologousFramePositionPair homologousPositionPair, Matrix JvSrc, Matrix JvTrg) {
-		int dim = this.transformationEquations.getDimension();
+		int dim = this.transformationEquations.getTransformationType().getDimension();
 		UpperSymmPackMatrix Dw = new UpperSymmPackMatrix(dim); 
 		
 		boolean isSourcePoint = true;
@@ -1217,7 +1265,7 @@ public class TransformationAdjustment {
 		double alpha = testStatisticDefinition.getProbabilityValue();
 		double beta  = testStatisticDefinition.getPowerOfTest();
 		int dof = (int)this.varianceComponentOfUnitWeight.getRedundancy();
-		int dim = this.transformationEquations.getDimension();
+		int dim = this.transformationEquations.getTransformationType().getDimension();
 		int numberOfHypotesis = this.homologousPointPairs.size() + (dof > 0 ? 1 : 0); // add one for global test //TODO add further hypotesis tests
 				
 		TestStatistic testStatistic;

@@ -292,18 +292,20 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		case EULER_ANGLE_Z:
 			return i18n.getString("UIParameterTableBuilder.parameter.type.angle.x", "Euler angle rz");
 			
-		case SCALE_SHEAR_COMPONENT_S11:
-			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.s11", "Auxiliary quantity s11");
-		case SCALE_SHEAR_COMPONENT_S12:
-			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.s12", "Auxiliary quantity s12");
-		case SCALE_SHEAR_COMPONENT_S13:
-			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.s13", "Auxiliary quantity s13");
-		case SCALE_SHEAR_COMPONENT_S22:
-			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.s22", "Auxiliary quantity s22");
-		case SCALE_SHEAR_COMPONENT_S23:
-			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.s23", "Auxiliary quantity s23");
-		case SCALE_SHEAR_COMPONENT_S33:
-			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.s11", "Auxiliary quantity s33");
+		case AUXILIARY_ELEMENT_11:
+			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.element11", "Auxiliary quantity e11");
+		case AUXILIARY_ELEMENT_12:
+			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.element12", "Auxiliary quantity e12");
+		case AUXILIARY_ELEMENT_13:
+			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.element13", "Auxiliary quantity e13");
+		case AUXILIARY_ELEMENT_21:
+			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.element22", "Auxiliary quantity e21");
+		case AUXILIARY_ELEMENT_22:
+			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.element22", "Auxiliary quantity e22");
+		case AUXILIARY_ELEMENT_23:
+			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.element23", "Auxiliary quantity e23");
+		case AUXILIARY_ELEMENT_33:
+			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.element33", "Auxiliary quantity e33");
 		case CONSTANT:
 			return i18n.getString("UIParameterTableBuilder.parameter.type.constant", "Constant");
 		}

@@ -22,7 +22,17 @@
 package org.applied_geodesy.adjustment.transformation;
 
 public enum TransformationType {
-	HEIGHT,
-	PLANAR,
-	SPATIAL
+	HEIGHT(1),
+	PLANAR(2),
+	SPATIAL(3);
+
+	private final int dimension;
+	
+	private TransformationType(int dimension) {
+		this.dimension = dimension;
+	}
+	
+	public final int getDimension() {
+		return this.dimension;
+	}
 }

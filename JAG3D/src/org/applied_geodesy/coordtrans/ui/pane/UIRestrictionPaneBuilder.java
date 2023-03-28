@@ -131,18 +131,15 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 	}
 	
 	private Node createPane() {
-		TransformationPropertyMenuEventHandler transformationPropertyEventHandler = new TransformationPropertyMenuEventHandler();
-	
+		Node parameterTitledPane = this.createParameterRestrictionPane();
+		Node identScalePane      = this.createIdentScalePane();
+		
 		GridPane gridPane = UiUtil.createGridPane();
 		gridPane.setHgap(10);
 		gridPane.setVgap(20);
 		gridPane.setPadding(new Insets(20,15,20,15)); // oben, recht, unten, links
 		gridPane.setAlignment(Pos.BASELINE_CENTER);
-		
-		Region spacer = new Region();
-		spacer.setPrefSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		spacer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		
+
 		Region leftSpacer = new Region();
 		leftSpacer.setPrefSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		leftSpacer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -151,38 +148,48 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		rightSpacer.setPrefSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		rightSpacer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-		CheckBox shiftXCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.shift.x.label", "Shift tx"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.shift.x.tooltip", "Checked, if x-shift is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SHIFT_X, this.parameterRestrictionCheckboxes);
-		CheckBox shiftYCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.shift.y.label", "Shift ty"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.shift.y.tooltip", "Checked, if y-shift is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SHIFT_Y, this.parameterRestrictionCheckboxes);
-		CheckBox shiftZCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.shift.z.label", "Shift tz"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.shift.z.tooltip", "Checked, if z-shift is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SHIFT_Z, this.parameterRestrictionCheckboxes);
+		GridPane.setHgrow(leftSpacer,          Priority.ALWAYS);
+		GridPane.setHgrow(rightSpacer,         Priority.ALWAYS);
+		GridPane.setHgrow(parameterTitledPane, Priority.SOMETIMES);
+		GridPane.setHgrow(identScalePane,      Priority.SOMETIMES);
 		
-		CheckBox scaleXCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.x.label", "Scale mx"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.x.tooltip", "Checked, if x-scale is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SCALE_X, this.parameterRestrictionCheckboxes);
-		CheckBox scaleYCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.y.label", "Scale my"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.y.tooltip", "Checked, if y-scale is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SCALE_Y, this.parameterRestrictionCheckboxes);
-		CheckBox scaleZCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.z.label", "Scale mz"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.z.tooltip", "Checked, if z-scale is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SCALE_Z, this.parameterRestrictionCheckboxes);
+		int row = 0;		
+		int col = 0;
+		gridPane.add(leftSpacer,          col++, row,   1, 1);
+		gridPane.add(parameterTitledPane, col++, row,   1, 1);
+		gridPane.add(rightSpacer,         col++, row++, 1, 1);
 		
-		CheckBox shearXCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.shear.x.label", "Shear sx"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.shear.x.tooltip", "Checked, if x-shear is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SHEAR_X, this.parameterRestrictionCheckboxes);
-		CheckBox shearYCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.shear.y.label", "Shear sy"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.shear.y.tooltip", "Checked, if y-shear is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SHEAR_Y, this.parameterRestrictionCheckboxes);
-		CheckBox shearZCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.shear.z.label", "Shear sz"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.shear.z.tooltip", "Checked, if z-shear is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SHEAR_Z, this.parameterRestrictionCheckboxes);
+		col = 1;
+		gridPane.add(identScalePane,      col++, row++,   1, 1);
+
+		ScrollPane scrollPane = new ScrollPane(gridPane);
+		scrollPane.setFitToHeight(true);
+		scrollPane.setFitToWidth(true);
+		return scrollPane;
+	}
+	
+	private Node createParameterRestrictionPane() {
+		TransformationPropertyMenuEventHandler transformationPropertyEventHandler = new TransformationPropertyMenuEventHandler();
+
+		CheckBox shiftXCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.shift.x.label", "Shift tx"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.shift.x.tooltip", "Checked, if x-shift is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SHIFT_X, this.parameterRestrictionCheckboxes);
+		CheckBox shiftYCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.shift.y.label", "Shift ty"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.shift.y.tooltip", "Checked, if y-shift is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SHIFT_Y, this.parameterRestrictionCheckboxes);
+		CheckBox shiftZCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.shift.z.label", "Shift tz"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.shift.z.tooltip", "Checked, if z-shift is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SHIFT_Z, this.parameterRestrictionCheckboxes);
 		
-		CheckBox rotationXCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.rotation.x.label", "Rotation rx"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.rotation.x.tooltip", "Checked, if x-rotation is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_ROTATION_X, this.parameterRestrictionCheckboxes);
-		CheckBox rotationYCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.rotation.y.label", "Rotation ry"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.rotation.y.tooltip", "Checked, if y-rotation is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_ROTATION_Y, this.parameterRestrictionCheckboxes);
-		CheckBox rotationZCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.rotation.z.label", "Rotation rz"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.rotation.z.tooltip", "Checked, if z-rotation is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_ROTATION_Z, this.parameterRestrictionCheckboxes);
+		CheckBox scaleXCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.x.label", "Scale mx"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.x.tooltip", "Checked, if x-scale is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SCALE_X, this.parameterRestrictionCheckboxes);
+		CheckBox scaleYCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.y.label", "Scale my"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.y.tooltip", "Checked, if y-scale is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SCALE_Y, this.parameterRestrictionCheckboxes);
+		CheckBox scaleZCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.z.label", "Scale mz"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.z.tooltip", "Checked, if z-scale is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SCALE_Z, this.parameterRestrictionCheckboxes);
 		
-		CheckBox scaleXYCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.xy.label", "Scales mx = my"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.xy.tooltip", "Checked, if x-scale is identical with y-scale"), ParameterRestrictionType.IDENTICAL_SCALE_XY, this.parameterRestrictionCheckboxes);
-		CheckBox scaleXZCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.xz.label", "Scales mx = mz"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.xz.tooltip", "Checked, if x-scale is identical with z-scale"), ParameterRestrictionType.IDENTICAL_SCALE_XZ, this.parameterRestrictionCheckboxes);
-		CheckBox scaleYZCheckBox = createCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.yz.label", "Scales my = mz"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.yz.tooltip", "Checked, if y-scale is identical with z-scale"), ParameterRestrictionType.IDENTICAL_SCALE_YZ, this.parameterRestrictionCheckboxes);
-			
-		HBox identScaleNode = new HBox(50);
-//		HBox.setHgrow(scaleXYCheckBox, Priority.ALWAYS);
-//		HBox.setHgrow(scaleXZCheckBox, Priority.ALWAYS);
-//		HBox.setHgrow(scaleYZCheckBox, Priority.ALWAYS);
-		identScaleNode.getChildren().setAll(scaleXYCheckBox, scaleXZCheckBox, scaleYZCheckBox);
-		TitledPane identScalePane = UiUtil.createTitledPane(
-				i18n.getString("UIRestrictionPaneBuilder.restriction.type.scales.title", "Scale conditions"), 
-				i18n.getString("UIRestrictionPaneBuilder.restriction.type.scales.tooltip", "Select scale conditions"), 
-				identScaleNode
-		);
-		identScalePane.setCollapsible(false);
+		CheckBox shearXCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.shear.x.label", "Shear sx"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.shear.x.tooltip", "Checked, if x-shear is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SHEAR_X, this.parameterRestrictionCheckboxes);
+		CheckBox shearYCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.shear.y.label", "Shear sy"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.shear.y.tooltip", "Checked, if y-shear is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SHEAR_Y, this.parameterRestrictionCheckboxes);
+		CheckBox shearZCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.shear.z.label", "Shear sz"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.shear.z.tooltip", "Checked, if z-shear is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_SHEAR_Z, this.parameterRestrictionCheckboxes);
 		
+		CheckBox rotationXCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.rotation.x.label", "Rotation rx"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.rotation.x.tooltip", "Checked, if x-rotation is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_ROTATION_X, this.parameterRestrictionCheckboxes);
+		CheckBox rotationYCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.rotation.y.label", "Rotation ry"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.rotation.y.tooltip", "Checked, if y-rotation is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_ROTATION_Y, this.parameterRestrictionCheckboxes);
+		CheckBox rotationZCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.rotation.z.label", "Rotation rz"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.rotation.z.tooltip", "Checked, if z-rotation is an unknown parameter to be estimated"), ParameterRestrictionType.FIXED_ROTATION_Z, this.parameterRestrictionCheckboxes);
+		
+		Region spacer = new Region();
+		spacer.setPrefSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		spacer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		
 		HBox shiftNode = new HBox(50);
 		shiftNode.getChildren().setAll(shiftXCheckBox, shiftYCheckBox, shiftZCheckBox);
@@ -192,7 +199,6 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 				shiftNode
 		);
 		shiftPane.setCollapsible(false);
-		
 		
 		HBox scaleNode = new HBox(50);
 		scaleNode.getChildren().setAll(scaleXCheckBox, scaleYCheckBox, scaleZCheckBox);
@@ -247,15 +253,14 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		parameterGridPane.add(rotationZCheckBox, col++, row,   1, 1);
 		parameterGridPane.add(shearZCheckBox,    col++, row++, 1, 1);
 
-		TitledPane parameterTitledPane = UiUtil.createTitledPane(
+		TitledPane titledPane = UiUtil.createTitledPane(
 				i18n.getString("UIRestrictionPaneBuilder.restriction.parameter.title", "Transformation parameters"), 
 				i18n.getString("UIRestrictionPaneBuilder.restriction.parameter.tooltip", "Select transformation parameters to be estimated"), 
 				parameterGridPane
 		);
-		parameterTitledPane.setCollapsible(false);
+		titledPane.setCollapsible(false);
 		
 		
-
 		MenuBar menuBar = new MenuBar();
 		Menu menu = new Menu();
 		menu.setGraphic(new Label(i18n.getString("UIRestrictionPaneBuilder.transformation.property.title", "\u25BC"))); // Transformation properties
@@ -274,32 +279,33 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		header.setSpacing(0);
 		HBox.setHgrow(spacer, Priority.ALWAYS);
 		header.setSpacing(0);
-		header.getChildren().setAll(parameterTitledPane.getGraphic(), spacer, menuBar);
-		parameterTitledPane.setGraphic(header);
-		header.minWidthProperty().bind(parameterTitledPane.widthProperty().subtract(menuBar.widthProperty()));
+		header.getChildren().setAll(titledPane.getGraphic(), spacer, menuBar);
+		titledPane.setGraphic(header);
+		header.minWidthProperty().bind(titledPane.widthProperty().subtract(menuBar.widthProperty()));
 		
-		GridPane.setHgrow(leftSpacer,  Priority.ALWAYS);
-		GridPane.setHgrow(rightSpacer, Priority.ALWAYS);
-		GridPane.setHgrow(parameterTitledPane,  Priority.SOMETIMES);
-		GridPane.setHgrow(identScalePane, Priority.SOMETIMES);
-		
-		row = 0;		
-		col = 0;
-		gridPane.add(leftSpacer,          col++, row,   1, 1);
-		gridPane.add(parameterTitledPane, col++, row,   1, 1);
-		gridPane.add(rightSpacer,         col++, row++, 1, 1);
-		
-		col = 1;
-		gridPane.add(identScalePane,      col++, row++,   1, 1);
-		
-		
-		ScrollPane scrollPane = new ScrollPane(gridPane);
-		scrollPane.setFitToHeight(true);
-		scrollPane.setFitToWidth(true);
-		return  scrollPane;
+		return titledPane;
 	}
 	
-	private CheckBox createCheckBox(String label, String tooltip, ParameterRestrictionType restrictionType, Map<ParameterRestrictionType, CheckBox> checkBoxMap) {
+	private Node createIdentScalePane() {
+		CheckBox scaleXYCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.xy.label", "Scales mx = my"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.xy.tooltip", "Checked, if x-scale is identical with y-scale"), ParameterRestrictionType.IDENTICAL_SCALE_XY, this.parameterRestrictionCheckboxes);
+		CheckBox scaleXZCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.xz.label", "Scales mx = mz"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.xz.tooltip", "Checked, if x-scale is identical with z-scale"), ParameterRestrictionType.IDENTICAL_SCALE_XZ, this.parameterRestrictionCheckboxes);
+		CheckBox scaleYZCheckBox = createRestrictionCheckBox(i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.yz.label", "Scales my = mz"), i18n.getString("UIRestrictionPaneBuilder.restriction.type.scale.yz.tooltip", "Checked, if y-scale is identical with z-scale"), ParameterRestrictionType.IDENTICAL_SCALE_YZ, this.parameterRestrictionCheckboxes);
+			
+		HBox identScaleNode = new HBox(50);
+		identScaleNode.getChildren().setAll(scaleXYCheckBox, scaleXZCheckBox, scaleYZCheckBox);
+
+		TitledPane titledPane = UiUtil.createTitledPane(
+				i18n.getString("UIRestrictionPaneBuilder.restriction.type.scales.title", "Scale conditions"), 
+				i18n.getString("UIRestrictionPaneBuilder.restriction.type.scales.tooltip", "Select scale conditions"), 
+				identScaleNode
+		);
+		titledPane.setCollapsible(false);
+		
+		return titledPane;
+	}
+	
+	
+	private CheckBox createRestrictionCheckBox(String label, String tooltip, ParameterRestrictionType restrictionType, Map<ParameterRestrictionType, CheckBox> checkBoxMap) {
 		CheckBox checkBox = UiUtil.createCheckBox(label, tooltip);
 		checkBox.setUserData(restrictionType);
 		checkBox.setSelected(true);
@@ -326,7 +332,7 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 	@Override
 	public void transformationChanged(TransformationEvent evt) {
 		if (this.transformation != null)
-			this.lastTransformationType = this.transformation.getTransformationType();
+			this.lastTransformationType = this.transformation.getTransformationEquations().getTransformationType();
 		
 		if (evt.getEventType() == TransformationEventType.TRANSFORMATION_MODEL_REMOVED) {
 			this.transformation = null;
@@ -336,9 +342,9 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		}
 		this.setDisable();
 		
-		if (lastTransformationType == null || this.transformation == null || lastTransformationType != this.transformation.getTransformationType())
+		if (this.lastTransformationType == null || this.transformation == null || this.lastTransformationType != this.transformation.getTransformationEquations().getTransformationType())
 			this.setSimilarProperty();
-		else if(this.transformation != null && lastTransformationType == this.transformation.getTransformationType()) {
+		else if(this.transformation != null && lastTransformationType == this.transformation.getTransformationEquations().getTransformationType()) {
 			for (CheckBox checkBox : this.parameterRestrictionCheckboxes.values())
 				handleSelection((ParameterRestrictionType)checkBox.getUserData(), checkBox.isSelected());
 		}

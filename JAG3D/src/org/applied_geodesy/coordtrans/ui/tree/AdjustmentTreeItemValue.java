@@ -34,7 +34,8 @@ public class AdjustmentTreeItemValue extends TreeItemValue<TransformationAdjustm
 	@Override
 	public TabType[] getTabTypes() {
 		return new  TabType[] {
-				TabType.RESTRICTIONS
+				TabType.RESTRICTIONS,
+				TabType.INTERPOLATION
 		};
 	}
 }

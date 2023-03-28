@@ -99,11 +99,8 @@ public class MultiQuadraticInterpolation extends Interpolation {
 			vy.set(i, -estimatedFramePositionA.getResidualY());
 			vz.set(i, -estimatedFramePositionA.getResidualZ());
 		}
-		MathExtension.print(vx);
-		MathExtension.print(S);
+
 		MathExtension.solve(S, vx, true);
-		MathExtension.print(vx);
-		
 		DenseVector tmp = new DenseVector(vy, true);
 		S.mult(tmp, vy);
 		tmp = new DenseVector(vz, true);

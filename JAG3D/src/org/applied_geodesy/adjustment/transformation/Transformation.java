@@ -24,13 +24,17 @@ package org.applied_geodesy.adjustment.transformation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.applied_geodesy.adjustment.transformation.equation.TransformationEquations;
 import org.applied_geodesy.adjustment.transformation.interpolation.Interpolation;
+import org.applied_geodesy.adjustment.transformation.parameter.ParameterType;
+import org.applied_geodesy.adjustment.transformation.parameter.ProcessingType;
 import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.transformation.point.EstimatedFramePosition;
 import org.applied_geodesy.adjustment.transformation.point.FramePositionPair;
@@ -60,11 +64,9 @@ public abstract class Transformation {
 	private ObjectProperty<Boolean> estimateCenterOfMasses               = new SimpleObjectProperty<Boolean>(this, "estimateCenterOfMasses", Boolean.TRUE);
 	private ObjectProperty<Interpolation> interpolation                  = new SimpleObjectProperty<Interpolation>(this, "interpolation");
 	private ObservableUniqueList<FramePositionPair> framePositionPairs   = new ObservableUniqueList<FramePositionPair>();
-	
+	private Set<ParameterType> fixedUnknownParameterTypes                = new HashSet<ParameterType>();	
 	Transformation() {}
-	
-	public abstract TransformationType getTransformationType();
-	
+
 	public void prepareIteration() {}
 	
 	public final Map<ParameterRestrictionType, Restriction> getSupportedParameterRestrictions() {
@@ -142,7 +144,7 @@ public abstract class Transformation {
 	public void transformFramePositionPairs(UpperSymmPackMatrix Dp) {
 		TransformationEquations transformationEquations = this.getTransformationEquations();
 		if (transformationEquations != null) {
-			int dim = transformationEquations.getDimension();
+			int dim = transformationEquations.getTransformationType().getDimension();
 			Map<String, EstimatedFramePosition> estimatedTargetPositions = new HashMap<String,EstimatedFramePosition>();
 			ObservableUniqueList<HomologousFramePositionPair> homologousFramePositionPairs = transformationEquations.getHomologousFramePositionPairs();
 
@@ -257,9 +259,37 @@ public abstract class Transformation {
 		);
 	}
 	
-	public abstract boolean addRestriction(ParameterRestrictionType parameterRestrictionType);
+	public boolean addRestriction(ParameterRestrictionType parameterRestrictionType) {
+		Map<ParameterRestrictionType, Restriction> supportedRestrictions = this.getSupportedParameterRestrictions();
+		if (!supportedRestrictions.containsKey(parameterRestrictionType)) 
+			return false;
+		
+		Restriction restriction = supportedRestrictions.get(parameterRestrictionType);
+		
+		if (this.getRestrictions().contains(restriction))
+			return false;
+		
+		if (this.getRestrictionToParameterMap().containsKey(parameterRestrictionType))
+			this.fixedUnknownParameterTypes.add(this.getRestrictionToParameterMap().get(parameterRestrictionType));
+		
+		return this.getRestrictions().add(restriction);
+	}
+
+	public boolean removeRestriction(ParameterRestrictionType parameterRestrictionType) {
+		Map<ParameterRestrictionType, Restriction> supportedRestrictions = this.getSupportedParameterRestrictions();
+		if (!supportedRestrictions.containsKey(parameterRestrictionType)) 
+			return false;
+		
+		if (this.getRestrictionToParameterMap().containsKey(parameterRestrictionType))
+			this.fixedUnknownParameterTypes.remove(this.getRestrictionToParameterMap().get(parameterRestrictionType));
+		
+		Restriction restriction = supportedRestrictions.get(parameterRestrictionType);
+		return this.getRestrictions().remove(restriction);
+	}
 	
-	public abstract boolean removeRestriction(ParameterRestrictionType parameterRestrictionType);
+	public boolean isFixedParameter(UnknownParameter parameter) {
+		return parameter.getProcessingType() == ProcessingType.FIXED || this.fixedUnknownParameterTypes.contains(parameter.getParameterType());
+	}
 	
-	public abstract boolean isFixedParameter(UnknownParameter parameter);
+	abstract Map<ParameterRestrictionType, ParameterType> getRestrictionToParameterMap();
 }
