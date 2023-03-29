@@ -165,8 +165,11 @@ public class TransformationAdjustment {
 	}
 
 	public void setTransformation(Transformation transformation) {
-		if (this.transformation != null)
+		if (this.transformation != null) {
+//			this.transformation.getFramePositionPairs().clear();
+//			this.transformation.getHomologousFramePositionPairs().clear();
 			this.fireTransformationChanged(this.transformation, TransformationEventType.TRANSFORMATION_MODEL_REMOVED);
+		}
 				
 		this.reset();
 		this.transformation = transformation;
@@ -292,7 +295,7 @@ public class TransformationAdjustment {
 
 				DenseVector n = neq.getVector();
 				UpperSymmPackMatrix N = neq.getMatrix();
-				
+
 				if (!isFirstIteration) 
 					estimateCompleteModel = isEstimated;
 

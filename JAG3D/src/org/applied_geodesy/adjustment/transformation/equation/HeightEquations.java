@@ -98,11 +98,8 @@ public class HeightEquations extends TransformationEquations {
 		// Set inverted center of maas reduction 
 		Tz.setValue( tz + Zi + mz*zi );
 
-		centerOfMasses.getSourceSystemPosition().setX(0);
-		centerOfMasses.getSourceSystemPosition().setY(0);
-		
-		centerOfMasses.getTargetSystemPosition().setX(0);
-		centerOfMasses.getTargetSystemPosition().setY(0);
+		centerOfMasses.getSourceSystemPosition().setZ(0);
+		centerOfMasses.getTargetSystemPosition().setZ(0);
 		
 		// fill jacobian A to transform shift vector		
 		int nou = Dp.numColumns();
@@ -121,12 +118,12 @@ public class HeightEquations extends TransformationEquations {
 		DispersionablePosition pointSourceCRS = positionPair.getSourceSystemPosition();
 		AdjustablePosition pointTargetCRS = positionPair.getTargetSystemPosition();
 		
-		double zi = pointSourceCRS.getX() - centerOfMasses.getSourceSystemPosition().getZ();
-		double Zi = pointTargetCRS.getX() - centerOfMasses.getTargetSystemPosition().getZ();
-		
+		double zi = pointSourceCRS.getZ() - centerOfMasses.getSourceSystemPosition().getZ();
+		double Zi = pointTargetCRS.getZ() - centerOfMasses.getTargetSystemPosition().getZ();
+
 		UnknownParameter Tz = this.parameters.get(ParameterType.SHIFT_Z);
 		UnknownParameter Mz = this.parameters.get(ParameterType.SCALE_Z);
-		
+
 		// Shift
 		double tz = Tz.getValue();
 		// Scale
@@ -138,7 +135,7 @@ public class HeightEquations extends TransformationEquations {
 			if (Tz.getColumn() >= 0)
 				Jx.set(rowIndex, Tz.getColumn(), 1.0);
 			if (Mz.getColumn() >= 0)
-				Jx.set(rowIndex, Tz.getColumn(),  zi);						
+				Jx.set(rowIndex, Mz.getColumn(),  zi);						
 		}
 		
 		// source system observation

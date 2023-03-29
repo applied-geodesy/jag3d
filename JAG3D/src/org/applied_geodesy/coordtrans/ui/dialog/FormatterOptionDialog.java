@@ -218,13 +218,13 @@ public class FormatterOptionDialog {
 				gridPane,
 				++row);
 		
-//		this.addRow(
-//				i18n.getString("FormatterOptionDialog.unit.scale.value.label", "Scale:"),
-//    			i18n.getString("FormatterOptionDialog.unit.scale.value.tooltip.digits", "Set number of fraction digits for type scale"),
-//    			i18n.getString("FormatterOptionDialog.unit.scale.value.tooltip.unit", "Set unit for type scale value"),
-//				formatterOptions.get(CellValueType.SCALE),
-//				gridPane,
-//				++row);
+		this.addRow(
+				i18n.getString("FormatterOptionDialog.unit.scale.value.label", "Scale:"),
+    			i18n.getString("FormatterOptionDialog.unit.scale.value.tooltip.digits", "Set number of fraction digits for type scale"),
+    			i18n.getString("FormatterOptionDialog.unit.scale.value.tooltip.unit", "Set unit for type scale value"),
+				formatterOptions.get(CellValueType.SCALE),
+				gridPane,
+				++row);
 		
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.vector.value.label", "Vector:"),
@@ -264,13 +264,13 @@ public class FormatterOptionDialog {
 				gridPane,
 				++row);
 		
-//		this.addRow(
-//				i18n.getString("FormatterOptionDialog.unit.scale.uncertainty.label", "Scale uncertainty:"),
-//    			i18n.getString("FormatterOptionDialog.unit.scale.uncertainty.tooltip.digits", "Set number of fraction digits for type scale uncertainty"),
-//    			i18n.getString("FormatterOptionDialog.unit.scale.uncertainty.tooltip.unit", "Set unit for type scale uncertainty"),
-//				formatterOptions.get(CellValueType.SCALE_UNCERTAINTY),
-//				gridPane,
-//				++row);
+		this.addRow(
+				i18n.getString("FormatterOptionDialog.unit.scale.uncertainty.label", "Scale uncertainty:"),
+    			i18n.getString("FormatterOptionDialog.unit.scale.uncertainty.tooltip.digits", "Set number of fraction digits for type scale uncertainty"),
+    			i18n.getString("FormatterOptionDialog.unit.scale.uncertainty.tooltip.unit", "Set unit for type scale uncertainty"),
+				formatterOptions.get(CellValueType.SCALE_UNCERTAINTY),
+				gridPane,
+				++row);
 		
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.vector.uncertainty.label", "Vector uncertainty:"),
@@ -309,13 +309,13 @@ public class FormatterOptionDialog {
 				gridPane,
 				++row);
 		
-//		this.addRow(
-//				i18n.getString("FormatterOptionDialog.unit.scale.residual.label", "Scale residual:"),
-//    			i18n.getString("FormatterOptionDialog.unit.scale.residual.tooltip.digits", "Set number of fraction digits for type scale residual"),
-//    			i18n.getString("FormatterOptionDialog.unit.scale.residual.tooltip.unit", "Set unit for type scale residual"),
-//				formatterOptions.get(CellValueType.SCALE_RESIDUAL),
-//				gridPane,
-//				++row);
+		this.addRow(
+				i18n.getString("FormatterOptionDialog.unit.scale.residual.label", "Scale residual:"),
+    			i18n.getString("FormatterOptionDialog.unit.scale.residual.tooltip.digits", "Set number of fraction digits for type scale residual"),
+    			i18n.getString("FormatterOptionDialog.unit.scale.residual.tooltip.unit", "Set unit for type scale residual"),
+				formatterOptions.get(CellValueType.SCALE_RESIDUAL),
+				gridPane,
+				++row);
 		
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.vector.residual.label", "Vector residual:"),

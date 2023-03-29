@@ -90,10 +90,10 @@ public class PlanarAffineTransformation extends Transformation {
 		UnknownParameter one  = new UnknownParameter(ParameterType.CONSTANT, false, 1.0, false, ProcessingType.FIXED);
 
 		/* Readable transformation parameters */
-		// Derive Euler angles from quaternion
+		// Derive Euler angle
 		Restriction eulerAngleZRestriction = new InverseTangentRestriction(false, a21, a11, eulerAngleZ);
 		
-		// Derive scale
+		// Derive scales
 		Restriction tmpScaleXRestriction = new ProductSumRestriction(false, List.of(a11, a21), List.of(a11, a21), 0.5, List.of(SignType.PLUS, SignType.PLUS), tmpScaleX);
 		Restriction tmpScaleYRestriction = new ProductSumRestriction(false, List.of(a12, a22), List.of(a12, a22), 0.5, List.of(SignType.PLUS, SignType.PLUS), tmpScaleY);
 
