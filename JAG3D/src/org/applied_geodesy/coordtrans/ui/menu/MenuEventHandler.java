@@ -28,7 +28,6 @@ import org.applied_geodesy.coordtrans.ui.dialog.AboutDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.FormatterOptionDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.LeastSquaresSettingDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.TestStatisticDialog;
-import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.tree.UITreeBuilder;
 
 import javafx.event.ActionEvent;
@@ -37,7 +36,6 @@ import javafx.scene.control.MenuItem;
 
 class MenuEventHandler implements EventHandler<ActionEvent> {
 	private UIMenuBuilder menuBuilder;
-	private I18N i18n = I18N.getInstance();
 	private UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
 
 	MenuEventHandler(UIMenuBuilder menuBuilder) {

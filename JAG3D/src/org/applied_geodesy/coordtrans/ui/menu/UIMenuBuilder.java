@@ -23,9 +23,13 @@ package org.applied_geodesy.coordtrans.ui.menu;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.applied_geodesy.adjustment.transformation.HeightTransformation;
 import org.applied_geodesy.adjustment.transformation.PlanarAffineTransformation;
 import org.applied_geodesy.adjustment.transformation.SpatialAffineTransformation;
 import org.applied_geodesy.adjustment.transformation.Transformation;
@@ -42,9 +46,12 @@ import org.applied_geodesy.coordtrans.ui.dialog.FilePathsSelectionDialog.FilePat
 import org.applied_geodesy.coordtrans.ui.dialog.ReadFileProgressDialog;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.io.PositionFileReader;
+import org.applied_geodesy.coordtrans.ui.io.report.FTLReport;
 import org.applied_geodesy.coordtrans.ui.table.UIFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIHomologousFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.tree.UITreeBuilder;
+import org.applied_geodesy.ui.dialog.OptionDialog;
+import org.applied_geodesy.ui.io.DefaultFileChooser;
 import org.applied_geodesy.util.ObservableUniqueList;
 
 import javafx.collections.ObservableList;
@@ -56,6 +63,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 public class UIMenuBuilder implements TransformationChangeListener {
 
@@ -121,14 +129,14 @@ public class UIMenuBuilder implements TransformationChangeListener {
 	}
 	
 	private void createReportMenu(Menu parentMenu) {
-//		List<File> templateFiles = FTLReport.getTemplates();
-//		if (templateFiles != null && !templateFiles.isEmpty()) {
-//			for (File templateFile : templateFiles) {
-//				MenuItem templateFileItem = createMenuItem(templateFile.getName(), false, MenuItemType.REPORT, templateFile, null, this.menuEventHandler, true);
-//
-//				parentMenu.getItems().add(templateFileItem);
-//			}
-//		}
+		List<File> templateFiles = FTLReport.getTemplates();
+		if (templateFiles != null && !templateFiles.isEmpty()) {
+			for (File templateFile : templateFiles) {
+				MenuItem templateFileItem = createMenuItem(templateFile.getName(), false, MenuItemType.REPORT, templateFile, null, this.menuEventHandler, true);
+
+				parentMenu.getItems().add(templateFileItem);
+			}
+		}
 	}
 	
 	private void createHelpMenu(Menu parentMenu) {
@@ -261,6 +269,7 @@ public class UIMenuBuilder implements TransformationChangeListener {
 				}
 			}
 		}
+		
 		UIHomologousFramePositionPairTableBuilder homologousFramePositionPairTableBuilder = UIHomologousFramePositionPairTableBuilder.getInstance();
 		homologousFramePositionPairTableBuilder.setTransformationType(transformationType);
 		TableView<HomologousFramePositionPair> homologousPositionPairTable = homologousFramePositionPairTableBuilder.getTable();
@@ -273,10 +282,11 @@ public class UIMenuBuilder implements TransformationChangeListener {
 		ObservableList<FramePositionPair> positionPairTableModel = framePositionPairTableBuilder.getTableModel(positionPairTable);
 		positionPairTableModel.setAll(framePositionPairs);
 		
-				
+		// Create new transformation	
 		Transformation transformation = null;
 		switch(transformationType) {
 		case HEIGHT:
+			transformation = new HeightTransformation();
 			CoordTrans.setTitle(i18n.getString("CoordTrans.transformation.type.height.title", "Height transformation"));
 			break;
 		case PLANAR:
@@ -299,41 +309,41 @@ public class UIMenuBuilder implements TransformationChangeListener {
 	}
 	
 	void createReport(File templateFile) {
-//		try {
-//			if (UITreeBuilder.getInstance().getFeatureAdjustment().getFeature() == null)
-//				return;
-//
-//			Pattern pattern = Pattern.compile(".*?\\.(\\w+)\\.ftlh$", Pattern.CASE_INSENSITIVE);
-//			Matcher matcher = pattern.matcher(templateFile.getName().toLowerCase());
-//			String extension = "html";
-//			ExtensionFilter extensionFilter = new ExtensionFilter(i18n.getString("UIMenuBuilder.report.extension.html", "Hypertext Markup Language"), "*.html", "*.htm", "*.HTML", "*.HTM");
-//			if (matcher.find() && matcher.groupCount() == 1) {
-//				extension = matcher.group(1);
-//				extensionFilter = new ExtensionFilter(String.format(Locale.ENGLISH, i18n.getString("UIMenuBuilder.report.extension.template", "%s-File"), extension), "*." + extension); 
-//			}
-//			
-//			String fileNameSuggestion = "report." + extension;
-//
-//			FTLReport ftl = new FTLReport(UITreeBuilder.getInstance().getFeatureAdjustment());
-//			File reportFile = DefaultFileChooser.showSaveDialog(
-//					JUniForm.getStage(),
-//					i18n.getString("UIMenuBuilder.filechooser.report.title", "Save adjustment report"), 
-//					fileNameSuggestion,
-//					extensionFilter
-//			);
-//			if (reportFile != null && ftl != null) {
-//				ftl.setTemplate(templateFile.getName());
-//				ftl.toFile(reportFile);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			OptionDialog.showThrowableDialog (
-//					i18n.getString("UIMenuBuilder.message.error.report.exception.title", "I/O Error"),
-//					i18n.getString("UIMenuBuilder.message.error.report.exception.header", "Error, could not create adjustment report."),
-//					i18n.getString("UIMenuBuilder.message.error.report.exception.message", "An exception has occurred during report creation."),
-//					e
-//					);
-//		}
+		try {
+			if (UITreeBuilder.getInstance().getTransformationAdjustment().getTransformation() == null)
+				return;
+
+			Pattern pattern = Pattern.compile(".*?\\.(\\w+)\\.ftlh$", Pattern.CASE_INSENSITIVE);
+			Matcher matcher = pattern.matcher(templateFile.getName().toLowerCase());
+			String extension = "html";
+			ExtensionFilter extensionFilter = new ExtensionFilter(i18n.getString("UIMenuBuilder.report.extension.html", "Hypertext Markup Language"), "*.html", "*.htm", "*.HTML", "*.HTM");
+			if (matcher.find() && matcher.groupCount() == 1) {
+				extension = matcher.group(1);
+				extensionFilter = new ExtensionFilter(String.format(Locale.ENGLISH, i18n.getString("UIMenuBuilder.report.extension.template", "%s-File"), extension), "*." + extension); 
+			}
+			
+			String fileNameSuggestion = "report." + extension;
+
+			FTLReport ftl = new FTLReport(UITreeBuilder.getInstance().getTransformationAdjustment());
+			File reportFile = DefaultFileChooser.showSaveDialog(
+					CoordTrans.getStage(),
+					i18n.getString("UIMenuBuilder.filechooser.report.title", "Save adjustment report"), 
+					fileNameSuggestion,
+					extensionFilter
+			);
+			if (reportFile != null && ftl != null) {
+				ftl.setTemplate(templateFile.getName());
+				ftl.toFile(reportFile);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			OptionDialog.showThrowableDialog (
+					i18n.getString("UIMenuBuilder.message.error.report.exception.title", "I/O Error"),
+					i18n.getString("UIMenuBuilder.message.error.report.exception.header", "Error, could not create adjustment report."),
+					i18n.getString("UIMenuBuilder.message.error.report.exception.message", "An exception has occurred during report creation."),
+					e
+					);
+		}
 	}
 	
 	public void setReportMenuDisable(boolean disable) {
