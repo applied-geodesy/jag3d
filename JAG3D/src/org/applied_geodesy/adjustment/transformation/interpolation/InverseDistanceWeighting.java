@@ -23,6 +23,7 @@ package org.applied_geodesy.adjustment.transformation.interpolation;
 
 import java.util.Collection;
 
+import org.applied_geodesy.adjustment.transformation.TransformationAdjustment.Interrupt;
 import org.applied_geodesy.adjustment.transformation.point.EstimatedFramePosition;
 import org.applied_geodesy.adjustment.transformation.point.FramePositionPair;
 
@@ -64,11 +65,14 @@ public class InverseDistanceWeighting extends Interpolation {
 	}
 	
 	@Override
-	public void interpolate(Collection<EstimatedFramePosition> estimatedFramePositions, Collection<FramePositionPair> framePositionPairs) {
+	public void interpolate(Collection<EstimatedFramePosition> estimatedFramePositions, Collection<FramePositionPair> framePositionPairs, Interrupt interrupt) {
 		double k = this.getExponent();
 		double m = this.getSmoothing();
 
 		for (FramePositionPair framePositionPair : framePositionPairs) {
+			if (interrupt.isInterrupted())
+				return;
+			
 			if (!framePositionPair.isEnable())
 				continue;
 			

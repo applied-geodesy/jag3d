@@ -71,6 +71,20 @@ import no.uib.cipr.matrix.Vector;
 import no.uib.cipr.matrix.NotConvergedException.Reason;
 
 public class TransformationAdjustment {
+	public class Interrupt {
+		private boolean interrupt = false;
+		public boolean isInterrupted() {
+			return this.interrupt;
+		}
+		
+		public void interrupt() {
+			this.interrupt = true;
+		}
+
+		private void setInterrupted(boolean interrupt) {
+			this.interrupt = interrupt;
+		}
+	}
 	private final PropertyChangeSupport change = new PropertyChangeSupport(this);
 	private List<EventListener> listenerList = new ArrayList<EventListener>();
 	
@@ -87,10 +101,10 @@ public class TransformationAdjustment {
 	private EstimationStateType currentEstimationStatus = EstimationStateType.BUSY;
 	private EstimationType estimationType = EstimationType.L2NORM;
 	
-	private boolean interrupt             = false,
-			calculateStochasticParameters = false,
-			adjustModelParametersOnly     = false,
-			preconditioning               = true;
+	private final Interrupt interrupt = new Interrupt();
+	private boolean calculateStochasticParameters = false,
+			adjustModelParametersOnly             = false,
+			preconditioning                       = true;
 	
 	private int maximalNumberOfIterations = DefaultValue.getMaximalNumberOfIterations(),
 			iterationStep                 = 0,
@@ -282,10 +296,10 @@ public class TransformationAdjustment {
 				// create the normal system of equations including restrictions
 				NormalEquationSystem neq = this.createNormalEquation();
 
-				if (this.interrupt || neq == null) {
+				if (this.interrupt.isInterrupted() || neq == null) {
 					this.currentEstimationStatus = EstimationStateType.INTERRUPT;
 					this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-					this.interrupt = false;
+					this.interrupt.setInterrupted(false);
 					return this.currentEstimationStatus;
 				}
 
@@ -372,11 +386,11 @@ public class TransformationAdjustment {
 					this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
 					return this.currentEstimationStatus;
 				}
-
-				if (this.interrupt) {
+				
+				if (this.interrupt.isInterrupted()) {
 					this.currentEstimationStatus = EstimationStateType.INTERRUPT;
 					this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-					this.interrupt = false;
+					this.interrupt.setInterrupted(false);
 					return this.currentEstimationStatus;
 				}
 
@@ -498,7 +512,7 @@ public class TransformationAdjustment {
 			}
 		}
 				
-		if (this.interrupt)
+		if (this.interrupt.isInterrupted())
 			return;
 		
 		// estimate and update residuals before updating the model parameters --> estimated omega
@@ -509,7 +523,7 @@ public class TransformationAdjustment {
 		// updating model parameters --> estimated maxAbsDx
 		this.maxAbsDx = this.updateUnknownParameters(dx);
 		this.lastValidmaxAbsDx = this.maxAbsDx;
-		if (this.interrupt)
+		if (this.interrupt.isInterrupted())
 			return;
 
 		if (estimateCompleteModel) {
@@ -571,37 +585,7 @@ public class TransformationAdjustment {
 	}
 	
 	private void transformFramePositionPairs() {
-		this.transformation.transformFramePositionPairs(this.Qxx);
-//		ObservableUniqueList<FramePositionPair> framePositionPairs = this.transformation.getFramePositionPairs();
-//		
-//		Map<String, HomologousFramePositionPair> homologousFramePositionPairs = new HashMap<String, HomologousFramePositionPair>(this.homologousPointPairs.size());
-//		for (HomologousFramePositionPair homologousFramePositionPair : this.homologousPointPairs)
-//			homologousFramePositionPairs.put(homologousFramePositionPair.getName(), homologousFramePositionPair);
-//		
-//		for (FramePositionPair framePositionPair : framePositionPairs) {
-//			if (!framePositionPair.isEnable())
-//				continue;
-//
-//			this.transformationEquations.transform(framePositionPair, this.Qxx);
-//			
-//			if (homologousFramePositionPairs.containsKey(framePositionPair.getName())) {
-//				HomologousFramePositionPair homologousFramePositionPair = homologousFramePositionPairs.get(framePositionPair.getName());
-//				HomologousFramePosition targetPosition0 = homologousFramePositionPair.getTargetSystemPosition();
-//				EstimatedFramePosition transformedTargetPosition = framePositionPair.getTargetSystemPosition();
-//				
-//				double vx = transformedTargetPosition.getX0() - targetPosition0.getX0();
-//				double vy = transformedTargetPosition.getY0() - targetPosition0.getY0();
-//				double vz = transformedTargetPosition.getZ0() - targetPosition0.getZ0();
-//				
-//				transformedTargetPosition.setX0(targetPosition0.getX0());
-//				transformedTargetPosition.setY0(targetPosition0.getY0());
-//				transformedTargetPosition.setZ0(targetPosition0.getZ0());
-//				
-//				transformedTargetPosition.setResidualX(vx);
-//				transformedTargetPosition.setResidualY(vy);
-//				transformedTargetPosition.setResidualZ(vz);
-//			}
-//		}
+		this.transformation.transformFramePositionPairs(this.Qxx, this.interrupt);
 	}
 	
 	private double getEstimateVarianceOfUnitWeightApriori() {
@@ -609,7 +593,7 @@ public class TransformationAdjustment {
 		double vari = 0;
 		int cnt = 0;
 		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs) {
-			if (this.interrupt)
+			if (this.interrupt.isInterrupted())
 				return 1.0;
 
 			for (HomologousFramePosition point : homologousPointPair) {
@@ -699,7 +683,7 @@ public class TransformationAdjustment {
 	private double updateUnknownParameters(Vector dx) {
 		double maxAbsDx = 0;
 		for (UnknownParameter unknownParameter : this.parameters) {
-			if (this.interrupt)
+			if (this.interrupt.isInterrupted())
 				return 0;
 			
 			int column = unknownParameter.getColumn();
@@ -730,7 +714,7 @@ public class TransformationAdjustment {
 
 		int nou = this.numberOfUnknownParameters;
 		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs) {
-			if (this.interrupt)
+			if (this.interrupt.isInterrupted())
 				return 0;
 
 			int dim = this.transformationEquations.getTransformationType().getDimension();
@@ -794,7 +778,7 @@ public class TransformationAdjustment {
 
 		int nou = this.numberOfUnknownParameters;
 		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs) {
-			if (this.interrupt)
+			if (this.interrupt.isInterrupted())
 				return 0;
 			
 			int dim = this.transformationEquations.getTransformationType().getDimension();
@@ -1052,7 +1036,7 @@ public class TransformationAdjustment {
 
 		int dim = this.transformationEquations.getTransformationType().getDimension();
 		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs) {
-			if (this.interrupt)
+			if (this.interrupt.isInterrupted())
 				return null;
 			
 			// Derive Jacobians A, B and vector of misclosures
@@ -1064,7 +1048,7 @@ public class TransformationAdjustment {
 
 			boolean isSourcePoint = true;
 			for (HomologousFramePosition point : homologousPointPair) {
-				if (this.interrupt)
+				if (this.interrupt.isInterrupted())
 					return null;
 				
 				Matrix Jv = isSourcePoint ? JvSrc : JvTrg;
@@ -1095,7 +1079,7 @@ public class TransformationAdjustment {
 
 			// AT P A und AT P w
 			for (int rowJxT = 0; rowJxT < this.parameters.size(); rowJxT++) {
-				if (this.interrupt)
+				if (this.interrupt.isInterrupted())
 					return null;
 				
 				int rowN = this.parameters.get(rowJxT).getColumn();
@@ -1121,7 +1105,7 @@ public class TransformationAdjustment {
 		}
 
 		for (Restriction restriction : this.restrictions) {
-			if (this.interrupt)
+			if (this.interrupt.isInterrupted())
 				return null;
 			
 			// set parameter restrictions behind the model equations
@@ -1143,7 +1127,7 @@ public class TransformationAdjustment {
 		if (this.preconditioning) {
 			// Pre-conditioning == Just the square root of the main diagonal of AT*P*A
 			for (int column = 0; column < N.numColumns(); column++) {
-				if (this.interrupt)
+				if (this.interrupt.isInterrupted())
 					return null;
 				
 				double value = N.get(column, column);
@@ -1181,7 +1165,7 @@ public class TransformationAdjustment {
 		
 		boolean isSourcePoint = true;
 		for (HomologousFramePosition point : homologousPositionPair) {
-			if (this.interrupt)
+			if (this.interrupt.isInterrupted())
 				return null;
 			
 			Matrix Jv = isSourcePoint ? JvSrc : JvTrg;
@@ -1351,7 +1335,7 @@ public class TransformationAdjustment {
 	}
 	
 	public void interrupt() {
-		this.interrupt = true;
+		this.interrupt.interrupt();
 	}
 	
 	public EstimationType getEstimationType() {

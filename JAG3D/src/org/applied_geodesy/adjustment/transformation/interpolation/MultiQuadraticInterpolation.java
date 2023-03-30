@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.applied_geodesy.adjustment.MathExtension;
+import org.applied_geodesy.adjustment.transformation.TransformationAdjustment.Interrupt;
 import org.applied_geodesy.adjustment.transformation.point.EstimatedFramePosition;
 import org.applied_geodesy.adjustment.transformation.point.FramePositionPair;
 
@@ -68,7 +69,7 @@ public class MultiQuadraticInterpolation extends Interpolation {
 	}
 
 	@Override
-	public void interpolate(Collection<EstimatedFramePosition> estimatedFramePositionsCollection, Collection<FramePositionPair> framePositionPairs) {
+	public void interpolate(Collection<EstimatedFramePosition> estimatedFramePositionsCollection, Collection<FramePositionPair> framePositionPairs, Interrupt interrupt) {
 		double k = this.getExponent();
 		double m = this.getSmoothing();
 		
@@ -81,8 +82,14 @@ public class MultiQuadraticInterpolation extends Interpolation {
 		DenseVector vz = new DenseVector(numberOfEstimatedFramePosition);
 		
 		for (int i = 0; i < numberOfEstimatedFramePosition; i++) {
+			if (interrupt.isInterrupted())
+				return;
+			
 			EstimatedFramePosition estimatedFramePositionA = estimatedFramePositions.get(i);
 			for (int j = i; j < numberOfEstimatedFramePosition; j++) {
+				if (interrupt.isInterrupted())
+					return;
+				
 				EstimatedFramePosition estimatedFramePositionB = estimatedFramePositions.get(j);
 				
 				double dx = estimatedFramePositionB.getX0() - estimatedFramePositionA.getX0();
@@ -107,6 +114,9 @@ public class MultiQuadraticInterpolation extends Interpolation {
 		S.mult(tmp, vz);
 		
 		for (FramePositionPair framePositionPair : framePositionPairs) {
+			if (interrupt.isInterrupted())
+				return;
+			
 			if (!framePositionPair.isEnable())
 				continue;
 			

@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.applied_geodesy.adjustment.transformation.TransformationAdjustment.Interrupt;
 import org.applied_geodesy.adjustment.transformation.equation.TransformationEquations;
 import org.applied_geodesy.adjustment.transformation.interpolation.Interpolation;
 import org.applied_geodesy.adjustment.transformation.parameter.ParameterType;
@@ -141,7 +142,7 @@ public abstract class Transformation {
 		return this.framePositionPairs;
 	}
 	
-	public void transformFramePositionPairs(UpperSymmPackMatrix Dp) {
+	public void transformFramePositionPairs(UpperSymmPackMatrix Dp, Interrupt interrupt) {
 		TransformationEquations transformationEquations = this.getTransformationEquations();
 		if (transformationEquations != null) {
 			int dim = transformationEquations.getTransformationType().getDimension();
@@ -150,6 +151,8 @@ public abstract class Transformation {
 
 			if (this.interpolation.get() != null) {
 				for (HomologousFramePositionPair homologousFramePositionPair : homologousFramePositionPairs) {
+					if (interrupt.isInterrupted())
+						return;
 					if (homologousFramePositionPair.isEnable()) {
 						EstimatedFramePosition estimatedTargetPosition = EstimatedFramePosition.create(dim);
 						estimatedTargetPosition.setX0(homologousFramePositionPair.getTargetSystemPosition().getX0());
@@ -162,6 +165,8 @@ public abstract class Transformation {
 			
 			for (FramePositionPair framePositionPair : this.framePositionPairs) {
 				if (framePositionPair.isEnable()) {
+					if (interrupt.isInterrupted())
+						return;
 					transformationEquations.transform(framePositionPair, Dp);
 
 					if (this.interpolation.get() != null && estimatedTargetPositions.containsKey(framePositionPair.getName())) {
@@ -174,7 +179,7 @@ public abstract class Transformation {
 			}
 			
 			if (this.interpolation.get() != null) {
-				this.interpolation.get().interpolate(estimatedTargetPositions.values(), this.framePositionPairs);
+				this.interpolation.get().interpolate(estimatedTargetPositions.values(), this.framePositionPairs, interrupt);
 			}
 		}
 	}

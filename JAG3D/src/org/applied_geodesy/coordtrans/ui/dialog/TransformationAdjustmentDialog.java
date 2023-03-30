@@ -26,7 +26,6 @@ import java.beans.PropertyChangeListener;
 import java.util.Locale;
 
 import org.applied_geodesy.adjustment.EstimationStateType;
-import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.transformation.Transformation;
 import org.applied_geodesy.adjustment.transformation.TransformationAdjustment;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
@@ -64,7 +63,6 @@ public class TransformationAdjustmentDialog {
 	private class AdjustmentTask extends Task<EstimationStateType> implements PropertyChangeListener {
 		private final String iterationTextTemplate;
 		private final String convergenceTextTemplate;
-		private final String unscentedTransformationTextTemplate;
 		private TransformationAdjustment adjustment;
 		private double processState = 0.0;
 		private double finalStepProcesses = 0.0;
@@ -72,7 +70,6 @@ public class TransformationAdjustmentDialog {
 		private AdjustmentTask(TransformationAdjustment adjustment) {
 			this.adjustment = adjustment;
 
-			this.unscentedTransformationTextTemplate = i18n.getString("TransformationAdjustmentDialog.unscentedtransformation.label",   "%d. unscented transformation step of %d \u2026");
 			this.iterationTextTemplate   = i18n.getString("TransformationAdjustmentDialog.iteration.label",   "%d. iteration step of maximal %d \u2026");
 			this.convergenceTextTemplate = i18n.getString("TransformationAdjustmentDialog.convergence.label", "Convergence max|dx| = %.2e");
 		}
@@ -89,7 +86,6 @@ public class TransformationAdjustmentDialog {
 				this.updateIterationProgressMessage(i18n.getString("TransformationAdjustmentDialog.pleasewait.label", "Please wait\u2026"));
 				this.updateConvergenceProgressMessage(null);
 
-				this.updateProgressOnIterate = !(this.adjustment.getEstimationType() == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION || this.adjustment.getEstimationType() == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION);
 				this.finalStepProcesses = 0.25 / 3.0; // Nenner == Anzahl + 1 an zusaetzlichen Tasks (INVERT_NORMAL_EQUATION_MATRIX, ESTIAMTE_STOCHASTIC_PARAMETERS)
 				this.adjustment.addPropertyChangeListener(this);
 
@@ -280,17 +276,6 @@ public class TransformationAdjustmentDialog {
 				}
 				break;
 				
-			case UNSCENTED_TRANSFORMATION_STEP:
-				if (oldValue != null && newValue != null && oldValue instanceof Integer && newValue instanceof Integer) {
-					int current = (Integer)newValue;
-					int maximal = (Integer)oldValue;
-					double frac = 0.75 * Math.min((double)current / (double)maximal, 1.0);
-					this.processState = Math.max(this.processState, frac);
-					this.updateMessage(String.format(Locale.ENGLISH, this.unscentedTransformationTextTemplate, current, maximal));
-					this.updateProgress(this.processState, 1.0);
-				}
-				break;
-
 			case INVERT_NORMAL_EQUATION_MATRIX:
 				this.processState += this.finalStepProcesses;
 				this.updateProgress(this.processState, 1.0);
@@ -315,6 +300,7 @@ public class TransformationAdjustmentDialog {
 				break;
 
 			// unused cases
+			case UNSCENTED_TRANSFORMATION_STEP:
 			case PRINCIPAL_COMPONENT_ANALYSIS:
 			case EXPORT_COVARIANCE_MATRIX:
 			case EXPORT_COVARIANCE_INFORMATION:

@@ -23,6 +23,7 @@ package org.applied_geodesy.adjustment.transformation.interpolation;
 
 import java.util.Collection;
 
+import org.applied_geodesy.adjustment.transformation.TransformationAdjustment.Interrupt;
 import org.applied_geodesy.adjustment.transformation.point.EstimatedFramePosition;
 import org.applied_geodesy.adjustment.transformation.point.FramePositionPair;
 
@@ -41,7 +42,7 @@ public abstract class Interpolation {
 		this.interpolationType = new ReadOnlyObjectWrapper<InterpolationType>(this, "interpolationType", interpolationType);
 	}
 	
-	public abstract void interpolate(Collection<EstimatedFramePosition> estimatedFramePositions, Collection<FramePositionPair> framePositionPairs);
+	public abstract void interpolate(Collection<EstimatedFramePosition> estimatedFramePositions, Collection<FramePositionPair> framePositionPairs, Interrupt interrupt);
 	
 	public final ObservableObjectValue<InterpolationType> interpolationTypeProperty() {
 		return this.interpolationType;

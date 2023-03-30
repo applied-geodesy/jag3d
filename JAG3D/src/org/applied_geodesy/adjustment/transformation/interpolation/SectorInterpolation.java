@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.applied_geodesy.adjustment.MathExtension;
+import org.applied_geodesy.adjustment.transformation.TransformationAdjustment.Interrupt;
 import org.applied_geodesy.adjustment.transformation.point.EstimatedFramePosition;
 import org.applied_geodesy.adjustment.transformation.point.FramePositionPair;
 
@@ -67,13 +68,16 @@ public class SectorInterpolation extends Interpolation {
 	}
 
 	@Override
-	public void interpolate(Collection<EstimatedFramePosition> estimatedFramePositions, Collection<FramePositionPair> framePositionPairs) {
+	public void interpolate(Collection<EstimatedFramePosition> estimatedFramePositions, Collection<FramePositionPair> framePositionPairs, Interrupt interrupt) {
 		double a = this.getNumeratorExponent();
 		double b = this.getDenominatorExponent();
 		
 		int numberOfEstimatedFramePositions = estimatedFramePositions.size();
 		
 		for (FramePositionPair framePositionPair : framePositionPairs) {
+			if (interrupt.isInterrupted())
+				return;
+			
 			if (!framePositionPair.isEnable())
 				continue;
 			
@@ -82,6 +86,8 @@ public class SectorInterpolation extends Interpolation {
 			EstimatedFramePosition targetSystemPosition = framePositionPair.getTargetSystemPosition();
 			
 			for (EstimatedFramePosition estimatedFramePosition : estimatedFramePositions) {
+				if (interrupt.isInterrupted())
+					return;
 
 				double dx = estimatedFramePosition.getX0() - targetSystemPosition.getX();
 				double dy = estimatedFramePosition.getY0() - targetSystemPosition.getY();
@@ -100,12 +106,18 @@ public class SectorInterpolation extends Interpolation {
 			Collections.sort(sectorElements);
 			
 			for (SectorElement sectorElementA : sectorElements) {
+				if (interrupt.isInterrupted())
+					return;
+				
 				double azimuthA  = sectorElementA.getAzimuth();
 				double distanceA = sectorElementA.getDistance();
 				double sumWeights = 0.0, maxWeight = 0.0;
 				double ux = 0.0, uy = 0.0, uz = 0.0;
 				
 				for (SectorElement sectorElementB : sectorElements) {
+					if (interrupt.isInterrupted())
+						return;
+					
 					double azimuthB  = sectorElementB.getAzimuth();
 					double distanceB = sectorElementB.getDistance();
 
@@ -139,6 +151,9 @@ public class SectorInterpolation extends Interpolation {
 			
 			double ux = 0.0, uy = 0.0, uz = 0.0, sumWeights = 0.0;
 			for (int i = 0, j = i+1; i < numberOfEstimatedFramePositions; i++, j++) {
+				if (interrupt.isInterrupted())
+					return;
+				
 				if (j == numberOfEstimatedFramePositions)
 					j = 0;
 				
