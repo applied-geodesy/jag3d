@@ -5,7 +5,7 @@ Class-Path:
   lib/arpack_combined_all-0.1.jar  
   lib/core-1.1.2.jar 
   lib/mtj-1.0.4.jar    
-  lib/freemarker-2.3.31.jar 
+  lib/freemarker-2.3.32.jar 
   lib/hsqldb-2.7.1.jar 
   lib/sqltool-2.7.1.jar 
   lib/jdistlib-0.4.5-bin.jar 
