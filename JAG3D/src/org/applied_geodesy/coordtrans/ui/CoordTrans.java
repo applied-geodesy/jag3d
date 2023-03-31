@@ -40,6 +40,7 @@ import org.applied_geodesy.coordtrans.ui.dialog.MatrixDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.TransformationAdjustmentDialog;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
+import org.applied_geodesy.coordtrans.ui.io.report.FTLReport;
 import org.applied_geodesy.coordtrans.ui.menu.UIMenuBuilder;
 import org.applied_geodesy.coordtrans.ui.pane.UIInterpolationPaneBuilder;
 import org.applied_geodesy.coordtrans.ui.pane.UIRestrictionPaneBuilder;
@@ -55,6 +56,7 @@ import org.applied_geodesy.util.ImageUtils;
 import org.applied_geodesy.version.coordtrans.Version;
 
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -85,7 +87,7 @@ public class CoordTrans extends Application {
 	}
 	
 	private static I18N i18n = I18N.getInstance();
-	private final static String TITLE_TEMPLATE = "%s%sCoordTrans%s \u2014 Least-Squares Adjustment of Transformation Parameters";
+	private final static String TITLE_TEMPLATE = "%s%sCoordTrans%s \u2014 Least Squares-based Coordinate Transformation";
 	private static Stage primaryStage;
 	private Button adjustmentButton;
 	
@@ -105,7 +107,9 @@ public class CoordTrans extends Application {
 	}
 	
 	private void setHostServices() {
-		
+		HostServices hostServices = this.getHostServices();
+		FTLReport.setHostServices(hostServices);
+		AboutDialog.setHostServices(hostServices);
 	}
 	
 	private void setStageToDialogs(Stage primaryStage) {

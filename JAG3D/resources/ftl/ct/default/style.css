@@ -1,0 +1,258 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    background: #fefefe;
+}
+
+html, p, pre, dt, dl, dd {
+	font-family: verdana, arial, sans-serif;
+    color: #2a2a2a;
+    font-size: 12px;
+}
+
+header {
+	width: 75%;
+	margin-left: 10%;
+	margin-top: 25px;
+	font: bold 1.0em Georgia, Times, 'Times New Roman', serif;
+	color: #023bb0;
+}
+header h1 span {
+	font-size: 0.5em;
+	color: #3f64b0;
+}
+table {
+    margin: 0 0;
+    border-collapse: separate;
+    background: #fafafa;
+    border-spacing: 0;
+}
+table.j3d_datatable {
+    width: 100%;
+}
+table.j3d_datatable tbody td,
+table.j3d_datatable tfoot td {
+    text-align: right;
+}
+table thead th {
+    font-weight: normal;
+    border-top: 1px solid #eaeaea;
+    border-bottom: 1px solid #fefefe;
+    color: #fefefe;
+    background: #3f64b0;
+    background: linear-gradient(to bottom, #3f64b0 0%, #023bb0 100%);
+}
+table thead th span {
+    display: block;
+    font-weight: lighter;
+    font-size: 0.75em;
+}
+table thead th span.unit:not(:empty):before {
+    content: " in ";
+}
+table thead th span.unit:not(:empty):after {
+	content: "";
+}	
+table thead th:first-child {
+    border-top-left-radius: 7px;
+}
+table thead th:last-child {
+    border-top-right-radius: 7px;
+}
+table tbody td,
+table tbody th,
+table tfoot td,
+table thead th {
+    height: 1.2em;
+    line-height: 1.2em;
+    box-shadow: 0 1px 0 #fefefe;
+    white-space: nowrap;
+    padding: 5px;
+    border-right: 1px solid #fefefe;
+}
+table tbody th {
+    text-align: left;
+}
+table tbody td {
+    text-align: center;
+}
+table tbody td,
+table tbody th {
+    border-bottom: 1px solid #fefefe;
+    background: #efefef;
+}
+table tbody td span,
+table tbody th span {
+    width: 50%;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+table tbody tr:nth-child(even) td,
+table tbody tr:nth-child(even) th {
+    background: #dedede;
+}
+table tfoot td:last-child,
+table thead th:last-child {
+    border-right: none;
+}
+table tbody td:first-child,
+table tbody th:first-child {
+    border-left: 1px solid #3f64b0;
+}
+table tbody td:last-child,
+table tbody th:last-child {
+    text-align: center;
+    border-right: 1px solid #3f64b0;
+}
+table.j3d_datatable tfoot td:last-child {
+    text-align: center;
+}
+table tfoot td {
+    border-bottom: 1px solid #dadada;
+    color: #fefefe;
+    padding: 0 5px;
+    background: #3f64b0;
+    background: linear-gradient(to bottom, #023bb0 0%, #3f64b0 100%);
+}
+table tfoot td:first-child {
+    border-bottom-left-radius: 7px;
+}
+table tfoot td:last-child {
+    border-bottom-right-radius: 7px;
+}
+table tbody tr:nth-child(odd):hover td,
+table tbody tr:nth-child(odd):hover th {
+    background: #e4ebf2;
+}
+table tbody tr:nth-child(even):hover td,
+table tbody tr:nth-child(even):hover th {
+    background: #d3dde7;
+}
+table tbody td span.accepted {
+    color: darkgreen;
+}
+table tbody td span.rejected {
+    color: darkred;
+}
+section {
+    overflow: auto;
+    margin: 25px 50px;
+    padding: 1.5em;
+    background: #f9f9f9;
+    background-image: linear-gradient(to bottom right, #f9f9f9 0%, #fefefe 50%);
+    border-left: 1px solid #023bb0;
+    border-top: 1px solid #023bb0;
+    border-radius: 2px 2px 2px 2px;
+    border-image: linear-gradient(to bottom right, #023bb0 0%, #f9f9f9 50%) 1 1;
+}
+section h2 {
+    margin: 0 0 0.5em 0;
+    padding: 0;
+    font: bold 1.1em Georgia, Times, 'Times New Roman', serif;
+}
+section ul.rank_defect {
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+}
+section ul.rank_defect li {
+    display: inline;
+    list-style-type: none;
+    margin: 0px;
+}
+section ul.rank_defect li:after {
+    content: ", ";
+}
+section ul.rank_defect li:first-child:before {
+    content: "(";
+}
+section ul.rank_defect li:last-child:after {
+    content: ")";
+}
+section dl dd li {
+    margin-left: 15px;
+}
+caption {
+    margin: 5px 0px 6px 3px;
+    text-align: left;
+    caption-side: bottom;
+    font: normal 0.8em Georgia, Times, 'Times New Roman', serif;
+    min-height: 0.2em;
+}
+dt,
+dd {
+    float: left;
+}
+dt {
+    width: 300px;
+    clear: both;
+    font-weight: bold;
+    margin: 2px 0 2px 0;
+}
+dt:after {
+    content: ": ";
+}
+footer {
+	margin: 10px auto;
+	padding: 5px 0;
+	border-top: 1px solid #bebebe;
+	font: normal 0.9em Georgia, Times, 'Times New Roman', serif;
+	color: #bebebe;
+	text-align: center;
+}
+footer a {
+	color: #bebebe;
+}
+footer:hover, footer:hover a {
+	color: #666;
+}
+
+
+figcaption {
+	font-size: 0.7em;
+}
+ol.chart {
+    border-left: 5px solid #3f64b0;
+    background: none;
+    list-style: none;
+    padding: 0;
+    margin: 0 10px 15px 10px;
+    border-radius: 3px;
+}
+ol.chart li {
+    display: block;
+    border: 1px solid #3f64b0;
+    width: 500px;
+    margin: 5px 0 5px 3px;
+    box-shadow: 2px 2px 5px #e4ebf2;
+    border-radius: 3px;
+}
+ol.chart li span {
+    display: block;
+    white-space: nowrap;
+    background: #d5d5d5;
+    box-sizing: border-box;
+    padding: 2px 0px;
+    line-height: 1.5;
+    font-size: 0.8em;
+}
+ol.chart li:hover {
+    background: #d3dde7;
+}
+ol.chart li:nth-child(1) span {
+	border-left: 1px solid rgb(162, 205, 90);
+    background: rgb(162, 205, 90);
+}
+ol.chart li:nth-child(2) span {
+	border-left: 1px solid rgb(238, 220, 130);
+    background: rgb(238, 220, 130);
+}
+ol.chart li:nth-child(3) span {
+	border-left: 1px solid rgb(238, 44, 44);
+    background: rgb(238, 44, 44);
+}

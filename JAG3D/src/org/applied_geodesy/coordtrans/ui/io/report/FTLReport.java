@@ -41,6 +41,7 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.adjustment.transformation.TransformationAdjustment;
 import org.applied_geodesy.adjustment.transformation.VarianceComponent;
+import org.applied_geodesy.adjustment.transformation.interpolation.InterpolationType;
 import org.applied_geodesy.adjustment.transformation.parameter.ParameterType;
 import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.transformation.point.EstimatedFramePosition;
@@ -73,7 +74,7 @@ public class FTLReport {
 	private Template template = null;
 	private static HostServices hostServices;
 	private Map<String, Object> data = new HashMap<String, Object>();
-	public final static String TEMPLATE_PATH = "ftl/coordtrans/";
+	public final static String TEMPLATE_PATH = "ftl/ct/";
 	private final Configuration cfg = new Configuration(VERSION);
 	private TransformationAdjustment adjustment;
 	public FTLReport(TransformationAdjustment adjustment) {
@@ -273,7 +274,7 @@ public class FTLReport {
 	}
 	
 	private void addUnknownParameters() {
-		this.setParam("unknown_parameters", this.getUnknownParameters());
+		this.setParam("unknown_transformation_parameters", this.getUnknownParameters());
 	}
 
 	private void addCorrelationMatrix() {
@@ -381,7 +382,7 @@ public class FTLReport {
 		List<FramePositionPair> framePositionPairs = this.adjustment.getTransformation().getFramePositionPairs();
 		
 		int dimension = this.adjustment.getTransformation().getTransformationEquations().getTransformationType().getDimension();
-		
+		boolean isInterpolated = this.adjustment.getTransformation().getInterpolation() != null && this.adjustment.getTransformation().getInterpolation().getInterpolationType() != InterpolationType.NONE; 
 		for (FramePositionPair positionPair : framePositionPairs) {
 			if (!positionPair.isEnable())
 				continue;
@@ -422,8 +423,8 @@ public class FTLReport {
 		if (positionList != null && !positionList.isEmpty()) {
 			positions.put("positions",    positionList);
 			positions.put("dimension",    dimension);
-			
-			this.setParam("position_pairs", positions);
+			positions.put("interpolation",isInterpolated);
+			this.setParam("transformed_position_pairs", positions);
 		}
 	}
 	

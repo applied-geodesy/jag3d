@@ -109,7 +109,7 @@ public class AboutDialog {
 		gridPane.setAlignment(Pos.CENTER);
 //		gridPane.setGridLinesVisible(true);
 		
-		Text applicationText = new Text("Least-Squares Adjustment of Transformation Parameters");
+		Text applicationText = new Text("Least Squares-based Coordinate Transformation");
 		applicationText.setFont(Font.font("SansSerif", FontWeight.NORMAL, FontPosture.REGULAR, 14));
 		applicationText.setTextAlignment(TextAlignment.CENTER);
 		

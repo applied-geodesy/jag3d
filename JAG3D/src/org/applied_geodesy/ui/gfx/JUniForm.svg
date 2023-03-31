@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org) -->
+
+<!-- by Michael Loesler (https://applied-geodesy.org)   -->
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -14,7 +17,7 @@
    width="500"
    version="1.1">
   <title
-     id="title2995">Java Graticule 3D</title>
+     id="title2995">Java Applied Geodesy 3D</title>
   <sodipodi:namedview
      inkscape:document-rotation="0"
      inkscape:current-layer="JAG3D"

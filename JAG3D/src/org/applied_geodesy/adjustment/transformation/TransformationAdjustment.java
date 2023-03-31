@@ -451,6 +451,8 @@ public class TransformationAdjustment {
 			centerOfMaasTrg.setX(0);
 			centerOfMaasTrg.setY(0);
 			centerOfMaasTrg.setZ(0);
+			
+			this.interrupt.setInterrupted(false);
 		}
 
 		if (this.currentEstimationStatus.getId() == EstimationStateType.BUSY.getId() || this.calculateStochasticParameters) {
