@@ -269,8 +269,8 @@ public class ConfidenceRegion {
 			double qyy = this.covarianceMatrix.get(1, 1);
 			double qxy = this.covarianceMatrix.get(0, 1);
 			double w = Math.sqrt( (qxx-qyy)*(qxx-qyy) + 4*qxy*qxy );
-			double a = Math.sqrt(0.5*(qxx+qyy+w));
-			double b = Math.sqrt(0.5*(qxx+qyy-w));
+			double a = qxx+qyy+w > 0 ? Math.sqrt(0.5*(qxx+qyy+w)) : 0;
+			double b = qxx+qyy-w > 0 ? Math.sqrt(0.5*(qxx+qyy-w)) : 0;
 			this.helmertEllipseAxes[0] = a;
 			this.helmertEllipseAxes[1] = b;
 			this.helmertEllipseAngle = MathExtension.MOD(0.5*Math.atan2(2.0*qxy, qxx-qyy), 2.0*Math.PI);
