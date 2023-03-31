@@ -30,8 +30,8 @@
 		</#if>
 
 		<#if feature_points.dimension != 1>
-			<th><#outputformat "plainText">r<sub>y</sub><span class="unit">${unit_abbr_percentage}</span></#outputformat></th>
 			<th><#outputformat "plainText">r<sub>x</sub><span class="unit">${unit_abbr_percentage}</span></#outputformat></th>
+			<th><#outputformat "plainText">r<sub>y</sub><span class="unit">${unit_abbr_percentage}</span></#outputformat></th>
 		</#if>
 		
 		<#if feature_points.dimension != 2>
