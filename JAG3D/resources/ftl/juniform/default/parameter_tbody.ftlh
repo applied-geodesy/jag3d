@@ -1,6 +1,6 @@
 <tbody>
 	<#list unknown_feature_parameters as parameter>
-		<#if parameter.visible>
+		<#if parameter.visible && parameter_type_map[parameter.parameter_type]?? && parameter_processing_map[parameter.processing_type]??>
 			<tr>
 				<th>${parameter.name}</th>
 	
