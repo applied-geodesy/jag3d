@@ -85,8 +85,8 @@
 				</dd>
 			</#if>
 
-			<dt><#outputformat "plainText">Irrtumswahrscheinlichkeit &alpha;</#outputformat></dt><dd>${test_statistic_probability_value?string[df_percentage]}&nbsp;${unit_abbr_percentage}</dd>
-			<dt><#outputformat "plainText">Macht des Tests (1-&beta;)</#outputformat></dt><dd>${test_statistic_power_of_test?string[df_percentage]}&nbsp;${unit_abbr_percentage}</dd>
+			<dt>Irrtumswahrscheinlichkeit &alpha;</dt><dd>${test_statistic_probability_value?string[df_percentage]}&nbsp;${unit_abbr_percentage}</dd>
+			<dt>Macht des Tests (1-&beta;)</dt><dd>${test_statistic_power_of_test?string[df_percentage]}&nbsp;${unit_abbr_percentage}</dd>
 
 			<dt>Kurzbeschreibung</dt>
 			<dd><pre>${project_description}</pre></dd>
