@@ -101,9 +101,11 @@
 			
 			<article>
 				<#include "default/parameter_table.ftlh" parse=true>
-				<#include "default/matrix_table.ftlh" parse=true>
+				<#include "default/transformation_matrix_table.ftlh" parse=true>
+				<#include "default/correlation_matrix_table.ftlh" parse=true>
+				<#include "default/euler_angles_table.ftlh" parse=true>
 			</article>
-		
+
 		</body>
 	</html>
 </#compress>

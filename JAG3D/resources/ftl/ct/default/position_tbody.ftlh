@@ -105,7 +105,7 @@
 						<td><@printFormattedNumber value=position.sigma_Z format=df_length_uncertainty/></td>
 					</#if>
 					
-					<#if position_pairs.interpolation??>	
+					<#if interpolation_type?? && interpolation_type != 'NONE'>
 						<#if position_pairs.dimension != 1>
 							<td><@printFormattedNumber value=position.residual_X format=df_length_residual/></td>
 							<td><@printFormattedNumber value=position.residual_Y format=df_length_residual/></td>

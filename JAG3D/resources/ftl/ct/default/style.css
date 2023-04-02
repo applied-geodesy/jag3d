@@ -31,7 +31,7 @@ table {
     border-spacing: 0;
 }
 table.j3d_datatable {
-    width: 100%;
+    /*width: 100%;*/
 }
 table.j3d_datatable tbody td,
 table.j3d_datatable tfoot td {

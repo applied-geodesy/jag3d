@@ -4,12 +4,12 @@
 		
 		<#if view == "SOURCE" || view == "TARGET">
 			<#if position_pairs.dimension != 1>
-				<th><#outputformat "plainText">${(view == "SOURCE")?then('x', 'X')}<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
-				<th><#outputformat "plainText">${(view == "SOURCE")?then('y', 'Y')}<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+				<th><#outputformat "plainText">${(view == "SOURCE")?then('x', 'X')}<span class="unit">${unit_abbr_length}</span></#outputformat></th>
+				<th><#outputformat "plainText">${(view == "SOURCE")?then('y', 'Y')}<span class="unit">${unit_abbr_length}</span></#outputformat></th>
 			</#if>
 			
 			<#if position_pairs.dimension != 2>
-				<th><#outputformat "plainText">${(view == "SOURCE")?then('z', 'Z')}<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+				<th><#outputformat "plainText">${(view == "SOURCE")?then('z', 'Z')}<span class="unit">${unit_abbr_length}</span></#outputformat></th>
 			</#if>
 	
 			<#if position_pairs.dimension != 1>
@@ -77,21 +77,21 @@
 			
 		<#else>
 			<#if position_pairs.dimension != 1>
-				<th><#outputformat "plainText">x${(view == "TRANSFORMED")?then('', 'x<sub>0</sub>')}<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
-				<th><#outputformat "plainText">y${(view == "TRANSFORMED")?then('', 'y<sub>0</sub>')}<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+				<th><#outputformat "plainText">x${(view == "TRANSFORMED")?then('', '<sub>0</sub>')}<span class="unit">${unit_abbr_length}</span></#outputformat></th>
+				<th><#outputformat "plainText">y${(view == "TRANSFORMED")?then('', '<sub>0</sub>')}<span class="unit">${unit_abbr_length}</span></#outputformat></th>
 			</#if>
 			
 			<#if position_pairs.dimension != 2>
-				<th><#outputformat "plainText">z${(view == "TRANSFORMED")?then('', 'x<sub>0</sub>')}<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+				<th><#outputformat "plainText">z${(view == "TRANSFORMED")?then('', '<sub>0</sub>')}<span class="unit">${unit_abbr_length}</span></#outputformat></th>
 			</#if>
 			
 			<#if position_pairs.dimension != 1>
-				<th><#outputformat "plainText">X${(view == "TRANSFORMED")?then('', 'x<sub>0</sub>')}<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
-				<th><#outputformat "plainText">Y${(view == "TRANSFORMED")?then('', 'x<sub>0</sub>')}<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+				<th><#outputformat "plainText">X${(view == "TRANSFORMED")?then('', '<sub>0</sub>')}<span class="unit">${unit_abbr_length}</span></#outputformat></th>
+				<th><#outputformat "plainText">Y${(view == "TRANSFORMED")?then('', '<sub>0</sub>')}<span class="unit">${unit_abbr_length}</span></#outputformat></th>
 			</#if>
 			
 			<#if position_pairs.dimension != 2>
-				<th><#outputformat "plainText">Z${(view == "TRANSFORMED")?then('', 'x<sub>0</sub>')}<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+				<th><#outputformat "plainText">Z${(view == "TRANSFORMED")?then('', '<sub>0</sub>')}<span class="unit">${unit_abbr_length}</span></#outputformat></th>
 			</#if>
 			
 			<#if view == "TRANSFORMED">	
@@ -104,14 +104,14 @@
 					<th><#outputformat "plainText">&sigma;<sub>Z</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
 				</#if>
 				
-				<#if position_pairs.interpolation??>	
+				<#if interpolation_type?? && interpolation_type != 'NONE'>	
 					<#if position_pairs.dimension != 1>
-						<th><#outputformat "plainText">&epsilon;<sub>X</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
-						<th><#outputformat "plainText">&epsilon;<sub>Y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+						<th><#outputformat "plainText">&delta;<sub>X</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+						<th><#outputformat "plainText">&delta;<sub>Y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 					</#if>
 							
 					<#if position_pairs.dimension != 2>
-						<th><#outputformat "plainText">&epsilon;<sub>Z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
+						<th><#outputformat "plainText">&delta;<sub>Z</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 					</#if>
 				</#if>
 			</#if>

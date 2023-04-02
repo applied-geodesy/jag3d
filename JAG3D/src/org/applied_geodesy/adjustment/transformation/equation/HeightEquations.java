@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.transformation.TransformationType;
 import org.applied_geodesy.adjustment.transformation.parameter.ParameterType;
 import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
@@ -177,5 +178,22 @@ public class HeightEquations extends TransformationEquations {
 	@Override
 	public TransformationType getTransformationType() {
 		return TransformationType.HEIGHT;
+	}
+
+	@Override
+	public Matrix getHomogeneousCoordinateTransformationMatrix() {
+		// transformation parameters
+		double tz = this.parameters.get(ParameterType.SHIFT_Z).getValue();
+		double mz = this.parameters.get(ParameterType.SCALE_Z).getValue();
+		
+		return new DenseMatrix(new double[][] {
+			{ mz, tz },
+			{ 0,   1 }
+		});
+	}
+
+	@Override
+	public Matrix getRotationMatrix() {
+		return MathExtension.identity(1);
 	}
 }

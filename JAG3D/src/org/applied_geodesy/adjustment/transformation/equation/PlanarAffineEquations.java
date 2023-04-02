@@ -270,4 +270,36 @@ public class PlanarAffineEquations extends TransformationEquations {
 	public TransformationType getTransformationType() {
 		return TransformationType.PLANAR;
 	}
+
+	@Override
+	public Matrix getHomogeneousCoordinateTransformationMatrix() {
+		// transformation parameter
+		double tx = this.parameters.get(ParameterType.SHIFT_X).getValue();
+		double ty = this.parameters.get(ParameterType.SHIFT_Y).getValue();
+
+		double a11 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_11).getValue();
+		double a12 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_12).getValue();
+
+		double a21 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_21).getValue();
+		double a22 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_22).getValue();
+
+		return new DenseMatrix(new double[][] {
+			{ a11, -a12,  tx },
+			{ a21,  a22,  ty },
+			{ 0.0,  0.0, 1.0 }
+		});
+	}
+
+	@Override
+	public Matrix getRotationMatrix() {
+		// transformation parameter
+		double a11 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_11).getValue();
+		double a21 = this.parameters.get(ParameterType.AUXILIARY_ELEMENT_21).getValue();
+		double r =  Math.atan2(a21, a11);
+		
+		return new DenseMatrix(new double[][] {
+			{ Math.cos(r), -Math.sin(r) },
+			{ Math.sin(r),  Math.cos(r) }
+		});
+	}
 }

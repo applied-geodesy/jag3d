@@ -67,6 +67,10 @@ public abstract class TransformationEquations implements Iterable<HomologousFram
 	
 	public abstract TransformationType getTransformationType();
 	
+	public abstract Matrix getHomogeneousCoordinateTransformationMatrix();
+	
+	public abstract Matrix getRotationMatrix();
+	
 	public abstract Collection<UnknownParameter> getUnknownParameters();
 	
 	public abstract UnknownParameter getUnknownParameter(ParameterType parameterType);

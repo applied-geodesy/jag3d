@@ -156,7 +156,7 @@ public class SpatialAffineTransformation extends Transformation {
 				
 		// Fixed rotation
 		Restriction fixedRotationXRestriction = new ProductSumRestriction(false, List.of(q2, q0), List.of(q3, q1), List.of(SignType.PLUS, SignType.MINUS), zero);
-		Restriction fixedRotationYRestriction = new ProductSumRestriction(false, List.of(q1, q0), List.of(q3, q2), List.of(SignType.PLUS, SignType.MINUS), zero);
+		Restriction fixedRotationYRestriction = new ProductSumRestriction(false, List.of(q1, q0), List.of(q3, q2), List.of(SignType.PLUS, SignType.PLUS),  zero);
 		Restriction fixedRotationZRestriction = new ProductSumRestriction(false, List.of(q1, q0), List.of(q2, q3), List.of(SignType.PLUS, SignType.MINUS), zero);
 		
 		// Identical scales x == y, x == z, y == z

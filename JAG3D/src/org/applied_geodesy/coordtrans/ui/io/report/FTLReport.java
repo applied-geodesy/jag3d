@@ -31,17 +31,24 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.applied_geodesy.adjustment.MathExtension;
+import org.applied_geodesy.adjustment.MathExtension.EulerAngleConventionType;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.adjustment.transformation.TransformationAdjustment;
 import org.applied_geodesy.adjustment.transformation.VarianceComponent;
+import org.applied_geodesy.adjustment.transformation.interpolation.Interpolation;
 import org.applied_geodesy.adjustment.transformation.interpolation.InterpolationType;
+import org.applied_geodesy.adjustment.transformation.interpolation.InverseDistanceWeighting;
+import org.applied_geodesy.adjustment.transformation.interpolation.MultiQuadraticInterpolation;
+import org.applied_geodesy.adjustment.transformation.interpolation.SectorInterpolation;
 import org.applied_geodesy.adjustment.transformation.parameter.ParameterType;
 import org.applied_geodesy.adjustment.transformation.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.transformation.point.EstimatedFramePosition;
@@ -123,7 +130,11 @@ public class FTLReport {
 		this.addHomologousFramePositionPairs();
 		this.addFramePositionPairs();
 		this.addUnknownParameters();
+		
 		this.addCorrelationMatrix();
+		this.addHomogeneousCoordinateTransformationMatrix();
+		
+		this.addEulerAngles();
 	}
 
 	public String getSuggestedFileName() {
@@ -238,6 +249,28 @@ public class FTLReport {
 		this.setParam("report_creation_date",  new Date(System.currentTimeMillis()));
 		this.setParam("version", org.applied_geodesy.version.juniform.Version.get());
 		this.setParam("estimation_type", this.adjustment.getEstimationType());
+		if (this.adjustment.getTransformation().getInterpolation() == null || this.adjustment.getTransformation().getInterpolation().getInterpolationType() == InterpolationType.NONE) 
+			this.setParam("interpolation_type", InterpolationType.NONE.name());
+		else {
+			Interpolation interpolation = this.adjustment.getTransformation().getInterpolation();
+			this.setParam("interpolation_type", interpolation.getInterpolationType().name());
+			switch (interpolation.getInterpolationType()) {
+			case INVERSE_DISTANCE_WEIGHTING:
+				this.setParam("interpolation_idw_exponent",  ((InverseDistanceWeighting)interpolation).getExponent());
+				this.setParam("interpolation_idw_smoothing", ((InverseDistanceWeighting)interpolation).getSmoothing());
+				break;
+			case MULTI_QUADRATIC:
+				this.setParam("interpolation_mq_exponent",  ((MultiQuadraticInterpolation)interpolation).getExponent());
+				this.setParam("interpolation_mq_smoothing", ((MultiQuadraticInterpolation)interpolation).getSmoothing());
+				break;
+			case SECTOR:
+				this.setParam("interpolation_sect_numerator_exponent",   ((SectorInterpolation)interpolation).getNumeratorExponent());
+				this.setParam("interpolation_sect_denominator_exponent", ((SectorInterpolation)interpolation).getDenominatorExponent());
+				break;
+			default:
+				break;
+			}
+		}
 	}
 
 	private void addTeststatistics() {
@@ -276,6 +309,63 @@ public class FTLReport {
 	private void addUnknownParameters() {
 		this.setParam("unknown_transformation_parameters", this.getUnknownParameters());
 	}
+	
+	private void addHomogeneousCoordinateTransformationMatrix() {
+		Matrix transformationMatrix = this.adjustment.getTransformation().getTransformationEquations().getHomogeneousCoordinateTransformationMatrix();
+		if (transformationMatrix == null)
+			return;
+		
+		List<HashMap<String, Object>> matrix = new ArrayList<HashMap<String, Object>>();
+
+		int cols = transformationMatrix.numColumns();
+		int rows = transformationMatrix.numRows();
+		
+		int dimension = this.adjustment.getTransformation().getTransformationEquations().getTransformationType().getDimension();
+		
+		for (int r = 0; r < rows; r++) {
+			HashMap<String, Object> row = new HashMap<String, Object>(2);
+			List<Double> rowVec = new ArrayList<Double>(rows);
+			for (int c = 0; c < cols; c++)
+				rowVec.add(transformationMatrix.get(r, c));
+
+			if (dimension != 1 && r < 2)
+				row.put("parameter", r == 0 ? 'x' : 'y');
+			
+			if (dimension != 2 && r == dimension - 1)
+				row.put("parameter", 'z');
+			
+			if (r == dimension)
+				row.put("parameter", 'h');
+			
+			row.put("data", rowVec);
+			
+			matrix.add(row);
+		}
+
+		this.setParam("homogeneous_coordinate_transformation_matrix", matrix);
+	}
+	
+	private void addEulerAngles() {
+		if (this.adjustment.getTransformation().getTransformationEquations().getTransformationType().getDimension() != 3)
+			return;
+		
+		Matrix R = this.adjustment.getTransformation().getTransformationEquations().getRotationMatrix();
+		EulerAngleConventionType eulerAngleConventions[] = MathExtension.EulerAngleConventionType.values();
+		
+		List<HashMap<String, Object>> conventions = new ArrayList<HashMap<String, Object>>();
+		for (EulerAngleConventionType eulerAngleConvention : eulerAngleConventions) {
+			double eulerAngles[] = MathExtension.rotationMatrix3D2EulerAngles(R, eulerAngleConvention);
+			
+			HashMap<String, Object> angles = new HashMap<String, Object>();
+			angles.put("convention",   eulerAngleConvention.name());
+			angles.put("phi",   options.convertAngleToView(eulerAngles[0]));
+			angles.put("theta", options.convertAngleToView(eulerAngles[1]));
+			angles.put("psi",   options.convertAngleToView(eulerAngles[2]));
+			
+			conventions.add(angles);
+		}
+		this.setParam("euler_angles_conventions", conventions);
+	}
 
 	private void addCorrelationMatrix() {
 		Matrix correlationMatrix = this.adjustment.getCorrelationMatrix();
@@ -292,9 +382,8 @@ public class FTLReport {
 		for (int r = 0; r < rows; r++) {
 			HashMap<String, Object> row = new HashMap<String, Object>(2);
 			List<Double> rowVec = new ArrayList<Double>(rows);
-			for (int c = 0; c < cols; c++) {
+			for (int c = 0; c < cols; c++) 
 				rowVec.add(correlationMatrix.get(r, c));
-			}
 			
 			row.put("parameter", this.getUnknownParameter(unknownParameters.get(r)));
 			row.put("data", rowVec);
@@ -382,7 +471,6 @@ public class FTLReport {
 		List<FramePositionPair> framePositionPairs = this.adjustment.getTransformation().getFramePositionPairs();
 		
 		int dimension = this.adjustment.getTransformation().getTransformationEquations().getTransformationType().getDimension();
-		boolean isInterpolated = this.adjustment.getTransformation().getInterpolation() != null && this.adjustment.getTransformation().getInterpolation().getInterpolationType() != InterpolationType.NONE; 
 		for (FramePositionPair positionPair : framePositionPairs) {
 			if (!positionPair.isEnable())
 				continue;
@@ -421,9 +509,8 @@ public class FTLReport {
 		}
 		
 		if (positionList != null && !positionList.isEmpty()) {
-			positions.put("positions",    positionList);
-			positions.put("dimension",    dimension);
-			positions.put("interpolation",isInterpolated);
+			positions.put("positions",     positionList);
+			positions.put("dimension",     dimension);
 			this.setParam("transformed_position_pairs", positions);
 		}
 	}

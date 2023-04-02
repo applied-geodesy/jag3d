@@ -521,4 +521,74 @@ public class SpatialAffineEquations extends TransformationEquations {
 	public TransformationType getTransformationType() {
 		return TransformationType.SPATIAL;
 	}
+
+	@Override
+	public Matrix getHomogeneousCoordinateTransformationMatrix() {
+		// transformation parameters
+		double tx = this.getUnknownParameter(ParameterType.SHIFT_X).getValue();
+		double ty = this.getUnknownParameter(ParameterType.SHIFT_Y).getValue();
+		double tz = this.getUnknownParameter(ParameterType.SHIFT_Z).getValue();
+		
+		double q0 = this.getUnknownParameter(ParameterType.QUATERNION_Q0).getValue();
+		double q1 = this.getUnknownParameter(ParameterType.QUATERNION_Q1).getValue();
+		double q2 = this.getUnknownParameter(ParameterType.QUATERNION_Q2).getValue();
+		double q3 = this.getUnknownParameter(ParameterType.QUATERNION_Q3).getValue();
+		
+		double s11 = this.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_11).getValue();
+		double s12 = this.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_12).getValue();
+		double s13 = this.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_13).getValue();
+		
+		double s22 = this.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_22).getValue();
+		double s23 = this.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_23).getValue();
+		
+		double s33 = this.getUnknownParameter(ParameterType.AUXILIARY_ELEMENT_33).getValue();
+	    
+		// Rotation matrix
+		double r11 = 2.0*q0*q0-1.0+2.0*q1*q1;
+		double r12 = 2.0*(q1*q2-q0*q3);
+		double r13 = 2.0*(q1*q3+q0*q2);
+
+		double r21 = 2.0*(q1*q2+q0*q3);
+		double r22 = 2.0*q0*q0-1.0+2.0*q2*q2;
+		double r23 = 2.0*(q2*q3-q0*q1);
+
+		double r31 = 2.0*(q1*q3-q0*q2);
+		double r32 = 2.0*(q2*q3+q0*q1);
+		double r33 = 2.0*q0*q0-1.0+2.0*q3*q3;
+
+		return new DenseMatrix( new double[][]{
+			{r11*s11, r11*s12+r12*s22, r11*s13+r12*s23+r13*s33, tx}, 
+			{r21*s11, r21*s12+r22*s22, r21*s13+r22*s23+r23*s33, ty},
+			{r31*s11, r31*s12+r32*s22, r31*s13+r32*s23+r33*s33, tz},
+			{0,0,0,1}
+		});	
+	}
+
+	@Override
+	public Matrix getRotationMatrix() {
+		// Quaternion
+		double q0 = this.getUnknownParameter(ParameterType.QUATERNION_Q0).getValue();
+		double q1 = this.getUnknownParameter(ParameterType.QUATERNION_Q1).getValue();
+		double q2 = this.getUnknownParameter(ParameterType.QUATERNION_Q2).getValue();
+		double q3 = this.getUnknownParameter(ParameterType.QUATERNION_Q3).getValue();
+			    
+		// Matrix elements
+		double r11 = 2.0*q0*q0-1.0+2.0*q1*q1;
+		double r12 = 2.0*(q1*q2-q0*q3);
+		double r13 = 2.0*(q1*q3+q0*q2);
+
+		double r21 = 2.0*(q1*q2+q0*q3);
+		double r22 = 2.0*q0*q0-1.0+2.0*q2*q2;
+		double r23 = 2.0*(q2*q3-q0*q1);
+
+		double r31 = 2.0*(q1*q3-q0*q2);
+		double r32 = 2.0*(q2*q3+q0*q1);
+		double r33 = 2.0*q0*q0-1.0+2.0*q3*q3;
+
+		return new DenseMatrix( new double[][]{
+			{r11, r12, r13},
+			{r21, r22, r23},
+			{r31, r32, r33}
+		});		  
+	}
 }

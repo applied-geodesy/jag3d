@@ -104,7 +104,7 @@
 					<td></td>
 				</#if>
 					
-				<#if position_pairs.interpolation??>	
+				<#if interpolation_type?? && interpolation_type != 'NONE'>
 					<#if position_pairs.dimension != 1>
 						<td></td>
 						<td></td>
