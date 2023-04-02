@@ -86,8 +86,8 @@
 				</dd>
 			</#if>
 
-			<dt><#outputformat "plainText">Probability Value &alpha;</#outputformat></dt><dd>${test_statistic_probability_value?string[df_percentage]}&nbsp;${unit_abbr_percentage}</dd>
-			<dt><#outputformat "plainText">Test Power (1-&beta;)</#outputformat></dt><dd>${test_statistic_power_of_test?string[df_percentage]}&nbsp;${unit_abbr_percentage}</dd>
+			<dt>Probability Value &alpha;</dt><dd>${test_statistic_probability_value?string[df_percentage]}&nbsp;${unit_abbr_percentage}</dd>
+			<dt>Test Power (1-&beta;)</dt><dd>${test_statistic_power_of_test?string[df_percentage]}&nbsp;${unit_abbr_percentage}</dd>
 		
 			<dt>Description</dt>
 			<dd><pre>${project_description}</pre></dd>
