@@ -28,10 +28,8 @@ import java.util.Optional;
 
 import org.applied_geodesy.jag3d.DefaultApplicationProperty;
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 import org.applied_geodesy.jag3d.ui.tabpane.UITabPaneBuilder;
 import org.applied_geodesy.ui.dialog.OptionDialog;
-import org.applied_geodesy.jag3d.ui.graphic.UIGraphicPaneBuilder;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.application.Platform;
@@ -48,7 +46,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -68,26 +65,37 @@ public class UITreeBuilder {
 		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 			if (!isIgnoreEvent()) {
 				TreeItemValue treeItemValue = this.item.getValue();
+				TreeItemType itemType = treeItemValue.getItemType();
 				MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = treeView.getSelectionModel();
-				selectionModel.select(this.item);
 				List<TreeItem<TreeItemValue>> treeItems = selectionModel.getSelectedItems();
-				
-				for (TreeItem<TreeItemValue> treeItem : treeItems) {
-					if (treeItem.isLeaf() && treeItem.getValue().getItemType() == treeItemValue.getItemType()) {
+
+				if (!this.item.isLeaf() || 
+						TreeItemType.isPointTypeDirectory(itemType) ||
+						TreeItemType.isObservationTypeDirectory(itemType) || 
+						TreeItemType.isGNSSObservationTypeDirectory(itemType) || 
+						TreeItemType.isVerticalDeflectionTypeDirectory(itemType) || 
+						TreeItemType.isCongruenceAnalysisTypeDirectory(itemType)) {
+					if (!item.isExpanded())
+						item.setExpanded(true);
+					selectChildren(this.item);
+					
+					for (TreeItem<TreeItemValue> treeItem : treeItems) {
 						treeItem.getValue().setEnable(newValue);
 						save(treeItem.getValue());
 					}
 				}
-			
-				// refresh network plot, if visibility of group has changed
-				Tab selectedTab = UITabPaneBuilder.getInstance().getTabPane().getSelectionModel().getSelectedItem();
-				if (selectedTab != null && selectedTab.getUserData() instanceof TabType && ((TabType)selectedTab.getUserData()) == TabType.GRAPHIC) {
-					Platform.runLater(new Runnable() {
-						@Override
-						public void run() {
-							UIGraphicPaneBuilder.getInstance().getLayerManager().redraw();
+				else if (this.item.isLeaf() && !treeItems.contains(this.item)) {
+					selectionModel.clearSelection();
+					save(this.item.getValue());
+					selectionModel.select(this.item);
+				}
+				else {
+					for (TreeItem<TreeItemValue> treeItem : treeItems) {
+						if (treeItem.isLeaf() && treeItem.getValue().getItemType() == treeItemValue.getItemType() && treeItem.getValue().isEnable() != newValue) {
+							treeItem.getValue().setEnable(newValue);
+							save(treeItem.getValue());
 						}
-					});
+					}
 				}
 			}
 		}
@@ -123,13 +131,6 @@ public class UITreeBuilder {
 			}
 		}
 	}
-
-//	private class TreeSelectionChangeListener implements ChangeListener<TreeItem<TreeItemValue>> {
-//		@Override
-//		public void changed(ObservableValue<? extends TreeItem<TreeItemValue>> observable, TreeItem<TreeItemValue> oldValue, TreeItem<TreeItemValue> newValue) {
-//			handleTreeSelections(newValue);
-//		}
-//	}
 	
 	private class TreeListSelectionChangeListener implements ListChangeListener<TreeItem<TreeItemValue>> {
 		@Override
@@ -241,35 +242,75 @@ public class UITreeBuilder {
 
 		for (TreeItem<TreeItemValue> item : referencePointItem.getChildren()) {
 			item.expandedProperty().addListener(new TreeItemExpandingChangeListener(item));
-			this.directoryItemMap.put(item.getValue().getItemType(), (CheckBoxTreeItem<TreeItemValue>)item);
+			if (item instanceof CheckBoxTreeItem<?>) {
+				CheckBoxTreeItem<TreeItemValue> checkBoxItem = (CheckBoxTreeItem<TreeItemValue>)item;
+				checkBoxItem.selectedProperty().addListener(new TreeCheckBoxChangeListener(checkBoxItem));
+				checkBoxItem.setIndependent(true);
+				this.directoryItemMap.put(item.getValue().getItemType(), checkBoxItem);
+			}
 		}
 		for (TreeItem<TreeItemValue> item : stochasticPointItem.getChildren()) {
 			item.expandedProperty().addListener(new TreeItemExpandingChangeListener(item));
-			this.directoryItemMap.put(item.getValue().getItemType(), (CheckBoxTreeItem<TreeItemValue>)item);
+			if (item instanceof CheckBoxTreeItem<?>) {
+				CheckBoxTreeItem<TreeItemValue> checkBoxItem = (CheckBoxTreeItem<TreeItemValue>)item;
+				checkBoxItem.selectedProperty().addListener(new TreeCheckBoxChangeListener(checkBoxItem));
+				checkBoxItem.setIndependent(true);
+				this.directoryItemMap.put(item.getValue().getItemType(), checkBoxItem);
+			}
 		}
 		for (TreeItem<TreeItemValue> item : datumPointItem.getChildren()) {
 			item.expandedProperty().addListener(new TreeItemExpandingChangeListener(item));
-			this.directoryItemMap.put(item.getValue().getItemType(), (CheckBoxTreeItem<TreeItemValue>)item);
+			if (item instanceof CheckBoxTreeItem<?>) {
+				CheckBoxTreeItem<TreeItemValue> checkBoxItem = (CheckBoxTreeItem<TreeItemValue>)item;
+				checkBoxItem.selectedProperty().addListener(new TreeCheckBoxChangeListener(checkBoxItem));
+				checkBoxItem.setIndependent(true);
+				this.directoryItemMap.put(item.getValue().getItemType(), checkBoxItem);
+			}
 		}
 		for (TreeItem<TreeItemValue> item : newPointItem.getChildren()) {
 			item.expandedProperty().addListener(new TreeItemExpandingChangeListener(item));
-			this.directoryItemMap.put(item.getValue().getItemType(), (CheckBoxTreeItem<TreeItemValue>)item);
+			if (item instanceof CheckBoxTreeItem<?>) {
+				CheckBoxTreeItem<TreeItemValue> checkBoxItem = (CheckBoxTreeItem<TreeItemValue>)item;
+				checkBoxItem.selectedProperty().addListener(new TreeCheckBoxChangeListener(checkBoxItem));
+				checkBoxItem.setIndependent(true);
+				this.directoryItemMap.put(item.getValue().getItemType(), checkBoxItem);
+			}
 		}
 		for (TreeItem<TreeItemValue> item : verticalDeflectionItem.getChildren()) {
 			item.expandedProperty().addListener(new TreeItemExpandingChangeListener(item));
-			this.directoryItemMap.put(item.getValue().getItemType(), (CheckBoxTreeItem<TreeItemValue>)item);
+			if (item instanceof CheckBoxTreeItem<?>) {
+				CheckBoxTreeItem<TreeItemValue> checkBoxItem = (CheckBoxTreeItem<TreeItemValue>)item;
+				checkBoxItem.selectedProperty().addListener(new TreeCheckBoxChangeListener(checkBoxItem));
+				checkBoxItem.setIndependent(true);
+				this.directoryItemMap.put(item.getValue().getItemType(), checkBoxItem);
+			}
 		}		
 		for (TreeItem<TreeItemValue> item : congruenceAnalysisItem.getChildren()) {
 			item.expandedProperty().addListener(new TreeItemExpandingChangeListener(item));
-			this.directoryItemMap.put(item.getValue().getItemType(), (CheckBoxTreeItem<TreeItemValue>)item);
+			if (item instanceof CheckBoxTreeItem<?>) {
+				CheckBoxTreeItem<TreeItemValue> checkBoxItem = (CheckBoxTreeItem<TreeItemValue>)item;
+				checkBoxItem.selectedProperty().addListener(new TreeCheckBoxChangeListener(checkBoxItem));
+				checkBoxItem.setIndependent(true);
+				this.directoryItemMap.put(item.getValue().getItemType(), checkBoxItem);
+			}
 		}
 		for (TreeItem<TreeItemValue> item : terrestrialObservationItem.getChildren()) {
 			item.expandedProperty().addListener(new TreeItemExpandingChangeListener(item));
-			this.directoryItemMap.put(item.getValue().getItemType(), (CheckBoxTreeItem<TreeItemValue>)item);
+			if (item instanceof CheckBoxTreeItem<?>) {
+				CheckBoxTreeItem<TreeItemValue> checkBoxItem = (CheckBoxTreeItem<TreeItemValue>)item;
+				checkBoxItem.selectedProperty().addListener(new TreeCheckBoxChangeListener(checkBoxItem));
+				checkBoxItem.setIndependent(true);
+				this.directoryItemMap.put(item.getValue().getItemType(), checkBoxItem);
+			}
 		}
 		for (TreeItem<TreeItemValue> item : gnssBaselineItem.getChildren()) {
 			item.expandedProperty().addListener(new TreeItemExpandingChangeListener(item));
-			this.directoryItemMap.put(item.getValue().getItemType(), (CheckBoxTreeItem<TreeItemValue>)item);
+			if (item instanceof CheckBoxTreeItem<?>) {
+				CheckBoxTreeItem<TreeItemValue> checkBoxItem = (CheckBoxTreeItem<TreeItemValue>)item;
+				checkBoxItem.selectedProperty().addListener(new TreeCheckBoxChangeListener(checkBoxItem));
+				checkBoxItem.setIndependent(true);
+				this.directoryItemMap.put(item.getValue().getItemType(), checkBoxItem);
+			}
 		}
 
 		// Add first Level to root item
@@ -664,8 +705,6 @@ public class UITreeBuilder {
 
 	private void selectChildren(TreeItem<TreeItemValue> parent) {
 		try {
-//			this.treeView.getSelectionModel().selectedItemProperty().removeListener(this.treeSelectionChangeListener);
-//			this.treeView.getSelectionModel().getSelectedItems().removeListener(this.treeListSelectionChangeListener);
 			this.ignoreTreeSelection = true;
 			if (!parent.isLeaf() && parent.isExpanded()) {
 				this.treeView.getSelectionModel().clearSelection();
@@ -683,8 +722,6 @@ public class UITreeBuilder {
 			}
 		}
 		finally {
-//			this.treeView.getSelectionModel().selectedItemProperty().addListener(this.treeSelectionChangeListener);
-//			this.treeView.getSelectionModel().getSelectedItems().addListener(this.treeListSelectionChangeListener);
 			this.ignoreTreeSelection = false;
 		}
 	}
