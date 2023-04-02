@@ -40,6 +40,10 @@ import no.uib.cipr.matrix.Vector;
 import no.uib.cipr.matrix.sparse.CompDiagMatrix;
 
 public final class MathExtension {
+	public enum EulerAngleConventionType {
+		ZYX, ZXY, YXZ, YZX, XYZ, XZY, ZYZ, ZXZ, YZY, YXY, XZX, XYX;
+	}
+	
 	/**
 	 * Liefert in Abhaengigkeit vom Vorzeichen von b den Wert a positiv oder negativ.
 	 * Das Vorzeichen von a wird ignoriert.
@@ -478,5 +482,188 @@ public final class MathExtension {
 	 */
 	public static double acot2(double x, double y) {
 		return Math.atan2(y, x);
+	}
+	
+	public static double[] rotationMatrix3D2EulerAngles(Matrix R, EulerAngleConventionType convention) {
+		double r11 = R.get(0, 0);
+		double r12 = R.get(0, 1);
+		double r13 = R.get(0, 2);
+
+		double r21 = R.get(1, 0);
+		double r22 = R.get(1, 1);
+		double r23 = R.get(1, 2);
+
+		double r31 = R.get(2, 0);
+		double r32 = R.get(2, 1);
+		double r33 = R.get(2, 2);
+
+		double cy = 0;
+		double eps = Constant.EPS;
+		double phi = 0, psi = 0, theta = 0;
+		
+		switch (convention) {
+		case ZYX:
+			cy = Math.hypot(r11, r21);
+			if (cy > 16.0 * eps) {
+				phi   = Math.atan2( r21, r11);
+				theta = Math.atan2(-r31, cy);
+				psi   = Math.atan2( r32, r33);
+			}
+			else {
+				phi   = 0.0;
+				theta = Math.atan2(-r31, cy);
+				psi   = Math.atan2(-r23, r22);
+			}
+			break;
+		case ZXY:
+			cy = Math.hypot(r22, r12);
+			if (cy > 16.0 * eps) {
+				phi   = -Math.atan2( r12, r22);
+				theta = -Math.atan2(-r32, cy);
+				psi   = -Math.atan2( r31, r33);
+			}
+			else {
+				phi   = 0.0;
+				theta = -Math.atan2(-r32, cy);
+				psi   = -Math.atan2(-r13, r11);
+			}
+			break;
+		case YXZ:
+			cy = Math.hypot(r33, r13);
+			if (cy > 16.0 * eps) {
+				phi   = Math.atan2( r13, r33);
+				theta = Math.atan2(-r23, cy);
+				psi   = Math.atan2( r21, r22);
+			}
+			else {
+				phi   = 0.0;
+				theta = Math.atan2(-r23, cy);
+				psi   = Math.atan2(-r12, r11);
+			}
+			break;
+		case YZX:
+			cy = Math.hypot(r11, r31);
+			if (cy > 16.0 * eps) {
+				phi   = -Math.atan2( r31, r11);
+				theta = -Math.atan2(-r21, cy);
+				psi   = -Math.atan2( r23, r22);
+			}
+			else {
+				phi   = 0.0;
+				theta = -Math.atan2(-r21, cy);
+				psi   = -Math.atan2(-r32, r33);
+			}
+			break;
+		case XYZ:
+			cy = Math.hypot(r33, r23);
+			if (cy > 16.0 * eps) {
+				phi   = -Math.atan2( r23, r33);
+				theta = -Math.atan2(-r13, cy);
+				psi   = -Math.atan2( r12, r11);
+			}
+			else {
+				phi   = 0.0;
+				theta = -Math.atan2(-r13, cy);
+				psi   = -Math.atan2(-r21, r22);
+			}
+			break;
+		case XZY:
+			cy = Math.hypot(r22, r32);
+			if (cy > 16.0 * eps) {
+				phi   = Math.atan2( r32, r22);
+				theta = Math.atan2(-r12, cy);
+				psi   = Math.atan2( r13, r11);
+			}
+			else {
+				phi   = 0.0;
+				theta = Math.atan2(-r12, cy);
+				psi   = Math.atan2(-r31, r33);
+			}
+			break;
+
+		case ZYZ:
+			cy = Math.hypot(r32, r31);
+			if (cy > 16.0 * eps) {
+				phi   = -Math.atan2(r23, -r13);
+				theta = -Math.atan2( cy, r33);
+				psi   = -Math.atan2(r32, r31);
+			}
+			else {
+				phi   = 0.0;
+				theta = -Math.atan2( cy, r33);
+				psi   = -Math.atan2(-r21, r22);
+			}
+			break;
+		case ZXZ:
+			cy = Math.hypot(r32, r31);
+			if (cy > 16.0 * eps) {
+				phi   = Math.atan2(r13, -r23);
+				theta = Math.atan2( cy, r33);
+				psi   = Math.atan2(r31, r32);
+			}
+			else {
+				phi   = 0.0;
+				theta = Math.atan2(cy, r33);
+				psi   = Math.atan2(-r12, r11);
+			}
+			break;
+		case YZY:
+			cy = Math.hypot(r23, r21);
+			if (cy > 16.0 * eps) {
+				phi   = Math.atan2(r32, -r12);
+				theta = Math.atan2( cy, r22);
+				psi   = Math.atan2(r23, r21);
+			}
+			else {
+				phi   = 0.0;
+				theta = Math.atan2( cy, r22);
+				psi   = Math.atan2(-r31, r33);
+			}
+			break;
+		case YXY:
+			cy = Math.hypot(r23, r21);
+			if (cy > 16.0 * eps) {
+				phi   = -Math.atan2(r12, -r32);
+				theta = -Math.atan2( cy, r22);
+				psi   = -Math.atan2(r21, r23);
+			}
+			else {
+				phi   = 0.0;
+				theta = -Math.atan2( cy, r22);
+				psi   = -Math.atan2(-r13, r11);
+			}
+			break;
+		case XZX:
+			cy = Math.hypot(r13, r12);
+			if (cy > 16.0 * eps) {
+				phi   = -Math.atan2(r31, -r21);
+				theta = -Math.atan2( cy, r11);
+				psi   = -Math.atan2(r13, r12);
+			}
+			else {
+				phi   = 0.0;
+				theta = -Math.atan2(cy, r11);
+				psi   = -Math.atan2(-r32, r33);
+			}
+			break;
+		case XYX:
+			cy = Math.hypot(r12, r13);
+			if (cy > 16.0 * eps) {
+				phi   = Math.atan2(r21, -r31);
+				theta = Math.atan2( cy, r11);
+				psi   = Math.atan2(r12, r13);
+			}
+			else {
+				phi   = 0.0;
+				theta = Math.atan2(  cy, r11);
+				psi   = Math.atan2(-r23, r22);
+			}
+			break;
+		}
+		return new double[] {
+				MathExtension.MOD(phi,   2.0*Math.PI), 
+				MathExtension.MOD(theta, 2.0*Math.PI), 
+				MathExtension.MOD(psi,   2.0*Math.PI), 
+		};
 	}
 }
