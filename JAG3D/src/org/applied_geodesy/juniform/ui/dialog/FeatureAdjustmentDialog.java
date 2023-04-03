@@ -32,7 +32,6 @@ import org.applied_geodesy.adjustment.geometry.FeatureAdjustment;
 import org.applied_geodesy.juniform.ui.menu.UIMenuBuilder;
 import org.applied_geodesy.juniform.ui.table.UIParameterTableBuilder;
 import org.applied_geodesy.juniform.ui.table.UIPointTableBuilder;
-import org.applied_geodesy.juniform.ui.table.UITestStatisticParameterSetTableBuilder;
 import org.applied_geodesy.juniform.ui.tree.UITreeBuilder;
 import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.juniform.ui.i18n.I18N;
@@ -540,8 +539,5 @@ public class FeatureAdjustmentDialog {
 		UIParameterTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
 		UIParameterTableBuilder.getInstance().getTable().refresh();
 		UIParameterTableBuilder.getInstance().getTable().sort();
-		UITestStatisticParameterSetTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
-		UITestStatisticParameterSetTableBuilder.getInstance().getTable().refresh();
-		UITestStatisticParameterSetTableBuilder.getInstance().getTable().sort();
 	}
 }

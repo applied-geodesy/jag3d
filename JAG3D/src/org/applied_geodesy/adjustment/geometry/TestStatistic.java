@@ -28,7 +28,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public class TestStatistic {
-	private ObjectProperty<VarianceComponent> varianceComponent = new SimpleObjectProperty<VarianceComponent>(this, "varianceComponent", new VarianceComponent());
+	private ObjectProperty<VarianceComponent> varianceComponent = new SimpleObjectProperty<VarianceComponent>(this, "varianceComponent", new VarianceComponent(VarianceComponentType.GLOBAL));
 	
 	private ObjectProperty<Double> fisherTestNumerator = new SimpleObjectProperty<Double>(this, "fisherTestNumerator", 0.0);
 	private ObjectProperty<Integer> degreeOfFreedom    = new SimpleObjectProperty<Integer>(this, "degreeOfFreedom", 0);

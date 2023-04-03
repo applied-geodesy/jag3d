@@ -21,9 +21,8 @@
 
 package org.applied_geodesy.juniform.ui.table;
 
-import org.applied_geodesy.adjustment.geometry.FeatureChangeListener;
-import org.applied_geodesy.adjustment.geometry.FeatureEvent;
 import org.applied_geodesy.adjustment.geometry.VarianceComponent;
+import org.applied_geodesy.adjustment.geometry.VarianceComponentType;
 import org.applied_geodesy.ui.table.ColumnTooltipHeader;
 import org.applied_geodesy.ui.table.ColumnType;
 import org.applied_geodesy.util.CellValueType;
@@ -31,12 +30,16 @@ import org.applied_geodesy.util.CellValueType;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Pos;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 
-public class UIVarianceComponentTableBuilder extends UIEditableTableBuilder<VarianceComponent> implements FeatureChangeListener {
+public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComponent> {
 	private static UIVarianceComponentTableBuilder tableBuilder = new UIVarianceComponentTableBuilder();
 	private boolean isInitialize = false;
 
@@ -53,19 +56,34 @@ public class UIVarianceComponentTableBuilder extends UIEditableTableBuilder<Vari
 		if (this.isInitialize)
 			return;
 
+		TableColumn<VarianceComponent, VarianceComponentType> varianceComponentTypeColumn = null;
 		TableColumn<VarianceComponent, Boolean> booleanColumn = null;
 		TableColumn<VarianceComponent, Double> doubleColumn   = null;
 		TableColumn<VarianceComponent, Integer> integerColumn = null; 
 
 		TableView<VarianceComponent> table = this.createTable();
+		
+		double columWidth = 85;
+		// type of component
+		int columnIndex    = table.getColumns().size(); 
+		String labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.label", "Component");
+		String tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.type.tooltip", "Type of estimated variance component");
+		CellValueType cellValueType = CellValueType.STRING;
+		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		varianceComponentTypeColumn = this.<VarianceComponentType>getColumn(header, VarianceComponent::varianceComponentTypeProperty, getVarianceComponentTypeCallback(), ColumnType.VISIBLE, columnIndex, false); 
+		varianceComponentTypeColumn.setMinWidth(150);
+		varianceComponentTypeColumn.setSortable(false);
+		table.getColumns().add(varianceComponentTypeColumn);
 
 		// number of observations
-		int columnIndex = table.getColumns().size(); 
-		String labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.number_of_observations.label", "n");
-		String tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.number_of_observations.tooltip", "Number of observations");
-		CellValueType cellValueType = CellValueType.INTEGER;
-		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		integerColumn = this.<Integer>getColumn(header, VarianceComponent::numberOfModelEquationsProperty, getIntegerCallback(), ColumnType.VISIBLE, columnIndex, false); 
+		columnIndex = table.getColumns().size(); 
+		labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.number_of_observations.label", "n");
+		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.number_of_observations.tooltip", "Number of equations");
+		cellValueType = CellValueType.INTEGER;
+		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
+		integerColumn = this.<Integer>getColumn(header, VarianceComponent::numberOfObservationsProperty, getIntegerCallback(), ColumnType.VISIBLE, columnIndex, false); 
+		integerColumn.setPrefWidth(columWidth);
+		integerColumn.setSortable(false);
 		table.getColumns().add(integerColumn);
 
 		// redundnacy
@@ -75,6 +93,8 @@ public class UIVarianceComponentTableBuilder extends UIEditableTableBuilder<Vari
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, VarianceComponent::redundancyProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
+		doubleColumn.setPrefWidth(columWidth);
+		doubleColumn.setSortable(false);
 		table.getColumns().add(doubleColumn);
 
 		// Omega
@@ -83,7 +103,9 @@ public class UIVarianceComponentTableBuilder extends UIEditableTableBuilder<Vari
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.omega.tooltip", "Squared weigthed residuals");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, VarianceComponent::omegaProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
+		doubleColumn = this.<Double>getColumn(header, VarianceComponent::unitOmegaProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
+		doubleColumn.setPrefWidth(columWidth);
+		doubleColumn.setSortable(false);
 		table.getColumns().add(doubleColumn);
 
 		// Sigma a-posteriori
@@ -92,7 +114,9 @@ public class UIVarianceComponentTableBuilder extends UIEditableTableBuilder<Vari
 		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.variance.tooltip", "A-posteriori variance factor w.r.t. a-priori variance");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, VarianceComponent::varianceProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
+		doubleColumn = this.<Double>getColumn(header, VarianceComponent::unitVarianceProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 
+		doubleColumn.setPrefWidth(columWidth);
+		doubleColumn.setSortable(false);
 		table.getColumns().add(doubleColumn);
 
 		// Decision of test statistic
@@ -112,20 +136,48 @@ public class UIVarianceComponentTableBuilder extends UIEditableTableBuilder<Vari
 				return booleanProp;
 			}
 		});
+		booleanColumn.setSortable(false);
 		table.getColumns().add(booleanColumn);
-
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
 		this.table = table;
 
 	}
 	
+	private static Callback<TableColumn<VarianceComponent, VarianceComponentType>, TableCell<VarianceComponent, VarianceComponentType>> getVarianceComponentTypeCallback() {
+		return new Callback<TableColumn<VarianceComponent, VarianceComponentType>, TableCell<VarianceComponent, VarianceComponentType>>() {
+			@Override
+			public TableCell<VarianceComponent, VarianceComponentType> call(TableColumn<VarianceComponent, VarianceComponentType> cell) {
+				TableCell<VarianceComponent, VarianceComponentType> tableCell = new TextFieldTableCell<VarianceComponent, VarianceComponentType>(
+						new StringConverter<VarianceComponentType>() {
+
+							@Override
+							public String toString(VarianceComponentType type) {
+								if (type == null)
+									return null;
+
+								return getVarianceComponentTypeLabel(type);
+							}
+
+							@Override
+							public VarianceComponentType fromString(String string) {
+								return VarianceComponentType.valueOf(string);
+							}
+						});
+				tableCell.setAlignment(Pos.CENTER_LEFT);
+				return tableCell;	
+			}
+		};
+	}
+	
+	public static final String getVarianceComponentTypeLabel(VarianceComponentType type) {
+		switch (type) {
+		case GLOBAL:
+			return i18n.getString("UIVarianceComponentTableBuilder.type.global.label", "Global adjustment");
+		}
+		return null;
+	}
+	
 	@Override
 	void setValue(VarianceComponent row, int columnIndex, Object oldValue, Object newValue) {}
-
-	@Override
-	public void featureChanged(FeatureEvent evt) {
-		// TODO Auto-generated method stub
-		
-	}
 }

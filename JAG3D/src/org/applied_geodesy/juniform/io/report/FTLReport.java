@@ -38,9 +38,9 @@ import java.util.Map;
 
 import org.applied_geodesy.adjustment.geometry.Feature;
 import org.applied_geodesy.adjustment.geometry.FeatureAdjustment;
-import org.applied_geodesy.adjustment.geometry.FeatureType;
 import org.applied_geodesy.adjustment.geometry.GeometricPrimitive;
 import org.applied_geodesy.adjustment.geometry.VarianceComponent;
+import org.applied_geodesy.adjustment.geometry.VarianceComponentType;
 import org.applied_geodesy.adjustment.geometry.parameter.ParameterType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
@@ -511,17 +511,17 @@ public class FTLReport {
 		List<Map<String, Object>> vces = new ArrayList<Map<String, Object>>();
 		Map<String, Object> vce = new HashMap<String, Object>(6);
 		VarianceComponent varianceComponentOfUnitWeight = this.adjustment.getVarianceComponentOfUnitWeight();
+		VarianceComponentType varianceComponentType = varianceComponentOfUnitWeight.getVarianceComponentType();
 		int dof = (int)varianceComponentOfUnitWeight.getRedundancy();
-		int numberOfPoints = this.adjustment.getFeature().getFeaturePoints().size();
-		int dim = this.adjustment.getFeature().getFeatureType() == FeatureType.CURVE ? 2 : 3;
-		double sigma2apost = varianceComponentOfUnitWeight.getVariance() / varianceComponentOfUnitWeight.getVariance0();
-		double omega = varianceComponentOfUnitWeight.getOmega() / varianceComponentOfUnitWeight.getVariance0();
+		int numberOfObservations = varianceComponentOfUnitWeight.getNumberOfObservations();
+		double sigma2apost = varianceComponentOfUnitWeight.getUnitVariance();
+		double omega = varianceComponentOfUnitWeight.getUnitOmega();
 		boolean significant = varianceComponentOfUnitWeight.isSignificant();
 		double quantile = this.adjustment.getTestStatisticParameters().getTestStatisticParameter(dof > 0.000001 ? dof : 0, Double.POSITIVE_INFINITY).getQuantile();
 		
-		vce.put("type",                    "GLOBAL");
+		vce.put("type",                    varianceComponentType.name());
 		vce.put("omega",                   omega);
-		vce.put("number_of_observations",  dim * numberOfPoints);
+		vce.put("number_of_observations",  numberOfObservations);
 		vce.put("redundancy",              dof);
 		vce.put("sigma2apost",             sigma2apost);
 		vce.put("quantile",                quantile);

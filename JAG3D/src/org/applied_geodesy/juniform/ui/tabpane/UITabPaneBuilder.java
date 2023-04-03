@@ -24,11 +24,9 @@ package org.applied_geodesy.juniform.ui.tabpane;
 import org.applied_geodesy.adjustment.geometry.GeometricPrimitive;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
-import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.juniform.ui.propertiespane.UIPointSelectionPaneBuilder;
 import org.applied_geodesy.juniform.ui.table.UIParameterTableBuilder;
 import org.applied_geodesy.juniform.ui.table.UIPointTableBuilder;
-import org.applied_geodesy.juniform.ui.table.UITestStatisticParameterSetTableBuilder;
 import org.applied_geodesy.juniform.ui.tree.CurveTreeItemValue;
 import org.applied_geodesy.juniform.ui.tree.SurfaceTreeItemValue;
 import org.applied_geodesy.juniform.ui.tree.TreeItemType;
@@ -75,7 +73,6 @@ public class UITabPaneBuilder {
 
 	private UIPointTableBuilder pointTableBuilder = UIPointTableBuilder.getInstance();
 	private UIParameterTableBuilder parameterTableBuilder = UIParameterTableBuilder.getInstance();
-	private UITestStatisticParameterSetTableBuilder testStatisticTableBuilder = UITestStatisticParameterSetTableBuilder.getInstance();
 
 	private ObservableMap<TabType, Tab> tapMap = FXCollections.observableHashMap();
 	private TreeItemValue<?> lastTreeItemValue = null;
@@ -116,12 +113,6 @@ public class UITabPaneBuilder {
 				TabType.APOSTERIORI_PARAMETER, null
 				);
 		
-		this.createTab(
-				i18n.getString("UITabPaneBuilder.tab.parameter.global.label", "Global"), 
-				i18n.getString("UITabPaneBuilder.tab.parameter.global.title", "Table of global results"), 
-				TabType.GLOBAL_RESULT, null
-				);
-		
 		this.tabPane = new TabPane();
 		this.tabPane.setSide(Side.BOTTOM);
 
@@ -156,11 +147,6 @@ public class UITabPaneBuilder {
 			}
 			else if (tabType == TabType.APOSTERIORI_PARAMETER) {
 				TableView<UnknownParameter> parameterTableView = this.parameterTableBuilder.getTable();
-				this.setTableColumnView(tabType, parameterTableView);
-				node = parameterTableView;
-			}
-			else if (tabType == TabType.GLOBAL_RESULT) {
-				TableView<TestStatisticParameterSet> parameterTableView = this.testStatisticTableBuilder.getTable();
 				this.setTableColumnView(tabType, parameterTableView);
 				node = parameterTableView;
 			}

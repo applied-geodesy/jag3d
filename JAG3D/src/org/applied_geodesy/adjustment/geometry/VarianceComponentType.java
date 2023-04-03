@@ -19,22 +19,8 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.juniform.ui.tree;
+package org.applied_geodesy.adjustment.geometry;
 
-import org.applied_geodesy.juniform.ui.tabpane.TabType;
-
-public class FeatureTreeItemValue extends TreeItemValue<Void> {
-
-	FeatureTreeItemValue(String name) {
-		super(name, TreeItemType.FEATURE);
-	}
-
-	@Override
-	public TabType[] getTabTypes() {
-		return new  TabType[] {
-				TabType.APRIORI_POINT,
-				TabType.APOSTERIORI_POINT,
-				TabType.APOSTERIORI_PARAMETER
-		};
-	}
+public enum VarianceComponentType {
+	GLOBAL
 }

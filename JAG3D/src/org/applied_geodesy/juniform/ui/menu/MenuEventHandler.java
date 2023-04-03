@@ -51,9 +51,11 @@ import org.applied_geodesy.juniform.ui.dialog.AboutDialog;
 import org.applied_geodesy.juniform.ui.dialog.FeatureDialog;
 import org.applied_geodesy.juniform.ui.dialog.FormatterOptionDialog;
 import org.applied_geodesy.juniform.ui.dialog.LeastSquaresSettingDialog;
+import org.applied_geodesy.juniform.ui.dialog.QuantilesDialog;
 import org.applied_geodesy.juniform.ui.dialog.RestrictionDialog;
 import org.applied_geodesy.juniform.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.juniform.ui.dialog.UnknownParameterDialog;
+import org.applied_geodesy.juniform.ui.dialog.VarianceComponentsDialog;
 import org.applied_geodesy.juniform.ui.menu.UIMenuBuilder.DisableStateType;
 import org.applied_geodesy.juniform.ui.tree.UITreeBuilder;
 import org.applied_geodesy.juniform.ui.i18n.I18N;
@@ -131,6 +133,14 @@ class MenuEventHandler implements EventHandler<ActionEvent> {
 			
 		case PREFERENCES:
 			FormatterOptionDialog.showAndWait();
+			break;
+			
+		case QUANTILES:
+			QuantilesDialog.showAndWait(this.treeBuilder.getFeatureAdjustment() == null ? null : this.treeBuilder.getFeatureAdjustment().getTestStatisticParameters());
+			break;
+			
+		case VARIANCE_COMPONENT_ESTIMATION:
+			VarianceComponentsDialog.showAndWait(this.treeBuilder.getFeatureAdjustment() == null ? null : this.treeBuilder.getFeatureAdjustment().getVarianceComponentOfUnitWeight());
 			break;
 			
 		case EXIT:
@@ -229,7 +239,7 @@ class MenuEventHandler implements EventHandler<ActionEvent> {
 			this.treeBuilder.getFeatureAdjustment().setFeature(feature);
 			this.treeBuilder.handleTreeSelections();
 		}
-		else
+		else if (this.treeBuilder.getFeatureAdjustment().getFeature() == null)
 			JUniForm.setTitle(null);
 	}
 }

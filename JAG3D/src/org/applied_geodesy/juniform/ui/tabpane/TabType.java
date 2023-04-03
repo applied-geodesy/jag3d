@@ -28,7 +28,5 @@ public enum TabType {
 	APOSTERIORI_PARAMETER,
 	
 	POINT_SELECTION,
-	
-	GLOBAL_RESULT
 	;
 }

@@ -104,7 +104,7 @@ public class FeatureAdjustment {
             betaUT              = UnscentedTransformationParameter.getBeta(),
             weightZero          = UnscentedTransformationParameter.getWeightZero();
 	
-	private VarianceComponent varianceComponentOfUnitWeight = new VarianceComponent();
+	private VarianceComponent varianceComponentOfUnitWeight = new VarianceComponent(VarianceComponentType.GLOBAL);
 	private UpperSymmPackMatrix Qxx = null;
 
 	
@@ -189,7 +189,6 @@ public class FeatureAdjustment {
 			this.parameters                    = this.feature.getUnknownParameters();
 			this.restrictions                  = this.feature.getRestrictions();
 			this.geometricPrimitives           = this.feature.getGeometricPrimitives();
-			this.varianceComponentOfUnitWeight = this.feature.getVarianceComponentOfUnitWeight();
 			this.fireFeatureChanged(this.feature, FeatureEventType.FEATURE_ADDED);
 		}
 	}
@@ -198,7 +197,8 @@ public class FeatureAdjustment {
 		this.varianceComponentOfUnitWeight.setVariance0(1.0);
 		this.varianceComponentOfUnitWeight.setOmega(0.0);
 		this.varianceComponentOfUnitWeight.setRedundancy(0.0);
-		this.varianceComponentOfUnitWeight.setNumberOfModelEquations(0);
+		this.varianceComponentOfUnitWeight.setNumberOfObservations(0);
+		this.varianceComponentOfUnitWeight.setSignificant(false);
 		this.geometricPrimitives.clear();
 		this.parameters.clear();
 		this.restrictions.clear();
@@ -254,9 +254,9 @@ public class FeatureAdjustment {
 		
 		try {
 			this.Qxx = null;
-			int dim    = this.feature.getFeatureType() == FeatureType.CURVE ? 2 : 3;
-			int numObs = this.points.size() * dim;
-			int numberOfEstimationSteps = applyUnscentedTransformation ? numObs + 2 : 1;
+			int dimension               = this.feature.getFeatureType() == FeatureType.CURVE ? 2 : 3;
+			int numberOfObservations    = this.points.size() * dimension;
+			int numberOfEstimationSteps = applyUnscentedTransformation ? numberOfObservations + 2 : 1;
 
 			double alpha2  = this.alphaUT * this.alphaUT;
 			double weight0 = this.weightZero;
@@ -274,10 +274,10 @@ public class FeatureAdjustment {
 					numUnfixedParams += unknownParameter.getProcessingType() != ProcessingType.FIXED ? 1 : 0;
 					
 				xUT = new DenseVector(numUnfixedParams); // this.numberOfUnknownParameters
-				vUT = new DenseVector(numObs);
+				vUT = new DenseVector(numberOfObservations);
 				solutionVectors = new DenseMatrix(numUnfixedParams, numberOfEstimationSteps); // this.numberOfUnknownParameters, numberOfEstimationSteps
 				
-				SigmaUT = new double[numObs][dim];
+				SigmaUT = new double[numberOfObservations][dimension];
 				if (weight0 < 0 || weight0 >= 1)
 					throw new IllegalArgumentException("Error, zero-weight is out of range. If SUT is applied, valid values are 0 <= w0 < 1! " + weight0);
 
@@ -305,7 +305,8 @@ public class FeatureAdjustment {
 				double sigma2apriori = this.getEstimateVarianceOfUnitWeightApriori();
 				this.varianceComponentOfUnitWeight.setVariance0(1.0);
 				this.varianceComponentOfUnitWeight.setOmega(0.0);
-				this.varianceComponentOfUnitWeight.setNumberOfModelEquations(this.numberOfModelEquations);
+				this.varianceComponentOfUnitWeight.setNumberOfObservations(numberOfObservations);
+				this.varianceComponentOfUnitWeight.setSignificant(false);
 				this.varianceComponentOfUnitWeight.setRedundancy(this.numberOfModelEquations - this.numberOfUnknownParameters + this.restrictions.size());
 				this.varianceComponentOfUnitWeight.setVariance0( sigma2apriori < SQRT_EPS ? SQRT_EPS : sigma2apriori );
 				
@@ -801,9 +802,6 @@ public class FeatureAdjustment {
 					unknownParameter.setUncertainty( column >= 0 ? Math.sqrt(Math.abs(varianceOfUnitWeight * this.Qxx.get(column, column))) : 0.0 );
 				}
 			}
-			
-			// add all F quatiles
-			this.feature.getTestStatisticParameterSets().setAll(this.testStatisticParameters.getTestStatisticParameterSets());
 		}
 	}
 	
@@ -980,12 +978,13 @@ public class FeatureAdjustment {
 			if (estimateStochasticParameters) {
 				int dof = (int)this.varianceComponentOfUnitWeight.getRedundancy();
 				// test statistic depends on number of equation (i.e. number of geometries but not on the dimension of the point)
-				TestStatisticParameterSet testStatisticParametersAprio = this.testStatisticParameters.getTestStatisticParameter(nog, Double.POSITIVE_INFINITY);
+				int rank = Math.min(nog, dim);
+				TestStatisticParameterSet testStatisticParametersAprio = this.testStatisticParameters.getTestStatisticParameter(rank, Double.POSITIVE_INFINITY);
 				double noncentralityParameter = Math.sqrt(Math.abs(testStatisticParametersAprio.getNoncentralityParameter()));
 				point.setFisherQuantileApriori(testStatisticParametersAprio.getQuantile());
 				
-				if (dof-nog > 0) {
-					TestStatisticParameterSet testStatisticParametersApost = this.testStatisticParameters.getTestStatisticParameter(nog, dof-nog);
+				if (dof-rank > 0) {
+					TestStatisticParameterSet testStatisticParametersApost = this.testStatisticParameters.getTestStatisticParameter(rank, dof-rank);
 					point.setFisherQuantileAposteriori(testStatisticParametersApost.getQuantile());
 				}
 				

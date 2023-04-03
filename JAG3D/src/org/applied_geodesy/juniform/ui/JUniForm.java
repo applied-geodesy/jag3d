@@ -44,6 +44,7 @@ import org.applied_geodesy.juniform.ui.dialog.GeometricPrimitiveDialog;
 import org.applied_geodesy.juniform.ui.dialog.LeastSquaresSettingDialog;
 import org.applied_geodesy.juniform.ui.dialog.MatrixDialog;
 import org.applied_geodesy.juniform.ui.dialog.ProductSumRestrictionDialog;
+import org.applied_geodesy.juniform.ui.dialog.QuantilesDialog;
 import org.applied_geodesy.juniform.ui.dialog.ReadFileProgressDialog;
 import org.applied_geodesy.juniform.ui.dialog.RestrictionDialog;
 import org.applied_geodesy.juniform.ui.dialog.RestrictionTypeDialog;
@@ -51,12 +52,12 @@ import org.applied_geodesy.juniform.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.juniform.ui.dialog.TrigonometricRestrictionDialog;
 import org.applied_geodesy.juniform.ui.dialog.UnknownParameterDialog;
 import org.applied_geodesy.juniform.ui.dialog.UnknownParameterTypeDialog;
+import org.applied_geodesy.juniform.ui.dialog.VarianceComponentsDialog;
 import org.applied_geodesy.juniform.ui.dialog.VectorAngleRestrictionDialog;
 import org.applied_geodesy.juniform.ui.i18n.I18N;
 import org.applied_geodesy.juniform.ui.menu.UIMenuBuilder;
 import org.applied_geodesy.juniform.ui.table.UIParameterTableBuilder;
 import org.applied_geodesy.juniform.ui.table.UIPointTableBuilder;
-import org.applied_geodesy.juniform.ui.table.UITestStatisticParameterSetTableBuilder;
 import org.applied_geodesy.juniform.ui.tabpane.UITabPaneBuilder;
 import org.applied_geodesy.juniform.ui.tree.TreeItemValue;
 import org.applied_geodesy.juniform.ui.tree.UITreeBuilder;
@@ -140,6 +141,8 @@ public class JUniForm extends Application {
 		FeaturePointRestrictionDialog.setOwner(primaryStage);
 		VectorAngleRestrictionDialog.setOwner(primaryStage);
 		TrigonometricRestrictionDialog.setOwner(primaryStage);
+		QuantilesDialog.setOwner(primaryStage);
+		VarianceComponentsDialog.setOwner(primaryStage);
 	}
 
 	@Override
@@ -238,7 +241,6 @@ public class JUniForm extends Application {
 			adjustment.addFeatureChangeListener(UIMenuBuilder.getInstance());
 			adjustment.addFeatureChangeListener(UIParameterTableBuilder.getInstance());
 			adjustment.addFeatureChangeListener(UIPointTableBuilder.getInstance());
-			adjustment.addFeatureChangeListener(UITestStatisticParameterSetTableBuilder.getInstance());
 			adjustment.addFeatureChangeListener(new AdjustmentFeatureChangedListener());
 		}
 		else {
