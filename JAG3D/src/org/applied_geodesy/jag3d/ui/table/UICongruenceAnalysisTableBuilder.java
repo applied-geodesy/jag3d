@@ -57,6 +57,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -642,7 +643,9 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 			return;
 		}
 		
-		UITreeBuilder.getInstance().getTree().getSelectionModel().select(newTreeItem);
+		MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
+		selectionModel.clearSelection();
+		selectionModel.select(newTreeItem);
 	}
 	
 	public void export(File file, boolean aprioriValues) throws IOException {

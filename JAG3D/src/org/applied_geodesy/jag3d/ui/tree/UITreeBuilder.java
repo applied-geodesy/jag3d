@@ -370,22 +370,21 @@ public class UITreeBuilder {
 		int orderId = this.directoryItemMap.get(parentType).getChildren().size();
 
 		if (TreeItemType.isPointTypeLeaf(itemType))
-			itemValue = new PointTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.points", "Points") : name, orderId);
+			itemValue = new PointTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.points", "Points") : name, enable, orderId);
 
 		else if (TreeItemType.isObservationTypeLeaf(itemType) || TreeItemType.isGNSSObservationTypeLeaf(itemType))
-			itemValue = new ObservationTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.observations", "Observations") : name, orderId);
+			itemValue = new ObservationTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.observations", "Observations") : name, enable, orderId);
 
 		else if (TreeItemType.isVerticalDeflectionTypeLeaf(itemType))
-			itemValue = new VerticalDeflectionTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.vertical_deflection", "Vertical deflection") : name, orderId);
+			itemValue = new VerticalDeflectionTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.vertical_deflection", "Vertical deflection") : name, enable, orderId);
 		
 		else if (TreeItemType.isCongruenceAnalysisTypeLeaf(itemType))
-			itemValue = new CongruenceAnalysisTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.congruenceanalysis", "Point nexus") : name, orderId);
+			itemValue = new CongruenceAnalysisTreeItemValue(id, itemType, name == null || name.trim().isEmpty() ? i18n.getString("UITreeBuiler.directory.congruenceanalysis", "Point nexus") : name, enable, orderId);
 			
 		else	
 			throw new IllegalArgumentException(this.getClass().getSimpleName() + " NOT IMPLEMENTED YET!");
 
 		CheckBoxTreeItem<TreeItemValue> newItem = new CheckBoxTreeItem<TreeItemValue>(itemValue);
-		itemValue.setEnable(enable);
 
 		this.directoryItemMap.get(parentType).getChildren().add(newItem);
 		this.treeView.getSelectionModel().clearSelection();

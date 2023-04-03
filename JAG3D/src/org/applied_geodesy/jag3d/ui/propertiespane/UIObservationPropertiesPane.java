@@ -253,7 +253,7 @@ public class UIObservationPropertiesPane {
 	private void setGroupName(String name, int cnt) {
 		if (this.selectionInfoLabel != null) {
 			String groupNameTmpl    = this.i18n.getString("UIObservationPropertiesPane.status.selection.name.label", "Status:");
-			String selectionCntTmpl = cnt > 1 ? String.format(Locale.ENGLISH, this.i18n.getString("UIObservationPropertiesPane.status.selection.counter.label", "and %d more selected group(s)\u2026"), cnt) : "";
+			String selectionCntTmpl = cnt > 1 ? String.format(Locale.ENGLISH, this.i18n.getString("UIObservationPropertiesPane.status.selection.counter.label", "and %d more selected group(s)\u2026"), cnt-1) : "";
 			String label = String.format(
 					Locale.ENGLISH, 
 					"%s %s %s", 
