@@ -32,6 +32,7 @@ import org.applied_geodesy.adjustment.geometry.FeatureAdjustment;
 import org.applied_geodesy.juniform.ui.menu.UIMenuBuilder;
 import org.applied_geodesy.juniform.ui.table.UIParameterTableBuilder;
 import org.applied_geodesy.juniform.ui.table.UIPointTableBuilder;
+import org.applied_geodesy.juniform.ui.table.UITestStatisticParameterSetTableBuilder;
 import org.applied_geodesy.juniform.ui.tree.UITreeBuilder;
 import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.juniform.ui.i18n.I18N;
@@ -132,12 +133,7 @@ public class FeatureAdjustmentDialog {
 					@Override
 					public void run() {
 						try {
-							UIPointTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
-							UIPointTableBuilder.getInstance().getTable().refresh();
-							UIPointTableBuilder.getInstance().getTable().sort();
-							UIParameterTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
-							UIParameterTableBuilder.getInstance().getTable().refresh();
-							UIParameterTableBuilder.getInstance().getTable().sort();
+							refreshTables();
 						}
 						catch (Exception e) {
 							e.printStackTrace();
@@ -524,12 +520,7 @@ public class FeatureAdjustmentDialog {
 					throwable.printStackTrace();
 				}
 				try {
-					UIPointTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
-					UIPointTableBuilder.getInstance().getTable().refresh();
-					UIPointTableBuilder.getInstance().getTable().sort();
-					UIParameterTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
-					UIParameterTableBuilder.getInstance().getTable().refresh();
-					UIParameterTableBuilder.getInstance().getTable().sort();
+					refreshTables();
 				}
 				catch (Exception e) {
 					e.printStackTrace();
@@ -540,5 +531,17 @@ public class FeatureAdjustmentDialog {
 		Thread th = new Thread(this.adjustmentTask);
 		th.setDaemon(true);
 		th.start();
+	}
+	
+	private void refreshTables() {
+		UIPointTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
+		UIPointTableBuilder.getInstance().getTable().refresh();
+		UIPointTableBuilder.getInstance().getTable().sort();
+		UIParameterTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
+		UIParameterTableBuilder.getInstance().getTable().refresh();
+		UIParameterTableBuilder.getInstance().getTable().sort();
+		UITestStatisticParameterSetTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
+		UITestStatisticParameterSetTableBuilder.getInstance().getTable().refresh();
+		UITestStatisticParameterSetTableBuilder.getInstance().getTable().sort();
 	}
 }

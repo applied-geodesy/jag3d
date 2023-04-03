@@ -56,6 +56,7 @@ import org.applied_geodesy.juniform.ui.i18n.I18N;
 import org.applied_geodesy.juniform.ui.menu.UIMenuBuilder;
 import org.applied_geodesy.juniform.ui.table.UIParameterTableBuilder;
 import org.applied_geodesy.juniform.ui.table.UIPointTableBuilder;
+import org.applied_geodesy.juniform.ui.table.UITestStatisticParameterSetTableBuilder;
 import org.applied_geodesy.juniform.ui.tabpane.UITabPaneBuilder;
 import org.applied_geodesy.juniform.ui.tree.TreeItemValue;
 import org.applied_geodesy.juniform.ui.tree.UITreeBuilder;
@@ -237,6 +238,7 @@ public class JUniForm extends Application {
 			adjustment.addFeatureChangeListener(UIMenuBuilder.getInstance());
 			adjustment.addFeatureChangeListener(UIParameterTableBuilder.getInstance());
 			adjustment.addFeatureChangeListener(UIPointTableBuilder.getInstance());
+			adjustment.addFeatureChangeListener(UITestStatisticParameterSetTableBuilder.getInstance());
 			adjustment.addFeatureChangeListener(new AdjustmentFeatureChangedListener());
 		}
 		else {

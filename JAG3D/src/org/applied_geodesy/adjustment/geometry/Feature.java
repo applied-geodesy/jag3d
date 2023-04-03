@@ -32,6 +32,7 @@ import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
 import org.applied_geodesy.adjustment.geometry.point.Point;
 import org.applied_geodesy.adjustment.geometry.restriction.Restriction;
+import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.util.ObservableUniqueList;
 
 import javafx.beans.property.ObjectProperty;
@@ -81,6 +82,10 @@ public abstract class Feature implements Iterable<GeometricPrimitive>, Geometriz
 	private ObservableUniqueList<Restriction> postprocessingCalculations = new ObservableUniqueList<Restriction>();
 	private ObjectProperty<Boolean> estimateInitialGuess                 = new SimpleObjectProperty<Boolean>(this, "estimateInitialGuess", Boolean.TRUE);
 	private ObjectProperty<Boolean> estimateCenterOfMass                 = new SimpleObjectProperty<Boolean>(this, "estimateCenterOfMass", Boolean.TRUE);
+	
+	private ObservableList<TestStatisticParameterSet> testStatisticParameters = FXCollections.<TestStatisticParameterSet>observableArrayList();
+	private ObjectProperty<VarianceComponent> varianceComponentOfUnitWeight   = new SimpleObjectProperty<VarianceComponent>(this, "varianceComponentOfUnitWeight", new VarianceComponent());
+	
 	private Point centerOfMass;
 	
 	Feature(boolean immutable) {
@@ -93,6 +98,10 @@ public abstract class Feature implements Iterable<GeometricPrimitive>, Geometriz
 		for (GeometricPrimitive geometricPrimitive : this.geometricPrimitives)
 			geometricPrimitive.setCenterOfMass(centerOfMass);
 		this.centerOfMass = centerOfMass;
+	}
+	
+	public ObservableList<TestStatisticParameterSet> getTestStatisticParameterSets() {
+		return this.testStatisticParameters;
 	}
 	
 	public abstract FeatureType getFeatureType();
@@ -143,6 +152,18 @@ public abstract class Feature implements Iterable<GeometricPrimitive>, Geometriz
 	
 	public boolean isImmutable() {
 		return this.immutable.get();
+	}
+	
+	public ObjectProperty<VarianceComponent> varianceComponentOfUnitWeightProperty() {
+		return this.varianceComponentOfUnitWeight;
+	}
+	
+	public void setVarianceComponentOfUnitWeight(VarianceComponent varianceComponent) {
+		this.varianceComponentOfUnitWeight.set(varianceComponent);
+	}
+	
+	public VarianceComponent getVarianceComponentOfUnitWeight() {
+		return this.varianceComponentOfUnitWeight.get();
 	}
 
 	public final ObservableUniqueList<UnknownParameter> getUnknownParameters() {

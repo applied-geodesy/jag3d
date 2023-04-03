@@ -34,7 +34,8 @@ public class FeatureTreeItemValue extends TreeItemValue<Void> {
 		return new  TabType[] {
 				TabType.APRIORI_POINT,
 				TabType.APOSTERIORI_POINT,
-				TabType.APOSTERIORI_PARAMETER
+				TabType.APOSTERIORI_PARAMETER,
+				TabType.GLOBAL_RESULT
 		};
 	}
 }

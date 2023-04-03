@@ -186,9 +186,10 @@ public class FeatureAdjustment {
 		this.feature = feature;
 				
 		if (this.feature != null) {
-			this.parameters          = this.feature.getUnknownParameters();
-			this.restrictions        = this.feature.getRestrictions();
-			this.geometricPrimitives = this.feature.getGeometricPrimitives();
+			this.parameters                    = this.feature.getUnknownParameters();
+			this.restrictions                  = this.feature.getRestrictions();
+			this.geometricPrimitives           = this.feature.getGeometricPrimitives();
+			this.varianceComponentOfUnitWeight = this.feature.getVarianceComponentOfUnitWeight();
 			this.fireFeatureChanged(this.feature, FeatureEventType.FEATURE_ADDED);
 		}
 	}
@@ -197,6 +198,7 @@ public class FeatureAdjustment {
 		this.varianceComponentOfUnitWeight.setVariance0(1.0);
 		this.varianceComponentOfUnitWeight.setOmega(0.0);
 		this.varianceComponentOfUnitWeight.setRedundancy(0.0);
+		this.varianceComponentOfUnitWeight.setNumberOfModelEquations(0);
 		this.geometricPrimitives.clear();
 		this.parameters.clear();
 		this.restrictions.clear();
@@ -303,6 +305,7 @@ public class FeatureAdjustment {
 				double sigma2apriori = this.getEstimateVarianceOfUnitWeightApriori();
 				this.varianceComponentOfUnitWeight.setVariance0(1.0);
 				this.varianceComponentOfUnitWeight.setOmega(0.0);
+				this.varianceComponentOfUnitWeight.setNumberOfModelEquations(this.numberOfModelEquations);
 				this.varianceComponentOfUnitWeight.setRedundancy(this.numberOfModelEquations - this.numberOfUnknownParameters + this.restrictions.size());
 				this.varianceComponentOfUnitWeight.setVariance0( sigma2apriori < SQRT_EPS ? SQRT_EPS : sigma2apriori );
 				
@@ -785,10 +788,12 @@ public class FeatureAdjustment {
 			double varianceOfUnitWeight = this.varianceComponentOfUnitWeight.isApplyAposterioriVarianceOfUnitWeight() ? this.varianceComponentOfUnitWeight.getVariance() : this.varianceComponentOfUnitWeight.getVariance0();
 			
 			// global test statistic
-			TestStatisticParameterSet globalTestStatistic = this.testStatisticParameters.getTestStatisticParameter(this.varianceComponentOfUnitWeight.getRedundancy(), Double.POSITIVE_INFINITY, Boolean.TRUE);
-			double quantil = Math.max(globalTestStatistic.getQuantile(), 1.0 + Math.sqrt(Constant.EPS));
-			boolean significant = this.varianceComponentOfUnitWeight.getVariance() / this.varianceComponentOfUnitWeight.getVariance0() > quantil; 
-			this.varianceComponentOfUnitWeight.setSignificant(significant);
+			if (this.varianceComponentOfUnitWeight.getRedundancy() > 0) {
+				TestStatisticParameterSet globalTestStatistic = this.testStatisticParameters.getTestStatisticParameter(this.varianceComponentOfUnitWeight.getRedundancy(), Double.POSITIVE_INFINITY, Boolean.TRUE);
+				double quantil = Math.max(globalTestStatistic.getQuantile(), 1.0 + Math.sqrt(Constant.EPS));
+				boolean significant = this.varianceComponentOfUnitWeight.getVariance() / this.varianceComponentOfUnitWeight.getVariance0() > quantil; 
+				this.varianceComponentOfUnitWeight.setSignificant(significant);
+			}
 			
 			if (this.Qxx != null) {
 				for (UnknownParameter unknownParameter : this.parameters) {
@@ -796,6 +801,9 @@ public class FeatureAdjustment {
 					unknownParameter.setUncertainty( column >= 0 ? Math.sqrt(Math.abs(varianceOfUnitWeight * this.Qxx.get(column, column))) : 0.0 );
 				}
 			}
+			
+			// add all F quatiles
+			this.feature.getTestStatisticParameterSets().setAll(this.testStatisticParameters.getTestStatisticParameterSets());
 		}
 	}
 	
@@ -973,11 +981,13 @@ public class FeatureAdjustment {
 				int dof = (int)this.varianceComponentOfUnitWeight.getRedundancy();
 				// test statistic depends on number of equation (i.e. number of geometries but not on the dimension of the point)
 				TestStatisticParameterSet testStatisticParametersAprio = this.testStatisticParameters.getTestStatisticParameter(nog, Double.POSITIVE_INFINITY);
-				TestStatisticParameterSet testStatisticParametersApost = this.testStatisticParameters.getTestStatisticParameter(nog, dof-nog);
 				double noncentralityParameter = Math.sqrt(Math.abs(testStatisticParametersAprio.getNoncentralityParameter()));
-				
 				point.setFisherQuantileApriori(testStatisticParametersAprio.getQuantile());
-				point.setFisherQuantileAposteriori(testStatisticParametersApost.getQuantile());
+				
+				if (dof-nog > 0) {
+					TestStatisticParameterSet testStatisticParametersApost = this.testStatisticParameters.getTestStatisticParameter(nog, dof-nog);
+					point.setFisherQuantileAposteriori(testStatisticParametersApost.getQuantile());
+				}
 				
 				this.addStochasticParameters(point, Jx, Jv, Ww, noncentralityParameter);
 			}
@@ -1392,10 +1402,12 @@ public class FeatureAdjustment {
 		varianceOfUnitWeight = varianceOfUnitWeight / this.varianceComponentOfUnitWeight.getVariance0();
 
 		// global test statistic
-		TestStatisticParameterSet globalTestStatistic = this.testStatisticParameters.getTestStatisticParameter(this.varianceComponentOfUnitWeight.getRedundancy(), Double.POSITIVE_INFINITY, Boolean.TRUE);
-		double quantil = Math.max(globalTestStatistic.getQuantile(), 1.0 + Math.sqrt(Constant.EPS));
-		boolean significant = this.varianceComponentOfUnitWeight.getVariance() / this.varianceComponentOfUnitWeight.getVariance0() > quantil; 
-		this.varianceComponentOfUnitWeight.setSignificant(significant);
+		if (this.varianceComponentOfUnitWeight.getRedundancy() > 0) {
+			TestStatisticParameterSet globalTestStatistic = this.testStatisticParameters.getTestStatisticParameter(this.varianceComponentOfUnitWeight.getRedundancy(), Double.POSITIVE_INFINITY, Boolean.TRUE);
+			double quantil = Math.max(globalTestStatistic.getQuantile(), 1.0 + Math.sqrt(Constant.EPS));
+			boolean significant = this.varianceComponentOfUnitWeight.getVariance() / this.varianceComponentOfUnitWeight.getVariance0() > quantil; 
+			this.varianceComponentOfUnitWeight.setSignificant(significant);
+		}
 		for (UnknownParameter unknownParameter : this.parameters) {
 			int column = unknownParameter.getColumn();
 			unknownParameter.setUncertainty( column >= 0 ? Math.sqrt(Math.abs(varianceOfUnitWeight * this.Qxx.get(column, column))) : 0.0 );

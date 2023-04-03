@@ -29,6 +29,7 @@ public class VarianceComponent {
 	private ObjectProperty<Boolean> applyAposterioriVarianceOfUnitWeight = new SimpleObjectProperty<Boolean>(this, "applyAposterioriVarianceOfUnitWeight", Boolean.TRUE);
 	private ObjectProperty<Double> variance0     = new SimpleObjectProperty<Double>(this, "variance0", 1.0);
 	private ObjectProperty<Double> redundancy    = new SimpleObjectProperty<Double>(this, "redundancy", 0.0);
+	private ObjectProperty<Integer> numberOfModelEquations = new SimpleObjectProperty<Integer>(this, "numberOfModelEquations", 0);
 	private ObjectProperty<Double> omega         = new SimpleObjectProperty<Double>(this, "omega", 0.0);
 	private ObjectProperty<Boolean> significant  = new SimpleObjectProperty<Boolean>(this, "significant", Boolean.FALSE);
 	private ObjectBinding<Double> variance;
@@ -64,6 +65,14 @@ public class VarianceComponent {
 	
 	public void setOmega(double omega) {
 		this.omega.set(omega);
+	}
+	
+	public int getNumberOfModelEquations() {
+		return this.numberOfModelEquations.get();
+	}
+	
+	public void setNumberOfModelEquations(int numberOfModelEquations) {
+		this.numberOfModelEquations.set(numberOfModelEquations);
 	}
 	
 	public double getRedundancy() {
@@ -104,6 +113,10 @@ public class VarianceComponent {
 	
 	public ObjectProperty<Double> redundancyProperty() {
 		return this.redundancy;
+	}
+	
+	public ObjectProperty<Integer> numberOfModelEquationsProperty() {
+		return this.numberOfModelEquations;
 	}
 	
 	public ObjectProperty<Boolean> applyAposterioriVarianceOfUnitWeightProperty() {
