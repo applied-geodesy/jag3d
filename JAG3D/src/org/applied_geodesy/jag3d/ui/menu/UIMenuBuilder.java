@@ -1071,8 +1071,17 @@ public class UIMenuBuilder {
 				extensionFilter = new ExtensionFilter(String.format(Locale.ENGLISH, i18n.getString("UIMenuBuilder.extension.template", "%s-File"), extension), "*." + extension); 
 			}
 
-			String fileNameSuggestion = "report." + extension;
-			
+			String fileNameSuggestion = null;
+			String currentDataBaseName = SQLManager.getInstance().getDataBase() != null && SQLManager.getInstance().getDataBase() instanceof HSQLDB ? ((HSQLDB)SQLManager.getInstance().getDataBase()).getDataBaseFileName() : null;
+			if (currentDataBaseName != null && !currentDataBaseName.isBlank()) {
+				int lastIndex = currentDataBaseName.lastIndexOf(File.separatorChar);
+				if (lastIndex < 0 || lastIndex + 1 >= currentDataBaseName.length())
+					fileNameSuggestion = currentDataBaseName;
+				else
+					fileNameSuggestion = currentDataBaseName.substring(lastIndex + 1);
+			}
+			fileNameSuggestion = fileNameSuggestion == null || fileNameSuggestion.isBlank() ? "report." + extension : fileNameSuggestion + "." + extension;
+
 			FTLReport ftl = SQLManager.getInstance().getFTLReport();
 			File reportFile = DefaultFileChooser.showSaveDialog(
 					JAG3D.getStage(),
