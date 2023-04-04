@@ -1110,7 +1110,7 @@ public class FeatureAdjustment {
 		QllJvTWJxQxxJxTWJvQll = null;
 
 		// estimates the gross error if it is an controlled observation, i.e., r >> 0
-		if (dof > 0 && redundancy > Math.sqrt(Constant.EPS)) {
+		if (dof > 0 && redundancy > SQRT_EPS) {
 			// estimates Qnabla = P * Qvv * P = R * Qvv
 			Matrix PQvvP = new UpperSymmPackMatrix(dim);
 			R.mult(this.varianceComponentOfUnitWeight.getVariance0(), P, PQvvP);
