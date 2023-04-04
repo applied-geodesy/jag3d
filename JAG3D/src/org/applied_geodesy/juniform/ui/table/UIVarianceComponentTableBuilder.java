@@ -138,10 +138,11 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		});
 		booleanColumn.setSortable(false);
 		table.getColumns().add(booleanColumn);
+
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
 		this.table = table;
-
+		this.isInitialize = true;
 	}
 	
 	private static Callback<TableColumn<VarianceComponent, VarianceComponentType>, TableCell<VarianceComponent, VarianceComponentType>> getVarianceComponentTypeCallback() {

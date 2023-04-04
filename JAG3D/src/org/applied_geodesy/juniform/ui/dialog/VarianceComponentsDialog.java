@@ -30,7 +30,6 @@ import org.applied_geodesy.juniform.ui.table.UIVarianceComponentTableBuilder;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TableView;
@@ -47,7 +46,7 @@ public class VarianceComponentsDialog {
 	private Window window;
 	private ObservableList<VarianceComponent> tableModel;
 	private VarianceComponentsDialog() {}
-
+	private VBox contentPane;
 	
 	public static void setOwner(Window owner) {
 		varianceComponentsDialog.window = owner;
@@ -74,8 +73,10 @@ public class VarianceComponentsDialog {
 	}
 	
 	private void setVarianceComponents(VarianceComponent... varianceComponents) {
-		if (varianceComponents != null && varianceComponents.length > 0)
+		if (varianceComponents != null && varianceComponents.length > 0) {
 			this.tableModel.setAll(varianceComponents);
+			this.contentPane.setPrefHeight(this.contentPane.getMinHeight() + varianceComponents.length * 30);
+		}
 		else
 			this.tableModel.clear();
 	}
@@ -84,13 +85,14 @@ public class VarianceComponentsDialog {
 		if (this.dialog != null)
 			return;
 
+		this.contentPane = this.createPane();
 		this.dialog = new Dialog<Void>();
 		this.dialog.setTitle(i18N.getString("VarianceComponentsDialog.title", "Variance component estimation"));
 		this.dialog.setHeaderText(i18N.getString("VarianceComponentsDialog.header", "Estimated variance components"));
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CLOSE);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
 		this.dialog.initOwner(window);
-		this.dialog.getDialogPane().setContent(this.createPane());
+		this.dialog.getDialogPane().setContent(this.contentPane);
 		this.dialog.setResizable(true);
 		this.dialog.setResultConverter(new Callback<ButtonType, Void>() {
 			@Override
@@ -100,14 +102,13 @@ public class VarianceComponentsDialog {
 		});
 	}
 	
-	private Node createPane() {
+	private VBox createPane() {
 		TableView<VarianceComponent> varianceComponentTableView = UIVarianceComponentTableBuilder.getInstance().getTable();
 		this.tableModel = UIVarianceComponentTableBuilder.getInstance().getTableModel(varianceComponentTableView);
 		VBox contentPane = new VBox();
 		contentPane.setPadding(new Insets(5,10,5,10));
 		contentPane.getChildren().setAll(varianceComponentTableView);
-		contentPane.setPrefHeight(125);
-		
+		contentPane.setMinHeight(75);
 		return contentPane;
 	}
 }

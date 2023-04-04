@@ -31,7 +31,6 @@ import org.applied_geodesy.juniform.ui.table.UIQuantileTableBuilder;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TableView;
@@ -46,6 +45,7 @@ public class QuantilesDialog {
 	private static QuantilesDialog quantilesDialog = new QuantilesDialog();
 	private Dialog<Void> dialog = null;
 	private Window window;
+	private VBox contentPane;
 	private ObservableList<TestStatisticParameterSet> tableModel;
 	private QuantilesDialog() {}
 
@@ -75,8 +75,11 @@ public class QuantilesDialog {
 	}
 	
 	private void setTestStatisticParameters(TestStatisticParameters testStatisticParameters) {
-		if (testStatisticParameters != null)
-			this.tableModel.setAll(testStatisticParameters.getTestStatisticParameterSets());
+		if (testStatisticParameters != null) {
+			TestStatisticParameterSet[] quantiles = testStatisticParameters.getTestStatisticParameterSets();
+			this.tableModel.setAll(quantiles);
+			this.contentPane.setPrefHeight(this.contentPane.getMinHeight() + quantiles.length * 30);
+		}
 		else
 			this.tableModel.clear();
 	}
@@ -85,13 +88,14 @@ public class QuantilesDialog {
 		if (this.dialog != null)
 			return;
 
+		this.contentPane = this.createPane();
 		this.dialog = new Dialog<Void>();
 		this.dialog.setTitle(i18N.getString("QuantilesDialog.title", "Quantiles of Fisher distribution"));
 		this.dialog.setHeaderText(i18N.getString("QuantilesDialog.header", "Adjusted quantiles of Fisher distribution"));
 		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CLOSE);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
 		this.dialog.initOwner(window);
-		this.dialog.getDialogPane().setContent(this.createPane());
+		this.dialog.getDialogPane().setContent(this.contentPane);
 		this.dialog.setResizable(true);
 		this.dialog.setResultConverter(new Callback<ButtonType, Void>() {
 			@Override
@@ -101,14 +105,13 @@ public class QuantilesDialog {
 		});
 	}
 	
-	private Node createPane() {
+	private VBox createPane() {
 		TableView<TestStatisticParameterSet> quantileTableView = UIQuantileTableBuilder.getInstance().getTable();
 		this.tableModel = UIQuantileTableBuilder.getInstance().getTableModel(quantileTableView);
 		VBox contentPane = new VBox();
 		contentPane.setPadding(new Insets(5,10,5,10));
 		contentPane.getChildren().setAll(quantileTableView);
-		contentPane.setPrefHeight(200);
-		
+		contentPane.setMinHeight(75);
 		return contentPane;
 	}
 }
