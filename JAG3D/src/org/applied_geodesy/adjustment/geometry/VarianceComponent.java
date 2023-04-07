@@ -23,20 +23,29 @@ package org.applied_geodesy.adjustment.geometry;
 
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableObjectValue;
 
 public class VarianceComponent {
+	private ReadOnlyObjectProperty<VarianceComponentType> varianceComponentType;
 	private ObjectProperty<Boolean> applyAposterioriVarianceOfUnitWeight = new SimpleObjectProperty<Boolean>(this, "applyAposterioriVarianceOfUnitWeight", Boolean.TRUE);
 	private ObjectProperty<Double> variance0     = new SimpleObjectProperty<Double>(this, "variance0", 1.0);
 	private ObjectProperty<Double> redundancy    = new SimpleObjectProperty<Double>(this, "redundancy", 0.0);
+	private ObjectProperty<Integer> numberOfObservations = new SimpleObjectProperty<Integer>(this, "numberOfObservations", 0);
 	private ObjectProperty<Double> omega         = new SimpleObjectProperty<Double>(this, "omega", 0.0);
 	private ObjectProperty<Boolean> significant  = new SimpleObjectProperty<Boolean>(this, "significant", Boolean.FALSE);
 	private ObjectBinding<Double> variance;
 	
-	public VarianceComponent() {
+	private ObjectBinding<Double> unitVariance;
+	private ObjectBinding<Double> unitOmega;
+	
+	public VarianceComponent(VarianceComponentType varianceComponentType) {
+		this.varianceComponentType = new ReadOnlyObjectWrapper<VarianceComponentType>(this, "varianceComponentType", varianceComponentType);
 		this.variance = new ObjectBinding<Double>() {
 			{
-                super.bind(redundancy, omega);
+                super.bind(redundancy, omega, variance0);
             }
  
             @Override
@@ -44,6 +53,32 @@ public class VarianceComponent {
                 return omega.get() > 0 && redundancy.get() > 0 ? omega.get() / redundancy.get() : variance0.get();
             }
         };
+        
+        this.unitVariance = new ObjectBinding<Double>() {
+			{
+                super.bind(variance, variance0);
+            }
+ 
+            @Override
+            protected Double computeValue() {
+                return variance.get() / variance0.get();
+            }
+        };
+        
+        this.unitOmega = new ObjectBinding<Double>() {
+			{
+                super.bind(omega, variance0);
+            }
+ 
+            @Override
+            protected Double computeValue() {
+                return omega.get() / variance0.get();
+            }
+        };
+	}
+	
+	public ObservableObjectValue<VarianceComponentType> varianceComponentTypeProperty() {
+		return this.varianceComponentType;
 	}
 	
 	public double getVariance0() {
@@ -54,8 +89,16 @@ public class VarianceComponent {
 		this.variance0.set(variance0);
 	}
 	
+	public double getUnitVariance() {
+		return this.unitVariance.get();
+	}
+	
 	public double getVariance() {
 		return this.variance.get();
+	}
+	
+	public double getUnitOmega() {
+		return this.unitOmega.get();
 	}
 	
 	public double getOmega() {
@@ -64,6 +107,14 @@ public class VarianceComponent {
 	
 	public void setOmega(double omega) {
 		this.omega.set(omega);
+	}
+	
+	public int getNumberOfObservations() {
+		return this.numberOfObservations.get();
+	}
+	
+	public void setNumberOfObservations(int numberOfObservations) {
+		this.numberOfObservations.set(numberOfObservations);
 	}
 	
 	public double getRedundancy() {
@@ -94,16 +145,28 @@ public class VarianceComponent {
 		return this.variance0;
 	}
 	
-	public ObjectBinding<Double> varianceProperty() {
+	public ObservableObjectValue<Double> varianceProperty() {
 		return this.variance;
+	}
+	
+	public ObservableObjectValue<Double> unitVarianceProperty() {
+		return this.unitVariance;
 	}
 	
 	public ObjectProperty<Double> omegaProperty() {
 		return this.omega;
 	}
 	
+	public ObservableObjectValue<Double> unitOmegaProperty() {
+		return this.unitOmega;
+	}
+	
 	public ObjectProperty<Double> redundancyProperty() {
 		return this.redundancy;
+	}
+	
+	public ObjectProperty<Integer> numberOfObservationsProperty() {
+		return this.numberOfObservations;
 	}
 	
 	public ObjectProperty<Boolean> applyAposterioriVarianceOfUnitWeightProperty() {
@@ -112,5 +175,9 @@ public class VarianceComponent {
 	
 	public ObjectProperty<Boolean> significantProperty() {
 		return this.significant;
+	}
+	
+	public VarianceComponentType getVarianceComponentType() {
+		return this.varianceComponentType.get();
 	}
 }

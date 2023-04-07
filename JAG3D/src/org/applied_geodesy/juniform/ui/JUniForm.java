@@ -44,6 +44,7 @@ import org.applied_geodesy.juniform.ui.dialog.GeometricPrimitiveDialog;
 import org.applied_geodesy.juniform.ui.dialog.LeastSquaresSettingDialog;
 import org.applied_geodesy.juniform.ui.dialog.MatrixDialog;
 import org.applied_geodesy.juniform.ui.dialog.ProductSumRestrictionDialog;
+import org.applied_geodesy.juniform.ui.dialog.QuantilesDialog;
 import org.applied_geodesy.juniform.ui.dialog.ReadFileProgressDialog;
 import org.applied_geodesy.juniform.ui.dialog.RestrictionDialog;
 import org.applied_geodesy.juniform.ui.dialog.RestrictionTypeDialog;
@@ -51,6 +52,7 @@ import org.applied_geodesy.juniform.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.juniform.ui.dialog.TrigonometricRestrictionDialog;
 import org.applied_geodesy.juniform.ui.dialog.UnknownParameterDialog;
 import org.applied_geodesy.juniform.ui.dialog.UnknownParameterTypeDialog;
+import org.applied_geodesy.juniform.ui.dialog.VarianceComponentsDialog;
 import org.applied_geodesy.juniform.ui.dialog.VectorAngleRestrictionDialog;
 import org.applied_geodesy.juniform.ui.i18n.I18N;
 import org.applied_geodesy.juniform.ui.menu.UIMenuBuilder;
@@ -139,6 +141,8 @@ public class JUniForm extends Application {
 		FeaturePointRestrictionDialog.setOwner(primaryStage);
 		VectorAngleRestrictionDialog.setOwner(primaryStage);
 		TrigonometricRestrictionDialog.setOwner(primaryStage);
+		QuantilesDialog.setOwner(primaryStage);
+		VarianceComponentsDialog.setOwner(primaryStage);
 	}
 
 	@Override

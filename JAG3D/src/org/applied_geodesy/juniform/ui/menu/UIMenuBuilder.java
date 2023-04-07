@@ -109,6 +109,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 		Menu surfaceMenu    = createMenu(i18n.getString("UIMenuBuilder.menu.feature.surface.label", "_Surfaces"),  true);
 		Menu propertiesMenu = createMenu(i18n.getString("UIMenuBuilder.menu.properties.label", "Propert_ies"), true);
 		Menu adjustmentMenu = createMenu(i18n.getString("UIMenuBuilder.menu.adjustment.label", "Ad_justment"), true);
+		Menu analysisMenu   = createMenu(i18n.getString("UIMenuBuilder.menu.analysis.label", "Anal_ysis"), true);
 		this.reportMenu     = createMenu(i18n.getString("UIMenuBuilder.menu.report.label", "Repor_t"), true);
 		Menu helpMenu       = createMenu(i18n.getString("UIMenuBuilder.menu.help.label", "_?"), true);
 		
@@ -117,6 +118,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 		this.createSurfaceFeatureMenu(surfaceMenu, this.featureToggleGroup);
 		this.createPropertiesMenu(propertiesMenu);
 		this.createAdjustmentMenu(adjustmentMenu);
+		this.createAnalysisMenu(analysisMenu);
 		this.createReportMenu(this.reportMenu);
 		this.createHelpMenu(helpMenu);
 		
@@ -126,6 +128,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 				surfaceMenu,
 				propertiesMenu,
 				adjustmentMenu,
+				analysisMenu,
 				reportMenu,
 				helpMenu
 		);
@@ -173,6 +176,17 @@ public class UIMenuBuilder implements FeatureChangeListener {
 				paramameterPropertiesItem,
 				restrictionPropertiesItem,
 				postprocessingPropertiesItem
+		);
+	}
+	
+	private void createAnalysisMenu(Menu parentMenu) {
+		MenuItem quantileItem          = createMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.quantile.label", "_Quantiles"), true, MenuItemType.QUANTILES, new KeyCodeCombination(KeyCode.Q, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem varianceComponentItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.variance_component.label", "_Variance components"), true, MenuItemType.VARIANCE_COMPONENT_ESTIMATION, new KeyCodeCombination(KeyCode.V, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		
+		
+		parentMenu.getItems().addAll(
+				varianceComponentItem,
+				quantileItem
 		);
 	}
 	
@@ -321,6 +335,8 @@ public class UIMenuBuilder implements FeatureChangeListener {
 					
 				case TEST_STATISTIC:
 				case LEAST_SQUARES:
+				case QUANTILES:
+				case VARIANCE_COMPONENT_ESTIMATION:
 					item.setDisable(disableStateType == DisableStateType.CURVE_TYPE || disableStateType == DisableStateType.SURFACE_TYPE);
 					break;
 				

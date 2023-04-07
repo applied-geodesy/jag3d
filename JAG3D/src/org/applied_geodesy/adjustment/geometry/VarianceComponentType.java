@@ -19,48 +19,8 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.juniform.ui.menu;
+package org.applied_geodesy.adjustment.geometry;
 
-enum MenuItemType {
-	
-	LINE,
-	CIRCLE,
-	ELLIPSE,
-	QUADRATIC_CURVE,
-	
-	PLANE,
-	SPHERE,
-	ELLIPSOID,
-	CIRCULAR_CYLINDER,
-	CYLINDER,
-	CIRCULAR_CONE,
-	CONE,
-	CIRCULAR_PARABOLOID,
-	PARABOLOID,
-	SPATIAL_CIRCLE,
-	SPATIAL_ELLIPSE,
-	SPATIAL_LINE,
-	QUADRATIC_SURFACE,
-	
-	MODIFIABLE_CURVE,
-	MODIFIABLE_SURFACE,
-	
-	IMPORT_CURVE_POINTS,
-	IMPORT_SURFACE_POINTS,
-		
-	FEATURE_PROPERTIES,
-	PARAMETER_PROPERTIES,
-	RESTRICTION_PROPERTIES,
-	POSTPROCESSING_PROPERTIES,
-	
-	TEST_STATISTIC,
-	LEAST_SQUARES,
-	PREFERENCES,
-	
-	QUANTILES,
-	VARIANCE_COMPONENT_ESTIMATION,
-	
-	REPORT,
-	ABOUT,
-	EXIT;
+public enum VarianceComponentType {
+	GLOBAL
 }

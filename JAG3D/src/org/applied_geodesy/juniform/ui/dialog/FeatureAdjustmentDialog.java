@@ -132,12 +132,7 @@ public class FeatureAdjustmentDialog {
 					@Override
 					public void run() {
 						try {
-							UIPointTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
-							UIPointTableBuilder.getInstance().getTable().refresh();
-							UIPointTableBuilder.getInstance().getTable().sort();
-							UIParameterTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
-							UIParameterTableBuilder.getInstance().getTable().refresh();
-							UIParameterTableBuilder.getInstance().getTable().sort();
+							refreshTables();
 						}
 						catch (Exception e) {
 							e.printStackTrace();
@@ -524,12 +519,7 @@ public class FeatureAdjustmentDialog {
 					throwable.printStackTrace();
 				}
 				try {
-					UIPointTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
-					UIPointTableBuilder.getInstance().getTable().refresh();
-					UIPointTableBuilder.getInstance().getTable().sort();
-					UIParameterTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
-					UIParameterTableBuilder.getInstance().getTable().refresh();
-					UIParameterTableBuilder.getInstance().getTable().sort();
+					refreshTables();
 				}
 				catch (Exception e) {
 					e.printStackTrace();
@@ -540,5 +530,14 @@ public class FeatureAdjustmentDialog {
 		Thread th = new Thread(this.adjustmentTask);
 		th.setDaemon(true);
 		th.start();
+	}
+	
+	private void refreshTables() {
+		UIPointTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
+		UIPointTableBuilder.getInstance().getTable().refresh();
+		UIPointTableBuilder.getInstance().getTable().sort();
+		UIParameterTableBuilder.getInstance().getTable().getSelectionModel().clearSelection();
+		UIParameterTableBuilder.getInstance().getTable().refresh();
+		UIParameterTableBuilder.getInstance().getTable().sort();
 	}
 }
