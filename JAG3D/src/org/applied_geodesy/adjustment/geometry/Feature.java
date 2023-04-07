@@ -144,7 +144,7 @@ public abstract class Feature implements Iterable<GeometricPrimitive>, Geometriz
 	public boolean isImmutable() {
 		return this.immutable.get();
 	}
-
+	
 	public final ObservableUniqueList<UnknownParameter> getUnknownParameters() {
 		if (this.unknownParameters == null) {
 			this.unknownParameters = new ObservableUniqueList<UnknownParameter>();

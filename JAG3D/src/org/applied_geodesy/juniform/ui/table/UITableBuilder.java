@@ -170,14 +170,7 @@ public abstract class UITableBuilder<T> {
 	}
 
 	static <T> Callback<TableColumn<T,Double>, TableCell<T,Double>> getDoubleCallback(CellValueType cellValueType) {
-		return new Callback<TableColumn<T, Double>, TableCell<T, Double>>() {
-			@Override
-			public TableCell<T, Double> call(TableColumn<T, Double> cell) {
-				TableCell<T, Double> tableCell = new EditableCell<T, Double>(new EditableDoubleCellConverter(cellValueType));
-				tableCell.setAlignment(Pos.CENTER_RIGHT);
-				return tableCell;
-			}
-		};
+		return getDoubleCallback(cellValueType, false);
 	}
 
 	static <T> Callback<TableColumn<T,Double>, TableCell<T,Double>> getDoubleCallback(CellValueType cellValueType, boolean displayUnit) {
