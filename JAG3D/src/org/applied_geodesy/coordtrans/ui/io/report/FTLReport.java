@@ -31,7 +31,6 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +43,7 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.adjustment.transformation.TransformationAdjustment;
 import org.applied_geodesy.adjustment.transformation.VarianceComponent;
+import org.applied_geodesy.adjustment.transformation.VarianceComponentType;
 import org.applied_geodesy.adjustment.transformation.interpolation.Interpolation;
 import org.applied_geodesy.adjustment.transformation.interpolation.InterpolationType;
 import org.applied_geodesy.adjustment.transformation.interpolation.InverseDistanceWeighting;
@@ -686,28 +686,29 @@ public class FTLReport {
 	private void addVarianceEstimation() {
 		if ( this.adjustment.getTestStatisticParameters() == null)
 			return;
-		
-		List<Map<String, Object>> vces = new ArrayList<Map<String, Object>>();
-		Map<String, Object> vce = new HashMap<String, Object>(6);
-		VarianceComponent varianceComponentOfUnitWeight = this.adjustment.getVarianceComponentOfUnitWeight();
-		int dof = (int)varianceComponentOfUnitWeight.getRedundancy();
-		int numberOfPoints = this.adjustment.getTransformation().getHomologousFramePositionPairs().size();
-		int dimension = this.adjustment.getTransformation().getTransformationEquations().getTransformationType().getDimension();
-		double sigma2apost = varianceComponentOfUnitWeight.getVariance() / varianceComponentOfUnitWeight.getVariance0();
-		double omega = varianceComponentOfUnitWeight.getOmega() / varianceComponentOfUnitWeight.getVariance0();
-		boolean significant = varianceComponentOfUnitWeight.isSignificant();
-		double quantile = this.adjustment.getTestStatisticParameters().getTestStatisticParameter(dof > 0.000001 ? dof : 0, Double.POSITIVE_INFINITY).getQuantile();
-		
-		vce.put("type",                    "GLOBAL");
-		vce.put("omega",                   omega);
-		vce.put("number_of_observations",  dimension * numberOfPoints);
-		vce.put("redundancy",              dof);
-		vce.put("sigma2apost",             sigma2apost);
-		vce.put("quantile",                quantile);
-		vce.put("significant",             significant);
-		
-		vces.add(vce);
 
+		List<Map<String, Object>> vces = new ArrayList<Map<String, Object>>();
+		for (VarianceComponentType varianceComponentType : VarianceComponentType.values()) {
+			Map<String, Object> vce = new HashMap<String, Object>(6);
+			VarianceComponent varianceComponentOfUnitWeight = this.adjustment.getVarianceComponent(varianceComponentType);
+			double dof = varianceComponentOfUnitWeight.getRedundancy();
+			int numberOfPoints = this.adjustment.getTransformation().getHomologousFramePositionPairs().size();
+			int dimension = this.adjustment.getTransformation().getTransformationEquations().getTransformationType().getDimension();
+			double sigma2apost = varianceComponentOfUnitWeight.getVariance() / varianceComponentOfUnitWeight.getVariance0();
+			double omega = varianceComponentOfUnitWeight.getOmega() / varianceComponentOfUnitWeight.getVariance0();
+			boolean significant = varianceComponentOfUnitWeight.isSignificant();
+			double quantile = this.adjustment.getTestStatisticParameters().getTestStatisticParameter(dof > 0.000001 ? dof : 0, Double.POSITIVE_INFINITY).getQuantile();
+
+			vce.put("type",                    varianceComponentType.name());
+			vce.put("omega",                   omega);
+			vce.put("number_of_observations",  dimension * numberOfPoints);
+			vce.put("redundancy",              dof);
+			vce.put("sigma2apost",             sigma2apost);
+			vce.put("quantile",                quantile);
+			vce.put("significant",             significant);
+
+			vces.add(vce);
+		}
 		if (vces.size() > 0)
 			this.setParam("vce", vces); 
 	}

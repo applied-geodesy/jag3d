@@ -23,11 +23,15 @@ package org.applied_geodesy.coordtrans.ui.menu;
 
 import java.io.File;
 
+import org.applied_geodesy.adjustment.transformation.VarianceComponent;
+import org.applied_geodesy.adjustment.transformation.VarianceComponentType;
 import org.applied_geodesy.coordtrans.ui.CoordTrans;
 import org.applied_geodesy.coordtrans.ui.dialog.AboutDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.FormatterOptionDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.LeastSquaresSettingDialog;
+import org.applied_geodesy.coordtrans.ui.dialog.QuantilesDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.TestStatisticDialog;
+import org.applied_geodesy.coordtrans.ui.dialog.VarianceComponentsDialog;
 import org.applied_geodesy.coordtrans.ui.tree.UITreeBuilder;
 
 import javafx.event.ActionEvent;
@@ -73,6 +77,18 @@ class MenuEventHandler implements EventHandler<ActionEvent> {
 			
 		case LEAST_SQUARES:
 			LeastSquaresSettingDialog.showAndWait(this.treeBuilder.getTransformationAdjustment());
+			break;
+			
+		case QUANTILES:
+			QuantilesDialog.showAndWait(this.treeBuilder.getTransformationAdjustment() == null ? null : this.treeBuilder.getTransformationAdjustment().getTestStatisticParameters());
+			break;
+			
+		case VARIANCE_COMPONENT_ESTIMATION:
+			VarianceComponentsDialog.showAndWait(this.treeBuilder.getTransformationAdjustment() == null ? null : new VarianceComponent[] {
+					this.treeBuilder.getTransformationAdjustment().getVarianceComponent(VarianceComponentType.GLOBAL),
+					this.treeBuilder.getTransformationAdjustment().getVarianceComponent(VarianceComponentType.SOURCE),
+					this.treeBuilder.getTransformationAdjustment().getVarianceComponent(VarianceComponentType.TARGET)
+			});
 			break;
 			
 		case PREFERENCES:

@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import org.applied_geodesy.adjustment.DefaultValue;
 import org.applied_geodesy.adjustment.transformation.TransformationAdjustment;
+import org.applied_geodesy.adjustment.transformation.VarianceComponentType;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.utils.UiUtil;
 import org.applied_geodesy.ui.spinner.DoubleSpinner;
@@ -90,7 +91,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 	private void setTransformationAdjustment(TransformationAdjustment adjustment) {
 		this.adjustment = adjustment;
 
-		this.applyVarianceOfUnitWeightCheckBox.setSelected(this.adjustment.getVarianceComponentOfUnitWeight().isApplyAposterioriVarianceOfUnitWeight());
+		this.applyVarianceOfUnitWeightCheckBox.setSelected(this.adjustment.getVarianceComponent(VarianceComponentType.GLOBAL).isApplyAposterioriVarianceOfUnitWeight());
 		this.adjustModelParametersOnlyCheckBox.setSelected(this.adjustment.isAdjustModelParametersOnly());
 		this.preconditioningCheckBox.setSelected(this.adjustment.isPreconditioning());
 	
@@ -121,7 +122,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 			@Override
 			public Void call(ButtonType buttonType) {
 				if (buttonType == ButtonType.OK) {
-					adjustment.getVarianceComponentOfUnitWeight().setApplyAposterioriVarianceOfUnitWeight(applyVarianceOfUnitWeightCheckBox.isSelected());
+					adjustment.getVarianceComponent(VarianceComponentType.GLOBAL).setApplyAposterioriVarianceOfUnitWeight(applyVarianceOfUnitWeightCheckBox.isSelected());
 					adjustment.setAdjustModelParametersOnly(adjustModelParametersOnlyCheckBox.isSelected());
 					adjustment.setPreconditioning(preconditioningCheckBox.isSelected());
 					adjustment.setMaximalNumberOfIterations(iterationSpinner.getValue());

@@ -6,5 +6,7 @@
 }>
 
 <#assign vce_type_map = {
-		"GLOBAL" : "Total Adjustment"
+		"GLOBAL" : "Total Adjustment",
+		"SOURCE" : "Source System",
+		"TARGET" : "Target System"
 }>

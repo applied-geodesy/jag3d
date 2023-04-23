@@ -37,8 +37,10 @@ import org.applied_geodesy.coordtrans.ui.dialog.FilePathsSelectionDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.FormatterOptionDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.LeastSquaresSettingDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.MatrixDialog;
+import org.applied_geodesy.coordtrans.ui.dialog.QuantilesDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.TransformationAdjustmentDialog;
+import org.applied_geodesy.coordtrans.ui.dialog.VarianceComponentsDialog;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.io.report.FTLReport;
 import org.applied_geodesy.coordtrans.ui.menu.UIMenuBuilder;
@@ -113,6 +115,8 @@ public class CoordTrans extends Application {
 	}
 	
 	private void setStageToDialogs(Stage primaryStage) {
+		QuantilesDialog.setOwner(primaryStage);
+		VarianceComponentsDialog.setOwner(primaryStage);
 		OptionDialog.setOwner(primaryStage);
 		MatrixDialog.setOwner(primaryStage);
 		FilePathsSelectionDialog.setOwner(primaryStage);

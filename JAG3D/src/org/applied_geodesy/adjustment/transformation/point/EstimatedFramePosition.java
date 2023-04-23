@@ -22,6 +22,7 @@
 package org.applied_geodesy.adjustment.transformation.point;
 
 import org.applied_geodesy.adjustment.transformation.VarianceComponent;
+import org.applied_geodesy.adjustment.transformation.VarianceComponentType;
 
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
@@ -29,7 +30,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableObjectValue;
 
 public class EstimatedFramePosition extends Position implements AdjustablePosition {
-	private ObjectProperty<VarianceComponent> varianceComponent = new SimpleObjectProperty<VarianceComponent>(this, "varianceComponent", new VarianceComponent());
+	private ObjectProperty<VarianceComponent> varianceComponent = new SimpleObjectProperty<VarianceComponent>(this, "varianceComponent", new VarianceComponent(VarianceComponentType.GLOBAL));
 
 	private ObjectProperty<Double> residualX = new SimpleObjectProperty<Double>(this, "residualX", 0.0);
 	private ObjectProperty<Double> residualY = new SimpleObjectProperty<Double>(this, "residualY", 0.0);

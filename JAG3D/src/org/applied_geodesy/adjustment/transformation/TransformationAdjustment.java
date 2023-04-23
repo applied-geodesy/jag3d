@@ -119,7 +119,10 @@ public class TransformationAdjustment {
 	
 	private static double SQRT_EPS = Math.sqrt(Constant.EPS);
 	
-	private VarianceComponent varianceComponentOfUnitWeight = new VarianceComponent();
+	private VarianceComponent varianceComponentOfUnitWeight = new VarianceComponent(VarianceComponentType.GLOBAL);
+	private VarianceComponent varianceComponentSourceSystem = new VarianceComponent(VarianceComponentType.SOURCE);
+	private VarianceComponent varianceComponentTargetSystem = new VarianceComponent(VarianceComponentType.TARGET);
+	
 	private UpperSymmPackMatrix Qxx = null;
 	
 	
@@ -200,6 +203,23 @@ public class TransformationAdjustment {
 		this.varianceComponentOfUnitWeight.setVariance0(1.0);
 		this.varianceComponentOfUnitWeight.setOmega(0.0);
 		this.varianceComponentOfUnitWeight.setRedundancy(0.0);
+		this.varianceComponentOfUnitWeight.setNumberOfObservations(0);
+		this.varianceComponentOfUnitWeight.setSignificant(false);
+
+		this.varianceComponentSourceSystem.setVariance0(1.0);
+		this.varianceComponentSourceSystem.setOmega(0.0);
+		this.varianceComponentSourceSystem.setRedundancy(0.0);
+		this.varianceComponentSourceSystem.setNumberOfObservations(0);
+		this.varianceComponentSourceSystem.setSignificant(false);
+		this.varianceComponentSourceSystem.setApplyAposterioriVarianceOfUnitWeight(this.varianceComponentOfUnitWeight.isApplyAposterioriVarianceOfUnitWeight());
+				
+		this.varianceComponentTargetSystem.setVariance0(1.0);
+		this.varianceComponentTargetSystem.setOmega(0.0);
+		this.varianceComponentTargetSystem.setRedundancy(0.0);
+		this.varianceComponentTargetSystem.setNumberOfObservations(0);
+		this.varianceComponentTargetSystem.setSignificant(false);
+		this.varianceComponentTargetSystem.setApplyAposterioriVarianceOfUnitWeight(this.varianceComponentOfUnitWeight.isApplyAposterioriVarianceOfUnitWeight());
+		
 		this.transformationEquations = null;
 		this.parameters.clear();
 		this.restrictions.clear();
@@ -259,12 +279,12 @@ public class TransformationAdjustment {
 			SimplePositionPair centerOfMasses = Transformation.deriveCenterOfMasses(this.transformation.getHomologousFramePositionPairs(), this.transformation.getRestrictions(), this.transformation.getSupportedParameterRestrictions());
 			this.prepareIterationProcess(centerOfMasses);
 			
-			int nou = this.numberOfUnknownParameters;
-			int nor = this.restrictions.size();
-			int noe = this.numberOfModelEquations;
+			int dimension            = this.transformationEquations.getTransformationType().getDimension();
+			int numberOfRestrictions = this.restrictions.size();
+			int numberOfObservations = this.homologousPointPairs.size() * dimension;
 			
-			if (noe < (nou-nor))
-				throw new MatrixSingularException("Error, the number of equations is less than the number of parameters to be estimated, " + noe + " < " + (nou - nor) + "! The system of equations is underestimated. Please add further equations." );
+			if (this.numberOfModelEquations < (this.numberOfUnknownParameters - numberOfRestrictions))
+				throw new MatrixSingularException("Error, the number of equations is less than the number of parameters to be estimated, " + this.numberOfModelEquations + " < " + (this.numberOfUnknownParameters - numberOfRestrictions) + "! The system of equations is underestimated. Please add further equations." );
 			
 			this.adaptedDampingValue = this.dampingValue;
 			int runs = this.maximalNumberOfIterations - 1;
@@ -283,8 +303,26 @@ public class TransformationAdjustment {
 			double sigma2apriori = this.getEstimateVarianceOfUnitWeightApriori();
 			this.varianceComponentOfUnitWeight.setVariance0(1.0);
 			this.varianceComponentOfUnitWeight.setOmega(0.0);
+			this.varianceComponentOfUnitWeight.setNumberOfObservations(2 * numberOfObservations);
+			this.varianceComponentOfUnitWeight.setSignificant(false);
 			this.varianceComponentOfUnitWeight.setRedundancy(this.numberOfModelEquations - this.numberOfUnknownParameters + this.restrictions.size());
 			this.varianceComponentOfUnitWeight.setVariance0( sigma2apriori < SQRT_EPS ? SQRT_EPS : sigma2apriori );
+			
+			this.varianceComponentSourceSystem.setVariance0(1.0);
+			this.varianceComponentSourceSystem.setOmega(0.0);
+			this.varianceComponentSourceSystem.setNumberOfObservations(numberOfObservations);
+			this.varianceComponentSourceSystem.setSignificant(false);
+			this.varianceComponentSourceSystem.setRedundancy(0);
+			this.varianceComponentSourceSystem.setVariance0( sigma2apriori < SQRT_EPS ? SQRT_EPS : sigma2apriori );
+			this.varianceComponentSourceSystem.setApplyAposterioriVarianceOfUnitWeight(this.varianceComponentOfUnitWeight.isApplyAposterioriVarianceOfUnitWeight());
+			
+			this.varianceComponentTargetSystem.setVariance0(1.0);
+			this.varianceComponentTargetSystem.setOmega(0.0);
+			this.varianceComponentTargetSystem.setNumberOfObservations(numberOfObservations);
+			this.varianceComponentTargetSystem.setSignificant(false);
+			this.varianceComponentTargetSystem.setRedundancy(0);
+			this.varianceComponentTargetSystem.setVariance0( sigma2apriori < SQRT_EPS ? SQRT_EPS : sigma2apriori );
+			this.varianceComponentTargetSystem.setApplyAposterioriVarianceOfUnitWeight(this.varianceComponentOfUnitWeight.isApplyAposterioriVarianceOfUnitWeight());
 			
 			do {
 				this.maxAbsDx = 0.0;
@@ -536,11 +574,23 @@ public class TransformationAdjustment {
 			// add uncertainties
 			double varianceOfUnitWeight = this.varianceComponentOfUnitWeight.isApplyAposterioriVarianceOfUnitWeight() ? this.varianceComponentOfUnitWeight.getVariance() : this.varianceComponentOfUnitWeight.getVariance0();
 
-			// global test statistic
-			TestStatisticParameterSet globalTestStatistic = this.testStatisticParameters.getTestStatisticParameter(this.varianceComponentOfUnitWeight.getRedundancy(), Double.POSITIVE_INFINITY, Boolean.TRUE);
-			double quantil = Math.max(globalTestStatistic.getQuantile(), 1.0 + Math.sqrt(Constant.EPS));
+			// global/overall variance component test statistic
+			TestStatisticParameterSet vceTestStatistic = this.testStatisticParameters.getTestStatisticParameter(this.varianceComponentOfUnitWeight.getRedundancy(), Double.POSITIVE_INFINITY, Boolean.TRUE);
+			double quantil = Math.max(vceTestStatistic.getQuantile(), 1.0 + Math.sqrt(Constant.EPS));
 			boolean significant = this.varianceComponentOfUnitWeight.getVariance() / this.varianceComponentOfUnitWeight.getVariance0() > quantil; 
 			this.varianceComponentOfUnitWeight.setSignificant(significant);
+			
+			// source system variance component test statistic
+			vceTestStatistic = this.testStatisticParameters.getTestStatisticParameter(this.varianceComponentSourceSystem.getRedundancy(), Double.POSITIVE_INFINITY, Boolean.TRUE);
+			quantil = Math.max(vceTestStatistic.getQuantile(), 1.0 + Math.sqrt(Constant.EPS));
+			significant = this.varianceComponentSourceSystem.getVariance() / this.varianceComponentSourceSystem.getVariance0() > quantil; 
+			this.varianceComponentSourceSystem.setSignificant(significant);
+			
+			// target system variance component test statistic
+			vceTestStatistic = this.testStatisticParameters.getTestStatisticParameter(this.varianceComponentTargetSystem.getRedundancy(), Double.POSITIVE_INFINITY, Boolean.TRUE);
+			quantil = Math.max(vceTestStatistic.getQuantile(), 1.0 + Math.sqrt(Constant.EPS));
+			significant = this.varianceComponentTargetSystem.getVariance() / this.varianceComponentTargetSystem.getVariance0() > quantil; 
+			this.varianceComponentTargetSystem.setSignificant(significant);
 
 			if (this.Qxx != null) {
 				int dim = 1;
@@ -777,7 +827,9 @@ public class TransformationAdjustment {
 	 */
 	private double updateResiduals(Vector dx, boolean estimateStochasticParameters) throws MatrixSingularException, IllegalArgumentException, NotConvergedException {
 		double omega = 0;
-
+		double omegaSrc = 0;
+		double omegaTrg = 0;
+		
 		int nou = this.numberOfUnknownParameters;
 		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs) {
 			if (this.interrupt.isInterrupted())
@@ -836,6 +888,21 @@ public class TransformationAdjustment {
 
 			if (!estimateStochasticParameters)
 				Ww = null;
+			else {
+				isSourcePoint = true;
+				for (int i = 0; i < 2; i++) {
+					Matrix Dvce = this.getDispersionOfMisclosures(homologousPointPair, isSourcePoint ? JvSrc : null, isSourcePoint ? null : JvTrg);
+					Vector DvceWv = new DenseVector(dim); 
+					Dvce.mult(Wv, DvceWv);
+
+					if (isSourcePoint)
+						omegaSrc += DvceWv.dot(Wv);
+					else
+						omegaTrg += DvceWv.dot(Wv);
+
+					isSourcePoint = false;
+				}
+			}
 			
 			omega += misclosures.dot(Wv);
 			
@@ -880,6 +947,12 @@ public class TransformationAdjustment {
 				this.addStochasticParameters(homologousPointPair, Jx, JvSrc, JvTrg, Dw, Ww, Wv, noncentralityParameter);
 			}
 		}
+		
+		if (estimateStochasticParameters) {
+			this.varianceComponentSourceSystem.setOmega(omegaSrc);
+			this.varianceComponentTargetSystem.setOmega(omegaTrg);
+		}
+		
 		return omega;
 	}
 	
@@ -912,10 +985,9 @@ public class TransformationAdjustment {
 		}
 		
 		boolean isSourcePoint = true;
-		double redundancy = 0;
+		double redundancySrc = 0, redundancyTrg = 0;
 		for (HomologousFramePosition point : homologousPointPair) {
 			Matrix Jv = isSourcePoint ? JvSrc : JvTrg;
-			isSourcePoint = false;
 			
 			// estimate dispersion of residuals Qvv = Qll*B'*Qkk*B*Qll
 			Matrix Qll = point.getDispersionApriori();
@@ -938,6 +1010,7 @@ public class TransformationAdjustment {
 			
 			if (dof > 0) {
 				P.mult(this.varianceComponentOfUnitWeight.getVariance0(), QllJvTWJxQxxJxTWJvQll, R);
+
 				for (int row = 0; row < dim; row++) {
 					double r = R.get(row, row);
 					if (r > 0) {
@@ -950,7 +1023,10 @@ public class TransformationAdjustment {
 						else if (dim != 2)
 							point.setRedundancyZ(r);
 
-						redundancy += r;
+						if (isSourcePoint)
+							redundancySrc += r;
+						else
+							redundancyTrg += r;
 					}
 				}
 			}
@@ -967,13 +1043,16 @@ public class TransformationAdjustment {
 
 			}
 			QllJvTWJxQxxJxTWJvQll = null;
-			
+			isSourcePoint = false;
 		}
 		WJxQxxJxTW = null;
 
 
 		// estimates the gross error of misclosures, if r >> 0
-		if (dof > 0 && redundancy > Math.sqrt(Constant.EPS)) {
+		if (dof > 0 && (redundancySrc + redundancyTrg) > Math.sqrt(Constant.EPS)) {
+			this.varianceComponentSourceSystem.setRedundancy(this.varianceComponentSourceSystem.getRedundancy() + redundancySrc);
+			this.varianceComponentTargetSystem.setRedundancy(this.varianceComponentTargetSystem.getRedundancy() + redundancyTrg);
+			
 			// derive Qvv = Qll - A*Qxx*AT of misclosures and overwritte Dw <-- Qvv
 			Dw.add(-1.0, JxQxxJxT);
 			JxQxxJxT = null;
@@ -1173,6 +1252,9 @@ public class TransformationAdjustment {
 			Matrix Jv = isSourcePoint ? JvSrc : JvTrg;
 			isSourcePoint = false;
 			
+			if (Jv == null)
+				continue;
+			
 			Matrix D = point.getDispersionApriori();
 			Matrix JvD = new DenseMatrix(dim, dim);
 			
@@ -1300,8 +1382,15 @@ public class TransformationAdjustment {
 		}
 	}
 	
-	public VarianceComponent getVarianceComponentOfUnitWeight() {
-		return this.varianceComponentOfUnitWeight;
+	public VarianceComponent getVarianceComponent(VarianceComponentType varianceComponentType) {
+		switch (varianceComponentType) {
+		case SOURCE:
+			return this.varianceComponentSourceSystem;
+		case TARGET:
+			return this.varianceComponentTargetSystem;
+		default:
+			return this.varianceComponentOfUnitWeight;
+		}
 	}
 
 	public void setLevenbergMarquardtDampingValue(double lambda) {

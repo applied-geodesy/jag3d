@@ -89,10 +89,12 @@ public class UIMenuBuilder implements TransformationChangeListener {
 		Menu fileMenu       = createMenu(i18n.getString("UIMenuBuilder.menu.file.label", "_File"),  true);
 		
 		Menu adjustmentMenu = createMenu(i18n.getString("UIMenuBuilder.menu.adjustment.label", "Ad_justment"), true);
+		Menu analysisMenu   = createMenu(i18n.getString("UIMenuBuilder.menu.analysis.label", "Anal_ysis"), true);
 		this.reportMenu     = createMenu(i18n.getString("UIMenuBuilder.menu.report.label", "Repor_t"), true);
 		Menu helpMenu       = createMenu(i18n.getString("UIMenuBuilder.menu.help.label", "_?"), true);
 		
 		this.createFileMenu(fileMenu);
+		this.createAnalysisMenu(analysisMenu);
 		this.createAdjustmentMenu(adjustmentMenu);
 		this.createReportMenu(this.reportMenu);
 		this.createHelpMenu(helpMenu);
@@ -100,6 +102,7 @@ public class UIMenuBuilder implements TransformationChangeListener {
 		this.menuBar.getMenus().addAll(
 				fileMenu,
 				adjustmentMenu,
+				analysisMenu,
 				this.reportMenu,
 				helpMenu
 		);
@@ -125,6 +128,17 @@ public class UIMenuBuilder implements TransformationChangeListener {
 				teststatisticItem,
 				new SeparatorMenuItem(),
 				preferencesItem
+		);
+	}
+	
+	private void createAnalysisMenu(Menu parentMenu) {
+		MenuItem quantileItem          = createMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.quantile.label", "_Quantiles"), true, MenuItemType.QUANTILES, new KeyCodeCombination(KeyCode.Q, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		MenuItem varianceComponentItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.analysis.variance_component.label", "_Variance components"), true, MenuItemType.VARIANCE_COMPONENT_ESTIMATION, new KeyCodeCombination(KeyCode.V, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		
+		
+		parentMenu.getItems().addAll(
+				varianceComponentItem,
+				quantileItem
 		);
 	}
 	
@@ -375,6 +389,8 @@ public class UIMenuBuilder implements TransformationChangeListener {
 
 				case TEST_STATISTIC:
 				case LEAST_SQUARES:
+				case QUANTILES:
+				case VARIANCE_COMPONENT_ESTIMATION:
 					item.setDisable(disable);
 					break;
 					

@@ -19,20 +19,10 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.coordtrans.ui.menu;
+package org.applied_geodesy.adjustment.transformation;
 
-enum MenuItemType {
-	
-	IMPORT_POSITIONS,
-	
-	QUANTILES,
-	VARIANCE_COMPONENT_ESTIMATION,
-	
-	TEST_STATISTIC,
-	LEAST_SQUARES,
-	PREFERENCES,
-	
-	REPORT,
-	ABOUT,
-	EXIT;
+public enum VarianceComponentType {
+	GLOBAL,
+	SOURCE,
+	TARGET
 }
