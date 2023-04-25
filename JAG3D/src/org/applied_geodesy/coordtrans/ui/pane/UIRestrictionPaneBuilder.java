@@ -50,6 +50,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -60,6 +61,21 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		CONGRUENT,
 		SIMILAR,
 		AFFINE
+	}
+	
+	private class RestrictionChangeListener implements ChangeListener<Boolean> {
+		private final CheckBox checkBox;
+		
+		private RestrictionChangeListener(CheckBox checkBox) {
+			this.checkBox = checkBox;
+		}
+		
+		@Override
+		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+			if (this.checkBox.getUserData() instanceof ParameterRestrictionType) {
+				handleSelection((ParameterRestrictionType)this.checkBox.getUserData(), this.checkBox.isSelected());
+			}
+		}
 	}
 	
 	private class TransformationPropertyMenuEventHandler implements EventHandler<ActionEvent> {
@@ -82,21 +98,6 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 						break;
 					}
 				}
-			}
-		}
-	}
-	
-	private class RestrictionChangeListener implements ChangeListener<Boolean> {
-		private final CheckBox checkBox;
-		
-		private RestrictionChangeListener(CheckBox checkBox) {
-			this.checkBox = checkBox;
-		}
-		
-		@Override
-		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-			if (this.checkBox.getUserData() instanceof ParameterRestrictionType) {
-				handleSelection((ParameterRestrictionType)this.checkBox.getUserData(), this.checkBox.isSelected());
 			}
 		}
 	}
@@ -263,7 +264,9 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		
 		MenuBar menuBar = new MenuBar();
 		Menu menu = new Menu();
-		menu.setGraphic(new Label(i18n.getString("UIRestrictionPaneBuilder.transformation.property.title", "\u25BC"))); // Transformation properties
+		Label label = new Label(i18n.getString("UIRestrictionPaneBuilder.transformation.property.label", "\u25BC"));
+		label.setTooltip(new Tooltip(i18n.getString("UIRestrictionPaneBuilder.transformation.property.tooltip", "Select transformation properties")));
+		menu.setGraphic(label); 
 		menu.getItems().addAll(
 				getMenuItem(i18n.getString("UIRestrictionPaneBuilder.transformation.property.congruent.label", "Congruent"), transformationPropertyEventHandler, TransformationPropertyType.CONGRUENT),
 				getMenuItem(i18n.getString("UIRestrictionPaneBuilder.transformation.property.similar.label", "Similar"), transformationPropertyEventHandler, TransformationPropertyType.SIMILAR),
@@ -304,6 +307,12 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		return titledPane;
 	}
 	
+	private void setDisable() {
+		Set<ParameterRestrictionType> supportedRestrictionTypes = this.transformation == null ? Collections.<ParameterRestrictionType>emptySet() : this.transformation.getSupportedParameterRestrictions().keySet();
+		for (CheckBox checkBox : this.parameterRestrictionCheckboxes.values()) {
+			checkBox.setDisable(!supportedRestrictionTypes.contains(checkBox.getUserData()));
+		}
+	}
 	
 	private CheckBox createRestrictionCheckBox(String label, String tooltip, ParameterRestrictionType restrictionType, Map<ParameterRestrictionType, CheckBox> checkBoxMap) {
 		CheckBox checkBox = UiUtil.createCheckBox(label, tooltip);
@@ -320,13 +329,6 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		item.setOnAction(eventHandler);
 		item.setUserData(propertyType);
 		return item;
-	}
-	
-	private void setDisable() {
-		Set<ParameterRestrictionType> supportedRestrictionTypes = this.transformation == null ? Collections.<ParameterRestrictionType>emptySet() : this.transformation.getSupportedParameterRestrictions().keySet();
-		for (CheckBox checkBox : this.parameterRestrictionCheckboxes.values()) {
-			checkBox.setDisable(!supportedRestrictionTypes.contains(checkBox.getUserData()));
-		}
 	}
 
 	@Override

@@ -147,7 +147,6 @@ public class AboutDialog {
 				+ "\u2219 netlib-java: BSD License\r\n"
 				+ "\u2219 JLAPACK: BSD License\r\n"
 				+ "\u2219 JDistlib: GNU General Public License v2.0\r\n"
-				+ "\u2219 JLaTeXMath: GNU General Public License v2.0\r\n"
 				+ "\u2219 Launch4J: BSD/MIT License");
 		
 		authorLabel.setLabelFor(author);

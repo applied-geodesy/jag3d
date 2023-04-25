@@ -137,24 +137,24 @@ public class UIInterpolationPaneBuilder implements TransformationChangeListener 
 		Insets radioInsets = new Insets(10,0,0,0);
 		Insets labelInsets = new Insets(0,0,0,40);
 		
-		RadioButton nonRadioButton = createInterpolationRadioButton(i18n.getString("UIRestrictionPaneBuilder.interpolation.type.none.label", "No interpolation of residual gaps"), i18n.getString("UIRestrictionPaneBuilder.interpolation.type.none.tooltip", "Selected, if no interpolation approach is prescribed."), InterpolationType.NONE, interpolationGroup);
-		RadioButton idwRadioButton = createInterpolationRadioButton(i18n.getString("UIRestrictionPaneBuilder.interpolation.type.inverse_distance_weighting.label", "Inverse distance weighting"), i18n.getString("UIRestrictionPaneBuilder.interpolation.type.inverse_distance_weighting.tooltip", "Selected, if inverse distance weighting is to be applied."), InterpolationType.INVERSE_DISTANCE_WEIGHTING, interpolationGroup);
-		RadioButton msiRadioButton = createInterpolationRadioButton(i18n.getString("UIRestrictionPaneBuilder.interpolation.type.multiquadratic.label", "Multiquadratic interpolation"), i18n.getString("UIRestrictionPaneBuilder.interpolation.type.multiquadratic.tooltip", "Selected, if multiquadratic interpolation is to be applied."), InterpolationType.MULTI_QUADRATIC, interpolationGroup);
-		RadioButton secRadioButton = createInterpolationRadioButton(i18n.getString("UIRestrictionPaneBuilder.interpolation.type.sector.label", "Sector interpolation"), i18n.getString("UIRestrictionPaneBuilder.interpolation.type.sector.tooltip", "Selected, if sector interpolation is to be applied."), InterpolationType.SECTOR, interpolationGroup);
+		RadioButton nonRadioButton = this.createInterpolationRadioButton(i18n.getString("UIInterpolationPaneBuilder.interpolation.type.none.label", "No interpolation of residual gaps"), i18n.getString("UIInterpolationPaneBuilder.interpolation.type.none.tooltip", "Selected, if no interpolation approach is prescribed."), InterpolationType.NONE, interpolationGroup);
+		RadioButton idwRadioButton = this.createInterpolationRadioButton(i18n.getString("UIInterpolationPaneBuilder.interpolation.type.inverse_distance_weighting.label", "Inverse distance weighting"), i18n.getString("UIInterpolationPaneBuilder.interpolation.type.inverse_distance_weighting.tooltip", "Selected, if inverse distance weighting is to be applied."), InterpolationType.INVERSE_DISTANCE_WEIGHTING, interpolationGroup);
+		RadioButton msiRadioButton = this.createInterpolationRadioButton(i18n.getString("UIInterpolationPaneBuilder.interpolation.type.multiquadratic.label", "Multiquadratic interpolation"), i18n.getString("UIInterpolationPaneBuilder.interpolation.type.multiquadratic.tooltip", "Selected, if multiquadratic interpolation is to be applied."), InterpolationType.MULTI_QUADRATIC, interpolationGroup);
+		RadioButton secRadioButton = this.createInterpolationRadioButton(i18n.getString("UIInterpolationPaneBuilder.interpolation.type.sector.label", "Sector interpolation"), i18n.getString("UIInterpolationPaneBuilder.interpolation.type.sector.tooltip", "Selected, if sector interpolation is to be applied."), InterpolationType.SECTOR, interpolationGroup);
 		
 		nonRadioButton.setPadding(radioInsets);
 		idwRadioButton.setPadding(radioInsets);
 		msiRadioButton.setPadding(radioInsets);
 		secRadioButton.setPadding(radioInsets);
 
-		Label idxExponentLabel  = new Label(i18n.getString("UIRestrictionPaneBuilder.interpolation.type.inverse_distance_weighting.parameter.exponent.label", "Exponent: "));
-		Label idxSmoothingLabel = new Label(i18n.getString("UIRestrictionPaneBuilder.interpolation.type.inverse_distance_weighting.parameter.smoothing.label", "Smoothing value: "));
+		Label idxExponentLabel  = new Label(i18n.getString("UIInterpolationPaneBuilder.interpolation.type.inverse_distance_weighting.parameter.exponent.label", "Exponent: "));
+		Label idxSmoothingLabel = new Label(i18n.getString("UIInterpolationPaneBuilder.interpolation.type.inverse_distance_weighting.parameter.smoothing.label", "Smoothing value: "));
 		
-		Label msiExponentLabel  = new Label(i18n.getString("UIRestrictionPaneBuilder.interpolation.type.multiquadratic.parameter.exponent.label", "Exponent: "));
-		Label msiSmoothingLabel = new Label(i18n.getString("UIRestrictionPaneBuilder.interpolation.type.multiquadratic.parameter.smoothing.label", "Smoothing value: "));
+		Label msiExponentLabel  = new Label(i18n.getString("UIInterpolationPaneBuilder.interpolation.type.multiquadratic.parameter.exponent.label", "Exponent: "));
+		Label msiSmoothingLabel = new Label(i18n.getString("UIInterpolationPaneBuilder.interpolation.type.multiquadratic.parameter.smoothing.label", "Smoothing value: "));
 		
-		Label secNumeratorExponentLabel   = new Label(i18n.getString("UIRestrictionPaneBuilder.interpolation.type.sector.parameter.exponent.numerator.label", "Exponent of numerator: "));
-		Label secDenominatorExponentLabel = new Label(i18n.getString("UIRestrictionPaneBuilder.interpolation.type.sector.parameter.exponent.denominator.label", "Exponent of denominator: "));
+		Label secNumeratorExponentLabel   = new Label(i18n.getString("UIInterpolationPaneBuilder.interpolation.type.sector.parameter.exponent.numerator.label", "Exponent of numerator: "));
+		Label secDenominatorExponentLabel = new Label(i18n.getString("UIInterpolationPaneBuilder.interpolation.type.sector.parameter.exponent.denominator.label", "Exponent of denominator: "));
 		
 		idxExponentLabel.setPadding(labelInsets);
 		idxSmoothingLabel.setPadding(labelInsets);
@@ -165,14 +165,14 @@ public class UIInterpolationPaneBuilder implements TransformationChangeListener 
 		secNumeratorExponentLabel.setPadding(labelInsets);
 		secDenominatorExponentLabel.setPadding(labelInsets);
 		
-		DoubleTextField idxExponentField  = this.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("UIRestrictionPaneBuilder.interpolation.type.inverse_distance_weighting.parameter.exponent.tooltip", "Exponent of inverse distance weighting"), InterpolationType.INVERSE_DISTANCE_WEIGHTING);
-		DoubleTextField idxSmoothingField = this.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("UIRestrictionPaneBuilder.interpolation.type.inverse_distance_weighting.parameter.smoothing.tooltip", "Smoothing value in inverse distance weighting"), InterpolationType.INVERSE_DISTANCE_WEIGHTING);
+		DoubleTextField idxExponentField  = this.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("UIInterpolationPaneBuilder.interpolation.type.inverse_distance_weighting.parameter.exponent.tooltip", "Exponent of inverse distance weighting"), InterpolationType.INVERSE_DISTANCE_WEIGHTING);
+		DoubleTextField idxSmoothingField = this.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("UIInterpolationPaneBuilder.interpolation.type.inverse_distance_weighting.parameter.smoothing.tooltip", "Smoothing value in inverse distance weighting"), InterpolationType.INVERSE_DISTANCE_WEIGHTING);
 		
-		DoubleTextField msiExponentField  = this.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("UIRestrictionPaneBuilder.interpolation.type.multiquadratic.parameter.exponent.tooltip", "Exponent of multiquadratic interpolation"), InterpolationType.MULTI_QUADRATIC);
-		DoubleTextField msiSmoothingField = this.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("UIRestrictionPaneBuilder.interpolation.type.multiquadratic.parameter.smoothing.tooltip", "Smoothing value of multiquadratic interpolation"), InterpolationType.MULTI_QUADRATIC);
+		DoubleTextField msiExponentField  = this.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("UIInterpolationPaneBuilder.interpolation.type.multiquadratic.parameter.exponent.tooltip", "Exponent of multiquadratic interpolation"), InterpolationType.MULTI_QUADRATIC);
+		DoubleTextField msiSmoothingField = this.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("UIInterpolationPaneBuilder.interpolation.type.multiquadratic.parameter.smoothing.tooltip", "Smoothing value of multiquadratic interpolation"), InterpolationType.MULTI_QUADRATIC);
 		
-		DoubleTextField secNumeratorExponentField   = this.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("UIRestrictionPaneBuilder.interpolation.type.sector.parameter.exponent.nominator.tooltip", "Nominator exponent of sector interpolation"), InterpolationType.SECTOR);
-		DoubleTextField secDenominatorExponentField = this.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("UIRestrictionPaneBuilder.interpolation.type.sector.parameter.exponent.denominator.tooltip", "Denominator exponent of sector interpolation"), InterpolationType.SECTOR);
+		DoubleTextField secNumeratorExponentField   = this.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("UIInterpolationPaneBuilder.interpolation.type.sector.parameter.exponent.numerator.tooltip", "Numerator exponent of sector interpolation"), InterpolationType.SECTOR);
+		DoubleTextField secDenominatorExponentField = this.createDoubleTextField(CellValueType.DOUBLE, 0, i18n.getString("UIInterpolationPaneBuilder.interpolation.type.sector.parameter.exponent.denominator.tooltip", "Denominator exponent of sector interpolation"), InterpolationType.SECTOR);
 				
 		idxExponentField.numberProperty().bindBidirectional(((InverseDistanceWeighting)this.interpolationApproaches.get(InterpolationType.INVERSE_DISTANCE_WEIGHTING)).exponentProperty());
 		idxSmoothingField.numberProperty().bindBidirectional(((InverseDistanceWeighting)this.interpolationApproaches.get(InterpolationType.INVERSE_DISTANCE_WEIGHTING)).smoothingProperty());
@@ -232,8 +232,8 @@ public class UIInterpolationPaneBuilder implements TransformationChangeListener 
 		interpolationApproachGridPane.add(secDenominatorExponentField, 1, row++,   1, 1);
 		
 		TitledPane titledPane = UiUtil.createTitledPane(
-				i18n.getString("UIRestrictionPaneBuilder.interpolation.title", "Interpolation of residual gaps"), 
-				i18n.getString("UIRestrictionPaneBuilder.interpolation.tooltip", "Select interpolation approach"), 
+				i18n.getString("UIInterpolationPaneBuilder.interpolation.title", "Interpolation of residual gaps"), 
+				i18n.getString("UIInterpolationPaneBuilder.interpolation.tooltip", "Select interpolation approach"), 
 				interpolationApproachGridPane
 		);
 		titledPane.setCollapsible(false);

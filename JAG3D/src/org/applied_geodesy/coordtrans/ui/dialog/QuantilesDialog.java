@@ -25,8 +25,8 @@ import java.util.Optional;
 
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameters;
-import org.applied_geodesy.juniform.ui.i18n.I18N;
-import org.applied_geodesy.juniform.ui.table.UIQuantileTableBuilder;
+import org.applied_geodesy.coordtrans.ui.i18n.I18N;
+import org.applied_geodesy.coordtrans.ui.table.UIQuantileTableBuilder;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;

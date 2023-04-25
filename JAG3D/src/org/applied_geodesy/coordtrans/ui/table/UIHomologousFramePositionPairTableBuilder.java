@@ -97,8 +97,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// Enable/Disable
 		int columnIndex = table.getColumns().size(); 
 		final int columnIndexEnable = columnIndex;
-		String labelText   = i18n.getString("UIPointTableBuilder.tableheader.enable.label", "Enable");
-		String tooltipText = i18n.getString("UIPointTableBuilder.tableheader.enable.tooltip", "State of the point");
+		String labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.enable.label", "Enable");
+		String tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.enable.tooltip", "State of the point");
 		CellValueType cellValueType = CellValueType.BOOLEAN;
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		booleanColumn = this.<Boolean>getColumn(header, HomologousFramePositionPair::enableProperty, getBooleanCallback(), ColumnType.VISIBLE, columnIndex, true);
@@ -115,8 +115,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// Point-ID
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.station.name.label", "Point-Id");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.station.name.tooltip", "Id of the point");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.station.name.label", "Point-Id");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.station.name.tooltip", "Id of the point");
 		cellValueType = CellValueType.STRING;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(header, HomologousFramePositionPair::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
@@ -127,8 +127,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// A-priori Components
 		// x0-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.source.x0.label", "x0");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.source.x0.tooltip", "A-priori x-component of the point in source system");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.source.x0.label", "x0");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.source.x0.tooltip", "A-priori x-component of the point in source system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceX0Property, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APRIORI_POINT : ColumnType.HIDDEN, columnIndex, true);
@@ -136,8 +136,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// y0-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.source.y0.label", "y0");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.source.y0.tooltip", "A-priori y-component of the point in source system");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.source.y0.label", "y0");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.source.y0.tooltip", "A-priori y-component of the point in source system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceY0Property, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APRIORI_POINT : ColumnType.HIDDEN, columnIndex, true);
@@ -145,8 +145,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// z0-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.source.z0.label", "z0");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.source.z0.tooltip", "A-priori z-component of the point in source system");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.source.z0.label", "z0");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.source.z0.tooltip", "A-priori z-component of the point in source system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceZ0Property, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APRIORI_POINT : ColumnType.HIDDEN, columnIndex, true);
@@ -155,8 +155,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// TARGET
 		// X0-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.target.x0.label", "X0");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.target.x0.tooltip", "A-priori x-component of the point in target system");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.target.x0.label", "X0");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.target.x0.tooltip", "A-priori x-component of the point in target system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetX0Property, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APRIORI_POINT : ColumnType.HIDDEN, columnIndex, true);
@@ -164,8 +164,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// Y0-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.target.y0.label", "Y0");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.target.y0.tooltip", "A-priori y-component of the point in target system");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.target.y0.label", "Y0");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.target.y0.tooltip", "A-priori y-component of the point in target system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetY0Property, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APRIORI_POINT : ColumnType.HIDDEN, columnIndex, true);
@@ -173,8 +173,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// Z0-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.target.z0.label", "Z0");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.target.z0.tooltip", "A-priori z-component of the point in target system");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.target.z0.label", "Z0");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.target.z0.tooltip", "A-priori z-component of the point in target system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetZ0Property, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APRIORI_POINT : ColumnType.HIDDEN, columnIndex, true);
@@ -183,8 +183,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		
 		// Covariance of both positions
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.covariance.label", "Uncertainties");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.covariance.tooltip", "A-priori variance-covariance matrix");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.covariance.label", "Uncertainties");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.covariance.tooltip", "A-priori variance-covariance matrix");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		matrixColumn = this.<Boolean>getColumn(header, HomologousFramePositionPair::containsDispersionablePositionProperty, getMatrixCallback(), ColumnType.APRIORI_POINT, columnIndex, true);
@@ -196,8 +196,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// SOURCE
 		// x-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.source.x.label", "x");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.source.x.tooltip", "A-posteriori x-component of the point in source system");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.source.x.label", "x");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.source.x.tooltip", "A-posteriori x-component of the point in source system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -205,8 +205,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		
 		// y-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.source.y.label", "y");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.source.y.tooltip", "A-posteriori y-component of the point in source system");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.source.y.label", "y");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.source.y.tooltip", "A-posteriori y-component of the point in source system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -214,8 +214,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// z-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.source.z.label", "z");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.source.z.tooltip", "A-posteriori z-component of the point in source system");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.source.z.label", "z");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.source.z.tooltip", "A-posteriori z-component of the point in source system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -224,8 +224,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// A-posteriori Uncertainties
 		// X-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.x.label", "\u03C3x");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.x.tooltip", "A-posteriori uncertainty of x-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.uncertainty.x.label", "\u03C3x");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.uncertainty.x.tooltip", "A-posteriori uncertainty of x-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceUncertaintyXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -234,8 +234,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// Y-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.y.label", "\u03C3y");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.y.tooltip", "A-posteriori uncertainty of y-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.uncertainty.y.label", "\u03C3y");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.uncertainty.y.tooltip", "A-posteriori uncertainty of y-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceUncertaintyYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -244,8 +244,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// Z-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.z.label", "\u03C3z");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.z.tooltip", "A-posteriori uncertainty of z-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.uncertainty.z.label", "\u03C3z");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.uncertainty.z.tooltip", "A-posteriori uncertainty of z-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceUncertaintyZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -255,8 +255,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// Redundancy
 		// rx
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.redundancy.x.label", "rx");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.x.tooltip", "Redundancy of x-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.redundancy.x.label", "rx");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.redundancy.x.tooltip", "Redundancy of x-component");
 		cellValueType = CellValueType.PERCENTAGE;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceRedundancyXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -265,8 +265,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		
 		// ry
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.redundancy.y.label", "ry");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.y.tooltip", "Redundancy of y-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.redundancy.y.label", "ry");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.redundancy.y.tooltip", "Redundancy of y-component");
 		cellValueType = CellValueType.PERCENTAGE;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceRedundancyYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -275,8 +275,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// rz
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.redundancy.z.label", "rz");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.z.tooltip", "Redundancy of z-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.redundancy.z.label", "rz");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.redundancy.z.tooltip", "Redundancy of z-component");
 		cellValueType = CellValueType.PERCENTAGE;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceRedundancyZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -286,8 +286,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// Residual 
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.x.label", "\u03B5x");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.x.label", "\u03B5x");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceResidualXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -296,8 +296,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.y.label", "\u03B5y");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.y.label", "\u03B5y");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceResidualYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -306,8 +306,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.z.label", "\u03B5z");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.z.label", "\u03B5z");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceResidualZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -318,8 +318,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// TARGET
 		// X-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.target.x.label", "X");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.target.x.tooltip", "A-posteriori x-component of the point in target system");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.target.x.label", "X");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.target.x.tooltip", "A-posteriori x-component of the point in target system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -327,8 +327,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// Y-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.target.y.label", "Y");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.target.y.tooltip", "A-posteriori y-component of the point in target system");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.target.y.label", "Y");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.target.y.tooltip", "A-posteriori y-component of the point in target system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -336,8 +336,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// Z-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.target.z.label", "Z");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.target.z.tooltip", "A-posteriori z-component of the point in target system");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.target.z.label", "Z");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.target.z.tooltip", "A-posteriori z-component of the point in target system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -347,8 +347,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// A-posteriori Uncertainties
 		// X-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.x.label", "\u03C3x");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.x.tooltip", "A-posteriori uncertainty of x-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.uncertainty.x.label", "\u03C3x");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.uncertainty.x.tooltip", "A-posteriori uncertainty of x-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetUncertaintyXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -357,8 +357,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// Y-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.y.label", "\u03C3y");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.y.tooltip", "A-posteriori uncertainty of y-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.uncertainty.y.label", "\u03C3y");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.uncertainty.y.tooltip", "A-posteriori uncertainty of y-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetUncertaintyYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -367,8 +367,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// Z-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.z.label", "\u03C3z");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.z.tooltip", "A-posteriori uncertainty of z-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.uncertainty.z.label", "\u03C3z");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.uncertainty.z.tooltip", "A-posteriori uncertainty of z-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetUncertaintyZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -378,8 +378,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// Redundancy
 		// rx
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.redundancy.x.label", "rx");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.x.tooltip", "Redundancy of x-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.redundancy.x.label", "rx");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.redundancy.x.tooltip", "Redundancy of x-component");
 		cellValueType = CellValueType.PERCENTAGE;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetRedundancyXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -388,8 +388,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		
 		// ry
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.redundancy.y.label", "ry");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.y.tooltip", "Redundancy of y-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.redundancy.y.label", "ry");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.redundancy.y.tooltip", "Redundancy of y-component");
 		cellValueType = CellValueType.PERCENTAGE;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetRedundancyYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -398,8 +398,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// rz
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.redundancy.z.label", "rz");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.redundancy.z.tooltip", "Redundancy of z-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.redundancy.z.label", "rz");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.redundancy.z.tooltip", "Redundancy of z-component");
 		cellValueType = CellValueType.PERCENTAGE;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetRedundancyZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -409,8 +409,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// Residual 
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.x.label", "\u03B5x");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.x.label", "\u03B5x");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetResidualXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -419,8 +419,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.y.label", "\u03B5y");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.y.label", "\u03B5y");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetResidualYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -429,8 +429,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.z.label", "\u03B5z");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.z.label", "\u03B5z");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::targetResidualZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -442,8 +442,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// Gross-Error
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.grosserror.x.label", "\u2207x");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.grosserror.x.tooltip", "Gross-error in x");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.grosserror.x.label", "\u2207x");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.grosserror.x.tooltip", "Gross-error in x");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::grossErrorXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
@@ -452,8 +452,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.grosserror.y.label", "\u2207y");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.grosserror.y.tooltip", "Gross-error in y");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.grosserror.y.label", "\u2207y");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.grosserror.y.tooltip", "Gross-error in y");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::grossErrorYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
@@ -462,8 +462,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.grosserror.z.label", "\u2207z");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.grosserror.z.tooltip", "Gross-error in z");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.grosserror.z.label", "\u2207z");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.grosserror.z.tooltip", "Gross-error in z");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::grossErrorZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
@@ -473,8 +473,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// MTB
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.x.label", "\u2207x(1)");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.x.tooltip", "Maximum tolerable bias in x");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.maximumtolerablebias.x.label", "\u2207x(1)");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.maximumtolerablebias.x.tooltip", "Maximum tolerable bias in x");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::maximumTolerableBiasXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
@@ -483,8 +483,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.y.label", "\u2207y(1)");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.y.tooltip", "Maximum tolerable bias in y");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.maximumtolerablebias.y.label", "\u2207y(1)");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.maximumtolerablebias.y.tooltip", "Maximum tolerable bias in y");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::maximumTolerableBiasYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
@@ -493,8 +493,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.z.label", "\u2207z(1)");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.maximumtolerablebias.z.tooltip", "Maximum tolerable bias in z");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.maximumtolerablebias.z.label", "\u2207z(1)");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.maximumtolerablebias.z.tooltip", "Maximum tolerable bias in z");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::maximumTolerableBiasZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
@@ -504,8 +504,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// MDB
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.x.label", "\u2207x(\u03BB)");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.x.tooltip", "Minimal detectable bias in x");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.minimaldetectablebias.x.label", "\u2207x(\u03BB)");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.minimaldetectablebias.x.tooltip", "Minimal detectable bias in x");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::minimalDetectableBiasXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
@@ -514,8 +514,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.y.label", "\u2207y(\u03BB)");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.y.tooltip", "Minimal detectable bias in y");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.minimaldetectablebias.y.label", "\u2207y(\u03BB)");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.minimaldetectablebias.y.tooltip", "Minimal detectable bias in y");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::minimalDetectableBiasYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
@@ -524,8 +524,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.z.label", "\u2207z(\u03BB)");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.minimaldetectablebias.z.tooltip", "Minimal detectable bias in z");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.minimaldetectablebias.z.label", "\u2207z(\u03BB)");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.minimaldetectablebias.z.tooltip", "Minimal detectable bias in z");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::minimalDetectableBiasZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);
@@ -534,8 +534,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 	
 		// p-Value
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.pvalue.apriori.label", "log(Pprio)");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.pvalue.apriori.tooltip", "A-priori p-value in logarithmic representation");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.pvalue.apriori.label", "log(Pprio)");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.pvalue.apriori.tooltip", "A-priori p-value in logarithmic representation");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::pValueAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT, columnIndex, false);
@@ -544,8 +544,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// p-Value
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.pvalue.aposteriori.label", "log(Ppost)");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.pvalue.aposteriori.tooltip", "A-posteriori p-value in logarithmic representation");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.pvalue.aposteriori.label", "log(Ppost)");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.pvalue.aposteriori.tooltip", "A-posteriori p-value in logarithmic representation");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::pValueAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT, columnIndex, false);
@@ -554,8 +554,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// Tprio
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.teststatistic.apriori.label", "Tprio");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.teststatistic.apriori.tooltip", "A-priori test statistic");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.teststatistic.apriori.label", "Tprio");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.teststatistic.apriori.tooltip", "A-priori test statistic");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::testStatisticAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT, columnIndex, false);
@@ -564,8 +564,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 		// Tpost
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.teststatistic.aposteriori.label", "Tpost");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.teststatistic.aposteriori.tooltip", "A-posteriori test statistic");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.teststatistic.aposteriori.label", "Tpost");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.teststatistic.aposteriori.tooltip", "A-posteriori test statistic");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::testStatisticAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT, columnIndex, false);
@@ -575,8 +575,8 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// Decision of test statistic
 		columnIndex = table.getColumns().size(); 
 		final int columnIndexSignificant = columnIndex;
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.testdecision.label", "Significant");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.testdecision.tooltip", "Checked, if null-hypothesis is rejected");
+		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.testdecision.label", "Significant");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.testdecision.tooltip", "Checked, if null-hypothesis is rejected");
 		cellValueType = CellValueType.BOOLEAN;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		booleanColumn = this.<Boolean>getColumn(header, HomologousFramePositionPair::significantProperty, getBooleanCallback(), ColumnType.APOSTERIORI_POINT, columnIndex, false);
@@ -712,7 +712,7 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 						} else {
 							this.button.getTooltip().setText(String.format(
 									Locale.ENGLISH, 
-									i18n.getString("UIPointTableBuilder.dispersion.button.tooltip", "Show dispersion of point %s"),
+									i18n.getString("UIHomologousFramePositionPairTableBuilder.dispersion.button.tooltip", "Show dispersion of point %s"),
 									getTableRow().getItem().getName()));
 
 							this.button.setOnMousePressed(new EventHandler<MouseEvent>() {
@@ -743,7 +743,7 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 	}
 	
 	private static Button getDispersionButton() {
-		Button button = UiUtil.createButton(i18n.getString("UIPointTableBuilder.dispersion.button.label", "Dispersion"),"");
+		Button button = UiUtil.createButton(i18n.getString("UIHomologousFramePositionPairTableBuilder.dispersion.button.label", "Dispersion"),"");
 		button.setMaxWidth(Control.USE_PREF_SIZE);
 		return button;
 	}

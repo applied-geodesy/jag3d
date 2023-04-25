@@ -220,6 +220,7 @@ public class TransformationAdjustment {
 		this.varianceComponentTargetSystem.setSignificant(false);
 		this.varianceComponentTargetSystem.setApplyAposterioriVarianceOfUnitWeight(this.varianceComponentOfUnitWeight.isApplyAposterioriVarianceOfUnitWeight());
 		
+		this.testStatisticParameters = null;
 		this.transformationEquations = null;
 		this.parameters.clear();
 		this.restrictions.clear();
@@ -829,7 +830,8 @@ public class TransformationAdjustment {
 		double omega = 0;
 		double omegaSrc = 0;
 		double omegaTrg = 0;
-		
+		double redundancySrc = 0;
+		double redundancyTrg = 0;
 		int nou = this.numberOfUnknownParameters;
 		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs) {
 			if (this.interrupt.isInterrupted())
@@ -944,19 +946,24 @@ public class TransformationAdjustment {
 				homologousPointPair.setFisherQuantileApriori(testStatisticParametersAprio.getQuantile());
 				homologousPointPair.setFisherQuantileAposteriori(testStatisticParametersApost.getQuantile());
 				
-				this.addStochasticParameters(homologousPointPair, Jx, JvSrc, JvTrg, Dw, Ww, Wv, noncentralityParameter);
+				double reduncancies[] = this.addStochasticParameters(homologousPointPair, Jx, JvSrc, JvTrg, Dw, Ww, Wv, noncentralityParameter);
+				redundancySrc += reduncancies[0];
+				redundancyTrg += reduncancies[1];
 			}
 		}
 		
 		if (estimateStochasticParameters) {
 			this.varianceComponentSourceSystem.setOmega(omegaSrc);
 			this.varianceComponentTargetSystem.setOmega(omegaTrg);
+			
+			this.varianceComponentSourceSystem.setRedundancy(redundancySrc);
+			this.varianceComponentTargetSystem.setRedundancy(redundancyTrg);
 		}
 		
 		return omega;
 	}
 	
-	private void addStochasticParameters(HomologousFramePositionPair homologousPointPair, Matrix Jx, Matrix JvSrc, Matrix JvTrg, UpperSymmPackMatrix Dw, UpperSymmPackMatrix Ww, Vector weightedResidualsOfMisclosures, double nonCentralityParameter) throws NotConvergedException, MatrixSingularException, IllegalArgumentException {
+	private double[] addStochasticParameters(HomologousFramePositionPair homologousPointPair, Matrix Jx, Matrix JvSrc, Matrix JvTrg, UpperSymmPackMatrix Dw, UpperSymmPackMatrix Ww, Vector weightedResidualsOfMisclosures, double nonCentralityParameter) throws NotConvergedException, MatrixSingularException, IllegalArgumentException {
 		int nou = this.numberOfUnknownParameters;
 		int dim = this.transformationEquations.getTransformationType().getDimension();
 		int dof = (int)this.varianceComponentOfUnitWeight.getRedundancy();
@@ -1050,9 +1057,6 @@ public class TransformationAdjustment {
 
 		// estimates the gross error of misclosures, if r >> 0
 		if (dof > 0 && (redundancySrc + redundancyTrg) > Math.sqrt(Constant.EPS)) {
-			this.varianceComponentSourceSystem.setRedundancy(this.varianceComponentSourceSystem.getRedundancy() + redundancySrc);
-			this.varianceComponentTargetSystem.setRedundancy(this.varianceComponentTargetSystem.getRedundancy() + redundancyTrg);
-			
 			// derive Qvv = Qll - A*Qxx*AT of misclosures and overwritte Dw <-- Qvv
 			Dw.add(-1.0, JxQxxJxT);
 			JxQxxJxT = null;
@@ -1104,6 +1108,7 @@ public class TransformationAdjustment {
 			homologousPointPair.getTestStatistic().setFisherTestNumerator(T);
 			homologousPointPair.getTestStatistic().setDegreeOfFreedom(dim);
 		}
+		return new double[] {redundancySrc, redundancyTrg};
 	}
 	
 	private NormalEquationSystem createNormalEquation() {

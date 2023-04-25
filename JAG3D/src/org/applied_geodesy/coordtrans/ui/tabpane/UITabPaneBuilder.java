@@ -111,20 +111,20 @@ public class UITabPaneBuilder {
 		);
 		
 		this.createTab(
-				i18n.getString("UITabPaneBuilder.tab.position.apriori.label", "Source system"), 
-				i18n.getString("UITabPaneBuilder.tab.position.apriori.title", "Table of source system positions"), 
+				i18n.getString("UITabPaneBuilder.tab.position.source.apriori.label", "Source system"), 
+				i18n.getString("UITabPaneBuilder.tab.position.source.apriori.title", "Table of source system positions"), 
 				TabType.APRIORI_SOURCE_SYSTEM_POINTS, null
 		);
 
 		this.createTab(
-				i18n.getString("UITabPaneBuilder.tab.position.aposteriori.label", "Source system"), 
-				i18n.getString("UITabPaneBuilder.tab.position.aposteriori.title", "Table of estimated source system positions"), 
+				i18n.getString("UITabPaneBuilder.tab.position.source.aposteriori.label", "Source system"), 
+				i18n.getString("UITabPaneBuilder.tab.position.source.aposteriori.title", "Table of estimated source system positions"), 
 				TabType.APOSTERIORI_SOURCE_SYSTEM_POINTS, null
 		);
 		
 		this.createTab(
-				i18n.getString("UITabPaneBuilder.tab.position.aposteriori.label", "Target system"), 
-				i18n.getString("UITabPaneBuilder.tab.position.aposteriori.title", "Table of estimated target system positions"), 
+				i18n.getString("UITabPaneBuilder.tab.position.target.aposteriori.label", "Target system"), 
+				i18n.getString("UITabPaneBuilder.tab.position.target.aposteriori.title", "Table of estimated target system positions"), 
 				TabType.APOSTERIORI_TARGET_SYSTEM_POINTS, null
 				);
 		

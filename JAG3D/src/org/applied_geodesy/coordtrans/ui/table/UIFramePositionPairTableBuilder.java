@@ -97,8 +97,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		// Enable/Disable
 		int columnIndex = table.getColumns().size(); 
 		final int columnIndexEnable = columnIndex;
-		String labelText   = i18n.getString("UIPointTableBuilder.tableheader.enable.label", "Enable");
-		String tooltipText = i18n.getString("UIPointTableBuilder.tableheader.enable.tooltip", "State of the point");
+		String labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.enable.label", "Enable");
+		String tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.enable.tooltip", "State of the point");
 		CellValueType cellValueType = CellValueType.BOOLEAN;
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		booleanColumn = this.<Boolean>getColumn(header, FramePositionPair::enableProperty, getBooleanCallback(), ColumnType.VISIBLE, columnIndex, true);
@@ -115,8 +115,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 
 		// Point-ID
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.station.name.label", "Point-Id");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.station.name.tooltip", "Id of the point");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.station.name.label", "Point-Id");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.station.name.tooltip", "Id of the point");
 		cellValueType = CellValueType.STRING;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		stringColumn = this.<String>getColumn(header, FramePositionPair::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
@@ -127,8 +127,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		// A-priori Components
 		// x0-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.source.x0.label", "x0");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.source.x0.tooltip", "A-priori x-component of the point in source system");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.source.x0.label", "x0");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.source.x0.tooltip", "A-priori x-component of the point in source system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FramePositionPair::sourceXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APRIORI_POINT : ColumnType.HIDDEN, columnIndex, true);
@@ -136,8 +136,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 
 		// y0-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.source.y0.label", "y0");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.source.y0.tooltip", "A-priori y-component of the point in source system");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.source.y0.label", "y0");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.source.y0.tooltip", "A-priori y-component of the point in source system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FramePositionPair::sourceYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APRIORI_POINT : ColumnType.HIDDEN, columnIndex, true);
@@ -145,8 +145,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 
 		// z0-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.source.z0.label", "z0");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.source.z0.tooltip", "A-priori z-component of the point in source system");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.source.z0.label", "z0");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.source.z0.tooltip", "A-priori z-component of the point in source system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FramePositionPair::sourceZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APRIORI_POINT : ColumnType.HIDDEN, columnIndex, true);
@@ -154,8 +154,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		
 		// Covariance of both positions
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.covariance.label", "Uncertainties");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.covariance.tooltip", "A-priori variance-covariance matrix");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.covariance.label", "Uncertainties");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.covariance.tooltip", "A-priori variance-covariance matrix");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		matrixColumn = this.<Boolean>getColumn(header, FramePositionPair::containsDispersionablePositionProperty, getMatrixCallback(), ColumnType.APRIORI_POINT, columnIndex, true);
@@ -167,8 +167,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		// TARGET
 		// X-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.target.x.label", "X");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.target.x.tooltip", "A-posteriori x-component of the point in target system");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.target.x.label", "X");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.target.x.tooltip", "A-posteriori x-component of the point in target system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -176,8 +176,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 
 		// Y-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.target.y.label", "Y");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.target.y.tooltip", "A-posteriori y-component of the point in target system");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.target.y.label", "Y");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.target.y.tooltip", "A-posteriori y-component of the point in target system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -185,8 +185,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 
 		// Z-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.target.z.label", "Z");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.target.z.tooltip", "A-posteriori z-component of the point in target system");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.target.z.label", "Z");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.target.z.tooltip", "A-posteriori z-component of the point in target system");
 		cellValueType = CellValueType.LENGTH;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -196,8 +196,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		// A-posteriori Uncertainties
 		// X-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.x.label", "\u03C3x");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.x.tooltip", "A-posteriori uncertainty of x-component");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.uncertainty.x.label", "\u03C3x");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.uncertainty.x.tooltip", "A-posteriori uncertainty of x-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetUncertaintyXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -206,8 +206,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 
 		// Y-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.y.label", "\u03C3y");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.y.tooltip", "A-posteriori uncertainty of y-component");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.uncertainty.y.label", "\u03C3y");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.uncertainty.y.tooltip", "A-posteriori uncertainty of y-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetUncertaintyYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -216,8 +216,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 
 		// Z-Comp.
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.z.label", "\u03C3z");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.uncertainty.z.tooltip", "A-posteriori uncertainty of z-component");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.uncertainty.z.label", "\u03C3z");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.uncertainty.z.tooltip", "A-posteriori uncertainty of z-component");
 		cellValueType = CellValueType.LENGTH_UNCERTAINTY;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetUncertaintyZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -227,8 +227,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		// Residual 
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residualgap.x.label", "\u03B4x");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residualgap.x.tooltip", "Residual gap of x-component applied by selected interpolation approach");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.residualgap.x.label", "\u03B4x");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.residualgap.x.tooltip", "Residual gap of x-component applied by selected interpolation approach");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetResidualXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -237,8 +237,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 		
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residualgap.y.label", "\u03B4y");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residualgap.y.tooltip", "Residual gap of y-component applied by selected interpolation approach");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.residualgap.y.label", "\u03B4y");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.residualgap.y.tooltip", "Residual gap of y-component applied by selected interpolation approach");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetResidualYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -247,8 +247,8 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residualgap.z.label", "\u03B4z");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residualgap.z.tooltip", "Residual gap of z-component applied by selected interpolation approach");
+		labelText   = i18n.getString("UIFramePositionPairTableBuilder.tableheader.residualgap.z.label", "\u03B4z");
+		tooltipText = i18n.getString("UIFramePositionPairTableBuilder.tableheader.residualgap.z.tooltip", "Residual gap of z-component applied by selected interpolation approach");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FramePositionPair::targetResidualZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_TARGET_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -352,7 +352,7 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 						} else {
 							this.button.getTooltip().setText(String.format(
 									Locale.ENGLISH, 
-									i18n.getString("UIPointTableBuilder.dispersion.button.tooltip", "Show dispersion of point %s"),
+									i18n.getString("UIFramePositionPairTableBuilder.dispersion.button.tooltip", "Show dispersion of point %s"),
 									getTableRow().getItem().getName()));
 
 							this.button.setOnMousePressed(new EventHandler<MouseEvent>() {
@@ -383,7 +383,7 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 	}
 	
 	private static Button getDispersionButton() {
-		Button button = UiUtil.createButton(i18n.getString("UIPointTableBuilder.dispersion.button.label", "Dispersion"),"");
+		Button button = UiUtil.createButton(i18n.getString("UIFramePositionPairTableBuilder.dispersion.button.label", "Dispersion"),"");
 		button.setMaxWidth(Control.USE_PREF_SIZE);
 		return button;
 	}

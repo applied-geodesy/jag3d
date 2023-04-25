@@ -166,6 +166,12 @@ public class UIMenuBuilder implements TransformationChangeListener {
 		return menu;
 	}
 	
+	private static MenuItem createMenuItem(String label, boolean mnemonicParsing, MenuItemType menuItemType, KeyCodeCombination keyCodeCombination, MenuEventHandler menuEventHandler, boolean disable) {
+		MenuItem menuItem = createMenuItem(new MenuItem(label), mnemonicParsing, menuItemType, keyCodeCombination, menuEventHandler, disable);
+
+		return menuItem;
+	}
+	
 	private static MenuItem createMenuItem(MenuItem menuItem, boolean mnemonicParsing, Object userDate, KeyCodeCombination keyCodeCombination, MenuEventHandler menuEventHandler, boolean disable) {
 		menuItem.setMnemonicParsing(mnemonicParsing);
 		if (keyCodeCombination != null)
@@ -173,12 +179,6 @@ public class UIMenuBuilder implements TransformationChangeListener {
 		menuItem.setOnAction(menuEventHandler);
 		menuItem.setDisable(disable);
 		menuItem.setUserData(userDate);
-		return menuItem;
-	}
-
-	private static MenuItem createMenuItem(String label, boolean mnemonicParsing, MenuItemType menuItemType, KeyCodeCombination keyCodeCombination, MenuEventHandler menuEventHandler, boolean disable) {
-		MenuItem menuItem = createMenuItem(new MenuItem(label), mnemonicParsing, menuItemType, keyCodeCombination, menuEventHandler, disable);
-
 		return menuItem;
 	}
 
@@ -301,25 +301,23 @@ public class UIMenuBuilder implements TransformationChangeListener {
 		switch(transformationType) {
 		case HEIGHT:
 			transformation = new HeightTransformation();
-			CoordTrans.setTitle(i18n.getString("CoordTrans.transformation.type.height.title", "Height transformation"));
 			break;
 		case PLANAR:
 			transformation = new PlanarAffineTransformation();
-			CoordTrans.setTitle(i18n.getString("CoordTrans.transformation.type.planar.title", "Planar transformation"));
 			break;
 		case SPATIAL:
 			transformation = new SpatialAffineTransformation();
-			CoordTrans.setTitle(i18n.getString("CoordTrans.transformation.type.spatial.title", "Spatial transformation"));
 			break;
 		default:
 			break;
-		
 		}
-		
-		this.fireTransformationChanged(transformation);
-		
+
 		if (transformation == null)
 			CoordTrans.setTitle(null);
+		else
+			CoordTrans.setTitle(transformationType.getDimension());
+		
+		this.fireTransformationChanged(transformation);
 	}
 	
 	void createReport(File templateFile) {

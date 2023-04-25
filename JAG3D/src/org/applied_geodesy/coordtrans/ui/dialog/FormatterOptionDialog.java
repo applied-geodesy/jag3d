@@ -204,7 +204,7 @@ public class FormatterOptionDialog {
 		int row = 0;
 		this.addRow(
 				i18n.getString("FormatterOptionDialog.unit.length.value.label", "Length:"),
-    			i18n.getString("FormatterOptionDialog.unit.length.value.tooltip", "Set number of fraction digits for type length"),
+    			i18n.getString("FormatterOptionDialog.unit.length.value.tooltip.digits", "Set number of fraction digits for type length"),
     			i18n.getString("FormatterOptionDialog.unit.length.value.tooltip.unit", "Set unit for type length value"),
 				formatterOptions.get(CellValueType.LENGTH),
 				gridPane,

@@ -93,6 +93,24 @@ public class CoordTrans extends Application {
 	private static Stage primaryStage;
 	private Button adjustmentButton;
 	
+
+	public static void setTitle(int dim) {
+		switch(dim) {
+		case 1:
+			setTitle(i18n.getString("CoordTrans.transformation.type.height.title", "Height transformation"));
+			break;
+		case 2:
+			setTitle(i18n.getString("CoordTrans.transformation.type.planar.title", "Planar transformation"));
+			break;
+		case 3:
+			setTitle(i18n.getString("CoordTrans.transformation.type.spatial.title", "Spatial transformation"));
+			break;
+		default:
+			setTitle(null);
+			break;
+		}
+	}
+	
 	public static void setTitle(String title) {
 		if (primaryStage != null && title != null && !title.trim().isEmpty())
 			primaryStage.setTitle(String.format(Locale.ENGLISH, TITLE_TEMPLATE, title, " \u2014 ", (Version.isReleaseCandidate() ? " (RC)" : "")));
@@ -138,7 +156,7 @@ public class CoordTrans extends Application {
 			UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
 			
 			this.adjustmentButton = new Button(i18n.getString("CoordTrans.button.adjust.label", "Adjust transformation"));
-			this.adjustmentButton.setTooltip(new Tooltip(i18n.getString("CoordTrans.button.adjust.tooltip", "Start transformation adjustment process")));
+			this.adjustmentButton.setTooltip(new Tooltip(i18n.getString("CoordTrans.button.adjust.tooltip", "Adjust transformation parameters")));
 			this.adjustmentButton.setOnAction(new EventHandler<ActionEvent>() { 
 				@Override
 				public void handle(ActionEvent event) {	   

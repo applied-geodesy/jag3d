@@ -93,21 +93,10 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 			return;
 		
 		TableColumn<UnknownParameter, ParameterType> parameterTypeColumn = null;
-//		TableColumn<UnknownParameter, ProcessingType> processingTypeColumn = null;
 		TableColumn<UnknownParameter, Double> doubleColumn   = null; 
-//		TableColumn<UnknownParameter, String> stringColumn   = null; 
 		TableColumn<UnknownParameter, Boolean> booleanColumn = null;
 
 		TableView<UnknownParameter> table = this.createTable();
-		
-		// Parameter name
-//		int columnIndex = table.getColumns().size(); 
-//		String labelText   = i18n.getString("UIParameterTableBuilder.tableheader.name.label", "Name");
-//		String tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.name.tooltip", "Name of the model parameter");
-//		ColumnTooltipHeader header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
-//		stringColumn = this.<String>getColumn(header, UnknownParameter::nameProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
-//		stringColumn.setComparator(new NaturalOrderComparator<String>());
-//		table.getColumns().add(stringColumn);
 		
 		// Parameter type
 		int columnIndex = table.getColumns().size(); 
@@ -129,20 +118,11 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		
 		// Uncertainty
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UIParameterTableBuilder.tableheader.uncertainty.label", "\u03C3");
+		labelText   = i18n.getString("UIParameterTableBuilder.tableheader.uncertainty.label", "Uncertainty");
 		tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.uncertainty.tooltip", "A-posteriori uncertainty of parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, UnknownParameter::uncertaintyProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.UNCERTAINTY), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
-		
-//		// description text
-//		columnIndex = table.getColumns().size(); 
-//		labelText   = i18n.getString("UIParameterTableBuilder.tableheader.description.label", "Description");
-//		tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.description.tooltip", "User-defined description of the parameter");
-//		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText); 
-//		stringColumn = this.<String>getColumn(header, UnknownParameter::descriptionProperty, getStringCallback(), ColumnType.VISIBLE, columnIndex, true); 
-//		stringColumn.setComparator(new NaturalOrderComparator<String>());
-//		table.getColumns().add(stringColumn);
 		
 		// Decision of test statistic
 		columnIndex = table.getColumns().size(); 
