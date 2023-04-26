@@ -117,6 +117,9 @@ public abstract class PositionPair<T1 extends Positionable, T2 extends Positiona
 	
 	@Override
 	public String toString() {
-		return "PositionPair [\n\tsourcePosition=" + this.sourcePosition + ",\n\ttargetPosition=" + this.targetPosition + "]";
+		return "PositionPair {\n"
+				+ "\t[ " + this.sourcePosition.get().getX() + " / " + this.sourcePosition.get().getY() + " / " + this.sourcePosition.get().getZ() + " ]"
+				+ "\t[ " + this.targetPosition.get().getX() + " / " + this.targetPosition.get().getY() + " / " + this.targetPosition.get().getZ() + " ]"
+				+ "}";
 	}
 }
