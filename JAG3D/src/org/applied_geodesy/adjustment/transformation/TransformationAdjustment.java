@@ -275,7 +275,7 @@ public class TransformationAdjustment {
 	}
 
 	public EstimationStateType estimateModel() throws NotConvergedException, MatrixSingularException, OutOfMemoryError {
-		
+		//this.estimationType = EstimationType.L1NORM; // TODO remove
 		try {
 			SimplePositionPair centerOfMasses = Transformation.deriveCenterOfMasses(this.transformation.getHomologousFramePositionPairs(), this.transformation.getRestrictions(), this.transformation.getSupportedParameterRestrictions());
 			this.prepareIterationProcess(centerOfMasses);
@@ -363,7 +363,6 @@ public class TransformationAdjustment {
 
 						// in-place estimation normal system N * x = n: N <-- Qxx, n <-- dx 
 						MathExtension.solve(N, n, true);
-
 						if (this.preconditioning)
 							this.applyPrecondition(neq.getPreconditioner(), N, n);	
 
@@ -516,7 +515,7 @@ public class TransformationAdjustment {
 	private void updateModel(Vector dxk, boolean estimateCompleteModel) throws MatrixSingularException, IllegalArgumentException, NotConvergedException {
 		// extract model parameters from dxk (ignoring Lagrange k) 
 		Vector dx = (dxk.size() == this.numberOfUnknownParameters) ? dxk : Matrices.getSubVector(dxk, Matrices.index(0, this.numberOfUnknownParameters));
-
+		//this.getOmega(dx);//TODO remove
 		if (this.adaptedDampingValue > 0) {
 			// reduce the step length
 			if (this.adaptedDampingValue != 0) {
@@ -557,7 +556,7 @@ public class TransformationAdjustment {
 			return;
 		
 		// estimate and update residuals before updating the model parameters --> estimated omega
-		double omega = this.updateResiduals(dx, !this.adjustModelParametersOnly && estimateCompleteModel && this.Qxx != null && this.adaptedDampingValue == 0);
+		double omega = this.updateResiduals(dx, !this.adjustModelParametersOnly && (estimateCompleteModel || this.estimationType == EstimationType.L1NORM) && this.Qxx != null && this.adaptedDampingValue == 0);
 
 		this.varianceComponentOfUnitWeight.setOmega(omega);
 
@@ -809,6 +808,21 @@ public class TransformationAdjustment {
 			Ww.mult(misclosures, Wv);
 
 			omega += misclosures.dot(Wv);
+			
+//			if (this.Qxx != null) {
+//				// estimate Qll = A*Qxx*AT
+//				Matrix QxxJxT = new DenseMatrix(nou, dim);
+//				this.Qxx.transBmult(Jx, QxxJxT);
+//				UpperSymmPackMatrix JxQxxJxT = new UpperSymmPackMatrix(dim);
+//				Jx.mult(QxxJxT, JxQxxJxT);
+//				QxxJxT = null;
+//
+//				// estimates R = (Qll - A * Qxx * A') * W = I - A * Qxx * A' * W
+//				Matrix R = Matrices.identity(dim);
+//				JxQxxJxT.multAdd(-1.0, Ww, R);
+//				MathExtension.print(R);
+//				JxQxxJxT = null;
+//			}
 		}
 		return omega;
 	}
