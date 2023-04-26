@@ -59,7 +59,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 	private Window window;
 	private Spinner<Integer> iterationSpinner;
 	private DoubleSpinner lmDampingSpinner;
-	private CheckBox applyVarianceOfUnitWeightCheckBox, adjustModelParametersOnlyCheckBox, preconditioningCheckBox;
+	private CheckBox applyVarianceOfUnitWeightCheckBox, adjustModelParametersOnlyCheckBox, preconditioningCheckBox, estimateCenterOfMassCheckBox;
 	private TransformationAdjustment adjustment;
 	private LeastSquaresSettingDialog() {}
 	private FormatterOptions options = FormatterOptions.getInstance();
@@ -94,6 +94,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		this.applyVarianceOfUnitWeightCheckBox.setSelected(this.adjustment.getVarianceComponent(VarianceComponentType.GLOBAL).isApplyAposterioriVarianceOfUnitWeight());
 		this.adjustModelParametersOnlyCheckBox.setSelected(this.adjustment.isAdjustModelParametersOnly());
 		this.preconditioningCheckBox.setSelected(this.adjustment.isPreconditioning());
+		this.estimateCenterOfMassCheckBox.setSelected(this.adjustment.getTransformation() != null ? this.adjustment.getTransformation().isEstimateCenterOfMasses() : false);
 	
 		double dampingValue = this.adjustment.getLevenbergMarquardtDampingValue();
 		SpinnerValueFactory.DoubleSpinnerValueFactory dampingSpinnerFactory = (SpinnerValueFactory.DoubleSpinnerValueFactory)this.lmDampingSpinner.getValueFactory();
@@ -126,7 +127,9 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 					adjustment.setAdjustModelParametersOnly(adjustModelParametersOnlyCheckBox.isSelected());
 					adjustment.setPreconditioning(preconditioningCheckBox.isSelected());
 					adjustment.setMaximalNumberOfIterations(iterationSpinner.getValue());
-					adjustment.setLevenbergMarquardtDampingValue(lmDampingSpinner.getValue());					
+					adjustment.setLevenbergMarquardtDampingValue(lmDampingSpinner.getValue());
+					if (adjustment.getTransformation() != null) 
+						adjustment.getTransformation().setEstimateCenterOfMasses(estimateCenterOfMassCheckBox.isSelected());
 				}
 				return null;
 			}
@@ -175,6 +178,11 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 				i18N.getString("LeastSquaresSettingDialog.preconditioning.label", "Preconditioning of normal system"),
 				i18N.getString("LeastSquaresSettingDialog.preconditioning.tooltip", "If checked, a preconditioned iterative adjustment will be used")
 		);
+		
+		this.estimateCenterOfMassCheckBox = UiUtil.createCheckBox(
+				i18N.getString("LeastSquaresSettingDialog.centerofmass.label", "Center of mass reduction"),
+				i18N.getString("LeastSquaresSettingDialog.centerofmass.tooltip", "If checked, points will be reduced by the center of mass")
+		); 
 
 		GridPane gridPane = UiUtil.createGridPane();
 		
@@ -184,6 +192,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		GridPane.setHgrow(this.applyVarianceOfUnitWeightCheckBox, Priority.ALWAYS);
 		GridPane.setHgrow(this.adjustModelParametersOnlyCheckBox, Priority.ALWAYS);
 		GridPane.setHgrow(this.preconditioningCheckBox,           Priority.ALWAYS);
+		GridPane.setHgrow(this.estimateCenterOfMassCheckBox,      Priority.ALWAYS);
 		GridPane.setHgrow(this.iterationSpinner,                  Priority.ALWAYS);
 		GridPane.setHgrow(this.lmDampingSpinner,                  Priority.ALWAYS);
 		
@@ -196,6 +205,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		GridPane.setMargin(this.applyVarianceOfUnitWeightCheckBox, insetsTop);
 		GridPane.setMargin(this.adjustModelParametersOnlyCheckBox, insetsCenter);
 		GridPane.setMargin(this.preconditioningCheckBox,           insetsCenter);
+		GridPane.setMargin(this.estimateCenterOfMassCheckBox,      insetsCenter);
 		
 		GridPane.setMargin(iterationLabel, insetsLeft);
 		GridPane.setMargin(dampingLabel,   insetsLeft);
@@ -207,6 +217,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		gridPane.add(this.applyVarianceOfUnitWeightCheckBox, 0, row++, 2, 1);
 		gridPane.add(this.adjustModelParametersOnlyCheckBox, 0, row++, 2, 1);
 		gridPane.add(this.preconditioningCheckBox,           0, row++, 2, 1);
+		gridPane.add(this.estimateCenterOfMassCheckBox,      0, row++, 2, 1);
 		
 		gridPane.add(iterationLabel,        0, row);
 		gridPane.add(this.iterationSpinner, 1, row++);
