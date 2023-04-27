@@ -713,7 +713,7 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 							this.button.getTooltip().setText(String.format(
 									Locale.ENGLISH, 
 									i18n.getString("UIHomologousFramePositionPairTableBuilder.dispersion.button.tooltip", "Show dispersion of point %s"),
-									getTableRow().getItem().getName()));
+									getTableRow().getItem() == null || getTableRow().getItem().getName() == null ? "" : getTableRow().getItem().getName()));
 
 							this.button.setOnMousePressed(new EventHandler<MouseEvent>() {
 								@Override

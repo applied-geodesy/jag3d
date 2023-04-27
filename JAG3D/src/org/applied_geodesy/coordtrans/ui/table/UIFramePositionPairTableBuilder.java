@@ -353,7 +353,7 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 							this.button.getTooltip().setText(String.format(
 									Locale.ENGLISH, 
 									i18n.getString("UIFramePositionPairTableBuilder.dispersion.button.tooltip", "Show dispersion of point %s"),
-									getTableRow().getItem().getName()));
+									getTableRow().getItem() == null || getTableRow().getItem().getName() == null ? "" : getTableRow().getItem().getName()));
 
 							this.button.setOnMousePressed(new EventHandler<MouseEvent>() {
 								@Override
