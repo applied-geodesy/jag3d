@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
+import org.applied_geodesy.coordtrans.ui.table.UIFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIHomologousFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIParameterTableBuilder;
 import org.applied_geodesy.coordtrans.ui.tree.UITreeBuilder;
@@ -362,9 +363,10 @@ public class ReadFileProgressDialog<T> {
 					});
 					throwable.printStackTrace();
 				}
-				//TODO add more tables
+				//TODO add more tables for refreshing
 				UITreeBuilder.getInstance().getTree().getSelectionModel().select(0);
 				UIHomologousFramePositionPairTableBuilder.getInstance().getTable().refresh();
+				UIFramePositionPairTableBuilder.getInstance().getTable().refresh();
 				UIParameterTableBuilder.getInstance().getTable().refresh();
 			}
 		});

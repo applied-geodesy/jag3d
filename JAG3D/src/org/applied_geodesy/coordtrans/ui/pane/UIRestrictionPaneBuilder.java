@@ -311,6 +311,7 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		Set<ParameterRestrictionType> supportedRestrictionTypes = this.transformation == null ? Collections.<ParameterRestrictionType>emptySet() : this.transformation.getSupportedParameterRestrictions().keySet();
 		for (CheckBox checkBox : this.parameterRestrictionCheckboxes.values()) {
 			checkBox.setDisable(!supportedRestrictionTypes.contains(checkBox.getUserData()));
+			checkBox.setSelected(!supportedRestrictionTypes.contains(checkBox.getUserData()));
 		}
 	}
 	

@@ -282,7 +282,7 @@ public class TransformationAdjustment {
 			int dimension            = this.transformationEquations.getTransformationType().getDimension();
 			int numberOfRestrictions = this.restrictions.size();
 			int numberOfObservations = this.homologousPointPairs.size() * dimension;
-			
+
 			if (this.numberOfModelEquations < (this.numberOfUnknownParameters - numberOfRestrictions))
 				throw new MatrixSingularException("Error, the number of equations is less than the number of parameters to be estimated, " + this.numberOfModelEquations + " < " + (this.numberOfUnknownParameters - numberOfRestrictions) + "! The system of equations is underestimated. Please add further equations." );
 			

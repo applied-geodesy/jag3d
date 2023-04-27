@@ -160,7 +160,7 @@ public class FilePathsSelectionDialog {
 			@Override
 			public FilePathPair call(ButtonType buttonType) {
 				if (buttonType == ButtonType.OK) {
-					FilePathPair filePathPair = readFiles();
+					FilePathPair filePathPair = getFilePathPair();
 					return filePathPair;
 				}
 				return null;
@@ -323,7 +323,7 @@ public class FilePathsSelectionDialog {
 		}
 	}
 	
-	private FilePathPair readFiles() {
+	private FilePathPair getFilePathPair() {
 		try {
 			Path sourceFilePath = this.convertString2Path(this.sourceSystemPathTextField.getText());
 			Path targetFilePath = this.convertString2Path(this.targetSystemPathTextField.getText());

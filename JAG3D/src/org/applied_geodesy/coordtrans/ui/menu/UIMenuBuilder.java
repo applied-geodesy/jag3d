@@ -222,7 +222,7 @@ public class UIMenuBuilder implements TransformationChangeListener {
 		Map<String, ObservedFramePosition> sourceSystemPositions = positions.get(0);
 		Map<String, ObservedFramePosition> targetSystemPositions = positions.get(1); 
 		
-		if (sourceSystemPositions == null || sourceSystemPositions.isEmpty())
+		if (sourceSystemPositions == null || sourceSystemPositions.isEmpty() || targetSystemPositions == null || targetSystemPositions.isEmpty())
 			return;
 		
 		ObservableUniqueList<HomologousFramePositionPair> homologousFramePositionPairs = new ObservableUniqueList<HomologousFramePositionPair>(Math.min(sourceSystemPositions.size(), targetSystemPositions.size()));
