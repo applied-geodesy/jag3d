@@ -275,7 +275,6 @@ public class TransformationAdjustment {
 	}
 
 	public EstimationStateType estimateModel() throws NotConvergedException, MatrixSingularException, OutOfMemoryError {
-		//this.estimationType = EstimationType.L1NORM; // TODO remove
 		try {
 			SimplePositionPair centerOfMasses = Transformation.deriveCenterOfMasses(this.transformation.getHomologousFramePositionPairs(), this.transformation.getRestrictions(), this.transformation.getSupportedParameterRestrictions());
 			this.prepareIterationProcess(centerOfMasses);
@@ -306,7 +305,7 @@ public class TransformationAdjustment {
 			this.varianceComponentOfUnitWeight.setOmega(0.0);
 			this.varianceComponentOfUnitWeight.setNumberOfObservations(2 * numberOfObservations);
 			this.varianceComponentOfUnitWeight.setSignificant(false);
-			this.varianceComponentOfUnitWeight.setRedundancy(this.numberOfModelEquations - this.numberOfUnknownParameters + this.restrictions.size());
+			this.varianceComponentOfUnitWeight.setRedundancy(this.numberOfModelEquations - this.numberOfUnknownParameters + numberOfRestrictions);
 			this.varianceComponentOfUnitWeight.setVariance0( sigma2apriori < SQRT_EPS ? SQRT_EPS : sigma2apriori );
 			
 			this.varianceComponentSourceSystem.setVariance0(1.0);
@@ -515,7 +514,7 @@ public class TransformationAdjustment {
 	private void updateModel(Vector dxk, boolean estimateCompleteModel) throws MatrixSingularException, IllegalArgumentException, NotConvergedException {
 		// extract model parameters from dxk (ignoring Lagrange k) 
 		Vector dx = (dxk.size() == this.numberOfUnknownParameters) ? dxk : Matrices.getSubVector(dxk, Matrices.index(0, this.numberOfUnknownParameters));
-		//this.getOmega(dx);//TODO remove
+		
 		if (this.adaptedDampingValue > 0) {
 			// reduce the step length
 			if (this.adaptedDampingValue != 0) {
@@ -764,7 +763,6 @@ public class TransformationAdjustment {
 	private double getOmega(Vector dx) throws MatrixSingularException, IllegalArgumentException, NotConvergedException {
 		double omega = 0;
 
-		int nou = this.numberOfUnknownParameters;
 		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs) {
 			if (this.interrupt.isInterrupted())
 				return 0;
@@ -772,7 +770,7 @@ public class TransformationAdjustment {
 			int dim = this.transformationEquations.getTransformationType().getDimension();
 
 			// Derive Jacobians A, B and vector of misclosures
-			Matrix Jx = new DenseMatrix(dim, nou);
+			Matrix Jx = new DenseMatrix(dim, this.numberOfUnknownParameters);
 			Matrix JvSrc = new DenseMatrix(dim, dim);
 			Matrix JvTrg = new DenseMatrix(dim, dim);
 			Vector misclosures = new DenseVector(dim);
@@ -808,10 +806,10 @@ public class TransformationAdjustment {
 			Ww.mult(misclosures, Wv);
 
 			omega += misclosures.dot(Wv);
-			
+
 //			if (this.Qxx != null) {
 //				// estimate Qll = A*Qxx*AT
-//				Matrix QxxJxT = new DenseMatrix(nou, dim);
+//				Matrix QxxJxT = new DenseMatrix(this.numberOfUnknownParameters, dim);
 //				this.Qxx.transBmult(Jx, QxxJxT);
 //				UpperSymmPackMatrix JxQxxJxT = new UpperSymmPackMatrix(dim);
 //				Jx.mult(QxxJxT, JxQxxJxT);
@@ -820,7 +818,6 @@ public class TransformationAdjustment {
 //				// estimates R = (Qll - A * Qxx * A') * W = I - A * Qxx * A' * W
 //				Matrix R = Matrices.identity(dim);
 //				JxQxxJxT.multAdd(-1.0, Ww, R);
-//				MathExtension.print(R);
 //				JxQxxJxT = null;
 //			}
 		}
