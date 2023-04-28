@@ -311,7 +311,7 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		Set<ParameterRestrictionType> supportedRestrictionTypes = this.transformation == null ? Collections.<ParameterRestrictionType>emptySet() : this.transformation.getSupportedParameterRestrictions().keySet();
 		for (CheckBox checkBox : this.parameterRestrictionCheckboxes.values()) {
 			checkBox.setDisable(!supportedRestrictionTypes.contains(checkBox.getUserData()));
-			checkBox.setSelected(!supportedRestrictionTypes.contains(checkBox.getUserData()));
+//			checkBox.setSelected(!supportedRestrictionTypes.contains(checkBox.getUserData()));
 		}
 	}
 	
@@ -347,9 +347,10 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		
 		if (this.lastTransformationType == null || this.transformation == null || this.lastTransformationType != this.transformation.getTransformationEquations().getTransformationType())
 			this.setSimilarProperty();
-		else if(this.transformation != null && lastTransformationType == this.transformation.getTransformationEquations().getTransformationType()) {
+		//else if(this.transformation != null && lastTransformationType == this.transformation.getTransformationEquations().getTransformationType()) {
+		if (this.transformation != null) {
 			for (CheckBox checkBox : this.parameterRestrictionCheckboxes.values())
-				handleSelection((ParameterRestrictionType)checkBox.getUserData(), checkBox.isSelected());
+				this.handleSelection((ParameterRestrictionType)checkBox.getUserData(), checkBox.isSelected());
 		}
 	}
 	
@@ -520,6 +521,5 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 				this.transformation.addRestriction(parameterRestrictionType);
 			}
 		}
-		
 	}
 }
