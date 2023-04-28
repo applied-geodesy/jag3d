@@ -529,6 +529,14 @@ public class FTLReport {
 		double redundancyTargetPositionsY = 0;
 		double redundancyTargetPositionsZ = 0;
 		
+		double maxResidualSourcePositionsX = 0;
+		double maxResidualSourcePositionsY = 0;
+		double maxResidualSourcePositionsZ = 0;
+		
+		double maxResidualTargetPositionsX = 0;
+		double maxResidualTargetPositionsY = 0;
+		double maxResidualTargetPositionsZ = 0;
+		
 		double maxGrossErrorGroupX = 0;
 		double maxGrossErrorGroupY = 0;
 		double maxGrossErrorGroupZ = 0;
@@ -571,10 +579,6 @@ public class FTLReport {
 				h.put("sigma_x", options.convertLengthUncertaintyToView(sourcePosition.getUncertaintyX()));
 				h.put("sigma_y", options.convertLengthUncertaintyToView(sourcePosition.getUncertaintyY()));
 				
-				h.put("residual_x", options.convertLengthResidualToView(sourcePosition.getResidualX()));
-				h.put("residual_y", options.convertLengthResidualToView(sourcePosition.getResidualY()));
-				
-				
 				h.put("X0", options.convertLengthToView(targetPosition.getX0()));
 				h.put("Y0", options.convertLengthToView(targetPosition.getY0()));
 				
@@ -583,10 +587,6 @@ public class FTLReport {
 				
 				h.put("sigma_X", options.convertLengthUncertaintyToView(targetPosition.getUncertaintyX()));
 				h.put("sigma_Y", options.convertLengthUncertaintyToView(targetPosition.getUncertaintyY()));
-				
-				h.put("residual_X", options.convertLengthResidualToView(targetPosition.getResidualX()));
-				h.put("residual_Y", options.convertLengthResidualToView(targetPosition.getResidualY()));
-				
 				
 				h.put("minimal_detectable_bias_x", options.convertLengthResidualToView(positionPair.getMinimalDetectableBiasX()));
 				h.put("minimal_detectable_bias_y", options.convertLengthResidualToView(positionPair.getMinimalDetectableBiasY()));
@@ -597,6 +597,12 @@ public class FTLReport {
 				double grossErrorX = options.convertLengthResidualToView(positionPair.getGrossErrorX());
 				double grossErrorY = options.convertLengthResidualToView(positionPair.getGrossErrorY());
 				
+				double sourceResidualX = options.convertLengthResidualToView(sourcePosition.getResidualX());
+				double sourceResidualY = options.convertLengthResidualToView(sourcePosition.getResidualY());
+				
+				double targetResidualX = options.convertLengthResidualToView(targetPosition.getResidualX());
+				double targetResidualY = options.convertLengthResidualToView(targetPosition.getResidualY());
+				
 				double sourceRedundancyX = sourcePosition.getRedundancyX();
 				double sourceRedundancyY = sourcePosition.getRedundancyY();
 				
@@ -606,11 +612,23 @@ public class FTLReport {
 				h.put("gross_error_x", grossErrorX);
 				h.put("gross_error_y", grossErrorY);
 				
+				h.put("residual_x", sourceResidualX);
+				h.put("residual_y", sourceResidualY);
+				
+				h.put("residual_X", targetResidualX);
+				h.put("residual_Y", targetResidualY);
+				
 				h.put("redundancy_x", options.convertPercentToView(sourceRedundancyX));
 				h.put("redundancy_y", options.convertPercentToView(sourceRedundancyY));
 				
 				h.put("redundancy_X", options.convertPercentToView(targetRedundancyX));
 				h.put("redundancy_Y", options.convertPercentToView(targetRedundancyY));
+				
+				maxResidualSourcePositionsX = Math.abs(sourceResidualX) > Math.abs(maxResidualSourcePositionsX) ? sourceResidualX : maxResidualSourcePositionsX;
+				maxResidualSourcePositionsY = Math.abs(sourceResidualY) > Math.abs(maxResidualSourcePositionsY) ? sourceResidualY : maxResidualSourcePositionsY;
+				
+				maxResidualTargetPositionsX = Math.abs(targetResidualX) > Math.abs(maxResidualTargetPositionsX) ? targetResidualX : maxResidualTargetPositionsX;
+				maxResidualTargetPositionsY = Math.abs(targetResidualY) > Math.abs(maxResidualTargetPositionsY) ? targetResidualY : maxResidualTargetPositionsY;
 				
 				redundancySourcePositionsX += sourceRedundancyX;
 				redundancySourcePositionsY += sourceRedundancyY;
@@ -628,15 +646,11 @@ public class FTLReport {
 				
 				h.put("sigma_z", options.convertLengthUncertaintyToView(sourcePosition.getUncertaintyZ()));
 				
-				h.put("residual_z", options.convertLengthResidualToView(sourcePosition.getResidualZ()));
-				
 				h.put("Z0", options.convertLengthToView(targetPosition.getZ0()));
 				
 				h.put("Z", options.convertLengthToView(targetPosition.getZ()));
 				
 				h.put("sigma_Z", options.convertLengthUncertaintyToView(targetPosition.getUncertaintyZ()));
-				
-				h.put("residual_Z", options.convertLengthResidualToView(targetPosition.getResidualZ()));
 				
 				h.put("minimal_detectable_bias_z", options.convertLengthResidualToView(positionPair.getMinimalDetectableBiasZ()));
 				
@@ -644,16 +658,26 @@ public class FTLReport {
 				
 				double grossErrorZ = options.convertLengthResidualToView(positionPair.getGrossErrorZ());
 				
+				double sourceResidualZ = options.convertLengthResidualToView(sourcePosition.getResidualZ());
+				double targetResidualZ = options.convertLengthResidualToView(targetPosition.getResidualZ());
+				
 				double sourceRedundancyZ = sourcePosition.getRedundancyZ();
 				double targetRedundancyZ = targetPosition.getRedundancyZ();
 				
 				h.put("gross_error_z", grossErrorZ);
+				
+				h.put("residual_z", sourceResidualZ);
+				h.put("residual_Z", targetResidualZ);
 				
 				h.put("redundancy_z", options.convertPercentToView(sourceRedundancyZ));
 				h.put("redundancy_Z", options.convertPercentToView(targetRedundancyZ));
 				
 				redundancySourcePositionsZ += sourceRedundancyZ;
 				redundancyTargetPositionsZ += targetRedundancyZ;
+				
+				maxResidualSourcePositionsZ = Math.abs(sourceResidualZ) > Math.abs(maxResidualSourcePositionsZ) ? sourceResidualZ : maxResidualSourcePositionsZ;
+				maxResidualTargetPositionsZ = Math.abs(targetResidualZ) > Math.abs(maxResidualTargetPositionsZ) ? targetResidualZ : maxResidualTargetPositionsZ;
+
 				maxGrossErrorGroupZ = Math.abs(grossErrorZ) > Math.abs(maxGrossErrorGroupZ) ? grossErrorZ : maxGrossErrorGroupZ;
 			}
 			
@@ -665,16 +689,24 @@ public class FTLReport {
 			positions.put("significant",  significantGroup);
 			positions.put("dimension",    dimension);
 
-			positions.put("redundancy_x",  redundancySourcePositionsX);
-			positions.put("redundancy_y",  redundancySourcePositionsY);
-			positions.put("redundancy_z",  redundancySourcePositionsZ);
-			positions.put("redundancy_xyz",    redundancySourcePositionsX+redundancySourcePositionsY+redundancySourcePositionsZ);
+			positions.put("redundancy_x",   redundancySourcePositionsX);
+			positions.put("redundancy_y",   redundancySourcePositionsY);
+			positions.put("redundancy_z",   redundancySourcePositionsZ);
+			positions.put("redundancy_xyz", redundancySourcePositionsX + redundancySourcePositionsY + redundancySourcePositionsZ);
 			
-			positions.put("redundancy_X",  redundancyTargetPositionsX);
-			positions.put("redundancy_Y",  redundancyTargetPositionsY);
-			positions.put("redundancy_Z",  redundancyTargetPositionsZ);
-			positions.put("redundancy_XYZ",    redundancyTargetPositionsX+redundancyTargetPositionsY+redundancyTargetPositionsZ);
+			positions.put("redundancy_X",   redundancyTargetPositionsX);
+			positions.put("redundancy_Y",   redundancyTargetPositionsY);
+			positions.put("redundancy_Z",   redundancyTargetPositionsZ);
+			positions.put("redundancy_XYZ", redundancyTargetPositionsX + redundancyTargetPositionsY + redundancyTargetPositionsZ);
 
+			positions.put("max_residual_x", maxResidualSourcePositionsX);
+			positions.put("max_residual_y", maxResidualSourcePositionsY);
+			positions.put("max_residual_z", maxResidualSourcePositionsZ);
+			
+			positions.put("max_residual_X", maxResidualTargetPositionsX);
+			positions.put("max_residual_Y", maxResidualTargetPositionsY);
+			positions.put("max_residual_Z", maxResidualTargetPositionsZ);
+			
 			positions.put("max_gross_error_x", maxGrossErrorGroupX);
 			positions.put("max_gross_error_y", maxGrossErrorGroupY);
 			positions.put("max_gross_error_z", maxGrossErrorGroupZ);

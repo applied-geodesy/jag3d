@@ -105,6 +105,10 @@
 				<#include "default/correlation_matrix_table.ftlh" parse=true>
 				<#include "default/euler_angles_table.ftlh" parse=true>
 			</article>
+			
+			<footer>
+				<p>Java&middot;Applied&middot;Geodesy&middot;3D &mdash; &copy; Michael L&ouml;sler &mdash; <a href="https://software.applied-geodesy.org">software.applied-geodesy.org</a><br>..:: Least-Squares Adjustment Software for Geodetic Sciences ::..</p>
+			</footer>
 
 		</body>
 	</html>

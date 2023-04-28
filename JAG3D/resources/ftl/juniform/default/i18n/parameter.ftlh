@@ -53,6 +53,7 @@
 	"parameter_type"   : "Parameter type",
 	"processing_type"  : "Processing type",
 	"value"            : "Value",
+	"uncertainty"      : "Uncertainty",
 	"description"      : "Description",
 	"column"           : "Column"
 }>

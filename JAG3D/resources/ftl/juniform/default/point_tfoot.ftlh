@@ -39,12 +39,12 @@
 		</#if>
 			
 		<#if feature_points.dimension != 1>
-			<td></td>
-			<td></td>
+			<td><@printFormattedNumber value=feature_points.max_residual_x format=df_length_residual/></td>
+			<td><@printFormattedNumber value=feature_points.max_residual_y format=df_length_residual/></td>
 		</#if>
 		
 		<#if feature_points.dimension != 2>
-			<td></td>
+			<td><@printFormattedNumber value=feature_points.max_residual_z format=df_length_residual/></td>
 		</#if>
 
 		<#if feature_points.dimension != 1>

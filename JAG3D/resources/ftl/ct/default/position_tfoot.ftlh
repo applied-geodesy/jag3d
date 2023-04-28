@@ -30,12 +30,12 @@
 			</#if>
 				
 			<#if position_pairs.dimension != 1>
-				<td></td>
-				<td></td>
+				<td><@printFormattedNumber value=(view == "SOURCE")?then(position_pairs.max_residual_x, position_pairs.max_residual_X) format=df_length_residual/></td>
+				<td><@printFormattedNumber value=(view == "SOURCE")?then(position_pairs.max_residual_y, position_pairs.max_residual_Y) format=df_length_residual/></td>
 			</#if>
 			
 			<#if position_pairs.dimension != 2>
-				<td></td>
+				<td><@printFormattedNumber value=(view == "SOURCE")?then(position_pairs.max_residual_z, position_pairs.max_residual_Z) format=df_length_residual/></td>
 			</#if>
 		
 		<#elseif view == "OUTLIER">		
