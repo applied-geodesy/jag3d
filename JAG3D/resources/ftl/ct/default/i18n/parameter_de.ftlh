@@ -37,6 +37,7 @@
 	"parameter_type"   : "Parametertyp",
 	"processing_type"  : "Prozessierungsart",
 	"value"            : "Wert",
+	"uncertainty"      : "Unsicherheit",
 	"description"      : "Beschreibung",
 	"column"           : "Spalte"
 }>

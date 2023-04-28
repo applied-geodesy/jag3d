@@ -6,7 +6,7 @@
 		
 		<th><#outputformat "plainText">${parameter_header_map['value']}</#outputformat></th>
 		
-		<th>&sigma;</th>
+		<th><#outputformat "plainText">${parameter_header_map['uncertainty']}</#outputformat></th>
 		
 		<th><#outputformat "plainText">${parameter_header_map['column']}</#outputformat></th>
 	</tr>

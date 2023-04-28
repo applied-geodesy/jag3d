@@ -12,7 +12,7 @@
 			</dd>
 			
 			<#if interpolation_type??>
-				<dt>Interpolation Type</dt>
+				<dt>Verteilung von Restabweichungen</dt>
 				<dd>
 					<#if interpolation_type == 'NONE'>
 						Keine nachbarschaftstreue Anpassung
