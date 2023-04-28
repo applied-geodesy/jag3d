@@ -313,7 +313,7 @@ public class TransformationAdjustment {
 			this.varianceComponentSourceSystem.setNumberOfObservations(numberOfObservations);
 			this.varianceComponentSourceSystem.setSignificant(false);
 			this.varianceComponentSourceSystem.setRedundancy(0);
-			this.varianceComponentSourceSystem.setVariance0( sigma2apriori < SQRT_EPS ? SQRT_EPS : sigma2apriori );
+			this.varianceComponentSourceSystem.setVariance0(this.varianceComponentOfUnitWeight.getVariance0());
 			this.varianceComponentSourceSystem.setApplyAposterioriVarianceOfUnitWeight(this.varianceComponentOfUnitWeight.isApplyAposterioriVarianceOfUnitWeight());
 			
 			this.varianceComponentTargetSystem.setVariance0(1.0);
@@ -321,7 +321,7 @@ public class TransformationAdjustment {
 			this.varianceComponentTargetSystem.setNumberOfObservations(numberOfObservations);
 			this.varianceComponentTargetSystem.setSignificant(false);
 			this.varianceComponentTargetSystem.setRedundancy(0);
-			this.varianceComponentTargetSystem.setVariance0( sigma2apriori < SQRT_EPS ? SQRT_EPS : sigma2apriori );
+			this.varianceComponentTargetSystem.setVariance0(this.varianceComponentOfUnitWeight.getVariance0());
 			this.varianceComponentTargetSystem.setApplyAposterioriVarianceOfUnitWeight(this.varianceComponentOfUnitWeight.isApplyAposterioriVarianceOfUnitWeight());
 			
 			do {
@@ -1078,7 +1078,7 @@ public class TransformationAdjustment {
 
 			// estimates Qnabla = P * Qvv * P = R * Qvv
 			UpperSymmPackMatrix WwQvvWw = new UpperSymmPackMatrix(dim);
-			QvvWw.mult(this.varianceComponentOfUnitWeight.getVariance0(), Ww, WwQvvWw);
+			QvvWw.mult(Ww, WwQvvWw);
 			QvvWw = null;
 			
 			Vector grossErrorsOfMisclosures = new DenseVector(dim);
