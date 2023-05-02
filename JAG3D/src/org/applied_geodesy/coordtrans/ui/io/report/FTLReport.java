@@ -81,7 +81,7 @@ public class FTLReport {
 	private Template template = null;
 	private static HostServices hostServices;
 	private Map<String, Object> data = new HashMap<String, Object>();
-	public final static String TEMPLATE_PATH = "ftl/ct/";
+	public final static String TEMPLATE_PATH = "ftl/coordtrans/";
 	private final Configuration cfg = new Configuration(VERSION);
 	private TransformationAdjustment adjustment;
 	public FTLReport(TransformationAdjustment adjustment) {

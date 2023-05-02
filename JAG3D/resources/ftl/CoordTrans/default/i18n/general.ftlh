@@ -1,44 +1,45 @@
 	<section>
-		<h2>Project</h2>
+		<h2>Summary</h2>
 		<dl>
-			<dt>CoordTrans</dt><dd>v${ct_version?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}.${ct_build?string["#"]}</dd>
-			<dt>Transformation type</dt>
-			<dd>${dimension?string["#"]}D Transformation</dd>
-			<dt>Date of calculation</dt><dd>${date?datetime?string("dd.MM.yyyy' - 'HH:mm:ss")}</dd>
-			
-			<dt>Adjustment type</dt>
+			<dt>CoordTrans Version</dt><dd>v${version?string["#"]}</dd>
+			<dt>Date of Calculation</dt><dd>${report_creation_date?date?string("dd.MM.yyyy")}</dd>
+
+			<dt>Adjustment Type</dt>
 			<dd>
-				<#if adjustment_type == 'L1NORM'>
-					Robust estimator (Danish method), k = ${threshold?string["0.0;; roundingMode=halfEven decimalSeparator='.'"]}
-				<#elseif adjustment_type == 'L2NORM'>
-					Least squares adjustment (Gau&szlig;-Helmert model)
+				<#if estimation_type == 'L2NORM'>
+					Least squares adjustment (L<sub>2</sub>Norm)
 				</#if>
 			</dd>
 			
-			<#if neighbourhood_adjustment_scheme?? && neighbourhood_adjustment_scheme != "NO_SCHEME">
-				<dt>Flaw dislocation</dt>
+			<#if interpolation_type??>
+				<dt>Interpolation Type</dt>
 				<dd>
-					<#assign hasParams = false>
-					<#if neighbourhood_adjustment_scheme == 'DISTANCE_WEIGHT_SCHEME'>
-						<#assign hasParams = true>
-						Distance weighted scheme
-					<#elseif neighbourhood_adjustment_scheme == 'MULTI_QUADRATIC_SCHEME'>
-						<#assign hasParams = true>
-						Multiquadratic interpolation
-					<#elseif neighbourhood_adjustment_scheme == 'SECTOR_METHODE_SCHEME'>
-						<#assign hasParams = true>
-						Distance and angle weighted sector method
-					<#elseif neighbourhood_adjustment_scheme == 'NATURAL_NEIGHBOUR_SCHEME'>	
-						Natural Neighbour (only X,Y-coordinates, no extrapolation)
-					</#if>
-					<#if hasParams>
-						(a = ${neighbourhood_adjustment_scheme_parameter_a?string["0.00;; roundingMode=halfEven decimalSeparator='.'"]}, 
-						b = ${neighbourhood_adjustment_scheme_parameter_b?string["0.00;; roundingMode=halfEven decimalSeparator='.'"]})
+					<#if interpolation_type == 'NONE'>
+						None
+					<#elseif interpolation_type == 'INVERSE_DISTANCE_WEIGHTING'>
+						Inverse distance weighting
+						<ul>
+							<li>Exponent: ${interpolation_idw_exponent?string[df_double]}</li>
+							<li>Smooting: ${interpolation_idw_smoothing?string[df_double]}</li>
+						</ul>
+					<#elseif interpolation_type == 'MULTI_QUADRATIC'>
+						Multi-quadratic interpolation
+						<ul>
+							<li>Exponent: ${interpolation_mq_exponent?string[df_double]}</li>
+							<li>Smooting: ${interpolation_mq_smoothing?string[df_double]}</li>
+						</ul>
+					<#elseif interpolation_type == 'SECTOR'>
+						Sector interpolation (angles and distances)
+						<ul>
+							<li>Numerator exponent: ${interpolation_sect_numerator_exponent?string[df_double]}</li>
+							<li>Denominator exponent: ${interpolation_sect_denominator_exponent?string[df_double]}</li>
+						</ul>
 					</#if>
 				</dd>
 			</#if>
 			
-			<dt>Probability value &alpha; [%]</dt><dd>${alpha?string["0.0#;; roundingMode=halfEven decimalSeparator='.'"]}</dd>
-			<dt>Test power (1-&beta;) [%]</dt><dd>${beta?string["0.0#;; roundingMode=halfEven decimalSeparator='.'"]}</dd>
+			<dt>Probability Value &alpha;</dt><dd>${test_statistic_probability_value?string[df_percentage]}&nbsp;${unit_abbr_percentage}</dd>
+			<dt>Test Power (1-&beta;)</dt><dd>${test_statistic_power_of_test?string[df_percentage]}&nbsp;${unit_abbr_percentage}</dd>
+
 		</dl>
 	</section>

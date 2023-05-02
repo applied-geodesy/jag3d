@@ -6,7 +6,7 @@
 }>
 
 <#assign vce_type_map = {
-		"TOTAL" :              "Gesamtausgleichung",
-		"SOURCE_POINT_GROUP" : "Startsystem",
-		"TARGET_POINT_GROUP" : "Zielsystem"
+		"GLOBAL" : "Gesamtausgleichung",
+		"SOURCE" : "Startsystem",
+		"TARGET" : "Zielsystem"
 }>

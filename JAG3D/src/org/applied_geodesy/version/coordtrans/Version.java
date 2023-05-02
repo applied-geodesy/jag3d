@@ -27,8 +27,8 @@ import org.applied_geodesy.version.VersionType;
 
 public class Version {
 	private final static Map<VersionType, Integer> versions = Map.of(
-			VersionType.ADJUSTMENT_CORE,   20220428,
-			VersionType.USER_INTERFACE,    20230123
+			VersionType.ADJUSTMENT_CORE,   20230502,
+			VersionType.USER_INTERFACE,    20230502
 	);
 	
 	private Version() {}
@@ -45,6 +45,6 @@ public class Version {
 	}
 	
 	public static boolean isReleaseCandidate() {
-		return Boolean.TRUE;
+		return Boolean.FALSE;
 	}
 }

@@ -1,13 +1,14 @@
 <tbody>
 	<#list vce as vce_comp>
-		<#if vce_type_map[vce_comp.type]?? >
+		<#if vce_type_map[vce_comp.type]?? && vce_comp.number_of_observations?? && vce_comp.number_of_observations gt 0 >
 			<tr>
 				<th><#outputformat "plainText">${vce_type_map[vce_comp.type]}</#outputformat></th>
-				<td>${vce_comp.redundancy?string[df_redundancy]}</td>
-				<td>${vce_comp.omega?string[df_omega]}</td>
-				<td>${vce_comp.sigma2apost?string[df_teststatistic]}</td>
-				<td>${vce_comp.k_prio?string[df_teststatistic]}</td>
-				<td><span class="${(!vce_comp.t_prio?is_infinite && !vce_comp.k_prio?is_infinite && vce_comp.t_prio gt vce_comp.k_prio)?then('rejected', 'accepted')}"><#outputformat "plainText">${(!vce_comp.t_prio?is_infinite && !vce_comp.k_prio?is_infinite && vce_comp.t_prio gt vce_comp.k_prio)?then('&#x2718;', '&#x2714;')}</#outputformat></span></td>
+				<td>${vce_comp.number_of_observations?string["#"]}</td>
+				<td><@printFormattedNumber value=vce_comp.redundancy format=df_statistic/></td>
+				<td><@printFormattedNumber value=vce_comp.omega format=df_statistic/></td>
+				<td><@printFormattedNumber value=vce_comp.sigma2apost format=df_statistic/></td>
+				<td><@printFormattedNumber value=vce_comp.quantile format=df_statistic/></td>
+				<td><span class="${vce_comp.significant?then('rejected', 'accepted')}"><#outputformat "plainText">${vce_comp.significant?then('&#x2718;', '&#x2714;')}</#outputformat></span></td>
 			</tr>
 		</#if>
 	</#list>

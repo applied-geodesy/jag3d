@@ -38,7 +38,6 @@ module org.applied_geodesy.jag3d {
 	requires mtj;
 
 	requires freemarker;
-	requires CoordTrans;
 	requires GeoTra;
 
 	requires org.hsqldb;

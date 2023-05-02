@@ -246,6 +246,10 @@ public class CoordTrans extends Application {
 			adjustment.addTransformationChangeListener(UIFramePositionPairTableBuilder.getInstance());
 			adjustment.addTransformationChangeListener(new AdjustmentTransformationChangedListener());
 		}
+		else {
+			primaryStage.show();
+			primaryStage.toFront();
+		}
 	}
 
 	

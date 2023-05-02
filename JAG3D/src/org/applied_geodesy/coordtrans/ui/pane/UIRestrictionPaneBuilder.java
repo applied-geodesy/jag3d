@@ -110,6 +110,7 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 	private Node restrictionNode = null;
 	private Map<ParameterRestrictionType, CheckBox> parameterRestrictionCheckboxes = new HashMap<ParameterRestrictionType, CheckBox>();
 	private TransformationType lastTransformationType = null;
+	private MenuBar transformationMenuBar = new MenuBar();
 	
 	private UIRestrictionPaneBuilder() {
 		this.init();
@@ -260,9 +261,7 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 				parameterGridPane
 		);
 		titledPane.setCollapsible(false);
-		
-		
-		MenuBar menuBar = new MenuBar();
+
 		Menu menu = new Menu();
 		Label label = new Label(i18n.getString("UIRestrictionPaneBuilder.transformation.property.label", "\u25BC"));
 		label.setTooltip(new Tooltip(i18n.getString("UIRestrictionPaneBuilder.transformation.property.tooltip", "Select transformation properties")));
@@ -272,9 +271,10 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 				getMenuItem(i18n.getString("UIRestrictionPaneBuilder.transformation.property.similar.label", "Similar"), transformationPropertyEventHandler, TransformationPropertyType.SIMILAR),
 				getMenuItem(i18n.getString("UIRestrictionPaneBuilder.transformation.property.affine.label", "Affine"), transformationPropertyEventHandler, TransformationPropertyType.AFFINE)
 		);
-		menuBar.setBackground(null);
-		menuBar.setPadding(new Insets(0,5,0,0));
-		menuBar.getMenus().add(menu);	
+		this.transformationMenuBar.setBackground(null);
+		this.transformationMenuBar.setPadding(new Insets(0,5,0,0));
+		this.transformationMenuBar.getMenus().add(menu);
+		this.transformationMenuBar.setDisable(true);
 		
 		HBox header = new HBox();
 		header.setPadding(new Insets(0));
@@ -282,9 +282,9 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		header.setSpacing(0);
 		HBox.setHgrow(spacer, Priority.ALWAYS);
 		header.setSpacing(0);
-		header.getChildren().setAll(titledPane.getGraphic(), spacer, menuBar);
+		header.getChildren().setAll(titledPane.getGraphic(), spacer, this.transformationMenuBar);
 		titledPane.setGraphic(header);
-		header.minWidthProperty().bind(titledPane.widthProperty().subtract(menuBar.widthProperty()));
+		header.minWidthProperty().bind(titledPane.widthProperty().subtract(this.transformationMenuBar.widthProperty()));
 		
 		return titledPane;
 	}
@@ -337,12 +337,12 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		if (this.transformation != null)
 			this.lastTransformationType = this.transformation.getTransformationEquations().getTransformationType();
 		
-		if (evt.getEventType() == TransformationEventType.TRANSFORMATION_MODEL_REMOVED) {
+		if (evt.getEventType() == TransformationEventType.TRANSFORMATION_MODEL_REMOVED)
 			this.transformation = null;
-		}
-		else if (evt.getEventType() == TransformationEventType.TRANSFORMATION_MODEL_ADDED) {
+		else if (evt.getEventType() == TransformationEventType.TRANSFORMATION_MODEL_ADDED)
 			this.transformation = evt.getSource();	
-		}
+
+		this.transformationMenuBar.setDisable(evt.getEventType() == TransformationEventType.TRANSFORMATION_MODEL_REMOVED);
 		this.setDisable();
 		
 		if (this.lastTransformationType == null || this.transformation == null || this.lastTransformationType != this.transformation.getTransformationEquations().getTransformationType())

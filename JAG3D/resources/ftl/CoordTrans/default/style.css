@@ -2,35 +2,37 @@
     margin: 0;
     padding: 0;
 }
+
 html {
-    font-family: verdana, arial, sans-serif;
-    color: #2a2a2a;
     background: #fefefe;
+}
+
+html, p, pre, dt, dl, dd {
+	font-family: verdana, arial, sans-serif;
+    color: #2a2a2a;
     font-size: 12px;
 }
+
 header {
 	width: 75%;
 	margin-left: 10%;
 	margin-top: 25px;
 	font: bold 1.0em Georgia, Times, 'Times New Roman', serif;
-	color: #d45400;
+	color: #023bb0;
 }
 header h1 span {
 	font-size: 0.5em;
-	color: #e25a00;
+	color: #3f64b0;
 }
 table {
     margin: 0 0;
     border-collapse: separate;
     background: #fafafa;
     border-spacing: 0;
-
 }
-/*
 table.j3d_datatable {
-    width: 100%;
+    /*width: 100%;*/
 }
-*/
 table.j3d_datatable tbody td,
 table.j3d_datatable tfoot td {
     text-align: right;
@@ -40,19 +42,19 @@ table thead th {
     border-top: 1px solid #eaeaea;
     border-bottom: 1px solid #fefefe;
     color: #fefefe;
-    background: #e25a00;
-    background: linear-gradient(to bottom, #e25a00 0%, #d45400 100%);
+    background: #3f64b0;
+    background: linear-gradient(to bottom, #3f64b0 0%, #023bb0 100%);
 }
 table thead th span {
     display: block;
     font-weight: lighter;
     font-size: 0.75em;
 }
-table thead th span.unit:before {
-    content: "[";
+table thead th span.unit:not(:empty):before {
+    content: " in ";
 }
-table thead th span.unit:after {
-	content: "]";
+table thead th span.unit:not(:empty):after {
+	content: "";
 }	
 table thead th:first-child {
     border-top-left-radius: 7px;
@@ -100,12 +102,12 @@ table thead th:last-child {
 }
 table tbody td:first-child,
 table tbody th:first-child {
-    border-left: 1px solid #e25a00;
+    border-left: 1px solid #3f64b0;
 }
 table tbody td:last-child,
 table tbody th:last-child {
     text-align: center;
-    border-right: 1px solid #e25a00;
+    border-right: 1px solid #3f64b0;
 }
 table.j3d_datatable tfoot td:last-child {
     text-align: center;
@@ -114,8 +116,8 @@ table tfoot td {
     border-bottom: 1px solid #dadada;
     color: #fefefe;
     padding: 0 5px;
-    background: #e25a00;
-    background: linear-gradient(to bottom, #d45400 0%, #e25a00 100%);
+    background: #3f64b0;
+    background: linear-gradient(to bottom, #023bb0 0%, #3f64b0 100%);
 }
 table tfoot td:first-child {
     border-bottom-left-radius: 7px;
@@ -143,10 +145,10 @@ section {
     padding: 1.5em;
     background: #f9f9f9;
     background-image: linear-gradient(to bottom right, #f9f9f9 0%, #fefefe 50%);
-    border-left: 1px solid #d45400;
-    border-top: 1px solid #d45400;
+    border-left: 1px solid #023bb0;
+    border-top: 1px solid #023bb0;
     border-radius: 2px 2px 2px 2px;
-    border-image: linear-gradient(to bottom right, #d45400 0%, #f9f9f9 50%) 1 1;
+    border-image: linear-gradient(to bottom right, #023bb0 0%, #f9f9f9 50%) 1 1;
 }
 section h2 {
     margin: 0 0 0.5em 0;
@@ -215,7 +217,7 @@ figcaption {
 	font-size: 0.7em;
 }
 ol.chart {
-    border-left: 5px solid #e25a00;
+    border-left: 5px solid #3f64b0;
     background: none;
     list-style: none;
     padding: 0;
@@ -224,7 +226,7 @@ ol.chart {
 }
 ol.chart li {
     display: block;
-    border: 1px solid #e25a00;
+    border: 1px solid #3f64b0;
     width: 500px;
     margin: 5px 0 5px 3px;
     box-shadow: 2px 2px 5px #e4ebf2;

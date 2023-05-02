@@ -282,10 +282,6 @@ public class FilePathsSelectionDialog {
 		gridPane.add(transformationTypeLabel,         0, row); 
 		gridPane.add(groupBox,                        1, row++, 2, 1); 
 		
-		//TODO remove values
-		this.sourceSystemPathTextField.setText("C:\\Users\\Micha\\Desktop\\start.txt");
-		this.targetSystemPathTextField.setText("C:\\Users\\Micha\\Desktop\\ziel.txt");
-		
 		return gridPane;
 	}
 	
