@@ -91,7 +91,7 @@ public class UITreeBuilder {
 				}
 				else {
 					for (TreeItem<TreeItemValue> treeItem : treeItems) {
-						if (treeItem.isLeaf() && treeItem.getValue().getItemType() == treeItemValue.getItemType() && treeItem.getValue().isEnable() != newValue) {
+						if (treeItem.isLeaf() && treeItem.getValue().getItemType() == treeItemValue.getItemType()) {
 							treeItem.getValue().setEnable(newValue);
 							save(treeItem.getValue());
 						}
