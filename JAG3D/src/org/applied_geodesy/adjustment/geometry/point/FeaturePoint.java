@@ -156,7 +156,7 @@ public class FeaturePoint extends Point implements Iterable<GeometricPrimitive> 
             protected Double computeValue() {
             	if (testStatistic.get().varianceComponentProperty().get().isApplyAposterioriVarianceOfUnitWeight())
             		return Math.sqrt(Math.abs(cofactorX.get() * testStatistic.get().varianceComponentProperty().get().varianceProperty().get()));
-            	return Math.sqrt(Math.abs(cofactorX.get()));
+            	return Math.sqrt(Math.abs(cofactorX.get() * testStatistic.get().varianceComponentProperty().get().variance0Property().get()));
             }
         };
         
@@ -169,7 +169,7 @@ public class FeaturePoint extends Point implements Iterable<GeometricPrimitive> 
             protected Double computeValue() {
             	if (testStatistic.get().varianceComponentProperty().get().isApplyAposterioriVarianceOfUnitWeight())
             		return Math.sqrt(Math.abs(cofactorY.get() * testStatistic.get().varianceComponentProperty().get().varianceProperty().get()));
-            	return Math.sqrt(Math.abs(cofactorY.get()));
+            	return Math.sqrt(Math.abs(cofactorY.get() * testStatistic.get().varianceComponentProperty().get().variance0Property().get()));
             }
         };
         
@@ -182,7 +182,7 @@ public class FeaturePoint extends Point implements Iterable<GeometricPrimitive> 
             protected Double computeValue() {
             	if (testStatistic.get().varianceComponentProperty().get().isApplyAposterioriVarianceOfUnitWeight())
             		return Math.sqrt(Math.abs(cofactorZ.get() * testStatistic.get().varianceComponentProperty().get().varianceProperty().get()));
-            	return Math.sqrt(Math.abs(cofactorZ.get()));
+            	return Math.sqrt(Math.abs(cofactorZ.get() * testStatistic.get().varianceComponentProperty().get().variance0Property().get()));
             }
         };
         
