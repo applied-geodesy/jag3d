@@ -182,11 +182,8 @@ public class TransformationAdjustment {
 	}
 
 	public void setTransformation(Transformation transformation) {
-		if (this.transformation != null) {
-//			this.transformation.getFramePositionPairs().clear();
-//			this.transformation.getHomologousFramePositionPairs().clear();
+		if (this.transformation != null)
 			this.fireTransformationChanged(this.transformation, TransformationEventType.TRANSFORMATION_MODEL_REMOVED);
-		}
 				
 		this.reset();
 		this.transformation = transformation;
@@ -621,7 +618,7 @@ public class TransformationAdjustment {
 					double T           = !isFixedParameter && uncertainty > SQRT_EPS & Math.abs(dVal) > SQRT_EPS ? dVal * dVal / cofactor : 0;
 
 					unknownParameter.setValue(value);
-					unknownParameter.setUncertainty(uncertainty );
+					unknownParameter.setUncertainty(uncertainty);
 					unknownParameter.getTestStatistic().setFisherTestNumerator(T);
 					unknownParameter.getTestStatistic().setDegreeOfFreedom(dim);
 
@@ -1012,15 +1009,13 @@ public class TransformationAdjustment {
 			
 			Matrix JvQll = new DenseMatrix(dim, dim); 
 			Jv.mult(1.0/this.varianceComponentOfUnitWeight.getVariance0(), Qll, JvQll);
-
-			Matrix WJxQxxJxTWJvSrcQll = new DenseMatrix(dim, dim);
-			WJxQxxJxTW.mult(JvQll, WJxQxxJxTWJvSrcQll);
 			
 			Matrix WJxQxxJxTWJvQll = new DenseMatrix(dim, dim);
 			WJxQxxJxTW.mult(JvQll, WJxQxxJxTWJvQll);
 			
 			Matrix QllJvTWJxQxxJxTWJvQll = new UpperSymmPackMatrix(dim);
 			JvQll.transAmult(WJxQxxJxTWJvQll, QllJvTWJxQxxJxTWJvQll);
+			WJxQxxJxTWJvQll = null;
 
 			// estimates redundancies R = P * Qvv
 			Matrix P = point.getInvertedDispersion(false);
@@ -1049,6 +1044,7 @@ public class TransformationAdjustment {
 				}
 			}
 			
+			// estimate cofactors of observations Q_ll = Qll - Qvv
 			for (int row = 0; row < dim; row++) {
 				if (row == 0 && dim != 1)
 					point.setCofactorX(Qll.get(row, row) / this.varianceComponentOfUnitWeight.getVariance0() - QllJvTWJxQxxJxTWJvQll.get(row, row));

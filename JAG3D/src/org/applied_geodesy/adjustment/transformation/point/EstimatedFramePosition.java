@@ -121,7 +121,7 @@ public class EstimatedFramePosition extends Position implements AdjustablePositi
         	protected Double computeValue() {
         		if (varianceComponent.get().isApplyAposterioriVarianceOfUnitWeight())
         			return Math.sqrt(Math.abs(cofactorX.get() * varianceComponent.get().varianceProperty().get()));
-        		return Math.sqrt(Math.abs(cofactorX.get()));
+        		return Math.sqrt(Math.abs(cofactorX.get() * varianceComponent.get().variance0Property().get()));
         	}
         };
 
@@ -134,7 +134,7 @@ public class EstimatedFramePosition extends Position implements AdjustablePositi
         	protected Double computeValue() {
         		if (varianceComponent.get().isApplyAposterioriVarianceOfUnitWeight())
         			return Math.sqrt(Math.abs(cofactorY.get() * varianceComponent.get().varianceProperty().get()));
-        		return Math.sqrt(Math.abs(cofactorY.get()));
+        		return Math.sqrt(Math.abs(cofactorY.get() * varianceComponent.get().variance0Property().get()));
         	}
         };
 
@@ -147,7 +147,7 @@ public class EstimatedFramePosition extends Position implements AdjustablePositi
         	protected Double computeValue() {
         		if (varianceComponent.get().isApplyAposterioriVarianceOfUnitWeight())
         			return Math.sqrt(Math.abs(cofactorZ.get() * varianceComponent.get().varianceProperty().get()));
-        		return Math.sqrt(Math.abs(cofactorZ.get()));
+        		return Math.sqrt(Math.abs(cofactorZ.get() * varianceComponent.get().variance0Property().get()));
         	}
         };
 	}
