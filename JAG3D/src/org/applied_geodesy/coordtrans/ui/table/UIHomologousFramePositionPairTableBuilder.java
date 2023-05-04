@@ -53,6 +53,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.util.Callback;
 
 public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBuilder<HomologousFramePositionPair> implements TransformationChangeListener {	
@@ -724,9 +725,10 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 							this.button.setOnAction(new EventHandler<ActionEvent>() {
 								@Override
 								public void handle(ActionEvent event) {
-									HomologousFramePositionPair positionPair = getTableRow().getItem();
-									getTableView().getSelectionModel().clearAndSelect(getTableRow().getIndex());
-									MatrixDialog.showAndWait(positionPair.getName(), positionPair.getSourceSystemPosition(), positionPair.getTargetSystemPosition());
+									TableViewSelectionModel<HomologousFramePositionPair> tableSelectionModel = getTableView().getSelectionModel();
+									//HomologousFramePositionPair positionPair = getTableRow().getItem();
+									tableSelectionModel.clearAndSelect(getTableRow().getIndex());
+									MatrixDialog.showAndWait(tableSelectionModel);
 								}
 								
 							});

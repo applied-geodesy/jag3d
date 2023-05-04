@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.transformation.point.DispersionablePosition;
+import org.applied_geodesy.adjustment.transformation.point.PositionPair;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.utils.UiUtil;
 import org.applied_geodesy.ui.textfield.DoubleTextField;
@@ -34,9 +35,12 @@ import org.applied_geodesy.util.CellValueType;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
@@ -44,6 +48,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -104,19 +109,23 @@ public class MatrixDialog {
 	private DoubleTextField[][] matrixElementsSourceSystem, matrixElementsTargetSystem;
 	private TitledPane sourceDispersionTitledPane, targetDispersionTitledPane;
 	private Accordion accordion = null;
-	private DispersionablePosition sourcePosition, targetPosition;
+	private DispersionablePosition currentSourcePosition, currentTargetPosition;
 	private ToggleGroup matrixTypeSourceSystemToggleGroup, matrixTypeTargetSystemToggleGroup;
 	private MatrixType matrixTypeSourceSystem = null, matrixTypeTargetSystem = null;
+	private TableViewSelectionModel<? extends PositionPair<?,?>> tableViewSelectionModel;
+	private Button previousButton = null, nextButton = null; 
 	private MatrixDialog() {}
 
 	public static void setOwner(Window owner) {
 		matrixDialog.window = owner;
 	}
+	
+	public static Optional<Void> showAndWait(TableViewSelectionModel<? extends PositionPair<?,?>> tableViewSelectionModel) {
+		matrixDialog.tableViewSelectionModel = tableViewSelectionModel;
 
-	public static Optional<Void> showAndWait(String name, DispersionablePosition sourcePosition, DispersionablePosition targetPosition) {
 		matrixDialog.init();
-		matrixDialog.setName(name);
-		matrixDialog.setDispersionablePositions(sourcePosition, targetPosition);
+		matrixDialog.setSelectedPositionPair();
+		
 		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
 		Platform.runLater(new Runnable() {
 			@Override
@@ -143,28 +152,89 @@ public class MatrixDialog {
 		this.dialog = new Dialog<Void>();
 		this.dialog.setTitle(i18n.getString("MatrixDialog.title", "Dispersion matrix"));
 		this.dialog.setHeaderText(String.format(Locale.ENGLISH, i18n.getString("MatrixDialog.header", "Dispersion of point %s"), ""));
-		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK);
+		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.PREVIOUS, ButtonType.NEXT, ButtonType.OK, ButtonType.CLOSE);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
 		this.dialog.initOwner(window);
 		this.dialog.getDialogPane().setContent(this.createPane());
 		this.dialog.setResizable(true);
+		
+		Node closeButton = this.dialog.getDialogPane().lookupButton(ButtonType.CLOSE);
+        closeButton.managedProperty().bind(closeButton.visibleProperty());
+        closeButton.setVisible(false);
+        
+        this.previousButton = (Button) this.dialog.getDialogPane().lookupButton(ButtonType.PREVIOUS);
+        this.previousButton.addEventFilter(ActionEvent.ACTION, new EventHandler<ActionEvent>() {
+        	@Override
+        	public void handle(ActionEvent event) {
+        		event.consume();
+        		changePositionPair(false);
+        	}
+        });
+
+        this.nextButton = (Button) this.dialog.getDialogPane().lookupButton(ButtonType.NEXT);
+        this.nextButton.addEventFilter(ActionEvent.ACTION, new EventHandler<ActionEvent>() {
+        	@Override
+        	public void handle(ActionEvent event) {
+        		event.consume();
+        		changePositionPair(true);				
+        	}
+        });
 
 		this.dialog.setResultConverter(new Callback<ButtonType, Void>() {
 			@Override
 			public Void call(ButtonType buttonType) {
 				if (buttonType == ButtonType.OK) {
-					setMatrix(sourcePosition, FrameType.SOURCE);
-					setMatrix(targetPosition, FrameType.TARGET);
+					setMatrix(currentSourcePosition, FrameType.SOURCE);
+					setMatrix(currentTargetPosition, FrameType.TARGET);
 				}
 				return null;
 			}
 		});
 	}
 	
+	private void setSelectedPositionPair() {
+		final int numberOfPointPairs = this.tableViewSelectionModel.getTableView().getItems().size();
+		if (numberOfPointPairs <= 0)
+			return;
+		
+		PositionPair<?, ?> positionPair = this.tableViewSelectionModel.getSelectedItem();
+		if (positionPair == null) {
+			this.tableViewSelectionModel.clearAndSelect(0);
+			positionPair = this.tableViewSelectionModel.getSelectedItem();
+		}
+			
+		if (positionPair != null) {
+			int index = this.tableViewSelectionModel.getSelectedIndex();
+			this.tableViewSelectionModel.clearAndSelect(index);
+
+			DispersionablePosition sourcePosition = positionPair.getSourceSystemPosition() instanceof DispersionablePosition ? (DispersionablePosition)positionPair.getSourceSystemPosition() : null;
+			DispersionablePosition targetPosition = positionPair.getTargetSystemPosition() instanceof DispersionablePosition ? (DispersionablePosition)positionPair.getTargetSystemPosition() : null;
+
+			this.setName(positionPair.getName());
+			this.setDispersionablePositions(sourcePosition, targetPosition);
+			
+			this.previousButton.setDisable(index <= 0);
+			this.nextButton.setDisable(index + 1 >= numberOfPointPairs);
+		}
+	}
+	
+	private void changePositionPair(boolean next) {
+		// Save current values
+		this.setMatrix(this.currentSourcePosition, FrameType.SOURCE);
+		this.setMatrix(this.currentTargetPosition, FrameType.TARGET);
+		
+		if (next)
+			this.tableViewSelectionModel.selectNext();
+		else
+			this.tableViewSelectionModel.selectPrevious();
+		
+		this.setSelectedPositionPair();
+	}
+	
 	private void setDispersionablePositions(DispersionablePosition sourcePosition, DispersionablePosition targetPosition) {
 		try {
-			this.sourcePosition = sourcePosition;
-			this.targetPosition = targetPosition;
+			this.currentSourcePosition = sourcePosition;
+			this.currentTargetPosition = targetPosition;
 
 			this.sourceDispersionTitledPane.setAnimated(false);
 			this.targetDispersionTitledPane.setAnimated(false);
@@ -184,8 +254,8 @@ public class MatrixDialog {
 			this.sourceDispersionTitledPane.setVisible(sourcePosition != null);
 			this.targetDispersionTitledPane.setVisible(targetPosition != null);
 
-			this.setDispersionablePosition(this.sourcePosition, FrameType.SOURCE);
-			this.setDispersionablePosition(this.targetPosition, FrameType.TARGET);
+			this.setDispersionablePosition(this.currentSourcePosition, FrameType.SOURCE);
+			this.setDispersionablePosition(this.currentTargetPosition, FrameType.TARGET);
 		}
 		finally {
 			this.sourceDispersionTitledPane.setAnimated(true);
@@ -388,6 +458,32 @@ public class MatrixDialog {
 			matrixElements = this.matrixElementsTargetSystem;
 		}
 		
+		if (matrixType == MatrixType.DENSE) {
+			boolean diagonalMatrixType = true;
+			for (int row = 0; row < dimension; row++) {
+				for (int column = row + 1; column < dimension; column++) {
+					if (matrixElements[row][column].getNumber().doubleValue() != 0) {
+						diagonalMatrixType = false;
+						break;
+					}
+				}
+			}
+			if (diagonalMatrixType)
+				matrixType = MatrixType.DIAGONAL;
+		}
+		
+		if (matrixType == MatrixType.DIAGONAL) {
+			boolean identityMatrixType = true;
+			for (int idx = 0; idx < dimension; idx++) {
+				if (matrixElements[idx][idx].getNumber().doubleValue() != 1) {
+					identityMatrixType = false;
+					break;
+				}
+			}
+			if (identityMatrixType)
+				matrixType = MatrixType.IDENTITY;
+		}
+		
 		switch(matrixType) {
 		case DENSE:
 			matrix = new UpperSymmPackMatrix(dimension);
@@ -410,7 +506,6 @@ public class MatrixDialog {
 				entry.set(value);
 			}
 		}
-		
 		position.setDispersionApriori(matrix);
 	}
 }

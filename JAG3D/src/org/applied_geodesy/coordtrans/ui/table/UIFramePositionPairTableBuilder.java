@@ -51,6 +51,7 @@ import javafx.scene.control.Control;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
@@ -364,9 +365,10 @@ public class UIFramePositionPairTableBuilder extends UIEditableTableBuilder<Fram
 							this.button.setOnAction(new EventHandler<ActionEvent>() {
 								@Override
 								public void handle(ActionEvent event) {
-									FramePositionPair positionPair = getTableRow().getItem();
-									getTableView().getSelectionModel().clearAndSelect(getTableRow().getIndex());
-									MatrixDialog.showAndWait(positionPair.getName(), positionPair.getSourceSystemPosition(), null);
+									TableViewSelectionModel<FramePositionPair> tableSelectionModel = getTableView().getSelectionModel();
+									//FramePositionPair positionPair = getTableRow().getItem();
+									tableSelectionModel.clearAndSelect(getTableRow().getIndex());
+									MatrixDialog.showAndWait(tableSelectionModel);
 								}
 								
 							});

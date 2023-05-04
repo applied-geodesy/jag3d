@@ -38,6 +38,7 @@ import org.applied_geodesy.coordtrans.ui.dialog.FormatterOptionDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.LeastSquaresSettingDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.MatrixDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.QuantilesDialog;
+import org.applied_geodesy.coordtrans.ui.dialog.ReadFileProgressDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.TransformationAdjustmentDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.VarianceComponentsDialog;
@@ -143,6 +144,7 @@ public class CoordTrans extends Application {
 		LeastSquaresSettingDialog.setOwner(primaryStage);
 		TestStatisticDialog.setOwner(primaryStage);
 		FormatterOptionDialog.setOwner(primaryStage);
+		ReadFileProgressDialog.setOwner(primaryStage);
 	}
 	
 	@Override
