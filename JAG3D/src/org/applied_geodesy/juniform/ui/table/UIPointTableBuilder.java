@@ -541,7 +541,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 							this.button.getTooltip().setText(String.format(
 									Locale.ENGLISH, 
 									i18n.getString("UIPointTableBuilder.dispersion.button.tooltip", "Show dispersion of point %s"),
-									getTableView().getItems().get(getIndex()).getName()));
+									getTableRow().getItem() == null || getTableRow().getItem().getName() == null ? "" : getTableRow().getItem().getName()));
 							
 							this.button.setOnMousePressed(new EventHandler<MouseEvent>() {
 								@Override
