@@ -190,11 +190,11 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 			AnalysisChartsDialog.showAndWait();
 			break;
 			
-		case MODULE_COORDTRANS:
 		case MODULE_GEOTRA:
 			this.menuBuilder.showSwingApplication(menuItemType);
 			break;
-			
+
+		case MODULE_COORDTRANS:
 		case MODULE_JUNIFORM:
 			this.menuBuilder.showModule(menuItemType);
 			break;

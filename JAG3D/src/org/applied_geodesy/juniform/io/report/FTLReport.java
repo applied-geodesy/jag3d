@@ -388,6 +388,10 @@ public class FTLReport {
 		List<FeaturePoint> featurePoints = this.adjustment.getFeature().getFeaturePoints();
 		
 		int dimension = -1;
+		double maxResidualGroupX = 0;
+		double maxResidualGroupY = 0;
+		double maxResidualGroupZ = 0;
+		
 		double redundancyGroupX = 0;
 		double redundancyGroupY = 0;
 		double redundancyGroupZ = 0;
@@ -429,20 +433,23 @@ public class FTLReport {
 				h.put("sigma_x", options.convertLengthUncertaintyToView(point.getUncertaintyX()));
 				h.put("sigma_y", options.convertLengthUncertaintyToView(point.getUncertaintyY()));
 				
-				h.put("residual_x", options.convertLengthResidualToView(point.getResidualX()));
-				h.put("residual_y", options.convertLengthResidualToView(point.getResidualY()));
-				
 				h.put("minimal_detectable_bias_x", options.convertLengthResidualToView(point.getMinimalDetectableBiasX()));
 				h.put("minimal_detectable_bias_y", options.convertLengthResidualToView(point.getMinimalDetectableBiasY()));
 				
 				h.put("maximum_tolerable_bias_x", options.convertLengthResidualToView(point.getMaximumTolerableBiasX()));
 				h.put("maximum_tolerable_bias_y", options.convertLengthResidualToView(point.getMaximumTolerableBiasY()));
 				
+				double residualX = options.convertLengthResidualToView(point.getResidualX());
+				double residualY = options.convertLengthResidualToView(point.getResidualY());
+				
 				double grossErrorX = options.convertLengthResidualToView(point.getGrossErrorX());
 				double grossErrorY = options.convertLengthResidualToView(point.getGrossErrorY());
 				
 				double redundancyX = point.getRedundancyX();
 				double redundancyY = point.getRedundancyY();
+				
+				h.put("residual_x", residualX);
+				h.put("residual_y", residualY);
 				
 				h.put("gross_error_x", grossErrorX);
 				h.put("gross_error_y", grossErrorY);
@@ -452,6 +459,9 @@ public class FTLReport {
 				
 				redundancyGroupX += redundancyX;
 				redundancyGroupY += redundancyY;
+				
+				maxResidualGroupX = Math.abs(residualX) > Math.abs(maxResidualGroupX) ? residualX : maxResidualGroupX;
+				maxResidualGroupY = Math.abs(residualY) > Math.abs(maxResidualGroupY) ? residualY : maxResidualGroupY;
 				
 				maxGrossErrorGroupX = Math.abs(grossErrorX) > Math.abs(maxGrossErrorGroupX) ? grossErrorX : maxGrossErrorGroupX;
 				maxGrossErrorGroupY = Math.abs(grossErrorY) > Math.abs(maxGrossErrorGroupY) ? grossErrorY : maxGrossErrorGroupY;
@@ -465,21 +475,24 @@ public class FTLReport {
 				
 				h.put("sigma_z", options.convertLengthUncertaintyToView(point.getUncertaintyZ()));
 				
-				h.put("residual_z", options.convertLengthResidualToView(point.getResidualZ()));
-				
 				h.put("minimal_detectable_bias_z", options.convertLengthResidualToView(point.getMinimalDetectableBiasZ()));
 				
 				h.put("maximum_tolerable_bias_z", options.convertLengthResidualToView(point.getMaximumTolerableBiasZ()));
+				
+				double residualZ = options.convertLengthResidualToView(point.getResidualZ());
 				
 				double grossErrorZ = options.convertLengthResidualToView(point.getGrossErrorZ());
 				
 				double redundancyZ = point.getRedundancyZ();
 				
+				h.put("residual_z", residualZ);
+				
 				h.put("gross_error_z", grossErrorZ);
 				
 				h.put("redundancy_z", options.convertPercentToView(redundancyZ));
 				
-				redundancyGroupZ += redundancyZ;
+				redundancyGroupZ   += redundancyZ;
+				maxResidualGroupZ   = Math.abs(residualZ) > Math.abs(maxResidualGroupZ) ? residualZ : maxResidualGroupZ;
 				maxGrossErrorGroupZ = Math.abs(grossErrorZ) > Math.abs(maxGrossErrorGroupZ) ? grossErrorZ : maxGrossErrorGroupZ;
 			}
 			
@@ -494,8 +507,12 @@ public class FTLReport {
 			points.put("redundancy_x",  redundancyGroupX);
 			points.put("redundancy_y",  redundancyGroupY);
 			points.put("redundancy_z",  redundancyGroupZ);
-			points.put("redundancy",    redundancyGroupX+redundancyGroupY+redundancyGroupZ);
+			points.put("redundancy",    redundancyGroupX + redundancyGroupY + redundancyGroupZ);
 
+			points.put("max_residual_x", maxResidualGroupX);
+			points.put("max_residual_y", maxResidualGroupY);
+			points.put("max_residual_z", maxResidualGroupZ);
+			
 			points.put("max_gross_error_x", maxGrossErrorGroupX);
 			points.put("max_gross_error_y", maxGrossErrorGroupY);
 			points.put("max_gross_error_z", maxGrossErrorGroupZ);

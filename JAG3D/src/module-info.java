@@ -26,6 +26,9 @@ module org.applied_geodesy.jag3d {
 	exports org.applied_geodesy.juniform;
 	exports org.applied_geodesy.juniform.ui;
 	
+	exports org.applied_geodesy.coordtrans;
+	exports org.applied_geodesy.coordtrans.ui;
+	
 	exports org.applied_geodesy.adjustment.cmd;
 		
 	requires arpack.combined.all;
@@ -35,7 +38,6 @@ module org.applied_geodesy.jag3d {
 	requires mtj;
 
 	requires freemarker;
-	requires CoordTrans;
 	requires GeoTra;
 
 	requires org.hsqldb;

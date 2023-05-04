@@ -50,6 +50,7 @@ import javax.swing.SwingUtilities;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
+import org.applied_geodesy.coordtrans.ui.CoordTrans;
 import org.applied_geodesy.jag3d.DefaultApplicationProperty;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
@@ -86,7 +87,6 @@ import org.applied_geodesy.util.sql.DataBase;
 import org.applied_geodesy.util.sql.HSQLDB;
 import org.applied_geodesy.version.jag3d.DatabaseVersionMismatchException;
 
-import com.derletztekick.geodesy.coordtrans.v2.gui.CoordTrans;
 import com.derletztekick.geodesy.geotra.gui.GeoTra;
 
 import javafx.application.HostServices;
@@ -1155,15 +1155,25 @@ public class UIMenuBuilder {
 			@Override
 			public void run() {
 				try {
+					Stage stage = null;
 					switch (menuItemType) {
 					case MODULE_JUNIFORM:
-						Stage stage = JUniForm.getStage();
+						stage = JUniForm.getStage();
 						if (stage == null) {
 							stage = new Stage();
 							stage.initOwner(JAG3D.getStage());
 						}
 						JUniForm juniform = new JUniForm();
 						juniform.start(stage);
+						break;
+					case MODULE_COORDTRANS:
+						stage = CoordTrans.getStage();
+						if (stage == null) {
+							stage = new Stage();
+							stage.initOwner(JAG3D.getStage());
+						}
+						CoordTrans coordTrans = new CoordTrans();
+						coordTrans.start(stage);
 						break;
 					default:
 						break;
@@ -1186,9 +1196,6 @@ public class UIMenuBuilder {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				switch (menuItemType) {
-				case MODULE_COORDTRANS:
-					new CoordTrans(true);
-					break;
 				case MODULE_GEOTRA:
 					new GeoTra(true);
 					break;
