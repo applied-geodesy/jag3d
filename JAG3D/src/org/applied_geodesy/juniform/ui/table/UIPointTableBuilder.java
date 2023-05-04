@@ -54,6 +54,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.input.MouseEvent;
@@ -553,9 +554,10 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 							this.button.setOnAction(new EventHandler<ActionEvent>() {
 								@Override
 								public void handle(ActionEvent event) {
-									FeaturePoint featurePoint = getTableRow().getItem();
-									getTableView().getSelectionModel().clearAndSelect(getTableRow().getIndex());
-									MatrixDialog.showAndWait(featurePoint);
+									TableViewSelectionModel<FeaturePoint> tableViewSelectionModel = getTableView().getSelectionModel();
+									//FeaturePoint featurePoint = getTableRow().getItem();
+									tableViewSelectionModel.clearAndSelect(getTableRow().getIndex());
+									MatrixDialog.showAndWait(tableViewSelectionModel);
 								}
 								
 							});
