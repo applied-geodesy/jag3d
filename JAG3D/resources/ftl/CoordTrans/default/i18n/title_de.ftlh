@@ -1,1 +1,0 @@
-<h1>CoordTrans - Report<br><span>Universelle Koordinatentransformation</span></h1>
