@@ -33,14 +33,18 @@ import org.applied_geodesy.juniform.ui.i18n.I18N;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -72,11 +76,13 @@ public class MatrixDialog {
 	}
 	private I18N i18n = I18N.getInstance();
 	private static MatrixDialog matrixDialog = new MatrixDialog();
-	private Dialog<FeaturePoint> dialog = null;
+	private Dialog<Void> dialog = null;
 	private DoubleTextField[][] elements;
 	private Window window;
-	private FeaturePoint featurePoint;
+	private FeaturePoint currentFeaturePoint;
+	private TableViewSelectionModel<FeaturePoint> tableViewSelectionModel;
 	private ToggleGroup matrixTypeToggleGroup;
+	private Button previousButton = null, nextButton = null; 
 	private MatrixType matrixType = null;
 	private MatrixDialog() {}
 
@@ -84,9 +90,10 @@ public class MatrixDialog {
 		matrixDialog.window = owner;
 	}
 
-	public static Optional<FeaturePoint> showAndWait(FeaturePoint featurePoint) {
+	public static Optional<Void> showAndWait(TableViewSelectionModel<FeaturePoint> tableViewSelectionModel) {
+		matrixDialog.tableViewSelectionModel = tableViewSelectionModel;
 		matrixDialog.init();
-		matrixDialog.setFeaturePoint(featurePoint);
+		matrixDialog.setSelectedFeaturePoint();
 		// @see https://bugs.openjdk.java.net/browse/JDK-8087458
 		Platform.runLater(new Runnable() {
 			@Override
@@ -110,32 +117,87 @@ public class MatrixDialog {
 		if (this.dialog != null)
 			return;
 		
-		this.dialog = new Dialog<FeaturePoint>();
+		this.dialog = new Dialog<Void>();
 		this.dialog.setTitle(i18n.getString("MatrixDialog.title", "Dispersion matrix"));
 		this.dialog.setHeaderText(String.format(Locale.ENGLISH, i18n.getString("MatrixDialog.header", "Dispersion of point %s"), ""));
-		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK);
+		this.dialog.getDialogPane().getButtonTypes().addAll(ButtonType.PREVIOUS, ButtonType.NEXT, ButtonType.OK, ButtonType.CLOSE);
 		this.dialog.initModality(Modality.APPLICATION_MODAL);
 		this.dialog.initOwner(window);
 		this.dialog.getDialogPane().setContent(this.createPane());
 		this.dialog.setResizable(true);
 
-		this.dialog.setResultConverter(new Callback<ButtonType, FeaturePoint>() {
+		Node closeButton = this.dialog.getDialogPane().lookupButton(ButtonType.CLOSE);
+        closeButton.managedProperty().bind(closeButton.visibleProperty());
+        closeButton.setVisible(false);
+        
+        this.previousButton = (Button) this.dialog.getDialogPane().lookupButton(ButtonType.PREVIOUS);
+        this.previousButton.addEventFilter(ActionEvent.ACTION, new EventHandler<ActionEvent>() {
+        	@Override
+        	public void handle(ActionEvent event) {
+        		event.consume();
+        		changeFeaturePoint(false);
+        	}
+        });
+
+        this.nextButton = (Button) this.dialog.getDialogPane().lookupButton(ButtonType.NEXT);
+        this.nextButton.addEventFilter(ActionEvent.ACTION, new EventHandler<ActionEvent>() {
+        	@Override
+        	public void handle(ActionEvent event) {
+        		event.consume();
+        		changeFeaturePoint(true);				
+        	}
+        });
+		
+		this.dialog.setResultConverter(new Callback<ButtonType, Void>() {
 			@Override
-			public FeaturePoint call(ButtonType buttonType) {
+			public Void call(ButtonType buttonType) {
 				if (buttonType == ButtonType.OK) {
 					setMatrix();
-					return featurePoint;
 				}
 				return null;
 			}
 		});
 	}
 	
-	private void setFeaturePoint(FeaturePoint featurePoint) {
-		this.featurePoint = featurePoint;
-		this.dialog.setHeaderText(String.format(Locale.ENGLISH, i18n.getString("MatrixDialog.header", "Dispersion of point %s"), this.featurePoint.getName()));
+	private void setSelectedFeaturePoint() {
+		final int numberOfPointPairs = this.tableViewSelectionModel.getTableView().getItems().size();
+		if (numberOfPointPairs <= 0)
+			return;
 		
-		Matrix matrix = this.featurePoint.getDispersionApriori();
+		FeaturePoint featurePoint = this.tableViewSelectionModel.getSelectedItem();
+		if (featurePoint == null) {
+			this.tableViewSelectionModel.clearAndSelect(0);
+			featurePoint = this.tableViewSelectionModel.getSelectedItem();
+		}
+			
+		if (featurePoint != null) {
+			int index = this.tableViewSelectionModel.getSelectedIndex();
+			this.tableViewSelectionModel.clearAndSelect(index);
+
+			this.setFeaturePoint(featurePoint);
+			
+			this.previousButton.setDisable(index <= 0);
+			this.nextButton.setDisable(index + 1 >= numberOfPointPairs);
+		}
+	}
+	
+	private void changeFeaturePoint(boolean next) {
+		// Save current values
+		this.setMatrix();
+		
+		if (next)
+			this.tableViewSelectionModel.selectNext();
+		else
+			this.tableViewSelectionModel.selectPrevious();
+		
+		this.setSelectedFeaturePoint();
+	}
+	
+	private void setFeaturePoint(FeaturePoint featurePoint) {
+		this.currentFeaturePoint = featurePoint;
+		this.dialog.setHeaderText(String.format(Locale.ENGLISH, i18n.getString("MatrixDialog.header", "Dispersion of point %s"), this.currentFeaturePoint.getName()));
+		
+		Matrix matrix = this.currentFeaturePoint.getDispersionApriori();
 		
 		if (matrix instanceof UpperSymmPackMatrix)
 			this.matrixType = MatrixType.DENSE;
@@ -224,7 +286,7 @@ public class MatrixDialog {
 	}
 	
 	private void changeMatrixType(MatrixType matrixType) {
-		int dimension = this.featurePoint.getDimension();
+		int dimension = this.currentFeaturePoint.getDimension();
 		this.matrixType = matrixType;
 		for (int i = 0; i < dimension; i++) {
 			for (int j = 0; j < dimension; j++) {			
@@ -248,7 +310,7 @@ public class MatrixDialog {
 	}
 	
 	private void setMatrix() {
-		int dimension = this.featurePoint.getDimension();
+		int dimension = this.currentFeaturePoint.getDimension();
 		Matrix matrix = null;
 		switch(this.matrixType) {
 		case DENSE:
@@ -273,6 +335,6 @@ public class MatrixDialog {
 			}
 		}
 		
-		this.featurePoint.setDispersionApriori(matrix);
+		this.currentFeaturePoint.setDispersionApriori(matrix);
 	}
 }
