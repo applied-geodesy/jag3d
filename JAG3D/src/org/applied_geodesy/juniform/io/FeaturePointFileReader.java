@@ -156,9 +156,14 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 		if (varX <= 0 || varY <= 0)
 			return point;
 
-		Matrix dispersion = new UpperSymmPackMatrix(point.getDimension());
+		Matrix dispersion = null;
+		if (covXY == 0)
+			dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
+		else {
+			dispersion = new UpperSymmPackMatrix(point.getDimension());
+			dispersion.set(0, 1, covXY);
+		}
 		dispersion.set(0, 0, varX);
-		dispersion.set(0, 1, covXY);
 		dispersion.set(1, 1, varY);
 		point.setDispersionApriori(dispersion);
 		return point;
@@ -236,12 +241,17 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 		if (varX <= 0 || varY <= 0 || varZ <= 0)
 			return point;
 
-		Matrix dispersion = new UpperSymmPackMatrix(point.getDimension());
+		Matrix dispersion = null;
+		if (covXY == 0 && covXZ == 0 && covYZ == 0)
+			dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
+		else {
+			dispersion = new UpperSymmPackMatrix(point.getDimension());
+			dispersion.set(0, 1, covXY);
+			dispersion.set(0, 2, covXZ);
+			dispersion.set(1, 2, covYZ);
+		}
 		dispersion.set(0, 0, varX);
-		dispersion.set(0, 1, covXY);
-		dispersion.set(0, 2, covXZ);
 		dispersion.set(1, 1, varY);
-		dispersion.set(1, 2, covYZ);
 		dispersion.set(2, 2, varZ);
 		point.setDispersionApriori(dispersion);
 		return point;
