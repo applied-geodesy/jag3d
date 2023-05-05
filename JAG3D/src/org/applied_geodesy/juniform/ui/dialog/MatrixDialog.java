@@ -312,6 +312,33 @@ public class MatrixDialog {
 	private void setMatrix() {
 		int dimension = this.currentFeaturePoint.getDimension();
 		Matrix matrix = null;
+		
+		if (this.matrixType == MatrixType.DENSE) {
+			boolean diagonalMatrixType = true;
+			for (int row = 0; row < dimension; row++) {
+				for (int column = row + 1; column < dimension; column++) {
+					if (this.elements[row][column].getNumber().doubleValue() != 0) {
+						diagonalMatrixType = false;
+						break;
+					}
+				}
+			}
+			if (diagonalMatrixType)
+				matrixType = MatrixType.DIAGONAL;
+		}
+		
+		if (this.matrixType == MatrixType.DIAGONAL) {
+			boolean identityMatrixType = true;
+			for (int idx = 0; idx < dimension; idx++) {
+				if (this.elements[idx][idx].getNumber().doubleValue() != 1) {
+					identityMatrixType = false;
+					break;
+				}
+			}
+			if (identityMatrixType)
+				matrixType = MatrixType.IDENTITY;
+		}
+		
 		switch(this.matrixType) {
 		case DENSE:
 			matrix = new UpperSymmPackMatrix(dimension);

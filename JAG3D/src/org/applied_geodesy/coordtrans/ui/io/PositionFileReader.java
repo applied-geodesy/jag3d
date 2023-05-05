@@ -179,10 +179,15 @@ public class PositionFileReader extends SourceFileReader<Map<String, ObservedFra
 
 		if (varX <= 0 || varY <= 0)
 			return true;
-
-		Matrix dispersion = new UpperSymmPackMatrix(position.getDimension());
+		
+		Matrix dispersion = null;
+		if (covXY == 0)
+			dispersion = new UpperSymmBandMatrix(position.getDimension(), 0);
+		else {
+			dispersion = new UpperSymmPackMatrix(position.getDimension());
+			dispersion.set(0, 1, covXY);
+		}
 		dispersion.set(0, 0, varX);
-		dispersion.set(0, 1, covXY);
 		dispersion.set(1, 1, varY);
 		position.setDispersionApriori(dispersion);
 		return true;
@@ -262,12 +267,17 @@ public class PositionFileReader extends SourceFileReader<Map<String, ObservedFra
 		if (varX <= 0 || varY <= 0 || varZ <= 0)
 			return true;
 
-		Matrix dispersion = new UpperSymmPackMatrix(position.getDimension());
+		Matrix dispersion = null;
+		if (covXY == 0 && covXZ == 0 && covYZ == 0)
+			dispersion = new UpperSymmBandMatrix(position.getDimension(), 0);
+		else {
+			dispersion = new UpperSymmPackMatrix(position.getDimension());
+			dispersion.set(0, 1, covXY);
+			dispersion.set(0, 2, covXZ);
+			dispersion.set(1, 2, covYZ);
+		}
 		dispersion.set(0, 0, varX);
-		dispersion.set(0, 1, covXY);
-		dispersion.set(0, 2, covXZ);
 		dispersion.set(1, 1, varY);
-		dispersion.set(1, 2, covYZ);
 		dispersion.set(2, 2, varZ);
 		position.setDispersionApriori(dispersion);
 		return true;
