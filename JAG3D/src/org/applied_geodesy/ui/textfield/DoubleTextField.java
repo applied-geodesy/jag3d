@@ -200,8 +200,10 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 		numberProperty().addListener(new ChangeListener<Double>() {
 			@Override
 			public void changed(ObservableValue<? extends Double> obserable, Double oldValue, Double newValue) {
-				setText(getEditorFormat(getNumber()));
-				//setText(getRendererFormat(newValue));
+				if (!isDisable())
+					setText(getEditorFormat(getNumber()));
+				else
+					setText(getRendererFormat(newValue));
 			}
 		});
 	}
