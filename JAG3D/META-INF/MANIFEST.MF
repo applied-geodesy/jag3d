@@ -18,7 +18,6 @@ Class-Path:
   javafx/lib/javafx.swing.jar 
   
   lib/tools.jar 
-  lib/CoordTrans.jar 
   lib/GeoTra.jar  
   
 Main-Class: org.applied_geodesy.jag3d.JAG3DApp
