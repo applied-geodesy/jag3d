@@ -270,7 +270,7 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		case EULER_ANGLE_Y:
 			return i18n.getString("UIParameterTableBuilder.parameter.type.angle.y", "Euler angle ry");
 		case EULER_ANGLE_Z:
-			return i18n.getString("UIParameterTableBuilder.parameter.type.angle.x", "Euler angle rz");
+			return i18n.getString("UIParameterTableBuilder.parameter.type.angle.z", "Euler angle rz");
 			
 		case AUXILIARY_ELEMENT_11:
 			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.element11", "Auxiliary quantity e11");
@@ -279,7 +279,7 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		case AUXILIARY_ELEMENT_13:
 			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.element13", "Auxiliary quantity e13");
 		case AUXILIARY_ELEMENT_21:
-			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.element22", "Auxiliary quantity e21");
+			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.element21", "Auxiliary quantity e21");
 		case AUXILIARY_ELEMENT_22:
 			return i18n.getString("UIParameterTableBuilder.parameter.type.auxiliary.element22", "Auxiliary quantity e22");
 		case AUXILIARY_ELEMENT_23:
