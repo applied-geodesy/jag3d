@@ -280,19 +280,26 @@ public class PlanarAffineTransformation extends Transformation {
 			o /= oa;
 			a /= oa;
 			
-			if (parameterRestrictions != null && parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_X) && parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_Y)) {
-				oa = Math.hypot(a, o);
-				if (oa <= Constant.EPS)
-					throw new MatrixSingularException("Error, system of equations is singular.");
-				
-				a /= oa;
-				o /= oa;
-			}
-			
 			a11 = a;
 			a12 = o;
 			a21 = o;
 			a22 = a;
+			
+			if (parameterRestrictions != null && (parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_X) || parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_Y))) {
+				oa = Math.hypot(a, o);
+				if (oa <= Constant.EPS)
+					throw new MatrixSingularException("Error, system of equations is singular.");
+
+				if (parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_X)) {
+					a11 /= oa;
+					a21 /= oa;
+				}
+				
+				if (parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_Y)) {
+					a12 /= oa;
+					a22 /= oa;
+				}
+			}
 		}
 
 		if (parameterRestrictions != null && !parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_X))
