@@ -16,12 +16,10 @@
   <icon>JAG3D.ico</icon>
   <jre>
     <path>openjdk\</path>
-    <bundledJre64Bit>true</bundledJre64Bit>
-    <bundledJreAsFallback>true</bundledJreAsFallback>
+    <requiresJdk>false</requiresJdk>
+    <requires64Bit>true</requires64Bit>
     <minVersion>15.0.0</minVersion>
     <maxVersion></maxVersion>
-    <jdkPreference>preferJre</jdkPreference>
-    <runtimeBits>64/32</runtimeBits>
   </jre>
   <versionInfo>
     <fileVersion>20.21.05.12</fileVersion>
