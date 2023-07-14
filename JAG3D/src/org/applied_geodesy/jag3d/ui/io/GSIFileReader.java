@@ -678,6 +678,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		// Speichere Daten bspw. Richtungen, da diese Satzweise zu halten sind
 		if ((this.dim == DimensionType.HEIGHT || this.dim == DimensionType.PLAN_AND_HEIGHT) && !this.leveling.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.LEVELING))) {
 			this.addLevelingData(this.levelingData);
+			this.levelingData = null;
 			this.lastTreeItem = this.saveObservationGroup(TreeItemType.LEVELING_LEAF, this.leveling);
 		}
 
