@@ -376,7 +376,7 @@ public class Direction extends Observation {
 	}
 
 	@Override
-	public double getCorrection() {
+	public double getObservationalError() {
 		Reduction reductions = this.getReductions();
 		
 		double calDir = this.getValueAposteriori();

@@ -288,7 +288,7 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.x.label", "\u03B5x");
-		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component, i.e. computed minus observed");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceResidualXProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -298,7 +298,7 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.y.label", "\u03B5y");
-		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component, i.e. computed minus observed");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceResidualYProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.HEIGHT ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);
@@ -308,7 +308,7 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.z.label", "\u03B5z");
-		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component");
+		tooltipText = i18n.getString("UIHomologousFramePositionPairTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component, i.e. computed minus observed");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, HomologousFramePositionPair::sourceResidualZProperty, getDoubleCallback(cellValueType), this.transformationType != TransformationType.PLANAR ? ColumnType.APOSTERIORI_SOURCE_SYSTEM : ColumnType.HIDDEN, columnIndex, false);

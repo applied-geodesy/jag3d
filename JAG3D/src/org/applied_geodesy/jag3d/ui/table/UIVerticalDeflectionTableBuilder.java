@@ -289,8 +289,8 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		// Residual
 		// y-epsilon
 		columnIndex = table.getColumns().size(); 
-		labelText   = this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.y.label", "\u03B5y")                                                 : i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.deviation.y.label", "\u0394y");
-		tooltipText = this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component of deflection of the vertical") : i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.deviation.y.tooltip", "Deviation of y-component w.r.t. y0");
+		labelText   = this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.y.label", "\u03B5y")                                                                               : i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.deviation.y.label", "\u0394y");
+		tooltipText = this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component of deflection of the vertical, i.e. computed minus observed") : i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.deviation.y.tooltip", "Deviation of y-component w.r.t. y0");
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_Y;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
@@ -299,8 +299,8 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 
 		// x-epsilon
 		columnIndex = table.getColumns().size(); 
-		labelText   = this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.x.label", "\u03B5y")                                                 : i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.deviation.x.label", "\u0394x");
-		tooltipText = this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component of deflection of the vertical") : i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.deviation.x.tooltip", "Deviation of x-component w.r.t. x0");
+		labelText   = this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.x.label", "\u03B5y")                                                                               : i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.deviation.x.label", "\u0394x");
+		tooltipText = this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component of deflection of the vertical, i.e. computed minus observed") : i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.deviation.x.tooltip", "Deviation of x-component w.r.t. x0");
 		cellValueType = CellValueType.ANGLE_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_X;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());

@@ -467,7 +467,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			// Residual
 			columnIndex = table.getColumns().size(); 
 			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.residual.label", "\u03B5");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.residual.tooltip", "Residual");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.residual.tooltip", "Residual, i.e. computed minus observed");
 			cellValueType = CellValueType.LENGTH_RESIDUAL;
 			columnContentType = ColumnContentType.RESIDUAL;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
@@ -514,7 +514,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			// Residual
 			columnIndex = table.getColumns().size(); 
 			labelText   = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.residual.label", "\u03B5");
-			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.residual.tooltip", "Residual");
+			tooltipText = i18n.getString("UITerrestrialObservationTableBuilder.tableheader.residual.tooltip", "Residual, i.e. computed minus observed");
 			cellValueType = CellValueType.ANGLE_RESIDUAL;
 			columnContentType = ColumnContentType.RESIDUAL;
 			header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());

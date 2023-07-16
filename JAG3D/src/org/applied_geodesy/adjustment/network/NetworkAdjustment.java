@@ -1224,7 +1224,7 @@ public class NetworkAdjustment implements Runnable {
 			double u   = observation.getStdApriori();
 			double qll = u*u;
 			double r   = observation.getRedundancy();
-			double v   = this.estimationType == EstimationType.SIMULATION ? 0.0 : observation.getCorrection();
+			double v   = this.estimationType == EstimationType.SIMULATION ? 0.0 : observation.getObservationalError();
 
 			if (qll > 0.0 && r > SQRT_EPS) {
 				double nv2 = v*v/qll/r;
@@ -1330,7 +1330,7 @@ public class NetworkAdjustment implements Runnable {
 			double u = maxNVObs.getStdApriori();
 			double r = maxNVObs.getRedundancy();
 			double k = c*u*Math.sqrt(r);
-			double v = this.estimationType == EstimationType.SIMULATION ? 0.0 : Math.abs(maxNVObs.getCorrection());
+			double v = this.estimationType == EstimationType.SIMULATION ? 0.0 : Math.abs(maxNVObs.getObservationalError());
 
 			if (v >= k && k > SQRT_EPS) {
 				maxNVObs.setStdApriori(u * Math.sqrt(v/k));
@@ -1534,7 +1534,7 @@ public class NetworkAdjustment implements Runnable {
 					double atp = at / (observationAT.getStdApriori() * observationAT.getStdApriori());
 					aTp.set(rowAT, atp);
 					// Absolutgliedvektor bestimmen
-					n.add(colAT, atp * observationAT.getCorrection());
+					n.add(colAT, atp * observationAT.getObservationalError());
 					// Hauptdiagonalelement aT*p*a
 					N.add(colAT, colAT, atp * at);
 				}
@@ -2699,7 +2699,7 @@ public class NetworkAdjustment implements Runnable {
 		}
 
 		if (vUT != null)
-			vUT.add(weight, this.getResiduals());
+			vUT.add(weight, this.getObservationalErrors());
 	}
 	
 	/**
@@ -2798,7 +2798,7 @@ public class NetworkAdjustment implements Runnable {
 				Observation observation = this.projectObservations.get(i); 
 				double qll = observation.getStdApriori()*observation.getStdApriori();
 				double r   = observation.getRedundancy();
-				double v   = this.estimationType == EstimationType.SIMULATION ? 0.0 : (vUT != null ? vUT.get(observation.getRowInJacobiMatrix()) : observation.getCorrection());
+				double v   = this.estimationType == EstimationType.SIMULATION ? 0.0 : (vUT != null ? vUT.get(observation.getRowInJacobiMatrix()) : observation.getObservationalError());
 				double vv  = v*v;
 				double omegaObs = vv/qll;
 				observation.setOmega(omegaObs);
@@ -2992,7 +2992,7 @@ public class NetworkAdjustment implements Runnable {
 						continue;
 					}
 					double qB = observationB.getStdApriori()*observationB.getStdApriori();
-					double vB = this.estimationType == EstimationType.SIMULATION ? 0.0 : -observationB.getCorrection();
+					double vB = this.estimationType == EstimationType.SIMULATION ? 0.0 : -observationB.getObservationalError();
 					double b  = 0.0;
 					vB = Math.abs(vB) < SQRT_EPS ? 0.0 : vB;
 
@@ -3128,7 +3128,7 @@ public class NetworkAdjustment implements Runnable {
 					Observation observationB = observations.get(k);
 
 					double qB = observationB.getStdApriori()*observationB.getStdApriori();
-					double vB = this.estimationType == EstimationType.SIMULATION ? 0.0 : -observationB.getCorrection();
+					double vB = this.estimationType == EstimationType.SIMULATION ? 0.0 : -observationB.getObservationalError();
 					double b  = 0.0;
 					vB = Math.abs(vB) < SQRT_EPS ? 0.0 : vB;
 
@@ -3720,7 +3720,7 @@ public class NetworkAdjustment implements Runnable {
 								//if (observationB.getObservationGroup().isReferenceEpoch())
 								//	continue;
 								double qB = observationB.getStdApriori()*observationB.getStdApriori();
-								double vB = this.estimationType == EstimationType.SIMULATION ? 0.0 : -observationB.getCorrection();
+								double vB = this.estimationType == EstimationType.SIMULATION ? 0.0 : -observationB.getObservationalError();
 								double b  = 0.0;
 								vB = Math.abs(vB) < SQRT_EPS ? 0.0 : vB;
 								
@@ -3950,7 +3950,7 @@ public class NetworkAdjustment implements Runnable {
 				    else {
 				    	Vector subPv = new DenseVector(dim);
 						for (int j=0; j<dim; j++)
-							subPv.set(j, baseline.get(j).getCorrection() / baseline.get(j).getStdApriori() / baseline.get(j).getStdApriori());
+							subPv.set(j, baseline.get(j).getObservationalError() / baseline.get(j).getStdApriori() / baseline.get(j).getStdApriori());
 
 				    	Vector nabla = new DenseVector(gnss.getDimension());
 						Vector ep    = new DenseVector(gnss.getDimension());
@@ -3997,7 +3997,7 @@ public class NetworkAdjustment implements Runnable {
 				double lamda = Math.abs(tsPrio.getNoncentralityParameter());
 				double qll = observation.getStdApriori()*observation.getStdApriori();
 				double r   = observation.getRedundancy();
-				double v   = this.estimationType == EstimationType.SIMULATION ? 0.0 : observation.getCorrection();
+				double v   = this.estimationType == EstimationType.SIMULATION ? 0.0 : observation.getObservationalError();
 				double pvv  = v*v/qll;
 				double mdb = r > SQRT_EPS ? Math.sqrt(Math.abs(lamda*qll/r)) : 0.0;
 				double mtb = r > SQRT_EPS ? Math.sqrt(Math.abs(qll/r)) : 0.0;
@@ -4780,7 +4780,7 @@ public class NetworkAdjustment implements Runnable {
 				}
 				
 			}
-			v.set(row, aDx - observation.getCorrection());
+			v.set(row, aDx - observation.getObservationalError());
 		}
 		
 		for (Point point : this.pointsWithStochasticDeflection) {
@@ -5233,11 +5233,11 @@ public class NetworkAdjustment implements Runnable {
 	 * Liefert die Verbesserungen nach der Ausgleichung IST - SOLL
 	 * @return e
 	 */
-	private Vector getResiduals() {
+	private Vector getObservationalErrors() {
 		Vector e = new DenseVector(this.numberOfObservations + this.numberOfStochasticPointRows + this.numberOfStochasticDeflectionRows);
 		for (int i=0; i<this.numberOfObservations; i++) {
 			Observation observation = this.projectObservations.get(i);
-			e.set(observation.getRowInJacobiMatrix(), observation.getCorrection());
+			e.set(observation.getRowInJacobiMatrix(), observation.getObservationalError());
 		}
 		
 		for (Point point : this.pointsWithStochasticDeflection) {
@@ -5521,7 +5521,7 @@ public class NetworkAdjustment implements Runnable {
     			}
     			
     			pw.println("--------DEBUG - RESIDUALS ------------");
-    			Vector e = this.getResiduals();
+    			Vector e = this.getObservationalErrors();
     			for (int i=0; i<W.size(); i++) {
     				pw.printf(Locale.ENGLISH, "%+35.15f%n", e.get(i));
     			}    			

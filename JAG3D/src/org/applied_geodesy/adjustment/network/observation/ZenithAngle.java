@@ -445,7 +445,7 @@ public class ZenithAngle extends Observation {
 	}
 
 	@Override
-	public double getCorrection() {
+	public double getObservationalError() {
 		double calAngle = this.getValueAposteriori();
 		double obsAngle = this.getValueApriori();
 				

@@ -213,7 +213,7 @@ public abstract class Observation {
 	}	
 
 	
-	public double getCorrection() {
+	public double getObservationalError() {
 		return this.getValueApriori() - this.getValueAposteriori();
 	}
 	
