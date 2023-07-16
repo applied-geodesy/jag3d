@@ -472,8 +472,8 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		// Residual 
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.y.label", "\u03B5y")                   : i18n.getString("UIPointTableBuilder.tableheader.deviation.y.label", "\u0394y");
-		tooltipText = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component") : i18n.getString("UIPointTableBuilder.tableheader.deviation.y.tooltip", "Deviation of y-component w.r.t. y0");
+		labelText   = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.y.label", "\u03B5y")                                                 : i18n.getString("UIPointTableBuilder.tableheader.deviation.y.label", "\u0394y");
+		tooltipText = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component of point, i.e. computed minus observed") : i18n.getString("UIPointTableBuilder.tableheader.deviation.y.tooltip", "Deviation of y-component w.r.t. y0");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_X;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
@@ -483,8 +483,8 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.x.label", "\u03B5x")                   : i18n.getString("UIPointTableBuilder.tableheader.deviation.x.label", "\u0394x");
-		tooltipText = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component") : i18n.getString("UIPointTableBuilder.tableheader.deviation.x.tooltip", "Deviation of x-component w.r.t. x0");
+		labelText   = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.x.label", "\u03B5x")                                                 : i18n.getString("UIPointTableBuilder.tableheader.deviation.x.label", "\u0394x");
+		tooltipText = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component of point, i.e. computed minus observed") : i18n.getString("UIPointTableBuilder.tableheader.deviation.x.tooltip", "Deviation of x-component w.r.t. x0");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_Y;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
@@ -494,8 +494,8 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
-		labelText   = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.z.label", "\u03B5z")                   : i18n.getString("UIPointTableBuilder.tableheader.deviation.z.label", "\u0394z");
-		tooltipText = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component") : i18n.getString("UIPointTableBuilder.tableheader.deviation.z.tooltip", "Deviation of z-component w.r.t. z0");
+		labelText   = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.z.label", "\u03B5z")                                                 : i18n.getString("UIPointTableBuilder.tableheader.deviation.z.label", "\u0394z");
+		tooltipText = this.type == PointType.STOCHASTIC_POINT ? i18n.getString("UIPointTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component of point, i.e. computed minus observed") : i18n.getString("UIPointTableBuilder.tableheader.deviation.z.tooltip", "Deviation of z-component w.r.t. z0");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_Z;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());

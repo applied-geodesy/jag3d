@@ -337,7 +337,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.y.label", "\u03B5y");
-		tooltipText = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component");
+		tooltipText = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component of GNSS baseline, i.e. computed minus observed");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_Y;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
@@ -348,7 +348,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.x.label", "\u03B5x");
-		tooltipText = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component");
+		tooltipText = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component of GNSS baseline, i.e. computed minus observed");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_X;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
@@ -359,7 +359,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.z.label", "\u03B5z");
-		tooltipText = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component");
+		tooltipText = i18n.getString("UIGNSSObservationTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component of GNSS baseline, i.e. computed minus observed");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.RESIDUAL_Z;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());

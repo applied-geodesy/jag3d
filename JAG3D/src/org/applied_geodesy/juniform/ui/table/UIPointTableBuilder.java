@@ -264,7 +264,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 		// x-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.x.label", "\u03B5x");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.x.tooltip", "Residual of x-component, i.e. computed minus observed");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FeaturePoint::residualXProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT, columnIndex, false);
@@ -274,7 +274,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 		// y-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.y.label", "\u03B5y");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.y.tooltip", "Residual of y-component, i.e. computed minus observed");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FeaturePoint::residualYProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_POINT, columnIndex, false);
@@ -284,7 +284,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 		// z-Comp
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIPointTableBuilder.tableheader.residual.z.label", "\u03B5z");
-		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component");
+		tooltipText = i18n.getString("UIPointTableBuilder.tableheader.residual.z.tooltip", "Residual of z-component, i.e. computed minus observed");
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(header, FeaturePoint::residualZProperty, getDoubleCallback(cellValueType), this.featureType == FeatureType.SURFACE ? ColumnType.APOSTERIORI_POINT : ColumnType.HIDDEN, columnIndex, false);

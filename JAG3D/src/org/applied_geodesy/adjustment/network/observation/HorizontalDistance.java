@@ -392,7 +392,7 @@ public class HorizontalDistance extends Observation {
 	}
 
 	@Override
-	public double getCorrection() {
+	public double getObservationalError() {
 		double calDist = this.getValueAposteriori();
 		double obsDist = this.getValueApriori();
 		

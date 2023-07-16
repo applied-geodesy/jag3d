@@ -290,9 +290,22 @@ class SQLDatabase {
 		sqls.put(20221220.0015, "UPDATE \"LayerFont\" SET \"background_opacity\" = 0.9  WHERE \"layer\" = " + LayerType.LEGEND.getId() + ";\r\n");
 		sqls.put(20221220.0016, "UPDATE \"LayerFont\" SET \"background_opacity\" = 0.25 WHERE \"layer\" IN (" + LayerType.REFERENCE_POINT_APRIORI.getId() + "," + LayerType.STOCHASTIC_POINT_APRIORI.getId() + "," + LayerType.DATUM_POINT_APRIORI.getId() + "," + LayerType.NEW_POINT_APRIORI.getId() + "," + LayerType.REFERENCE_POINT_APOSTERIORI.getId() + "," + LayerType.STOCHASTIC_POINT_APOSTERIORI.getId() + "," + LayerType.DATUM_POINT_APOSTERIORI.getId() + "," + LayerType.NEW_POINT_APOSTERIORI.getId() + ");\r\n");
 
-		// addnumber of observations per point
+		// add number of observations per point
 		sqls.put(20230110.0001, "ALTER TABLE \"PointAposteriori\" ADD \"number_of_observations\" INTEGER DEFAULT 0 NOT NULL;\r\n");
 
+		// interchange sign of residuals, i.e. computed minus observed
+		sqls.put(20230131.0001, "UPDATE \"ObservationAposteriori\" SET \"residual\" = -\"residual\";\r\n");
+		
+		sqls.put(20230131.0011, "UPDATE \"GNSSObservationAposteriori\" SET \"residual_x\" = -\"residual_x\";\r\n");
+		sqls.put(20230131.0012, "UPDATE \"GNSSObservationAposteriori\" SET \"residual_y\" = -\"residual_y\";\r\n");
+		sqls.put(20230131.0013, "UPDATE \"GNSSObservationAposteriori\" SET \"residual_z\" = -\"residual_z\";\r\n");
+		
+		sqls.put(20230131.0021, "UPDATE \"PointAposteriori\" SET \"residual_x\" = -\"residual_x\";\r\n");
+		sqls.put(20230131.0022, "UPDATE \"PointAposteriori\" SET \"residual_y\" = -\"residual_y\";\r\n");
+		sqls.put(20230131.0023, "UPDATE \"PointAposteriori\" SET \"residual_z\" = -\"residual_z\";\r\n");
+		
+		sqls.put(20230131.0031, "UPDATE \"VerticalDeflectionAposteriori\" SET \"residual_x\" = -\"residual_x\";\r\n");
+		sqls.put(20230131.0032, "UPDATE \"VerticalDeflectionAposteriori\" SET \"residual_y\" = -\"residual_y\";\r\n");
 		
 		return sqls;
 	}

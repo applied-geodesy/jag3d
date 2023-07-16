@@ -1206,9 +1206,10 @@ public class SQLAdjustmentManager {
 				stmt.setDouble(idx++, dimension != 1 ? point.getConfidenceAxis2D(1) : 0.0);
 				stmt.setDouble(idx++, dimension != 1 ? point.getConfidenceAngle2D() : 0.0);
 				
-				stmt.setDouble(idx++, dimension != 1 ? point.getY0() - point.getY() : 0.0);
-				stmt.setDouble(idx++, dimension != 1 ? point.getX0() - point.getX() : 0.0);
-				stmt.setDouble(idx++, dimension != 2 ? point.getZ0() - point.getZ() : 0.0);
+				// residuals epsilon = L - L0
+				stmt.setDouble(idx++, dimension != 1 ? point.getY() - point.getY0() : 0.0);
+				stmt.setDouble(idx++, dimension != 1 ? point.getX() - point.getX0() : 0.0);
+				stmt.setDouble(idx++, dimension != 2 ? point.getZ() - point.getZ0() : 0.0);
 
 				stmt.setDouble(idx++, dimension != 1 ? point.getRedundancyY() : 0.0);
 				stmt.setDouble(idx++, dimension != 1 ? point.getRedundancyX() : 0.0);
@@ -1305,8 +1306,9 @@ public class SQLAdjustmentManager {
 				stmt.setDouble(idx++, Math.max(point.getVerticalDeflectionX().getConfidence(), point.getVerticalDeflectionY().getConfidence()));
 				stmt.setDouble(idx++, Math.min(point.getVerticalDeflectionX().getConfidence(), point.getVerticalDeflectionY().getConfidence()));
 
-				stmt.setDouble(idx++, point.getVerticalDeflectionY().getValue0() - point.getVerticalDeflectionY().getValue());
-				stmt.setDouble(idx++, point.getVerticalDeflectionX().getValue0() - point.getVerticalDeflectionX().getValue());
+				// residuals epsilon = L - L0
+				stmt.setDouble(idx++, point.getVerticalDeflectionY().getValue() - point.getVerticalDeflectionY().getValue0());
+				stmt.setDouble(idx++, point.getVerticalDeflectionX().getValue() - point.getVerticalDeflectionX().getValue0());
 
 				stmt.setDouble(idx++, point.getVerticalDeflectionY().getRedundancy());
 				stmt.setDouble(idx++, point.getVerticalDeflectionX().getRedundancy());
@@ -1422,9 +1424,10 @@ public class SQLAdjustmentManager {
 						stmt.setDouble(idx++, gnssX == null || gnssX.getStd() < 0 ? 0.0 : gnssX.getStd());
 						stmt.setDouble(idx++, gnssZ == null || gnssZ.getStd() < 0 ? 0.0 : gnssZ.getStd());
 						
-						stmt.setDouble(idx++, gnssY == null ? 0.0 : gnssY.getCorrection());
-						stmt.setDouble(idx++, gnssX == null ? 0.0 : gnssX.getCorrection());
-						stmt.setDouble(idx++, gnssZ == null ? 0.0 : gnssZ.getCorrection());
+						// residuals epsilon = L - L0
+						stmt.setDouble(idx++, gnssY == null ? 0.0 : -gnssY.getObservationalError());
+						stmt.setDouble(idx++, gnssX == null ? 0.0 : -gnssX.getObservationalError());
+						stmt.setDouble(idx++, gnssZ == null ? 0.0 : -gnssZ.getObservationalError());
 
 						stmt.setDouble(idx++, gnssY == null ? 0.0 : gnssY.getRedundancy());
 						stmt.setDouble(idx++, gnssX == null ? 0.0 : gnssX.getRedundancy());
@@ -1478,8 +1481,9 @@ public class SQLAdjustmentManager {
 						stmt.setDouble(idx++, observation.getStdApriori() > 0 ? observation.getStdApriori() : 0.0);
 						stmt.setDouble(idx++, observation.getStd() > 0 ? observation.getStd() : 0.0);
 
-						stmt.setDouble(idx++, observation.getCorrection());
-						stmt.setDouble(idx++, observation.getRedundancy());
+						// residuals epsilon = L - L0
+						stmt.setDouble(idx++, -observation.getObservationalError());
+						stmt.setDouble(idx++,  observation.getRedundancy());
 
 						stmt.setDouble(idx++, observation.getGrossError());
 						stmt.setDouble(idx++, observation.getMinimalDetectableBias());
