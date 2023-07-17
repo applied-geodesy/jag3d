@@ -367,6 +367,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		// Speichere die (neue) Standpunktnummer und speichere den bisherigen Richtungssatz des alten Standpunkes
 		if (this.isNewStation && pointName != null && !pointName.isBlank()) {
 			this.startPointName = pointName;
+			this.endPointName   = null;
 			this.ih = ih==null ? 0.0 : ih;
 			this.th = th==null ? 0.0 : th;
 
@@ -379,7 +380,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			this.saveObservationGroups(false);
 			this.lastStartPointName = null;
 		}
-		else if (pointName != null && !pointName.trim().isEmpty()) {
+		else if (pointName != null && !pointName.isBlank()) {
 			this.endPointName = pointName;
 		}
 		else if (this.isNewLevelingLine) {
@@ -387,47 +388,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			this.lastLevelingLineName = null;
 			this.lastPointNameForeSightReading = null;
 		}
-
-		// Speichere Punkte aus der GSI
-		if (pointName != null && !pointName.trim().isEmpty() && !this.reservedNames.contains(pointName) && !this.pointMap.containsKey(pointName)) {
-			PointRow point = new PointRow();
-			point.setName(pointName);
-			point.setCode(pointCode);
-			point.setXApriori(x);
-			point.setYApriori(y);
-			point.setZApriori(z);
-
-			if ((this.dim == DimensionType.SPATIAL || this.dim == DimensionType.PLAN_AND_HEIGHT) && x != null && y != null && z != null) {
-				this.pointMap.put(pointName, point);
-				this.points3d.add(point);
-			}
-			else if ((this.dim == DimensionType.PLAN || this.dim == DimensionType.PLAN_AND_HEIGHT) && x != null && y != null) {
-				this.pointMap.put(pointName, point);
-				this.points2d.add(point);
-			}
-			else if ((this.dim == DimensionType.HEIGHT || this.dim == DimensionType.PLAN_AND_HEIGHT) && z != null) {
-				this.pointMap.put(pointName, point);
-				this.points1d.add(point);
-			}
-		}
-		else if (this.pointMap.containsKey(pointName)) {
-			PointRow point = this.pointMap.get(pointName);
-			if (this.hasZerosCoordinates(point)) {
-				if ((this.dim == DimensionType.SPATIAL || this.dim == DimensionType.PLAN_AND_HEIGHT) && x != null && y != null && z != null) {
-					point.setXApriori(x);
-					point.setYApriori(y);
-					point.setZApriori(z);
-				}
-				else if ((this.dim == DimensionType.PLAN || this.dim == DimensionType.PLAN_AND_HEIGHT) && x != null && y != null) {
-					point.setXApriori(x);
-					point.setYApriori(y);
-				}
-				else if ((this.dim == DimensionType.HEIGHT || this.dim == DimensionType.PLAN_AND_HEIGHT) && z != null) {
-					point.setZApriori(z);
-				}
-			}
-		}
-
+		
 		// Speichere Beobachtungen in den Gruppen
 		if (this.startPointName != null) {
 			// Pruefe, ob Werte neu gesetzt wurden
@@ -463,7 +424,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			}
 
 			// Fuege Beobachtungen hinzu
-			if (this.startPointName != null && this.endPointName != null) {
+			if (this.startPointName != null && this.endPointName != null) {					
 				if (this.lastStartPointName == null)
 					this.lastStartPointName = this.startPointName;
 				
@@ -472,9 +433,10 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				if (this.lastRb4Zb != null && this.zb != null) {
 					// speichere letzten Datensatz
 					this.addLevelingData(this.levelingData);
-//					if (this.levelingData != null)
-//						this.lastPointNameForeSightReading = this.levelingData.getEndPointName();
 					this.levelingData = null;
+					
+					if (this.startPointName.equals("0"))
+						this.startPointName = this.lastPointNameForeSightReading;
 
 					LevelingData sideLevelingData = new LevelingData();
 					sideLevelingData.addBackSightReading(this.startPointName, this.lastRb4Zb, this.distLastRb4Zb != null ? this.distLastRb4Zb : 0, true);
@@ -486,28 +448,27 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					
 					this.zb = null;
 					this.distZb = null;
+					
+					this.lastStartPointName = this.startPointName;
 				}
 
 				// ermittle Hoehenunterschied aus R1 und V1
 				if (this.rb1 != null && this.vb1 != null) {
 					// speichere letzten Datensatz
 					this.addLevelingData(this.levelingData);
-//					if (this.levelingData != null)
-//						this.lastPointNameForeSightReading = this.levelingData.getEndPointName();
 					this.levelingData = null;
 					
 					// erzeuge neuen Datensatz
 					if (this.levelingData == null)
 						this.levelingData = new LevelingData();
-
-					if (this.startPointName.equals("0")) {
-						this.startPointName = this.lastPointNameForeSightReading;
-					}
 					
-					if (this.endPointName.equals("0")) {
-						this.endPointName = generatePointId(++cnt);
-						this.lastPointNameForeSightReading = this.endPointName;//***
-					}
+					if (this.startPointName.equals("0"))
+						this.startPointName = this.lastPointNameForeSightReading;
+
+					if (this.endPointName.equals("0")) 
+						this.endPointName = this.lastPointNameForeSightReading = generatePointId(++cnt);
+
+					this.lastStartPointName = this.startPointName;
 
 					this.levelingData.addBackSightReading(this.startPointName, this.rb1, this.distRb1 != null ? this.distRb1 : 0, true);
 					this.levelingData.addForeSightReading(this.endPointName,   this.vb1, this.distVb1 != null ? this.distVb1 : 0, true);
@@ -518,13 +479,14 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				
 				// ermittle Hoehenunterschied aus R2 und V2
 				if (this.levelingData != null && this.rb2 != null && this.vb2 != null) {
-					this.levelingData.addBackSightReading(this.startPointName, this.rb2, this.distRb2 != null ? this.distRb2 : 0, false);
-					this.levelingData.addForeSightReading(this.endPointName,   this.vb2, this.distVb2 != null ? this.distVb2 : 0, false);
+					
+//					this.levelingData.addBackSightReading(this.startPointName, this.rb2, this.distRb2 != null ? this.distRb2 : 0, false);
+//					this.levelingData.addForeSightReading(this.endPointName,   this.vb2, this.distVb2 != null ? this.distVb2 : 0, false);
+					this.levelingData.addBackSightReading(null, this.rb2, this.distRb2 != null ? this.distRb2 : 0, false);
+					this.levelingData.addForeSightReading(null, this.vb2, this.distVb2 != null ? this.distVb2 : 0, false);
 		
 					// speichere Datensatz
 					this.addLevelingData(this.levelingData);
-//					if (this.levelingData != null)
-//						this.lastPointNameForeSightReading = this.levelingData.getEndPointName();
 					this.levelingData = null;
 					
 					this.rb2 = this.vb2 = null;
@@ -599,7 +561,51 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					this.zenithAngles.add(obs);
 				}
 			}			
-		}			
+		}
+		
+		// Speichere Punkte aus der GSI
+		if (pointName != null && !pointName.isBlank() && !this.reservedNames.contains(pointName) && !this.pointMap.containsKey(pointName)) {
+			if (this.dim == DimensionType.HEIGHT && pointName.equals("0") && this.lastPointNameForeSightReading != null && !this.lastPointNameForeSightReading.isBlank())
+				pointName = this.lastPointNameForeSightReading;
+			
+			PointRow point = new PointRow();
+			point.setName(pointName);
+			point.setCode(pointCode);
+			point.setXApriori(x);
+			point.setYApriori(y);
+			point.setZApriori(z);
+
+			if ((this.dim == DimensionType.SPATIAL || this.dim == DimensionType.PLAN_AND_HEIGHT) && x != null && y != null && z != null) {
+				this.pointMap.put(pointName, point);
+				this.points3d.add(point);
+			}
+			else if ((this.dim == DimensionType.PLAN || this.dim == DimensionType.PLAN_AND_HEIGHT) && x != null && y != null) {
+				this.pointMap.put(pointName, point);
+				this.points2d.add(point);
+			}
+			else if ((this.dim == DimensionType.HEIGHT || this.dim == DimensionType.PLAN_AND_HEIGHT) && z != null) {
+				this.pointMap.put(pointName, point);
+				this.points1d.add(point);
+			}
+		}
+		else if (this.pointMap.containsKey(pointName)) {
+			PointRow point = this.pointMap.get(pointName);
+			if (this.hasZerosCoordinates(point)) {
+				if ((this.dim == DimensionType.SPATIAL || this.dim == DimensionType.PLAN_AND_HEIGHT) && x != null && y != null && z != null) {
+					point.setXApriori(x);
+					point.setYApriori(y);
+					point.setZApriori(z);
+				}
+				else if ((this.dim == DimensionType.PLAN || this.dim == DimensionType.PLAN_AND_HEIGHT) && x != null && y != null) {
+					point.setXApriori(x);
+					point.setYApriori(y);
+				}
+				else if ((this.dim == DimensionType.HEIGHT || this.dim == DimensionType.PLAN_AND_HEIGHT) && z != null) {
+					point.setZApriori(z);
+				}
+			}
+		}
+		
 		this.isNewStation = false;
 		this.isNewLevelingLine = false;
 	}
@@ -701,8 +707,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		// Speichere Daten bspw. Richtungen, da diese Satzweise zu halten sind
 		if ((this.dim == DimensionType.HEIGHT || this.dim == DimensionType.PLAN_AND_HEIGHT) && !this.leveling.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.LEVELING))) {
 			this.addLevelingData(this.levelingData);
-//			if (this.levelingData != null)
-//				this.lastPointNameForeSightReading = this.levelingData.getEndPointName();
+			this.lastPointNameForeSightReading = null;
 			this.levelingData = null;
 			this.cnt = 0;
 			this.lastTreeItem = this.saveObservationGroup(TreeItemType.LEVELING_LEAF, this.leveling);
