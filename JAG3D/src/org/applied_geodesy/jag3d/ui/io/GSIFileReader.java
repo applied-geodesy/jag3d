@@ -25,10 +25,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -83,13 +86,15 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	private boolean isNewStation = false, isNewLevelingLine = false;
 	private Set<String> reservedNames = null;
 	private Map<String, PointRow> pointMap = new HashMap<String, PointRow>();
-	private String startPointName = null, endPointName = null, lastStartPointName = null, lastLevelingLineName = null;
+	private String startPointName = null, endPointName = null, lastStartPointName = null, lastLevelingLineName = null, lastPointNameForeSightReading = null;
 	private LevelingData levelingData = null;
 	
 	private double ih = 0.0, th = 0.0;
 	private Double rb1 = null, vb1 = null, distRb1 = null, distVb1 = null;
 	private Double rb2 = null, vb2 = null, distRb2 = null, distVb2 = null;
 	private Double zb = null, distZb = null, lastRb4Zb = null, distLastRb4Zb;
+	
+	private long cnt = 0;
 
 	private List<PointRow> points1d = null;
 	private List<PointRow> points2d = null;
@@ -180,6 +185,8 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 		this.slopeDistances.clear();
 		this.zenithAngles.clear();
+		
+		this.cnt = 0;
 	}
 
 	@Override
@@ -378,6 +385,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		else if (this.isNewLevelingLine) {
 			this.saveObservationGroups(this.dim == DimensionType.HEIGHT);
 			this.lastLevelingLineName = null;
+			this.lastPointNameForeSightReading = null;
 		}
 
 		// Speichere Punkte aus der GSI
@@ -464,6 +472,8 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				if (this.lastRb4Zb != null && this.zb != null) {
 					// speichere letzten Datensatz
 					this.addLevelingData(this.levelingData);
+//					if (this.levelingData != null)
+//						this.lastPointNameForeSightReading = this.levelingData.getEndPointName();
 					this.levelingData = null;
 
 					LevelingData sideLevelingData = new LevelingData();
@@ -482,11 +492,22 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				if (this.rb1 != null && this.vb1 != null) {
 					// speichere letzten Datensatz
 					this.addLevelingData(this.levelingData);
+//					if (this.levelingData != null)
+//						this.lastPointNameForeSightReading = this.levelingData.getEndPointName();
 					this.levelingData = null;
 					
 					// erzeuge neuen Datensatz
 					if (this.levelingData == null)
 						this.levelingData = new LevelingData();
+
+					if (this.startPointName.equals("0")) {
+						this.startPointName = this.lastPointNameForeSightReading;
+					}
+					
+					if (this.endPointName.equals("0")) {
+						this.endPointName = generatePointId(++cnt);
+						this.lastPointNameForeSightReading = this.endPointName;//***
+					}
 
 					this.levelingData.addBackSightReading(this.startPointName, this.rb1, this.distRb1 != null ? this.distRb1 : 0, true);
 					this.levelingData.addForeSightReading(this.endPointName,   this.vb1, this.distVb1 != null ? this.distVb1 : 0, true);
@@ -502,6 +523,8 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		
 					// speichere Datensatz
 					this.addLevelingData(this.levelingData);
+//					if (this.levelingData != null)
+//						this.lastPointNameForeSightReading = this.levelingData.getEndPointName();
 					this.levelingData = null;
 					
 					this.rb2 = this.vb2 = null;
@@ -678,7 +701,10 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		// Speichere Daten bspw. Richtungen, da diese Satzweise zu halten sind
 		if ((this.dim == DimensionType.HEIGHT || this.dim == DimensionType.PLAN_AND_HEIGHT) && !this.leveling.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.LEVELING))) {
 			this.addLevelingData(this.levelingData);
+//			if (this.levelingData != null)
+//				this.lastPointNameForeSightReading = this.levelingData.getEndPointName();
 			this.levelingData = null;
+			this.cnt = 0;
 			this.lastTreeItem = this.saveObservationGroup(TreeItemType.LEVELING_LEAF, this.leveling);
 		}
 
@@ -785,5 +811,17 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			obs.setValueApriori(deltaH);
 			this.leveling.add(obs);
 		}
+	}
+	
+	private static String generatePointId(long cnt) {
+		LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of("UTC"));
+		long doy   = localDateTime.getDayOfYear();
+		long musec = localDateTime.getNano()/1000;
+		long sec   = localDateTime.getSecond();
+		long min   = localDateTime.getMinute();
+		long hour  = localDateTime.getHour();
+		long musod = (hour * 3600L + min * 60L + sec) * 1000000L + musec;
+		int salt   = (int)Math.abs(Math.random()*1000);
+		return String.format(Locale.ENGLISH, "%c%04d%03d%011d%03d", 'W', cnt, doy, musod, salt);
 	}
 }
