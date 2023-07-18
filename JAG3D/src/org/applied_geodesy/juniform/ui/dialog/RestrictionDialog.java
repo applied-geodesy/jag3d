@@ -497,7 +497,10 @@ public class RestrictionDialog {
 			return;
 
 		this.restrictionList.getItems().remove(restriction);
-		this.removeRestrictionButton.setDisable(this.restrictionList.getItems().size() == 0);
+		this.removeRestrictionButton.setDisable(this.restrictionList.getItems().size() == 0 ||
+				this.restrictionList.getItems().size() > 0 &&
+				this.restrictionList.getSelectionModel().getSelectedItem() != null &&
+				this.restrictionList.getSelectionModel().getSelectedItem().isIndispensable());
 	}
 	
 	private Restriction createRestriction(RestrictionType restrictionType) {
