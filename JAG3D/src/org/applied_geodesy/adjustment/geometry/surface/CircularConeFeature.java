@@ -230,40 +230,21 @@ public class CircularConeFeature extends SurfaceFeature {
 		wy /= normw;
 		wz /= normw;
 		
-		DenseMatrix w = new DenseMatrix(1, 3, new double[] {wx, wy, wz}, true);
-		SVD svd = SVD.factorize(w);
-		Matrix V = svd.getVt();
-		
-		double ux = V.get(0, 1);
-		double uy = V.get(1, 1);
-		double uz = V.get(2, 1);
-		
-		double vx = V.get(0, 2);
-		double vy = V.get(1, 2);
-		double vz = V.get(2, 2);
-		
-		double det = ux*vy*wz + vx*wy*uz + wx*uy*vz - wx*vy*uz - vx*uy*wz - ux*wy*vz;
-		if (det < 0) {
-			wx = -wx;
-			wy = -wy;
-			wz = -wz;
-		}
-	
 		double rx = Math.atan2( wy, wz);
 		double ry = Math.atan2(-wx, Math.hypot(wy, wz));
 
 		// derive rotation sequence without rz, i.e., rz = 0 --> R = Ry*Rx
-		ux = Math.cos(ry);
-		uy = Math.sin(rx)*Math.sin(ry);
-		uz = Math.cos(rx)*Math.sin(ry);
+		double ux = Math.cos(ry);
+		double uy = Math.sin(rx)*Math.sin(ry);
+		double uz = Math.cos(rx)*Math.sin(ry);
 
-		vx = 0.0;
-		vy = Math.cos(rx);
-		vz =-Math.sin(rx);
+		double vx = 0.0;
+		double vy = Math.cos(rx);
+		double vz =-Math.sin(rx);
 
-		wx =-Math.sin(ry);
-		wy = Math.sin(rx)*Math.cos(ry);
-		wz = Math.cos(rx)*Math.cos(ry);
+		wx = -Math.sin(ry);
+		wy =  Math.sin(rx)*Math.cos(ry);
+		wz =  Math.cos(rx)*Math.cos(ry);
 		
 		// lambda1 > 0, lambda2 > 0 and lamda3 < 0
 		// evaluate signum of eigenvalues --> main axis of cone corresponds to lamda3
@@ -346,7 +327,7 @@ public class CircularConeFeature extends SurfaceFeature {
 		b = 0.5 * (a + c);
 
 		// circular cone was not detected, use sphere approach
-		if (Math.abs(Math.abs(a) - Math.abs(b)) > Math.pow(Constant.EPS, 1.0/3.0))
+		if (Math.abs(Math.abs(a) - Math.abs(c)) > Math.pow(Constant.EPS, 1.0/3.0))
 			cone.setInitialGuess(x0, y0, z0, b, b, ux, uy, uz, vx, vy, vz, wx, wy, wz);
 		else
 			cone.setInitialGuess(x0, y0, z0, b, b, r11, r12, r13, r21, r22, r23, r31, r32, r33);
