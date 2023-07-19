@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.juniform.test;
+package org.applied_geodesy.juniform.test.nist;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.juniform.test;
+package org.applied_geodesy.juniform.test.nist;
 
 import java.util.List;
 import java.util.Locale;
@@ -27,17 +27,16 @@ import java.util.Locale;
 import org.applied_geodesy.adjustment.geometry.Feature;
 import org.applied_geodesy.adjustment.geometry.parameter.ParameterType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
-import org.applied_geodesy.adjustment.geometry.surface.CircularCylinderFeature;
+import org.applied_geodesy.adjustment.geometry.surface.SpatialLineFeature;
 
-public class CircularCylinderTest extends NISTTest {
-	private CircularCylinderTest() {}
+public class SpatialLineTest extends NISTTest {
+	private SpatialLineTest() {}
 
 	@Override
 	void compare(List<Double> referenceResults, List<UnknownParameter> unknownParameters) {
-//		Cylinders – 7 numbers
-//		3 numbers represent a point on the cylinder axis
-//		3 numbers represent the direction cosines of the cylinder axis
-//		1 number represents the diameter of the cylinder
+//		Lines – 6 numbers
+//		3 numbers represent a point on the line
+//		3 numbers represent the direction cosines of the line
 		
 		double x0Ref = referenceResults.get(0);
 		double y0Ref = referenceResults.get(1);
@@ -47,27 +46,24 @@ public class CircularCylinderTest extends NISTTest {
 		double nyRef = referenceResults.get(4);
 		double nzRef = referenceResults.get(5);
 		
-		double rRef = 0.5 * referenceResults.get(6);
-		
-		double dRef = nxRef * x0Ref + nyRef * y0Ref + nzRef * z0Ref;
+		double d = nxRef * x0Ref + nyRef * y0Ref + nzRef * z0Ref;
 		
 		// position closest to the origin
-		x0Ref = x0Ref - dRef * nxRef;
-		y0Ref = y0Ref - dRef * nyRef;
-		z0Ref = z0Ref - dRef * nzRef;
+		x0Ref = x0Ref - d * nxRef;
+		y0Ref = y0Ref - d * nyRef;
+		z0Ref = z0Ref - d * nzRef;
 
 		double references[] = new double[] {
-				x0Ref, y0Ref, z0Ref, nxRef, nyRef, nzRef, rRef	
+				x0Ref, y0Ref, z0Ref, nxRef, nyRef, nzRef	
 		};
-		
+
 		List<ParameterType> types = List.of(
 				ParameterType.ORIGIN_COORDINATE_X, 
 				ParameterType.ORIGIN_COORDINATE_Y, 
 				ParameterType.ORIGIN_COORDINATE_Z, 
-				ParameterType.VECTOR_X, 
-				ParameterType.VECTOR_Y, 
-				ParameterType.VECTOR_Z,
-				ParameterType.RADIUS
+				ParameterType.VECTOR_X,
+				ParameterType.VECTOR_Y,
+				ParameterType.VECTOR_Z
 		);
 
 		for (int i = 0; i < types.size(); i++) {
@@ -83,7 +79,7 @@ public class CircularCylinderTest extends NISTTest {
 	
 	@Override
 	Feature getFeature() {
-		return new CircularCylinderFeature();
+		return new SpatialLineFeature();
 	}
 	
 	@Override
@@ -91,16 +87,15 @@ public class CircularCylinderTest extends NISTTest {
 		return 3;
 	}
 	
-	double getLambda() {
-		return 0.0;
-	}
-	
 	public static void main(String[] args) throws Exception {
 		System.setProperty("com.github.fommil.netlib.BLAS",   "com.github.fommil.netlib.F2jBLAS");
 		System.setProperty("com.github.fommil.netlib.LAPACK", "com.github.fommil.netlib.F2jLAPACK");
 		System.setProperty("com.github.fommil.netlib.ARPACK", "com.github.fommil.netlib.F2jARPACK");
 		
-		NISTTest test = new CircularCylinderTest();
-		test.start("./nist/Cylinder/");
+		NISTTest test2d = new SpatialLineTest();
+		test2d.start("./nist/Line2d/");
+		
+		NISTTest test3d = new SpatialLineTest();
+		test3d.start("./nist/Line3d/");
 	}
 }

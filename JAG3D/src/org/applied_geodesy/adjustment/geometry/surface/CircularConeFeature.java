@@ -244,9 +244,9 @@ public class CircularConeFeature extends SurfaceFeature {
 		
 		double det = ux*vy*wz + vx*wy*uz + wx*uy*vz - wx*vy*uz - vx*uy*wz - ux*wy*vz;
 		if (det < 0) {
-			ux = -ux;
-			uy = -uy;
-			uz = -uz;
+			wx = -wx;
+			wy = -wy;
+			wz = -wz;
 		}
 	
 		double rx = Math.atan2( wy, wz);
