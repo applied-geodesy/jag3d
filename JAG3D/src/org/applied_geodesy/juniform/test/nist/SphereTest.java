@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.juniform.test;
+package org.applied_geodesy.juniform.test.nist;
 
 import java.util.List;
 import java.util.Locale;
