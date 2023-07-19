@@ -87,7 +87,7 @@ public abstract class NISTTest {
 					
 					if (point != null)
 						points.add(point);
-									}
+				}
 			}
 			
 			if (dim == 2) {
