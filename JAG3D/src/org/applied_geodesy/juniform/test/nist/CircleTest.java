@@ -19,24 +19,31 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.juniform.test;
+package org.applied_geodesy.juniform.test.nist;
 
 import java.util.List;
 import java.util.Locale;
 
 import org.applied_geodesy.adjustment.geometry.Feature;
-import org.applied_geodesy.adjustment.geometry.curve.LineFeature;
+import org.applied_geodesy.adjustment.geometry.curve.CircleFeature;
 import org.applied_geodesy.adjustment.geometry.parameter.ParameterType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 
-public class LineTest extends NISTTest {
-	private LineTest() {}
+public class CircleTest extends NISTTest {
+	private CircleTest() {}
+
+	@Override
+	Feature getFeature() {
+		return new CircleFeature();
+	}
 
 	@Override
 	void compare(List<Double> referenceResults, List<UnknownParameter> unknownParameters) {
-//		Lines – 6 numbers
-//		3 numbers represent a point on the line
-//		3 numbers represent the direction cosines of the line
+//		Circles – 7 numbers
+//		3 numbers represent the center of the circle
+//		3 numbers represent the direction cosines of the normal of the plane containing
+//		the circle
+//		1 number represents the diameter of the circle
 		
 		int idxX = 0; 
 		int idxY = 1;
@@ -53,24 +60,16 @@ public class LineTest extends NISTTest {
 		double x0Ref = referenceResults.get(idxX);
 		double y0Ref = referenceResults.get(idxY);
 		
-		double nxRef = referenceResults.get(idxX+3);
-		double nyRef = referenceResults.get(idxY+3);
-		
-		double d = nxRef * x0Ref + nyRef * y0Ref;
-		
-		// position closest to the origin
-		x0Ref = x0Ref - d * nxRef;
-		y0Ref = y0Ref - d * nyRef;
+		double rRef  = 0.5 * referenceResults.get(6);
 
 		double references[] = new double[] {
-				x0Ref, y0Ref, nxRef, nyRef	
+				x0Ref, y0Ref, rRef
 		};
 
 		List<ParameterType> types = List.of(
 				ParameterType.ORIGIN_COORDINATE_X, 
 				ParameterType.ORIGIN_COORDINATE_Y, 
-				ParameterType.VECTOR_X,
-				ParameterType.VECTOR_Y
+				ParameterType.RADIUS 
 		);
 
 		for (int i = 0; i < types.size(); i++) {
@@ -85,11 +84,6 @@ public class LineTest extends NISTTest {
 	}
 	
 	@Override
-	Feature getFeature() {
-		return new LineFeature();
-	}
-	
-	@Override
 	int getDimension() {
 		return 2;
 	}
@@ -99,7 +93,7 @@ public class LineTest extends NISTTest {
 		System.setProperty("com.github.fommil.netlib.LAPACK", "com.github.fommil.netlib.F2jLAPACK");
 		System.setProperty("com.github.fommil.netlib.ARPACK", "com.github.fommil.netlib.F2jARPACK");
 		
-		NISTTest test = new LineTest();
-		test.start("./nist/Line2d/");
+		NISTTest test = new CircleTest();
+		test.start("./nist/Circle2d/");
 	}
 }

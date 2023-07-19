@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.juniform.test;
+package org.applied_geodesy.juniform.test.nist;
 
 import java.util.List;
 import java.util.Locale;
@@ -27,39 +27,41 @@ import java.util.Locale;
 import org.applied_geodesy.adjustment.geometry.Feature;
 import org.applied_geodesy.adjustment.geometry.parameter.ParameterType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
-import org.applied_geodesy.adjustment.geometry.surface.PlaneFeature;
+import org.applied_geodesy.adjustment.geometry.surface.EllipsoidFeature;
 
+public class EllipsoidTest extends NISTTest {
+	private EllipsoidTest() {}
 
-public class PlaneTest extends NISTTest {
-	
-	private PlaneTest() {}
+	@Override
+	Feature getFeature() {
+		return new EllipsoidFeature();
+	}
 
 	@Override
 	void compare(List<Double> referenceResults, List<UnknownParameter> unknownParameters) {
-//		Planes – 6 numbers
-//		3 numbers represent a point on the plane
-//		3 numbers represent the direction cosines of the normal to the plane
+//		Spheres – 4 numbers
+//		3 numbers represent the center of the sphere
+//		1 number represents the diameter of the sphere
 		
 		double x0Ref = referenceResults.get(0);
 		double y0Ref = referenceResults.get(1);
 		double z0Ref = referenceResults.get(2);
 		
-		double nxRef = referenceResults.get(3);
-		double nyRef = referenceResults.get(4);
-		double nzRef = referenceResults.get(5);
-		
-		double dRef = nxRef * x0Ref + nyRef * y0Ref + nzRef * z0Ref;
-		
+		double rRef  = 0.5 * referenceResults.get(3);
+
 		double references[] = new double[] {
-			nxRef, nyRef, nzRef, dRef	
+				x0Ref, y0Ref, z0Ref, 1.0/rRef, 1.0/rRef, 1.0/rRef	
 		};
-		
+
 		List<ParameterType> types = List.of(
-				ParameterType.VECTOR_X, 
-				ParameterType.VECTOR_Y, 
-				ParameterType.VECTOR_Z, 
-				ParameterType.LENGTH);
-		
+				ParameterType.ORIGIN_COORDINATE_X, 
+				ParameterType.ORIGIN_COORDINATE_Y, 
+				ParameterType.ORIGIN_COORDINATE_Z, 
+				ParameterType.MAJOR_AXIS_COEFFICIENT,
+				ParameterType.MIDDLE_AXIS_COEFFICIENT,
+				ParameterType.MINOR_AXIS_COEFFICIENT
+		);
+
 		for (int i = 0; i < types.size(); i++) {
 			for (UnknownParameter unknownParameter : unknownParameters) {
 				if (unknownParameter.getParameterType() == types.get(i)) {
@@ -72,13 +74,13 @@ public class PlaneTest extends NISTTest {
 	}
 	
 	@Override
-	Feature getFeature() {
-		return new PlaneFeature();
-	}
-
-	@Override
 	int getDimension() {
 		return 3;
+	}
+	
+	@Override
+	double getLambda() {
+		return 10.0;
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -86,7 +88,7 @@ public class PlaneTest extends NISTTest {
 		System.setProperty("com.github.fommil.netlib.LAPACK", "com.github.fommil.netlib.F2jLAPACK");
 		System.setProperty("com.github.fommil.netlib.ARPACK", "com.github.fommil.netlib.F2jARPACK");
 		
-		PlaneTest test = new PlaneTest();
-		test.start("./nist/Plane/");
+		NISTTest test = new EllipsoidTest();
+		test.start("./nist/Sphere/");
 	}
 }

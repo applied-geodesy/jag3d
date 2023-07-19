@@ -19,18 +19,18 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.juniform.test;
+package org.applied_geodesy.juniform.test.nist;
 
 import java.util.List;
 import java.util.Locale;
 
 import org.applied_geodesy.adjustment.geometry.Feature;
+import org.applied_geodesy.adjustment.geometry.curve.LineFeature;
 import org.applied_geodesy.adjustment.geometry.parameter.ParameterType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
-import org.applied_geodesy.adjustment.geometry.surface.SpatialLineFeature;
 
-public class SpatialLineTest extends NISTTest {
-	private SpatialLineTest() {}
+public class LineTest extends NISTTest {
+	private LineTest() {}
 
 	@Override
 	void compare(List<Double> referenceResults, List<UnknownParameter> unknownParameters) {
@@ -38,32 +38,39 @@ public class SpatialLineTest extends NISTTest {
 //		3 numbers represent a point on the line
 //		3 numbers represent the direction cosines of the line
 		
-		double x0Ref = referenceResults.get(0);
-		double y0Ref = referenceResults.get(1);
-		double z0Ref = referenceResults.get(2);
+		int idxX = 0; 
+		int idxY = 1;
+				
+		if (CMP_TYPE == ComponentOrderType.XZ) {
+			idxX = 0; 
+			idxY = 2;
+		}
+		else if (CMP_TYPE == ComponentOrderType.YZ) {
+			idxX = 1; 
+			idxY = 2;
+		}
 		
-		double nxRef = referenceResults.get(3);
-		double nyRef = referenceResults.get(4);
-		double nzRef = referenceResults.get(5);
+		double x0Ref = referenceResults.get(idxX);
+		double y0Ref = referenceResults.get(idxY);
 		
-		double d = nxRef * x0Ref + nyRef * y0Ref + nzRef * z0Ref;
+		double nxRef = referenceResults.get(idxX+3);
+		double nyRef = referenceResults.get(idxY+3);
+		
+		double d = nxRef * x0Ref + nyRef * y0Ref;
 		
 		// position closest to the origin
 		x0Ref = x0Ref - d * nxRef;
 		y0Ref = y0Ref - d * nyRef;
-		z0Ref = z0Ref - d * nzRef;
 
 		double references[] = new double[] {
-				x0Ref, y0Ref, z0Ref, nxRef, nyRef, nzRef	
+				x0Ref, y0Ref, nxRef, nyRef	
 		};
 
 		List<ParameterType> types = List.of(
 				ParameterType.ORIGIN_COORDINATE_X, 
 				ParameterType.ORIGIN_COORDINATE_Y, 
-				ParameterType.ORIGIN_COORDINATE_Z, 
 				ParameterType.VECTOR_X,
-				ParameterType.VECTOR_Y,
-				ParameterType.VECTOR_Z
+				ParameterType.VECTOR_Y
 		);
 
 		for (int i = 0; i < types.size(); i++) {
@@ -79,12 +86,12 @@ public class SpatialLineTest extends NISTTest {
 	
 	@Override
 	Feature getFeature() {
-		return new SpatialLineFeature();
+		return new LineFeature();
 	}
 	
 	@Override
 	int getDimension() {
-		return 3;
+		return 2;
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -92,10 +99,7 @@ public class SpatialLineTest extends NISTTest {
 		System.setProperty("com.github.fommil.netlib.LAPACK", "com.github.fommil.netlib.F2jLAPACK");
 		System.setProperty("com.github.fommil.netlib.ARPACK", "com.github.fommil.netlib.F2jARPACK");
 		
-		NISTTest test2d = new SpatialLineTest();
-		test2d.start("./nist/Line2d/");
-		
-		NISTTest test3d = new SpatialLineTest();
-		test3d.start("./nist/Line3d/");
+		NISTTest test = new LineTest();
+		test.start("./nist/Line2d/");
 	}
 }

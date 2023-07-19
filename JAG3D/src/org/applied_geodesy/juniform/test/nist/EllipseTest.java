@@ -19,22 +19,22 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.juniform.test;
+package org.applied_geodesy.juniform.test.nist;
 
 import java.util.List;
 import java.util.Locale;
 
 import org.applied_geodesy.adjustment.geometry.Feature;
-import org.applied_geodesy.adjustment.geometry.surface.SpatialCircleFeature;
+import org.applied_geodesy.adjustment.geometry.curve.EllipseFeature;
 import org.applied_geodesy.adjustment.geometry.parameter.ParameterType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 
-public class SpatialCircleTest extends NISTTest {
-	private SpatialCircleTest() {}
+public class EllipseTest extends NISTTest {
+	private EllipseTest() {}
 
 	@Override
 	Feature getFeature() {
-		return new SpatialCircleFeature();
+		return new EllipseFeature();
 	}
 
 	@Override
@@ -45,31 +45,33 @@ public class SpatialCircleTest extends NISTTest {
 //		the circle
 //		1 number represents the diameter of the circle
 		
-		double x0Ref = referenceResults.get(0);
-		double y0Ref = referenceResults.get(1);
-		double z0Ref = referenceResults.get(2);
+		int idxX = 0; 
+		int idxY = 1;
+				
+		if (CMP_TYPE == ComponentOrderType.XZ) {
+			idxX = 0; 
+			idxY = 2;
+		}
+		else if (CMP_TYPE == ComponentOrderType.YZ) {
+			idxX = 1; 
+			idxY = 2;
+		}
 		
-		double nxRef = referenceResults.get(3);
-		double nyRef = referenceResults.get(4);
-		double nzRef = referenceResults.get(5);
+		double x0Ref = referenceResults.get(idxX);
+		double y0Ref = referenceResults.get(idxY);
 		
 		double rRef  = 0.5 * referenceResults.get(6);
-		
-		double dRef = nxRef * x0Ref + nyRef * y0Ref + nzRef * z0Ref;
 
 		double references[] = new double[] {
-				x0Ref, y0Ref, z0Ref, rRef, nxRef, nyRef, nzRef, dRef	
+				x0Ref, y0Ref, rRef, rRef
 		};
 
 		List<ParameterType> types = List.of(
 				ParameterType.ORIGIN_COORDINATE_X, 
-				ParameterType.ORIGIN_COORDINATE_Y, 
-				ParameterType.ORIGIN_COORDINATE_Z, 
-				ParameterType.RADIUS,
-				ParameterType.VECTOR_X, 
-				ParameterType.VECTOR_Y, 
-				ParameterType.VECTOR_Z, 
-				ParameterType.LENGTH);
+				ParameterType.ORIGIN_COORDINATE_Y,
+				ParameterType.MAJOR_AXIS_COEFFICIENT,
+				ParameterType.MINOR_AXIS_COEFFICIENT 
+		);
 
 		for (int i = 0; i < types.size(); i++) {
 			for (UnknownParameter unknownParameter : unknownParameters) {
@@ -84,7 +86,7 @@ public class SpatialCircleTest extends NISTTest {
 	
 	@Override
 	int getDimension() {
-		return 3;
+		return 2;
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -92,10 +94,7 @@ public class SpatialCircleTest extends NISTTest {
 		System.setProperty("com.github.fommil.netlib.LAPACK", "com.github.fommil.netlib.F2jLAPACK");
 		System.setProperty("com.github.fommil.netlib.ARPACK", "com.github.fommil.netlib.F2jARPACK");
 		
-		NISTTest test2d = new SpatialCircleTest();
-		test2d.start("./nist/Circle2d/");
-		
-		NISTTest test3d = new SpatialCircleTest();
-		test3d.start("./nist/Circle3d_full/");
+		NISTTest test = new EllipseTest();
+		test.start("./nist/Circle2d/");
 	}
 }
