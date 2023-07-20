@@ -52,6 +52,7 @@ import org.applied_geodesy.adjustment.geometry.Feature;
 import org.applied_geodesy.adjustment.geometry.parameter.ParameterType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
+import org.applied_geodesy.adjustment.geometry.point.Point;
 import org.applied_geodesy.adjustment.geometry.surface.CircularConeFeature;
 import org.applied_geodesy.adjustment.geometry.surface.CircularCylinderFeature;
 import org.applied_geodesy.adjustment.geometry.surface.PlaneFeature;
@@ -393,8 +394,29 @@ public class TraCIM {
 				ny = unknownParameters.get(ParameterType.ROTATION_COMPONENT_R32).getValue();
 				nz = unknownParameters.get(ParameterType.ROTATION_COMPONENT_R33).getValue();
 				
+				alpha = unknownParameters.get(ParameterType.ANGLE).getValue();
 				r  = 0; // r = 0, if vector [x0/y0/z0] marks the apex of the cone
-				alpha = 2.0 * unknownParameters.get(ParameterType.ANGLE).getValue() * Constant.RHO_RAD2DEG; // full angle at the apex in degree
+
+				// PTB specified the orientation of the normal vector in the direction of decreasing radius
+				// even if the apex position is given, i.e., r == 0 and the orientation is ambiguous 
+				Point point = Feature.deriveCenterOfMass(points);
+				double mx = point.getX0() - x0;
+				double my = point.getY0() - y0;
+				double mz = point.getZ0() - z0;
+				double len = Math.sqrt(mx*mx + my*my + mz*mz);
+				mx /= len;
+				my /= len;
+				mz /= len;
+				
+				double phi = Math.acos(nx*mx + ny*my + nz*mz);
+				
+				if (phi < alpha) {
+					nx = -nx;
+					ny = -ny;
+					nz = -nz;
+				}
+				
+				alpha = 2.0 * alpha * Constant.RHO_RAD2DEG; // full angle at the apex in degree
 				
 				this.addPosition(xmlResults, x0, y0, z0);
 				this.addNormalVector(xmlResults, nx, ny, nz);
@@ -477,6 +499,5 @@ public class TraCIM {
     		}
     	}
 	}
-	
 
 }
