@@ -379,7 +379,7 @@ public class TraCIM {
 				break;
 				
 			case "CONE":
-				feature = traCIMTest.adjust(new CircularConeFeature(), points);
+				feature = traCIMTest.adjust(new CircularConeFeature(), points, 10);
 				if (feature == null) {
 					System.err.println("Error, least-squares failed for " + object + ", " + bId);
 					continue;

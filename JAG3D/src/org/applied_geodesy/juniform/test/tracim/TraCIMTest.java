@@ -35,6 +35,10 @@ import no.uib.cipr.matrix.NotConvergedException;
 class TraCIMTest {
 
 	public Feature adjust(Feature feature, List<FeaturePoint> points) {
+		return this.adjust(feature, points, 0);
+	}
+	
+	public Feature adjust(Feature feature, List<FeaturePoint> points, double lambda) {
 		FeatureAdjustment adjustment = new FeatureAdjustment();
 
 		for (GeometricPrimitive geometricPrimitive : feature)
@@ -45,7 +49,7 @@ class TraCIMTest {
 			// derive parameters for warm start of adjustment
 			if (feature.isEstimateInitialGuess())
 				feature.deriveInitialGuess();
-			adjustment.setLevenbergMarquardtDampingValue(this.getLambda());
+			adjustment.setLevenbergMarquardtDampingValue(Math.max(lambda, 0));
 			adjustment.setFeature(feature);
 			adjustment.init();
 			EstimationStateType type = adjustment.estimateModel();
@@ -58,9 +62,5 @@ class TraCIMTest {
 		}
 
 		return null;
-	}
-	
-	double getLambda() {
-		return 0.0;
 	}
 }
