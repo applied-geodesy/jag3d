@@ -46,7 +46,6 @@ import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.MatrixSingularException;
 import no.uib.cipr.matrix.NotConvergedException;
-import no.uib.cipr.matrix.SVD;
 import no.uib.cipr.matrix.SymmPackEVD;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
 
@@ -345,37 +344,18 @@ public class CircularConeFeature extends SurfaceFeature {
 		double wx = plane.getUnknownParameter(ParameterType.VECTOR_X).getValue0();
 		double wy = plane.getUnknownParameter(ParameterType.VECTOR_Y).getValue0();
 		double wz = plane.getUnknownParameter(ParameterType.VECTOR_Z).getValue0();
-		
-		DenseMatrix w = new DenseMatrix(1, 3, new double[] {wx, wy, wz}, true);
-		SVD svd = SVD.factorize(w);
-		Matrix V = svd.getVt();
-		
-		double ux = V.get(0, 1);
-		double uy = V.get(1, 1);
-		double uz = V.get(2, 1);
-		
-		double vx = V.get(0, 2);
-		double vy = V.get(1, 2);
-		double vz = V.get(2, 2);
-		
-		double det = ux*vy*wz + vx*wy*uz + wx*uy*vz - wx*vy*uz - vx*uy*wz - ux*wy*vz;
-		if (det < 0) {
-			wx = -wx;
-			wy = -wy;
-			wz = -wz;
-		}
 	
 		double rx = Math.atan2( wy, wz);
 		double ry = Math.atan2(-wx, Math.hypot(wy, wz));
 
 		// derive rotation sequence without rz, i.e., rz = 0 --> R = Ry*Rx
-		ux = Math.cos(ry);
-		uy = Math.sin(rx)*Math.sin(ry);
-		uz = Math.cos(rx)*Math.sin(ry);
+		double ux = Math.cos(ry);
+		double uy = Math.sin(rx)*Math.sin(ry);
+		double uz = Math.cos(rx)*Math.sin(ry);
 
-		vx = 0.0;
-		vy = Math.cos(rx);
-		vz =-Math.sin(rx);
+		double vx = 0.0;
+		double vy = Math.cos(rx);
+		double vz =-Math.sin(rx);
 
 		wx =-Math.sin(ry);
 		wy = Math.sin(rx)*Math.cos(ry);
