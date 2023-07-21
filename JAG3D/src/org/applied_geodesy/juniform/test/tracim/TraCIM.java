@@ -60,25 +60,24 @@ import org.applied_geodesy.adjustment.geometry.surface.SpatialCircleFeature;
 import org.applied_geodesy.adjustment.geometry.surface.SpatialLineFeature;
 import org.applied_geodesy.adjustment.geometry.surface.SphereFeature;
 import org.applied_geodesy.util.XMLUtilities;
+import org.applied_geodesy.version.coordtrans.Version;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-//Zertifikat der PTB ist ggf. nicht in Liste der vertrauenswuerdingen Dienste von Java und muss hinzugefuegt werden
-//keytool -import -alias tracim -keystore  "C:\Program Files\Java\jdk\lib\security\cacerts" -file tracimlx.ptb.de.crt
-//Password: changeit
+// Certificate of PTB may not be in list of trusted services defined by Java and must be added
+// C:\Program Files\Java\jdk\bin\keytool.exe -import -alias tracim -keystore  "C:\Program Files\Java\jdk\lib\security\cacerts" -file tracimlx.ptb.de.crt
+// Password: changeit
 public class TraCIM {
-
-	public final static String NUMBER_TEMPLATE = "%+.16f";
-	private final String baseURI = "https://tracim.ptb.de/tracim/api";
 	private final String orderId;
-	private final String customer = "Dr.-Ing. Michael Lösler";
+	private final String baseURI  = "https://tracim.ptb.de/tracim/api";
+	private final String customer = "Steinbeis Transfer Centre Applied Geodesy";
 	private final String vendor   = "Dr.-Ing. Michael Lösler";
 	private final String software = "Java·Applied·Geodesy·3D";
-	private final String version  = "2023";
-	private final String revision = "0713";
+	private final String version  = String.valueOf(Version.get()).substring(0, 4);
+	private final String revision = String.valueOf(Version.get()).substring(4);
 	private String processId;
 	
 	public TraCIM(String orderId) {
@@ -87,14 +86,24 @@ public class TraCIM {
 	
 	public Document getTestData() throws IOException, ParserConfigurationException, SAXException {
 		final String address = this.baseURI + "/order/" + this.orderId + "/test";
-		String response      = this.sendRequest(address, null);
-		Document document    = this.convertStringToXMLDocument(response);
-		return document;
+		String xmlString     = this.sendRequest(address, null);
+		
+		if (STORE_COMPLETE_TRANSACTION) {
+			String txtFile = BASE_PATH + "/gauss_data_sets.xml";
+			this.toFile(new File(txtFile), xmlString);
+		}
+		
+		return this.convertStringToXMLDocument(xmlString);
 	}
 	
 	public void saveReport(File file, String xmlResult) throws ParserConfigurationException, SAXException, IOException {
-		String xmlString = this.submitResult(xmlResult);
-		Document document = convertStringToXMLDocument(xmlString);
+		String xmlString  = this.submitResult(xmlResult);
+		if (STORE_COMPLETE_TRANSACTION) {
+			String txtFile = BASE_PATH + "/gauss_test_report.xml";
+			this.toFile(new File(txtFile), xmlString);
+		}
+		
+		Document document = this.convertStringToXMLDocument(xmlString);
 		
 		String xpathPattern = "//tracim/validation"; 
 		Node validationElement = (Node)XMLUtilities.xpathSearch(document, xpathPattern, null, XPathConstants.NODE);
@@ -115,35 +124,41 @@ public class TraCIM {
 			if (fos != null)
 				fos.close();
 		}
-		
 	}
 	
 	public String getResultAsXMLString(Document document) {
 		
-		String xpathPattern = "//tracim//process/key"; //"./tracim/order";
+		String xpathPattern = "//tracim//process/key";
 		this.processId = (String)XMLUtilities.xpathSearch(document, xpathPattern, null, XPathConstants.STRING);
-		StringBuffer xmlString = new StringBuffer();
+		StringBuffer xmlStringBuffer = new StringBuffer();
 		
-		// Quick and Dirty: erzeuge eine pseudo XML mit den Ergebnissen
-		// ein echtes XML Dokument lohnt nicht, da ein normaler String benoetigt wird 
-		xmlString.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
-		xmlString.append("<gaussResultPackage xmlns:tracim=\"http://tracim.ptb.de/tracim\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://tracim.ptb.de/gauss/test\">\r\n");
-		xmlString.append("<processKey>").append(this.processId).append("</processKey>\r\n");
-		xmlString.append("<customer>").append(this.customer).append("</customer>\r\n");
-		xmlString.append("<softwareVendor>").append(this.vendor).append("</softwareVendor>\r\n");
-		xmlString.append("<softwareName>").append(this.software).append("</softwareName>\r\n");
-		xmlString.append("<softwareVersion>").append(this.version).append("</softwareVersion>\r\n");
-		xmlString.append("<softwareRev>").append(this.revision).append("</softwareRev>\r\n");
-		xmlString.append("<resultPackage>\r\n").append(this.performTests(document)).append("</resultPackage>\r\n");
+		// Quick and Dirty: create a pseudo XML file containing adjustment results
+		// real XML is not required because PTB just requests an XML string and not a file
+		xmlStringBuffer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
+		xmlStringBuffer.append("<gaussResultPackage xmlns:tracim=\"http://tracim.ptb.de/tracim\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://tracim.ptb.de/gauss/test\">\r\n");
+		xmlStringBuffer.append("<processKey>").append(this.processId).append("</processKey>\r\n");
+		xmlStringBuffer.append("<customer>").append(this.customer).append("</customer>\r\n");
+		xmlStringBuffer.append("<softwareVendor>").append(this.vendor).append("</softwareVendor>\r\n");
+		xmlStringBuffer.append("<softwareName>").append(this.software).append("</softwareName>\r\n");
+		xmlStringBuffer.append("<softwareVersion>").append(this.version).append("</softwareVersion>\r\n");
+		xmlStringBuffer.append("<softwareRev>").append(this.revision).append("</softwareRev>\r\n");
+		xmlStringBuffer.append("<resultPackage>\r\n").append(this.performTests(document)).append("</resultPackage>\r\n");
 		
-		xmlString.append("<mpe_size>0.0001</mpe_size>\r\n");
-		xmlString.append("<mpe_angle>0.0000001</mpe_angle>\r\n");
-		xmlString.append("<mpe_position>0.0001</mpe_position>\r\n");
-		xmlString.append("<mpe_orientation>0.0000001</mpe_orientation>\r\n");
+		// Default MPE - lower values are not accepted by PTB
+		xmlStringBuffer.append("<mpe_size>0.0001</mpe_size>\r\n");
+		xmlStringBuffer.append("<mpe_angle>0.0000001</mpe_angle>\r\n");
+		xmlStringBuffer.append("<mpe_position>0.0001</mpe_position>\r\n");
+		xmlStringBuffer.append("<mpe_orientation>0.0000001</mpe_orientation>\r\n");
 
-		xmlString.append("</gaussResultPackage>\r\n");
+		xmlStringBuffer.append("</gaussResultPackage>\r\n");
 		
-		return xmlString.toString();
+		String xmlString = xmlStringBuffer.toString();
+		if (STORE_COMPLETE_TRANSACTION) {
+			String txtFile = BASE_PATH + "/gauss_adjustment_results.xml";
+			this.toFile(new File(txtFile), xmlString);
+		}
+		
+		return xmlString;
 	}
 	
 	private Document convertStringToXMLDocument(String xmlString) throws ParserConfigurationException, SAXException, IOException {
@@ -215,7 +230,7 @@ public class TraCIM {
 	
 	private String performTests(Document document) {
 		StringBuffer xmlResults = new StringBuffer();
-		String xpathPattern = "//tracim//testElement"; //"./tracim/order";
+		String xpathPattern = "//tracim//testElement";
 		NodeList testElementList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, null, XPathConstants.NODESET);
 		
 		for (int i=0; i<testElementList.getLength(); i++) {
@@ -243,20 +258,12 @@ public class TraCIM {
 				if (point != null)
 					points.add(point);
 			}
-			String txtFile = "C:/Users/michael.loesler/Desktop/tracim/" + bId + "_" + object + ".txt";
-			toFile(new File(txtFile), points);
 			
-//			<results>
-//			<basicID>b44</basicID>
-//			<computationObject>SPHERE</computationObject>
-//			<refParameter>
-//			<positionX>-75.6604087040049</positionX>
-//			<positionY>-15.8384993795741</positionY>
-//			<positionZ>-65.0405586921366</positionZ>
-//			<radius>16.6417488313056</radius>
-//			</refParameter>
-//			</results>
-			
+			if (STORE_COMPLETE_TRANSACTION) {
+				String txtFile = BASE_PATH + "/" + bId + "_" + object + "_" + this.orderId + ".txt";
+				this.toFile(new File(txtFile), points);
+			}
+
 			xmlResults.append("<results>\r\n");
 			xmlResults.append("<basicID>").append(bId).append("</basicID>\r\n");
 			xmlResults.append("<computationObject>").append(object).append("</computationObject>\r\n");
@@ -283,13 +290,7 @@ public class TraCIM {
 				nx = unknownParameters.get(ParameterType.VECTOR_X).getValue();
 				ny = unknownParameters.get(ParameterType.VECTOR_Y).getValue();
 				nz = unknownParameters.get(ParameterType.VECTOR_Z).getValue();
-				
-//				List<UnknownParameter> unknownParameterList = feature.getUnknownParameters();
-//				for (UnknownParameter unknownParameter : unknownParameterList) {
-//					System.out.println(unknownParameter);
-//				}
-//				System.out.println("-----------------------------------------------------------------------\n");
-				
+								
 				this.addPosition(xmlResults, x0, y0, z0);
 				this.addNormalVector(xmlResults, nx, ny, nz);
 
@@ -481,12 +482,26 @@ public class TraCIM {
 		sb.append("<angle>").append(String.format(Locale.ENGLISH, NUMBER_TEMPLATE, alpha)).append("</angle>\r\n");
 	}
 	
+	private void toFile(File file, String string) {
+		PrintWriter pw = null;
+    	try {
+    		pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+    		pw.println(string);
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	}
+    	finally {
+    		if (pw != null) {
+    			pw.close();
+    		}
+    	}
+	}
+	
 	private void toFile(File file, List<FeaturePoint> points) {
 		PrintWriter pw = null;
     	try {
     		pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
-    						//Pkt,X,Y,Z
-    		String format = "%25s\t%35.15f\t%35.15f\t%35.15f%n";
+    		String format = "%25s\t%35.15f\t%35.15f\t%35.15f%n"; //Id, X, Y, Z
     		for ( FeaturePoint point : points ) {
     			pw.printf(Locale.ENGLISH, format, point.getName(), point.getX(), point.getY(), point.getZ());
     		}
@@ -499,5 +514,27 @@ public class TraCIM {
     		}
     	}
 	}
+	
+	public final static String NUMBER_TEMPLATE = "%+.20f";
+	public final static String BASE_PATH = "C:/Users/michael.loesler/Desktop/tracim";
+	public final static boolean STORE_COMPLETE_TRANSACTION = true;
+	
+	public static void main(String[] args) {
+		System.setProperty("com.github.fommil.netlib.BLAS",   "com.github.fommil.netlib.F2jBLAS");
+		System.setProperty("com.github.fommil.netlib.LAPACK", "com.github.fommil.netlib.F2jLAPACK");
+		System.setProperty("com.github.fommil.netlib.ARPACK", "com.github.fommil.netlib.F2jARPACK");
+		
+		final String processKey = "";
+		final File file = new File(BASE_PATH + "/gauss_test_report.pdf");
+		try {
+			TraCIM traCIM = new TraCIM(processKey);
+			Document document = traCIM.getTestData();
+			String xmlResult = traCIM.getResultAsXMLString(document);
 
+			traCIM.saveReport(file, xmlResult);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
