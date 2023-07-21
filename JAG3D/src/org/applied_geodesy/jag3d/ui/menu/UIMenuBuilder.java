@@ -1115,7 +1115,9 @@ public class UIMenuBuilder {
 
 				if (propVersion > 0) {
 					validProperties = true; 
-					if (propVersion > Math.max(org.applied_geodesy.version.jag3d.Version.get(), org.applied_geodesy.version.juniform.Version.get())) {
+					if (propVersion > org.applied_geodesy.version.jag3d.Version.get() || 
+							propVersion > org.applied_geodesy.version.juniform.Version.get() || 
+							propVersion > org.applied_geodesy.version.coordtrans.Version.get()) {
 						Optional<ButtonType> result = OptionDialog.showConfirmationDialog(
 								i18n.getString("UIMenuBuilder.message.confirmation.outdated_version.title", "New version available"),
 								String.format(Locale.ENGLISH, i18n.getString("UIMenuBuilder.message.confirmation.outdated_version.header", "A new version v%d of JAG3D is available.\r\nDo you want to download the latest release?"), propVersion),
