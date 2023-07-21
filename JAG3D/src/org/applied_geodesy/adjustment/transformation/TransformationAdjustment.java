@@ -283,7 +283,6 @@ public class TransformationAdjustment {
 			if (this.numberOfModelEquations < (this.numberOfUnknownParameters - numberOfRestrictions))
 				throw new MatrixSingularException("Error, the number of equations is less than the number of parameters to be estimated, " + this.numberOfModelEquations + " < " + (this.numberOfUnknownParameters - numberOfRestrictions) + "! The system of equations is underestimated. Please add further equations." );
 			
-			this.adaptedDampingValue = this.dampingValue;
 			int runs = this.maximalNumberOfIterations - 1;
 			boolean isEstimated = false, estimateCompleteModel = false, isFirstIteration = true;
 			
@@ -1208,12 +1207,26 @@ public class TransformationAdjustment {
 			n.set(restriction.getRow(), -misclosure);
 		}
 		
+		if (this.dampingValue > 0) {
+			double maxElement = 0;
+			for (UnknownParameter unknownParameter : this.parameters) {
+				int column = unknownParameter.getColumn();
+				if (column < 0)
+					continue;
+				maxElement = Math.max(maxElement, N.get(column, column));
+			}
+			// derive first damping value for LMA
+			this.adaptedDampingValue = this.dampingValue * maxElement;
+			this.dampingValue = 0;
+		}
+		
 		if (this.adaptedDampingValue > 0) {
 			for (UnknownParameter unknownParameter : this.parameters) {
 				int column = unknownParameter.getColumn();
 				if (column < 0)
 					continue;
-				N.add(column, column, this.adaptedDampingValue * N.get(column, column));
+				//N.add(column, column, this.adaptedDampingValue * N.get(column, column));
+				N.add(column, column, this.adaptedDampingValue);
 			}
 		}
 		

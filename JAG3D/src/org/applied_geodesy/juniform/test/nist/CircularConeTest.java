@@ -133,7 +133,7 @@ public class CircularConeTest extends NISTTest {
 	
 	@Override
 	double getLambda() {
-		return 10.0;
+		return 0.001;
 	}
 	
 	public static void main(String[] args) throws Exception {
