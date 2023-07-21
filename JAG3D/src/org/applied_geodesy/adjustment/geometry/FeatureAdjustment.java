@@ -288,7 +288,6 @@ public class FeatureAdjustment {
 			for (int estimationStep = 0; estimationStep < numberOfEstimationSteps; estimationStep++) {
 				this.prepareIterationProcess(new Point(centerOfMass));
 
-				this.adaptedDampingValue = this.dampingValue;
 				int runs = this.maximalNumberOfIterations - 1;
 				boolean isEstimated = false, estimateCompleteModel = false, isFirstIteration = true;
 				
@@ -674,12 +673,26 @@ public class FeatureAdjustment {
 			n.set(restriction.getRow(), -misclosure);
 		}
 		
+		if (this.dampingValue > 0) {
+			double maxElement = 0;
+			for (UnknownParameter unknownParameter : this.parameters) {
+				int column = unknownParameter.getColumn();
+				if (column < 0)
+					continue;
+				maxElement = Math.max(maxElement, N.get(column, column));
+			}
+			// derive first damping value for LMA
+			this.adaptedDampingValue = this.dampingValue * maxElement;
+			this.dampingValue = 0;
+		}
+		
 		if (this.adaptedDampingValue > 0) {
 			for (UnknownParameter unknownParameter : this.parameters) {
 				int column = unknownParameter.getColumn();
 				if (column < 0)
 					continue;
-				N.add(column, column, this.adaptedDampingValue * N.get(column, column));
+				//N.add(column, column, this.adaptedDampingValue * N.get(column, column));
+				N.add(column, column, this.adaptedDampingValue);
 			}
 		}
 		
