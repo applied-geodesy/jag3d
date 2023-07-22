@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -85,14 +86,19 @@ public class TraCIM {
 	}
 	
 	public Document getTestData() throws IOException, ParserConfigurationException, SAXException {
-		final String address = this.baseURI + "/order/" + this.orderId + "/test";
-		String xmlString     = this.sendRequest(address, null);
-		
-		if (STORE_COMPLETE_TRANSACTION) {
-			String txtFile = BASE_PATH + "/gauss_data_sets.xml";
-			this.toFile(new File(txtFile), xmlString);
+		String xmlString = ""; 
+		if (READ_DATA_FROM_LOCAL_FILE) {
+			xmlString = this.getFileContent(BASE_PATH + "/gauss_data_sets.xml");
 		}
-		
+		else {
+			final String address = this.baseURI + "/order/" + this.orderId + "/test";
+			xmlString = this.sendRequest(address, null);
+
+			if (STORE_COMPLETE_TRANSACTION) {
+				String txtFile = BASE_PATH + "/gauss_data_sets.xml";
+				this.toFile(new File(txtFile), xmlString);
+			}
+		}
 		return this.convertStringToXMLDocument(xmlString);
 	}
 	
@@ -126,7 +132,7 @@ public class TraCIM {
 		}
 	}
 	
-	public String getResultAsXMLString(Document document) {
+	public String getResultAsXMLString(Document document) throws IOException {
 		
 		String xpathPattern = "//tracim//process/key";
 		this.processId = (String)XMLUtilities.xpathSearch(document, xpathPattern, null, XPathConstants.STRING);
@@ -172,6 +178,28 @@ public class TraCIM {
 		final String address  = this.baseURI + "/test/" + this.processId;
 		String response = this.sendRequest(address, xmlResult);
 		return response;
+	}
+	
+	private String getFileContent(String fileName) throws IOException {
+		StringBuffer stringBuffer = new StringBuffer();
+		BufferedReader reader = null; 
+		try {
+			reader = new BufferedReader(new FileReader(fileName));
+			String str;
+			while ((str = reader.readLine()) != null) {
+	        	stringBuffer.append(str);
+	        }
+		}
+		finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return stringBuffer.toString();
 	}
 	
 	private String sendRequest(String address, String data) throws IOException {
@@ -228,7 +256,7 @@ public class TraCIM {
 		return response;
 	}
 	
-	private String performTests(Document document) {
+	private String performTests(Document document) throws IOException {
 		StringBuffer xmlResults = new StringBuffer();
 		String xpathPattern = "//tracim//testElement";
 		NodeList testElementList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, null, XPathConstants.NODESET);
@@ -293,6 +321,11 @@ public class TraCIM {
 								
 				this.addPosition(xmlResults, x0, y0, z0);
 				this.addNormalVector(xmlResults, nx, ny, nz);
+				
+				if (STORE_COMPLETE_TRANSACTION) {
+					String txtFile = BASE_PATH + "/" + bId + "_" + object + "_" + this.orderId + ".sol";
+					this.toFile(new File(txtFile), new double[]{x0, y0, z0, nx, ny, nz});
+				}
 
 				break;
 				
@@ -329,6 +362,11 @@ public class TraCIM {
 				this.addPosition(xmlResults, x0, y0, z0);
 				this.addNormalVector(xmlResults, nx, ny, nz);
 				
+				if (STORE_COMPLETE_TRANSACTION) {
+					String txtFile = BASE_PATH + "/" + bId + "_" + object + "_" + this.orderId + ".sol";
+					this.toFile(new File(txtFile), new double[]{x0, y0, z0, nx, ny, nz});
+				}
+				
 				break;
 				
 			case "CIRCLE":
@@ -353,6 +391,11 @@ public class TraCIM {
 				this.addNormalVector(xmlResults, nx, ny, nz);
 				this.addRadius(xmlResults, r);
 				
+				if (STORE_COMPLETE_TRANSACTION) {
+					String txtFile = BASE_PATH + "/" + bId + "_" + object + "_" + this.orderId + ".sol";
+					this.toFile(new File(txtFile), new double[]{x0, y0, z0, nx, ny, nz, r});
+				}
+				
 				break;
 				
 			case "CYLINDER":
@@ -376,6 +419,11 @@ public class TraCIM {
 				this.addPosition(xmlResults, x0, y0, z0);
 				this.addNormalVector(xmlResults, nx, ny, nz);
 				this.addRadius(xmlResults, r);
+				
+				if (STORE_COMPLETE_TRANSACTION) {
+					String txtFile = BASE_PATH + "/" + bId + "_" + object + "_" + this.orderId + ".sol";
+					this.toFile(new File(txtFile), new double[]{x0, y0, z0, nx, ny, nz, r});
+				}
 				
 				break;
 				
@@ -424,6 +472,11 @@ public class TraCIM {
 				this.addRadius(xmlResults, r);
 				this.addAngle(xmlResults, alpha);
 				
+				if (STORE_COMPLETE_TRANSACTION) {
+					String txtFile = BASE_PATH + "/" + bId + "_" + object + "_" + this.orderId + ".sol";
+					this.toFile(new File(txtFile), new double[]{x0, y0, z0, nx, ny, nz, alpha, r});
+				}
+				
 				break;
 				
 			case "SPHERE":
@@ -442,6 +495,11 @@ public class TraCIM {
 				
 				this.addPosition(xmlResults, x0, y0, z0);
 				this.addRadius(xmlResults, r);
+				
+				if (STORE_COMPLETE_TRANSACTION) {
+					String txtFile = BASE_PATH + "/" + bId + "_" + object + "_" + this.orderId + ".sol";
+					this.toFile(new File(txtFile), new double[]{x0, y0, z0, r});
+				}
 				
 				break;
 			}
@@ -482,14 +540,19 @@ public class TraCIM {
 		sb.append("<angle>").append(String.format(Locale.ENGLISH, NUMBER_TEMPLATE, alpha)).append("</angle>\r\n");
 	}
 	
-	private void toFile(File file, String string) {
+	private void toFile(File file, double[] array) throws IOException {
+		StringBuffer sb = new StringBuffer();
+		for (double d : array)
+			sb.append(String.format(Locale.ENGLISH, NUMBER_TEMPLATE, d)).append("\r\n");
+		this.toFile(file, sb.toString());
+	}
+	
+	private void toFile(File file, String string) throws IOException {
 		PrintWriter pw = null;
     	try {
     		pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
     		pw.println(string);
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
+    	} 
     	finally {
     		if (pw != null) {
     			pw.close();
@@ -497,7 +560,7 @@ public class TraCIM {
     	}
 	}
 	
-	private void toFile(File file, List<FeaturePoint> points) {
+	private void toFile(File file, List<FeaturePoint> points) throws IOException {
 		PrintWriter pw = null;
     	try {
     		pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
@@ -505,9 +568,7 @@ public class TraCIM {
     		for ( FeaturePoint point : points ) {
     			pw.printf(Locale.ENGLISH, format, point.getName(), point.getX(), point.getY(), point.getZ());
     		}
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
+    	} 
     	finally {
     		if (pw != null) {
     			pw.close();
@@ -515,8 +576,9 @@ public class TraCIM {
     	}
 	}
 	
+	public final static boolean READ_DATA_FROM_LOCAL_FILE = false;
 	public final static String NUMBER_TEMPLATE = "%+.20f";
-	public final static String BASE_PATH = "C:/Users/michael.loesler/Desktop/tracim";
+	public final static String BASE_PATH = "./tracim";
 	public final static boolean STORE_COMPLETE_TRANSACTION = true;
 	
 	public static void main(String[] args) {
@@ -525,13 +587,13 @@ public class TraCIM {
 		System.setProperty("com.github.fommil.netlib.ARPACK", "com.github.fommil.netlib.F2jARPACK");
 		
 		final String processKey = "";
-		final File file = new File(BASE_PATH + "/gauss_test_report.pdf");
 		try {
 			TraCIM traCIM = new TraCIM(processKey);
 			Document document = traCIM.getTestData();
 			String xmlResult = traCIM.getResultAsXMLString(document);
-
-			traCIM.saveReport(file, xmlResult);
+			System.out.println(xmlResult);
+			
+			traCIM.saveReport(new File(BASE_PATH + "/gauss_test_report.pdf"), xmlResult);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
