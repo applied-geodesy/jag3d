@@ -120,6 +120,7 @@ public class AboutDialog {
 		Label dbVersionLabel   = this.createLabel("DB version:");
 		Label coreVersionLabel = this.createLabel("AC version:");
 		Label homePageLabel    = this.createLabel("Homepage:");
+		Label moduleLabel      = this.createLabel("Module:");
 		Label thirdPartyLabel  = this.createLabel("3rd Party Libraries:");
 		Label iconLabel        = this.createLabel("Icon set:");
 
@@ -144,6 +145,9 @@ public class AboutDialog {
 			}
 		});
 		
+		Label module = this.createLabel(""
+				+ "\u2219 CoordTrans: " + "v" + org.applied_geodesy.version.coordtrans.Version.get() + "\r\n"
+				+ "\u2219 JUniForm: "   + "v" + org.applied_geodesy.version.juniform.Version.get());
 
 		Label thirdParty = this.createLabel(""
 				+ "\u2219 MTJ: GNU Lesser General Public License v3.0\r\n"
@@ -165,6 +169,7 @@ public class AboutDialog {
 		coreVersionLabel.setLabelFor(coreVersion);
 		homePageLabel.setLabelFor(homePageLink);
 		thirdPartyLabel.setLabelFor(thirdParty);
+		moduleLabel.setLabelFor(module);
 		iconLabel.setLabelFor(icon);
 	
 		GridPane.setHalignment(applicationText, HPos.CENTER);
@@ -188,6 +193,9 @@ public class AboutDialog {
 		
 		gridPane.add(homePageLabel, 0, row);
 		gridPane.add(homePageLink, 1, row++);
+		
+		gridPane.add(moduleLabel, 0, row);
+		gridPane.add(module, 1, row++);
 		
 		gridPane.add(thirdPartyLabel, 0, row);
 		gridPane.add(thirdParty, 1, row++);
