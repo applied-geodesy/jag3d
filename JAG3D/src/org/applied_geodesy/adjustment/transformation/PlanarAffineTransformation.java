@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.transformation.equation.PlanarAffineEquations;
 import org.applied_geodesy.adjustment.transformation.parameter.ParameterType;
 import org.applied_geodesy.adjustment.transformation.parameter.ProcessingType;
@@ -40,8 +41,6 @@ import org.applied_geodesy.adjustment.transformation.restriction.ProductSumRestr
 import org.applied_geodesy.adjustment.transformation.restriction.Restriction;
 import org.applied_geodesy.adjustment.transformation.restriction.ProductSumRestriction.SignType;
 import org.applied_geodesy.util.ObservableUniqueList;
-
-import com.derletztekick.tools.geodesy.Constant;
 
 import no.uib.cipr.matrix.MatrixSingularException;
 import no.uib.cipr.matrix.NotConvergedException;
