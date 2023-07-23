@@ -17,7 +17,7 @@
    width="500"
    version="1.1">
   <title
-     id="title2995">Java Applied Geodesy 3D</title>
+     id="title2995">CoordTrans</title>
   <sodipodi:namedview
      inkscape:document-rotation="0"
      inkscape:current-layer="JAG3D"
@@ -49,7 +49,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title>Java Graticule 3D</dc:title>
+        <dc:title>CoordTrans</dc:title>
         <dc:creator>
           <cc:Agent>
             <dc:title>Michael Loesler</dc:title>
@@ -60,8 +60,8 @@
             <dc:title>Michael Loesler</dc:title>
           </cc:Agent>
         </dc:rights>
-        <dc:source>derletztekick.com</dc:source>
-        <dc:relation>Java Graticule 3D - Softwarelogo</dc:relation>
+        <dc:source>https://applied-geodesy.org</dc:source>
+        <dc:relation>Java Applied Geodesy 3D - Softwarelogo</dc:relation>
         <dc:publisher>
           <cc:Agent>
             <dc:title>Michael Loesler</dc:title>
