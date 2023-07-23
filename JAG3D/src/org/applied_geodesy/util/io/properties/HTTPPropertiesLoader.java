@@ -77,9 +77,8 @@ public class HTTPPropertiesLoader {
 	 * Hierbei wird eine PHP-Datei gelesen bspw.:
 	 * 
 	 * <?php
-	 * 	define("VERSION", 2.0);
-	 * 	define("BUILD",   20091120);
-	 * 	define("URI",     "http://sourceforge.net/projects/javagraticule3d/files/latest");
+	 * 	define("VERSION",   20230716);
+	 * 	define("DOWNLOAD",  "https://github.com/applied-geodesy/jag3d/releases/latest");
 	 * 	
 	 * 	header('X-Powered-By: JAG3D');
 	 * 	header('Cache-Control: no-cache, no-store, max-age=0, must-revalidate');
@@ -87,9 +86,8 @@ public class HTTPPropertiesLoader {
 	 * 
 	 * 	if (isset($_POST['checkupdate']) && $_POST['checkupdate'] == "jag3d") {
 	 * 		header('Content-Type: text/plain; charset=utf-8');
-	 * 		echo "VERSION: ".VERSION."\r\n";
-	 * 		echo "BUILD: ".BUILD."\r\n";
-	 * 		echo "URI: ".URI."\r\n";
+	 * 		echo "VERSION  = ".VERSION."\r\n";
+	 * 		echo "DOWNLOAD = ".DOWNLOAD."\r\n";
 	 * 	} 
 	 * 	else {
 	 * 		header('Content-Type: text/html; charset=utf-8');

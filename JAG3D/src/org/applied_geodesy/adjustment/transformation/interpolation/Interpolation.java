@@ -23,11 +23,10 @@ package org.applied_geodesy.adjustment.transformation.interpolation;
 
 import java.util.Collection;
 
+import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.transformation.TransformationAdjustment.Interrupt;
 import org.applied_geodesy.adjustment.transformation.point.EstimatedFramePosition;
 import org.applied_geodesy.adjustment.transformation.point.FramePositionPair;
-
-import com.derletztekick.tools.geodesy.Constant;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
