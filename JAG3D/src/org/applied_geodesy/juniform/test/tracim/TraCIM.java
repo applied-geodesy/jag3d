@@ -88,14 +88,14 @@ public class TraCIM {
 	public Document getTestData() throws IOException, ParserConfigurationException, SAXException {
 		String xmlString = ""; 
 		if (READ_DATA_FROM_LOCAL_FILE) {
-			xmlString = this.getFileContent(BASE_PATH + "/gauss_data_sets.xml");
+			xmlString = this.getFileContent(BASE_PATH + "/gauss_data_sets_" + this.orderId + ".xml");
 		}
 		else {
 			final String address = this.baseURI + "/order/" + this.orderId + "/test";
 			xmlString = this.sendRequest(address, null);
 
 			if (STORE_COMPLETE_TRANSACTION) {
-				String txtFile = BASE_PATH + "/gauss_data_sets.xml";
+				String txtFile = BASE_PATH + "/gauss_data_sets_" + this.orderId + ".xml";
 				this.toFile(new File(txtFile), xmlString);
 			}
 		}
@@ -105,7 +105,7 @@ public class TraCIM {
 	public void saveReport(File file, String xmlResult) throws ParserConfigurationException, SAXException, IOException {
 		String xmlString  = this.submitResult(xmlResult);
 		if (STORE_COMPLETE_TRANSACTION) {
-			String txtFile = BASE_PATH + "/gauss_test_report.xml";
+			String txtFile = BASE_PATH + "/gauss_test_report_" + this.orderId + ".xml";
 			this.toFile(new File(txtFile), xmlString);
 		}
 		
@@ -160,7 +160,7 @@ public class TraCIM {
 		
 		String xmlString = xmlStringBuffer.toString();
 		if (STORE_COMPLETE_TRANSACTION) {
-			String txtFile = BASE_PATH + "/gauss_adjustment_results.xml";
+			String txtFile = BASE_PATH + "/gauss_adjustment_results_" + this.orderId + ".xml";
 			this.toFile(new File(txtFile), xmlString);
 		}
 		
@@ -592,7 +592,7 @@ public class TraCIM {
 			Document document = traCIM.getTestData();
 			String xmlResult = traCIM.getResultAsXMLString(document);
 
-			traCIM.saveReport(new File(BASE_PATH + "/gauss_test_report.pdf"), xmlResult);
+			traCIM.saveReport(new File(BASE_PATH + "/gauss_test_report_" + processKey + ".pdf"), xmlResult);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
