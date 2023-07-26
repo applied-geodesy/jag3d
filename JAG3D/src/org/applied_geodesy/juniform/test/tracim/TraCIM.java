@@ -443,10 +443,11 @@ public class TraCIM {
 				ny = unknownParameters.get(ParameterType.ROTATION_COMPONENT_R32).getValue();
 				nz = unknownParameters.get(ParameterType.ROTATION_COMPONENT_R33).getValue();
 				
-				alpha = unknownParameters.get(ParameterType.ANGLE).getValue();
-				r  = 0; // r = 0, if vector [x0/y0/z0] marks the apex of the cone
+				// PTB has specified the opening angle as a positive value
+				alpha = Math.abs(unknownParameters.get(ParameterType.ANGLE).getValue());
+				r = 0; // r = 0, if vector [x0/y0/z0] marks the apex of the cone
 
-				// PTB specified the orientation of the normal vector in the direction of decreasing radius
+				// PTB has specified the orientation of the normal vector in the direction of decreasing radius
 				// even if the apex position is given, i.e., r == 0 and the orientation is ambiguous 
 				Point point = Feature.deriveCenterOfMass(points);
 				double mx = point.getX0() - x0;
@@ -458,7 +459,6 @@ public class TraCIM {
 				mz /= len;
 				
 				double phi = Math.acos(nx*mx + ny*my + nz*mz);
-				
 				if (phi < alpha) {
 					nx = -nx;
 					ny = -ny;
@@ -591,8 +591,7 @@ public class TraCIM {
 			TraCIM traCIM = new TraCIM(processKey);
 			Document document = traCIM.getTestData();
 			String xmlResult = traCIM.getResultAsXMLString(document);
-			System.out.println(xmlResult);
-			
+
 			traCIM.saveReport(new File(BASE_PATH + "/gauss_test_report.pdf"), xmlResult);
 			
 		} catch (Exception e) {
