@@ -90,10 +90,11 @@ public class FeatureAdjustment {
 			numberOfUnknownParameters     = 0,
 			maximumNumberOfGeometricPrimitivesPerPoint = 0;
 	
-	private boolean interrupt             = false,
-			calculateStochasticParameters = false,
-			adjustModelParametersOnly     = false,
-			preconditioning      = true;
+	private boolean interrupt              = false,
+			calculateStochasticParameters  = false,
+			adjustModelParametersOnly      = false,
+			preconditioning                = true,
+			deriveFirstAdaptedDampingValue = false;
 
 	private double maxAbsDx     = 0.0,
 			maxAbsRestriction   = 0.0,
@@ -248,6 +249,9 @@ public class FeatureAdjustment {
 	
 	public EstimationStateType estimateModel() throws NotConvergedException, MatrixSingularException, OutOfMemoryError {
 		boolean applyUnscentedTransformation = this.estimationType == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION;
+
+		this.deriveFirstAdaptedDampingValue  = this.dampingValue > 0;
+		this.adaptedDampingValue = 0;
 		
 		this.currentEstimationStatus = EstimationStateType.BUSY;
 		this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
@@ -473,7 +477,7 @@ public class FeatureAdjustment {
 					}
 					else {
 						this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
-						this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxAbsDx);
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), isFirstIteration ? 0 : SQRT_EPS, Math.max(this.maxAbsDx, this.maxAbsRestriction));
 					}
 					isFirstIteration = false;
 
@@ -496,6 +500,9 @@ public class FeatureAdjustment {
 			this.feature.getCenterOfMass().setX0(0);
 			this.feature.getCenterOfMass().setY0(0);
 			this.feature.getCenterOfMass().setZ0(0);
+			
+			this.interrupt = false;
+			this.adaptedDampingValue = 0.0;
 		}
 
 		if (this.currentEstimationStatus.getId() == EstimationStateType.BUSY.getId() || this.calculateStochasticParameters) {
@@ -673,7 +680,7 @@ public class FeatureAdjustment {
 			n.set(restriction.getRow(), -misclosure);
 		}
 		
-		if (this.dampingValue > 0) {
+		if (this.deriveFirstAdaptedDampingValue) {
 			double maxElement = 0;
 			for (UnknownParameter unknownParameter : this.parameters) {
 				int column = unknownParameter.getColumn();
@@ -683,7 +690,7 @@ public class FeatureAdjustment {
 			}
 			// derive first damping value for LMA
 			this.adaptedDampingValue = this.dampingValue * maxElement;
-			this.dampingValue = 0;
+			this.deriveFirstAdaptedDampingValue = false;
 		}
 		
 		if (this.adaptedDampingValue > 0) {
