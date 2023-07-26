@@ -104,7 +104,8 @@ public class TransformationAdjustment {
 	private final Interrupt interrupt = new Interrupt();
 	private boolean calculateStochasticParameters = false,
 			adjustModelParametersOnly             = false,
-			preconditioning                       = true;
+			preconditioning                       = true,
+			deriveFirstAdaptedDampingValue        = false;
 	
 	private int maximalNumberOfIterations = DefaultValue.getMaximalNumberOfIterations(),
 			iterationStep                 = 0,
@@ -272,6 +273,12 @@ public class TransformationAdjustment {
 	}
 
 	public EstimationStateType estimateModel() throws NotConvergedException, MatrixSingularException, OutOfMemoryError {
+		this.deriveFirstAdaptedDampingValue  = this.dampingValue > 0;
+		this.adaptedDampingValue = 0;
+		
+		this.currentEstimationStatus = EstimationStateType.BUSY;
+		this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+		
 		try {
 			SimplePositionPair centerOfMasses = Transformation.deriveCenterOfMasses(this.transformation.getHomologousFramePositionPairs(), this.transformation.getRestrictions(), this.transformation.getSupportedParameterRestrictions());
 			this.prepareIterationProcess(centerOfMasses);
@@ -454,7 +461,7 @@ public class TransformationAdjustment {
 				}
 				else {
 					this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
-					this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxAbsDx);
+					this.change.firePropertyChange(this.currentEstimationStatus.name(), isFirstIteration ? 0 : SQRT_EPS, Math.max(this.maxAbsDx, this.maxAbsRestriction));
 				}
 
 				if (isEstimated || this.adaptedDampingValue <= SQRT_EPS || runs < this.maximalNumberOfIterations * 0.1 + 1)
@@ -486,6 +493,7 @@ public class TransformationAdjustment {
 			centerOfMaasTrg.setZ(0);
 			
 			this.interrupt.setInterrupted(false);
+			this.adaptedDampingValue = 0.0;
 		}
 
 		if (this.currentEstimationStatus.getId() == EstimationStateType.BUSY.getId() || this.calculateStochasticParameters) {
@@ -1207,7 +1215,7 @@ public class TransformationAdjustment {
 			n.set(restriction.getRow(), -misclosure);
 		}
 		
-		if (this.dampingValue > 0) {
+		if (this.deriveFirstAdaptedDampingValue) {
 			double maxElement = 0;
 			for (UnknownParameter unknownParameter : this.parameters) {
 				int column = unknownParameter.getColumn();
@@ -1217,7 +1225,7 @@ public class TransformationAdjustment {
 			}
 			// derive first damping value for LMA
 			this.adaptedDampingValue = this.dampingValue * maxElement;
-			this.dampingValue = 0;
+			this.deriveFirstAdaptedDampingValue = false;
 		}
 		
 		if (this.adaptedDampingValue > 0) {
