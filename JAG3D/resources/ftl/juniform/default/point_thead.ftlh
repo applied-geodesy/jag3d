@@ -3,21 +3,21 @@
 		<th><#outputformat "plainText">${point_table_header_map['id']}</#outputformat></th>
 		
 		<#if feature_points.dimension != 1>
-			<th><#outputformat "plainText">x<sub>0</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
-			<th><#outputformat "plainText">y<sub>0</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+			<th><#outputformat "plainText">x<sub>0</sub><span class="unit">${unit_abbr_length}</span></#outputformat></th>
+			<th><#outputformat "plainText">y<sub>0</sub><span class="unit">${unit_abbr_length}</span></#outputformat></th>
 		</#if>
 		
 		<#if feature_points.dimension != 2>
-			<th><#outputformat "plainText">z<sub>0</sub><span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+			<th><#outputformat "plainText">z<sub>0</sub><span class="unit">${unit_abbr_length}</span></#outputformat></th>
 		</#if>
 		
 		<#if feature_points.dimension != 1>
-			<th><#outputformat "plainText">x<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
-			<th><#outputformat "plainText">y<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+			<th><#outputformat "plainText">x<span class="unit">${unit_abbr_length}</span></#outputformat></th>
+			<th><#outputformat "plainText">y<span class="unit">${unit_abbr_length}</span></#outputformat></th>
 		</#if>
 		
 		<#if feature_points.dimension != 2>
-			<th><#outputformat "plainText">z<span class="unit">${unit_abbr_length_uncertainty}</span></#outputformat></th>
+			<th><#outputformat "plainText">z<span class="unit">${unit_abbr_length}</span></#outputformat></th>
 		</#if>
 
 		<#if feature_points.dimension != 1>
