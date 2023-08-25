@@ -732,8 +732,8 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 				if (pValue == null) 
 					this.setTableRowHighlight(row, TableRowHighlightRangeType.NONE);
 				else
-					this.setTableRowHighlight(row, pValue < Math.log(leftBoundary / 100.0) ? TableRowHighlightRangeType.INADEQUATE : 
-						pValue <= Math.log(rightBoundary / 100.0) ? TableRowHighlightRangeType.SATISFACTORY :
+					this.setTableRowHighlight(row, pValue < Math.log(leftBoundary) ? TableRowHighlightRangeType.INADEQUATE : 
+						pValue <= Math.log(rightBoundary) ? TableRowHighlightRangeType.SATISFACTORY :
 							TableRowHighlightRangeType.EXCELLENT);
 				
 				break;
