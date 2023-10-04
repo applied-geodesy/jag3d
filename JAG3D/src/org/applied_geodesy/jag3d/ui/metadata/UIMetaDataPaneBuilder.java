@@ -172,15 +172,15 @@ public class UIMetaDataPaneBuilder {
 		
 		gridPane.add(new Region(),              0, ++row, 2, 1);
 		
-		gridPane.add(operatorLabel,             0, ++row);
-		gridPane.add(dateLabel,                 1,   row);
-		gridPane.add(this.operatorLimitedTextField, 0, ++row);
-		gridPane.add(this.datePicker,           1,   row);
+		gridPane.add(operatorLabel,                   0, ++row);
+		gridPane.add(dateLabel,                       1,   row);
+		gridPane.add(this.operatorLimitedTextField,   0, ++row);
+		gridPane.add(this.datePicker,                 1,   row);
 		
-		gridPane.add(new Region(),              0, ++row, 2, 1);
+		gridPane.add(new Region(),                    0, ++row, 2, 1);
 		
-		gridPane.add(customerIdLabel,           0, ++row);
-		gridPane.add(projectIdLabel,            1,   row);
+		gridPane.add(customerIdLabel,                 0, ++row);
+		gridPane.add(projectIdLabel,                  1,   row);
 		gridPane.add(this.customerIdLimitedTextField, 0, ++row);
 		gridPane.add(this.projectIdLimitedTextField,  1,   row);
 		
@@ -271,9 +271,18 @@ public class UIMetaDataPaneBuilder {
 		this.descriptionTextArea.setText(null);
 	}
 	
+	private boolean isFilled() {
+		return this.nameLimitedTextField.getText() != null &&
+				this.operatorLimitedTextField.getText() != null &&
+				this.customerIdLimitedTextField.getText() != null &&
+				this.projectIdLimitedTextField.getText() != null &&
+				this.descriptionTextArea.getText() != null;
+	}
+	
 	private void save() {
 		try {
-			SQLManager.getInstance().save(this.metaData);
+			if (isFilled())
+				SQLManager.getInstance().save(this.metaData);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
