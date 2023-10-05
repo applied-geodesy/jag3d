@@ -759,7 +759,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		});
 		table.getColumns().add(booleanColumn);
 
-		this.addContextMenu(table, this.createContextMenu(true));
+		this.addContextMenu(table, this.createContextMenu(ContextMenuType.POINT));
 		this.addDynamicRowAdder(table);
 		this.addColumnOrderSequenceListeners(tableContentType, table);
 
@@ -926,7 +926,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 					SQLManager.getInstance().saveItem(clonedRow);
 				} 
 				catch (Exception e) {
-					raiseErrorMessage(ContextMenuType.DUPLICATE, e);
+					raiseErrorMessage(ContextMenuItemType.DUPLICATE, e);
 					e.printStackTrace();
 					break;
 				}
@@ -957,7 +957,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 					SQLManager.getInstance().remove(row);
 				} 
 				catch (Exception e) {
-					raiseErrorMessage(ContextMenuType.REMOVE, e);
+					raiseErrorMessage(ContextMenuItemType.REMOVE, e);
 					e.printStackTrace();
 					break;
 				}
@@ -974,7 +974,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 	}
 	
 	@Override
-	void moveRows(ContextMenuType type) {
+	void moveRows(ContextMenuItemType type) {
 		TreeItemType parentType = null;
 
 		switch(type) {

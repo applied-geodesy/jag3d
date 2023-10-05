@@ -423,7 +423,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		});
 		table.getColumns().add(booleanColumn);
 
-		this.addContextMenu(table, this.createContextMenu(false));
+		this.addContextMenu(table, this.createContextMenu(ContextMenuType.DEFAULT));
 		this.addDynamicRowAdder(table);
 		this.addColumnOrderSequenceListeners(tableContentType, table);
 
@@ -562,7 +562,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 					SQLManager.getInstance().saveItem(clonedRow);
 				} 
 				catch (Exception e) {
-					raiseErrorMessage(ContextMenuType.DUPLICATE, e);
+					raiseErrorMessage(ContextMenuItemType.DUPLICATE, e);
 					e.printStackTrace();
 					break;
 				}
@@ -593,7 +593,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 					SQLManager.getInstance().remove(row);
 				} 
 				catch (Exception e) {
-					raiseErrorMessage(ContextMenuType.REMOVE, e);
+					raiseErrorMessage(ContextMenuItemType.REMOVE, e);
 					e.printStackTrace();
 					break;
 				}
@@ -610,8 +610,8 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 	}
 	
 	@Override
-	void moveRows(ContextMenuType type) {
-		if (type != ContextMenuType.MOVETO)
+	void moveRows(ContextMenuItemType type) {
+		if (type != ContextMenuItemType.MOVETO)
 			return;
 				
 		List<CongruenceAnalysisRow> selectedRows = new ArrayList<CongruenceAnalysisRow>(this.table.getSelectionModel().getSelectedItems());
