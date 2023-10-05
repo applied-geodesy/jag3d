@@ -658,7 +658,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		});
 		table.getColumns().add(booleanColumn);
 		
-		this.addContextMenu(table, this.createContextMenu(false));
+		this.addContextMenu(table, this.createContextMenu(ContextMenuType.OBSERVATION));
 		this.addDynamicRowAdder(table);
 		this.addColumnOrderSequenceListeners(tableContentType, table);
 		
@@ -847,7 +847,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				try {
 					SQLManager.getInstance().saveItem(clonedRow);
 				} catch (Exception e) {
-					raiseErrorMessage(ContextMenuType.DUPLICATE, e);
+					raiseErrorMessage(ContextMenuItemType.DUPLICATE, e);
 					e.printStackTrace();
 					break;
 				}
@@ -877,7 +877,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				try {
 					SQLManager.getInstance().remove(row);
 				} catch (Exception e) {
-					raiseErrorMessage(ContextMenuType.REMOVE, e);
+					raiseErrorMessage(ContextMenuItemType.REMOVE, e);
 					e.printStackTrace();
 					break;
 				}
@@ -894,8 +894,8 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 	}
 	
 	@Override
-	void moveRows(ContextMenuType type) {
-		if (type != ContextMenuType.MOVETO)
+	void moveRows(ContextMenuItemType type) {
+		if (type != ContextMenuItemType.MOVETO)
 			return;
 
 		List<TerrestrialObservationRow> selectedRows = new ArrayList<TerrestrialObservationRow>(this.table.getSelectionModel().getSelectedItems());

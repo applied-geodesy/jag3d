@@ -589,7 +589,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		});
 		table.getColumns().add(booleanColumn);
 
-		this.addContextMenu(table, this.createContextMenu(false));
+		this.addContextMenu(table, this.createContextMenu(ContextMenuType.DEFAULT));
 		this.addDynamicRowAdder(table);
 		this.addColumnOrderSequenceListeners(tableContentType, table);
 
@@ -761,7 +761,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 				try {
 					SQLManager.getInstance().saveItem(clonedRow);
 				} catch (Exception e) {
-					raiseErrorMessage(ContextMenuType.DUPLICATE, e);
+					raiseErrorMessage(ContextMenuItemType.DUPLICATE, e);
 					e.printStackTrace();
 					break;
 				}
@@ -791,7 +791,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 				try {
 					SQLManager.getInstance().remove(row);
 				} catch (Exception e) {
-					raiseErrorMessage(ContextMenuType.REMOVE, e);
+					raiseErrorMessage(ContextMenuItemType.REMOVE, e);
 					e.printStackTrace();
 					break;
 				}
@@ -808,8 +808,8 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 	}
 	
 	@Override
-	void moveRows(ContextMenuType type) {
-		if (type != ContextMenuType.MOVETO)
+	void moveRows(ContextMenuItemType type) {
+		if (type != ContextMenuItemType.MOVETO)
 			return;
 		
 		List<GNSSObservationRow> selectedRows = new ArrayList<GNSSObservationRow>(this.table.getSelectionModel().getSelectedItems());

@@ -28,6 +28,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.applied_geodesy.jag3d.DefaultApplicationProperty;
+import org.applied_geodesy.jag3d.ui.dialog.InstrumentAndReflectorHeightAdaptionDialog;
+import org.applied_geodesy.jag3d.ui.dialog.SearchAndReplaceDialog;
 import org.applied_geodesy.jag3d.ui.table.row.GroupRow;
 import org.applied_geodesy.jag3d.ui.tree.Groupable;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
@@ -44,12 +46,19 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITableBuilder<T> {
 
 	enum ContextMenuType {
+		POINT,
+		OBSERVATION,
+		DEFAULT;
+	}
+	
+	enum ContextMenuItemType {
 		REMOVE,
 		DUPLICATE,
 		MOVETO,
@@ -59,14 +68,17 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 		MOVETO_NEW,
 		MOVETO_REFERENCE,
 		MOVETO_STOCHASTIC,
-		MOVETO_DATUM;
+		MOVETO_DATUM,
+		
+		ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT,
+		SEARCH_AND_REPLACE;
 	}
 
 	private class ContextMenuEventHandler implements EventHandler<ActionEvent> {
 		@Override
 		public void handle(ActionEvent event) {
-			if (event.getSource() instanceof MenuItem && ((MenuItem)event.getSource()).getUserData() instanceof ContextMenuType) {
-				ContextMenuType contextMenuType = (ContextMenuType)((MenuItem)event.getSource()).getUserData();
+			if (event.getSource() instanceof MenuItem && ((MenuItem)event.getSource()).getUserData() instanceof ContextMenuItemType) {
+				ContextMenuItemType contextMenuType = (ContextMenuItemType)((MenuItem)event.getSource()).getUserData();
 				switch(contextMenuType) {
 				case REMOVE:
 					removeTableRows();
@@ -82,6 +94,10 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 					break;
 				case DUPLICATE:
 					duplicateRows();
+					break;
+				case ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT:
+				case SEARCH_AND_REPLACE:
+					showDialog(contextMenuType);
 					break;
 				}
 			}
@@ -100,75 +116,91 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 		return this.table;
 	}
 
-	ContextMenu createContextMenu(boolean isPointTable) {
+	ContextMenu createContextMenu(ContextMenuType contextMenuType) {
 		MenuItem removeMenuItem = this.createMenuItem(
 				i18n.getString("UIEditableTableBuilder.contextmenu.remove", "Remove selected items"),
-				ContextMenuType.REMOVE,
+				ContextMenuItemType.REMOVE,
 				listener
 				);
 
 		MenuItem duplicateMenuItem = this.createMenuItem(
 				i18n.getString("UIEditableTableBuilder.contextmenu.duplicate", "Duplicate selected items"),
-				ContextMenuType.DUPLICATE,
+				ContextMenuItemType.DUPLICATE,
 				listener
 				);
 		
 		MenuItem selectGroupsMenuItem = this.createMenuItem(
 				i18n.getString("UIEditableTableBuilder.contextmenu.select", "Select item groups"),
-				ContextMenuType.SELECT_GROUPS,
+				ContextMenuItemType.SELECT_GROUPS,
+				listener
+				);
+		
+		MenuItem searchAndReplaceMenuItem = this.createMenuItem(
+				i18n.getString("UIEditableTableBuilder.contextmenu.search_and_replace", "Search and replace"),
+				ContextMenuItemType.SEARCH_AND_REPLACE,
 				listener
 				);
 		
 		ContextMenu contextMenu = new ContextMenu(removeMenuItem, duplicateMenuItem);
 
-		if (!isPointTable) {
+		if (contextMenuType != ContextMenuType.POINT) {
 			MenuItem moveToMenuItem = this.createMenuItem(
 					i18n.getString("UIEditableTableBuilder.contextmenu.moveto", "Move selected items"),
-					ContextMenuType.MOVETO,
+					ContextMenuItemType.MOVETO,
 					listener
 					);
+			
 			contextMenu.getItems().add(moveToMenuItem);
 		}
-		else {
+		else if (contextMenuType == ContextMenuType.POINT) {
 			Menu moveToMenu = this.createMenu(
 					i18n.getString("UIEditableTableBuilder.contextmenu.moveto", "Move selected items")
 					);
 
 			MenuItem moveToReferenceMenuItem = this.createMenuItem(
 					i18n.getString("UIEditableTableBuilder.contextmenu.moveto.reference", "Reference point group"),
-					ContextMenuType.MOVETO_REFERENCE,
+					ContextMenuItemType.MOVETO_REFERENCE,
 					listener
 					);
 
 			MenuItem moveToStochasticMenuItem = this.createMenuItem(
 					i18n.getString("UIEditableTableBuilder.contextmenu.moveto.stochastic", "Stochastic point group"),
-					ContextMenuType.MOVETO_STOCHASTIC,
+					ContextMenuItemType.MOVETO_STOCHASTIC,
 					listener
 					);
 
 			MenuItem moveToDatumMenuItem = this.createMenuItem(
 					i18n.getString("UIEditableTableBuilder.contextmenu.moveto.datum", "Datum point group"),
-					ContextMenuType.MOVETO_DATUM,
+					ContextMenuItemType.MOVETO_DATUM,
 					listener
 					);
 
 			MenuItem moveToNewMenuItem = this.createMenuItem(
 					i18n.getString("UIEditableTableBuilder.contextmenu.moveto.new", "New point group"),
-					ContextMenuType.MOVETO_NEW,
+					ContextMenuItemType.MOVETO_NEW,
 					listener
 					);
-			
-			
 
 			moveToMenu.getItems().addAll(moveToReferenceMenuItem, moveToStochasticMenuItem, moveToDatumMenuItem, moveToNewMenuItem);
 			contextMenu.getItems().add(moveToMenu);
 		}
 		
-		contextMenu.getItems().addAll(new SeparatorMenuItem(), selectGroupsMenuItem);
+		contextMenu.getItems().addAll(new SeparatorMenuItem(), selectGroupsMenuItem, new SeparatorMenuItem(), searchAndReplaceMenuItem);
+		
+		if (contextMenuType == ContextMenuType.OBSERVATION) {
+			MenuItem instrumentAndReflectorHeightItem = this.createMenuItem(
+					i18n.getString("UIEditableTableBuilder.contextmenu.instrument_and_reflector_height", "Height adaption"),
+					ContextMenuItemType.ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT,
+					listener
+					);
+
+			contextMenu.getItems().add(instrumentAndReflectorHeightItem);
+		}
+		
 		return contextMenu;
 	}
 
-	void raiseErrorMessage(ContextMenuType type, Exception e) {
+	void raiseErrorMessage(ContextMenuItemType type, Exception e) {
 		Platform.runLater(new Runnable() {
 			@Override public void run() {
 				switch(type) {
@@ -198,6 +230,8 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 							e);
 					break;
 
+				case ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT:
+				case SEARCH_AND_REPLACE:
 				case SELECT_GROUPS:
 					break;
 				}
@@ -218,7 +252,7 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 		});
 	}
 
-	private MenuItem createMenuItem(String label, ContextMenuType type, ContextMenuEventHandler listener) {
+	private MenuItem createMenuItem(String label, ContextMenuItemType type, ContextMenuEventHandler listener) {
 		MenuItem item = new MenuItem(label);
 		item.setUserData(type);
 		item.setOnAction(listener);
@@ -233,7 +267,7 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 	abstract void enableDragSupport();
 	abstract void removeRows();
 	abstract void duplicateRows();
-	abstract void moveRows(ContextMenuType type);
+	abstract void moveRows(ContextMenuItemType type);
 	private void selectGroups() {
 		try {
 			List<GroupRow> selectedRows = new ArrayList<GroupRow>(this.table.getSelectionModel().getSelectedItems());
@@ -289,6 +323,25 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 			removeRows();
 	}
 	
+	private void showDialog(ContextMenuItemType contextMenuItemType) {
+		TreeView<TreeItemValue> treeView = UITreeBuilder.getInstance().getTree();
+		
+		TreeItem<TreeItemValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
+		if (selectedItem == null)
+			return;
+		
+		List<TreeItem<TreeItemValue>> selectedItems = treeView.getSelectionModel().getSelectedItems();
+		TreeItemValue selectedTreeItemValues[] = new TreeItemValue[selectedItems != null ? selectedItems.size() : 0];
+		
+		for (int i=0; i<selectedItems.size(); i++)
+			selectedTreeItemValues[i] = selectedItems.get(i).getValue();
+		
+		if (contextMenuItemType == ContextMenuItemType.SEARCH_AND_REPLACE)
+			SearchAndReplaceDialog.showAndWait(selectedItem.getValue(), selectedTreeItemValues);
+		else if (contextMenuItemType == ContextMenuItemType.ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT)
+			InstrumentAndReflectorHeightAdaptionDialog.showAndWait(selectedItem.getValue(), selectedTreeItemValues);
+	}
+		
 	private void addTableKeyEvents() {
 		this.table.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
 			public void handle(KeyEvent keyEvent) {
