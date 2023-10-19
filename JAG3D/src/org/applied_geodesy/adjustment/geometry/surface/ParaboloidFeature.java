@@ -42,6 +42,7 @@ import no.uib.cipr.matrix.MatrixSingularException;
 import no.uib.cipr.matrix.NotConvergedException;
 import no.uib.cipr.matrix.SymmPackEVD;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
+import no.uib.cipr.matrix.Vector.Norm;
 
 public class ParaboloidFeature extends SurfaceFeature {
 	
@@ -100,8 +101,7 @@ public class ParaboloidFeature extends SurfaceFeature {
 		double x0 = sphere.getUnknownParameter(ParameterType.ORIGIN_COORDINATE_X).getValue0();
 		double y0 = sphere.getUnknownParameter(ParameterType.ORIGIN_COORDINATE_Y).getValue0();
 		double z0 = sphere.getUnknownParameter(ParameterType.ORIGIN_COORDINATE_Z).getValue0();
-		double r  = sphere.getUnknownParameter(ParameterType.RADIUS).getValue0();
-		
+
 		double x1 = cylinder.getUnknownParameter(ParameterType.PRIMARY_FOCAL_COORDINATE_X).getValue0();
 		double y1 = cylinder.getUnknownParameter(ParameterType.PRIMARY_FOCAL_COORDINATE_Y).getValue0();
 		double z1 = cylinder.getUnknownParameter(ParameterType.PRIMARY_FOCAL_COORDINATE_Z).getValue0();
@@ -140,17 +140,57 @@ public class ParaboloidFeature extends SurfaceFeature {
 //		     uy vy wy
 //		     uz vz wz]
 		
-		double det = ux*vy*wz + vx*wy*uz + wx*uy*vz - wx*vy*uz - vx*uy*wz - ux*wy*vz;
-		if (det < 0) {
+		// Distance from plane, defined by axis and shift parameters, to origin
+		DenseVector shift = new DenseVector(new double[] {x0, y0, z0}, false);
+		DenseVector axis = new DenseVector(new double[] {wx, wy, wz}, false);
+		double dPlane0 = shift.dot(axis);
+		
+		// Find closest and furthest surface points to symmetrical axis
+		double closestLateralDistance = Double.MAX_VALUE, closestRadialDistance = 0;
+		double furthestLateralDistance = -1, furthestRadialDistance = 0;
+		for (FeaturePoint point : points) {
+			// Direction vector from shift to surface point
+			DenseVector surfacePoint = new DenseVector(new double[] {point.getX0(), point.getY0(), point.getZ0()}, false);
+			// Distance between plane and point along normal axis
+			double radialDistance = surfacePoint.dot(axis) - dPlane0;
+			// Reduce by shift to obtain direction vector, i.e., x = alpha*y + x
+			surfacePoint.add(-1.0, shift);
+			DenseVector cross = MathExtension.cross(surfacePoint, axis);
+			// Distance perpendicular to normal axis
+			double lateralDist = cross.norm(Norm.Two);
+			if (lateralDist < closestLateralDistance) {
+				closestLateralDistance = lateralDist;
+				closestRadialDistance  = radialDistance;
+			}
+			if (lateralDist > furthestLateralDistance) {
+				furthestLateralDistance = lateralDist;
+				furthestRadialDistance  = radialDistance;
+			}
+		}
+
+		// use closest point to paraboloid as apex shift: x = alpha*y + x
+		shift.add(closestRadialDistance, axis);
+		// shift of paraboloid
+		x0 = shift.get(0);
+		y0 = shift.get(1);
+		z0 = shift.get(2);
+
+		// Derivation of the direction of axis pointing from apex to open surface, using closest and furthest position, i.e.,
+		// v = (x0 + tmax*s) - (x0 + tmin*s) = s*(tmax - tmin) 
+		if (furthestRadialDistance < closestRadialDistance) {
+			//minEvec.scale(-1);
 			wx = -wx;
 			wy = -wy;
 			wz = -wz;
 		}
-		
-		x0 = x0 - wx*r;
-		y0 = y0 - wy*r;
-		z0 = z0 - wz*r;
 
+		// check rotation for det(R) = +1
+		double det = ux*vy*wz + vx*wy*uz + wx*uy*vz - wx*vy*uz - vx*uy*wz - ux*wy*vz;
+		if (det < 0) {
+			ux = -ux;
+			uy = -uy;
+			uz = -uz;
+		}
 
 		Quaternion q = FeatureUtil.getQuaternionHz(new double[] {wx, wy, wz});
 		Collection<FeaturePoint> rotatedPoints = FeatureUtil.getRotatedFeaturePoints(points, new double[] {0, 0, 0}, q);
@@ -190,10 +230,10 @@ public class ParaboloidFeature extends SurfaceFeature {
 	private static void deriveInitialGuessByQuadraticFunction(Collection<FeaturePoint> points, Paraboloid paraboloid) throws IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
 		final int dim = 3;
 		final double SQRT2 = Math.sqrt(2.0);
-		
+
 		QuadraticSurface quadraticSurface = new QuadraticSurface();
 		QuadraticSurfaceFeature.deriveInitialGuess(points, quadraticSurface);
-		
+
 		double a = quadraticSurface.getUnknownParameter(ParameterType.POLYNOMIAL_COEFFICIENT_A).getValue0();
 		double b = quadraticSurface.getUnknownParameter(ParameterType.POLYNOMIAL_COEFFICIENT_B).getValue0();
 		double c = quadraticSurface.getUnknownParameter(ParameterType.POLYNOMIAL_COEFFICIENT_C).getValue0();
@@ -257,13 +297,6 @@ public class ParaboloidFeature extends SurfaceFeature {
 		double r32 = evec.get(2, 1);
 		double r33 = evec.get(2, 2);
 
-		// check for det(R) = +1
-		double det = r11*r22*r33 + r12*r23*r31 + r13*r21*r32 - r13*r22*r31 - r12*r21*r33 - r11*r23*r32;
-		if (det < 0) {
-			evec.set(minEvalIdx, 0, -evec.get(minEvalIdx, 0));
-			evec.set(minEvalIdx, 1, -evec.get(minEvalIdx, 1));
-			evec.set(minEvalIdx, 2, -evec.get(minEvalIdx, 2));
-		}
 		DenseVector minEvec = new DenseVector(new double[] {evec.get(0, minEvalIdx), evec.get(1, minEvalIdx), evec.get(2, minEvalIdx)}, false);
 
 		DenseVector canonicalShift = new DenseVector(3);
@@ -324,22 +357,68 @@ public class ParaboloidFeature extends SurfaceFeature {
 			}
 		}
 		
+		// Distance from plane, defined by axis and shift parameters, to origin 
+		double dPlane0 = shift.dot(minEvec);
+
+		// Find closest and furthest surface points to symmetrical axis
+		double closestLateralDistance = Double.MAX_VALUE, closestRadialDistance = 0;
+		double furthestLateralDistance = -1, furthestRadialDistance = 0;
+		for (FeaturePoint point : points) {
+			// Direction vector from shift to surface point
+			DenseVector surfacePoint = new DenseVector(new double[] {point.getX0(), point.getY0(), point.getZ0()}, false);
+			// Distance between plane and point along normal axis
+			double radialDistance = surfacePoint.dot(minEvec) - dPlane0;
+			// Reduce by shift to obtain direction vector, i.e., x = alpha*y + x
+			surfacePoint.add(-1.0, shift);
+			DenseVector cross = MathExtension.cross(surfacePoint, minEvec);
+			// Distance perpendicular to normal axis
+			double lateralDist = cross.norm(Norm.Two);
+			if (lateralDist < closestLateralDistance) {
+				closestLateralDistance = lateralDist;
+				closestRadialDistance  = radialDistance;
+			}
+			if (lateralDist > furthestLateralDistance) {
+				furthestLateralDistance = lateralDist;
+				furthestRadialDistance  = radialDistance;
+			}
+		}
+		
+		// use closest point to paraboloid as apex shift: x = alpha*y + x
+		shift.add(closestRadialDistance, minEvec);
+		// shift of paraboloid
+		double x0 = shift.get(0);
+		double y0 = shift.get(1);
+		double z0 = shift.get(2);
+		
 		// transpose of rotation matrix
 		r11 = rotation.get(0, 0);
 		r12 = rotation.get(1, 0);
 		r13 = rotation.get(2, 0);
-		
+
 		r21 = rotation.get(0, 1);
 		r22 = rotation.get(1, 1);
 		r23 = rotation.get(2, 1);
-		
+
 		r31 = rotation.get(0, 2);
 		r32 = rotation.get(1, 2);
 		r33 = rotation.get(2, 2);
 		
-		double x0 = shift.get(0);
-		double y0 = shift.get(1);
-		double z0 = shift.get(2);
+		// Derivation of the direction of axis pointing from apex to open surface, using closest and furthest position, i.e.,
+		// v = (x0 + tmax*s) - (x0 + tmin*s) = s*(tmax - tmin) 
+		if (furthestRadialDistance < closestRadialDistance) {
+			//minEvec.scale(-1);
+			r31 = -r31;
+			r32 = -r32;
+			r33 = -r33;
+		}
+		
+		// check rotation for det(R) = +1
+		double det = r11*r22*r33 + r12*r23*r31 + r13*r21*r32 - r13*r22*r31 - r12*r21*r33 - r11*r23*r32;
+		if (det < 0) {
+			r11 = -r11;
+			r12 = -r12;
+			r13 = -r13;
+		}
 		
 		paraboloid.setInitialGuess(x0, y0, z0, a, b, r11, r12, r13, r21, r22, r23, r31, r32, r33);
 	}
