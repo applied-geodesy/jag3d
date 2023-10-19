@@ -223,7 +223,7 @@ public class ConeFeature extends SurfaceFeature {
 		double eval[] = evd.getEigenvalues();
 		
 		// lambda1 > 0, lambda2 > 0 and lamda3 < 0
-		// evaluate signum of eigenvalues --> main axis of cone corresponds to lamda3
+		// evaluate sign of eigenvalues --> main axis of cone corresponds to lamda3
 		int order[] = new int[]{0,1,2};
 		if (Math.signum(eval[0]) == Math.signum(eval[1])) {
 			a = Math.sqrt(Math.abs(eval[0]/eval[2]));
