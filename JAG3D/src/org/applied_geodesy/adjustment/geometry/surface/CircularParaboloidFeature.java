@@ -31,6 +31,7 @@ import org.applied_geodesy.adjustment.geometry.parameter.ProcessingType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
 import org.applied_geodesy.adjustment.geometry.restriction.AverageRestriction;
+import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction;
 import org.applied_geodesy.adjustment.geometry.surface.primitive.Paraboloid;
 import org.applied_geodesy.adjustment.geometry.surface.primitive.Plane;
 import org.applied_geodesy.adjustment.geometry.surface.primitive.Sphere;
@@ -53,6 +54,7 @@ public class CircularParaboloidFeature extends SurfaceFeature {
 		UnknownParameter A = this.paraboloid.getUnknownParameter(ParameterType.MAJOR_AXIS_COEFFICIENT);
 		UnknownParameter C = this.paraboloid.getUnknownParameter(ParameterType.MINOR_AXIS_COEFFICIENT);
 		
+		
 		UnknownParameter R21 = this.paraboloid.getUnknownParameter(ParameterType.ROTATION_COMPONENT_R21);
 		
 		A.setVisible(false);
@@ -63,11 +65,23 @@ public class CircularParaboloidFeature extends SurfaceFeature {
 		AverageRestriction AequalsBRestriction = new AverageRestriction(true, List.of(A), C);
 		AverageRestriction radiusRestriction   = new AverageRestriction(true, List.of(A, C), B);
 		
+		UnknownParameter four = new UnknownParameter(ParameterType.CONSTANT, true, 4.0, false, ProcessingType.FIXED);
+		UnknownParameter BB = new UnknownParameter(ParameterType.CONSTANT, true, 0.0, false, ProcessingType.POSTPROCESSING);
+		UnknownParameter F  = new UnknownParameter(ParameterType.LENGTH, true, 0.0, true, ProcessingType.POSTPROCESSING);
+		ProductSumRestriction invSquaredBRestriction = new ProductSumRestriction(true, List.of(B), List.of(B), BB);
+		ProductSumRestriction focalLengthRestriction = new ProductSumRestriction(true, List.of(four), List.of(BB), -1.0, F);
+		
 		this.add(this.paraboloid);
 		
 		this.getUnknownParameters().add(B);
+		this.getUnknownParameters().add(F);
+		this.getUnknownParameters().add(BB);
+		this.getUnknownParameters().add(four);
+		
 		this.getRestrictions().add(AequalsBRestriction);
 		this.getPostProcessingCalculations().add(radiusRestriction);
+		this.getPostProcessingCalculations().add(invSquaredBRestriction);
+		this.getPostProcessingCalculations().add(focalLengthRestriction);
 	}
 	
 	public Paraboloid getParaboloid() {
