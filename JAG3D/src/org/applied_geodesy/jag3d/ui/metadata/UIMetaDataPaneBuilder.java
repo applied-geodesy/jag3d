@@ -22,9 +22,6 @@
 package org.applied_geodesy.jag3d.ui.metadata;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.format.FormatStyle;
 
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
@@ -52,7 +49,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.util.StringConverter;
 
 public class UIMetaDataPaneBuilder {
 	
