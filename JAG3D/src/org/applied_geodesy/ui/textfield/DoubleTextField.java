@@ -343,14 +343,17 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 	private void parseAndFormatInput() {
 		try {
 			String input = this.getText();
-			if (input != null && !input.trim().isEmpty()) {
-				input = input.replaceAll(",", ".");
+			if (input != null && !input.isBlank()) {
+				input = input.trim();
+				input = input.replaceAll(",", ".");  // replace comma by dot
+				if (input.startsWith("+")) // remove leading plus sign
+					input = input.substring(1);
 				ParsePosition parsePosition = new ParsePosition(0);
 				Double newValue = this.options.getFormatterOptions().get(this.type).parse(input, parsePosition).doubleValue();
 				// check if value is not null and if the complete value is error-free parsed 
 				// https://www.ibm.com/developerworks/library/j-numberformat/index.html
 				// https://stackoverflow.com/questions/14194888/validating-decimal-numbers-in-a-locale-sensitive-way-in-java
-				if (newValue != null && parsePosition.getErrorIndex() < 0 && parsePosition.getIndex() == input.length()) {
+				if (newValue != null && parsePosition.getErrorIndex() < 0 && parsePosition.getIndex() == input.length() && this.check(newValue)) {
 					switch(this.type) {
 					case ANGLE:
 						newValue = this.options.convertAngleToModel(newValue.doubleValue());
@@ -408,13 +411,16 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 					// set new value, if valid
 					this.setNumber(!this.check(newValue) ? this.getNumber() : newValue);
 				}
+				else
+					this.setText(this.getRendererFormat(this.getNumber()));
 			}
-			else if ((input == null || input.trim().isEmpty()) && this.check(null)) {
+			else if ((input == null || input.isBlank()) && this.check(null)) {
 				this.setNumber(null);
 			}
 			this.selectAll();
 			
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			this.setText(this.getRendererFormat(this.getNumber()));
 		}
 	}
