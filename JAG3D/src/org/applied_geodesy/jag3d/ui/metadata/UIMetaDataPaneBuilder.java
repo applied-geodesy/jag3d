@@ -21,6 +21,11 @@
 
 package org.applied_geodesy.jag3d.ui.metadata;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.FormatStyle;
+
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateChangeListener;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateEvent;
 import org.applied_geodesy.jag3d.sql.ProjectDatabaseStateType;
@@ -42,9 +47,12 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.util.StringConverter;
 
 public class UIMetaDataPaneBuilder {
 	
@@ -228,6 +236,15 @@ public class UIMetaDataPaneBuilder {
 		datePicker.setOnAction(listener);
 		datePicker.focusedProperty().addListener(listener);
 		datePicker.setEditable(false);
+		datePicker.addEventFilter(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent mouseEvent) {
+				if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
+					if(mouseEvent.getClickCount() == 2){
+						datePicker.setValue(LocalDate.now());
+					}
+				}
+			}
+		});
 		return datePicker;
 	}
 	
