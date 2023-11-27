@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
+import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.ui.textfield.DoubleTextField;
 import org.applied_geodesy.util.CellValueType;
 import org.applied_geodesy.juniform.ui.i18n.I18N;
@@ -362,6 +363,17 @@ public class MatrixDialog {
 			}
 		}
 		
-		this.currentFeaturePoint.setDispersionApriori(matrix);
+		try {
+			this.currentFeaturePoint.setDispersionApriori(matrix);
+		}
+		catch(IllegalArgumentException e) {
+			OptionDialog.showThrowableDialog (
+					i18n.getString("MatrixDialog.message.error.failed.exception.title",   "Invalid Dispersion Matrix"),
+					i18n.getString("MatrixDialog.message.error.failed.exception.header",  "Error, could not save dispersion matrix."),
+					i18n.getString("MatrixDialog.message.error.failed.exception.message", "An exception has occurred when saving dispersion matrix."),
+					e
+			);
+			throw e;
+		}
 	}
 }

@@ -27,9 +27,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableObjectValue;
 import no.uib.cipr.matrix.Matrix;
-import no.uib.cipr.matrix.UnitUpperTriangBandMatrix;
-import no.uib.cipr.matrix.UpperSymmBandMatrix;
-import no.uib.cipr.matrix.UpperSymmPackMatrix;
 
 public class ObservedFramePosition extends Position implements DispersionablePosition {
 	private ObjectProperty<Matrix> dispersionApriori = new SimpleObjectProperty<Matrix>(this, "dispersionApriori");
@@ -73,17 +70,7 @@ public class ObservedFramePosition extends Position implements DispersionablePos
 	
 	@Override
 	public void setDispersionApriori(Matrix dispersion) throws IllegalArgumentException {
-		if (!dispersion.isSquare() || this.getDimension() != dispersion.numColumns())
-			throw new IllegalArgumentException("Error, dispersion matrix must be a squared matrix of dimension " + this.getDimension() + " x " + this.getDimension() + "!");
-			
-		if (!(dispersion instanceof UpperSymmBandMatrix) && !(dispersion instanceof UnitUpperTriangBandMatrix) && !(dispersion instanceof UpperSymmPackMatrix))
-			throw new IllegalArgumentException("Error, dispersion matrix must be of type UpperSymmBandMatrix, UnitUpperTriangBandMatrix, or UpperSymmPackMatrix!");
-		
-		
-		if ((dispersion instanceof UpperSymmBandMatrix && ((UpperSymmBandMatrix)dispersion).numSuperDiagonals() != 0 ) || 
-				(dispersion instanceof UnitUpperTriangBandMatrix) && ((UnitUpperTriangBandMatrix)dispersion).numSuperDiagonals() != 0)
-			throw new IllegalArgumentException("Error, dispersion matrix must be a diagonal matrix, if BandMatrix type is used!");
-
+		this.checkDispersionMatrix(dispersion);
 		this.dispersionApriori.set(dispersion);
 	}
 }
