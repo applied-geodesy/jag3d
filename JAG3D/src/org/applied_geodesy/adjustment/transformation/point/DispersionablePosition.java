@@ -62,4 +62,39 @@ public interface DispersionablePosition extends Positionable {
 		
 		throw new IllegalArgumentException("Error, dispersion matrix must be of type UpperSymmBandMatrix, UnitUpperTriangBandMatrix, or UpperSymmPackMatrix!");		 
 	}
+	
+	default public void checkDispersionMatrix(Matrix dispersion) throws IllegalArgumentException {
+		if (!dispersion.isSquare() || this.getDimension() != dispersion.numColumns())
+			throw new IllegalArgumentException("Error, dispersion matrix must be a squared matrix of dimension " + this.getDimension() + " x " + this.getDimension() + "!");
+			
+		if (!(dispersion instanceof UpperSymmBandMatrix) && !(dispersion instanceof UnitUpperTriangBandMatrix) && !(dispersion instanceof UpperSymmPackMatrix))
+			throw new IllegalArgumentException("Error, dispersion matrix must be of type UpperSymmBandMatrix, UnitUpperTriangBandMatrix, or UpperSymmPackMatrix!");
+		
+		
+		if ((dispersion instanceof UpperSymmBandMatrix && ((UpperSymmBandMatrix)dispersion).numSuperDiagonals() != 0 ) || 
+				(dispersion instanceof UnitUpperTriangBandMatrix) && ((UnitUpperTriangBandMatrix)dispersion).numSuperDiagonals() != 0)
+			throw new IllegalArgumentException("Error, dispersion matrix must be a diagonal matrix, if BandMatrix type is used!");
+	
+		
+		if (dispersion instanceof UpperSymmBandMatrix || dispersion instanceof UpperSymmPackMatrix) {
+			for (int row = 0; row < dispersion.numRows(); row++) {
+				double varI = dispersion.get(row, row);
+				if (varI <= 0)
+					throw new IllegalArgumentException("Error, element (" + row + ", " + row + ") on main diagonal of dispersion matrix is less than or equal to zero but must be greater than zero!");
+
+				if (dispersion instanceof UpperSymmPackMatrix) {
+					for (int col = row + 1; col < dispersion.numColumns(); col++) {
+						double varJ    = dispersion.get(col, col);
+						double covarIJ = dispersion.get(row, col);
+
+						if (varJ <= 0)
+							throw new IllegalArgumentException("Error, element (" + col + ", " + col + ": " + varJ + ") on main diagonal of dispersion matrix is less than or equal to zero but must be greater than zero!");
+
+						if (Math.abs(covarIJ) >= Math.sqrt(varI * varJ))
+							throw new IllegalArgumentException("Error, invalid dispersion matrix, as correlation coefficient of element (" + row + ", " + col + ") is not between -1 and 1!");
+					}
+				}
+			}
+		}
+	}
 }

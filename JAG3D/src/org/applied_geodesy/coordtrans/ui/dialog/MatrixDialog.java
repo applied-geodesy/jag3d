@@ -29,6 +29,7 @@ import org.applied_geodesy.adjustment.transformation.point.DispersionablePositio
 import org.applied_geodesy.adjustment.transformation.point.PositionPair;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
 import org.applied_geodesy.coordtrans.ui.utils.UiUtil;
+import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.ui.textfield.DoubleTextField;
 import org.applied_geodesy.util.CellValueType;
 
@@ -506,6 +507,18 @@ public class MatrixDialog {
 				entry.set(value);
 			}
 		}
-		position.setDispersionApriori(matrix);
+		
+		try {
+			position.setDispersionApriori(matrix);
+		}
+		catch(IllegalArgumentException e) {
+			OptionDialog.showThrowableDialog (
+					i18n.getString("MatrixDialog.message.error.failed.exception.title",   "Invalid Dispersion Matrix"),
+					i18n.getString("MatrixDialog.message.error.failed.exception.header",  "Error, could not save dispersion matrix."),
+					i18n.getString("MatrixDialog.message.error.failed.exception.message", "An exception has occurred when saving dispersion matrix."),
+					e
+			);
+			throw e;
+		}
 	}
 }
