@@ -227,7 +227,12 @@ public class DeltaZ extends Observation {
 	public void setScale(Scale newScale) {
 		this.scale = newScale;
 		this.scale.setObservation( this );
-	}	
+	}
+	
+	@Override
+	public int getColInJacobiMatrixFromScale() {
+		return this.scale.getColInJacobiMatrix();
+	}
 
 	@Override
 	public double getValueAposteriori() {
