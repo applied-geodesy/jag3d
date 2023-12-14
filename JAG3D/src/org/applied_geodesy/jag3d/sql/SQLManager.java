@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EventListener;
@@ -2793,7 +2794,7 @@ public class SQLManager {
 		stmt.setString(idx++,  metaData.getName());
 		stmt.setString(idx++,  metaData.getOperator());
 		stmt.setString(idx++,  metaData.getDescription());
-		stmt.setTimestamp(idx++, Timestamp.valueOf(metaData.getDate().atStartOfDay()));
+		stmt.setTimestamp(idx++, Timestamp.valueOf(metaData.getDate() == null ? LocalDateTime.now() : metaData.getDate().atStartOfDay()));
 		
 		stmt.setString(idx++,  metaData.getCustomerId());
 		stmt.setString(idx++,  metaData.getProjectId());

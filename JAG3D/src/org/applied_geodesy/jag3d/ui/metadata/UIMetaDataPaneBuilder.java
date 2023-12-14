@@ -231,7 +231,7 @@ public class UIMetaDataPaneBuilder {
 		datePicker.setMinWidth(150);
 		datePicker.setOnAction(listener);
 		datePicker.focusedProperty().addListener(listener);
-		datePicker.setEditable(false);
+		datePicker.setEditable(true);
 		datePicker.addEventFilter(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseEvent) {
 				if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
