@@ -77,7 +77,7 @@ public class UIPrincipalComponentTableBuilder extends UITableBuilder<PrincipalCo
 		doubleColumn = this.<Double>getColumn(header, PrincipalComponentRow::ratioProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 		
-		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 		this.table = table;
 		this.isInitialize = true;
 	}

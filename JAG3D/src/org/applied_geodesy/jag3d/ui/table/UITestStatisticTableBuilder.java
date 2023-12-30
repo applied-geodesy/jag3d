@@ -108,7 +108,7 @@ public class UITestStatisticTableBuilder extends UITableBuilder<TestStatisticRow
 		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::quantileProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 		
-		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 		this.table = table;
 		this.isInitialize = true;
 	}

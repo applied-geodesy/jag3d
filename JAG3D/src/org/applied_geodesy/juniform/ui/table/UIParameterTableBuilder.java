@@ -142,7 +142,7 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		stringColumn.setComparator(new NaturalOrderTableColumnComparator<String>(stringColumn));
 		table.getColumns().add(stringColumn);
 		
-		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 		this.table = table;
 		this.isInitialize = true;
 	}

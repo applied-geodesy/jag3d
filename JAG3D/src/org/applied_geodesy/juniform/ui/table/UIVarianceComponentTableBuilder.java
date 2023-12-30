@@ -139,7 +139,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		booleanColumn.setSortable(false);
 		table.getColumns().add(booleanColumn);
 
-		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 
 		this.table = table;
 		this.isInitialize = true;
