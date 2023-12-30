@@ -28,6 +28,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -105,9 +107,10 @@ public class HTTPPropertiesLoader {
 	 * 	}
 	 * ?>
 	 * @throws IOException 
+	 * @throws URISyntaxException 
 	 * 
 	 */
-	public static Properties getProperties(String address, URLParameter... params) throws IOException {
+	public static Properties getProperties(String address, URLParameter... params) throws IOException, URISyntaxException {
 		Properties properties = new Properties();
 		BufferedReader bufferedReader = null;
 		OutputStreamWriter outputStreamWriter = null;
@@ -138,7 +141,7 @@ public class HTTPPropertiesLoader {
 			for (URLParameter param : params)
 				data += URLEncoder.encode(param.getKey().trim(), "UTF-8") + "=" + URLEncoder.encode(param.getValue().trim(), "UTF-8");
 
-			URL url = new URL( address );
+			URL url = (new URI(address)).toURL();
 			URLConnection conn = url.openConnection();
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
@@ -161,7 +164,7 @@ public class HTTPPropertiesLoader {
 	}
 
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, URISyntaxException {
 		String address = "https://software.applied-geodesy.org/update.php";
 
 		URLParameter param = new URLParameter("checkupdate", "jag3d");

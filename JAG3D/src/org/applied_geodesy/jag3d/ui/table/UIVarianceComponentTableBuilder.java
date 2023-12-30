@@ -182,7 +182,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 			this.addColumnOrderSequenceListeners(tableContentType, table);
 		
 		if (this.type == VarianceComponentDisplayType.OVERALL_COMPONENTS)
-			table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+			table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 		
 		this.tables.put(this.type, table);
 		this.table = table;

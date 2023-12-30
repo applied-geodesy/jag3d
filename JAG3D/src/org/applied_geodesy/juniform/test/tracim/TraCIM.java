@@ -32,6 +32,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -85,7 +87,7 @@ public class TraCIM {
 		this.orderId = orderId;
 	}
 	
-	public Document getTestData() throws IOException, ParserConfigurationException, SAXException {
+	public Document getTestData() throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
 		String xmlString = ""; 
 		if (READ_DATA_FROM_LOCAL_FILE) {
 			xmlString = this.getFileContent(BASE_PATH + "/gauss_data_sets_" + this.orderId + ".xml");
@@ -102,7 +104,7 @@ public class TraCIM {
 		return this.convertStringToXMLDocument(xmlString);
 	}
 	
-	public void saveReport(File file, String xmlResult) throws ParserConfigurationException, SAXException, IOException {
+	public void saveReport(File file, String xmlResult) throws ParserConfigurationException, SAXException, IOException, URISyntaxException {
 		String xmlString  = this.submitResult(xmlResult);
 		if (STORE_COMPLETE_TRANSACTION) {
 			String txtFile = BASE_PATH + "/gauss_test_report_" + this.orderId + ".xml";
@@ -174,7 +176,7 @@ public class TraCIM {
 		return doc;
 	}
 	
-	private String submitResult(String xmlResult) throws IOException  {
+	private String submitResult(String xmlResult) throws IOException, URISyntaxException  {
 		final String address  = this.baseURI + "/test/" + this.processId;
 		String response = this.sendRequest(address, xmlResult);
 		return response;
@@ -202,12 +204,12 @@ public class TraCIM {
 		return stringBuffer.toString();
 	}
 	
-	private String sendRequest(String address, String data) throws IOException {
+	private String sendRequest(String address, String data) throws IOException, URISyntaxException {
 		String response = null;
 		BufferedReader in = null;
 		try {
 			data = data == null ? "" : data;
-			URL url = new URL(address);
+			URL url = (new URI(address)).toURL();
 			StringBuilder postData = new StringBuilder();
 			postData.append(URLEncoder.encode(String.valueOf(data), "UTF-8"));
 			byte[] postDataBytes = data.getBytes("UTF-8");
