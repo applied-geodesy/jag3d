@@ -5483,14 +5483,12 @@ public class SQLManager {
 			inTypeArray.append(",?");
 		
 		String sql = "SELECT "
-				+ "\"type\", "
-				+ "(\"number_of_observations\" - \"number_of_effective_observations\") AS \"number_of_uncontrolled_residuals\", "
-				+ "\"number_of_negative_residuals\", "
-				+ "(\"number_of_effective_observations\" - \"number_of_negative_residuals\") AS \"number_of_positive_residuals\" "
+				+ "SUM(\"number_of_observations\" - \"number_of_effective_observations\") AS \"number_of_uncontrolled_residuals\", "
+				+ "SUM(\"number_of_negative_residuals\") AS \"number_of_negative_residuals\", "
+				+ "SUM(\"number_of_effective_observations\" - \"number_of_negative_residuals\") AS \"number_of_positive_residuals\" "
 				+ "FROM \"VarianceComponent\" "
 				+ "WHERE \"number_of_observations\" > 0 "
-				+ "AND \"type\" IN (" + inTypeArray + ") "
-				+ "ORDER BY \"type\" ASC";
+				+ "AND \"type\" IN (" + inTypeArray + ")";
 		
 		
 //		String sql = "SELECT "
