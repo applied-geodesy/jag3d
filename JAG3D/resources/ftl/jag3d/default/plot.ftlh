@@ -4,7 +4,7 @@
 	<#assign vector_scale = vector_scale???then(vector_scale, 250.0)>
 	<#assign svg_width    = 700>
 	<#assign svg_height   = 700> 
-	<#assign df_svg       = "0.00000;; roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
+	<#assign df_svg       = "0.00;; roundingMode=halfEven decimalSeparator='.' infinity='∞' nan='NaN'">
 
 	<#assign points = {}>
 	<#assign plot_network = false>
@@ -38,8 +38,8 @@
 						<#assign point1 = points[point_pair.start_point_name]>
 						<#assign point2 = points[point_pair.end_point_name]>
 							
-						<#assign dx = (point2.x - point1.x)>
-						<#assign dy = (point2.y - point1.y)>
+						<#assign dx = point2.x - point1.x>
+						<#assign dy = point2.y - point1.y>
 						
 						<#assign x = point1.x + 0.5*dx>
 						<#assign y = point1.y + 0.5*dy>
@@ -63,10 +63,21 @@
 			</#list>
 		</#if>
 
-		<#assign min_x = min_x-0.1*(max_x - min_x)>
-		<#assign min_y = min_y-0.1*(max_y - min_y)>
-		<#assign max_x = max_x+0.1*(max_x - min_x)>
-		<#assign max_y = max_y+0.1*(max_y - min_y)>
+		<#assign avg_x = 0.5*(max_x + min_x)>
+		<#assign avg_y = 0.5*(max_y + min_y)>
+		
+		<#assign min_x = min_x - avg_x>
+		<#assign min_y = min_y - avg_y>
+		<#assign max_x = max_x - avg_x>
+		<#assign max_y = max_y - avg_y>
+		
+		<#assign dx = max_x - min_x>
+		<#assign dy = max_y - min_y>
+		<#assign min_x = min_x - 0.1*dx>
+		<#assign min_y = min_y - 0.1*dy>
+		<#assign max_x = max_x + 0.1*dx>
+		<#assign max_y = max_y + 0.1*dy>
+		
 		<#assign scale_to_view = [(max_x - min_x) / svg_height, (max_y - min_y) / svg_width]?max>
 		
 		<#assign svg_width  = (max_y - min_y)/scale_to_view>
@@ -111,7 +122,7 @@
 														cy="0" 
 														ry="<@printFormattedNumber value=point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>" 
 														rx="<@printFormattedNumber value=point.helmert_minor_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
-														transform="translate(<@printFormattedNumber value=point.y format=df_svg/>, <@printFormattedNumber value=point.x format=df_svg/>) scale(1,-1) rotate(<@printFormattedNumber value=point.helmert_alpha*unit_conversion_angle*180/Math.PI format=df_svg/>, 0, 0) " 
+														transform="translate(<@printFormattedNumber value=point.y - avg_y format=df_svg/>, <@printFormattedNumber value=point.x - avg_x format=df_svg/>) scale(1, -1) rotate(<@printFormattedNumber value=point.helmert_alpha*unit_conversion_angle*180/Math.PI format=df_svg/>, 0, 0) " 
 														stroke="#000000" 
 														stroke-width="0.25" 
 														fill="#cccccc" 
@@ -119,10 +130,10 @@
 														stroke-dasharray="[1 0]" />
 												<#elseif group.dimension == 1>
 													<line 
-														x1="<@printFormattedNumber value=point.y format=df_svg/>"
-														y1="<@printFormattedNumber value=point.x - 0.5*point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
-														x2="<@printFormattedNumber value=point.y format=df_svg/>"
-														y2="<@printFormattedNumber value=point.x + 0.5*point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
+														x1="<@printFormattedNumber value=point.y - avg_y format=df_svg/>"
+														y1="<@printFormattedNumber value=point.x - avg_x - 0.5*point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
+														x2="<@printFormattedNumber value=point.y - avg_y format=df_svg/>"
+														y2="<@printFormattedNumber value=point.x - avg_x + 0.5*point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
 														stroke="#000000" 
 														stroke-width="2.5" 
 														vector-effect="non-scaling-stroke" 
@@ -141,8 +152,8 @@
 													<#assign point1 = points[point_pair.start_point_name]>
 													<#assign point2 = points[point_pair.end_point_name]>
 														
-													<#assign x = point1.x + 0.5*(point2.x - point1.x)>
-													<#assign y = point1.y + 0.5*(point2.y - point1.y)>
+													<#assign x = point1.x - avg_x + 0.5*(point2.x - point1.x)>
+													<#assign y = point1.y - avg_y + 0.5*(point2.y - point1.y)>
 		
 													<#if group.dimension != 1 && layers["POINT_SHIFT_HORIZONTAL"].visible>
 														<ellipse 
@@ -179,10 +190,10 @@
 												<#if point.significant>
 													<#if group.dimension != 1 && layer == "POINT_SHIFT_HORIZONTAL">
 														<line 
-															x1="<@printFormattedNumber value=point.y format=df_svg/>"
-															y1="<@printFormattedNumber value=point.x format=df_svg/>"
-															x2="<@printFormattedNumber value=point.y + point.gross_error_y * vector_scale * unit_conversion_length_residual / unit_conversion_length format=df_svg/>"
-															y2="<@printFormattedNumber value=point.x + point.gross_error_x * vector_scale * unit_conversion_length_residual / unit_conversion_length format=df_svg/>"
+															x1="<@printFormattedNumber value=point.y - avg_y format=df_svg/>"
+															y1="<@printFormattedNumber value=point.x - avg_x format=df_svg/>"
+															x2="<@printFormattedNumber value=point.y - avg_y + point.gross_error_y * vector_scale * unit_conversion_length_residual / unit_conversion_length format=df_svg/>"
+															y2="<@printFormattedNumber value=point.x - avg_x + point.gross_error_x * vector_scale * unit_conversion_length_residual / unit_conversion_length format=df_svg/>"
 															stroke="#ff8c00" 
 															stroke-width="1.5" 
 															vector-effect="non-scaling-stroke" 
@@ -191,10 +202,10 @@
 													</#if>
 													<#if group.dimension != 2 && layer == "POINT_SHIFT_VERTICAL">
 														<line 
-															x1="<@printFormattedNumber value=point.y format=df_svg/>"
-															y1="<@printFormattedNumber value=point.x format=df_svg/>"
-															x2="<@printFormattedNumber value=point.y format=df_svg/>"
-															y2="<@printFormattedNumber value=point.x + point.gross_error_z * vector_scale * unit_conversion_length_residual / unit_conversion_length format=df_svg/>"
+															x1="<@printFormattedNumber value=point.y - avg_y format=df_svg/>"
+															y1="<@printFormattedNumber value=point.x - avg_x format=df_svg/>"
+															x2="<@printFormattedNumber value=point.y - avg_y format=df_svg/>"
+															y2="<@printFormattedNumber value=point.x - avg_x + point.gross_error_z * vector_scale * unit_conversion_length_residual / unit_conversion_length format=df_svg/>"
 															stroke="#ffaf00" 
 															stroke-width="1.5" 
 															vector-effect="non-scaling-stroke" 
@@ -213,11 +224,11 @@
 													<#assign point1 = points[point_pair.start_point_name]>
 													<#assign point2 = points[point_pair.end_point_name]>
 															
-													<#assign dx = (point2.x - point1.x)>
-													<#assign dy = (point2.y - point1.y)>
+													<#assign dx = point2.x - point1.x>
+													<#assign dy = point2.y - point1.y>
 													
-													<#assign x = point1.x + 0.5*dx>
-													<#assign y = point1.y + 0.5*dy>
+													<#assign x = point1.x - avg_x + 0.5*dx>
+													<#assign y = point1.y - avg_y + 0.5*dy>
 													
 													<#if group.dimension != 1 && layer == "POINT_SHIFT_HORIZONTAL">
 														<line 
@@ -276,38 +287,38 @@
 				
 									<#if observation_lines??>
 										<#list observation_lines as key, line>
-											<#assign dx = (line.point2.x - line.point1.x)>
-											<#assign dy = (line.point2.y - line.point1.y)>
+											<#assign dx = line.point2.x - line.point1.x>
+											<#assign dy = line.point2.y - line.point1.y>
 											<#assign distance = [Math.sqrt(dx*dx + dy*dy), 1]?max>
 											<#assign dx = dx / distance>
 											<#assign dy = dy / distance>
 											<#assign maxLength = 125*scale_to_view>
 											<#assign backside  = backsides[key]???then(1,0)>
 											<line 
-												x1="<@printFormattedNumber value=line.point1.y format=df_svg/>"
-												y1="<@printFormattedNumber value=line.point1.x format=df_svg/>"
-												x2="<@printFormattedNumber value=line.point1.y + ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
-												y2="<@printFormattedNumber value=line.point1.x + ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
+												x1="<@printFormattedNumber value=line.point1.y - avg_y format=df_svg/>"
+												y1="<@printFormattedNumber value=line.point1.x - avg_x format=df_svg/>"
+												x2="<@printFormattedNumber value=line.point1.y - avg_y + ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
+												y2="<@printFormattedNumber value=line.point1.x - avg_x + ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
 												vector-effect="non-scaling-stroke"
 												stroke="#778899" 
 												stroke-width="0.25" 
 												stroke-dasharray="[1 0]" /> 
 											<#if backside == 1>
 												<line 
-													x1="<@printFormattedNumber value=line.point2.y format=df_svg/>"
-													y1="<@printFormattedNumber value=line.point2.x format=df_svg/>"
-													x2="<@printFormattedNumber value=line.point2.y - ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
-													y2="<@printFormattedNumber value=line.point2.x - ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
+													x1="<@printFormattedNumber value=line.point2.y - avg_y format=df_svg/>"
+													y1="<@printFormattedNumber value=line.point2.x - avg_x format=df_svg/>"
+													x2="<@printFormattedNumber value=line.point2.y - avg_y - ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
+													y2="<@printFormattedNumber value=line.point2.x - avg_x - ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
 													vector-effect="non-scaling-stroke"
 													stroke="#778899" 
 													stroke-width="0.25" 
 													stroke-dasharray="[1 0]" /> 
 											</#if>
 											<line 
-												x1="<@printFormattedNumber value=line.point1.y + ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
-												y1="<@printFormattedNumber value=line.point1.x + ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
-												x2="<@printFormattedNumber value=line.point2.y - backside * ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
-												y2="<@printFormattedNumber value=line.point2.x - backside * ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
+												x1="<@printFormattedNumber value=line.point1.y - avg_y + ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
+												y1="<@printFormattedNumber value=line.point1.x - avg_x + ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
+												x2="<@printFormattedNumber value=line.point2.y - avg_y - backside * ([0.35*distance, maxLength]?min) * dy format=df_svg/>"
+												y2="<@printFormattedNumber value=line.point2.x - avg_x - backside * ([0.35*distance, maxLength]?min) * dx format=df_svg/>"
 												vector-effect="non-scaling-stroke" 
 												stroke="#778899" 
 												stroke-width="0.25" 
@@ -342,7 +353,7 @@
 														stroke-width="0.2" 
 														fill="#dda0dd"
 														vector-effect="non-scaling-stroke" 
-														transform="translate(<@printFormattedNumber value=point.y format=df_svg/>, <@printFormattedNumber value=point.x format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=scale_to_view format=df_svg/>) " />
+														transform="translate(<@printFormattedNumber value=point.y - avg_y format=df_svg/>, <@printFormattedNumber value=point.x - avg_x format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=scale_to_view format=df_svg/>) " />
 												<#elseif group.type == "DATUM_POINT">
 													<polygon 
 														points="-4.0,-2.3 0,4.7 4.0,-2.3" 
@@ -350,7 +361,7 @@
 														stroke="#000000" 
 														stroke-width="0.2" 
 														vector-effect="non-scaling-stroke" 
-														transform="translate(<@printFormattedNumber value=point.y format=df_svg/>, <@printFormattedNumber value=point.x format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=scale_to_view format=df_svg/>) " />
+														transform="translate(<@printFormattedNumber value=point.y - avg_y format=df_svg/>, <@printFormattedNumber value=point.x - avg_x format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=scale_to_view format=df_svg/>) " />
 												<#elseif group.type == "STOCHASTIC_POINT">
 													<polygon 
 														points="-3,-3 -3,3, 3,3 3,-3" 
@@ -358,7 +369,7 @@
 														stroke="#000000" 
 														stroke-width="0.2" 
 														vector-effect="non-scaling-stroke" 
-														transform="translate(<@printFormattedNumber value=point.y format=df_svg/>, <@printFormattedNumber value=point.x format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=scale_to_view format=df_svg/>) " />
+														transform="translate(<@printFormattedNumber value=point.y - avg_y format=df_svg/>, <@printFormattedNumber value=point.x - avg_x format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=scale_to_view format=df_svg/>) " />
 												<#elseif group.type == "REFERENCE_POINT">
 													<polygon 
 														points="-3,-3 -3,3, 3,3 3,-3" 
@@ -366,7 +377,7 @@
 														stroke="#000000" 
 														stroke-width="0.2" 
 														vector-effect="non-scaling-stroke" 
-														transform="rotate(45,<@printFormattedNumber value=point.y format=df_svg/>, <@printFormattedNumber value=point.x format=df_svg/>) translate(<@printFormattedNumber value=point.y format=df_svg/>, <@printFormattedNumber value=point.x format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=scale_to_view format=df_svg/>) " />				
+														transform="rotate(45,<@printFormattedNumber value=point.y - avg_y format=df_svg/>, <@printFormattedNumber value=point.x - avg_x format=df_svg/>) translate(<@printFormattedNumber value=point.y - avg_y format=df_svg/>, <@printFormattedNumber value=point.x - avg_x format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=scale_to_view format=df_svg/>) " />				
 												<#else>
 													<#continue>
 												</#if>
@@ -375,7 +386,7 @@
 													y="0"
 													fill="#696969" 
 													font-size="0.7em" 
-													transform="translate(<@printFormattedNumber value=point.y+7*scale_to_view format=df_svg/>,<@printFormattedNumber value=point.x-10*scale_to_view format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=-scale_to_view format=df_svg/>) ">${point.name}</text>
+													transform="translate(<@printFormattedNumber value=point.y - avg_y + 7*scale_to_view format=df_svg/>,<@printFormattedNumber value=point.x - avg_x - 10*scale_to_view format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=-scale_to_view format=df_svg/>) ">${point.name}</text>
 													
 											</#list>
 										</#if>
@@ -418,7 +429,7 @@
 							y="0" 
 							fill="gray" 
 							font-size="0.6em"
-							transform="translate(<@printFormattedNumber value=max_y-10*scale_to_view - 1.5*world_scalebar format=df_svg/>, <@printFormattedNumber value=min_x + 10*scale_to_view format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=-scale_to_view format=df_svg/>) ">${(3*world_scalebar)?int} ${unit_abbr_length}</text>
+							transform="translate(<@printFormattedNumber value=max_y - 10*scale_to_view - 1.5*world_scalebar format=df_svg/>, <@printFormattedNumber value=min_x + 10*scale_to_view format=df_svg/>) scale(<@printFormattedNumber value=scale_to_view format=df_svg/>, <@printFormattedNumber value=-scale_to_view format=df_svg/>) ">${(3*world_scalebar)?int} ${unit_abbr_length}</text>
 					</g>
 					<#outputformat "plainText">${plot_svg_support}</#outputformat>
 				</svg>
