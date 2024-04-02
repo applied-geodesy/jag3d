@@ -226,7 +226,7 @@ public class TransformationAdjustment {
 		this.Qxx = null;
 	}
 	
-	private void prepareIterationProcess(SimplePositionPair centerOfMasses) {
+	private void prepareIterationProcess(SimplePositionPair centerOfMasses) throws MatrixSingularException, IllegalArgumentException, NotConvergedException {
 		// set warm start solution x <-- x0
 		this.transformation.applyInitialGuess();
 		
@@ -267,9 +267,11 @@ public class TransformationAdjustment {
 			restriction.setRow(-1);
 
 		// reset points
-		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs) {
+		for (HomologousFramePositionPair homologousPointPair : this.homologousPointPairs)
 			homologousPointPair.reset();
-		}
+		
+		// derive initial guess of residuals
+		this.updateResiduals(new DenseVector(this.numberOfUnknownParameters), false);
 	}
 
 	public EstimationStateType estimateModel() throws NotConvergedException, MatrixSingularException, OutOfMemoryError {
