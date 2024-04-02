@@ -207,7 +207,7 @@ public class FeatureAdjustment {
 		this.Qxx = null;
 	}
 	
-	private void prepareIterationProcess(Point centerOfMass) {
+	private void prepareIterationProcess(Point centerOfMass) throws MatrixSingularException, IllegalArgumentException, NotConvergedException {
 		// set warm start solution x <-- x0
 		this.feature.applyInitialGuess();
 		// reset center of mass
@@ -245,6 +245,9 @@ public class FeatureAdjustment {
 		// reset feature points
 		for (FeaturePoint featurePoint : this.points)
 			featurePoint.reset();
+		
+		// derive initial guess of residuals
+		this.updateResiduals(new DenseVector(this.numberOfUnknownParameters), false);
 	}
 	
 	public EstimationStateType estimateModel() throws NotConvergedException, MatrixSingularException, OutOfMemoryError {
