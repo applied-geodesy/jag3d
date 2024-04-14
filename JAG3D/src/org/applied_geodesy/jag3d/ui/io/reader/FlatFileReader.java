@@ -19,32 +19,37 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.io;
+package org.applied_geodesy.jag3d.ui.io.reader;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
+import java.nio.file.Path;
 
-import org.applied_geodesy.adjustment.network.ObservationType;
+import org.applied_geodesy.jag3d.ui.i18n.I18N;
+import org.applied_geodesy.util.io.SourceFileReader;
 
-public class ImportOption {
+import javafx.stage.FileChooser.ExtensionFilter;
 
-	private static ImportOption importOption = new ImportOption();
-
-	private Map<ObservationType, Boolean> separateStation = new HashMap<ObservationType, Boolean>();
+public abstract class FlatFileReader<T> extends SourceFileReader<T> {
 	
-	private ImportOption() {}
-	
-	public static ImportOption getInstance() {
-		return importOption;
+	protected FlatFileReader() {
+		super();
 	}
 	
-	public boolean isGroupSeparation(ObservationType observationType) {
-		if (this.separateStation.containsKey(observationType))
-			return this.separateStation.get(observationType);
-		return DefaultImportOption.isGroupSeparation(observationType);
+	protected FlatFileReader(String fileName) {
+		this(new File(fileName).toPath());
+	}
+
+	protected FlatFileReader(File sf) {
+		this(sf.toPath());
 	}
 	
-	public void setGroupSeparation(ObservationType observationType, boolean separate) {
-		this.separateStation.put(observationType, separate);
+	protected FlatFileReader(Path path) {
+		super(path);
+	}
+	
+	public static ExtensionFilter[] getExtensionFilters() {
+		return new ExtensionFilter[] {
+				new ExtensionFilter(I18N.getInstance().getString("FlatFileReader.extension", "All files"), "*.*")
+		};
 	}
 }

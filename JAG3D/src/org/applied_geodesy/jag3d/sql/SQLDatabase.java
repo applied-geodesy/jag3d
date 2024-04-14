@@ -38,7 +38,8 @@ import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTas
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
-import org.applied_geodesy.jag3d.ui.io.ImportOption;
+import org.applied_geodesy.jag3d.ui.io.reader.ImportOption;
+import org.applied_geodesy.jag3d.ui.io.writer.ExportOption.ExportResultType;
 import org.applied_geodesy.jag3d.ui.table.column.TableContentType;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.DefaultTableRowHighlightValue;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlightRangeType;
@@ -250,7 +251,7 @@ class SQLDatabase {
 		
 		// transfer Earth radius to semi-axes
 		sqls.put(20210513.0010, "UPDATE \"ReductionDefinition\" SET \"major_axis\" = \"earth_radius\", \"minor_axis\" = \"earth_radius\" WHERE \"id\" = 1;\r\n");
-		sqls.put(20210513.0011, "ALTER TABLE \"ReductionDefinition\" DROP COLUMN \"earth_radius\"\r\n");
+		sqls.put(20210513.0011, "ALTER TABLE \"ReductionDefinition\" DROP COLUMN \"earth_radius\";\r\n");
 		
 		// add maximum tolerable bias
 		sqls.put(20210629.0001, "ALTER TABLE \"ObservationAposteriori\" ADD \"maximum_tolerable_bias\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
@@ -306,6 +307,11 @@ class SQLDatabase {
 		
 		sqls.put(20230131.0031, "UPDATE \"VerticalDeflectionAposteriori\" SET \"residual_x\" = -\"residual_x\";\r\n");
 		sqls.put(20230131.0032, "UPDATE \"VerticalDeflectionAposteriori\" SET \"residual_y\" = -\"residual_y\";\r\n");
+		
+		// export adjustment result options
+		sqls.put(20230716.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ExportResult\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" INTEGER DEFAULT " + ExportResultType.NONE.getId() + " NOT NULL);\r\n");
+		sqls.put(20230716.0002, "INSERT INTO \"ExportResult\" (\"id\", \"type\") SELECT \"id\", CASEWHEN(\"export_covariance_matrix\", " + ExportResultType.ASCII.getId() + ", " + ExportResultType.NONE.getId() + ") AS \"type\" FROM \"AdjustmentDefinition\" WHERE \"id\" = 1;\r\n");	
+		sqls.put(20230716.0003, "ALTER TABLE \"AdjustmentDefinition\" DROP COLUMN \"export_covariance_matrix\";\r\n");
 		
 		return sqls;
 	}

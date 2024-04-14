@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.io;
+package org.applied_geodesy.jag3d.ui.io.reader;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,63 +27,66 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
+import org.applied_geodesy.adjustment.network.PointType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.table.row.VerticalDeflectionRow;
+import org.applied_geodesy.jag3d.ui.table.row.PointRow;
+import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
-import org.applied_geodesy.jag3d.ui.tree.VerticalDeflectionTreeItemValue;
 import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.util.io.SourceFileReader;
 import org.applied_geodesy.util.io.csv.CSVColumnType;
+import org.applied_geodesy.util.io.csv.CSVParser;
 import org.applied_geodesy.util.io.csv.ColumnRange;
 
 import javafx.scene.control.TreeItem;
 
-public class ColumnDefinedVerticalDeflectionFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
-	private final String tabulator;
+public class CSVPointFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
+	private final CSVParser parser;
 	
-	private final VerticalDeflectionType verticalDeflectionType;
-	private Set<String> reservedNames = null;
+	private final PointType pointType;
 	private TreeItemType treeItemType;
-	private List<VerticalDeflectionRow> verticalDeflections = null;
+	private Set<String> reservedNames = null;
 	
 	private FormatterOptions options = FormatterOptions.getInstance();
 	private NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.ENGLISH);
 
-	private int lastCharacterPosition = 0;
 	private List<ColumnRange> columnRanges = new ArrayList<ColumnRange>(0);
+	private List<PointRow> points = null;
 
-	public ColumnDefinedVerticalDeflectionFileReader(VerticalDeflectionType verticalDeflectionType, String tabulator) {
-		this.verticalDeflectionType = verticalDeflectionType;
-		this.tabulator = tabulator;
-		this.treeItemType = TreeItemType.getTreeItemTypeByVerticalDeflectionType(verticalDeflectionType); 
+	private List<String> parsedLine = null;
+	
+	public CSVPointFileReader(PointType pointType, CSVParser parser) {
+		this.pointType = pointType;
+		this.parser = parser;
+		this.treeItemType = TreeItemType.getTreeItemTypeByPointType(pointType, 3); // dim = 3 for check
 		if (this.treeItemType == null)
-			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, observation type could not be transformed to tree item type. " + verticalDeflectionType);
+			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, observation type could not be transformed to tree item type. " + pointType);
 		this.reset();
 	}
 
-	public ColumnDefinedVerticalDeflectionFileReader(String fileName, VerticalDeflectionType verticalDeflectionType, String tabulator) {
-		this(new File(fileName).toPath(), verticalDeflectionType, tabulator);
+	public CSVPointFileReader(String fileName, PointType pointType, CSVParser parser) {
+		this(new File(fileName).toPath(), pointType, parser);
 	}
 
-	public ColumnDefinedVerticalDeflectionFileReader(File sf, VerticalDeflectionType verticalDeflectionType, String tabulator) {
-		this(sf.toPath(), verticalDeflectionType, tabulator);
+	public CSVPointFileReader(File sf, PointType pointType, CSVParser parser) {
+		this(sf.toPath(), pointType, parser);
 	}
 
-	public ColumnDefinedVerticalDeflectionFileReader(Path path, VerticalDeflectionType verticalDeflectionType, String tabulator) {
+	public CSVPointFileReader(Path path, PointType pointType, CSVParser parser) {
 		super(path);
-		this.verticalDeflectionType = verticalDeflectionType;
-		this.tabulator = tabulator;
-		this.treeItemType = TreeItemType.getTreeItemTypeByVerticalDeflectionType(verticalDeflectionType); 
+		this.pointType = pointType;
+		this.parser = parser;
+		this.treeItemType = TreeItemType.getTreeItemTypeByPointType(pointType, 3); // dim = 3 for check
 		if (this.treeItemType == null)
-			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, observation type could not be transformed to tree item type. " + verticalDeflectionType);
+			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, observation type could not be transformed to tree item type. " + pointType);
 		this.reset();
 	}
 
@@ -96,19 +99,6 @@ public class ColumnDefinedVerticalDeflectionFileReader extends SourceFileReader<
 	}
 
 	@Override
-	public void reset() {
-		if (this.verticalDeflections == null) 
-			this.verticalDeflections = new ArrayList<VerticalDeflectionRow>();
-		if (this.reservedNames == null)
-			this.reservedNames = new HashSet<String>();
-		
-		this.verticalDeflections.clear();
-		this.reservedNames.clear();
-
-		this.lastCharacterPosition = 0;
-	}
-
-	@Override
 	public TreeItem<TreeItemValue> readAndImport() throws IOException, SQLException {
 		this.reset();
 		this.ignoreLinesWhichStartWith("#");
@@ -117,25 +107,34 @@ public class ColumnDefinedVerticalDeflectionFileReader extends SourceFileReader<
 		
 		boolean hasXComponent = false;
 		boolean hasYComponent = false;
-
+		boolean hasZComponent = false;
 		for (ColumnRange range : this.columnRanges) {
-			this.lastCharacterPosition = Math.max(this.lastCharacterPosition, range.getColumnEnd() + 1);
 			if (range.getType() == CSVColumnType.X)
 				hasXComponent = true;
 			else if (range.getType() == CSVColumnType.Y)
 				hasYComponent = true;
+			else if (range.getType() == CSVColumnType.Z)
+				hasZComponent = true;
 		}
 
-		if (hasXComponent && hasYComponent) {
+		int dimension = -1;
+		if (hasXComponent && hasYComponent && hasZComponent)
+			dimension = 3;
+		else if (hasXComponent && hasYComponent)
+			dimension = 2;
+		else if (hasZComponent)
+			dimension = 1;
+
+		if (dimension >= 1 && dimension <= 3) {
 			super.read();
 
-			if (!this.verticalDeflections.isEmpty()) {
-				this.treeItemType = TreeItemType.getTreeItemTypeByVerticalDeflectionType(this.verticalDeflectionType); 
+			if (!this.points.isEmpty()) {
+				this.treeItemType = TreeItemType.getTreeItemTypeByPointType(pointType, dimension);
 				String itemName = this.createItemName(null, null);
 				TreeItemType parentType = TreeItemType.getDirectoryByLeafType(this.treeItemType);
 				newTreeItem = UITreeBuilder.getInstance().addItem(parentType, -1, itemName, true, false);
 				try {
-					SQLManager.getInstance().saveGroup((VerticalDeflectionTreeItemValue)newTreeItem.getValue());
+					SQLManager.getInstance().saveGroup((PointTreeItemValue)newTreeItem.getValue());
 				} catch (SQLException e) {
 					UITreeBuilder.getInstance().removeItem(newTreeItem);
 					e.printStackTrace();
@@ -143,8 +142,8 @@ public class ColumnDefinedVerticalDeflectionFileReader extends SourceFileReader<
 				}
 
 				try {
-					int groupId = ((VerticalDeflectionTreeItemValue)newTreeItem.getValue()).getGroupId();
-					for (VerticalDeflectionRow row : this.verticalDeflections) {
+					int groupId = ((PointTreeItemValue)newTreeItem.getValue()).getGroupId();
+					for (PointRow row : this.points) {
 						row.setGroupId(groupId);
 						SQLManager.getInstance().saveItem(row);
 					}
@@ -160,45 +159,85 @@ public class ColumnDefinedVerticalDeflectionFileReader extends SourceFileReader<
 	}
 
 	@Override
-	public void parse(String line) throws SQLException {
-		line = String.format("%" + this.lastCharacterPosition + "s", line.replaceAll("\t", this.tabulator));
+	public void reset() {
+		if (this.points == null) 
+			this.points = new ArrayList<PointRow>();
+		if (this.reservedNames == null)
+			this.reservedNames = new HashSet<String>();
+		if (this.parsedLine == null)
+			this.parsedLine = new ArrayList<String>(20);
 
-		VerticalDeflectionRow row = new VerticalDeflectionRow();
+		this.parsedLine.clear();
+		this.points.clear();
+		this.reservedNames.clear();
+	}
+
+	@Override
+	public void parse(String line) throws SQLException {
+		try {
+			String parsedLine[] = this.parser.parseLineMulti(line);
+			if (parsedLine != null && parsedLine.length > 0) {
+				this.parsedLine.addAll(Arrays.asList(parsedLine));
+			}
+
+			if (!this.parser.isPending()) {
+				this.parsePoint(this.parsedLine);
+				this.parsedLine.clear();
+			}
+		} 
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void parsePoint(List<String> parsedLine) {
+		PointRow row = new PointRow();
 		
 		for (ColumnRange range : this.columnRanges) {
 			try {
 				CSVColumnType type = range.getType();
-				int startPos = range.getColumnStart();
-				int endPos   = range.getColumnEnd() + 1;
+				int pos = range.getColumnStart() - 1;
+				if (pos < 0 || pos >= parsedLine.size())
+					continue;
 
 				double value;
 				switch(type) {
 				case POINT_ID:
-					String name = line.substring(startPos, endPos).trim();
+					String name = parsedLine.get(pos).trim();
 					if (name != null && !name.isEmpty())
 						row.setName(name);
 					else
 						continue;
 					break;
+				case POINT_CODE:
+					row.setCode(parsedLine.get(pos).trim());
+					break;
 					
 				case X:
-					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
-					row.setXApriori(options.convertAngleToModel(value));
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setXApriori(options.convertLengthToModel(value));
 					break;
 				case Y:
-					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
-					row.setYApriori(options.convertAngleToModel(value));
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setYApriori(options.convertLengthToModel(value));
+					break;
+				case Z:
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setZApriori(options.convertLengthToModel(value));
 					break;
 					
 				case UNCERTAINTY_X:
-					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
-					row.setSigmaXapriori(options.convertAngleToModel(value));
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setSigmaXapriori(options.convertLengthToModel(value));
 					break;
 				case UNCERTAINTY_Y:
-					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
-					row.setSigmaYapriori(options.convertAngleToModel(value));
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setSigmaYapriori(options.convertLengthToModel(value));
 					break;
-					
+				case UNCERTAINTY_Z:
+					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					row.setSigmaZapriori(options.convertLengthToModel(value));
+					break;
 				default:
 					System.err.println(this.getClass().getSimpleName() + " Error, unsupported column type! " + type);
 					break;
@@ -210,8 +249,8 @@ public class ColumnDefinedVerticalDeflectionFileReader extends SourceFileReader<
 			}
 		}
 
-		if (row.getName() != null && !row.getName().isEmpty() && !this.reservedNames.contains(row.getName()) && (row.getXApriori() != null && row.getYApriori() != null)) {
-			this.verticalDeflections.add(row);
+		if (row.getName() != null && !row.getName().isEmpty() && !this.reservedNames.contains(row.getName()) && (row.getZApriori() != null || row.getXApriori() != null && row.getYApriori() != null)) {
+			this.points.add(row);
 			this.reservedNames.add(row.getName());
 		}
 	}

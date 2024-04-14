@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.io;
+package org.applied_geodesy.jag3d.ui.io.reader;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,56 +30,53 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.table.row.PointRow;
-import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
+import org.applied_geodesy.jag3d.ui.table.row.VerticalDeflectionRow;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
+import org.applied_geodesy.jag3d.ui.tree.VerticalDeflectionTreeItemValue;
 
 import javafx.scene.control.TreeItem;
 
-public class PointFlatFileReader extends FlatFileReader<TreeItem<TreeItemValue>> {
-	private final int dimension;
+public class VerticalDeflectionFlatFileReader extends FlatFileReader<TreeItem<TreeItemValue>> {
 	private Set<String> reservedNames = null;
 	private final TreeItemType treeItemType;
 	
-	private List<PointRow> points = null;
+	private List<VerticalDeflectionRow> verticalDeflections = null;
 	
-	public PointFlatFileReader(PointType pointType, int dimension) {
-		this.dimension = dimension;
-		this.treeItemType = TreeItemType.getTreeItemTypeByPointType(pointType, dimension);
+	public VerticalDeflectionFlatFileReader(VerticalDeflectionType verticalDeflectionType) {
+		this.treeItemType = TreeItemType.getTreeItemTypeByVerticalDeflectionType(verticalDeflectionType);
 		if (this.treeItemType == null)
-			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, point type could not be transformed to tree item type. " + pointType);
+			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, point type could not be transformed to tree item type. " + verticalDeflectionType);
 		this.reset();
 	}
 	
-	public PointFlatFileReader(String fileName, PointType pointType, int dimension) {
-		this(new File(fileName).toPath(), pointType, dimension);
+	public VerticalDeflectionFlatFileReader(String fileName, VerticalDeflectionType verticalDeflectionType) {
+		this(new File(fileName).toPath(), verticalDeflectionType);
 	}
 
-	public PointFlatFileReader(File sf, PointType pointType, int dimension) {
-		this(sf.toPath(), pointType, dimension);
+	public VerticalDeflectionFlatFileReader(File sf,  VerticalDeflectionType verticalDeflectionType) {
+		this(sf.toPath(), verticalDeflectionType);
 	}
 	
-	public PointFlatFileReader(Path path, PointType pointType, int dimension) {
+	public VerticalDeflectionFlatFileReader(Path path,  VerticalDeflectionType verticalDeflectionType) {
 		super(path);
-		this.dimension = dimension;
-		this.treeItemType = TreeItemType.getTreeItemTypeByPointType(pointType, dimension);
+		this.treeItemType = TreeItemType.getTreeItemTypeByVerticalDeflectionType(verticalDeflectionType);
 		if (this.treeItemType == null)
-			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, point type could not be transformed to tree item type. " + pointType);
+			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, point type could not be transformed to tree item type. " + verticalDeflectionType);
 		this.reset();
 	}
 	
 	@Override
 	public void reset() {
-		if (this.points == null) 
-			this.points = new ArrayList<PointRow>();
+		if (this.verticalDeflections == null) 
+			this.verticalDeflections = new ArrayList<VerticalDeflectionRow>();
 		if (this.reservedNames == null)
 			this.reservedNames = new HashSet<String>();
 		
-		this.points.clear();
+		this.verticalDeflections.clear();
 		this.reservedNames.clear();
 	}
 
@@ -87,17 +84,17 @@ public class PointFlatFileReader extends FlatFileReader<TreeItem<TreeItemValue>>
 	public TreeItem<TreeItemValue> readAndImport() throws IOException, SQLException {
 		this.reset();
 		this.ignoreLinesWhichStartWith("#");
-		this.reservedNames = SQLManager.getInstance().getFullPointNameSet();
+		this.reservedNames = SQLManager.getInstance().getFullVerticalDeflectionNameSet();
 		TreeItem<TreeItemValue> newTreeItem = null;
 		
 		super.read();
 		
-		if (!this.points.isEmpty()) {
+		if (!this.verticalDeflections.isEmpty()) {
 			String itemName = this.createItemName(null, null);
 			TreeItemType parentType = TreeItemType.getDirectoryByLeafType(this.treeItemType);
 			newTreeItem = UITreeBuilder.getInstance().addItem(parentType, -1, itemName, true, false);
 			try {
-				SQLManager.getInstance().saveGroup((PointTreeItemValue)newTreeItem.getValue());
+				SQLManager.getInstance().saveGroup((VerticalDeflectionTreeItemValue)newTreeItem.getValue());
 			} catch (SQLException e) {
 				UITreeBuilder.getInstance().removeItem(newTreeItem);
 				e.printStackTrace();
@@ -105,9 +102,9 @@ public class PointFlatFileReader extends FlatFileReader<TreeItem<TreeItemValue>>
 			}
 			
 			try {
-				int groupId = ((PointTreeItemValue)newTreeItem.getValue()).getGroupId();
-				if (!this.points.isEmpty()) {
-					for (PointRow row : this.points) {
+				int groupId = ((VerticalDeflectionTreeItemValue)newTreeItem.getValue()).getGroupId();
+				if (!this.verticalDeflections.isEmpty()) {
+					for (VerticalDeflectionRow row : this.verticalDeflections) {
 						row.setGroupId(groupId);
 						SQLManager.getInstance().saveItem(row);
 					}
@@ -126,12 +123,12 @@ public class PointFlatFileReader extends FlatFileReader<TreeItem<TreeItemValue>>
 	public void parse(String line) {
 		line = line.trim();
 		
-		PointRow pointRow = null;
+		VerticalDeflectionRow verticalDeflectionRow = null;
 		try {
-			pointRow = PointRow.scan(line, this.dimension);
-			if (pointRow != null && !this.reservedNames.contains(pointRow.getName())) {
-				this.points.add(pointRow);
-				this.reservedNames.add(pointRow.getName());
+			verticalDeflectionRow = VerticalDeflectionRow.scan(line);
+			if (verticalDeflectionRow != null && !this.reservedNames.contains(verticalDeflectionRow.getName())) {
+				this.verticalDeflections.add(verticalDeflectionRow);
+				this.reservedNames.add(verticalDeflectionRow.getName());
 			}
 		}
 		catch (Exception err) {

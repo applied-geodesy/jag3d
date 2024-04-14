@@ -59,18 +59,18 @@ import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.JAG3D;
 import org.applied_geodesy.jag3d.ui.dialog.ColumnImportDialog;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
-import org.applied_geodesy.jag3d.ui.io.BeoFileReader;
-import org.applied_geodesy.jag3d.ui.io.CongruenceAnalysisFlatFileReader;
-import org.applied_geodesy.jag3d.ui.io.DL100FileReader;
-import org.applied_geodesy.jag3d.ui.io.DimensionType;
-import org.applied_geodesy.jag3d.ui.io.FlatFileReader;
-import org.applied_geodesy.jag3d.ui.io.GKAFileReader;
-import org.applied_geodesy.jag3d.ui.io.GSIFileReader;
-import org.applied_geodesy.jag3d.ui.io.M5FileReader;
-import org.applied_geodesy.jag3d.ui.io.ObservationFlatFileReader;
-import org.applied_geodesy.jag3d.ui.io.PointFlatFileReader;
-import org.applied_geodesy.jag3d.ui.io.VerticalDeflectionFlatFileReader;
-import org.applied_geodesy.jag3d.ui.io.ZFileReader;
+import org.applied_geodesy.jag3d.ui.io.reader.BeoFileReader;
+import org.applied_geodesy.jag3d.ui.io.reader.CongruenceAnalysisFlatFileReader;
+import org.applied_geodesy.jag3d.ui.io.reader.DL100FileReader;
+import org.applied_geodesy.jag3d.ui.io.reader.DimensionType;
+import org.applied_geodesy.jag3d.ui.io.reader.FlatFileReader;
+import org.applied_geodesy.jag3d.ui.io.reader.GKAFileReader;
+import org.applied_geodesy.jag3d.ui.io.reader.GSIFileReader;
+import org.applied_geodesy.jag3d.ui.io.reader.M5FileReader;
+import org.applied_geodesy.jag3d.ui.io.reader.ObservationFlatFileReader;
+import org.applied_geodesy.jag3d.ui.io.reader.PointFlatFileReader;
+import org.applied_geodesy.jag3d.ui.io.reader.VerticalDeflectionFlatFileReader;
+import org.applied_geodesy.jag3d.ui.io.reader.ZFileReader;
 import org.applied_geodesy.jag3d.ui.io.report.FTLReport;
 import org.applied_geodesy.jag3d.ui.io.sql.OADBReader;
 import org.applied_geodesy.jag3d.ui.io.xml.HeXMLFileReader;
@@ -269,6 +269,7 @@ public class UIMenuBuilder {
 	private void createPropertyMenu(Menu parentMenu) {
 		MenuItem formatterItem     = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.formatter.label", "Formatter preferences"), true, MenuItemType.FORMATTER_PREFERENCES, new KeyCodeCombination(KeyCode.ENTER, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
 		MenuItem importItem        = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.import.label", "Import preferences"), true, MenuItemType.IMPORT_PREFERENCES, new KeyCodeCombination(KeyCode.I, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);
+		MenuItem exportItem        = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.export.label", "Export preferences"), true, MenuItemType.EXPORT_PREFERENCES, new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN), this.menuEventHandler, true);	
 		MenuItem leastSquaresItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.leastsquares.label", "Least-squares"), true, MenuItemType.LEAST_SQUARES, new KeyCodeCombination(KeyCode.Q, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 		MenuItem teststatisticItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.teststatistic.label", "Test statistic"), true, MenuItemType.TEST_STATISTIC, new KeyCodeCombination(KeyCode.T, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 		MenuItem projectionItem    = createMenuItem(i18n.getString("UIMenuBuilder.menu.property.projection.label", "Projection \u0026 reductions"), true, MenuItemType.PROJECTION_AND_REDUCTION, new KeyCodeCombination(KeyCode.I, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
@@ -280,8 +281,10 @@ public class UIMenuBuilder {
 				rankDefectItem,
 				projectionItem,
 				new SeparatorMenuItem(),
-				formatterItem,
-				importItem
+				importItem,
+				exportItem,
+				new SeparatorMenuItem(),
+				formatterItem
 		);
 	}
 

@@ -26,8 +26,9 @@ import java.util.List;
 import org.applied_geodesy.adjustment.network.ParameterType;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
-public class UnknownParameters {
+public class UnknownParameters implements Iterable<UnknownParameter> {
 	private int col = 0;
 	private int lastPointColumn = -1, lastParamColumn = -1, leastParamColumn = -1;
 	private List<UnknownParameter> parameters = new ArrayList<UnknownParameter>();
@@ -123,5 +124,10 @@ public class UnknownParameters {
 
 	public int size() {
 		return this.parameters.size();
+	}
+	
+	@Override
+	public Iterator<UnknownParameter> iterator() {
+		return this.parameters.iterator();
 	}
 }

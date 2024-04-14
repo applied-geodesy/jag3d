@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.io;
+package org.applied_geodesy.jag3d.ui.io.reader;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,13 +33,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.applied_geodesy.adjustment.network.PointType;
+import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
-import org.applied_geodesy.jag3d.ui.table.row.PointRow;
-import org.applied_geodesy.jag3d.ui.tree.PointTreeItemValue;
+import org.applied_geodesy.jag3d.ui.table.row.VerticalDeflectionRow;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemType;
 import org.applied_geodesy.jag3d.ui.tree.TreeItemValue;
 import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
+import org.applied_geodesy.jag3d.ui.tree.VerticalDeflectionTreeItemValue;
 import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.util.io.SourceFileReader;
 import org.applied_geodesy.util.io.csv.CSVColumnType;
@@ -48,10 +48,10 @@ import org.applied_geodesy.util.io.csv.ColumnRange;
 
 import javafx.scene.control.TreeItem;
 
-public class CSVPointFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
+public class CSVVerticalDeflectionFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	private final CSVParser parser;
 	
-	private final PointType pointType;
+	private final VerticalDeflectionType verticalDeflectionType;
 	private TreeItemType treeItemType;
 	private Set<String> reservedNames = null;
 	
@@ -59,34 +59,34 @@ public class CSVPointFileReader extends SourceFileReader<TreeItem<TreeItemValue>
 	private NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.ENGLISH);
 
 	private List<ColumnRange> columnRanges = new ArrayList<ColumnRange>(0);
-	private List<PointRow> points = null;
+	private List<VerticalDeflectionRow> verticalDeflections = null;
 
 	private List<String> parsedLine = null;
 	
-	public CSVPointFileReader(PointType pointType, CSVParser parser) {
-		this.pointType = pointType;
+	public CSVVerticalDeflectionFileReader(VerticalDeflectionType verticalDeflectionType, CSVParser parser) {
+		this.verticalDeflectionType = verticalDeflectionType;
 		this.parser = parser;
-		this.treeItemType = TreeItemType.getTreeItemTypeByPointType(pointType, 3); // dim = 3 for check
+		this.treeItemType = TreeItemType.getTreeItemTypeByVerticalDeflectionType(verticalDeflectionType); 
 		if (this.treeItemType == null)
-			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, observation type could not be transformed to tree item type. " + pointType);
+			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, observation type could not be transformed to tree item type. " + verticalDeflectionType);
 		this.reset();
 	}
 
-	public CSVPointFileReader(String fileName, PointType pointType, CSVParser parser) {
-		this(new File(fileName).toPath(), pointType, parser);
+	public CSVVerticalDeflectionFileReader(String fileName, VerticalDeflectionType verticalDeflectionType, CSVParser parser) {
+		this(new File(fileName).toPath(), verticalDeflectionType, parser);
 	}
 
-	public CSVPointFileReader(File sf, PointType pointType, CSVParser parser) {
-		this(sf.toPath(), pointType, parser);
+	public CSVVerticalDeflectionFileReader(File sf, VerticalDeflectionType verticalDeflectionType, CSVParser parser) {
+		this(sf.toPath(), verticalDeflectionType, parser);
 	}
 
-	public CSVPointFileReader(Path path, PointType pointType, CSVParser parser) {
+	public CSVVerticalDeflectionFileReader(Path path, VerticalDeflectionType verticalDeflectionType, CSVParser parser) {
 		super(path);
-		this.pointType = pointType;
+		this.verticalDeflectionType = verticalDeflectionType;
 		this.parser = parser;
-		this.treeItemType = TreeItemType.getTreeItemTypeByPointType(pointType, 3); // dim = 3 for check
+		this.treeItemType = TreeItemType.getTreeItemTypeByVerticalDeflectionType(verticalDeflectionType); 
 		if (this.treeItemType == null)
-			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, observation type could not be transformed to tree item type. " + pointType);
+			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, observation type could not be transformed to tree item type. " + verticalDeflectionType);
 		this.reset();
 	}
 
@@ -102,39 +102,29 @@ public class CSVPointFileReader extends SourceFileReader<TreeItem<TreeItemValue>
 	public TreeItem<TreeItemValue> readAndImport() throws IOException, SQLException {
 		this.reset();
 		this.ignoreLinesWhichStartWith("#");
-		this.reservedNames = SQLManager.getInstance().getFullPointNameSet();
+		this.reservedNames = SQLManager.getInstance().getFullVerticalDeflectionNameSet();
 		TreeItem<TreeItemValue> newTreeItem = null;
 		
 		boolean hasXComponent = false;
 		boolean hasYComponent = false;
-		boolean hasZComponent = false;
+
 		for (ColumnRange range : this.columnRanges) {
 			if (range.getType() == CSVColumnType.X)
 				hasXComponent = true;
 			else if (range.getType() == CSVColumnType.Y)
 				hasYComponent = true;
-			else if (range.getType() == CSVColumnType.Z)
-				hasZComponent = true;
 		}
 
-		int dimension = -1;
-		if (hasXComponent && hasYComponent && hasZComponent)
-			dimension = 3;
-		else if (hasXComponent && hasYComponent)
-			dimension = 2;
-		else if (hasZComponent)
-			dimension = 1;
-
-		if (dimension >= 1 && dimension <= 3) {
+		if (hasXComponent && hasYComponent) {
 			super.read();
 
-			if (!this.points.isEmpty()) {
-				this.treeItemType = TreeItemType.getTreeItemTypeByPointType(pointType, dimension);
+			if (!this.verticalDeflections.isEmpty()) {
+				this.treeItemType = TreeItemType.getTreeItemTypeByVerticalDeflectionType(this.verticalDeflectionType);
 				String itemName = this.createItemName(null, null);
 				TreeItemType parentType = TreeItemType.getDirectoryByLeafType(this.treeItemType);
 				newTreeItem = UITreeBuilder.getInstance().addItem(parentType, -1, itemName, true, false);
 				try {
-					SQLManager.getInstance().saveGroup((PointTreeItemValue)newTreeItem.getValue());
+					SQLManager.getInstance().saveGroup((VerticalDeflectionTreeItemValue)newTreeItem.getValue());
 				} catch (SQLException e) {
 					UITreeBuilder.getInstance().removeItem(newTreeItem);
 					e.printStackTrace();
@@ -142,8 +132,8 @@ public class CSVPointFileReader extends SourceFileReader<TreeItem<TreeItemValue>
 				}
 
 				try {
-					int groupId = ((PointTreeItemValue)newTreeItem.getValue()).getGroupId();
-					for (PointRow row : this.points) {
+					int groupId = ((VerticalDeflectionTreeItemValue)newTreeItem.getValue()).getGroupId();
+					for (VerticalDeflectionRow row : this.verticalDeflections) {
 						row.setGroupId(groupId);
 						SQLManager.getInstance().saveItem(row);
 					}
@@ -160,15 +150,15 @@ public class CSVPointFileReader extends SourceFileReader<TreeItem<TreeItemValue>
 
 	@Override
 	public void reset() {
-		if (this.points == null) 
-			this.points = new ArrayList<PointRow>();
+		if (this.verticalDeflections == null) 
+			this.verticalDeflections = new ArrayList<VerticalDeflectionRow>();
 		if (this.reservedNames == null)
 			this.reservedNames = new HashSet<String>();
 		if (this.parsedLine == null)
 			this.parsedLine = new ArrayList<String>(20);
 
 		this.parsedLine.clear();
-		this.points.clear();
+		this.verticalDeflections.clear();
 		this.reservedNames.clear();
 	}
 
@@ -181,7 +171,7 @@ public class CSVPointFileReader extends SourceFileReader<TreeItem<TreeItemValue>
 			}
 
 			if (!this.parser.isPending()) {
-				this.parsePoint(this.parsedLine);
+				this.parseVerticalDeflection(this.parsedLine);
 				this.parsedLine.clear();
 			}
 		} 
@@ -190,8 +180,8 @@ public class CSVPointFileReader extends SourceFileReader<TreeItem<TreeItemValue>
 		}
 	}
 
-	private void parsePoint(List<String> parsedLine) {
-		PointRow row = new PointRow();
+	private void parseVerticalDeflection(List<String> parsedLine) {
+		VerticalDeflectionRow row = new VerticalDeflectionRow();
 		
 		for (ColumnRange range : this.columnRanges) {
 			try {
@@ -209,9 +199,6 @@ public class CSVPointFileReader extends SourceFileReader<TreeItem<TreeItemValue>
 					else
 						continue;
 					break;
-				case POINT_CODE:
-					row.setCode(parsedLine.get(pos).trim());
-					break;
 					
 				case X:
 					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
@@ -220,10 +207,6 @@ public class CSVPointFileReader extends SourceFileReader<TreeItem<TreeItemValue>
 				case Y:
 					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
 					row.setYApriori(options.convertLengthToModel(value));
-					break;
-				case Z:
-					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
-					row.setZApriori(options.convertLengthToModel(value));
 					break;
 					
 				case UNCERTAINTY_X:
@@ -234,10 +217,7 @@ public class CSVPointFileReader extends SourceFileReader<TreeItem<TreeItemValue>
 					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
 					row.setSigmaYapriori(options.convertLengthToModel(value));
 					break;
-				case UNCERTAINTY_Z:
-					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
-					row.setSigmaZapriori(options.convertLengthToModel(value));
-					break;
+
 				default:
 					System.err.println(this.getClass().getSimpleName() + " Error, unsupported column type! " + type);
 					break;
@@ -249,8 +229,8 @@ public class CSVPointFileReader extends SourceFileReader<TreeItem<TreeItemValue>
 			}
 		}
 
-		if (row.getName() != null && !row.getName().isEmpty() && !this.reservedNames.contains(row.getName()) && (row.getZApriori() != null || row.getXApriori() != null && row.getYApriori() != null)) {
-			this.points.add(row);
+		if (row.getName() != null && !row.getName().isEmpty() && !this.reservedNames.contains(row.getName()) && (row.getXApriori() != null && row.getYApriori() != null)) {
+			this.verticalDeflections.add(row);
 			this.reservedNames.add(row.getName());
 		}
 	}

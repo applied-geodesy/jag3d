@@ -319,16 +319,17 @@ public class FeatureAdjustmentDialog {
 
 			// unused cases
 			case PRINCIPAL_COMPONENT_ANALYSIS:
-			case EXPORT_COVARIANCE_MATRIX:
-			case EXPORT_COVARIANCE_INFORMATION:
+			case EXPORT_ADJUSTMENT_RESULTS:
+			case LEVENBERG_MARQUARDT_STEP:
 				break;
 				
-			// adjustment failed (exception) 
+			// adjustment failed without exception
 			case NOT_INITIALISED:
 			case NO_CONVERGENCE:
 			case OUT_OF_MEMORY:
 			case ROBUST_ESTIMATION_FAILED:
 			case SINGULAR_MATRIX:
+			case EXPORT_ADJUSTMENT_RESULTS_FAILED:
 				break;
 
 			}

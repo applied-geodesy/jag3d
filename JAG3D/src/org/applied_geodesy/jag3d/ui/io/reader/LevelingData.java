@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.io;
+package org.applied_geodesy.jag3d.ui.io.reader;
 
 class LevelingData {
 	private Double r1 = null, r2 = null, dr1 = null, dr2 = null;
