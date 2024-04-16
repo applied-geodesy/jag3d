@@ -64,6 +64,7 @@ public class FeatureAdjustmentDialog {
 		private final String iterationTextTemplate;
 		private final String convergenceTextTemplate;
 		private final String unscentedTransformationTextTemplate;
+		private final String dampingValueTextTemplate;
 		private FeatureAdjustment adjustment;
 		private double processState = 0.0;
 		private double finalStepProcesses = 0.0;
@@ -72,8 +73,9 @@ public class FeatureAdjustmentDialog {
 			this.adjustment = adjustment;
 
 			this.unscentedTransformationTextTemplate = i18n.getString("FeatureAdjustmentDialog.unscentedtransformation.label",   "%d. unscented transformation step of %d \u2026");
-			this.iterationTextTemplate   = i18n.getString("FeatureAdjustmentDialog.iteration.label",   "%d. iteration step of maximal %d \u2026");
-			this.convergenceTextTemplate = i18n.getString("FeatureAdjustmentDialog.convergence.label", "Convergence max|dx| = %.2e");
+			this.iterationTextTemplate    = i18n.getString("FeatureAdjustmentDialog.iteration.label",   "%d. iteration step of maximal %d \u2026");
+			this.convergenceTextTemplate  = i18n.getString("FeatureAdjustmentDialog.convergence.label", "Convergence max|dx| = %.2e");
+			this.dampingValueTextTemplate = i18n.getString("FeatureAdjustmentDialog.damping.label",     "Damping value \u03BB = %.2e");
 		}
 		
 		@Override
@@ -104,20 +106,6 @@ public class FeatureAdjustmentDialog {
 				if (feature.isEstimateInitialGuess())
 					feature.deriveInitialGuess();
 				
-//				// transfer inital guess to parameters to be estimated
-//				feature.applyInitialGuess();
-//				
-//				// reset center of mass
-//				if (feature.getCenterOfMass() != null) {
-//					feature.getCenterOfMass().setX0(0);
-//					feature.getCenterOfMass().setY0(0);
-//					feature.getCenterOfMass().setZ0(0);
-//				}
-//				
-//				// set center of mass
-//				if (feature.isEstimateCenterOfMass()) 
-//					feature.setCenterOfMass(Feature.deriveCenterOfMass(feature.getFeaturePoints()));
-
 				this.adjustment.init();
 				EstimationStateType returnType = this.adjustment.estimateModel();
 
@@ -316,11 +304,18 @@ public class FeatureAdjustmentDialog {
 				this.updateIterationProgressMessage(i18n.getString("FeatureAdjustmentDialog.pleasewait.label", "Please wait\u2026"));
 				this.updateConvergenceProgressMessage(null);
 				break;
+				
+			case LEVENBERG_MARQUARDT_STEP:
+				if (oldValue != null && newValue != null && oldValue instanceof Double && newValue instanceof Double) {
+					double lambdaNew = (Double)newValue;
+					double lambdaOld = (Double)oldValue;
+					this.updateConvergenceProgressMessage(String.format(Locale.ENGLISH, this.dampingValueTextTemplate, lambdaNew, lambdaOld));
+				}
+				break;
 
 			// unused cases
 			case PRINCIPAL_COMPONENT_ANALYSIS:
 			case EXPORT_ADJUSTMENT_RESULTS:
-			case LEVENBERG_MARQUARDT_STEP:
 				break;
 				
 			// adjustment failed without exception
