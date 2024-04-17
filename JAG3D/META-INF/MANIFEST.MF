@@ -11,6 +11,7 @@ Class-Path:
   lib/jdistlib-0.4.5-bin.jar 
   lib/tablelayout.jar 
   lib/jlatexmath-1.0.7.jar 
+  lib/mfl-core-0.5.15.jar
   
   javafx/lib/javafx.base.jar 
   javafx/lib/javafx.controls.jar 
