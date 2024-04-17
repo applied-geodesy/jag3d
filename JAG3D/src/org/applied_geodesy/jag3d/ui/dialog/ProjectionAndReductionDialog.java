@@ -263,16 +263,16 @@ public class ProjectionAndReductionDialog {
 		String tooltip = i18n.getString("ProjectionAndReductionDialog.properties.tooltip", "Projection properties");
 		
 		String labelProjLocalCartesian   = i18n.getString("ProjectionAndReductionDialog.properties.local_cartesian.label", "Local Cartesian system");
-		String tooltipProjLocalCartesian = i18n.getString("ProjectionAndReductionDialog.properties.local_cartesian.tooltip", "If checked, a local Cartesian system will be used");
+		String tooltipProjLocalCartesian = i18n.getString("ProjectionAndReductionDialog.properties.local_cartesian.tooltip", "If selected, a local Cartesian system will be used");
 
 		String labelProjGK   = i18n.getString("ProjectionAndReductionDialog.properties.gauss_krueger.label", "Gau\u00DF-Kr\u00FCger");
-		String tooltipProjGK = i18n.getString("ProjectionAndReductionDialog.properties.gauss_krueger.tooltip", "If checked, Gau\u00DF-Kr\u00FCger projection will be applied");
+		String tooltipProjGK = i18n.getString("ProjectionAndReductionDialog.properties.gauss_krueger.tooltip", "If selected, Gau\u00DF-Kr\u00FCger projection will be applied");
 
 		String labelProjUTM   = i18n.getString("ProjectionAndReductionDialog.properties.utm.label", "Universale Transverse Mercator");
-		String tooltipProjUTM = i18n.getString("ProjectionAndReductionDialog.properties.utm.tooltip", "If checked, UTM projection will be applied");
+		String tooltipProjUTM = i18n.getString("ProjectionAndReductionDialog.properties.utm.tooltip", "If selected, UTM projection will be applied");
 		
 		String labelProjEllipsoidal   = i18n.getString("ProjectionAndReductionDialog.properties.ellipsoidal.label", "Local ellipsoidal system");
-		String tooltipProjEllipsoidal = i18n.getString("ProjectionAndReductionDialog.properties.ellipsoidal.tooltip", "If checked, a local ellipsoidal Earth model will be used");
+		String tooltipProjEllipsoidal = i18n.getString("ProjectionAndReductionDialog.properties.ellipsoidal.tooltip", "If selected, a local ellipsoidal Earth model will be used");
 
 		ProjectionSelectionChangeListener projectionSelectionChangeListener = new ProjectionSelectionChangeListener();
 		this.localCartesianProjectionRadioButton = this.createRadioButton(labelProjLocalCartesian, tooltipProjLocalCartesian);

@@ -30,6 +30,7 @@ import org.applied_geodesy.jag3d.ui.dialog.AnalysisChartsDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ApproximationValuesDialog;
 import org.applied_geodesy.jag3d.ui.dialog.AverageDialog;
 import org.applied_geodesy.jag3d.ui.dialog.CongruentPointDialog;
+import org.applied_geodesy.jag3d.ui.dialog.ExportOptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.FormatterOptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.ImportOptionDialog;
 import org.applied_geodesy.jag3d.ui.dialog.LeastSquaresSettingDialog;
@@ -100,6 +101,10 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 			
 		case IMPORT_PREFERENCES:
 			ImportOptionDialog.showAndWait();
+			break;
+			
+		case EXPORT_PREFERENCES:
+			ExportOptionDialog.showAndWait();
 			break;
 			
 		case LEAST_SQUARES:

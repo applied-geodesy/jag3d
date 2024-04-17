@@ -23,17 +23,12 @@ package org.applied_geodesy.adjustment.network;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -81,6 +76,8 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameters;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.adjustment.statistic.UnadjustedTestStatitic;
+import org.applied_geodesy.jag3d.ui.io.writer.AdjustmentResultWritable;
+import org.applied_geodesy.jag3d.ui.io.writer.NetworkAdjustmentResultWriter;
 import org.applied_geodesy.transformation.datum.SphericalDeflectionModel;
 
 import javafx.util.Pair;
@@ -157,7 +154,9 @@ public class NetworkAdjustment implements Runnable {
 	private UnknownParameters unknownParameters = new UnknownParameters();
 	private ObservationGroup projectObservations = new ObservationGroup(-1, Double.NaN, Double.NaN, Double.NaN, Epoch.REFERENCE);
 	private RankDefect rankDefect = new RankDefect();
-	private String coVarExportPathAndFileName = null;
+	
+	//private String coVarExportPathAndFileName = null;
+	private AdjustmentResultWritable adjustmentResultWriter = null;
 	
 	/**
 	 * Berechnung von Vor-Faktoren zur Bestimmung von EP und EF*SP. Fuer terrestrische Beobachtung wird der Vor-Faktor 
@@ -1993,7 +1992,25 @@ public class NetworkAdjustment implements Runnable {
 			n.zero();
 		
 		return new NormalEquationSystem(N, n);
-	}	
+	}
+	
+	/**
+	 * Liefert die Kofaktormatrix der Ausgleichung.
+	 * !!! Auchtung, die Matrix wird in verschiedenen Schritten überschrieben und enthaelt am Ende der
+	 * Berechnung nicht mehr Qxx. Die Methode sollte nur von AdjustmentResultWritable Klassen aufgerufen 
+	 * werrden !!!
+	 * @return dispersion
+	 */
+	public Matrix getCofactorMatrix() {
+		return this.Qxx;
+	}
+	
+	/**
+	 * Zeigt an, ob Iteration an der naechst moeglichen Stelle abzubrechen ist
+	 */
+	public boolean isInterrupted() {
+		return this.interrupt;
+	}
 	
 	/**
 	 * Bricht Iteration an der naechst moeglichen Stelle ab
@@ -2261,9 +2278,16 @@ public class NetworkAdjustment implements Runnable {
 				}
 				while (!estimateCompleteModel);
 			}
+			
 			// Exportiere CoVar (sofern aktiviert), da diese danach ueberschrieben wird
-			if (!this.exportCovarianceMatrix()) 
-				System.err.println("Fehler, Varianz-Kovarianz-Matrix konnte nicht exportiert werden.");
+			try {
+				this.exportAdjustmentResults();
+			} catch (NullPointerException | IllegalArgumentException | IOException e) {
+				e.printStackTrace();
+				this.currentEstimationStatus = EstimationStateType.EXPORT_ADJUSTMENT_RESULTS_FAILED;
+				this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
+				return this.currentEstimationStatus;
+			}
 			
 			// Fuehre Hauptkomponentenanalyse durch; Qxx wird hierbei zu NULL gesetzt
 			if (this.numberOfPrincipalComponents > 0)
@@ -4889,6 +4913,22 @@ public class NetworkAdjustment implements Runnable {
 	}
 	
 	/**
+	 * Liefert die Anzahl der Beobachtungen im Netz
+	 * @return numberOfObservations
+	 */
+	public int getNumberOfObservations() {
+		return this.numberOfObservations;
+	}
+	
+	/**
+	 * Liefert die Anzahl an Parametern im Modell
+	 * @return numberOfUnknownParameters
+	 */
+	public int getNumberOfUnknownParameters() {
+		return this.numberOfUnknownParameters;
+	}
+		
+	/**
 	 * Liefert die Quadratsumme der Verbesserungen &Omega; = vTPv
 	 * @return &Omega;
 	 */
@@ -5387,158 +5427,24 @@ public class NetworkAdjustment implements Runnable {
 		this.sphericalDeflectionModel = sphericalDeflectionModel;
 	}
 	
-	public boolean hasCovarianceExportPathAndBaseName() {
-		return this.coVarExportPathAndFileName != null && !this.coVarExportPathAndFileName.isEmpty();
+	public boolean hasAdjustmentResultWriter() {
+		return this.adjustmentResultWriter != null;
 	}
-	
-	public void setCovarianceExportPathAndBaseName(String path) {
-		this.coVarExportPathAndFileName = path;
-	}
-	
-	private boolean exportCovarianceMatrix() {
-		if (this.coVarExportPathAndFileName == null)
-			return true;
-		
-		
-		File coVarMatrixFile = new File(this.coVarExportPathAndFileName + ".cxx");
-		File coVarInfoFile   = new File(this.coVarExportPathAndFileName + ".info");
-		
-		return this.exportCovarianceMatrixInfoToFile(coVarInfoFile) && this.exportCovarianceMatrixToFile(coVarMatrixFile);
-	}
-	
-	/**
-	 * Schreibt punktbezogene Informationen zur CoVar raus
-	 * @param f
-	 * @return isWritten
-	 */
-	private boolean exportCovarianceMatrixInfoToFile(File f) {
-		// noch keine Loesung vorhanden
-		if (f == null || this.Qxx == null)
-    		return false;
-		
-		this.currentEstimationStatus = EstimationStateType.EXPORT_COVARIANCE_INFORMATION;
-		this.change.firePropertyChange(this.currentEstimationStatus.name(), null, f.toString());
-		
-		boolean isComplete = false;
-    	PrintWriter pw = null;
-    	try {
-    		pw = new PrintWriter(new BufferedWriter(new FileWriter( f )));
-    						//Pkt,Type(XYZ),Coord,Row in NGL, Num Obs
-    		String format = "%25s\t%5s\t%35.15f\t%10d\t%10d%n";
-    		for ( Point point : this.allPoints.values() ) {
-    			if (this.interrupt)
-    				break;
-    			
-    			int colInJacobi = point.getColInJacobiMatrix();
-    			int rowInJacobi = point.getRowInJacobiMatrix();
-    			int dim = point.getDimension();
-    			int numberOfObservations = point.numberOfObservations() + (rowInJacobi >= 0 ? dim : 0);
-    			if (colInJacobi < 0)
-    				continue;
-    			
-    			if (dim != 1) {
-    				pw.printf(Locale.ENGLISH, format, point.getName(), 'X', point.getX(), colInJacobi++, numberOfObservations);
-    				pw.printf(Locale.ENGLISH, format, point.getName(), 'Y', point.getY(), colInJacobi++, numberOfObservations);
-    			}
-    			if (dim != 2) {
-    				pw.printf(Locale.ENGLISH, format, point.getName(), 'Z', point.getZ(), colInJacobi++, numberOfObservations);
-    			}
-				
-    		}
-    		isComplete = true;
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
-    	finally {
-    		if (pw != null) {
-    			pw.close();
-    		}
-    	}
- 
-    	return isComplete;
-	}
-	
-	/**
-	 * Schreibt die CoVar raus
-	 * @param f
-	 * @return isWritten
-	 */
-	private boolean exportCovarianceMatrixToFile(File f) {
-		// noch keine Loesung vorhanden
-		if (f == null || this.Qxx == null || this.Qxx.numRows() < this.numberOfUnknownParameters)
-			return false;
-		
-		this.currentEstimationStatus = EstimationStateType.EXPORT_COVARIANCE_MATRIX;
-		this.change.firePropertyChange(this.currentEstimationStatus.name(), null, f.toString());
-		
-    	boolean isComplete = false;
-    	boolean isDEBUG = false;
-    	PrintWriter pw = null;
-    	double sigma2apost = this.getVarianceFactorAposteriori();
 
-    	try {
-    		pw = new PrintWriter(new BufferedWriter(new FileWriter( f )));
-
-    		for (int i=0; i<this.numberOfUnknownParameters; i++) {
-    			if (this.interrupt)
-    				break;
-    			
-    			for (int j=0; j<this.numberOfUnknownParameters; j++) {
-    				if (this.interrupt)
-        				break;
-    				
-    				pw.printf(Locale.ENGLISH, "%+35.25f  ", sigma2apost*this.Qxx.get(i,j));
-    			}
-    			pw.println();
-    		}
-    		
-    		if (isDEBUG) {
-    			pw.println("--------DEBUG - SIGMA2APOST ------------");
-    			pw.printf(Locale.ENGLISH, "%+35.15f%n", sigma2apost);
-    			
-    			pw.println("--------DEBUG - COFACTOR ------------");
-    			int size = this.Qxx.numRows();
-    			for (int i=0; i<size; i++) {
-        			for (int j=0; j<size; j++) {
-        				pw.printf(Locale.ENGLISH, "%+35.15f  ", this.Qxx.get(i,j));
-        			}
-        			pw.println();
-        		}
-    			
-    			Matrix A = this.getJacobiMatrix();
-    			pw.println("--------DEBUG - JACOBI ------------");
-    			for (int i=0; i<A.numRows(); i++) {
-        			for (int j=0; j<A.numColumns(); j++) {
-        				pw.printf(Locale.ENGLISH, "%+35.15f  ", A.get(i,j));
-        			}
-        			pw.println();
-        		}
-    			
-    			pw.println("--------DEBUG - WEIGHTS ------------");
-    			Vector W = this.getWeightedMatrix();
-    			for (int i=0; i<W.size(); i++) {
-    				pw.printf(Locale.ENGLISH, "%+35.15f%n", W.get(i));
-    			}
-    			
-    			pw.println("--------DEBUG - RESIDUALS ------------");
-    			Vector e = this.getObservationalErrors();
-    			for (int i=0; i<W.size(); i++) {
-    				pw.printf(Locale.ENGLISH, "%+35.15f%n", e.get(i));
-    			}    			
-    		}
-    		
-    		isComplete = true;
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
-    	finally {
-    		if (pw != null) {
-    			pw.close();
-    		}
-    	}
-    	return isComplete;
-    }
+	public void setAdjustmentResultWritable(AdjustmentResultWritable adjustmentResultWriter) {
+		this.adjustmentResultWriter = adjustmentResultWriter;
+	}
 	
+	private void exportAdjustmentResults() throws NullPointerException, IOException {
+		if (this.adjustmentResultWriter == null)
+			return;
+		
+		this.currentEstimationStatus = EstimationStateType.EXPORT_ADJUSTMENT_RESULTS;
+		if (this.adjustmentResultWriter instanceof NetworkAdjustmentResultWriter)
+			this.change.firePropertyChange(this.currentEstimationStatus.name(), null, ((NetworkAdjustmentResultWriter)this.adjustmentResultWriter).getExportPathAndFileBaseName());
+		this.adjustmentResultWriter.export(this);
+	}
+
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
 		this.change.addPropertyChangeListener(listener);
 	}

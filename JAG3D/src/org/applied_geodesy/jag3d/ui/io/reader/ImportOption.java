@@ -19,11 +19,32 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.io;
+package org.applied_geodesy.jag3d.ui.io.reader;
 
-public enum DimensionType {
-	HEIGHT,
-	PLAN,
-	PLAN_AND_HEIGHT,
-	SPATIAL
+import java.util.HashMap;
+import java.util.Map;
+
+import org.applied_geodesy.adjustment.network.ObservationType;
+
+public class ImportOption {
+
+	private static ImportOption importOption = new ImportOption();
+
+	private Map<ObservationType, Boolean> separateStation = new HashMap<ObservationType, Boolean>();
+	
+	private ImportOption() {}
+	
+	public static ImportOption getInstance() {
+		return importOption;
+	}
+	
+	public boolean isGroupSeparation(ObservationType observationType) {
+		if (this.separateStation.containsKey(observationType))
+			return this.separateStation.get(observationType);
+		return DefaultImportOption.isGroupSeparation(observationType);
+	}
+	
+	public void setGroupSeparation(ObservationType observationType, boolean separate) {
+		this.separateStation.put(observationType, separate);
+	}
 }

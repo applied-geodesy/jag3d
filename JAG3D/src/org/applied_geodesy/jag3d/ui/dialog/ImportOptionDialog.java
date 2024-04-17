@@ -26,7 +26,7 @@ import java.util.Optional;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
-import org.applied_geodesy.jag3d.ui.io.ImportOption;
+import org.applied_geodesy.jag3d.ui.io.reader.ImportOption;
 import org.applied_geodesy.jag3d.ui.table.rowhighlight.TableRowHighlight;
 import org.applied_geodesy.ui.dialog.OptionDialog;
 
@@ -97,12 +97,11 @@ public class ImportOptionDialog {
 		this.dialog.setResultConverter(new Callback<ButtonType, ImportOption>() {
 			@Override
 			public ImportOption call(ButtonType buttonType) {
+				ImportOption importOption = ImportOption.getInstance();
 				if (buttonType == ButtonType.OK) {
-					ImportOption importOption = ImportOption.getInstance();
 					save();
-					return importOption;
 				}
-				return null;
+				return importOption;
 			}
 		});
 	}
@@ -187,9 +186,10 @@ public class ImportOptionDialog {
 	}
 
 	private void load() {
-		ImportOption importOption = ImportOption.getInstance();
 		try {
+			ImportOption importOption = ImportOption.getInstance();
 			SQLManager.getInstance().loadImportPreferences();
+			
 			this.levelingCheckBox.setSelected(importOption.isGroupSeparation(ObservationType.LEVELING));
 			
 			this.directionCheckBox.setSelected(importOption.isGroupSeparation(ObservationType.DIRECTION));

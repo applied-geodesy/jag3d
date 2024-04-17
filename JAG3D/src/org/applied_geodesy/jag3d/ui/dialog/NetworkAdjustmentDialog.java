@@ -90,7 +90,7 @@ public class NetworkAdjustmentDialog {
 
 				this.adjustment = this.dataBaseManager.getNetworkAdjustment();
 				this.updateProgressOnIterate = !(this.adjustment.getEstimationType() == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION || this.adjustment.getEstimationType() == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION);
-				this.finalStepProcesses = 0.25 / (this.adjustment.hasCovarianceExportPathAndBaseName() ? 6.0 : 4.0);
+				this.finalStepProcesses = 0.25 / (this.adjustment.hasAdjustmentResultWriter() ? 5.0 : 4.0);
 				this.adjustment.addPropertyChangeListener(this);
 
 				this.processState = 0.0;
@@ -283,11 +283,10 @@ public class NetworkAdjustmentDialog {
 				this.updateMessage(i18n.getString("NetworkAdjustmentDialog.principal_component_analysis.label", "Principal component analysis\u2026"));
 				break;
 
-			case EXPORT_COVARIANCE_MATRIX:
-			case EXPORT_COVARIANCE_INFORMATION:
+			case EXPORT_ADJUSTMENT_RESULTS:
 				this.processState += this.finalStepProcesses;
 				this.updateProgress(this.processState, 1.0);
-				this.updateMessage(i18n.getString("NetworkAdjustmentDialog.export_covariance_matrix.label", "Export covariance matrix\u2026"));
+				this.updateMessage(i18n.getString("NetworkAdjustmentDialog.export_adjustment_results.label", "Export adjustment results\u2026"));
 				if (newValue != null) {
 					this.updateIterationProgressMessage(newValue.toString());
 					this.updateConvergenceProgressMessage(null);
@@ -304,13 +303,18 @@ public class NetworkAdjustmentDialog {
 				this.updateIterationProgressMessage(i18n.getString("NetworkAdjustmentDialog.pleasewait.label", "Please wait\u2026"));
 				this.updateConvergenceProgressMessage(null);
 				break;
+				
+			// unused cases
+			case LEVENBERG_MARQUARDT_STEP:
+				break;
 
-				// Adjustment faild (wo exception) 
+			// adjustment failed without exception
 			case NOT_INITIALISED:
 			case NO_CONVERGENCE:
 			case OUT_OF_MEMORY:
 			case ROBUST_ESTIMATION_FAILED:
 			case SINGULAR_MATRIX:
+			case EXPORT_ADJUSTMENT_RESULTS_FAILED:
 				break;
 
 			}
@@ -458,6 +462,13 @@ public class NetworkAdjustmentDialog {
 								i18n.getString("NetworkAdjustmentDialog.message.error.failed.singularmatrix.title",  "Network adjustment failed"),
 								i18n.getString("NetworkAdjustmentDialog.message.error.failed.singularmatrix.header", "Singular normal euqation matrix"),
 								i18n.getString("NetworkAdjustmentDialog.message.error.failed.singularmatrix.message", "Error, could not invert normal equation matrix.")
+								);
+						break;
+					case EXPORT_ADJUSTMENT_RESULTS_FAILED:
+						OptionDialog.showErrorDialog(
+								i18n.getString("NetworkAdjustmentDialog.message.error.failed.export.title",  "I/O error"),
+								i18n.getString("NetworkAdjustmentDialog.message.error.failed.export.header", "Export adjustment result"),
+								i18n.getString("NetworkAdjustmentDialog.message.error.failed.export.message", "Error, could not export network adjustment result.")
 								);
 						break;
 

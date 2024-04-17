@@ -768,6 +768,7 @@ public class FeatureAdjustment {
 			// Check if the current solution converts - if not, reject
 			boolean lmaConverge = prevOmega >= curOmega;
 			this.varianceComponentOfUnitWeight.setOmega(curOmega);
+			double lastAdaptedDampingValue = this.adaptedDampingValue;
 			
 			if (lmaConverge) {
 				this.adaptedDampingValue *= 0.2;
@@ -778,14 +779,18 @@ public class FeatureAdjustment {
 				// To avoid infinity
 				if (this.adaptedDampingValue > 1.0/SQRT_EPS) {
 					this.adaptedDampingValue = 1.0/SQRT_EPS;
-					
 					// force an update within the next iteration 
 					this.varianceComponentOfUnitWeight.setOmega(0.0);
 				}
-
+			}
+			
+			this.currentEstimationStatus = EstimationStateType.LEVENBERG_MARQUARDT_STEP;
+			this.change.firePropertyChange(this.currentEstimationStatus.name(), lastAdaptedDampingValue, this.adaptedDampingValue);
+			
+			if (!lmaConverge) {
 				// Current solution is NOT an improvement --> cancel procedure
 				this.maxAbsDx = this.lastValidmaxAbsDx;
-				dxk.zero();
+				dx.zero();
 				return;
 			}
 		}

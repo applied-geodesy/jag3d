@@ -24,7 +24,6 @@ package org.applied_geodesy.jag3d.sql;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
@@ -67,8 +66,10 @@ import org.applied_geodesy.jag3d.ui.dialog.ScopeType;
 import org.applied_geodesy.jag3d.ui.dialog.chart.SignType;
 import org.applied_geodesy.jag3d.ui.graphic.UIGraphicPaneBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.sql.SQLGraphicManager;
-import org.applied_geodesy.jag3d.ui.io.ImportOption;
+import org.applied_geodesy.jag3d.ui.io.reader.ImportOption;
 import org.applied_geodesy.jag3d.ui.io.report.FTLReport;
+import org.applied_geodesy.jag3d.ui.io.writer.ExportOption;
+import org.applied_geodesy.jag3d.ui.io.writer.ExportOption.ExportResultType;
 import org.applied_geodesy.jag3d.ui.metadata.MetaData;
 import org.applied_geodesy.jag3d.ui.metadata.UIMetaDataPaneBuilder;
 import org.applied_geodesy.jag3d.ui.propertiespane.UICongruenceAnalysisPropertiesPane;
@@ -4367,7 +4368,7 @@ public class SQLManager {
 				+ "\"type\", \"number_of_iterations\", \"robust_estimation_limit\", "
 				+ "\"number_of_principal_components\", \"apply_variance_of_unit_weight\", "
 				+ "\"estimate_direction_set_orientation_approximation\", "
-				+ "\"congruence_analysis\", \"export_covariance_matrix\", "
+				+ "\"congruence_analysis\", "
 				+ "\"scaling\", \"damping\", \"weight_zero\" "
 				+ "FROM \"AdjustmentDefinition\" "
 				+ "JOIN \"UnscentedTransformation\" "
@@ -4387,7 +4388,6 @@ public class SQLManager {
 				settings.setApplyVarianceOfUnitWeight(rs.getBoolean("apply_variance_of_unit_weight"));
 				settings.setOrientation(rs.getBoolean("estimate_direction_set_orientation_approximation"));
 				settings.setCongruenceAnalysis(rs.getBoolean("congruence_analysis"));
-				settings.setExportCovarianceMatrix(rs.getBoolean("export_covariance_matrix"));
 				
 				settings.setScalingParameterAlphaUT(rs.getDouble("scaling"));
 				settings.setDampingParameterBetaUT(rs.getDouble("damping"));
@@ -4401,8 +4401,8 @@ public class SQLManager {
 			return;
 	
 		String sql = "MERGE INTO \"AdjustmentDefinition\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN)) "
-				+ ") AS \"vals\" (\"id\", \"type\", \"number_of_iterations\", \"robust_estimation_limit\", \"number_of_principal_components\", \"apply_variance_of_unit_weight\", \"estimate_direction_set_orientation_approximation\", \"congruence_analysis\", \"export_covariance_matrix\") ON \"AdjustmentDefinition\".\"id\" = \"vals\".\"id\" AND \"AdjustmentDefinition\".\"id\" = 1 "
+				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN)) "
+				+ ") AS \"vals\" (\"id\", \"type\", \"number_of_iterations\", \"robust_estimation_limit\", \"number_of_principal_components\", \"apply_variance_of_unit_weight\", \"estimate_direction_set_orientation_approximation\", \"congruence_analysis\") ON \"AdjustmentDefinition\".\"id\" = \"vals\".\"id\" AND \"AdjustmentDefinition\".\"id\" = 1 "
 				+ "WHEN MATCHED THEN UPDATE SET "
 				+ "\"AdjustmentDefinition\".\"type\"                            = \"vals\".\"type\", "
 				+ "\"AdjustmentDefinition\".\"number_of_iterations\"            = \"vals\".\"number_of_iterations\", "
@@ -4410,8 +4410,7 @@ public class SQLManager {
 				+ "\"AdjustmentDefinition\".\"number_of_principal_components\"  = \"vals\".\"number_of_principal_components\", "
 				+ "\"AdjustmentDefinition\".\"apply_variance_of_unit_weight\"   = \"vals\".\"apply_variance_of_unit_weight\", "
 				+ "\"AdjustmentDefinition\".\"estimate_direction_set_orientation_approximation\" = \"vals\".\"estimate_direction_set_orientation_approximation\", "
-				+ "\"AdjustmentDefinition\".\"congruence_analysis\"      = \"vals\".\"congruence_analysis\", "
-				+ "\"AdjustmentDefinition\".\"export_covariance_matrix\" = \"vals\".\"export_covariance_matrix\" "
+				+ "\"AdjustmentDefinition\".\"congruence_analysis\"             = \"vals\".\"congruence_analysis\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"type\", "
@@ -4420,8 +4419,7 @@ public class SQLManager {
 				+ "\"vals\".\"number_of_principal_components\", "
 				+ "\"vals\".\"apply_variance_of_unit_weight\", "
 				+ "\"vals\".\"estimate_direction_set_orientation_approximation\", "
-				+ "\"vals\".\"congruence_analysis\", "
-				+ "\"vals\".\"export_covariance_matrix\" ";
+				+ "\"vals\".\"congruence_analysis\" ";
 		
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -4435,7 +4433,6 @@ public class SQLManager {
 		stmt.setBoolean(idx++,  settings.isApplyVarianceOfUnitWeight());
 		stmt.setBoolean(idx++,  settings.isOrientation());
 		stmt.setBoolean(idx++,  settings.isCongruenceAnalysis());
-		stmt.setBoolean(idx++,  settings.isExportCovarianceMatrix());
 
 		stmt.execute();
 		
@@ -5320,6 +5317,48 @@ public class SQLManager {
 		stmt.execute();
 	}
 	
+	public void loadExportPreferences() throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
+		ExportOption exportOption = ExportOption.getInstance(); 
+		String sql = "SELECT "
+				+ "\"type\" "
+				+ "FROM \"ExportResult\" "
+				+ "WHERE \"id\" = 1 LIMIT 1";
+
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+
+		ResultSet rs = stmt.executeQuery();
+		if (rs.next()) {
+			int type = rs.getInt("type");
+			ExportResultType exportResultType = ExportResultType.getEnumByValue(type);
+			exportOption.setExportResultType(exportResultType);
+		}
+	}
+	
+	public void saveExportPreferences() throws SQLException {
+		if (!this.hasDatabase() || !this.dataBase.isOpen())
+			return;
+		
+		String sql = "MERGE INTO \"ExportResult\" USING (VALUES "
+				+ "(CAST(? AS INT), CAST(? AS INT)) "
+				+ ") AS \"vals\" (\"id\", \"type\") ON \"ExportResult\".\"id\" = \"vals\".\"id\" "
+				+ "WHEN MATCHED THEN UPDATE SET "
+				+ "\"ExportResult\".\"type\" = \"vals\".\"type\" "
+				+ "WHEN NOT MATCHED THEN INSERT VALUES "
+				+ "\"vals\".\"id\", "
+				+ "\"vals\".\"type\"";
+		
+		ExportOption exportOption = ExportOption.getInstance(); 
+
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		int idx = 1;
+		stmt.setInt(idx++, 1);
+		stmt.setInt(idx++, exportOption.getExportResultType().getId());
+		stmt.execute();
+	}
+	
 	public void loadImportPreferences() throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
@@ -5560,20 +5599,6 @@ public class SQLManager {
 		}
 
 		return normalizedResiduals;
-	}
-
-	public void executeStatement(String sql) throws SQLException {
-		if (!this.hasDatabase() || !this.dataBase.isOpen() || sql == null || sql.isBlank() || sql.isEmpty())
-			return;
-		
-		try {
-			this.dataBase.setAutoCommit(false);
-			Statement stmt = this.dataBase.getStatement();
-			stmt.execute(sql);
-		}
-		finally {
-			this.dataBase.setAutoCommit(true);
-		}
 	}
 	
 	public DataBase getDataBase() {

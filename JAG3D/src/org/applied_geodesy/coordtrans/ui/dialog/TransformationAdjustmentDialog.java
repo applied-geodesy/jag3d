@@ -63,6 +63,7 @@ public class TransformationAdjustmentDialog {
 	private class AdjustmentTask extends Task<EstimationStateType> implements PropertyChangeListener {
 		private final String iterationTextTemplate;
 		private final String convergenceTextTemplate;
+		private final String dampingValueTextTemplate;
 		private TransformationAdjustment adjustment;
 		private double processState = 0.0;
 		private double finalStepProcesses = 0.0;
@@ -70,8 +71,9 @@ public class TransformationAdjustmentDialog {
 		private AdjustmentTask(TransformationAdjustment adjustment) {
 			this.adjustment = adjustment;
 
-			this.iterationTextTemplate   = i18n.getString("TransformationAdjustmentDialog.iteration.label",   "%d. iteration step of maximal %d \u2026");
-			this.convergenceTextTemplate = i18n.getString("TransformationAdjustmentDialog.convergence.label", "Convergence max|dx| = %.2e");
+			this.iterationTextTemplate    = i18n.getString("TransformationAdjustmentDialog.iteration.label",   "%d. iteration step of maximal %d \u2026");
+			this.convergenceTextTemplate  = i18n.getString("TransformationAdjustmentDialog.convergence.label", "Convergence max|dx| = %.2e");
+			this.dampingValueTextTemplate = i18n.getString("TransformationAdjustmentDialog.damping.label",     "Damping value \u03BB = %.2e");
 		}
 		
 		@Override
@@ -298,20 +300,28 @@ public class TransformationAdjustmentDialog {
 				this.updateIterationProgressMessage(i18n.getString("TransformationAdjustmentDialog.pleasewait.label", "Please wait\u2026"));
 				this.updateConvergenceProgressMessage(null);
 				break;
+				
+			case LEVENBERG_MARQUARDT_STEP:
+				if (oldValue != null && newValue != null && oldValue instanceof Double && newValue instanceof Double) {
+					double lambdaNew = (Double)newValue;
+					double lambdaOld = (Double)oldValue;
+					this.updateConvergenceProgressMessage(String.format(Locale.ENGLISH, this.dampingValueTextTemplate, lambdaNew, lambdaOld));
+				}
+				break;
 
 			// unused cases
 			case UNSCENTED_TRANSFORMATION_STEP:
 			case PRINCIPAL_COMPONENT_ANALYSIS:
-			case EXPORT_COVARIANCE_MATRIX:
-			case EXPORT_COVARIANCE_INFORMATION:
+			case EXPORT_ADJUSTMENT_RESULTS:
 				break;
 				
-			// adjustment failed (exception) 
+			// adjustment failed without exception
 			case NOT_INITIALISED:
 			case NO_CONVERGENCE:
 			case OUT_OF_MEMORY:
 			case ROBUST_ESTIMATION_FAILED:
 			case SINGULAR_MATRIX:
+			case EXPORT_ADJUSTMENT_RESULTS_FAILED:
 				break;
 
 			}

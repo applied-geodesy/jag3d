@@ -43,6 +43,9 @@ module org.applied_geodesy.jag3d {
 	requires org.hsqldb;
 	requires org.hsqldb.sqltool;
 	
+	requires us.hebi.matlab.mat.mfl.core;
+	requires jdk.unsupported;
+	
 	requires java.desktop;
 	requires java.logging;
 	requires java.sql;

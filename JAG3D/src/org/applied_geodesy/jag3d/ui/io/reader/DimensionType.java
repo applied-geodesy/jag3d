@@ -19,37 +19,11 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.io;
+package org.applied_geodesy.jag3d.ui.io.reader;
 
-import java.io.File;
-import java.nio.file.Path;
-
-import org.applied_geodesy.jag3d.ui.i18n.I18N;
-import org.applied_geodesy.util.io.SourceFileReader;
-
-import javafx.stage.FileChooser.ExtensionFilter;
-
-public abstract class FlatFileReader<T> extends SourceFileReader<T> {
-	
-	protected FlatFileReader() {
-		super();
-	}
-	
-	protected FlatFileReader(String fileName) {
-		this(new File(fileName).toPath());
-	}
-
-	protected FlatFileReader(File sf) {
-		this(sf.toPath());
-	}
-	
-	protected FlatFileReader(Path path) {
-		super(path);
-	}
-	
-	public static ExtensionFilter[] getExtensionFilters() {
-		return new ExtensionFilter[] {
-				new ExtensionFilter(I18N.getInstance().getString("FlatFileReader.extension", "All files"), "*.*")
-		};
-	}
+public enum DimensionType {
+	HEIGHT,
+	PLAN,
+	PLAN_AND_HEIGHT,
+	SPATIAL
 }

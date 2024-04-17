@@ -156,6 +156,7 @@ public class AboutDialog {
 				+ "\u2219 JLAPACK: BSD License\r\n"
 				+ "\u2219 HSQLDB: BSD License\r\n"
 				+ "\u2219 JDistlib: GNU General Public License v2.0\r\n"
+				+ "\u2219 MAT File Library: Apache License v2.0\r\n"
 				+ "\u2219 OpenCSV: Apache License v2.0\r\n"
 				+ "\u2219 Launch4J: BSD/MIT License");
 		

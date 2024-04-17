@@ -96,6 +96,10 @@ import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameters;
 import org.applied_geodesy.adjustment.statistic.TestStatisticType;
+import org.applied_geodesy.jag3d.ui.io.writer.AdjustmentResultWritable;
+import org.applied_geodesy.jag3d.ui.io.writer.DefaultNetworkAdjustmentResultWriter;
+import org.applied_geodesy.jag3d.ui.io.writer.MatlabNetworkAdjustmentResultWriter;
+import org.applied_geodesy.jag3d.ui.io.writer.ExportOption.ExportResultType;
 import org.applied_geodesy.transformation.datum.Ellipsoid;
 import org.applied_geodesy.transformation.datum.SphericalDeflectionModel;
 import org.applied_geodesy.util.sql.DataBase;
@@ -166,6 +170,7 @@ public class SQLAdjustmentManager {
 
 		this.networkAdjustment = new NetworkAdjustment();
 		this.addAdjustmentDefinition(this.networkAdjustment);
+		this.addExportOptions(this.networkAdjustment);
 
 		// Definition of test statistic
 		TestStatisticDefinition testStatisticDefinition = this.getTestStatisticDefinition();
@@ -372,13 +377,46 @@ public class SQLAdjustmentManager {
 		}
 		return null;
 	}
+	
+	private void addExportOptions(NetworkAdjustment adjustment) throws SQLException {
+		if (!(this.dataBase instanceof HSQLDB))
+			return;
+		
+		// export path of covariance matrix
+		String dataBaseFilePath = ((HSQLDB)this.dataBase).getDataBaseFileName();
+		
+		String sql = "SELECT "
+				+ "\"type\" "
+				+ "FROM \"ExportResult\" "
+				+ "WHERE \"id\" = 1 LIMIT 1";
+		
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+
+		ResultSet rs = stmt.executeQuery();
+		if (rs.next()) {
+			ExportResultType type = ExportResultType.getEnumByValue(rs.getInt("type"));
+			
+			AdjustmentResultWritable adjustmentResultWritable = null;
+			switch (type) {
+			case ASCII:
+				adjustmentResultWritable = new DefaultNetworkAdjustmentResultWriter(dataBaseFilePath);
+				break;
+			case MATLAB:
+				adjustmentResultWritable = new MatlabNetworkAdjustmentResultWriter(dataBaseFilePath);
+				break;
+			case NONE:
+				break;			
+			}
+			adjustment.setAdjustmentResultWritable(adjustmentResultWritable);
+		}
+	}
 
 	private void addAdjustmentDefinition(NetworkAdjustment adjustment) throws SQLException {
 		String sql = "SELECT "
 				+ "\"type\", \"number_of_iterations\", \"robust_estimation_limit\", "
 				+ "\"number_of_principal_components\", \"apply_variance_of_unit_weight\", "
 				+ "\"estimate_direction_set_orientation_approximation\", "
-				+ "\"congruence_analysis\", \"export_covariance_matrix\", "
+				+ "\"congruence_analysis\", "
 				+ "\"scaling\", \"damping\", \"weight_zero\" "
 				+ "FROM \"AdjustmentDefinition\" "
 				+ "JOIN \"UnscentedTransformation\" "
@@ -395,7 +433,6 @@ public class SQLAdjustmentManager {
 			int numberOfPrincipalComponents       = rs.getInt("number_of_principal_components");
 			this.estimateOrientationApproximation = rs.getBoolean("estimate_direction_set_orientation_approximation");
 			this.congruenceAnalysis               = rs.getBoolean("congruence_analysis");
-			boolean exportCovarianceMatrix        = rs.getBoolean("export_covariance_matrix");
 			boolean applyVarianceOfUnitWeight     = rs.getBoolean("apply_variance_of_unit_weight");
 			
 			double scalingUT = rs.getDouble("scaling");
@@ -417,10 +454,6 @@ public class SQLAdjustmentManager {
 			adjustment.setUnscentedTransformationScaling(scalingUT);
 			adjustment.setUnscentedTransformationDamping(dampingUT);
 			adjustment.setUnscentedTransformationWeightZero(weight0UT);
-			
-			// export path of covariance matrix
-			if (exportCovarianceMatrix && this.dataBase instanceof HSQLDB) 
-				this.networkAdjustment.setCovarianceExportPathAndBaseName(((HSQLDB)this.dataBase).getDataBaseFileName());
 		}
 	}
 

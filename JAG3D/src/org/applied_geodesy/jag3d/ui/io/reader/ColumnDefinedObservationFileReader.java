@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.io;
+package org.applied_geodesy.jag3d.ui.io.reader;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +27,6 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -43,19 +42,18 @@ import org.applied_geodesy.jag3d.ui.tree.UITreeBuilder;
 import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.util.io.SourceFileReader;
 import org.applied_geodesy.util.io.csv.CSVColumnType;
-import org.applied_geodesy.util.io.csv.CSVParser;
 import org.applied_geodesy.util.io.csv.ColumnRange;
 
 import javafx.scene.control.TreeItem;
 
-public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
-	private final CSVParser parser;
-	
+public class ColumnDefinedObservationFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
+	private final String tabulator;
 	private final ObservationType observationType;
 	private final TreeItemType treeItemType;
 	private FormatterOptions options = FormatterOptions.getInstance();
 	private NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.ENGLISH);
 
+	private int lastCharacterPosition = 0;
 	private List<ColumnRange> columnRanges = new ArrayList<ColumnRange>(0);
 	private List<TerrestrialObservationRow> observations = null;
 	private List<GNSSObservationRow> gnss = null;
@@ -64,30 +62,28 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 	private boolean isGroupWithEqualStation = true;
 	private String startPointName = null;
 
-	private List<String> parsedLine = null;
-	
-	public CSVObservationFileReader(ObservationType observationType, CSVParser parser) {
+	public ColumnDefinedObservationFileReader(ObservationType observationType, String tabulator) {
 		this.observationType = observationType;
 		this.separateGroup   = ImportOption.getInstance().isGroupSeparation(observationType);
-		this.parser = parser;
+		this.tabulator = tabulator;
 		this.treeItemType = TreeItemType.getTreeItemTypeByObservationType(observationType);
 		if (this.treeItemType == null)
 			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, observation type could not be transformed to tree item type. " + observationType);
 		this.reset();
 	}
 
-	public CSVObservationFileReader(String fileName, ObservationType observationType, CSVParser parser) {
-		this(new File(fileName).toPath(), observationType, parser);
+	public ColumnDefinedObservationFileReader(String fileName, ObservationType observationType, String tabulator) {
+		this(new File(fileName).toPath(), observationType, tabulator);
 	}
 
-	public CSVObservationFileReader(File sf, ObservationType observationType, CSVParser parser) {
-		this(sf.toPath(), observationType, parser);
+	public ColumnDefinedObservationFileReader(File sf, ObservationType observationType, String tabulator) {
+		this(sf.toPath(), observationType, tabulator);
 	}
 
-	public CSVObservationFileReader(Path path, ObservationType observationType, CSVParser parser) {
+	public ColumnDefinedObservationFileReader(Path path, ObservationType observationType, String tabulator) {
 		super(path);
 		this.observationType = observationType;
-		this.parser = parser;
+		this.tabulator = tabulator;
 		this.treeItemType = TreeItemType.getTreeItemTypeByObservationType(observationType);
 		if (this.treeItemType == null)
 			throw new IllegalArgumentException(this.getClass().getSimpleName() + " : Error, observation type could not be transformed to tree item type. " + observationType);
@@ -102,63 +98,45 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 		this.numberFormat = NumberFormat.getNumberInstance(locale);
 	}
 
-	
-	
-	@Override
-	public TreeItem<TreeItemValue> readAndImport() throws IOException, SQLException {
-		this.reset();
-		this.ignoreLinesWhichStartWith("#");
-		TreeItem<TreeItemValue> newTreeItem = null;
-
-		super.read();
-
-		if (!this.observations.isEmpty() || !this.gnss.isEmpty()) {
-			if (!this.observations.isEmpty())
-				newTreeItem = this.saveGroup(this.treeItemType, this.observations);
-			else if (!this.gnss.isEmpty())
-				newTreeItem = this.saveGroup(this.treeItemType, this.gnss);
-		}
-		
-		this.reset();
-		return newTreeItem;
-	}
-
 	@Override
 	public void reset() {
 		if (this.observations == null)
 			this.observations = new ArrayList<TerrestrialObservationRow>();
 		if (this.gnss == null)
 			this.gnss = new ArrayList<GNSSObservationRow>();
-		if (this.parsedLine == null)
-			this.parsedLine = new ArrayList<String>(20);
 
 		this.observations.clear();
 		this.gnss.clear();
-		this.parsedLine.clear();
-		
+
 		this.isGroupWithEqualStation = true;
 		this.startPointName = null;
+
+		this.lastCharacterPosition = 0;
 	}
 
-	@Override
-	public void parse(String line) throws SQLException {
-		try {
-			String parsedLine[] = this.parser.parseLineMulti(line);
-			if (parsedLine != null && parsedLine.length > 0) {
-				this.parsedLine.addAll(Arrays.asList(parsedLine));
-			}
 
-			if (!this.parser.isPending()) {
-				if (this.isGNSS())
-					this.parseGNSSObservation(this.parsedLine);
-				else
-					this.parseTerrestrialObservation(this.parsedLine);
-				this.parsedLine.clear();
-			}
-		} 
-		catch (IOException e) {
-			e.printStackTrace();
+	@Override
+	public TreeItem<TreeItemValue> readAndImport() throws IOException, SQLException {
+		this.reset();
+		this.ignoreLinesWhichStartWith("#");
+
+		for (ColumnRange range : this.columnRanges) {
+			this.lastCharacterPosition = Math.max(this.lastCharacterPosition, range.getColumnEnd() + 1);
 		}
+		
+		TreeItem<TreeItemValue> newTreeItem = null;
+
+		super.read();
+		
+		if (!this.observations.isEmpty() || !this.gnss.isEmpty()) {
+			if (!this.observations.isEmpty())
+				newTreeItem = this.saveGroup(this.treeItemType, this.observations);
+			else if (!this.gnss.isEmpty())
+				newTreeItem = this.saveGroup(this.treeItemType, this.gnss);
+		}
+
+		this.reset();
+		return newTreeItem;
 	}
 	
 	private TreeItem<TreeItemValue> saveGroup(TreeItemType itemType, List<? extends ObservationRow> observations) throws SQLException {
@@ -209,20 +187,40 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 		return newTreeItem;
 	}
 
-	private void parseTerrestrialObservation(List<String> parsedLine) {
+	@Override
+	public void parse(String line) throws SQLException {
+		line = String.format("%" + this.lastCharacterPosition + "s", line.replaceAll("\t", this.tabulator));
+
+		if (this.isGNSS())
+			this.parseGNSSObservation(line);
+		else
+			this.parseTerrestrialObservation(line);
+	}
+	
+	private boolean isGNSS() {
+		switch(this.observationType) {
+		case GNSS1D:
+		case GNSS2D:
+		case GNSS3D:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	private void parseTerrestrialObservation(String line) {
 		TerrestrialObservationRow row = new TerrestrialObservationRow();
 		
 		for (ColumnRange range : this.columnRanges) {
 			try {
 				CSVColumnType type = range.getType();
-				int pos = range.getColumnStart() - 1;
-				if (pos < 0 || pos >= parsedLine.size())
-					continue;
+				int startPos = range.getColumnStart();
+				int endPos   = range.getColumnEnd() + 1;
 
 				double value;
 				switch(type) {
 				case STATION:
-					String startPointName = parsedLine.get(pos).trim();
+					String startPointName = line.substring(startPos, endPos).trim();
 					if (startPointName != null && !startPointName.isEmpty()) {
 						if (this.startPointName == null)
 							this.startPointName = startPointName;
@@ -239,22 +237,22 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 						continue;
 					break;
 				case TARGET:
-					String endPointName = parsedLine.get(pos).trim();
+					String endPointName = line.substring(startPos, endPos).trim();
 					if (endPointName != null && !endPointName.isEmpty())
 						row.setEndPointName(endPointName);
 					else
 						continue;
 					break;
 				case INSTRUMENT_HEIGHT:
-					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
 					row.setInstrumentHeight(options.convertLengthToModel(value));
 					break;
 				case TARGET_HEIGHT:
-					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
 					row.setReflectorHeight(options.convertLengthToModel(value));
 					break;
 				case VALUE:
-					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
 					switch(this.observationType) {
 					case DIRECTION:
 					case ZENITH_ANGLE:
@@ -268,7 +266,7 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 					}
 					break;
 				case UNCERTAINTY:
-					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
 					switch(this.observationType) {
 					case DIRECTION:
 					case ZENITH_ANGLE:
@@ -280,7 +278,7 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 					}
 					break;
 				case DISTANCE_FOR_UNCERTAINTY:
-					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
 					row.setDistanceApriori(options.convertLengthToModel(value));
 					break;
 				default:
@@ -293,25 +291,24 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 				return;
 			}
 		}
-		
+
 		if (row.getStartPointName() != null && row.getEndPointName() != null && row.getValueApriori() != null && !row.getStartPointName().isEmpty() && !row.getEndPointName().isEmpty() && !row.getStartPointName().equals(row.getEndPointName()))
 			this.observations.add(row);
 	}
 	
-	private void parseGNSSObservation(List<String> parsedLine) {
+	private void parseGNSSObservation(String line) {
 		GNSSObservationRow row = new GNSSObservationRow();
 		
 		for (ColumnRange range : this.columnRanges) {
 			try {
 				CSVColumnType type = range.getType();
-				int pos = range.getColumnStart() - 1;
-				if (pos < 0 || pos >= parsedLine.size())
-					continue;
+				int startPos = range.getColumnStart();
+				int endPos   = range.getColumnEnd() + 1;
 
 				double value;
 				switch(type) {
 				case STATION:
-					String startPointName = parsedLine.get(pos).trim();
+					String startPointName = line.substring(startPos, endPos).trim();
 					if (startPointName != null && !startPointName.isEmpty()) {
 						if (this.startPointName == null)
 							this.startPointName = startPointName;
@@ -328,7 +325,7 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 						continue;
 					break;
 				case TARGET:
-					String endPointName = parsedLine.get(pos).trim();
+					String endPointName = line.substring(startPos, endPos).trim();
 					if (endPointName != null && !endPointName.isEmpty())
 						row.setEndPointName(endPointName);
 					else
@@ -336,28 +333,28 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 					break;
 					
 				case X:
-					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
 					row.setXApriori(options.convertLengthToModel(value));
 					break;
 				case Y:
-					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
 					row.setYApriori(options.convertLengthToModel(value));
 					break;
 				case Z:
-					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
 					row.setZApriori(options.convertLengthToModel(value));
 					break;
 					
 				case UNCERTAINTY_X:
-					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
 					row.setSigmaXapriori(options.convertLengthToModel(value));
 					break;
 				case UNCERTAINTY_Y:
-					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
 					row.setSigmaYapriori(options.convertLengthToModel(value));
 					break;
 				case UNCERTAINTY_Z:
-					value = this.numberFormat.parse(parsedLine.get(pos).trim()).doubleValue();
+					value = this.numberFormat.parse(line.substring(startPos, endPos).trim()).doubleValue();
 					row.setSigmaZapriori(options.convertLengthToModel(value));
 					break;
 				default:
@@ -376,16 +373,7 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 						(this.observationType == ObservationType.GNSS2D && row.getXApriori() != null && row.getYApriori() != null) ||
 						(this.observationType == ObservationType.GNSS1D && row.getZApriori() != null)))
 			this.gnss.add(row);
+
 	}
-	
-	private boolean isGNSS() {
-		switch(this.observationType) {
-		case GNSS1D:
-		case GNSS2D:
-		case GNSS3D:
-			return true;
-		default:
-			return false;
-		}
-	}
+
 }

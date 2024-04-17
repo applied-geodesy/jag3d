@@ -19,32 +19,47 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.version.coordtrans;
+package org.applied_geodesy.jag3d.ui.io.writer;
 
-import java.util.Map;
+public class ExportOption {
+	public enum ExportResultType {
+		NONE(0),
+		ASCII(1),
+		MATLAB(2)
+		;
 
-import org.applied_geodesy.version.VersionType;
+		private int id;
+		private ExportResultType(int id) {
+			this.id = id;
+		}
 
-public class Version {
-	private final static Map<VersionType, Integer> versions = Map.of(
-			VersionType.ADJUSTMENT_CORE,   20230726,
-			VersionType.USER_INTERFACE,    20240414
-	);
-	
-	private Version() {}
-	
-	public static Integer get(VersionType type) {
-		return versions.get(type);
+		public final int getId() {
+			return id;
+		}
+
+		public static ExportResultType getEnumByValue(int value) {
+			for(ExportResultType element : ExportResultType.values()) {
+				if(element.id == value)
+					return element;
+			}
+			return NONE;
+		} 
 	}
 	
-	public static Integer get() {
-		int max = 0;
-		for (Integer version : versions.values())
-			max = Math.max(max, version);
-		return max;
+	private static ExportOption exportOption = new ExportOption();
+	private ExportResultType exportResultType = ExportResultType.NONE;
+	
+	private ExportOption() {}
+	
+	public static ExportOption getInstance() {
+		return exportOption;
 	}
 	
-	public static boolean isReleaseCandidate() {
-		return Boolean.FALSE;
+	public void setExportResultType(ExportResultType exportResultType) {
+		this.exportResultType = exportResultType == null ? ExportResultType.NONE : exportResultType;
+	}
+	
+	public ExportResultType getExportResultType() {
+		return this.exportResultType;
 	}
 }
