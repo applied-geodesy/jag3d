@@ -290,7 +290,7 @@ public class FTLReport {
 		String sql = "SELECT "
 				+ "\"type\", \"number_of_iterations\", "
 				+ "\"robust_estimation_limit\", \"estimate_direction_set_orientation_approximation\", "
-				+ "\"congruence_analysis\", \"export_covariance_matrix\" "
+				+ "\"congruence_analysis\" "
 				+ "FROM \"AdjustmentDefinition\" WHERE \"id\" = 1 LIMIT 1";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
