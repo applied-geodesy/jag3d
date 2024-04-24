@@ -78,6 +78,10 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeView;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -200,6 +204,66 @@ public class JUniForm extends Application {
 			border.setBottom(hbox);
 
 			Scene scene = new Scene(border);
+			
+			scene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+				final KeyCombination adjustKeyComb  = new KeyCodeCombination(KeyCode.F5);
+				
+				final KeyCombination tabOneKeyComb   = new KeyCodeCombination(KeyCode.DIGIT1, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabTwoKeyComb   = new KeyCodeCombination(KeyCode.DIGIT2, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabThreeKeyComb = new KeyCodeCombination(KeyCode.DIGIT3, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabFourKeyComb  = new KeyCodeCombination(KeyCode.DIGIT4, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabFiveKeyComb  = new KeyCodeCombination(KeyCode.DIGIT5, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabSixKeyComb   = new KeyCodeCombination(KeyCode.DIGIT6, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabSevenKeyComb = new KeyCodeCombination(KeyCode.DIGIT7, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabEightKeyComb = new KeyCodeCombination(KeyCode.DIGIT8, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabNineKeyComb  = new KeyCodeCombination(KeyCode.DIGIT9, KeyCombination.SHORTCUT_DOWN);
+				
+				final KeyCombination tabOneKeyCombNum   = new KeyCodeCombination(KeyCode.NUMPAD1, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabTwoKeyCombNum   = new KeyCodeCombination(KeyCode.NUMPAD2, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabThreeKeyCombNum = new KeyCodeCombination(KeyCode.NUMPAD3, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabFourKeyCombNum  = new KeyCodeCombination(KeyCode.NUMPAD4, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabFiveKeyCombNum  = new KeyCodeCombination(KeyCode.NUMPAD5, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabSixKeyCombNum   = new KeyCodeCombination(KeyCode.NUMPAD6, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabSevenKeyCombNum = new KeyCodeCombination(KeyCode.NUMPAD7, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabEightKeyCombNum = new KeyCodeCombination(KeyCode.NUMPAD8, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabNineKeyCombNum  = new KeyCodeCombination(KeyCode.NUMPAD9, KeyCombination.SHORTCUT_DOWN);
+				
+			    public void handle(KeyEvent keyEvent) {
+			        if (adjustKeyComb.match(keyEvent) && !adjustmentButton.isDisabled()) {
+			        	adjustmentButton.fire();
+			        	keyEvent.consume();
+			        }
+			        else if (tabPane.getSelectionModel().getSelectedItem() != null) {
+			        	if (tabOneKeyComb.match(keyEvent) || tabTwoKeyComb.match(keyEvent) || tabThreeKeyComb.match(keyEvent) || tabFourKeyComb.match(keyEvent) || 
+			        			tabFiveKeyComb.match(keyEvent) || tabSixKeyComb.match(keyEvent) || tabSevenKeyComb.match(keyEvent) || tabEightKeyComb.match(keyEvent) || tabNineKeyComb.match(keyEvent) ||
+			        			tabOneKeyCombNum.match(keyEvent) || tabTwoKeyCombNum.match(keyEvent) || tabThreeKeyCombNum.match(keyEvent) || tabFourKeyCombNum.match(keyEvent) || 
+			        			tabFiveKeyCombNum.match(keyEvent) || tabSixKeyCombNum.match(keyEvent) || tabSevenKeyCombNum.match(keyEvent) || tabEightKeyCombNum.match(keyEvent) || tabNineKeyCombNum.match(keyEvent)) {
+			        		
+			        		int size = tabPane.getTabs().size();
+			        		
+			        		if ((tabOneKeyComb.match(keyEvent) || tabOneKeyCombNum.match(keyEvent)) && size > 0)
+			        			tabPane.getSelectionModel().clearAndSelect(0);
+			        		else if ((tabTwoKeyComb.match(keyEvent) || tabTwoKeyCombNum.match(keyEvent))&& size > 1)
+			        			tabPane.getSelectionModel().clearAndSelect(1);
+			        		else if ((tabThreeKeyComb.match(keyEvent) || tabThreeKeyCombNum.match(keyEvent)) && size > 2)
+			        			tabPane.getSelectionModel().clearAndSelect(2);
+			        		else if ((tabFourKeyComb.match(keyEvent) || tabFourKeyCombNum.match(keyEvent)) && size > 3)
+			        			tabPane.getSelectionModel().clearAndSelect(3);
+			        		else if ((tabFiveKeyComb.match(keyEvent) || tabFiveKeyCombNum.match(keyEvent)) && size > 4)
+			        			tabPane.getSelectionModel().clearAndSelect(4);
+			        		else if ((tabSixKeyComb.match(keyEvent) || tabSixKeyCombNum.match(keyEvent)) && size > 5)
+			        			tabPane.getSelectionModel().clearAndSelect(5);
+			        		else if ((tabSevenKeyComb.match(keyEvent) || tabSevenKeyCombNum.match(keyEvent)) && size > 6)
+			        			tabPane.getSelectionModel().clearAndSelect(6);
+			        		else if ((tabEightKeyComb.match(keyEvent) || tabEightKeyCombNum.match(keyEvent)) && size > 7)
+			        			tabPane.getSelectionModel().clearAndSelect(7);
+			        		else if ((tabNineKeyComb.match(keyEvent) || tabNineKeyCombNum.match(keyEvent)) && size > 8)
+			        			tabPane.getSelectionModel().clearAndSelect(8);
+			        		keyEvent.consume();
+			        	}
+			        }
+			    }
+			});
 			
 			// add external style definitions
 			try {

@@ -416,8 +416,7 @@ public class UITabPaneBuilder {
 								}
 							}
 						}
-						this.tabPane.getTabs().clear();
-						this.tabPane.getTabs().addAll(newTabList);
+						this.tabPane.getTabs().setAll(newTabList);
 					}
 					else {
 						boolean validLastSelectedTabType = false;
