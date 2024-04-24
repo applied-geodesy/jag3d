@@ -223,22 +223,73 @@ public class JAG3D extends Application {
 			Scene scene = new Scene(border);
 
 			scene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-				final KeyCombination zoomInKeyComb     = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
-				final KeyCombination zoomOutKeyComb    = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
-				final KeyCombination zoomInKeyCombNum  = new KeyCodeCombination(KeyCode.ADD, KeyCombination.CONTROL_DOWN);
-				final KeyCombination zoomOutKeyCombNum = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
+				final KeyCombination adjustKeyComb  = new KeyCodeCombination(KeyCode.F5);
+				final KeyCombination zoomInKeyComb  = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination zoomOutKeyComb = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN);
+
+				final KeyCombination tabOneKeyComb   = new KeyCodeCombination(KeyCode.DIGIT1, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabTwoKeyComb   = new KeyCodeCombination(KeyCode.DIGIT2, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabThreeKeyComb = new KeyCodeCombination(KeyCode.DIGIT3, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabFourKeyComb  = new KeyCodeCombination(KeyCode.DIGIT4, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabFiveKeyComb  = new KeyCodeCombination(KeyCode.DIGIT5, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabSixKeyComb   = new KeyCodeCombination(KeyCode.DIGIT6, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabSevenKeyComb = new KeyCodeCombination(KeyCode.DIGIT7, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabEightKeyComb = new KeyCodeCombination(KeyCode.DIGIT8, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabNineKeyComb  = new KeyCodeCombination(KeyCode.DIGIT9, KeyCombination.SHORTCUT_DOWN);
+
+				final KeyCombination zoomInKeyCombNum  = new KeyCodeCombination(KeyCode.ADD, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination zoomOutKeyCombNum = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.SHORTCUT_DOWN);
+				
+				final KeyCombination tabOneKeyCombNum   = new KeyCodeCombination(KeyCode.NUMPAD1, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabTwoKeyCombNum   = new KeyCodeCombination(KeyCode.NUMPAD2, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabThreeKeyCombNum = new KeyCodeCombination(KeyCode.NUMPAD3, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabFourKeyCombNum  = new KeyCodeCombination(KeyCode.NUMPAD4, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabFiveKeyCombNum  = new KeyCodeCombination(KeyCode.NUMPAD5, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabSixKeyCombNum   = new KeyCodeCombination(KeyCode.NUMPAD6, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabSevenKeyCombNum = new KeyCodeCombination(KeyCode.NUMPAD7, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabEightKeyCombNum = new KeyCodeCombination(KeyCode.NUMPAD8, KeyCombination.SHORTCUT_DOWN);
+				final KeyCombination tabNineKeyCombNum  = new KeyCodeCombination(KeyCode.NUMPAD9, KeyCombination.SHORTCUT_DOWN);
+				
+				
 			    public void handle(KeyEvent keyEvent) {
-			        if (keyEvent.getCode() == KeyCode.F5 && !adjustmentButton.isDisabled()) {
+			        if (adjustKeyComb.match(keyEvent) && !adjustmentButton.isDisabled()) {
 			        	adjustmentButton.fire();
 			        	keyEvent.consume();
 			        }
-			        else if ((zoomInKeyComb.match(keyEvent) || zoomInKeyCombNum.match(keyEvent)) && tabPane.getSelectionModel().getSelectedItem() != null && tabPane.getSelectionModel().getSelectedItem().getContent() == UIGraphicPaneBuilder.getInstance().getPane()) {
-			        	UIGraphicPaneBuilder.getInstance().getLayerManager().zoomIn();
-			        	keyEvent.consume();
-			        }
-			        else if ((zoomOutKeyComb.match(keyEvent) || zoomOutKeyCombNum.match(keyEvent)) && tabPane.getSelectionModel().getSelectedItem() != null && tabPane.getSelectionModel().getSelectedItem().getContent() == UIGraphicPaneBuilder.getInstance().getPane()) {
-			        	UIGraphicPaneBuilder.getInstance().getLayerManager().zoomOut();
-			        	keyEvent.consume();
+			        else if (tabPane.getSelectionModel().getSelectedItem() != null) {
+			        	if ((zoomInKeyComb.match(keyEvent) || zoomInKeyCombNum.match(keyEvent)) && tabPane.getSelectionModel().getSelectedItem().getContent() == UIGraphicPaneBuilder.getInstance().getPane()) {
+			        		UIGraphicPaneBuilder.getInstance().getLayerManager().zoomIn();
+			        		keyEvent.consume();
+			        	}
+			        	else if ((zoomOutKeyComb.match(keyEvent) || zoomOutKeyCombNum.match(keyEvent)) && tabPane.getSelectionModel().getSelectedItem().getContent() == UIGraphicPaneBuilder.getInstance().getPane()) {
+			        		UIGraphicPaneBuilder.getInstance().getLayerManager().zoomOut();
+			        		keyEvent.consume();
+			        	}
+			        	else if (tabOneKeyComb.match(keyEvent) || tabTwoKeyComb.match(keyEvent) || tabThreeKeyComb.match(keyEvent) || tabFourKeyComb.match(keyEvent) || 
+			        			tabFiveKeyComb.match(keyEvent) || tabSixKeyComb.match(keyEvent) || tabSevenKeyComb.match(keyEvent) || tabEightKeyComb.match(keyEvent) || tabNineKeyComb.match(keyEvent) ||
+			        			tabOneKeyCombNum.match(keyEvent) || tabTwoKeyCombNum.match(keyEvent) || tabThreeKeyCombNum.match(keyEvent) || tabFourKeyCombNum.match(keyEvent) || 
+			        			tabFiveKeyCombNum.match(keyEvent) || tabSixKeyCombNum.match(keyEvent) || tabSevenKeyCombNum.match(keyEvent) || tabEightKeyCombNum.match(keyEvent) || tabNineKeyCombNum.match(keyEvent)) {
+			        		int size = tabPane.getTabs().size();
+			        		if ((tabOneKeyComb.match(keyEvent) || tabOneKeyCombNum.match(keyEvent)) && size > 0)
+			        			tabPane.getSelectionModel().clearAndSelect(0);
+			        		else if ((tabTwoKeyComb.match(keyEvent) || tabTwoKeyCombNum.match(keyEvent))&& size > 1)
+			        			tabPane.getSelectionModel().clearAndSelect(1);
+			        		else if ((tabThreeKeyComb.match(keyEvent) || tabThreeKeyCombNum.match(keyEvent)) && size > 2)
+			        			tabPane.getSelectionModel().clearAndSelect(2);
+			        		else if ((tabFourKeyComb.match(keyEvent) || tabFourKeyCombNum.match(keyEvent)) && size > 3)
+			        			tabPane.getSelectionModel().clearAndSelect(3);
+			        		else if ((tabFiveKeyComb.match(keyEvent) || tabFiveKeyCombNum.match(keyEvent)) && size > 4)
+			        			tabPane.getSelectionModel().clearAndSelect(4);
+			        		else if ((tabSixKeyComb.match(keyEvent) || tabSixKeyCombNum.match(keyEvent)) && size > 5)
+			        			tabPane.getSelectionModel().clearAndSelect(5);
+			        		else if ((tabSevenKeyComb.match(keyEvent) || tabSevenKeyCombNum.match(keyEvent)) && size > 6)
+			        			tabPane.getSelectionModel().clearAndSelect(6);
+			        		else if ((tabEightKeyComb.match(keyEvent) || tabEightKeyCombNum.match(keyEvent)) && size > 7)
+			        			tabPane.getSelectionModel().clearAndSelect(7);
+			        		else if ((tabNineKeyComb.match(keyEvent) || tabNineKeyCombNum.match(keyEvent)) && size > 8)
+			        			tabPane.getSelectionModel().clearAndSelect(8);
+			        		keyEvent.consume();
+			        	}
 			        }
 			    }
 			});
