@@ -369,13 +369,13 @@ public class ProjectionAndReductionDialog {
 		this.minorAxisTextField.setMaxWidth(Double.MAX_VALUE);
 		
 		
-		this.referenceLatitudeTextField = new DoubleTextField(0.0, CellValueType.ANGLE, true, ValueSupport.INCLUDING_INCLUDING_INTERVAL, -0.5 * Math.PI - Constant.EPS, 0.5 * Math.PI + Constant.EPS);
+		this.referenceLatitudeTextField = new DoubleTextField(0.0, CellValueType.ANGLE, true, ValueSupport.INCLUDING_INCLUDING_INTERVAL, -0.5 * Math.PI - Math.sqrt(Constant.EPS), 0.5 * Math.PI + Math.sqrt(Constant.EPS));
 		this.referenceLatitudeTextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.principal_point.latitude.tooltip", "Latitude of principal point")));
 		this.referenceLatitudeTextField.setMinWidth(100);
 		this.referenceLatitudeTextField.setPrefWidth(150);
 		this.referenceLatitudeTextField.setMaxWidth(Double.MAX_VALUE);
 		
-		this.referenceLongitudeTextField = new DoubleTextField(0.0, CellValueType.ANGLE, true, ValueSupport.INCLUDING_INCLUDING_INTERVAL, -Math.PI - Constant.EPS, Math.PI + Constant.EPS);
+		this.referenceLongitudeTextField = new DoubleTextField(0.0, CellValueType.ANGLE, true, ValueSupport.INCLUDING_INCLUDING_INTERVAL, -Math.PI - Math.sqrt(Constant.EPS), Math.PI + Math.sqrt(Constant.EPS));
 		this.referenceLongitudeTextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.principal_point.longitude.tooltip", "Longitude of principal point")));
 		this.referenceLongitudeTextField.setMinWidth(100);
 		this.referenceLongitudeTextField.setPrefWidth(150);

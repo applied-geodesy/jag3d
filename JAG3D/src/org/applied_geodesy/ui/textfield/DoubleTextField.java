@@ -353,7 +353,7 @@ public class DoubleTextField extends TextField implements FormatterChangedListen
 				// check if value is not null and if the complete value is error-free parsed 
 				// https://www.ibm.com/developerworks/library/j-numberformat/index.html
 				// https://stackoverflow.com/questions/14194888/validating-decimal-numbers-in-a-locale-sensitive-way-in-java
-				if (newValue != null && parsePosition.getErrorIndex() < 0 && parsePosition.getIndex() == input.length() && this.check(newValue)) {
+				if (newValue != null && parsePosition.getErrorIndex() < 0 && parsePosition.getIndex() == input.length()) { 
 					switch(this.type) {
 					case ANGLE:
 						newValue = this.options.convertAngleToModel(newValue.doubleValue());
