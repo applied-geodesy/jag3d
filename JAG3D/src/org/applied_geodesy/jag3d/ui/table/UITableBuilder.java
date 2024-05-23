@@ -114,12 +114,11 @@ public abstract class UITableBuilder<T extends Row> {
 		@Override
 		public void changed(ObservableValue<? extends S> observable, S oldValue, S newValue) {
 			if (this.rowData != null) {
-				List<T> selectedItems = table.getSelectionModel().getSelectedItems();
+				// Erzeuge eine tiefe Kopie
+				List<T> selectedItems = new ArrayList<T>(table.getSelectionModel().getSelectedItems()); 
 				if (selectedItems == null || selectedItems.isEmpty() || !selectedItems.contains(this.rowData)) {
 					selectedItems = new ArrayList<T>(1);
 					selectedItems.add(this.rowData);
-					table.getSelectionModel().clearSelection();
-					table.getSelectionModel().select(this.rowData);
 				}
 				
 				for (T item : selectedItems)
@@ -128,7 +127,9 @@ public abstract class UITableBuilder<T extends Row> {
 				if (selectedItems.size() > 1)
 					table.refresh();
 				
-//				setValue(rowData, columnIndex, oldValue, newValue);
+				// Entferne Selektion da Tabelle ggf. direkt sortiert wird 
+				table.getSelectionModel().clearSelection();
+				table.getSelectionModel().select(this.rowData); 
 			}
 		}
 	}
