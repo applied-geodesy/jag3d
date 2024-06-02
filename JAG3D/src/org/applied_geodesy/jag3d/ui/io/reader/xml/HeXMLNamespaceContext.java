@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.io.xml;
+package org.applied_geodesy.jag3d.ui.io.reader.xml;
 
 import org.applied_geodesy.util.io.xml.XMLNamespaceContext;
 import org.w3c.dom.Attr;
