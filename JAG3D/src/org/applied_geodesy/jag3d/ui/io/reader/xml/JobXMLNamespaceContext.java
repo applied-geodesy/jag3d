@@ -19,8 +19,24 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.io.xml;
+package org.applied_geodesy.jag3d.ui.io.reader.xml;
 
-enum LengthUnit {
-	METER, MILLIMETER, CENTIMETER, KILOMETER, FOOT, US_SURVEY_FOOT, INCH, MILE;
+import org.applied_geodesy.util.io.xml.XMLNamespaceContext;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+
+/**
+ * @author Michael Loesler
+ */
+class JobXMLNamespaceContext extends XMLNamespaceContext {
+	JobXMLNamespaceContext(Document document) {
+		super(document, "", "http://www.trimble.com/schema/JobXML/5_0");
+	}
+	
+	@Override
+	public String getPrefix(Attr attribute) {
+		if (attribute.getNodeValue().toLowerCase().contains("trimble.com/schema/jobxml"))
+			return "";
+		return this.getDefaultPrefix();
+	}
 }

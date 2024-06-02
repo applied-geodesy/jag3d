@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.io.xml;
+package org.applied_geodesy.jag3d.ui.io.reader.xml;
 
 import java.io.File;
 import java.io.IOException;

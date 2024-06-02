@@ -19,8 +19,8 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.jag3d.ui.io.xml;
+package org.applied_geodesy.jag3d.ui.io.reader.xml;
 
-enum AngularUnit {
-	RADIAN, GRADIAN, DEGREE, DDMMSSss;
+enum LengthUnit {
+	METER, MILLIMETER, CENTIMETER, KILOMETER, FOOT, US_SURVEY_FOOT, INCH, MILE;
 }
