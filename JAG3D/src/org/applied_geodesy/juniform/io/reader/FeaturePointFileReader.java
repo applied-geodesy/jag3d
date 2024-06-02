@@ -19,17 +19,18 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.coordtrans.ui.io;
+package org.applied_geodesy.juniform.io.reader;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.sql.SQLException;
 
-import org.applied_geodesy.adjustment.transformation.TransformationType;
-import org.applied_geodesy.adjustment.transformation.point.ObservedFramePosition;
-import org.applied_geodesy.coordtrans.ui.i18n.I18N;
+import org.applied_geodesy.adjustment.geometry.FeatureType;
+import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
+import org.applied_geodesy.juniform.ui.i18n.I18N;
 import org.applied_geodesy.util.FormatterOptions;
+import org.applied_geodesy.util.ObservableUniqueList;
 import org.applied_geodesy.util.io.SourceFileReader;
 
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -37,138 +38,113 @@ import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.UpperSymmBandMatrix;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
 
-public class PositionFileReader extends SourceFileReader<Map<String, ObservedFramePosition>> {
-	private Map<String, ObservedFramePosition> positions;
-	private final TransformationType transformationType;
-	public PositionFileReader(TransformationType transformationType) {
-		this.transformationType = transformationType;
+public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueList<FeaturePoint>> {
+	private final FeatureType featureType;
+	private ObservableUniqueList<FeaturePoint> points;
+	
+	public FeaturePointFileReader(FeatureType featureType) {
+		this.featureType = featureType;
 		this.reset();
 	}
 	
-	public PositionFileReader(String fileName, TransformationType transformationType) {
-		this(new File(fileName).toPath(), transformationType);
+	public FeaturePointFileReader(String fileName, FeatureType featureType) {
+		this(new File(fileName).toPath(), featureType);
 	}
 
-	public PositionFileReader(File sf, TransformationType transformationType) {
-		this(sf.toPath(), transformationType);
+	public FeaturePointFileReader(File sf, FeatureType featureType) {
+		this(sf.toPath(), featureType);
 	}
 	
-	public PositionFileReader(Path path, TransformationType transformationType) {
+	public FeaturePointFileReader(Path path, FeatureType featureType) {
 		super(path);
-		this.transformationType = transformationType;
+		this.featureType = featureType;
 		this.reset();
 	}
 
-	public TransformationType getTransformationType() {
-		return this.transformationType;
+	public FeatureType getFeatureType() {
+		return this.featureType;
 	}
-
+	
 	@Override
-	public Map<String, ObservedFramePosition> readAndImport() throws Exception {
+	public ObservableUniqueList<FeaturePoint> readAndImport() throws IOException, SQLException {
 		this.ignoreLinesWhichStartWith("#");
 		super.read();
 		if (this.isInterrupted())
-			this.positions.clear();
-		return this.positions;
+			this.points.clear();
+		return this.points;
 	}
 
 	@Override
 	public void reset() {
-		 this.positions = new LinkedHashMap<String, ObservedFramePosition>(10000);
+		if (this.points == null)
+			 this.points = new ObservableUniqueList<FeaturePoint>(10000);
+		this.points.clear();
 	}
 
 	@Override
 	public void parse(String line) {
 		line = line.trim();
-
+		FeaturePoint point = null;
+		
 		try {
-			switch(this.transformationType) {
-			case HEIGHT:
-				scanHeightPosition(this.positions, line);
+			switch(this.featureType) {
+			case CURVE:
+				point = scanCurvePoint(line);
 				break;
-			case PLANAR:
-				scanPlanarPosition(this.positions, line);
-				break;
-			case SPATIAL:
-				scanSpatialPosition(this.positions, line);
-				break;	
+			case SURFACE:
+				point = scanSurfacePoint(line);
+				break;		
 			}
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			e.printStackTrace();
 			return;
 		}
+
+		if (point != null)
+			this.points.add(point);
 	}
 	
-	private static boolean scanHeightPosition(Map<String, ObservedFramePosition> positionMap, String str) throws NumberFormatException, IllegalArgumentException {
-		FormatterOptions options = FormatterOptions.getInstance();
-		String columns[] = str.trim().split("[\\s;]+");
-
-		if (columns.length < 2)
-			return false;
-		
-		String name = columns[0]; 
-		double z = options.convertLengthToModel(Double.parseDouble(columns[1].replace(',', '.'))); 
-		
-		ObservedFramePosition position = new ObservedFramePosition(z);
-		positionMap.put(name, position);
-		
-		if (columns.length < 3)
-			return true;
-		
-		double sigmaZ = options.convertLengthToModel(Double.parseDouble(columns[2].replace(',', '.'))); 
-		
-		if (sigmaZ <= 0)
-			return true;
-
-		Matrix dispersion = new UpperSymmBandMatrix(position.getDimension(), 0);
-		dispersion.set(0, 0, sigmaZ * sigmaZ);
-		position.setDispersionApriori(dispersion);
-		return true;
-	}
-	
-	private static boolean scanPlanarPosition(Map<String, ObservedFramePosition> positionMap, String str) throws NumberFormatException, IllegalArgumentException {
+	private static FeaturePoint scanCurvePoint(String str) throws NumberFormatException {
 		FormatterOptions options = FormatterOptions.getInstance();
 		String columns[] = str.trim().split("[\\s;]+");
 
 		if (columns.length < 3)
-			return false;
+			return null;
 		
 		String name = columns[0]; 
 		double x = options.convertLengthToModel(Double.parseDouble(columns[1].replace(',', '.'))); 
 		double y = options.convertLengthToModel(Double.parseDouble(columns[2].replace(',', '.')));
 		
-		ObservedFramePosition position = new ObservedFramePosition(x, y);
-		positionMap.put(name, position);
-		
+		FeaturePoint point = new FeaturePoint(name, x, y);
 		if (columns.length < 4)
-			return true;
+			return point;
 		
 		double sigmaX, sigmaY;
 		sigmaX = sigmaY = options.convertLengthToModel(Double.parseDouble(columns[3].replace(',', '.'))); 
 		
 		if (columns.length < 5) {
 			if (sigmaX <= 0 || sigmaY <= 0)
-				return true;
+				return point;
 			
-			Matrix dispersion = new UpperSymmBandMatrix(position.getDimension(), 0);
+			Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 			dispersion.set(0, 0, sigmaX * sigmaX);
 			dispersion.set(1, 1, sigmaY * sigmaY);
-			position.setDispersionApriori(dispersion);
-			return true;
+			point.setDispersionApriori(dispersion);
+			return point;
 		}
 		
 		sigmaY = options.convertLengthToModel(Double.parseDouble(columns[4].replace(',', '.'))); 
 		
 		if (columns.length < 6) {
 			if (sigmaX <= 0 || sigmaY <= 0)
-				return true;
+				return point;
 			
-			Matrix dispersion = new UpperSymmBandMatrix(position.getDimension(), 0);
+			Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 			dispersion.set(0, 0, sigmaX * sigmaX);
 			dispersion.set(1, 1, sigmaY * sigmaY);
-			position.setDispersionApriori(dispersion);
-			return true;
+			point.setDispersionApriori(dispersion);
+			return point;
 		}
 
 		// first two values == first row/column
@@ -178,80 +154,78 @@ public class PositionFileReader extends SourceFileReader<Map<String, ObservedFra
 		double varY  = options.convertLengthToModel(options.convertLengthToModel(Double.parseDouble(columns[5].replace(',', '.'))));
 
 		if (varX <= 0 || varY <= 0)
-			return true;
-		
+			return point;
+
 		Matrix dispersion = null;
 		if (covXY == 0)
-			dispersion = new UpperSymmBandMatrix(position.getDimension(), 0);
+			dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 		else {
-			dispersion = new UpperSymmPackMatrix(position.getDimension());
+			dispersion = new UpperSymmPackMatrix(point.getDimension());
 			dispersion.set(0, 1, covXY);
 		}
 		dispersion.set(0, 0, varX);
 		dispersion.set(1, 1, varY);
-		position.setDispersionApriori(dispersion);
-		return true;
+		point.setDispersionApriori(dispersion);
+		return point;
 	}
 	
-	private static boolean scanSpatialPosition(Map<String, ObservedFramePosition> positionMap, String str) throws NumberFormatException, IllegalArgumentException {
+	private static FeaturePoint scanSurfacePoint(String str) throws NumberFormatException {
 		FormatterOptions options = FormatterOptions.getInstance();
 		String columns[] = str.trim().split("[\\s;]+");
 		
 		if (columns.length < 4)
-			return false;
+			return null;
 		
 		String name = columns[0]; 
 		double x = options.convertLengthToModel(Double.parseDouble(columns[1].replace(',', '.'))); 
 		double y = options.convertLengthToModel(Double.parseDouble(columns[2].replace(',', '.')));
 		double z = options.convertLengthToModel(Double.parseDouble(columns[3].replace(',', '.')));
 		
-		ObservedFramePosition position = new ObservedFramePosition(x, y, z);
-		positionMap.put(name, position);
-		
+		FeaturePoint point = new FeaturePoint(name, x, y, z);
 		if (columns.length < 5)
-			return true;
+			return point;
 		
 		double sigmaX, sigmaY, sigmaZ;
 		sigmaX = sigmaY = sigmaZ = options.convertLengthToModel(Double.parseDouble(columns[4].replace(',', '.'))); 
 		
 		if (columns.length < 6) {
 			if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
-				return true;
+				return point;
 			
-			Matrix dispersion = new UpperSymmBandMatrix(position.getDimension(), 0);
+			Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 			dispersion.set(0, 0, sigmaX * sigmaX);
 			dispersion.set(1, 1, sigmaY * sigmaY);
 			dispersion.set(2, 2, sigmaZ * sigmaZ);
-			position.setDispersionApriori(dispersion);
-			return true;
+			point.setDispersionApriori(dispersion);
+			return point;
 		}
 		
 		sigmaY = sigmaZ = options.convertLengthToModel(Double.parseDouble(columns[5].replace(',', '.'))); 
 		
 		if (columns.length < 7) {
 			if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
-				return true;
+				return point;
 			
-			Matrix dispersion = new UpperSymmBandMatrix(position.getDimension(), 0);
+			Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 			dispersion.set(0, 0, sigmaX * sigmaX);
 			dispersion.set(1, 1, sigmaX * sigmaX); // if only two uncertainty colums are given, set sx = sy; sz
 			dispersion.set(2, 2, sigmaZ * sigmaZ);
-			position.setDispersionApriori(dispersion);
-			return true;
+			point.setDispersionApriori(dispersion);
+			return point;
 		}
 		
 		sigmaZ = options.convertLengthToModel(Double.parseDouble(columns[6].replace(',', '.'))); 
 		
 		if (columns.length < 10) {
 			if (sigmaX <= 0 || sigmaY <= 0 || sigmaZ <= 0)
-				return true;
+				return point;
 			
-			Matrix dispersion = new UpperSymmBandMatrix(position.getDimension(), 0);
+			Matrix dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 			dispersion.set(0, 0, sigmaX * sigmaX);
 			dispersion.set(1, 1, sigmaY * sigmaY);
 			dispersion.set(2, 2, sigmaZ * sigmaZ);
-			position.setDispersionApriori(dispersion);
-			return true;
+			point.setDispersionApriori(dispersion);
+			return point;
 		}
 		
 		// first three values == first row/column
@@ -265,13 +239,13 @@ public class PositionFileReader extends SourceFileReader<Map<String, ObservedFra
 		double varZ  = options.convertLengthToModel(options.convertLengthToModel(Double.parseDouble(columns[9].replace(',', '.'))));
 
 		if (varX <= 0 || varY <= 0 || varZ <= 0)
-			return true;
+			return point;
 
 		Matrix dispersion = null;
 		if (covXY == 0 && covXZ == 0 && covYZ == 0)
-			dispersion = new UpperSymmBandMatrix(position.getDimension(), 0);
+			dispersion = new UpperSymmBandMatrix(point.getDimension(), 0);
 		else {
-			dispersion = new UpperSymmPackMatrix(position.getDimension());
+			dispersion = new UpperSymmPackMatrix(point.getDimension());
 			dispersion.set(0, 1, covXY);
 			dispersion.set(0, 2, covXZ);
 			dispersion.set(1, 2, covYZ);
@@ -279,13 +253,13 @@ public class PositionFileReader extends SourceFileReader<Map<String, ObservedFra
 		dispersion.set(0, 0, varX);
 		dispersion.set(1, 1, varY);
 		dispersion.set(2, 2, varZ);
-		position.setDispersionApriori(dispersion);
-		return true;
+		point.setDispersionApriori(dispersion);
+		return point;
 	}
 	
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(I18N.getInstance().getString("PositionFileReader.extension.description", "All files"),	"*.*")
+				new ExtensionFilter(I18N.getInstance().getString("FeaturePointFileReader.extension.description", "All files"),	"*.*")
 		};
 	}
 }

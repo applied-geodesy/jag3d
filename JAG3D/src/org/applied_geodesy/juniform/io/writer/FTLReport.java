@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.juniform.io.report;
+package org.applied_geodesy.juniform.io.writer;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -123,18 +123,14 @@ public class FTLReport {
 		this.addUnknownFeatureParameters();
 		this.addCorrelationMatrix();
 	}
-
-	public String getSuggestedFileName() {
-		return this.adjustment.getFeature() != null ? this.adjustment.getFeature().getFeatureType().name() : null;
-	}
-
+	
 	public void toFile(File report) throws ClassNotFoundException, TemplateException, IOException {
 		if (report != null) {
 			this.createReport();
-			Writer file = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(report), StandardCharsets.UTF_8));
-			this.template.process(this.data, file);
-			file.flush();
-			file.close();
+			Writer fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(report), StandardCharsets.UTF_8));
+			this.template.process(this.data, fileWriter);
+			fileWriter.flush();
+			fileWriter.close();
 
 			if (hostServices != null)
 				hostServices.showDocument(report.getAbsolutePath());

@@ -32,6 +32,8 @@ enum MenuItemType {
 	LEAST_SQUARES,
 	PREFERENCES,
 	
+	EXPORT_MATLAB,
+	
 	REPORT,
 	ABOUT,
 	EXIT;

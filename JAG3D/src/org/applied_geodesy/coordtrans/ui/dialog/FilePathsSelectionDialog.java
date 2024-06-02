@@ -33,7 +33,7 @@ import java.util.Optional;
 import org.applied_geodesy.adjustment.transformation.TransformationType;
 import org.applied_geodesy.coordtrans.ui.CoordTrans;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
-import org.applied_geodesy.coordtrans.ui.io.PositionFileReader;
+import org.applied_geodesy.coordtrans.ui.io.reader.PositionFileReader;
 import org.applied_geodesy.coordtrans.ui.utils.UiUtil;
 import org.applied_geodesy.ui.dialog.OptionDialog;
 import org.applied_geodesy.ui.io.DefaultFileChooser;

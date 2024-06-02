@@ -45,7 +45,7 @@ import org.applied_geodesy.adjustment.geometry.surface.SpatialCircleFeature;
 import org.applied_geodesy.adjustment.geometry.surface.SpatialEllipseFeature;
 import org.applied_geodesy.adjustment.geometry.surface.SpatialLineFeature;
 import org.applied_geodesy.adjustment.geometry.surface.SphereFeature;
-import org.applied_geodesy.juniform.io.FeaturePointFileReader;
+import org.applied_geodesy.juniform.io.reader.FeaturePointFileReader;
 import org.applied_geodesy.juniform.ui.JUniForm;
 import org.applied_geodesy.juniform.ui.dialog.AboutDialog;
 import org.applied_geodesy.juniform.ui.dialog.FeatureDialog;
@@ -225,6 +225,10 @@ class MenuEventHandler implements EventHandler<ActionEvent> {
 			
 		case REPORT:
 			this.menuBuilder.createReport(file);
+			break;
+			
+		case EXPORT_MATLAB:
+			this.menuBuilder.createMatlabFile();
 			break;
 			
 		case ABOUT:

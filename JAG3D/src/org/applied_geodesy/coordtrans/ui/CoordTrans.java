@@ -43,7 +43,7 @@ import org.applied_geodesy.coordtrans.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.TransformationAdjustmentDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.VarianceComponentsDialog;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
-import org.applied_geodesy.coordtrans.ui.io.report.FTLReport;
+import org.applied_geodesy.coordtrans.ui.io.writer.FTLReport;
 import org.applied_geodesy.coordtrans.ui.menu.UIMenuBuilder;
 import org.applied_geodesy.coordtrans.ui.pane.UIInterpolationPaneBuilder;
 import org.applied_geodesy.coordtrans.ui.pane.UIRestrictionPaneBuilder;

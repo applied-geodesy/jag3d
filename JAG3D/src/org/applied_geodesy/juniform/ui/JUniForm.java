@@ -33,7 +33,7 @@ import org.applied_geodesy.adjustment.geometry.FeatureChangeListener;
 import org.applied_geodesy.adjustment.geometry.FeatureEvent;
 import org.applied_geodesy.adjustment.geometry.FeatureEvent.FeatureEventType;
 import org.applied_geodesy.jag3d.ui.JAG3D;
-import org.applied_geodesy.juniform.io.report.FTLReport;
+import org.applied_geodesy.juniform.io.writer.FTLReport;
 import org.applied_geodesy.juniform.ui.dialog.AboutDialog;
 import org.applied_geodesy.juniform.ui.dialog.AverageRestrictionDialog;
 import org.applied_geodesy.juniform.ui.dialog.FeatureAdjustmentDialog;
