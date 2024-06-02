@@ -99,6 +99,10 @@ class MenuEventHandler implements EventHandler<ActionEvent> {
 			CoordTrans.close();
 			break;
 			
+		case EXPORT_MATLAB:
+			this.menuBuilder.createMatlabFile();
+			break;
+			
 		case REPORT:
 			this.menuBuilder.createReport(file);
 			break;

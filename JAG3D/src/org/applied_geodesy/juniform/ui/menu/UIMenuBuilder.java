@@ -34,9 +34,10 @@ import org.applied_geodesy.adjustment.geometry.FeatureType;
 import org.applied_geodesy.adjustment.geometry.GeometricPrimitive;
 import org.applied_geodesy.adjustment.geometry.FeatureEvent.FeatureEventType;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
-import org.applied_geodesy.juniform.io.FeaturePointFileReader;
-import org.applied_geodesy.juniform.io.InitialGuessFileReader;
-import org.applied_geodesy.juniform.io.report.FTLReport;
+import org.applied_geodesy.juniform.io.reader.FeaturePointFileReader;
+import org.applied_geodesy.juniform.io.reader.InitialGuessFileReader;
+import org.applied_geodesy.juniform.io.writer.FTLReport;
+import org.applied_geodesy.juniform.io.writer.MatlabFeatureAdjustmentResultWriter;
 import org.applied_geodesy.juniform.ui.JUniForm;
 import org.applied_geodesy.juniform.ui.dialog.ReadFileProgressDialog;
 import org.applied_geodesy.juniform.ui.table.UIPointTableBuilder;
@@ -278,11 +279,13 @@ public class UIMenuBuilder implements FeatureChangeListener {
 	}
 	
 	private void createReportMenu(Menu parentMenu) {
+		MenuItem matlabItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.report.matlab.label", "_Matlab file"), true, MenuItemType.EXPORT_MATLAB, new KeyCodeCombination(KeyCode.M, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		parentMenu.getItems().add(matlabItem);
+		
 		List<File> templateFiles = FTLReport.getTemplates();
 		if (templateFiles != null && !templateFiles.isEmpty()) {
 			for (File templateFile : templateFiles) {
 				MenuItem templateFileItem = createMenuItem(templateFile.getName(), false, MenuItemType.REPORT, templateFile, null, this.menuEventHandler, true);
-
 				parentMenu.getItems().add(templateFileItem);
 			}
 		}
@@ -367,6 +370,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 					break;
 					
 				case REPORT:
+				case EXPORT_MATLAB:
 					this.setReportMenuDisable(true);
 					break;
 					
@@ -530,6 +534,36 @@ public class UIMenuBuilder implements FeatureChangeListener {
 		}
 	}
 	
+	void createMatlabFile() {
+		try {
+			if (UITreeBuilder.getInstance().getFeatureAdjustment().getFeature() == null)
+				return;
+
+			ExtensionFilter extensionFilter = new ExtensionFilter(i18n.getString("UIMenuBuilder.report.extension.mat", "Binary Matlab file"), "*.mat", "*.MAT");
+			String fileNameSuggestion = "feature.mat";
+
+			MatlabFeatureAdjustmentResultWriter matWriter = new MatlabFeatureAdjustmentResultWriter();
+			File binFile = DefaultFileChooser.showSaveDialog(
+					JUniForm.getStage(),
+					i18n.getString("UIMenuBuilder.filechooser.export.matlab.title", "Save Matlab file"), 
+					fileNameSuggestion,
+					extensionFilter
+			);
+			if (binFile != null && matWriter != null) {
+				matWriter.toFile(binFile, UITreeBuilder.getInstance().getFeatureAdjustment());
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			OptionDialog.showThrowableDialog (
+					i18n.getString("UIMenuBuilder.message.error.export.matlab.exception.title", "I/O Error"),
+					i18n.getString("UIMenuBuilder.message.error.export.matlab.exception.header", "Error, could not binary Matlab file."),
+					i18n.getString("UIMenuBuilder.message.error.export.matlab.exception.message", "An exception has occurred during file creation."),
+					e
+					);
+		}
+	}
+	
 	void createReport(File templateFile) {
 		try {
 			if (UITreeBuilder.getInstance().getFeatureAdjustment().getFeature() == null)
@@ -549,7 +583,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 			FTLReport ftl = new FTLReport(UITreeBuilder.getInstance().getFeatureAdjustment());
 			File reportFile = DefaultFileChooser.showSaveDialog(
 					JUniForm.getStage(),
-					i18n.getString("UIMenuBuilder.filechooser.report.title", "Save adjustment report"), 
+					i18n.getString("UIMenuBuilder.filechooser.export.report.title", "Save adjustment report"), 
 					fileNameSuggestion,
 					extensionFilter
 			);
@@ -560,9 +594,9 @@ public class UIMenuBuilder implements FeatureChangeListener {
 		} catch (Exception e) {
 			e.printStackTrace();
 			OptionDialog.showThrowableDialog (
-					i18n.getString("UIMenuBuilder.message.error.report.exception.title", "I/O Error"),
-					i18n.getString("UIMenuBuilder.message.error.report.exception.header", "Error, could not create adjustment report."),
-					i18n.getString("UIMenuBuilder.message.error.report.exception.message", "An exception has occurred during report creation."),
+					i18n.getString("UIMenuBuilder.message.error.export.report.exception.title", "I/O Error"),
+					i18n.getString("UIMenuBuilder.message.error.export.report.exception.header", "Error, could not create adjustment report."),
+					i18n.getString("UIMenuBuilder.message.error.export.report.exception.message", "An exception has occurred during report creation."),
 					e
 					);
 		}

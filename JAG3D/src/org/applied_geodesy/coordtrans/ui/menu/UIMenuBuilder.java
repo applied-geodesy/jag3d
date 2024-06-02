@@ -45,8 +45,9 @@ import org.applied_geodesy.coordtrans.ui.dialog.FilePathsSelectionDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.FilePathsSelectionDialog.FilePathPair;
 import org.applied_geodesy.coordtrans.ui.dialog.ReadFileProgressDialog;
 import org.applied_geodesy.coordtrans.ui.i18n.I18N;
-import org.applied_geodesy.coordtrans.ui.io.PositionFileReader;
-import org.applied_geodesy.coordtrans.ui.io.report.FTLReport;
+import org.applied_geodesy.coordtrans.ui.io.reader.PositionFileReader;
+import org.applied_geodesy.coordtrans.ui.io.writer.FTLReport;
+import org.applied_geodesy.coordtrans.ui.io.writer.MatlabTransformationAdjustmentResultWriter;
 import org.applied_geodesy.coordtrans.ui.table.UIFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.table.UIHomologousFramePositionPairTableBuilder;
 import org.applied_geodesy.coordtrans.ui.tree.UITreeBuilder;
@@ -143,11 +144,13 @@ public class UIMenuBuilder implements TransformationChangeListener {
 	}
 	
 	private void createReportMenu(Menu parentMenu) {
+		MenuItem matlabItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.report.matlab.label", "_Matlab file"), true, MenuItemType.EXPORT_MATLAB, new KeyCodeCombination(KeyCode.M, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
+		parentMenu.getItems().add(matlabItem);
+		
 		List<File> templateFiles = FTLReport.getTemplates();
 		if (templateFiles != null && !templateFiles.isEmpty()) {
 			for (File templateFile : templateFiles) {
 				MenuItem templateFileItem = createMenuItem(templateFile.getName(), false, MenuItemType.REPORT, templateFile, null, this.menuEventHandler, true);
-
 				parentMenu.getItems().add(templateFileItem);
 			}
 		}
@@ -320,6 +323,36 @@ public class UIMenuBuilder implements TransformationChangeListener {
 		this.fireTransformationChanged(transformation);
 	}
 	
+	void createMatlabFile() {
+		try {
+			if (UITreeBuilder.getInstance().getTransformationAdjustment().getTransformation() == null)
+				return;
+
+			ExtensionFilter extensionFilter = new ExtensionFilter(i18n.getString("UIMenuBuilder.report.extension.mat", "Binary Matlab file"), "*.mat", "*.MAT");
+			String fileNameSuggestion = "transformation.mat";
+
+			MatlabTransformationAdjustmentResultWriter matWriter = new MatlabTransformationAdjustmentResultWriter();
+			File binFile = DefaultFileChooser.showSaveDialog(
+					CoordTrans.getStage(),
+					i18n.getString("UIMenuBuilder.filechooser.export.matlab.title", "Save Matlab file"), 
+					fileNameSuggestion,
+					extensionFilter
+			);
+			if (binFile != null && matWriter != null) {
+				matWriter.toFile(binFile, UITreeBuilder.getInstance().getTransformationAdjustment());
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			OptionDialog.showThrowableDialog (
+					i18n.getString("UIMenuBuilder.message.error.export.matlab.exception.title", "I/O Error"),
+					i18n.getString("UIMenuBuilder.message.error.export.matlab.exception.header", "Error, could not binary Matlab file."),
+					i18n.getString("UIMenuBuilder.message.error.export.matlab.exception.message", "An exception has occurred during file creation."),
+					e
+					);
+		}
+	}
+	
 	void createReport(File templateFile) {
 		try {
 			if (UITreeBuilder.getInstance().getTransformationAdjustment().getTransformation() == null)
@@ -339,7 +372,7 @@ public class UIMenuBuilder implements TransformationChangeListener {
 			FTLReport ftl = new FTLReport(UITreeBuilder.getInstance().getTransformationAdjustment());
 			File reportFile = DefaultFileChooser.showSaveDialog(
 					CoordTrans.getStage(),
-					i18n.getString("UIMenuBuilder.filechooser.report.title", "Save adjustment report"), 
+					i18n.getString("UIMenuBuilder.filechooser.export.report.title", "Save adjustment report"), 
 					fileNameSuggestion,
 					extensionFilter
 			);
@@ -350,9 +383,9 @@ public class UIMenuBuilder implements TransformationChangeListener {
 		} catch (Exception e) {
 			e.printStackTrace();
 			OptionDialog.showThrowableDialog (
-					i18n.getString("UIMenuBuilder.message.error.report.exception.title", "I/O Error"),
-					i18n.getString("UIMenuBuilder.message.error.report.exception.header", "Error, could not create adjustment report."),
-					i18n.getString("UIMenuBuilder.message.error.report.exception.message", "An exception has occurred during report creation."),
+					i18n.getString("UIMenuBuilder.message.error.export.report.exception.title", "I/O Error"),
+					i18n.getString("UIMenuBuilder.message.error.export.report.exception.header", "Error, could not create adjustment report."),
+					i18n.getString("UIMenuBuilder.message.error.export.report.exception.message", "An exception has occurred during report creation."),
 					e
 					);
 		}
@@ -393,6 +426,7 @@ public class UIMenuBuilder implements TransformationChangeListener {
 					break;
 					
 				case REPORT:
+				case EXPORT_MATLAB:
 					this.setReportMenuDisable(true);
 					break;
 					

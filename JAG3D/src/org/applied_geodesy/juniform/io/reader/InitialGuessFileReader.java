@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.juniform.io;
+package org.applied_geodesy.juniform.io.reader;
 
 import java.io.File;
 import java.nio.file.Path;

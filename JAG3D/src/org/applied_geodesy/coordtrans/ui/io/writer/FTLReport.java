@@ -19,7 +19,7 @@
 *                                                                      *
 ***********************************************************************/
 
-package org.applied_geodesy.coordtrans.ui.io.report;
+package org.applied_geodesy.coordtrans.ui.io.writer;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -136,12 +136,7 @@ public class FTLReport {
 		
 		this.addEulerAngles();
 	}
-
-	public String getSuggestedFileName() {
-		return this.adjustment.getTransformation() != null && this.adjustment.getTransformation().getTransformationEquations() != null ? 
-				this.adjustment.getTransformation().getTransformationEquations().getTransformationType().name() : null;
-	}
-
+	
 	public void toFile(File report) throws ClassNotFoundException, TemplateException, IOException {
 		if (report != null) {
 			this.createReport();
