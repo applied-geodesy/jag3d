@@ -86,7 +86,7 @@ public class Orientation extends AdditionalUnknownParameter {
 
 		// Ermittle eine a-priori Orieniterung mittels der Lage-koorigierten Richtungen
 		if (this.isEnable() && this.estimateApproximationValue)
-			this.setValue( MathExtension.MOD(this.getValue() + this.advancedOrientation(), 2*Math.PI) );
+			this.setValue( MathExtension.MOD(this.getValue() + this.advancedOrientation(), 2.0*Math.PI) );
 	}
 	
 	/**
