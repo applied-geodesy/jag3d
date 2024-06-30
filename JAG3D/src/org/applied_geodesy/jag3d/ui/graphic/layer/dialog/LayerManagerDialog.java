@@ -23,8 +23,10 @@ package org.applied_geodesy.jag3d.ui.graphic.layer.dialog;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.graphic.layer.ArrowLayer;
@@ -49,8 +51,11 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogEvent;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
@@ -60,13 +65,49 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 
 public class LayerManagerDialog {
+	
+	private class LayersVisibleChangeListener implements ChangeListener<Boolean> {
+		private final Set<Layer> layerSet;
+		private final CheckBox checkBox;
+		public LayersVisibleChangeListener(CheckBox checkBox, Set<Layer> layerSet) {
+			this.layerSet = layerSet;
+			this.checkBox = checkBox;
+		}
+		
+		@Override
+		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+			try {
+				ignoreVisibleEvent = true;
+				for (Layer layer : layerSet) 
+					layer.setVisible(newValue);
+				this.checkBox.setSelected(newValue);
+			}
+			finally {
+				ignoreVisibleEvent = false;
+			}
+		}
+	}
 
+	private class LayerVisibleStateChangeListener implements ChangeListener<Boolean> {
+		private final Layer layer;
+		public LayerVisibleStateChangeListener(Layer layer) {
+			this.layer = layer;
+		}
+		
+		@Override
+		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+			if (!ignoreVisibleEvent)
+				updateGlobalLayerVisibleState(this.layer.getLayerType());
+		}
+	}
+	
 	private class LayerIndexChangeListener implements ChangeListener<Number> {
 		private ListView<Layer> listView;
 		private LayerIndexChangeListener(ListView<Layer> listView) {
@@ -164,6 +205,10 @@ public class LayerManagerDialog {
 	private Button upButton, downButton;
 	private ListView<Layer> layerListView;
 	private ObservableList<Layer> layers;
+	private Set<Layer> aPrioriLayerSet = new HashSet<Layer>();
+	private Set<Layer> aPosterioriLayerSet = new HashSet<Layer>();
+	private CheckBox allAprioriLayersVisibleCheckBox, allAPosterioriLayersVisibleCheckBox;
+	private boolean ignoreVisibleEvent = false;
 	private LayerManagerDialog() {}
 
 
@@ -219,11 +264,32 @@ public class LayerManagerDialog {
 	}
 
 	private Node createPane() {
+		
 		this.layerPropertyBorderPane.setTop(this.createLayerOrderToolBar());
-
-		BorderPane rootNode = new BorderPane();
+		
+		this.allAprioriLayersVisibleCheckBox     = this.createCheckBox(i18n.getString("LayerManagerDialog.multiselection.apriori.label", "A-priori layers selection"), i18n.getString("LayerManagerDialog.multiselection.apriori.tooltip", "If checked, all a-priori layers are visible"));
+		this.allAPosterioriLayersVisibleCheckBox = this.createCheckBox(i18n.getString("LayerManagerDialog.multiselection.aposteriori.label", "A-posteriori layers selection"), i18n.getString("LayerManagerDialog.multiselection.aposteriori.tooltip", "If checked, all a-posteriori layers are visible"));
+		
+		this.allAprioriLayersVisibleCheckBox.selectedProperty().addListener(new LayersVisibleChangeListener(this.allAprioriLayersVisibleCheckBox, this.aPrioriLayerSet));
+		this.allAPosterioriLayersVisibleCheckBox.selectedProperty().addListener(new LayersVisibleChangeListener(this.allAPosterioriLayersVisibleCheckBox, this.aPosterioriLayerSet));
+		
 		this.layerListView = this.createLayerListPane();
-		rootNode.setLeft(this.layerListView);
+		
+		// Pseudoselection, damit Checkboxen korreten Status anzeigen
+		this.updateGlobalLayerVisibleState(LayerType.OBSERVATION_APRIORI);
+		this.updateGlobalLayerVisibleState(LayerType.OBSERVATION_APOSTERIORI);
+		
+		VBox checkBoxGroup = new VBox(5);
+		checkBoxGroup.getChildren().add(this.allAprioriLayersVisibleCheckBox);
+		checkBoxGroup.getChildren().add(this.allAPosterioriLayersVisibleCheckBox);
+		
+		VBox layerBox = new VBox(10);
+		layerBox.getChildren().add(this.layerListView);
+		layerBox.getChildren().add(checkBoxGroup);
+
+		VBox.setVgrow(layerListView, Priority.ALWAYS);
+		BorderPane rootNode = new BorderPane();
+		rootNode.setLeft(layerBox);
 		rootNode.setCenter(this.layerPropertyBorderPane);
 		return rootNode;
 	}
@@ -248,8 +314,33 @@ public class LayerManagerDialog {
 		ListView<Layer> listView = new ListView<Layer>();
 		
 		int length = this.layers.size();
-		for (int i = length - 1; i >= 0; i--)
-			listView.getItems().add(this.layers.get(i));
+		for (int i = length - 1; i >= 0; i--) {
+			Layer layer = this.layers.get(i);
+			listView.getItems().add(layer);
+			
+			LayerType type = layer.getLayerType();
+			switch (type) {
+			case NEW_POINT_APRIORI:
+			case DATUM_POINT_APRIORI:
+			case STOCHASTIC_POINT_APRIORI:
+			case REFERENCE_POINT_APRIORI:
+			case OBSERVATION_APRIORI:
+				this.aPrioriLayerSet.add(layer);
+				layer.visibleProperty().addListener(new LayerVisibleStateChangeListener(layer));
+				break;
+
+			case NEW_POINT_APOSTERIORI:
+			case DATUM_POINT_APOSTERIORI:
+			case STOCHASTIC_POINT_APOSTERIORI:
+			case REFERENCE_POINT_APOSTERIORI:
+			case OBSERVATION_APOSTERIORI:
+				this.aPosterioriLayerSet.add(layer);
+				layer.visibleProperty().addListener(new LayerVisibleStateChangeListener(layer));
+				break;
+			default:
+				break;
+			}
+		}
 
 		listView.setCellFactory(new Callback<ListView<Layer>, ListCell<Layer>>() {
 			@Override 
@@ -364,5 +455,52 @@ public class LayerManagerDialog {
 				}
 			});
 		}
+	}
+	
+	private void updateGlobalLayerVisibleState(LayerType type) {
+		int numberOfVisibleLayers = 0;
+		switch (type) {
+		case NEW_POINT_APRIORI:
+		case DATUM_POINT_APRIORI:
+		case STOCHASTIC_POINT_APRIORI:
+		case REFERENCE_POINT_APRIORI:
+		case OBSERVATION_APRIORI:
+			for (Layer layer : this.aPrioriLayerSet) {
+				if (layer.isVisible())
+					numberOfVisibleLayers++;
+			}
+			this.allAprioriLayersVisibleCheckBox.setSelected(this.aPrioriLayerSet.size() == numberOfVisibleLayers);
+			this.allAprioriLayersVisibleCheckBox.setIndeterminate(numberOfVisibleLayers > 0 && numberOfVisibleLayers < this.aPrioriLayerSet.size());
+
+			break;
+		case NEW_POINT_APOSTERIORI:
+		case DATUM_POINT_APOSTERIORI:
+		case STOCHASTIC_POINT_APOSTERIORI:
+		case REFERENCE_POINT_APOSTERIORI:
+		case OBSERVATION_APOSTERIORI:
+			for (Layer layer : this.aPosterioriLayerSet) {
+				if (layer.isVisible())
+					numberOfVisibleLayers++;
+			}
+			this.allAPosterioriLayersVisibleCheckBox.setSelected(this.aPosterioriLayerSet.size() == numberOfVisibleLayers);
+			this.allAPosterioriLayersVisibleCheckBox.setIndeterminate(numberOfVisibleLayers > 0 && numberOfVisibleLayers < this.aPosterioriLayerSet.size());
+
+			break;
+		default:
+			break;
+		}
+	}
+	
+	private CheckBox createCheckBox(String title, String tooltip) {
+		Label label = new Label(title);
+		label.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		label.setPadding(new Insets(0,0,0,3));
+		CheckBox checkBox = new CheckBox();
+		checkBox.setGraphic(label);
+		checkBox.setTooltip(new Tooltip(tooltip));
+		checkBox.setMinHeight(Control.USE_PREF_SIZE);
+		checkBox.setMaxHeight(Double.MAX_VALUE);
+		return checkBox;
 	}
 }
