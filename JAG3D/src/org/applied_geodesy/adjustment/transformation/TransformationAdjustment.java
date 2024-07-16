@@ -451,12 +451,12 @@ public class TransformationAdjustment {
 						if (this.estimationType == EstimationType.L1NORM) {
 							this.currentEstimationStatus = EstimationStateType.ROBUST_ESTIMATION_FAILED;
 							this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-							throw new NotConvergedException(Reason.Iterations, "Error, euqation system does not converge! Last iterate max|dx| = " + this.maxAbsDx + " (" + SQRT_EPS + ").");
+							throw new NotConvergedException(Reason.Iterations, "Error, equation system does not converge! Last iterate max|dx| = " + this.maxAbsDx + " (" + SQRT_EPS + ").");
 						}
 						else {
 							this.currentEstimationStatus = EstimationStateType.NO_CONVERGENCE;
 							this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxAbsDx);
-							throw new NotConvergedException(Reason.Iterations, "Error, euqation system does not converge! Last iterate max|dx| = " + this.maxAbsDx + " (" + SQRT_EPS + ").");
+							throw new NotConvergedException(Reason.Iterations, "Error, equation system does not converge! Last iterate max|dx| = " + this.maxAbsDx + " (" + SQRT_EPS + ").");
 						}
 					}
 					isEstimated = true;
