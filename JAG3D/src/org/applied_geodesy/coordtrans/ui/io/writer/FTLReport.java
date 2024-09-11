@@ -76,7 +76,7 @@ import javafx.application.HostServices;
 import no.uib.cipr.matrix.Matrix;
 
 public class FTLReport {
-	private final static Version VERSION = Configuration.VERSION_2_3_32;
+	private final static Version VERSION = Configuration.VERSION_2_3_33;
 	private FormatterOptions options = FormatterOptions.getInstance();
 	private Template template = null;
 	private static HostServices hostServices;
