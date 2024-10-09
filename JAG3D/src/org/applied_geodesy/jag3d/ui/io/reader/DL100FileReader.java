@@ -141,24 +141,24 @@ public class DL100FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					String pointName = null;
 					Double z0 = null;
 					if (line.toUpperCase().startsWith("B") && data.length > 5) {
-						if (!data[5].trim().isEmpty())
+						if (!data[5].isBlank())
 							this.loopDate = this.dateFormatIn.parse(data[5].trim());
-						if (!data[3].trim().isEmpty()) {
+						if (!data[3].isBlank()) {
 							pointName = data[3].trim();
-							if (!this.pointNames.contains(pointName) && !data[4].trim().isEmpty()) 
+							if (!this.pointNames.contains(pointName) && !data[4].isBlank()) 
 								z0 = this.convertInputToTrueValue(unit, data[4].trim());
 						}
 					}
 					else if (line.toUpperCase().startsWith("C") && data.length > 20) {
-						if (!data[20].trim().isEmpty())
+						if (!data[20].isBlank())
 							this.loopDate = this.dateFormatIn.parse(data[20].trim());
-						if (!data[18].trim().isEmpty()) {
+						if (!data[18].isBlank()) {
 							pointName = data[18].trim();
-							if (!this.pointNames.contains(pointName) && !data[19].trim().isEmpty()) 
+							if (!this.pointNames.contains(pointName) && !data[19].isBlank()) 
 								z0 = this.convertInputToTrueValue(unit, data[19].trim());
 						}
 					}
-					if (pointName != null && z0 != null && !pointName.isEmpty() && !this.pointNames.contains(pointName)) {
+					if (pointName != null && z0 != null && !pointName.isBlank() && !this.pointNames.contains(pointName)) {
 						PointRow point = new PointRow();
 						point.setName(pointName);
 						point.setZApriori(z0);
@@ -188,7 +188,7 @@ public class DL100FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					
 					boolean isSideShot = line.toUpperCase().startsWith("K") && this.startPointName != null && this.rb != null;
 					
-					if (data[1].trim().length() < 2 || data[7].trim().isEmpty())
+					if (data[1].trim().length() < 2 || data[7].isBlank())
 						return;
 					
 					String pointName = data[7].trim();
@@ -199,14 +199,14 @@ public class DL100FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					// Messwert, Strecke, Koordinate
 					double m = 0.0, d = 0.0, z = 0.0;
 
-					if (data[2].trim().isEmpty())
+					if (data[2].isBlank())
 						return;
 					m = this.convertMeasurmentToTrueValue(unit, data[2], true);
 					
-					if (!data[3].trim().isEmpty())
+					if (!data[3].isBlank())
 						d = this.convertMeasurmentToTrueValue(unit, data[3], false);
 					
-					if (!data[4].trim().isEmpty())
+					if (!data[4].isBlank())
 						z = this.convertMeasurmentToTrueValue(unit, data[4], true);
 
 					if (isFirstBackSightMeasurment) {

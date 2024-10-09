@@ -264,7 +264,7 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 				if (key == 11 || key > 100 && key/10 == 11) {
 					pointName = this.removeLeadingZeros(data).trim();
-					if (pointName.isEmpty())
+					if (pointName.isBlank())
 						pointName = "0";
 				}
 

@@ -163,10 +163,10 @@ public class CongruenceAnalysisFlatFileReader extends FlatFileReader<TreeItem<Tr
 			String name1 = congruenceAnalysisRow.getNameInReferenceEpoch();
 			String name2 = congruenceAnalysisRow.getNameInControlEpoch();
 			
-			if (name1 == null || name2 == null || name1.trim().isEmpty() || name2.trim().isEmpty() || name1.equals(name2))
+			if (name1 == null || name2 == null || name1.isBlank() || name2.isBlank() || name1.equals(name2))
 				return;
 			
-			CongruenceAnalysisPointPair pair = new CongruenceAnalysisPointPair(name1, name2);
+			CongruenceAnalysisPointPair pair = new CongruenceAnalysisPointPair(name1.trim(), name2.trim());
 			
 			if (!this.reservedNamePairs.contains(pair)) {
 				this.congruenceAnalysisPairs.add(congruenceAnalysisRow);

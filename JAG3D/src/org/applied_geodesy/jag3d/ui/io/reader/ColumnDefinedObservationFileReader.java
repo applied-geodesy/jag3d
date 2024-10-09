@@ -221,7 +221,7 @@ public class ColumnDefinedObservationFileReader extends SourceFileReader<TreeIte
 				switch(type) {
 				case STATION:
 					String startPointName = line.substring(startPos, endPos).trim();
-					if (startPointName != null && !startPointName.isEmpty()) {
+					if (startPointName != null && !startPointName.isBlank()) {
 						if (this.startPointName == null)
 							this.startPointName = startPointName;
 						this.isGroupWithEqualStation = this.isGroupWithEqualStation && this.startPointName.equals(startPointName);
@@ -238,7 +238,7 @@ public class ColumnDefinedObservationFileReader extends SourceFileReader<TreeIte
 					break;
 				case TARGET:
 					String endPointName = line.substring(startPos, endPos).trim();
-					if (endPointName != null && !endPointName.isEmpty())
+					if (endPointName != null && !endPointName.isBlank())
 						row.setEndPointName(endPointName);
 					else
 						continue;
@@ -292,7 +292,7 @@ public class ColumnDefinedObservationFileReader extends SourceFileReader<TreeIte
 			}
 		}
 
-		if (row.getStartPointName() != null && row.getEndPointName() != null && row.getValueApriori() != null && !row.getStartPointName().isEmpty() && !row.getEndPointName().isEmpty() && !row.getStartPointName().equals(row.getEndPointName()))
+		if (row.getStartPointName() != null && row.getEndPointName() != null && row.getValueApriori() != null && !row.getStartPointName().isBlank() && !row.getEndPointName().isBlank() && !row.getStartPointName().equals(row.getEndPointName()))
 			this.observations.add(row);
 	}
 	
@@ -309,7 +309,7 @@ public class ColumnDefinedObservationFileReader extends SourceFileReader<TreeIte
 				switch(type) {
 				case STATION:
 					String startPointName = line.substring(startPos, endPos).trim();
-					if (startPointName != null && !startPointName.isEmpty()) {
+					if (startPointName != null && !startPointName.isBlank()) {
 						if (this.startPointName == null)
 							this.startPointName = startPointName;
 						this.isGroupWithEqualStation = this.isGroupWithEqualStation && this.startPointName.equals(startPointName);
@@ -326,7 +326,7 @@ public class ColumnDefinedObservationFileReader extends SourceFileReader<TreeIte
 					break;
 				case TARGET:
 					String endPointName = line.substring(startPos, endPos).trim();
-					if (endPointName != null && !endPointName.isEmpty())
+					if (endPointName != null && !endPointName.isBlank())
 						row.setEndPointName(endPointName);
 					else
 						continue;
@@ -368,7 +368,7 @@ public class ColumnDefinedObservationFileReader extends SourceFileReader<TreeIte
 			}
 		}
 
-		if (row.getStartPointName() != null && row.getEndPointName() != null && !row.getStartPointName().isEmpty() && !row.getEndPointName().isEmpty() && !row.getStartPointName().equals(row.getEndPointName()) && 
+		if (row.getStartPointName() != null && row.getEndPointName() != null && !row.getStartPointName().isBlank() && !row.getEndPointName().isBlank() && !row.getStartPointName().equals(row.getEndPointName()) && 
 				((this.observationType == ObservationType.GNSS3D && row.getZApriori() != null && row.getXApriori() != null && row.getYApriori() != null) ||
 						(this.observationType == ObservationType.GNSS2D && row.getXApriori() != null && row.getYApriori() != null) ||
 						(this.observationType == ObservationType.GNSS1D && row.getZApriori() != null)))

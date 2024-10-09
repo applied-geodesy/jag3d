@@ -128,7 +128,7 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		}
 
 		// Parse observations
-		if (!this.isNewStation && this.startPointName != null && !this.startPointName.trim().isEmpty()) {
+		if (!this.isNewStation && this.startPointName != null && !this.startPointName.isBlank()) {
 			// P_targ, Targname, GPS_ww, GPS_d, GPS_ss, nSatz, npos, s, ss, h_s, r, sr, z, sz, h_z, sadd, refr, bre, I_extar, EX_tar, EY_tar, EZ_tar, dTrunnion, dSighting, nErrorFlag, dPreasure, dTemperature, dSignalstrength, nAutoLockMode, nPrismNr, nTargetID, bDR
 			//1,2007_2,2207,4,345660.92,1,2,201.73478,0.00120,0.000,265.9469,0.00020000,297.0004,0.00020000,0.000,0.000,0.142,0.0,1,,,,-0.0304,-0.0003,0,1022.10,12.90,,3,,,0
 			//2,2008_2,2207,4,345669.75,1,1,154.83761,0.00115,0.000,51.4744,0.00020000,104.4044,0.00020000,0.000,0.000,0.142,0.0,1,,,,0.0244,-0.0029,0,1022.00,12.90,,3,,,0

@@ -194,7 +194,7 @@ public class CSVVerticalDeflectionFileReader extends SourceFileReader<TreeItem<T
 				switch(type) {
 				case POINT_ID:
 					String name = parsedLine.get(pos).trim();
-					if (name != null && !name.isEmpty())
+					if (name != null && !name.isBlank())
 						row.setName(name);
 					else
 						continue;
@@ -229,7 +229,7 @@ public class CSVVerticalDeflectionFileReader extends SourceFileReader<TreeItem<T
 			}
 		}
 
-		if (row.getName() != null && !row.getName().isEmpty() && !this.reservedNames.contains(row.getName()) && (row.getXApriori() != null && row.getYApriori() != null)) {
+		if (row.getName() != null && !row.getName().isBlank() && !this.reservedNames.contains(row.getName()) && (row.getXApriori() != null && row.getYApriori() != null)) {
 			this.verticalDeflections.add(row);
 			this.reservedNames.add(row.getName());
 		}

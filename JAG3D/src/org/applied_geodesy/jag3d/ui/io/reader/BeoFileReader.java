@@ -131,7 +131,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 		// Standpunkt
 		if (key.equalsIgnoreCase("10.")) {
 			this.startPointName = line.substring(15, 28).trim();
-			if (this.startPointName.isEmpty())
+			if (this.startPointName.isBlank())
 				return;
 
 
@@ -143,7 +143,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			catch(NumberFormatException e) { };
 		}
 		
-		else if (this.startPointName != null && !this.startPointName.isEmpty() && (key.equalsIgnoreCase("20.") || key.equalsIgnoreCase("21.") || key.equalsIgnoreCase("24.") || key.equalsIgnoreCase("31."))) {
+		else if (this.startPointName != null && !this.startPointName.isBlank() && (key.equalsIgnoreCase("20.") || key.equalsIgnoreCase("21.") || key.equalsIgnoreCase("24.") || key.equalsIgnoreCase("31."))) {
 			if (this.isNewStation) {
 				this.saveObservationGroups(false);
 				this.lastStartPointName = null;
@@ -151,7 +151,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			this.isNewStation = false;
 
 			String endPointName = line.substring(15, 28).trim();
-			if (endPointName.isEmpty() || this.startPointName.equals(endPointName))
+			if (endPointName.isBlank() || this.startPointName.equals(endPointName))
 				return;
 
 			double th = 0.0;
@@ -167,7 +167,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			// Strecke3D
 			String value = line.substring(33, 49).trim();
 			double distance = 0;
-			if (!value.isEmpty() && !value.startsWith("-1000.")) {
+			if (!value.isBlank() && !value.startsWith("-1000.")) {
 				try { 
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
@@ -186,7 +186,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			// Zenitwinkel
 			value = line.substring(64, 79).trim();
 			double zenith = 0.5 * Math.PI;
-			if (!value.isEmpty() && !value.startsWith("-1000.")) {
+			if (!value.isBlank() && !value.startsWith("-1000.")) {
 				try { 
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
@@ -206,7 +206,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			}
 			// Richtung
 			value = line.substring(49, 64).trim();
-			if (!value.isEmpty() && !value.startsWith("-1000.")) {
+			if (!value.isBlank() && !value.startsWith("-1000.")) {
 				try {
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
@@ -224,7 +224,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				catch(NumberFormatException e) { };
 			}
 		}
-		else if (this.startPointName != null && !this.startPointName.isEmpty() && key.equalsIgnoreCase("50.")) {
+		else if (this.startPointName != null && !this.startPointName.isBlank() && key.equalsIgnoreCase("50.")) {
 			if (this.isNewStation) {
 				this.saveObservationGroups(false);
 				this.lastStartPointName = null;
@@ -232,7 +232,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			this.isNewStation = false;
 
 			String endPointName = line.substring(15, 28).trim();
-			if (endPointName.isEmpty())
+			if (endPointName.isBlank())
 				return;
 
 			double th = 0.0;
@@ -247,7 +247,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			// Strecke2D
 			double distance = 0.0; // Wird ggf. fuer delta-H mitverwendet
 			String value = line.substring(33, 49).trim();
-			if (!value.isEmpty() && !value.startsWith("-1000.")) {
+			if (!value.isBlank() && !value.startsWith("-1000.")) {
 				try { 
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
@@ -265,7 +265,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			}
 			// Richtung
 			value = line.substring(49, 64).trim();
-			if (!value.isEmpty() && !value.startsWith("-1000.")) {
+			if (!value.isBlank() && !value.startsWith("-1000.")) {
 				try {
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
@@ -282,7 +282,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			}
 			// Hoehenunterschied
 			value = line.substring(64, 79).trim();
-			if (!value.isEmpty() && !value.startsWith("-1000.")) {
+			if (!value.isBlank() && !value.startsWith("-1000.")) {
 				try { 
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
@@ -298,7 +298,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				catch(NumberFormatException e) { };
 			}
 		}
-		else if (this.startPointName != null && !this.startPointName.isEmpty() && key.equalsIgnoreCase("70.")) {
+		else if (this.startPointName != null && !this.startPointName.isBlank() && key.equalsIgnoreCase("70.")) {
 			if (this.isNewStation) {
 				this.saveObservationGroups(false);
 				this.lastStartPointName = null;
@@ -306,7 +306,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			this.isNewStation = false;
 
 			String endPointName = line.substring(15, 28).trim();
-			if (endPointName.isEmpty())
+			if (endPointName.isBlank())
 				return;
 
 			double th = 0.0;
@@ -317,7 +317,7 @@ public class BeoFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 			// Hoehenunterschied
 			String value = line.substring(64, 79).trim();
-			if (!value.isEmpty() && !value.startsWith("-1000.")) {
+			if (!value.isBlank() && !value.startsWith("-1000.")) {
 				try { 
 					TerrestrialObservationRow obs = new TerrestrialObservationRow();
 					obs.setStartPointName(this.startPointName);
