@@ -90,15 +90,15 @@ public abstract class LockFileReader {
 
 			long readedBytes = 0L;
 			String currentLine = null;
-			while (!this.interrupt && (currentLine = reader.readLine()) != null) {
+			while (!this.interrupt && (currentLine = removeNonBMPCharacters(reader.readLine())) != null) {
 				readedBytes += currentLine.length();
 
 				if (isFirstLine && currentLine.startsWith(UTF8_BOM)) {
 					currentLine = currentLine.substring(1); 
 					isFirstLine = false;
 				}
-
-				if (!currentLine.trim().isEmpty() && (this.ignoreStartString.isEmpty() || !currentLine.startsWith( this.ignoreStartString )))
+				
+				if (!currentLine.isBlank() && (this.ignoreStartString.isEmpty() || !currentLine.startsWith( this.ignoreStartString )))
 					this.parse(currentLine);
 
 				this.fireFileProgressChanged(sourceFile, FileProgressEventType.READ_LINE, readedBytes, totalBytes);
@@ -116,6 +116,37 @@ public abstract class LockFileReader {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private String removeNonBMPCharacters(final String str) {
+		if (str == null || str.isBlank())
+			return str;
+		
+		final int len = str.length();
+		if (len == 0)
+			return str;
+		
+		// https://stackoverflow.com/questions/6198986/how-can-i-replace-non-printable-unicode-characters-in-java
+		StringBuilder stringBuilder = new StringBuilder(len);
+		for (int offset = 0; offset < len;) {
+		    int codePoint = str.codePointAt(offset);
+		    offset += Character.charCount(codePoint);
+
+		    // Replace invisible control characters and unused code points
+		    switch (Character.getType(codePoint)) {
+		        case Character.CONTROL:     // \p{Cc}
+		        case Character.FORMAT:      // \p{Cf}
+		        case Character.PRIVATE_USE: // \p{Co}
+		        case Character.SURROGATE:   // \p{Cs}
+		        case Character.UNASSIGNED:  // \p{Cn}
+		            break;
+		        default:
+		        	stringBuilder.append(Character.toChars(codePoint));
+		            break;
+		    }
+		}
+
+	    return stringBuilder.toString();
 	}
 
 	public void interrupt() {

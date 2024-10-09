@@ -223,7 +223,7 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 				switch(type) {
 				case STATION:
 					String startPointName = parsedLine.get(pos).trim();
-					if (startPointName != null && !startPointName.isEmpty()) {
+					if (startPointName != null && !startPointName.isBlank()) {
 						if (this.startPointName == null)
 							this.startPointName = startPointName;
 						this.isGroupWithEqualStation = this.isGroupWithEqualStation && this.startPointName.equals(startPointName);
@@ -240,7 +240,7 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 					break;
 				case TARGET:
 					String endPointName = parsedLine.get(pos).trim();
-					if (endPointName != null && !endPointName.isEmpty())
+					if (endPointName != null && !endPointName.isBlank())
 						row.setEndPointName(endPointName);
 					else
 						continue;
@@ -312,7 +312,7 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 				switch(type) {
 				case STATION:
 					String startPointName = parsedLine.get(pos).trim();
-					if (startPointName != null && !startPointName.isEmpty()) {
+					if (startPointName != null && !startPointName.isBlank()) {
 						if (this.startPointName == null)
 							this.startPointName = startPointName;
 						this.isGroupWithEqualStation = this.isGroupWithEqualStation && this.startPointName.equals(startPointName);
@@ -329,7 +329,7 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 					break;
 				case TARGET:
 					String endPointName = parsedLine.get(pos).trim();
-					if (endPointName != null && !endPointName.isEmpty())
+					if (endPointName != null && !endPointName.isBlank())
 						row.setEndPointName(endPointName);
 					else
 						continue;
@@ -371,7 +371,7 @@ public class CSVObservationFileReader extends SourceFileReader<TreeItem<TreeItem
 			}
 		}
 
-		if (row.getStartPointName() != null && row.getEndPointName() != null && !row.getStartPointName().isEmpty() && !row.getEndPointName().isEmpty() && !row.getStartPointName().equals(row.getEndPointName()) && 
+		if (row.getStartPointName() != null && row.getEndPointName() != null && !row.getStartPointName().isBlank() && !row.getEndPointName().isBlank() && !row.getStartPointName().equals(row.getEndPointName()) && 
 				((this.observationType == ObservationType.GNSS3D && row.getZApriori() != null && row.getXApriori() != null && row.getYApriori() != null) ||
 						(this.observationType == ObservationType.GNSS2D && row.getXApriori() != null && row.getYApriori() != null) ||
 						(this.observationType == ObservationType.GNSS1D && row.getZApriori() != null)))

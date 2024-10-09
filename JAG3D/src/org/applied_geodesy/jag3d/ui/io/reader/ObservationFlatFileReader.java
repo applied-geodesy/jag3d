@@ -142,9 +142,9 @@ public class ObservationFlatFileReader extends FlatFileReader<TreeItem<TreeItemV
 			
 			String startPointName = null;
 			if (terrestrialObservationRow != null)
-				startPointName = terrestrialObservationRow.getStartPointName();
+				startPointName = terrestrialObservationRow.getStartPointName().trim();
 			else if (gnssObservationRow != null)
-				startPointName = gnssObservationRow.getStartPointName();
+				startPointName = gnssObservationRow.getStartPointName().trim();
 			
 			if (startPointName != null) {
 				if (this.startPointName == null)
