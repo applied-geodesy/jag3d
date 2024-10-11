@@ -122,30 +122,28 @@ public abstract class LockFileReader {
 		if (str == null || str.isBlank())
 			return str;
 		
-		final int len = str.length();
-		if (len == 0)
-			return str;
-		
-		// https://stackoverflow.com/questions/6198986/how-can-i-replace-non-printable-unicode-characters-in-java
+		final int len = str.length();		
 		StringBuilder stringBuilder = new StringBuilder(len);
 		for (int offset = 0; offset < len;) {
 		    int codePoint = str.codePointAt(offset);
 		    offset += Character.charCount(codePoint);
-
-		    // Replace invisible control characters and unused code points
-		    switch (Character.getType(codePoint)) {
-		        case Character.CONTROL:     // \p{Cc}
-		        case Character.FORMAT:      // \p{Cf}
-		        case Character.PRIVATE_USE: // \p{Co}
-		        case Character.SURROGATE:   // \p{Cs}
-		        case Character.UNASSIGNED:  // \p{Cn}
-		            break;
-		        default:
-		        	stringBuilder.append(Character.toChars(codePoint));
-		            break;
-		    }
+		    if (!Character.isIdentifierIgnorable(codePoint))
+		    	stringBuilder.append(Character.toChars(codePoint));
+//		    else {
+//		    	// Replace invisible control characters and unused code points
+//		    	switch (Character.getType(codePoint)) {
+//		    	case Character.CONTROL:     // \p{Cc} <-- enthaelt Tab
+//		    	case Character.FORMAT:      // \p{Cf}
+//		    	case Character.PRIVATE_USE: // \p{Co}
+//		    	case Character.SURROGATE:   // \p{Cs}
+//		    	case Character.UNASSIGNED:  // \p{Cn}
+//		    		break;
+//		    	default:
+//		    		stringBuilder.append(Character.toChars(codePoint));
+//		    		break;
+//		    	}
+//		    }
 		}
-
 	    return stringBuilder.toString();
 	}
 
