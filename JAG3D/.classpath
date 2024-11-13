@@ -67,12 +67,12 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/hsqldb-2.7.3.jar">
+	<classpathentry kind="lib" path="lib/hsqldb-2.7.4.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/sqltool-2.7.3.jar">
+	<classpathentry kind="lib" path="lib/sqltool-2.7.4.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
