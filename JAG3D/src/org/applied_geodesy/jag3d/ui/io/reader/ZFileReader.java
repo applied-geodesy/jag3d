@@ -264,10 +264,10 @@ public class ZFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				this.ih = 0;
 				this.targetHeights.clear();
 
-				if (key1.substring(2).matches("\\d+")) {
-					this.is2DStartPoint = key1.substring(2).matches("^9+$");
+				if (key1.matches("\\d+")) {
+					this.is2DStartPoint = key1.matches("^9+$");
 					if (!this.is2DStartPoint)
-						try {this.ih = 0.001 * Integer.parseInt(key1.substring(2).trim());} catch(Exception e){}
+						try {this.ih = 0.001 * Integer.parseInt(key1.trim(), 10);} catch(Exception e){}
 				}
 
 				if (line.length() > 71 && line.substring(70, 71).equals("|")) {
@@ -280,12 +280,12 @@ public class ZFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 			else if (this.startPointName != null && !this.startPointName.isEmpty() && line.length() >= 71 && c1 >= 2 && c1 <= 8 && c2 >= 0 && c2 <= 4 && line.charAt(68) != '*') {
 				String endPointId = key2;
 				double th = 0;
-				boolean is2DEndPoint = key1.substring(2).matches("^9+$");
+				boolean is2DEndPoint = key1.matches("^9+$");
 				if (!is2DEndPoint) {
-					if (key1.substring(2).matches("^0+$") && this.targetHeights.containsKey(endPointId)) 
+					if (key1.matches("^0+$") && this.targetHeights.containsKey(endPointId)) 
 						th = this.targetHeights.get(endPointId).doubleValue();
-					else if (key1.substring(2).matches("\\d+")) {
-						try {th = 0.001 * Integer.parseInt(key1.substring(2).trim());} catch(Exception e){}
+					else if (key1.matches("\\d+")) {
+						try {th = 0.001 * Integer.parseInt(key1.trim(), 10);} catch(Exception e){}
 						this.targetHeights.put(endPointId, th);	
 					}
 				}
