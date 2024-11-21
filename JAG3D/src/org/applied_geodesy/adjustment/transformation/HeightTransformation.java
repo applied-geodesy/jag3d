@@ -23,6 +23,7 @@ package org.applied_geodesy.adjustment.transformation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +87,9 @@ public class HeightTransformation extends Transformation {
 	}
 	
 	public static void deriveInitialGuess(Collection<HomologousFramePositionPair> points, HeightTransformation transformation, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
+		if (parameterRestrictions == null)
+			parameterRestrictions = Collections.emptySet();
+		
 		deriveInitialGuess(points, transformation.heightEquations, parameterRestrictions);
 	}
 	
@@ -110,12 +114,12 @@ public class HeightTransformation extends Transformation {
 
 		double z0 = 0, Z0 = 0;
 		int nop = 0;
-		for (HomologousFramePositionPair HomologousFramePositionPair : points) {
-			if (!HomologousFramePositionPair.isEnable())
+		for (HomologousFramePositionPair homologousFramePositionPair : points) {
+			if (!homologousFramePositionPair.isEnable())
 				continue;
 			
-			HomologousFramePosition pointSrc = HomologousFramePositionPair.getSourceSystemPosition();
-			HomologousFramePosition pointTrg = HomologousFramePositionPair.getTargetSystemPosition();
+			HomologousFramePosition pointSrc = homologousFramePositionPair.getSourceSystemPosition();
+			HomologousFramePosition pointTrg = homologousFramePositionPair.getTargetSystemPosition();
 			
 			z0 += pointSrc.getZ0();
 			Z0 += pointTrg.getZ0();
@@ -124,23 +128,23 @@ public class HeightTransformation extends Transformation {
 		}
 		
 		if (nop <= 0)
-			throw new IllegalArgumentException("Error, the number of points zero.");
+			throw new IllegalArgumentException("Error, the number of points is zero.");
 		
 		z0 /= nop;
 		Z0 /= nop;
 
-		if (parameterRestrictions != null && parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_Z)) {
+		if (parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_Z)) {
 			mz = 1;
 		} 
 		else {
 			mz = 0.0;
 			nop = 0;
-			for (HomologousFramePositionPair HomologousFramePositionPair : points) {
-				if (!HomologousFramePositionPair.isEnable())
+			for (HomologousFramePositionPair homologousFramePositionPair : points) {
+				if (!homologousFramePositionPair.isEnable())
 					continue;
 
-				HomologousFramePosition pointSrc = HomologousFramePositionPair.getSourceSystemPosition();
-				HomologousFramePosition pointTrg = HomologousFramePositionPair.getTargetSystemPosition();
+				HomologousFramePosition pointSrc = homologousFramePositionPair.getSourceSystemPosition();
+				HomologousFramePosition pointTrg = homologousFramePositionPair.getTargetSystemPosition();
 
 				double dz = pointSrc.getZ0() - z0;
 				double dZ = pointTrg.getZ0() - Z0;
@@ -154,7 +158,7 @@ public class HeightTransformation extends Transformation {
 			
 			mz /= nop;		}
 
-		if (parameterRestrictions != null && !parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_Z))
+		if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_Z))
 			tz = Z0 - (mz*z0);
 
 		heightEquations.setInitialGuess(tz, mz);	
