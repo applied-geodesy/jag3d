@@ -23,11 +23,13 @@ package org.applied_geodesy.adjustment.transformation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.transformation.equation.SpatialAffineEquations;
 import org.applied_geodesy.adjustment.transformation.parameter.ParameterType;
@@ -295,10 +297,176 @@ public class SpatialAffineTransformation extends Transformation {
 	}
 	
 	public static void deriveInitialGuess(Collection<HomologousFramePositionPair> points, SpatialAffineEquations spatialAffineEquations, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
-		if (parameterRestrictions == null || (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHEAR_X) && !parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHEAR_Y) && !parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHEAR_Z)))
+		if (parameterRestrictions == null)
+			parameterRestrictions = Collections.emptySet();
+		
+		if (parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_X) && parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Y) && !parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Z) || 
+				parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_X) && !parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Y) && parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Z) || 
+				!parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_X) && parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Y) && parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Z))
+			deriveInitialGuessViaPlanarAffin(points, spatialAffineEquations, parameterRestrictions);
+		else if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHEAR_X) && !parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHEAR_Y) && !parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHEAR_Z))
 			deriveInitialGuessViaQRdecomposition(points, spatialAffineEquations, parameterRestrictions);
 		else
 			deriveInitialGuessViaEigendecomposition(points, spatialAffineEquations, parameterRestrictions);
+	}
+	
+	private static void deriveInitialGuessViaPlanarAffin(Collection<HomologousFramePositionPair> points, SpatialAffineEquations spatialAffineEquations, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
+		double tx = 0;
+		double ty = 0;
+		double tz = 0;
+		
+		double q0 = 1;
+		double q1 = 0;
+		double q2 = 0;
+		double q3 = 0;
+		
+		double s11 = 1;
+		double s12 = 0;
+		double s13 = 0;
+
+		double s22 = 1;
+		double s23 = 0;
+
+		double s33 = 1;
+		
+		
+		double x0 = 0, y0 = 0, z0 = 0;
+		double X0 = 0, Y0 = 0, Z0 = 0;
+		
+		int nop = 0;
+		for (HomologousFramePositionPair homologousFramePositionPair : points) {
+			if (!homologousFramePositionPair.isEnable())
+				continue;
+			
+			HomologousFramePosition pointSrc = homologousFramePositionPair.getSourceSystemPosition();
+			HomologousFramePosition pointTrg = homologousFramePositionPair.getTargetSystemPosition();
+			
+			x0 += pointSrc.getX0();
+			y0 += pointSrc.getY0();
+			z0 += pointSrc.getZ0();
+			
+			X0 += pointTrg.getX0();
+			Y0 += pointTrg.getY0();
+			Z0 += pointTrg.getZ0();
+			
+			nop++;
+		}
+		
+		if (nop <= 0)
+			throw new IllegalArgumentException("Error, the number of points zero.");
+		
+		x0 /= nop;
+		y0 /= nop;
+		z0 /= nop;
+		
+		X0 /= nop;
+		Y0 /= nop;
+		Z0 /= nop;
+
+		double o = 0.0, a = 0.0, oa = 0.0;
+		for (HomologousFramePositionPair homologousFramePositionPair : points) {
+			if (!homologousFramePositionPair.isEnable())
+				continue;
+
+			HomologousFramePosition pointSrc = homologousFramePositionPair.getSourceSystemPosition();
+			HomologousFramePosition pointTrg = homologousFramePositionPair.getTargetSystemPosition();
+
+			double x = pointSrc.getX0() - x0;
+			double y = pointSrc.getY0() - y0;
+			double z = pointSrc.getZ0() - z0;
+
+			double X = pointTrg.getX0() - X0;
+			double Y = pointTrg.getY0() - Y0;
+			double Z = pointTrg.getZ0() - Z0;
+			
+			// Rotation rx, ry fixed
+			if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Z)) {
+					o  += x * Y - y * X;
+					a  += x * X + y * Y;
+			}
+			// Rotation rx, rz fixed
+			else if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Y)) {
+				o  += x * Z - z * X;
+				a  += x * X + z * Z;
+			}
+			// Rotation ry, rz fixed
+			else if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_X)) {
+				o  += y * Z - z * Y;
+				a  += y * Y + z * Z;
+			}
+
+			oa += x*x + y*y;
+		}
+
+		if (oa <= Constant.EPS)
+			throw new MatrixSingularException("Error, system of equations is singular.");
+
+		o /= oa;
+		a /= oa;
+		
+		// Massstab mx=my=mz
+		double m = Math.hypot(a, o);
+		if (parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_X) || parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_Y) || parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_Z)) {
+			if (m <= Constant.EPS)
+				throw new MatrixSingularException("Error, system of equations is singular.");
+			o /= m;
+			a /= m;
+		}
+
+		if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_X)) {
+			s11 = m;
+			s12 = 0;
+			s13 = 0;
+		}
+		if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_Y)) {
+			s22 = m;
+			s23 = 0;
+		}
+		if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_Z)) {
+			s33 = m;
+		}
+		
+		// Drehwinkel und Achse
+		double alpha = 0.5 * Math.atan2(o,a);
+		q0 = Math.cos(alpha);
+		// Rotation rx, ry fixed --> axis [0 0 1]
+		if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Z)) {
+			q3 = Math.sin(alpha);
+			if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_X))
+				tx = X0 - (a*x0 - o*y0);
+
+			if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_Y))
+				ty = Y0 - (o*x0 + a*y0);
+			
+			if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_Z))
+				tz = Z0 - z0;
+		}
+		// Rotation rx, rz fixed --> axis [0 1 0]
+		else if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Y)) {
+			q2 = Math.sin(alpha);
+			if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_X))
+				tx = X0 - (a*x0 - o*z0);
+
+			if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_Y))
+				ty = Y0 - y0;
+			
+			if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_Z))
+				tz = Z0 - (o*x0 + a*z0);
+		}
+		// Rotation ry, rz fixed --> axis [1 0 0]
+		else if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_X)) {
+			q1 = Math.sin(alpha);
+			if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_X))
+				tx = X0 - x0;
+
+			if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_Y))
+				ty = Y0 - (a*y0 - o*z0);
+			
+			if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_Z))
+				tz = Z0 - (o*y0 + a*z0);
+		}
+
+		spatialAffineEquations.setInitialGuess(tx, ty, tz, q0, q1, q2, q3, s11, s12, s13, s22,  s23,  s33);	
 	}
 	
 	private static void deriveInitialGuessViaQRdecomposition(Collection<HomologousFramePositionPair> points, SpatialAffineEquations spatialAffineEquations, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
@@ -327,12 +495,12 @@ public class SpatialAffineTransformation extends Transformation {
 		double X0 = 0, Y0 = 0, Z0 = 0;
 		
 		int nop = 0;
-		for (HomologousFramePositionPair HomologousFramePositionPair : points) {
-			if (!HomologousFramePositionPair.isEnable())
+		for (HomologousFramePositionPair homologousFramePositionPair : points) {
+			if (!homologousFramePositionPair.isEnable())
 				continue;
 			
-			HomologousFramePosition pointSrc = HomologousFramePositionPair.getSourceSystemPosition();
-			HomologousFramePosition pointTrg = HomologousFramePositionPair.getTargetSystemPosition();
+			HomologousFramePosition pointSrc = homologousFramePositionPair.getSourceSystemPosition();
+			HomologousFramePosition pointTrg = homologousFramePositionPair.getTargetSystemPosition();
 			
 			x0 += pointSrc.getX0();
 			y0 += pointSrc.getY0();
@@ -346,7 +514,7 @@ public class SpatialAffineTransformation extends Transformation {
 		}
 		
 		if (nop <= 0)
-			throw new IllegalArgumentException("Error, the number of points zero.");
+			throw new IllegalArgumentException("Error, the number of points is zero.");
 		
 		x0 /= nop;
 		y0 /= nop;
@@ -356,83 +524,78 @@ public class SpatialAffineTransformation extends Transformation {
 		Y0 /= nop;
 		Z0 /= nop;
 
-		for (HomologousFramePositionPair HomologousFramePositionPair : points) {
-			if (!HomologousFramePositionPair.isEnable())
-				continue;
-			
-			HomologousFramePosition pointSrc = HomologousFramePositionPair.getSourceSystemPosition();
-			HomologousFramePosition pointTrg = HomologousFramePositionPair.getTargetSystemPosition();
-			
-			double x = pointSrc.getX0() - x0;
-			double y = pointSrc.getY0() - y0;
-			double z = pointSrc.getZ0() - z0;
+		if (nop > 2 && (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_X) || !parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Y) || !parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Z))) {
+			for (HomologousFramePositionPair homologousFramePositionPair : points) {
+				if (!homologousFramePositionPair.isEnable())
+					continue;
 
-			double X = pointTrg.getX0() - X0;
-			double Y = pointTrg.getY0() - Y0;
-			double Z = pointTrg.getZ0() - Z0;
-			
-			for (int row = 0; row <= 6; row += 3) {
-				N.add(row, row,   x*x);
-				N.add(row, row+1, x*y);
-				N.add(row, row+2, x*z);
-				
-				N.add(row+1, row+1, y*y);
-				N.add(row+1, row+2, y*z);
-				
-				N.add(row+2, row+2, z*z);
-				
-				double w = 0;
-				if (row == 0)
-					w = X;
-				else if (row == 3)
-					w = Y;
-				else
-					w = Z;
-				
-				n.add(row,   x*w);
-				n.add(row+1, y*w);
-				n.add(row+2, z*w);
-			}			
-		}
+				HomologousFramePosition pointSrc = homologousFramePositionPair.getSourceSystemPosition();
+				HomologousFramePosition pointTrg = homologousFramePositionPair.getTargetSystemPosition();
 
-		Vector t = new DenseVector(n.size());
+				double x = pointSrc.getX0() - x0;
+				double y = pointSrc.getY0() - y0;
+				double z = pointSrc.getZ0() - z0;
 
-		try {
-			N.solve(n, t);
-		}
-		catch (Exception e) {
-			N = MathExtension.pinv(N, -1);
-			N.mult(n, t);
-		}
+				double X = pointTrg.getX0() - X0;
+				double Y = pointTrg.getY0() - Y0;
+				double Z = pointTrg.getZ0() - Z0;
 
-		DenseMatrix T = new DenseMatrix(3,3);
-		for (int i=0; i<9; i++)
-			T.set(i/3, i%3, t.get(i));
+				for (int row = 0; row <= 6; row += 3) {
+					N.add(row, row,   x*x);
+					N.add(row, row+1, x*y);
+					N.add(row, row+2, x*z);
 
-		QR qr = QR.factorize(T);
-		Matrix Q = qr.getQ();
-		Matrix R = qr.getR();
-		
-//		double qx = (Q.get(1,1) * Q.get(2,2)) - (Q.get(2,1) * Q.get(1,2));
-//		double qy = (Q.get(1,0) * Q.get(2,2)) - (Q.get(2,0) * Q.get(1,2));
-//		double qz = (Q.get(1,0) * Q.get(2,1)) - (Q.get(2,0) * Q.get(1,1));
-//		double det3 = Q.get(0,0) * qx - Q.get(0,1) * qy + Q.get(0,2) * qz;
-			
-		if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_X) || !parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Y) || !parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Z)) {
+					N.add(row+1, row+1, y*y);
+					N.add(row+1, row+2, y*z);
+
+					N.add(row+2, row+2, z*z);
+
+					double w = 0;
+					if (row == 0)
+						w = X;
+					else if (row == 3)
+						w = Y;
+					else
+						w = Z;
+
+					n.add(row,   x*w);
+					n.add(row+1, y*w);
+					n.add(row+2, z*w);
+				}			
+			}
+
+			Vector t = new DenseVector(n.size());
+
+			try {
+				N.solve(n, t);
+			}
+			catch (Exception e) {
+				N = MathExtension.pinv(N, -1);
+				N.mult(n, t);
+			}
+
+			DenseMatrix T = new DenseMatrix(3,3);
+			for (int i=0; i<9; i++)
+				T.set(i/3, i%3, t.get(i));
+
+			QR qr = QR.factorize(T);
+			Matrix Q = qr.getQ();
+			Matrix R = qr.getR();
+
 			q0 = 0.5*Math.sqrt(1.0 + Q.get(0,0) + Q.get(1,1) + Q.get(2,2));
 			q1 = 0.25 * (Q.get(2,1) - Q.get(1,2)) / q0;
 			q2 = 0.25 * (Q.get(0,2) - Q.get(2,0)) / q0;
 			q3 = 0.25 * (Q.get(1,0) - Q.get(0,1)) / q0;
+
+			s11 = R.get(0,0);
+			s12 = R.get(0,1);
+			s13 = R.get(0,2);
+
+			s22 = R.get(1,1);
+			s23 = R.get(1,2);
+
+			s33 = R.get(2,2);
 		}
-		
-		s11 = R.get(0,0);
-		s12 = R.get(0,1);
-		s13 = R.get(0,2);
-		
-		s22 = R.get(1,1);
-		s23 = R.get(1,2);
-		
-		s33 = R.get(2,2);
 
 		double smxP = s11*x0 + s12*y0 + s13*z0;
 		double smyP = s22*y0 + s23*z0;
@@ -491,12 +654,12 @@ public class SpatialAffineTransformation extends Transformation {
 		double x0 = 0, y0 = 0, z0 = 0;
 		double X0 = 0, Y0 = 0, Z0 = 0;
 		int nop = 0;
-		for (HomologousFramePositionPair HomologousFramePositionPair : points) {
-			if (!HomologousFramePositionPair.isEnable())
+		for (HomologousFramePositionPair homologousFramePositionPair : points) {
+			if (!homologousFramePositionPair.isEnable())
 				continue;
 			
-			HomologousFramePosition pointSrc = HomologousFramePositionPair.getSourceSystemPosition();
-			HomologousFramePosition pointTrg = HomologousFramePositionPair.getTargetSystemPosition();
+			HomologousFramePosition pointSrc = homologousFramePositionPair.getSourceSystemPosition();
+			HomologousFramePosition pointTrg = homologousFramePositionPair.getTargetSystemPosition();
 			
 			x0 += pointSrc.getX0();
 			y0 += pointSrc.getY0();
@@ -509,8 +672,8 @@ public class SpatialAffineTransformation extends Transformation {
 			nop++;
 		}
 		
-//		if (nop < 3)
-//			throw new IllegalArgumentException("Error, the number of points is not sufficient; at least 3 points are needed. " + nop);
+		if (nop <= 0)
+			throw new IllegalArgumentException("Error, the number of points is zero.");
 		
 		x0 /= nop;
 		y0 /= nop;
@@ -520,7 +683,7 @@ public class SpatialAffineTransformation extends Transformation {
 		Y0 /= nop;
 		Z0 /= nop;
 		
-		if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_X) || !parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Y) || !parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Z)) {
+		if (nop > 2 && (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_X) || !parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Y) || !parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Z))) {
 			DenseMatrix S = new DenseMatrix(3,3);
 
 			for (HomologousFramePositionPair HomologousFramePositionPair : points) {

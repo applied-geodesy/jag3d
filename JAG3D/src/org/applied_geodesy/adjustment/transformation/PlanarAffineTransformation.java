@@ -23,6 +23,7 @@ package org.applied_geodesy.adjustment.transformation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -211,6 +212,16 @@ public class PlanarAffineTransformation extends Transformation {
 	}
 	
 	public static void deriveInitialGuess(Collection<HomologousFramePositionPair> points, PlanarAffineEquations planarAffineEquations, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
+		if (parameterRestrictions == null)
+			parameterRestrictions = Collections.emptySet();
+		
+		if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Z) && !parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHEAR_Z))
+			deriveInitialGuessViaAffin(points, planarAffineEquations, parameterRestrictions);
+		else
+			deriveInitialGuessViaHelmert(points, planarAffineEquations, parameterRestrictions);
+	}
+	
+	public static void deriveInitialGuessViaHelmert(Collection<HomologousFramePositionPair> points, PlanarAffineEquations planarAffineEquations, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
 		double tx = 0;
 		double ty = 0;
 		
@@ -223,12 +234,12 @@ public class PlanarAffineTransformation extends Transformation {
 		double X0 = 0, Y0 = 0;
 		
 		int nop = 0;
-		for (HomologousFramePositionPair HomologousFramePositionPair : points) {
-			if (!HomologousFramePositionPair.isEnable())
+		for (HomologousFramePositionPair homologousFramePositionPair : points) {
+			if (!homologousFramePositionPair.isEnable())
 				continue;
 			
-			HomologousFramePosition pointSrc = HomologousFramePositionPair.getSourceSystemPosition();
-			HomologousFramePosition pointTrg = HomologousFramePositionPair.getTargetSystemPosition();
+			HomologousFramePosition pointSrc = homologousFramePositionPair.getSourceSystemPosition();
+			HomologousFramePosition pointTrg = homologousFramePositionPair.getTargetSystemPosition();
 			
 			x0 += pointSrc.getX0();
 			y0 += pointSrc.getY0();
@@ -240,7 +251,7 @@ public class PlanarAffineTransformation extends Transformation {
 		}
 		
 		if (nop <= 0)
-			throw new IllegalArgumentException("Error, the number of points zero.");
+			throw new IllegalArgumentException("Error, the number of points is zero.");
 		
 		x0 /= nop;
 		y0 /= nop;
@@ -248,18 +259,18 @@ public class PlanarAffineTransformation extends Transformation {
 		X0 /= nop;
 		Y0 /= nop;
 
-		if (parameterRestrictions != null && parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Z) && parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHEAR_Z)) {
+		if (parameterRestrictions.contains(ParameterRestrictionType.FIXED_ROTATION_Z) && parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHEAR_Z)) {
 			a11 = 1;
 			a22 = 1;
 		} 
 		else {
 			double o = 0.0, a = 0.0, oa = 0.0;
-			for (HomologousFramePositionPair HomologousFramePositionPair : points) {
-				if (!HomologousFramePositionPair.isEnable())
+			for (HomologousFramePositionPair homologousFramePositionPair : points) {
+				if (!homologousFramePositionPair.isEnable())
 					continue;
 
-				HomologousFramePosition pointSrc = HomologousFramePositionPair.getSourceSystemPosition();
-				HomologousFramePosition pointTrg = HomologousFramePositionPair.getTargetSystemPosition();
+				HomologousFramePosition pointSrc = homologousFramePositionPair.getSourceSystemPosition();
+				HomologousFramePosition pointTrg = homologousFramePositionPair.getTargetSystemPosition();
 
 				double x = pointSrc.getX0() - x0;
 				double y = pointSrc.getY0() - y0;
@@ -284,7 +295,7 @@ public class PlanarAffineTransformation extends Transformation {
 			a21 = o;
 			a22 = a;
 			
-			if (parameterRestrictions != null && (parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_X) || parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_Y))) {
+			if (parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_X) || parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_Y)) {
 				oa = Math.hypot(a, o);
 				if (oa <= Constant.EPS)
 					throw new MatrixSingularException("Error, system of equations is singular.");
@@ -301,12 +312,112 @@ public class PlanarAffineTransformation extends Transformation {
 			}
 		}
 
-		if (parameterRestrictions != null && !parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_X))
+		if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_X))
 			tx = X0 - (a11*x0 - a12*y0);
 
-		if (parameterRestrictions != null && !parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_Y))
+		if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_Y))
 			ty = Y0 - (a21*x0 + a22*y0);
 
+
+		planarAffineEquations.setInitialGuess(tx, ty, a11, a12, a21, a22);	
+	}
+	
+	private static void deriveInitialGuessViaAffin(Collection<HomologousFramePositionPair> points, PlanarAffineEquations planarAffineEquations, Set<ParameterRestrictionType> parameterRestrictions) throws MatrixSingularException, IllegalArgumentException, NotConvergedException, UnsupportedOperationException {
+		double tx = 0;
+		double ty = 0;
+		
+		double a11 = 1;
+		double a12 = 0;
+		double a21 = 0;
+		double a22 = 1;
+		
+		double x0 = 0, y0 = 0;
+		double X0 = 0, Y0 = 0;
+		
+		int nop = 0;
+		for (HomologousFramePositionPair homologousFramePositionPair : points) {
+			if (!homologousFramePositionPair.isEnable())
+				continue;
+			
+			HomologousFramePosition pointSrc = homologousFramePositionPair.getSourceSystemPosition();
+			HomologousFramePosition pointTrg = homologousFramePositionPair.getTargetSystemPosition();
+			
+			x0 += pointSrc.getX0();
+			y0 += pointSrc.getY0();
+			
+			X0 += pointTrg.getX0();
+			Y0 += pointTrg.getY0();
+			
+			nop++;
+		}
+		
+		if (nop <= 0)
+			throw new IllegalArgumentException("Error, the number of points is zero.");
+		
+		x0 /= nop;
+		y0 /= nop;
+		
+		X0 /= nop;
+		Y0 /= nop;
+
+		double xx = 0, xX = 0, xY = 0, yy = 0, yY = 0, yX = 0, xy = 0;
+		for (HomologousFramePositionPair homologousFramePositionPair : points) {
+			if (!homologousFramePositionPair.isEnable())
+				continue;
+
+			HomologousFramePosition pointSrc = homologousFramePositionPair.getSourceSystemPosition();
+			HomologousFramePosition pointTrg = homologousFramePositionPair.getTargetSystemPosition();
+
+			double x = pointSrc.getX0() - x0;
+			double y = pointSrc.getY0() - y0;
+
+			double X = pointTrg.getX0() - X0;
+			double Y = pointTrg.getY0() - Y0;
+
+			xx += x * x;
+			xX += x * X;
+			xY += x * Y;
+			
+			yy += y * y;
+			yY += y * Y;
+			yX += y * X;
+			
+			xy += x * y;
+		}
+
+		double N = xx * yy - xy*xy;
+		if (N <= Constant.EPS)
+			throw new MatrixSingularException("Error, system of equations is singular.");
+
+		a11 = (xX * yy - yX * xy) / N; // a1
+		a12 = (xX * xy - yX * xx) / N; // a2
+		a21 = (xY * yy - yY * xy) / N; // a4
+		a22 = (yY * xx - xY * xy) / N; // a3
+
+		if (parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_X)) {
+			double mx = Math.hypot(a11, a21);
+			if (mx <= Constant.EPS)
+				throw new MatrixSingularException("Error, system of equations is singular.");
+			a11 /= mx;
+			a21 /= mx;
+		}
+
+		if (parameterRestrictions.contains(ParameterRestrictionType.FIXED_SCALE_Y)) {
+			double my = Math.hypot(a12, a22);
+			if (my <= Constant.EPS)
+				throw new MatrixSingularException("Error, system of equations is singular.");
+			a12 /= my;
+			a22 /= my;
+		}
+
+
+		if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_X))
+			tx = X0 - (a11*x0 - a12*y0);
+
+		if (!parameterRestrictions.contains(ParameterRestrictionType.FIXED_SHIFT_Y))
+			ty = Y0 - (a21*x0 + a22*y0);
+		
+		
 		planarAffineEquations.setInitialGuess(tx, ty, a11, a12, a21, a22);	
 	}
 	
