@@ -25,5 +25,6 @@ public enum AnalysisChartType {
 	RESIDUALS,
 	REDUNDANCY,
 	SIGN,
+	INFLUENCE_ON_POSITION,
 	;
 }

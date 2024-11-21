@@ -5459,11 +5459,17 @@ public class SQLManager {
 		for (int i = 1; i < observationTypes.length; i++)
 			inArrayValues.append(",?");
 		
+		String columnName = null;
+		if (tableRowHighlightType == TableRowHighlightType.INFLUENCE_ON_POSITION)
+			columnName = "influence_on_position";
+		else
+			columnName = "redundancy";
+				
 		String sql = "SELECT "
 				+ "CASE "
-				+ "WHEN \"redundancy\" < (SELECT \"left_boundary\" FROM \"TableRowHighlightRange\" WHERE \"type\" = ? LIMIT 1) THEN CAST(? AS INT) "
-				+ "WHEN \"redundancy\" BETWEEN (SELECT \"left_boundary\" FROM \"TableRowHighlightRange\" WHERE \"type\" = ? LIMIT 1) AND (SELECT \"right_boundary\" FROM \"TableRowHighlightRange\" WHERE \"type\" = ? LIMIT 1) THEN CAST(? AS INT) "
-				+ "WHEN \"redundancy\" > (SELECT \"right_boundary\" FROM \"TableRowHighlightRange\" WHERE \"type\" = ? LIMIT 1) THEN CAST(? AS INT) "
+				+ "WHEN ABS(\"" + columnName + "\") < (SELECT \"left_boundary\" FROM \"TableRowHighlightRange\" WHERE \"type\" = ? LIMIT 1) THEN CAST(? AS INT) "
+				+ "WHEN ABS(\"" + columnName + "\") BETWEEN (SELECT \"left_boundary\" FROM \"TableRowHighlightRange\" WHERE \"type\" = ? LIMIT 1) AND (SELECT \"right_boundary\" FROM \"TableRowHighlightRange\" WHERE \"type\" = ? LIMIT 1) THEN CAST(? AS INT) "
+				+ "WHEN ABS(\"" + columnName + "\") > (SELECT \"right_boundary\" FROM \"TableRowHighlightRange\" WHERE \"type\" = ? LIMIT 1) THEN CAST(? AS INT) "
 				+ "END AS \"range\", "
 				+ "COUNT(\"id\") AS \"data_count\" "
 				+ "FROM \"ObservationAposteriori\" "
@@ -5480,24 +5486,35 @@ public class SQLManager {
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 
 		int idx = 1;
-		stmt.setInt(idx++, tableRowHighlightType.getId()); // INADEQUATE range
-		stmt.setInt(idx++, TableRowHighlightRangeType.INADEQUATE.getId()); // INADEQUATE
-		
-		stmt.setInt(idx++, tableRowHighlightType.getId()); // SATISFACTORY - left range
-		stmt.setInt(idx++, tableRowHighlightType.getId()); // SATISFACTORY - right range
-		stmt.setInt(idx++, TableRowHighlightRangeType.SATISFACTORY.getId()); // SATISFACTORY
-		
-		stmt.setInt(idx++, tableRowHighlightType.getId()); // EXCELLENT range
-		stmt.setInt(idx++, TableRowHighlightRangeType.EXCELLENT.getId()); // EXCELLENT
+		if (tableRowHighlightType == TableRowHighlightType.INFLUENCE_ON_POSITION) {
+			stmt.setInt(idx++, tableRowHighlightType.getId());                // EXCELLENT range
+			stmt.setInt(idx++, TableRowHighlightRangeType.EXCELLENT.getId()); // EXCELLENT
+		}
+		else {
+			stmt.setInt(idx++, tableRowHighlightType.getId());                 // INADEQUATE range
+			stmt.setInt(idx++, TableRowHighlightRangeType.INADEQUATE.getId()); // INADEQUATE
+		}
 
+		stmt.setInt(idx++, tableRowHighlightType.getId());                   // SATISFACTORY - left range
+		stmt.setInt(idx++, tableRowHighlightType.getId());                   // SATISFACTORY - right range
+		stmt.setInt(idx++, TableRowHighlightRangeType.SATISFACTORY.getId()); // SATISFACTORY
+
+		if (tableRowHighlightType == TableRowHighlightType.INFLUENCE_ON_POSITION) {
+			stmt.setInt(idx++, tableRowHighlightType.getId());                 // INADEQUATE range
+			stmt.setInt(idx++, TableRowHighlightRangeType.INADEQUATE.getId()); // INADEQUATE
+		}
+		else {
+			stmt.setInt(idx++, tableRowHighlightType.getId());                // EXCELLENT range
+			stmt.setInt(idx++, TableRowHighlightRangeType.EXCELLENT.getId()); // EXCELLENT
+		}
 		for (ObservationType type : observationTypes) 
 			stmt.setInt(idx++, type.getId());
- 
+		
 		ResultSet rs = stmt.executeQuery();
 		while (rs.next()) {
 			int range = rs.getInt("range");
 			int count = rs.getInt("data_count");
-			
+
 			TableRowHighlightRangeType tableRowHighlightRangeType = TableRowHighlightRangeType.getEnumByValue(range);
 			if (tableRowHighlightRangeType != null && tableRowHighlightRangeType != TableRowHighlightRangeType.NONE) {
 				chartData.put(tableRowHighlightRangeType, count);
@@ -5507,7 +5524,6 @@ public class SQLManager {
 		return chartData;
 	}
 	
-	// TODO loadResidualSignDistributions
 	public Map<SignType, Integer> getResidualSigns(VarianceComponentType[] varianceComponentTypes) throws SQLException {
 		Map<SignType, Integer> chartData = new LinkedHashMap<SignType, Integer>(SignType.values().length);
 		chartData.put(SignType.POSITIVE, 0);
@@ -5528,19 +5544,6 @@ public class SQLManager {
 				+ "FROM \"VarianceComponent\" "
 				+ "WHERE \"number_of_observations\" > 0 "
 				+ "AND \"type\" IN (" + inTypeArray + ")";
-		
-		
-//		String sql = "SELECT "
-//				+ "SUM(CASE WHEN \"residual\" >= 0 THEN 1 ELSE 0 END) AS \"number_of_positive_residuals\", "
-//				+ "SUM(CASE WHEN \"residual\" <  0 THEN 1 ELSE 0 END) AS \"number_of_negative_residuals\" "
-//				+ "FROM \"ObservationAposteriori\" JOIN \"ObservationApriori\" "
-//				+ "ON \"ObservationApriori\".\"id\" = \"ObservationAposteriori\".\"id\" "
-//				+ "JOIN \"ObservationGroup\" "
-//				+ "ON \"ObservationGroup\".\"id\" = \"ObservationApriori\".\"group_id\" "
-//				+ "WHERE \"ObservationGroup\".\"enable\" = TRUE "
-//				+ "AND \"ObservationApriori\".\"enable\" = TRUE "
-//				+ "AND \"redundancy\" > 0 "
-//				+ "AND \"type\" IN (" + inTypeArray + ") ";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		

@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import org.applied_geodesy.jag3d.ui.dialog.chart.AnalysisChartType;
 import org.applied_geodesy.jag3d.ui.dialog.chart.AnalysisChartTypeListCell;
+import org.applied_geodesy.jag3d.ui.dialog.chart.UIInfluenceOnPositionAnalysisChart;
 import org.applied_geodesy.jag3d.ui.dialog.chart.UIRedundancyAnalysisChart;
 import org.applied_geodesy.jag3d.ui.dialog.chart.UIResidualAnalysisChart;
 import org.applied_geodesy.jag3d.ui.dialog.chart.UISignAnalysisChart;
@@ -162,6 +163,19 @@ public class AnalysisChartsDialog {
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					UIRedundancyAnalysisChart.getInstance().load();
+				}
+			});
+
+			break;
+			
+		case INFLUENCE_ON_POSITION:
+			this.dialog.setHeaderText(i18n.getString("AnalysisChartsDialog.chart.type.influence_on_position.header", "Pie chart of influence on position distribution"));
+			node = UIInfluenceOnPositionAnalysisChart.getInstance().getNode();
+			this.setChart(node);
+			
+			Platform.runLater(new Runnable() {
+				@Override public void run() {
+					UIInfluenceOnPositionAnalysisChart.getInstance().load();
 				}
 			});
 
