@@ -41,6 +41,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.chart.PieChart;
@@ -207,11 +208,12 @@ public class UIInfluenceOnPositionAnalysisChart {
 
 			// Adapt legend
 			Set<Node> nodes = this.pieChart.lookupAll("Label.chart-legend-item");
+			String legendAbbr = i18n.getString("UIInfluenceOnPositionAnalysisChart.chart.legend.abbreviation", "EP");
 			for (Node node : nodes) {
 				if (node instanceof Label && ((Label) node).getGraphic() instanceof Region) {
 					Label label = (Label) node;
 					Region region = (Region)label.getGraphic();
-
+					
 					String name = label.getText();
 					if (name.equals(INADEQUATE) || name.equals(SATISFACTORY) || name.equals(EXCELLENT)) {
 						TableRowHighlightRangeType tableRowHighlightRangeType = TableRowHighlightRangeType.valueOf(name);
@@ -219,15 +221,18 @@ public class UIInfluenceOnPositionAnalysisChart {
 						String rgbColor = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f, %.7f)", color.getRed()*255, color.getGreen()*255, color.getBlue()*255, color.getOpacity());
 						region.setStyle(color != null && color != Color.TRANSPARENT ? String.format("-fx-pie-color: %s;", rgbColor) : "");
 
+						label.setMaxWidth(Double.MAX_VALUE);
+						label.setAlignment(Pos.CENTER);
+						
 						switch (tableRowHighlightRangeType) {
 						case INADEQUATE:
-							label.setText(String.format(Locale.ENGLISH, "EP \u003E %s", options.toLengthResidualFormat(rightBoundary, true)));
+							label.setText(String.format(Locale.ENGLISH, "%s \u003E %s", legendAbbr,  options.toLengthResidualFormat(rightBoundary, true)));
 							break;	
 						case SATISFACTORY:
-							label.setText(String.format(Locale.ENGLISH, "%s \u2264 EP \u2264 %s", options.toLengthResidualFormat(leftBoundary, false), options.toLengthResidualFormat(rightBoundary, true)));
+							label.setText(String.format(Locale.ENGLISH, "%s \u2264 %s \u2264 %s", options.toLengthResidualFormat(leftBoundary, false), legendAbbr, options.toLengthResidualFormat(rightBoundary, true)));
 							break;
 						case EXCELLENT:
-							label.setText(String.format(Locale.ENGLISH, "EP \u003C %s", options.toLengthResidualFormat(leftBoundary, true)));
+							label.setText(String.format(Locale.ENGLISH, "%s \u003C %s", legendAbbr, options.toLengthResidualFormat(leftBoundary, true)));
 							break;											
 						default:
 							System.err.println(this.getClass().getSimpleName() + ": Unsupported table row highlight type" + tableRowHighlightRangeType);

@@ -41,6 +41,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.chart.PieChart;
@@ -207,6 +208,7 @@ public class UIRedundancyAnalysisChart {
 
 			// Adapt legend
 			Set<Node> nodes = this.pieChart.lookupAll("Label.chart-legend-item");
+			String legendAbbr = i18n.getString("UIRedundancyAnalysisChart.chart.legend.abbreviation", "r");
 			for (Node node : nodes) {
 				if (node instanceof Label && ((Label) node).getGraphic() instanceof Region) {
 					Label label = (Label) node;
@@ -218,16 +220,19 @@ public class UIRedundancyAnalysisChart {
 						Color color = this.tableRowHighlight.getColor(tableRowHighlightRangeType);
 						String rgbColor = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f, %.7f)", color.getRed()*255, color.getGreen()*255, color.getBlue()*255, color.getOpacity());
 						region.setStyle(color != null && color != Color.TRANSPARENT ? String.format("-fx-pie-color: %s;", rgbColor) : "");
+						
+						label.setMaxWidth(Double.MAX_VALUE);
+						label.setAlignment(Pos.CENTER);
 
 						switch (tableRowHighlightRangeType) {
 						case INADEQUATE:
-							label.setText(String.format(Locale.ENGLISH, "%s \u2264 r \u003C %s", 0, options.toPercentFormat(leftBoundary, true)));
+							label.setText(String.format(Locale.ENGLISH, "%s \u2264 %s \u003C %s", 0, legendAbbr, options.toPercentFormat(leftBoundary, true)));
 							break;
 						case SATISFACTORY:
-							label.setText(String.format(Locale.ENGLISH, "%s \u2264 r \u2264 %s", options.toPercentFormat(leftBoundary, false), options.toPercentFormat(rightBoundary, true)));
+							label.setText(String.format(Locale.ENGLISH, "%s \u2264 %s \u2264 %s", options.toPercentFormat(leftBoundary, false), legendAbbr, options.toPercentFormat(rightBoundary, true)));
 							break;
 						case EXCELLENT:
-							label.setText(String.format(Locale.ENGLISH, "%s \u003C r \u2264 %s", options.toPercentFormat(rightBoundary, false), options.toPercentFormat(1, true)));
+							label.setText(String.format(Locale.ENGLISH, "%s \u003C %s \u2264 %s", options.toPercentFormat(rightBoundary, false), legendAbbr, options.toPercentFormat(1, true)));
 							break;
 						default:
 							System.err.println(this.getClass().getSimpleName() + ": Unsupported table row highlight type" + tableRowHighlightRangeType);
