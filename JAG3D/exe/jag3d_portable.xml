@@ -18,16 +18,16 @@
     <path>openjdk\</path>
     <requiresJdk>false</requiresJdk>
     <requires64Bit>true</requires64Bit>
-    <minVersion>17.0.0</minVersion>
+    <minVersion>21.0.0</minVersion>
     <maxVersion></maxVersion>
   </jre>
   <versionInfo>
-    <fileVersion>20.23.12.30</fileVersion>
-    <txtFileVersion>20231230</txtFileVersion>
+    <fileVersion>20.24.11.23</fileVersion>
+    <txtFileVersion>20241123</txtFileVersion>
     <fileDescription>Java Applied Geodesy 3D (JAG3D) - Least-Squares Adjustment Software for Geodetic Sciences</fileDescription>
     <copyright>Michael Loesler</copyright>
-    <productVersion>20.23.12.30</productVersion>
-    <txtProductVersion>20231230</txtProductVersion>
+    <productVersion>20.24.11.23</productVersion>
+    <txtProductVersion>20241123</txtProductVersion>
     <productName>Java Applied Geodesy 3D (JAG3D) - Least-Squares Adjustment Software for Geodetic Sciences</productName>
     <companyName>Applied Geodesy - https://applied-geodesy.org</companyName>
     <internalName>JAG3D</internalName>
