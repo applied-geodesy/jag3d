@@ -40,6 +40,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.chart.PieChart;
@@ -231,6 +232,9 @@ public class UISignAnalysisChart {
 						Color color = this.tableRowHighlight.getColor(tableRowHighlightRangeType);
 						String rgbColor = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f, %.7f)", color.getRed()*255, color.getGreen()*255, color.getBlue()*255,  color.getOpacity());
 						region.setStyle(color != null && color != Color.TRANSPARENT ? String.format("-fx-pie-color: %s;", rgbColor) : "");
+						
+						label.setMaxWidth(Double.MAX_VALUE);
+						label.setAlignment(Pos.CENTER);
 
 						switch (signType) {
 						case POSITIVE:

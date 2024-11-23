@@ -46,6 +46,8 @@ public class AnalysisChartTypeListCell extends ListCell<AnalysisChartType> {
 			return i18n.getString("AnalysisChartTypeListViewCell.residual.label", "Residuals analysis");
 		case REDUNDANCY:
 			return i18n.getString("AnalysisChartTypeListViewCell.redundancy.label", "Redundancy distribution");
+		case INFLUENCE_ON_POSITION:
+			return i18n.getString("AnalysisChartTypeListViewCell.influence_on_position.label", "Influence on position distribution");
 		case SIGN:
 			return i18n.getString("AnalysisChartTypeListViewCell.sign.label", "Sign distribution");
 		}

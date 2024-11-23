@@ -56,7 +56,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
-public class UIRedundancyAnalysisChart {
+public class UIInfluenceOnPositionAnalysisChart {
 
 	private class TerrestrialObservationTypeChangeListener implements ChangeListener<TerrestrialObservationType> {
 		@Override
@@ -70,7 +70,7 @@ public class UIRedundancyAnalysisChart {
 	private TableRowHighlight tableRowHighlight = TableRowHighlight.getInstance();
 	
 	private FormatterOptions options = FormatterOptions.getInstance();
-	private static UIRedundancyAnalysisChart analysisChart = new UIRedundancyAnalysisChart();
+	private static UIInfluenceOnPositionAnalysisChart analysisChart = new UIInfluenceOnPositionAnalysisChart();
 	private Node analysisChartNode;
 	private Map<TableRowHighlightRangeType, Integer> chartData = new HashMap<TableRowHighlightRangeType, Integer>(0);
 	private final String INADEQUATE   = "INADEQUATE";   // TableRowHighlightRangeType.INADEQUATE.name()
@@ -80,9 +80,9 @@ public class UIRedundancyAnalysisChart {
 	private ComboBox<TerrestrialObservationType> terrestrialObservationTypeComboBox;
 	private PieChart pieChart;
 
-	private UIRedundancyAnalysisChart() {}
+	private UIInfluenceOnPositionAnalysisChart() {}
 
-	public static UIRedundancyAnalysisChart getInstance() {
+	public static UIInfluenceOnPositionAnalysisChart getInstance() {
 		analysisChart.init();
 		return analysisChart;
 	}
@@ -97,7 +97,7 @@ public class UIRedundancyAnalysisChart {
 
 		BorderPane borderPane = new BorderPane();
 
-		this.terrestrialObservationTypeComboBox = this.createTerrestrialObservationTypeComboBox(TerrestrialObservationType.ALL, i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.tooltip", "Set observational type"));
+		this.terrestrialObservationTypeComboBox = this.createTerrestrialObservationTypeComboBox(TerrestrialObservationType.ALL, i18n.getString("UIInfluenceOnPositionAnalysisChart.observationtype.terrestrial.tooltip", "Set observational type"));
 		Region spacer = new Region();
 		HBox hbox = new HBox(10);
 		hbox.setPadding(new Insets(5, 10, 5, 15));
@@ -170,10 +170,10 @@ public class UIRedundancyAnalysisChart {
 			terrestrialObservationType = terrestrialObservationType == null ? TerrestrialObservationType.ALL : terrestrialObservationType;
 			ObservationType[] observationTypes = this.getSelectedObservationTypes(terrestrialObservationType);
 			
-			double leftBoundary  = this.tableRowHighlight.getLeftBoundary(TableRowHighlightType.REDUNDANCY);
-			double rightBoundary = this.tableRowHighlight.getRightBoundary(TableRowHighlightType.REDUNDANCY);
+			double leftBoundary  = this.tableRowHighlight.getLeftBoundary(TableRowHighlightType.INFLUENCE_ON_POSITION);
+			double rightBoundary = this.tableRowHighlight.getRightBoundary(TableRowHighlightType.INFLUENCE_ON_POSITION);
 			
-			this.chartData = SQLManager.getInstance().getChartData(TableRowHighlightType.REDUNDANCY, observationTypes);
+			this.chartData = SQLManager.getInstance().getChartData(TableRowHighlightType.INFLUENCE_ON_POSITION, observationTypes);
 			this.pieChart.getData().clear();
 
 			List<PieChart.Data> dataList = FXCollections.observableArrayList();
@@ -208,32 +208,32 @@ public class UIRedundancyAnalysisChart {
 
 			// Adapt legend
 			Set<Node> nodes = this.pieChart.lookupAll("Label.chart-legend-item");
-			String legendAbbr = i18n.getString("UIRedundancyAnalysisChart.chart.legend.abbreviation", "r");
+			String legendAbbr = i18n.getString("UIInfluenceOnPositionAnalysisChart.chart.legend.abbreviation", "EP");
 			for (Node node : nodes) {
 				if (node instanceof Label && ((Label) node).getGraphic() instanceof Region) {
 					Label label = (Label) node;
 					Region region = (Region)label.getGraphic();
-
+					
 					String name = label.getText();
 					if (name.equals(INADEQUATE) || name.equals(SATISFACTORY) || name.equals(EXCELLENT)) {
 						TableRowHighlightRangeType tableRowHighlightRangeType = TableRowHighlightRangeType.valueOf(name);
 						Color color = this.tableRowHighlight.getColor(tableRowHighlightRangeType);
 						String rgbColor = String.format(Locale.ENGLISH, "rgb(%.0f, %.0f, %.0f, %.7f)", color.getRed()*255, color.getGreen()*255, color.getBlue()*255, color.getOpacity());
 						region.setStyle(color != null && color != Color.TRANSPARENT ? String.format("-fx-pie-color: %s;", rgbColor) : "");
-						
+
 						label.setMaxWidth(Double.MAX_VALUE);
 						label.setAlignment(Pos.CENTER);
-
+						
 						switch (tableRowHighlightRangeType) {
 						case INADEQUATE:
-							label.setText(String.format(Locale.ENGLISH, "%s \u2264 %s \u003C %s", 0, legendAbbr, options.toPercentFormat(leftBoundary, true)));
-							break;
+							label.setText(String.format(Locale.ENGLISH, "%s \u003E %s", legendAbbr,  options.toLengthResidualFormat(rightBoundary, true)));
+							break;	
 						case SATISFACTORY:
-							label.setText(String.format(Locale.ENGLISH, "%s \u2264 %s \u2264 %s", options.toPercentFormat(leftBoundary, false), legendAbbr, options.toPercentFormat(rightBoundary, true)));
+							label.setText(String.format(Locale.ENGLISH, "%s \u2264 %s \u2264 %s", options.toLengthResidualFormat(leftBoundary, false), legendAbbr, options.toLengthResidualFormat(rightBoundary, true)));
 							break;
 						case EXCELLENT:
-							label.setText(String.format(Locale.ENGLISH, "%s \u003C %s \u2264 %s", options.toPercentFormat(rightBoundary, false), legendAbbr, options.toPercentFormat(1, true)));
-							break;
+							label.setText(String.format(Locale.ENGLISH, "%s \u003C %s", legendAbbr, options.toLengthResidualFormat(leftBoundary, true)));
+							break;											
 						default:
 							System.err.println(this.getClass().getSimpleName() + ": Unsupported table row highlight type" + tableRowHighlightRangeType);
 							break;
@@ -247,9 +247,9 @@ public class UIRedundancyAnalysisChart {
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("UIRedundancyAnalysisChart.message.error.load.exception.title", "Unexpected SQL-Error"),
-							i18n.getString("UIRedundancyAnalysisChart.message.error.load.exception.header", "Error, could not load data from database."),
-							i18n.getString("UIRedundancyAnalysisChart.message.error.load.exception.message", "An exception has occurred during database transaction."),
+							i18n.getString("UIInfluenceOnPositionAnalysisChart.message.error.load.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UIInfluenceOnPositionAnalysisChart.message.error.load.exception.header", "Error, could not load data from database."),
+							i18n.getString("UIInfluenceOnPositionAnalysisChart.message.error.load.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}
@@ -271,17 +271,17 @@ public class UIRedundancyAnalysisChart {
 					return null;
 				switch(type) {
 				case ALL:
-					return i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.all.label", "All terrestrial observations");
+					return i18n.getString("UIInfluenceOnPositionAnalysisChart.observationtype.terrestrial.all.label", "All terrestrial observations");
 				case LEVELING:
-					return i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.leveling.label", "Leveling");
+					return i18n.getString("UIInfluenceOnPositionAnalysisChart.observationtype.terrestrial.leveling.label", "Leveling");
 				case DIRECTION:
-					return i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.direction.label", "Directions");
+					return i18n.getString("UIInfluenceOnPositionAnalysisChart.observationtype.terrestrial.direction.label", "Directions");
 				case HORIZONTAL_DISTANCE:
-					return i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.horizontal_distance.label", "Horizontal distances");
+					return i18n.getString("UIInfluenceOnPositionAnalysisChart.observationtype.terrestrial.horizontal_distance.label", "Horizontal distances");
 				case SLOPE_DISTANCE:
-					return i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.slope_distance.label", "Slope distances");
+					return i18n.getString("UIInfluenceOnPositionAnalysisChart.observationtype.terrestrial.slope_distance.label", "Slope distances");
 				case ZENITH_ANGLE:
-					return i18n.getString("UIRedundancyAnalysisChart.observationtype.terrestrial.zenith_angle.label", "Zenith angles");
+					return i18n.getString("UIInfluenceOnPositionAnalysisChart.observationtype.terrestrial.zenith_angle.label", "Zenith angles");
 				}
 				return null;
 			}
@@ -329,9 +329,9 @@ public class UIRedundancyAnalysisChart {
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					OptionDialog.showThrowableDialog (
-							i18n.getString("UIRedundancyAnalysisChart.message.error.load.exception.title", "Unexpected SQL-Error"),
-							i18n.getString("UIRedundancyAnalysisChart.message.error.load.exception.header", "Error, could not load data from database."),
-							i18n.getString("UIRedundancyAnalysisChart.message.error.load.exception.message", "An exception has occurred during database transaction."),
+							i18n.getString("UIInfluenceOnPositionAnalysisChart.message.error.load.exception.title", "Unexpected SQL-Error"),
+							i18n.getString("UIInfluenceOnPositionAnalysisChart.message.error.load.exception.header", "Error, could not load data from database."),
+							i18n.getString("UIInfluenceOnPositionAnalysisChart.message.error.load.exception.message", "An exception has occurred during database transaction."),
 							e
 							);
 				}
