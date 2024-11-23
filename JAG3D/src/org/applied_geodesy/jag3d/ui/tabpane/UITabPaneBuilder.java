@@ -407,7 +407,8 @@ public class UITabPaneBuilder {
 
 					if (!equalTabOrderAndTypes) {
 						ObservableList<Tab> newTabList = FXCollections.observableArrayList();
-
+						
+						this.tabPane.getTabs().clear();
 						for (TabType tabType : newTabTypes) {
 							if (this.tapMap.containsKey(tabType)) {
 								newTabList.add(this.tapMap.get(tabType));

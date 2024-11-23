@@ -263,7 +263,8 @@ public class UITabPaneBuilder {
 
 					if (!equalTabOrderAndTypes) {
 						ObservableList<Tab> newTabList = FXCollections.observableArrayList();
-
+						
+						this.tabPane.getTabs().clear();
 						for (TabType tabType : newTabTypes) {
 							if (this.tapMap.containsKey(tabType)) {
 								newTabList.add(this.tapMap.get(tabType));
@@ -272,8 +273,8 @@ public class UITabPaneBuilder {
 								}
 							}
 						}
-						this.tabPane.getTabs().clear();
-						this.tabPane.getTabs().addAll(newTabList);
+						
+						this.tabPane.getTabs().setAll(newTabList);
 					}
 					else {
 						boolean validLastSelectedTabType = false;
