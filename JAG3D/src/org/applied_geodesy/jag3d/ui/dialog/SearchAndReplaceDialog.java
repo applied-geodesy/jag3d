@@ -66,6 +66,7 @@ public class SearchAndReplaceDialog {
 	private RadioButton normalModeRadioButton;
 	private RadioButton regularExpressionRadioButton;
 	private CheckBox keepDialogOpenCheckBox;
+	private CheckBox deleteCollisionsCheckBox;
 	private ComboBox<ScopeType> scopeTypeComboBox;	
 	private TreeItemValue itemValue;
 	private TreeItemValue selectedTreeItemValues[];
@@ -154,6 +155,11 @@ public class SearchAndReplaceDialog {
 				i18n.getString("SearchAndReplaceDialog.keep_open.tooltip", "If selected, dialog will be kept open after data modification"));
 		this.keepDialogOpenCheckBox.setSelected(false);
 		
+		this.deleteCollisionsCheckBox = this.createCheckBox(
+				i18n.getString("SearchAndReplaceDialog.remove_collisions.label", "Remove collisions arising from replacement"), 
+				i18n.getString("SearchAndReplaceDialog.remove_collisions.tooltip", "If selected, occurring database collisions such as duplicate point names will be removed"));
+		this.deleteCollisionsCheckBox.setSelected(false);
+		
 		this.scopeTypeComboBox = this.createScopeTypeComboBox(ScopeType.SELECTION, i18n.getString("SearchAndReplaceDialog.scope.tooltip", "Select scope of application"));
 
 		Button switchInputButton = new Button(i18n.getString("SearchAndReplaceDialog.switch.label", "\u21C5"));
@@ -205,12 +211,13 @@ public class SearchAndReplaceDialog {
 		GridPane.setHgrow(modeLabel,         Priority.NEVER);
 		GridPane.setHgrow(switchInputButton, Priority.NEVER);
 		
-		GridPane.setHgrow(this.searchComboBox,         Priority.ALWAYS);
-		GridPane.setHgrow(this.replaceComboBox,        Priority.ALWAYS);
-		GridPane.setHgrow(hbox,                        Priority.ALWAYS);
-		GridPane.setHgrow(this.scopeTypeComboBox,      Priority.ALWAYS);
-		GridPane.setHgrow(this.keepDialogOpenCheckBox, Priority.ALWAYS);
-		GridPane.setHgrow(this.statusLabel,            Priority.ALWAYS);
+		GridPane.setHgrow(this.searchComboBox,           Priority.ALWAYS);
+		GridPane.setHgrow(this.replaceComboBox,          Priority.ALWAYS);
+		GridPane.setHgrow(hbox,                          Priority.ALWAYS);
+		GridPane.setHgrow(this.scopeTypeComboBox,        Priority.ALWAYS);
+		GridPane.setHgrow(this.keepDialogOpenCheckBox,   Priority.ALWAYS);
+		GridPane.setHgrow(this.deleteCollisionsCheckBox, Priority.ALWAYS);
+		GridPane.setHgrow(this.statusLabel,              Priority.ALWAYS);
 		
 		int row = 1;
 		gridPane.add(scopeLabel,             0, row);
@@ -226,8 +233,9 @@ public class SearchAndReplaceDialog {
 		gridPane.add(modeLabel,              0, row);
 		gridPane.add(hbox,                   1, row++, 2, 1);
 
-		gridPane.add(this.keepDialogOpenCheckBox, 1, row++, 2, 1);
-		gridPane.add(this.statusLabel,            1, row++, 2, 1);
+		gridPane.add(this.deleteCollisionsCheckBox, 1, row++, 2, 1);		
+		gridPane.add(this.keepDialogOpenCheckBox,   1, row++, 2, 1);
+		gridPane.add(this.statusLabel,              1, row++, 2, 1);
 			
 		Platform.runLater(new Runnable() {
 			@Override public void run() {
@@ -333,8 +341,10 @@ public class SearchAndReplaceDialog {
 			// masking values
 			if (!regExp)
 				search = "^\\Q"+search+"\\E";
+			
+			boolean deleteCollisions = this.deleteCollisionsCheckBox.isSelected();
 
-			int rows = SQLManager.getInstance().searchAndReplacePointNames(search, replace, scopeType, this.itemValue, this.selectedTreeItemValues);
+			int rows = SQLManager.getInstance().searchAndReplacePointNames(search, replace, scopeType, deleteCollisions, this.itemValue, this.selectedTreeItemValues);
 			if (this.keepDialogOpenCheckBox.isSelected())
 				this.statusLabel.setText(String.format(Locale.ENGLISH, i18n.getString("SearchAndReplaceDialog.result.label", "%d row(s) edited\u2026"), rows));
 		}
