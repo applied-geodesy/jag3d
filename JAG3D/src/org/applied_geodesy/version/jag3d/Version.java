@@ -46,6 +46,6 @@ public class Version {
 	}
 	
 	public static boolean isReleaseCandidate() {
-		return Boolean.TRUE;
+		return Boolean.FALSE;
 	}
 }
