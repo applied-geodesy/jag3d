@@ -196,7 +196,7 @@ public class SQLAdjustmentManager {
 		if (this.pure1DNetwork)
 			this.applicableHorizontalProjection = false;
 		
-		// Abbildungsreduktionen sind bei einer Diagnoseauswertung unzulaessig, da es keine realen Beobachtungen gibt 
+		// Abbildungsreduktionen sind bei einer Diagnoseauswertung unzulaessig, da es keine realen Beobachtungen gibt
 		if (this.estimationType == EstimationType.SIMULATION && this.reductions.size() > 0) 
 			throw new IllegalProjectionPropertyException("Projection cannot be applied to pseudo-observations in diagnosis adjustment (simulation)!");
 
@@ -354,9 +354,21 @@ public class SQLAdjustmentManager {
 			this.reductions.getPrincipalPoint().setCoordinates(x0, y0, z0, referenceLatitude, referenceLongitude, referenceHeight);
 			this.reductions.setEllipsoid(Ellipsoid.createEllipsoidFromMinorAxis(Math.max(majorAxis, minorAxis), Math.min(majorAxis, minorAxis)));
 
-			if (hasTaskType && projectionType != ProjectionType.LOCAL_ELLIPSOIDAL) {
+			if (hasTaskType) {
 				ReductionTaskType taskType = ReductionTaskType.getEnumByValue(taskTypeId);
-				this.reductions.addReductionTaskType(taskType);	
+				
+				switch (taskType) {
+				case DIRECTION:
+				case DISTANCE:
+					if (projectionType != ProjectionType.LOCAL_ELLIPSOIDAL && projectionType != ProjectionType.LOCAL_CARTESIAN)
+						this.reductions.addReductionTaskType(taskType);	
+					break;
+				case EARTH_CURVATURE:
+				case HEIGHT:
+					if (projectionType != ProjectionType.LOCAL_ELLIPSOIDAL)
+						this.reductions.addReductionTaskType(taskType);	
+					break;			
+				}
 			}
 		}
 	}
