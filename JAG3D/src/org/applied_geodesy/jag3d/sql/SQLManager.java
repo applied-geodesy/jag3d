@@ -2822,7 +2822,7 @@ public class SQLManager {
 		else if (TreeItemType.isGNSSObservationTypeLeaf(referenceItemType))
 			tableName = "GNSSObservationApriori";
 		else if (TreeItemType.isVerticalDeflectionTypeLeaf(referenceItemType))
-			tableName = "VerticalDeflectionTreeItemValue";
+			tableName = "VerticalDeflectionApriori";
 		else if (TreeItemType.isCongruenceAnalysisTypeLeaf(referenceItemType))
 			tableName = "CongruenceAnalysisPointPairApriori";
 		else 
