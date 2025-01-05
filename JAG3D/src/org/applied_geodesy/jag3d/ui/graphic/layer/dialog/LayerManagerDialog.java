@@ -83,11 +83,16 @@ public class LayerManagerDialog {
 		
 		@Override
 		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+			if (!ignoreVisibleEvent)
+				updateLayerVisibleState(newValue);
+		}
+		
+		private void updateLayerVisibleState(boolean select) {
 			try {
 				ignoreVisibleEvent = true;
 				for (Layer layer : layerSet) 
-					layer.setVisible(newValue);
-				this.checkBox.setSelected(newValue);
+					layer.setVisible(select);
+				this.checkBox.setSelected(select);
 			}
 			finally {
 				ignoreVisibleEvent = false;
@@ -458,36 +463,42 @@ public class LayerManagerDialog {
 	}
 	
 	private void updateGlobalLayerVisibleState(LayerType type) {
-		int numberOfVisibleLayers = 0;
-		switch (type) {
-		case NEW_POINT_APRIORI:
-		case DATUM_POINT_APRIORI:
-		case STOCHASTIC_POINT_APRIORI:
-		case REFERENCE_POINT_APRIORI:
-		case OBSERVATION_APRIORI:
-			for (Layer layer : this.aPrioriLayerSet) {
-				if (layer.isVisible())
-					numberOfVisibleLayers++;
-			}
-			this.allAprioriLayersVisibleCheckBox.setSelected(this.aPrioriLayerSet.size() == numberOfVisibleLayers);
-			this.allAprioriLayersVisibleCheckBox.setIndeterminate(numberOfVisibleLayers > 0 && numberOfVisibleLayers < this.aPrioriLayerSet.size());
+		try {
+			this.ignoreVisibleEvent = true;
+			int numberOfVisibleLayers = 0;
+			switch (type) {
+			case NEW_POINT_APRIORI:
+			case DATUM_POINT_APRIORI:
+			case STOCHASTIC_POINT_APRIORI:
+			case REFERENCE_POINT_APRIORI:
+			case OBSERVATION_APRIORI:
+				for (Layer layer : this.aPrioriLayerSet) {
+					if (layer.isVisible())
+						numberOfVisibleLayers++;
+				}
+				this.allAprioriLayersVisibleCheckBox.setSelected(this.aPrioriLayerSet.size() == numberOfVisibleLayers);
+				this.allAprioriLayersVisibleCheckBox.setIndeterminate(numberOfVisibleLayers > 0 && numberOfVisibleLayers < this.aPrioriLayerSet.size());
 
-			break;
-		case NEW_POINT_APOSTERIORI:
-		case DATUM_POINT_APOSTERIORI:
-		case STOCHASTIC_POINT_APOSTERIORI:
-		case REFERENCE_POINT_APOSTERIORI:
-		case OBSERVATION_APOSTERIORI:
-			for (Layer layer : this.aPosterioriLayerSet) {
-				if (layer.isVisible())
-					numberOfVisibleLayers++;
-			}
-			this.allAPosterioriLayersVisibleCheckBox.setSelected(this.aPosterioriLayerSet.size() == numberOfVisibleLayers);
-			this.allAPosterioriLayersVisibleCheckBox.setIndeterminate(numberOfVisibleLayers > 0 && numberOfVisibleLayers < this.aPosterioriLayerSet.size());
+				break;
+			case NEW_POINT_APOSTERIORI:
+			case DATUM_POINT_APOSTERIORI:
+			case STOCHASTIC_POINT_APOSTERIORI:
+			case REFERENCE_POINT_APOSTERIORI:
+			case OBSERVATION_APOSTERIORI:
+				for (Layer layer : this.aPosterioriLayerSet) {
+					if (layer.isVisible())
+						numberOfVisibleLayers++;
+				}
+				this.allAPosterioriLayersVisibleCheckBox.setSelected(this.aPosterioriLayerSet.size() == numberOfVisibleLayers);
+				this.allAPosterioriLayersVisibleCheckBox.setIndeterminate(numberOfVisibleLayers > 0 && numberOfVisibleLayers < this.aPosterioriLayerSet.size());
 
-			break;
-		default:
-			break;
+				break;
+			default:
+				break;
+			}
+		}
+		finally {
+			this.ignoreVisibleEvent = false;
 		}
 	}
 	
