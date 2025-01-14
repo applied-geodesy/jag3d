@@ -363,7 +363,7 @@ public class UIMenuBuilder implements TransformationChangeListener {
 			String extension = "html";
 			boolean openFileInSystemApplication = true;
 			ExtensionFilter extensionFilter = new ExtensionFilter(i18n.getString("UIMenuBuilder.report.extension.html", "Hypertext Markup Language"), "*.html", "*.htm", "*.HTML", "*.HTM");
-			if (matcher.find() && matcher.groupCount() == 1) {
+			if (matcher.find() && matcher.groupCount() == 2) {
 				openFileInSystemApplication = matcher.group(1) == null;
 				extension = matcher.group(2);
 				extensionFilter = new ExtensionFilter(String.format(Locale.ENGLISH, i18n.getString("UIMenuBuilder.report.extension.template", "%s-File"), extension), "*." + extension); 
