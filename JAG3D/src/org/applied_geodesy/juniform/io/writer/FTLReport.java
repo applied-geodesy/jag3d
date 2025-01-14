@@ -124,7 +124,7 @@ public class FTLReport {
 		this.addCorrelationMatrix();
 	}
 	
-	public void toFile(File report) throws ClassNotFoundException, TemplateException, IOException {
+	public void toFile(File report, boolean openFile) throws ClassNotFoundException, TemplateException, IOException {
 		if (report != null) {
 			this.createReport();
 			Writer fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(report), StandardCharsets.UTF_8));
@@ -132,7 +132,7 @@ public class FTLReport {
 			fileWriter.flush();
 			fileWriter.close();
 
-			if (hostServices != null)
+			if (hostServices != null && openFile)
 				hostServices.showDocument(report.getAbsolutePath());
 		}
 	}

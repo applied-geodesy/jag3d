@@ -156,7 +156,7 @@ public class FTLReport {
 		return this.dataBase != null ? this.dataBase.getURI() : null;
 	}
 
-	public void toFile(File report) throws ClassNotFoundException, SQLException, TemplateException, IOException {
+	public void toFile(File report, boolean openFile) throws ClassNotFoundException, SQLException, TemplateException, IOException {
 		if (report != null) {
 			this.createReport();
 			Writer file = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(report), StandardCharsets.UTF_8));
@@ -164,7 +164,7 @@ public class FTLReport {
 			file.flush();
 			file.close();
 
-			if (this.hostServices != null)
+			if (this.hostServices != null && openFile)
 				this.hostServices.showDocument(report.getAbsolutePath());
 		}
 	}

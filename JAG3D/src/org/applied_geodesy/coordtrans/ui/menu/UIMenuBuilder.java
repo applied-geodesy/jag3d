@@ -358,12 +358,14 @@ public class UIMenuBuilder implements TransformationChangeListener {
 			if (UITreeBuilder.getInstance().getTransformationAdjustment().getTransformation() == null)
 				return;
 
-			Pattern pattern = Pattern.compile(".*?\\.(\\w+)\\.ftlh$", Pattern.CASE_INSENSITIVE);
+			Pattern pattern = Pattern.compile(".*?\\.(\\.)?(\\w+)\\.ftlh$", Pattern.CASE_INSENSITIVE);
 			Matcher matcher = pattern.matcher(templateFile.getName().toLowerCase());
 			String extension = "html";
+			boolean openFileInSystemApplication = true;
 			ExtensionFilter extensionFilter = new ExtensionFilter(i18n.getString("UIMenuBuilder.report.extension.html", "Hypertext Markup Language"), "*.html", "*.htm", "*.HTML", "*.HTM");
 			if (matcher.find() && matcher.groupCount() == 1) {
-				extension = matcher.group(1);
+				openFileInSystemApplication = matcher.group(1) == null;
+				extension = matcher.group(2);
 				extensionFilter = new ExtensionFilter(String.format(Locale.ENGLISH, i18n.getString("UIMenuBuilder.report.extension.template", "%s-File"), extension), "*." + extension); 
 			}
 			
@@ -378,7 +380,7 @@ public class UIMenuBuilder implements TransformationChangeListener {
 			);
 			if (reportFile != null && ftl != null) {
 				ftl.setTemplate(templateFile.getName());
-				ftl.toFile(reportFile);
+				ftl.toFile(reportFile, openFileInSystemApplication);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
