@@ -137,7 +137,7 @@ public class FTLReport {
 		this.addEulerAngles();
 	}
 	
-	public void toFile(File report) throws ClassNotFoundException, TemplateException, IOException {
+	public void toFile(File report, boolean openFile) throws ClassNotFoundException, TemplateException, IOException {
 		if (report != null) {
 			this.createReport();
 			Writer file = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(report), StandardCharsets.UTF_8));
@@ -145,7 +145,7 @@ public class FTLReport {
 			file.flush();
 			file.close();
 
-			if (hostServices != null)
+			if (hostServices != null && openFile)
 				hostServices.showDocument(report.getAbsolutePath());
 		}
 	}
