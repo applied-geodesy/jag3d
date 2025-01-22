@@ -50,10 +50,26 @@ public class Line extends Curve {
 	}
 
 	public void setInitialGuess(double nx, double ny, double d, double l) throws IllegalArgumentException {
-		this.parameters.get(ParameterType.VECTOR_X).setValue0(nx);
-		this.parameters.get(ParameterType.VECTOR_Y).setValue0(ny);
-		this.parameters.get(ParameterType.LENGTH).setValue0(d);
-		this.parameters.get(ParameterType.VECTOR_LENGTH).setValue0(l);
+		// line parameters 
+		UnknownParameter Nx = this.parameters.get(ParameterType.VECTOR_X);
+		UnknownParameter Ny = this.parameters.get(ParameterType.VECTOR_Y);
+		
+		UnknownParameter D0 = this.parameters.get(ParameterType.LENGTH);
+		UnknownParameter L0 = this.parameters.get(ParameterType.VECTOR_LENGTH);
+		
+		// overwriting of a-priori values for parameters to be estimated (i.e. not fixed)
+		if (Nx.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Nx.setValue0(nx);
+		
+		if (Ny.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Ny.setValue0(ny);
+		
+		
+		if (D0.getProcessingType() == ProcessingType.ADJUSTMENT)
+			D0.setValue0(d);
+		
+		if (L0.getProcessingType() == ProcessingType.ADJUSTMENT)
+			L0.setValue0(l);
 	}
 	
 	@Override

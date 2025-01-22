@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.applied_geodesy.adjustment.geometry.PrimitiveType;
 import org.applied_geodesy.adjustment.geometry.parameter.ParameterType;
+import org.applied_geodesy.adjustment.geometry.parameter.ProcessingType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
 import org.applied_geodesy.adjustment.geometry.point.Point;
@@ -43,20 +44,40 @@ public class Ellipse extends Curve {
 	}
 
 	public void setInitialGuess(double x1, double y1, double x2, double y2, double a) throws IllegalArgumentException {
-		this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_X).setValue0(x1);
-		this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Y).setValue0(y1);
+		// ellipse parameters 
+		UnknownParameter X1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_X);
+		UnknownParameter Y1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Y);
 		
-		this.parameters.get(ParameterType.SECONDARY_FOCAL_COORDINATE_X).setValue0(x2);
-		this.parameters.get(ParameterType.SECONDARY_FOCAL_COORDINATE_Y).setValue0(y2);
+		UnknownParameter X2 = this.parameters.get(ParameterType.SECONDARY_FOCAL_COORDINATE_X);
+		UnknownParameter Y2 = this.parameters.get(ParameterType.SECONDARY_FOCAL_COORDINATE_Y);
 		
-		this.parameters.get(ParameterType.MAJOR_AXIS_COEFFICIENT).setValue0(a);
+		UnknownParameter A  = this.parameters.get(ParameterType.MAJOR_AXIS_COEFFICIENT);
+
+		// overwriting of a-priori values for parameters to be estimated (i.e. not fixed)
+		if (X1.getProcessingType() == ProcessingType.ADJUSTMENT)
+			X1.setValue0(x1);
+		
+		if (Y1.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Y1.setValue0(y1);
+		
+		
+		if (X2.getProcessingType() == ProcessingType.ADJUSTMENT)
+			X2.setValue0(x2);
+		
+		if (Y2.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Y2.setValue0(y2);
+		
+		
+		if (A.getProcessingType() == ProcessingType.ADJUSTMENT)
+			A.setValue0(a);
 	}
 	
 	@Override
 	public void jacobianElements(FeaturePoint point, Matrix Jx, Matrix Jv, int rowIndex) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
-		//Schwerpunktreduktion
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		
@@ -98,8 +119,10 @@ public class Ellipse extends Curve {
 	
 	@Override
 	public double getMisclosure(FeaturePoint point) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// rduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		

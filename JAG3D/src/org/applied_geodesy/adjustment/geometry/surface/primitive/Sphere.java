@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.applied_geodesy.adjustment.geometry.PrimitiveType;
 import org.applied_geodesy.adjustment.geometry.parameter.ParameterType;
+import org.applied_geodesy.adjustment.geometry.parameter.ProcessingType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
 import org.applied_geodesy.adjustment.geometry.point.Point;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
@@ -42,11 +43,25 @@ public class Sphere extends Surface {
 		this.init();
 	}
 
-	public void setInitialGuess(double x0, double y0, double z0, double r) throws IllegalArgumentException {
-		this.parameters.get(ParameterType.ORIGIN_COORDINATE_X).setValue0(x0);
-		this.parameters.get(ParameterType.ORIGIN_COORDINATE_Y).setValue0(y0);
-		this.parameters.get(ParameterType.ORIGIN_COORDINATE_Z).setValue0(z0);
-		this.parameters.get(ParameterType.RADIUS).setValue0(r);
+	public void setInitialGuess(double x0, double y0, double z0, double r0) throws IllegalArgumentException {
+		// sphere parameters 
+		UnknownParameter X0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_X);
+		UnknownParameter Y0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_Y);
+		UnknownParameter Z0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_Z);
+		UnknownParameter R0 = this.parameters.get(ParameterType.RADIUS);
+		
+		// overwriting of a-priori values for parameters to be estimated (i.e. not fixed)
+		if (X0.getProcessingType() == ProcessingType.ADJUSTMENT)
+			X0.setValue0(x0);
+		
+		if (Y0.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Y0.setValue0(y0);
+		
+		if (Z0.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Z0.setValue0(z0);
+		
+		if (R0.getProcessingType() == ProcessingType.ADJUSTMENT)
+			R0.setValue0(r0);		
 	}
 		
 	@Override

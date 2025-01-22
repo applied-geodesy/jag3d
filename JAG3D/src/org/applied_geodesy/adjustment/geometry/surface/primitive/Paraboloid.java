@@ -54,24 +54,72 @@ public class Paraboloid extends Surface {
 	}
 	
 	public void setInitialGuess(double x0, double y0, double z0, double a, double c, double r11, double r12, double r13, double r21, double r22, double r23, double r31, double r32, double r33) throws IllegalArgumentException {
-		this.parameters.get(ParameterType.ORIGIN_COORDINATE_X).setValue0(x0);
-		this.parameters.get(ParameterType.ORIGIN_COORDINATE_Y).setValue0(y0);
-		this.parameters.get(ParameterType.ORIGIN_COORDINATE_Z).setValue0(z0);
+		// paraboloid parameters
+		UnknownParameter X0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_X);
+		UnknownParameter Y0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_Y);
+		UnknownParameter Z0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_Z);
 		
-		this.parameters.get(ParameterType.MAJOR_AXIS_COEFFICIENT).setValue0(a);
-		this.parameters.get(ParameterType.MINOR_AXIS_COEFFICIENT).setValue0(c);
+		UnknownParameter A = this.parameters.get(ParameterType.MAJOR_AXIS_COEFFICIENT);
+		UnknownParameter C = this.parameters.get(ParameterType.MINOR_AXIS_COEFFICIENT);
 		
-		this.parameters.get(ParameterType.ROTATION_COMPONENT_R11).setValue0(r11);
-		this.parameters.get(ParameterType.ROTATION_COMPONENT_R12).setValue0(r12);
-		this.parameters.get(ParameterType.ROTATION_COMPONENT_R13).setValue0(r13);
+		UnknownParameter R11 = this.parameters.get(ParameterType.ROTATION_COMPONENT_R11);
+		UnknownParameter R12 = this.parameters.get(ParameterType.ROTATION_COMPONENT_R12);
+		UnknownParameter R13 = this.parameters.get(ParameterType.ROTATION_COMPONENT_R13);
 		
-		this.parameters.get(ParameterType.ROTATION_COMPONENT_R21).setValue0(r21);
-		this.parameters.get(ParameterType.ROTATION_COMPONENT_R22).setValue0(r22);
-		this.parameters.get(ParameterType.ROTATION_COMPONENT_R23).setValue0(r23);
+		UnknownParameter R21 = this.parameters.get(ParameterType.ROTATION_COMPONENT_R21);
+		UnknownParameter R22 = this.parameters.get(ParameterType.ROTATION_COMPONENT_R22);
+		UnknownParameter R23 = this.parameters.get(ParameterType.ROTATION_COMPONENT_R23);
 		
-		this.parameters.get(ParameterType.ROTATION_COMPONENT_R31).setValue0(r31);
-		this.parameters.get(ParameterType.ROTATION_COMPONENT_R32).setValue0(r32);
-		this.parameters.get(ParameterType.ROTATION_COMPONENT_R33).setValue0(r33);
+		UnknownParameter R31 = this.parameters.get(ParameterType.ROTATION_COMPONENT_R31);
+		UnknownParameter R32 = this.parameters.get(ParameterType.ROTATION_COMPONENT_R32);
+		UnknownParameter R33 = this.parameters.get(ParameterType.ROTATION_COMPONENT_R33);
+		
+		// overwriting of a-priori values for parameters to be estimated (i.e. not fixed)
+		if (X0.getProcessingType() == ProcessingType.ADJUSTMENT)
+			X0.setValue0(x0);
+		
+		if (Y0.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Y0.setValue0(y0);
+		
+		if (Z0.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Z0.setValue0(z0);
+		
+		
+		if (A.getProcessingType() == ProcessingType.ADJUSTMENT)
+			A.setValue0(a);
+		
+		if (C.getProcessingType() == ProcessingType.ADJUSTMENT)
+			C.setValue0(c);
+		
+		
+		if (R11.getProcessingType() == ProcessingType.ADJUSTMENT)
+			R11.setValue0(r11);
+		
+		if (R12.getProcessingType() == ProcessingType.ADJUSTMENT)
+			R12.setValue0(r12);
+		
+		if (R13.getProcessingType() == ProcessingType.ADJUSTMENT)
+			R13.setValue0(r13);
+		
+		
+		if (R21.getProcessingType() == ProcessingType.ADJUSTMENT)
+			R21.setValue0(r21);
+		
+		if (R22.getProcessingType() == ProcessingType.ADJUSTMENT)
+			R22.setValue0(r22);
+		
+		if (R23.getProcessingType() == ProcessingType.ADJUSTMENT)
+			R23.setValue0(r23);
+		
+		
+		if (R31.getProcessingType() == ProcessingType.ADJUSTMENT)
+			R31.setValue0(r31);
+		
+		if (R32.getProcessingType() == ProcessingType.ADJUSTMENT)
+			R32.setValue0(r32);
+		
+		if (R33.getProcessingType() == ProcessingType.ADJUSTMENT)
+			R33.setValue0(r33);		
 	}
 	
 	@Override

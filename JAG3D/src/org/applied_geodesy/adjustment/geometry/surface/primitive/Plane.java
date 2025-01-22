@@ -50,10 +50,24 @@ public class Plane extends Surface {
 	}
 	
 	public void setInitialGuess(double nx, double ny, double nz, double d) throws IllegalArgumentException {
-		this.parameters.get(ParameterType.VECTOR_X).setValue0(nx);
-		this.parameters.get(ParameterType.VECTOR_Y).setValue0(ny);
-		this.parameters.get(ParameterType.VECTOR_Z).setValue0(nz);
-		this.parameters.get(ParameterType.LENGTH).setValue0(d);
+		// plane parameters
+		UnknownParameter Nx = this.parameters.get(ParameterType.VECTOR_X);
+		UnknownParameter Ny = this.parameters.get(ParameterType.VECTOR_Y);
+		UnknownParameter Nz = this.parameters.get(ParameterType.VECTOR_Z);
+		UnknownParameter D0 = this.parameters.get(ParameterType.LENGTH);
+		
+		// overwriting of a-priori values for parameters to be estimated (i.e. not fixed)
+		if (Nx.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Nx.setValue0(nx);
+
+		if (Ny.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Ny.setValue0(ny);
+		
+		if (Nz.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Nz.setValue0(nz);
+
+		if (D0.getProcessingType() == ProcessingType.ADJUSTMENT)
+			D0.setValue0(d);
 	}
 
 	@Override

@@ -51,18 +51,52 @@ public class QuadraticSurface extends Surface {
 	}
 	
 	public void setInitialGuess(double a, double b, double c, double d, double e, double f, double g, double h, double i, double length) throws IllegalArgumentException {
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_A).setValue0(a);
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_B).setValue0(b);
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_C).setValue0(c);
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_D).setValue0(d);
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_E).setValue0(e);
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_F).setValue0(f);
+		// quadric parameters 	
+		UnknownParameter A = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_A);
+		UnknownParameter B = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_B);
+		UnknownParameter C = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_C);
+		UnknownParameter D = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_D);
+		UnknownParameter E = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_E);
+		UnknownParameter F = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_F);
 		
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_G).setValue0(g);
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_H).setValue0(h);
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_I).setValue0(i);
+		UnknownParameter G = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_G);
+		UnknownParameter H = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_H);
+		UnknownParameter I = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_I);
+
+		UnknownParameter Len = this.parameters.get(ParameterType.LENGTH);
 		
-		this.parameters.get(ParameterType.LENGTH).setValue0(length);
+		// overwriting of a-priori values for parameters to be estimated (i.e. not fixed)
+		if (A.getProcessingType() == ProcessingType.ADJUSTMENT)
+			A.setValue0(a);
+		
+		if (B.getProcessingType() == ProcessingType.ADJUSTMENT)
+			B.setValue0(b);
+		
+		if (C.getProcessingType() == ProcessingType.ADJUSTMENT)
+			C.setValue0(c);
+		
+		if (D.getProcessingType() == ProcessingType.ADJUSTMENT)
+			D.setValue0(d);
+		
+		if (E.getProcessingType() == ProcessingType.ADJUSTMENT)
+			E.setValue0(e);
+		
+		if (F.getProcessingType() == ProcessingType.ADJUSTMENT)
+			F.setValue0(f);
+		
+		
+		if (G.getProcessingType() == ProcessingType.ADJUSTMENT)
+			G.setValue0(g);
+		
+		if (H.getProcessingType() == ProcessingType.ADJUSTMENT)
+			H.setValue0(h);
+		
+		if (I.getProcessingType() == ProcessingType.ADJUSTMENT)
+			I.setValue0(i);
+
+		
+		if (Len.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Len.setValue0(length);
 	}
 	
 	@Override
