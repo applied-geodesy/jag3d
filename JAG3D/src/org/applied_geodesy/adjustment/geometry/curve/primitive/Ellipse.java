@@ -81,6 +81,7 @@ public class Ellipse extends Curve {
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		
+		// focal points 
 		UnknownParameter x1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_X);
 		UnknownParameter y1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Y);
 		
@@ -97,7 +98,8 @@ public class Ellipse extends Curve {
         double s2 = Math.hypot( dx2, dy2 );
 		
 		if (Jx != null) {
-			UnknownParameter a  = this.parameters.get(ParameterType.MAJOR_AXIS_COEFFICIENT);
+			// major axis
+			UnknownParameter a = this.parameters.get(ParameterType.MAJOR_AXIS_COEFFICIENT);
 
 			if (x1.getColumn() >= 0)
 				Jx.set(rowIndex, x1.getColumn(), dx1 / s1);
@@ -126,6 +128,7 @@ public class Ellipse extends Curve {
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		
+		// ellipse parameters 
 		double x1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_X).getValue();
 		double y1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Y).getValue();
 		

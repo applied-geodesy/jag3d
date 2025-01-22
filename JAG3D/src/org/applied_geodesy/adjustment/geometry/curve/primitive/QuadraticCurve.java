@@ -85,11 +85,14 @@ public class QuadraticCurve extends Curve {
 	
 	@Override
 	public void jacobianElements(FeaturePoint point, Matrix Jx, Matrix Jv, int rowIndex) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		
+		// quadric parameters 
 		UnknownParameter a = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_A);
 		UnknownParameter b = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_B);
 		UnknownParameter c = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_C);
@@ -124,11 +127,14 @@ public class QuadraticCurve extends Curve {
 	
 	@Override
 	public double getMisclosure(FeaturePoint point) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		
+		// quadric parameters 
 		double a = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_A).getValue();
 		double b = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_B).getValue();
 		double c = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_C).getValue();

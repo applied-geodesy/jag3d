@@ -99,6 +99,7 @@ public class Circle extends Curve {
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 
+		// circle parameters 
 		double x0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_X).getValue();
 		double y0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_Y).getValue();
 		double r  = this.parameters.get(ParameterType.RADIUS).getValue();

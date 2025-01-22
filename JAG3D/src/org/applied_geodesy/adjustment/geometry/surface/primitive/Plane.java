@@ -72,12 +72,15 @@ public class Plane extends Surface {
 
 	@Override
 	public void jacobianElements(FeaturePoint point, Matrix Jx, Matrix Jv, int rowIndex) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		double zi = point.getZ() - centerOfMass.getZ0();
 
+		// plane parameters 
 		UnknownParameter nx = this.parameters.get(ParameterType.VECTOR_X);
 		UnknownParameter ny = this.parameters.get(ParameterType.VECTOR_Y);
 		UnknownParameter nz = this.parameters.get(ParameterType.VECTOR_Z);
@@ -103,12 +106,15 @@ public class Plane extends Surface {
 
 	@Override
 	public double getMisclosure(FeaturePoint point) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		double zi = point.getZ() - centerOfMass.getZ0();
-		
+
+		// plane parameters 
 		double nx = this.parameters.get(ParameterType.VECTOR_X).getValue();
 		double ny = this.parameters.get(ParameterType.VECTOR_Y).getValue();
 		double nz = this.parameters.get(ParameterType.VECTOR_Z).getValue();

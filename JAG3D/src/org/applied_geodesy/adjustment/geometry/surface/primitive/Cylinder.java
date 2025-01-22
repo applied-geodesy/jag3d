@@ -104,12 +104,15 @@ public class Cylinder extends Surface {
 	
 	@Override
 	public void jacobianElements(FeaturePoint point, Matrix Jx, Matrix Jv, int rowIndex) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		double zi = point.getZ() - centerOfMass.getZ0();
-		
+
+		// cylinder parameters 
 		UnknownParameter x1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_X);
 		UnknownParameter y1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Y);
 		UnknownParameter z1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Z);
@@ -170,12 +173,15 @@ public class Cylinder extends Surface {
 	
 	@Override
 	public double getMisclosure(FeaturePoint point) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		double zi = point.getZ() - centerOfMass.getZ0();
-		
+
+		// cylinder parameters 
 		double x1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_X).getValue();
 		double y1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Y).getValue();
 		double z1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Z).getValue();

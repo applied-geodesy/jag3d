@@ -645,7 +645,7 @@ public class FeatureAdjustment {
 			W.mult(Jx, WJx);
 			W = null;
 
-			// AT P A und AT P w
+			// AT P A and AT P w
 			for (int rowJxT = 0; rowJxT < this.parameters.size(); rowJxT++) {
 				if (this.interrupt)
 					return null;
