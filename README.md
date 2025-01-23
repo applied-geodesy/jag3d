@@ -29,7 +29,12 @@ JAG3D's module JUniForm, short for Java·Unified·Form·Fitting, has successfull
 Proper handling of measured values is complex and requires not only the consideration of calibrated measuring instruments but also the use of reliable adjustment algorithms for a holistic evaluation of the full measuring process. More details can be found in the full [TraCIM report](https://software.applied-geodesy.org/doc/PTB_TraCIM_Test_Report_JAG3D.pdf).
 
 
-System requirements
+Adaptable and Flexible
+----------------------
+The JAG3D report uses the powerful [FreeMarker](https://freemarker.apache.org) Template Language to generate text output via customized templates. Users have the option of creating specific templates for their individual workflow – without programming experience in Java. In addition to column-based flat files, complex HTML or XML files are also supported. In software packages for computer-aided design (CAD), the Drawing Interchange Format (DXF) is often used for the exchange between different applications. As these examples are pure text files, specific FreeMarker templates can be defined to generate the content of the files. The JAG3D [download package](https://github.com/applied-geodesy/jag3d/releases/latest) contains an template for creating the standard HTML report. Sample templates for creating simple ASCII or DXF files can be found in the [template collection](https://github.com/loesler/jag3d_templates).
+
+
+System Requirements
 -------------------
 JAG3D is written in the platform-independent programming language Java and, therefore, the software is runnable at each platform and operation system that provides a Java Runtime Environment (JRE) and the [JavaFX](https://openjfx.io). JavaFX is included to the provided bundles. Moreover, the windows download package of JAG3D contains [OpenJDK](https://openjdk.java.net). For that reason, neither Java nor the platform dependent FX extension must be provided by the windows operating system. To run JAG3D on other platforms such as Linux or MacOS, the platform dependent JRE must be installed at the operating system. The JRE can be found for several platforms at Oracles [download page](https://java.oracle.com) or at the [OpenJDK](https://openjdk.java.net)-project pages.
 
