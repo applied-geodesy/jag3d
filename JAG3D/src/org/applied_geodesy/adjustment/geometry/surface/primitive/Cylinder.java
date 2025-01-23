@@ -52,29 +52,67 @@ public class Cylinder extends Surface {
 	}
 	
 	public void setInitialGuess(double x1, double y1, double z1, double x2, double y2, double z2, double nx, double ny, double nz, double a) throws IllegalArgumentException {
-		this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_X).setValue0(x1);
-		this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Y).setValue0(y1);
-		this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Z).setValue0(z1);
+		// cylinder parameters
+		UnknownParameter X1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_X);
+		UnknownParameter Y1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Y);
+		UnknownParameter Z1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Z);
 		
-		this.parameters.get(ParameterType.SECONDARY_FOCAL_COORDINATE_X).setValue0(x2);
-		this.parameters.get(ParameterType.SECONDARY_FOCAL_COORDINATE_Y).setValue0(y2);
-		this.parameters.get(ParameterType.SECONDARY_FOCAL_COORDINATE_Z).setValue0(z2);
+		UnknownParameter X2 = this.parameters.get(ParameterType.SECONDARY_FOCAL_COORDINATE_X);
+		UnknownParameter Y2 = this.parameters.get(ParameterType.SECONDARY_FOCAL_COORDINATE_Y);
+		UnknownParameter Z2 = this.parameters.get(ParameterType.SECONDARY_FOCAL_COORDINATE_Z);
 		
-		this.parameters.get(ParameterType.MAJOR_AXIS_COEFFICIENT).setValue0(a);
+		UnknownParameter A  = this.parameters.get(ParameterType.MAJOR_AXIS_COEFFICIENT);
+
+		UnknownParameter Nx = this.parameters.get(ParameterType.VECTOR_X);
+		UnknownParameter Ny = this.parameters.get(ParameterType.VECTOR_Y);
+		UnknownParameter Nz = this.parameters.get(ParameterType.VECTOR_Z);
 		
-		this.parameters.get(ParameterType.VECTOR_X).setValue0(nx);
-		this.parameters.get(ParameterType.VECTOR_Y).setValue0(ny);
-		this.parameters.get(ParameterType.VECTOR_Z).setValue0(nz);
+		// overwriting of a-priori values for parameters to be estimated (i.e. not fixed)
+		if (X1.getProcessingType() == ProcessingType.ADJUSTMENT)
+			X1.setValue0(x1);
+		
+		if (Y1.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Y1.setValue0(y1);
+		
+		if (Z1.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Z1.setValue0(z1);
+		
+		
+		if (X2.getProcessingType() == ProcessingType.ADJUSTMENT)
+			X2.setValue0(x2);
+		
+		if (Y2.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Y2.setValue0(y2);
+		
+		if (Z2.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Z2.setValue0(z2);
+		
+		
+		if (A.getProcessingType() == ProcessingType.ADJUSTMENT)
+			A.setValue0(a);
+		
+		
+		if (Nx.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Nx.setValue0(nx);
+		
+		if (Ny.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Ny.setValue0(ny);
+		
+		if (Nz.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Nz.setValue0(nz);
 	}
 	
 	@Override
 	public void jacobianElements(FeaturePoint point, Matrix Jx, Matrix Jv, int rowIndex) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		double zi = point.getZ() - centerOfMass.getZ0();
-		
+
+		// cylinder parameters 
 		UnknownParameter x1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_X);
 		UnknownParameter y1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Y);
 		UnknownParameter z1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Z);
@@ -135,12 +173,15 @@ public class Cylinder extends Surface {
 	
 	@Override
 	public double getMisclosure(FeaturePoint point) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		double zi = point.getZ() - centerOfMass.getZ0();
-		
+
+		// cylinder parameters 
 		double x1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_X).getValue();
 		double y1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Y).getValue();
 		double z1 = this.parameters.get(ParameterType.PRIMARY_FOCAL_COORDINATE_Z).getValue();

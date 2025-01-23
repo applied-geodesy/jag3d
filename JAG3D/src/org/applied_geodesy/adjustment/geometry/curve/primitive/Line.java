@@ -50,26 +50,45 @@ public class Line extends Curve {
 	}
 
 	public void setInitialGuess(double nx, double ny, double d, double l) throws IllegalArgumentException {
-		this.parameters.get(ParameterType.VECTOR_X).setValue0(nx);
-		this.parameters.get(ParameterType.VECTOR_Y).setValue0(ny);
-		this.parameters.get(ParameterType.LENGTH).setValue0(d);
-		this.parameters.get(ParameterType.VECTOR_LENGTH).setValue0(l);
+		// line parameters 
+		UnknownParameter Nx = this.parameters.get(ParameterType.VECTOR_X);
+		UnknownParameter Ny = this.parameters.get(ParameterType.VECTOR_Y);
+		
+		UnknownParameter D0 = this.parameters.get(ParameterType.LENGTH);
+		UnknownParameter L0 = this.parameters.get(ParameterType.VECTOR_LENGTH);
+		
+		// overwriting of a-priori values for parameters to be estimated (i.e. not fixed)
+		if (Nx.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Nx.setValue0(nx);
+		
+		if (Ny.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Ny.setValue0(ny);
+		
+		
+		if (D0.getProcessingType() == ProcessingType.ADJUSTMENT)
+			D0.setValue0(d);
+		
+		if (L0.getProcessingType() == ProcessingType.ADJUSTMENT)
+			L0.setValue0(l);
 	}
 	
 	@Override
 	public void jacobianElements(FeaturePoint point, Matrix Jx, Matrix Jv, int rowIndex) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
-		//Schwerpunktreduktion
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 
-		// Parameter der Geraden
+		// normal vector
 		UnknownParameter nx = this.parameters.get(ParameterType.VECTOR_X);
 		UnknownParameter ny = this.parameters.get(ParameterType.VECTOR_Y);
 		
 		if (Jx != null) {
+			// distance to origin
 			UnknownParameter d  = this.parameters.get(ParameterType.LENGTH);
+			
 			if (nx.getColumn() >= 0)
 				Jx.set(rowIndex, nx.getColumn(),  xi);
 			if (ny.getColumn() >= 0)
@@ -86,11 +105,14 @@ public class Line extends Curve {
 
 	@Override
 	public double getMisclosure(FeaturePoint point) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
-		
+
+		// line parameters
 		double nx = this.parameters.get(ParameterType.VECTOR_X).getValue();
 		double ny = this.parameters.get(ParameterType.VECTOR_Y).getValue();
 		double d  = this.parameters.get(ParameterType.LENGTH).getValue();

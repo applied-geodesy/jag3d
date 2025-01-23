@@ -50,20 +50,37 @@ public class Plane extends Surface {
 	}
 	
 	public void setInitialGuess(double nx, double ny, double nz, double d) throws IllegalArgumentException {
-		this.parameters.get(ParameterType.VECTOR_X).setValue0(nx);
-		this.parameters.get(ParameterType.VECTOR_Y).setValue0(ny);
-		this.parameters.get(ParameterType.VECTOR_Z).setValue0(nz);
-		this.parameters.get(ParameterType.LENGTH).setValue0(d);
+		// plane parameters
+		UnknownParameter Nx = this.parameters.get(ParameterType.VECTOR_X);
+		UnknownParameter Ny = this.parameters.get(ParameterType.VECTOR_Y);
+		UnknownParameter Nz = this.parameters.get(ParameterType.VECTOR_Z);
+		UnknownParameter D0 = this.parameters.get(ParameterType.LENGTH);
+		
+		// overwriting of a-priori values for parameters to be estimated (i.e. not fixed)
+		if (Nx.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Nx.setValue0(nx);
+
+		if (Ny.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Ny.setValue0(ny);
+		
+		if (Nz.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Nz.setValue0(nz);
+
+		if (D0.getProcessingType() == ProcessingType.ADJUSTMENT)
+			D0.setValue0(d);
 	}
 
 	@Override
 	public void jacobianElements(FeaturePoint point, Matrix Jx, Matrix Jv, int rowIndex) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		double zi = point.getZ() - centerOfMass.getZ0();
 
+		// plane parameters 
 		UnknownParameter nx = this.parameters.get(ParameterType.VECTOR_X);
 		UnknownParameter ny = this.parameters.get(ParameterType.VECTOR_Y);
 		UnknownParameter nz = this.parameters.get(ParameterType.VECTOR_Z);
@@ -89,12 +106,15 @@ public class Plane extends Surface {
 
 	@Override
 	public double getMisclosure(FeaturePoint point) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		double zi = point.getZ() - centerOfMass.getZ0();
-		
+
+		// plane parameters 
 		double nx = this.parameters.get(ParameterType.VECTOR_X).getValue();
 		double ny = this.parameters.get(ParameterType.VECTOR_Y).getValue();
 		double nz = this.parameters.get(ParameterType.VECTOR_Z).getValue();

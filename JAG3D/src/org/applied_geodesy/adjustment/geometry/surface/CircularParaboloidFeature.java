@@ -62,7 +62,7 @@ public class CircularParaboloidFeature extends SurfaceFeature {
 		R21.setProcessingType(ProcessingType.FIXED);
 
 		UnknownParameter B = new UnknownParameter(ParameterType.MIDDLE_AXIS_COEFFICIENT, true, 0.0, true, ProcessingType.POSTPROCESSING);
-		AverageRestriction AequalsBRestriction = new AverageRestriction(true, List.of(A), C);
+		AverageRestriction AequalsCRestriction = new AverageRestriction(true, List.of(A), C);
 		AverageRestriction radiusRestriction   = new AverageRestriction(true, List.of(A, C), B);
 		
 		UnknownParameter four = new UnknownParameter(ParameterType.CONSTANT, true, 4.0, false, ProcessingType.FIXED);
@@ -78,7 +78,7 @@ public class CircularParaboloidFeature extends SurfaceFeature {
 		this.getUnknownParameters().add(BB);
 		this.getUnknownParameters().add(four);
 		
-		this.getRestrictions().add(AequalsBRestriction);
+		this.getRestrictions().add(AequalsCRestriction);
 		this.getPostProcessingCalculations().add(radiusRestriction);
 		this.getPostProcessingCalculations().add(invSquaredBRestriction);
 		this.getPostProcessingCalculations().add(focalLengthRestriction);
@@ -110,22 +110,27 @@ public class CircularParaboloidFeature extends SurfaceFeature {
 		// derive initial guess
 		if (nop > 8) {
 			ParaboloidFeature.deriveInitialGuess(points, paraboloid);
+			
+			UnknownParameter X0 = paraboloid.getUnknownParameter(ParameterType.ORIGIN_COORDINATE_X);
+			UnknownParameter Y0 = paraboloid.getUnknownParameter(ParameterType.ORIGIN_COORDINATE_Y);
+			UnknownParameter Z0 = paraboloid.getUnknownParameter(ParameterType.ORIGIN_COORDINATE_Z);
+			
 			UnknownParameter A = paraboloid.getUnknownParameter(ParameterType.MAJOR_AXIS_COEFFICIENT);
 			UnknownParameter C = paraboloid.getUnknownParameter(ParameterType.MINOR_AXIS_COEFFICIENT);
-
-			UnknownParameter R11 = paraboloid.getUnknownParameter(ParameterType.ROTATION_COMPONENT_R11);
-			UnknownParameter R12 = paraboloid.getUnknownParameter(ParameterType.ROTATION_COMPONENT_R12);
-			UnknownParameter R13 = paraboloid.getUnknownParameter(ParameterType.ROTATION_COMPONENT_R13);
-
-			UnknownParameter R21 = paraboloid.getUnknownParameter(ParameterType.ROTATION_COMPONENT_R21);
-			UnknownParameter R22 = paraboloid.getUnknownParameter(ParameterType.ROTATION_COMPONENT_R22);
-			UnknownParameter R23 = paraboloid.getUnknownParameter(ParameterType.ROTATION_COMPONENT_R23);
 
 			UnknownParameter R31 = paraboloid.getUnknownParameter(ParameterType.ROTATION_COMPONENT_R31);
 			UnknownParameter R32 = paraboloid.getUnknownParameter(ParameterType.ROTATION_COMPONENT_R32);
 			UnknownParameter R33 = paraboloid.getUnknownParameter(ParameterType.ROTATION_COMPONENT_R33);
 
+			double x0 = X0.getValue0();
+			double y0 = Y0.getValue0();
+			double z0 = Z0.getValue0();
+			
 			double b = 0.5 * (A.getValue0() + C.getValue0());
+			if (A.getProcessingType() != ProcessingType.ADJUSTMENT)
+				b = A.getValue0();
+			if (C.getProcessingType() != ProcessingType.ADJUSTMENT)
+				b = C.getValue0();
 
 			double rx = Math.atan2( R32.getValue0(), R33.getValue0());
 			double ry = Math.atan2(-R31.getValue0(), Math.hypot(R32.getValue0(), R33.getValue0()));
@@ -142,21 +147,8 @@ public class CircularParaboloidFeature extends SurfaceFeature {
 			double r31 =-Math.sin(ry);
 			double r32 = Math.sin(rx)*Math.cos(ry);
 			double r33 = Math.cos(rx)*Math.cos(ry);
-
-			A.setValue0(b);
-			C.setValue0(b);
-
-			R11.setValue0(r11);
-			R12.setValue0(r12);
-			R13.setValue0(r13);
-
-			R21.setValue0(r21);
-			R22.setValue0(r22);
-			R23.setValue0(r23);
-
-			R31.setValue0(r31);
-			R32.setValue0(r32);
-			R33.setValue0(r33);
+			
+			paraboloid.setInitialGuess(x0, y0, z0, b, b, r11, r12, r13, r21, r22, r23, r31, r32, r33);
 		}
 
 		else 

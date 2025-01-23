@@ -51,23 +51,48 @@ public class QuadraticCurve extends Curve {
 	}
 	
 	public void setInitialGuess(double a, double b, double c, double d, double e, double length) throws IllegalArgumentException {
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_A).setValue0(a);
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_B).setValue0(b);
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_C).setValue0(c);
+		// quadric parameters 	
+		UnknownParameter A = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_A);
+		UnknownParameter B = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_B);
+		UnknownParameter C = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_C);
 		
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_D).setValue0(d);
-		this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_E).setValue0(e);
-
-		this.parameters.get(ParameterType.LENGTH).setValue0(length);
+		UnknownParameter D = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_D);
+		UnknownParameter E = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_E);
+		
+		UnknownParameter Len = this.parameters.get(ParameterType.LENGTH);
+		
+		// overwriting of a-priori values for parameters to be estimated (i.e. not fixed)
+		if (A.getProcessingType() == ProcessingType.ADJUSTMENT)
+			A.setValue0(a);
+		
+		if (B.getProcessingType() == ProcessingType.ADJUSTMENT)
+			B.setValue0(b);
+		
+		if (C.getProcessingType() == ProcessingType.ADJUSTMENT)
+			C.setValue0(c);
+		
+		
+		if (D.getProcessingType() == ProcessingType.ADJUSTMENT)
+			D.setValue0(d);
+		
+		if (E.getProcessingType() == ProcessingType.ADJUSTMENT)
+			E.setValue0(e);
+		
+		
+		if (Len.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Len.setValue0(length);
 	}
 	
 	@Override
 	public void jacobianElements(FeaturePoint point, Matrix Jx, Matrix Jv, int rowIndex) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		
+		// quadric parameters 
 		UnknownParameter a = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_A);
 		UnknownParameter b = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_B);
 		UnknownParameter c = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_C);
@@ -102,11 +127,14 @@ public class QuadraticCurve extends Curve {
 	
 	@Override
 	public double getMisclosure(FeaturePoint point) {
+		// center of mass
 		Point centerOfMass = this.getCenterOfMass();
 
+		// reduce to center of mass
 		double xi = point.getX() - centerOfMass.getX0();
 		double yi = point.getY() - centerOfMass.getY0();
 		
+		// quadric parameters 
 		double a = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_A).getValue();
 		double b = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_B).getValue();
 		double c = this.parameters.get(ParameterType.POLYNOMIAL_COEFFICIENT_C).getValue();
