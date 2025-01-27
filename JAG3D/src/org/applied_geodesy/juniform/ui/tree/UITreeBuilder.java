@@ -342,6 +342,11 @@ public class UITreeBuilder implements FeatureChangeListener {
 					parentLabel = i18n.getString("UITreeBuilder.surfaces.paraboloids", "Paraboloids");
 				}
 				
+				else if (geometry.getPrimitiveType() == PrimitiveType.TORUS) {
+					treeItemType = TreeItemType.TORUS;
+					parentLabel = i18n.getString("UITreeBuilder.surfaces.tori", "Tori");
+				}
+				
 				else if (geometry.getPrimitiveType() == PrimitiveType.QUADRATIC_SURFACE) {
 					treeItemType = TreeItemType.QUADRATIC_SURFACE;
 					parentLabel = i18n.getString("UITreeBuilder.surfaces.quadrics", "Quadratic surfaces");

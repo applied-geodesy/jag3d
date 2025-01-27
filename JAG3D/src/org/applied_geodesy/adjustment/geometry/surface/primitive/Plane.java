@@ -119,7 +119,7 @@ public class Plane extends Surface {
 		double ny = this.parameters.get(ParameterType.VECTOR_Y).getValue();
 		double nz = this.parameters.get(ParameterType.VECTOR_Z).getValue();
 		double d  = this.parameters.get(ParameterType.LENGTH).getValue();
-
+		
 		return nx * xi + ny * yi + nz * zi - d;
 	}
 	

@@ -23,32 +23,42 @@ package org.applied_geodesy.adjustment.geometry.surface.primitive;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.applied_geodesy.adjustment.geometry.PrimitiveType;
 import org.applied_geodesy.adjustment.geometry.parameter.ParameterType;
 import org.applied_geodesy.adjustment.geometry.parameter.ProcessingType;
 import org.applied_geodesy.adjustment.geometry.parameter.UnknownParameter;
-import org.applied_geodesy.adjustment.geometry.point.Point;
 import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
+import org.applied_geodesy.adjustment.geometry.point.Point;
+import org.applied_geodesy.adjustment.geometry.restriction.ProductSumRestriction;
+import org.applied_geodesy.adjustment.geometry.restriction.Restriction;
 
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
 
-
-public class Sphere extends Surface {
+public class Torus extends Surface {
 	private Map<ParameterType, UnknownParameter> parameters;
 	
-	public Sphere() {
+	private ProductSumRestriction vectorLengthRestriction;
+	
+	public Torus() {
 		this.init();
 	}
-
-	public void setInitialGuess(double x0, double y0, double z0, double r0) throws IllegalArgumentException {
-		// sphere parameters 
+	
+	public void setInitialGuess(double x0, double y0, double z0, double nx, double ny, double nz, double a, double c) throws IllegalArgumentException {
+		// torus parameters
 		UnknownParameter X0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_X);
 		UnknownParameter Y0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_Y);
 		UnknownParameter Z0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_Z);
-		UnknownParameter R0 = this.parameters.get(ParameterType.RADIUS);
+		
+		UnknownParameter Nx = this.parameters.get(ParameterType.VECTOR_X);
+		UnknownParameter Ny = this.parameters.get(ParameterType.VECTOR_Y);
+		UnknownParameter Nz = this.parameters.get(ParameterType.VECTOR_Z);
+		
+		UnknownParameter A = this.parameters.get(ParameterType.MAJOR_AXIS_COEFFICIENT);
+		UnknownParameter C = this.parameters.get(ParameterType.MINOR_AXIS_COEFFICIENT);
 		
 		// overwriting of a-priori values for parameters to be estimated (i.e. not fixed)
 		if (X0.getProcessingType() == ProcessingType.ADJUSTMENT)
@@ -58,12 +68,26 @@ public class Sphere extends Surface {
 			Y0.setValue0(y0);
 		
 		if (Z0.getProcessingType() == ProcessingType.ADJUSTMENT)
-			Z0.setValue0(z0);
+			Z0.setValue0(z0);		
 		
-		if (R0.getProcessingType() == ProcessingType.ADJUSTMENT)
-			R0.setValue0(r0);		
+		
+		if (Nx.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Nx.setValue0(nx);
+		
+		if (Ny.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Ny.setValue0(ny);
+		
+		if (Nz.getProcessingType() == ProcessingType.ADJUSTMENT)
+			Nz.setValue0(nz);
+		
+		
+		if (A.getProcessingType() == ProcessingType.ADJUSTMENT)
+			A.setValue0(a);
+		
+		if (C.getProcessingType() == ProcessingType.ADJUSTMENT)
+			C.setValue0(c);
 	}
-		
+
 	@Override
 	public void jacobianElements(FeaturePoint point, Matrix Jx, Matrix Jv, int rowIndex) {
 		// center of mass
@@ -74,27 +98,57 @@ public class Sphere extends Surface {
 		double yi = point.getY() - centerOfMass.getY0();
 		double zi = point.getZ() - centerOfMass.getZ0();
 
-		// sphere parameters 
+		// torus parameters 
 		UnknownParameter x0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_X);
 		UnknownParameter y0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_Y);
 		UnknownParameter z0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_Z);
+		
+		UnknownParameter nx = this.parameters.get(ParameterType.VECTOR_X);
+		UnknownParameter ny = this.parameters.get(ParameterType.VECTOR_Y);
+		UnknownParameter nz = this.parameters.get(ParameterType.VECTOR_Z);
+		
+		UnknownParameter a = this.parameters.get(ParameterType.MAJOR_AXIS_COEFFICIENT);
+		UnknownParameter c = this.parameters.get(ParameterType.MINOR_AXIS_COEFFICIENT);
+		
+		double dx = xi - x0.getValue();
+		double dy = yi - y0.getValue();
+		double dz = zi - z0.getValue();
+		
+		double aa = a.getValue() * a.getValue();
+		double cc = c.getValue() * c.getValue();
+
+		double g   = nx.getValue() * dx + ny.getValue() * dy + nz.getValue() * dz;
+		double dd  = dx*dx + dy*dy + dz*dz;
+		
+        double dac = dd + aa - cc;
+        double g2  = 2.0 * g;
+        double aa4 = 4.0 * aa;
 
 		if (Jx != null) {
-			UnknownParameter r  = this.parameters.get(ParameterType.RADIUS);
 			if (x0.getColumn() >= 0)
-				Jx.set(rowIndex, x0.getColumn(), -2.0 * (xi - x0.getValue()));
+				Jx.set(rowIndex, x0.getColumn(), aa4 * (2.0*dx - g2*nx.getValue()) - 4.0*dac*dx);
 			if (y0.getColumn() >= 0)
-				Jx.set(rowIndex, y0.getColumn(), -2.0 * (yi - y0.getValue()));
+				Jx.set(rowIndex, y0.getColumn(), aa4 * (2.0*dy - g2*ny.getValue()) - 4.0*dac*dy);
 			if (z0.getColumn() >= 0)
-				Jx.set(rowIndex, z0.getColumn(), -2.0 * (zi - z0.getValue()));
-			if (r.getColumn() >= 0)
-				Jx.set(rowIndex, r.getColumn(),  -2.0 * r.getValue());
+				Jx.set(rowIndex, z0.getColumn(), aa4 * (2.0*dz - g2*nz.getValue()) - 4.0*dac*dz);
+					
+			if (nx.getColumn() >= 0)
+				Jx.set(rowIndex, nx.getColumn(), aa4*g2*dx);
+			if (ny.getColumn() >= 0)
+				Jx.set(rowIndex, ny.getColumn(), aa4*g2*dy);
+			if (nz.getColumn() >= 0)
+				Jx.set(rowIndex, nz.getColumn(), aa4*g2*dz);
+			
+			if (a.getColumn() >= 0)
+				Jx.set(rowIndex, a.getColumn(),  4.0 * (g*g2 + dac - 2.0*dd) * a.getValue());
+			if (c.getColumn() >= 0)
+				Jx.set(rowIndex, c.getColumn(), -4.0 * dac * c.getValue());
 		}
 
 		if (Jv != null) {
-			Jv.set(rowIndex, 0, 2.0 * (xi - x0.getValue()));
-			Jv.set(rowIndex, 1, 2.0 * (yi - y0.getValue()));
-			Jv.set(rowIndex, 2, 2.0 * (zi - z0.getValue()));
+			Jv.set(rowIndex, 0, 4.0*dac*dx - aa4*(2.0*dx - g2*nx.getValue()));
+			Jv.set(rowIndex, 1, 4.0*dac*dy - aa4*(2.0*dy - g2*ny.getValue()));
+			Jv.set(rowIndex, 2, 4.0*dac*dz - aa4*(2.0*dz - g2*nz.getValue()));
 		}
 	}
 	
@@ -108,15 +162,33 @@ public class Sphere extends Surface {
 		double yi = point.getY() - centerOfMass.getY0();
 		double zi = point.getZ() - centerOfMass.getZ0();
 
-		// sphere parameters 
+		// torus parameters 
 		double x0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_X).getValue();
 		double y0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_Y).getValue();
 		double z0 = this.parameters.get(ParameterType.ORIGIN_COORDINATE_Z).getValue();
-		double r  = this.parameters.get(ParameterType.RADIUS).getValue();
-		
-		return ((xi-x0)*(xi-x0) + (yi-y0)*(yi-y0) + (zi-z0)*(zi-z0)) - r*r;
-	}
 
+		double nx = this.parameters.get(ParameterType.VECTOR_X).getValue();
+		double ny = this.parameters.get(ParameterType.VECTOR_Y).getValue();
+		double nz = this.parameters.get(ParameterType.VECTOR_Z).getValue();
+
+		double a = this.parameters.get(ParameterType.MAJOR_AXIS_COEFFICIENT).getValue();
+		double c = this.parameters.get(ParameterType.MINOR_AXIS_COEFFICIENT).getValue();
+		
+		double dx = xi - x0;
+		double dy = yi - y0;
+		double dz = zi - z0;
+		
+		double u = nz * dy - ny * dz;
+		double v = nx * dz - nz * dx;
+		double w = ny * dx - nx * dy;
+		
+		double ff  = u*u + v*v + w*w;
+		double dd  = dx*dx + dy*dy + dz*dz;
+		double dac = dd + a*a - c*c;
+		
+		return dac*dac - 4*a*a*ff;
+	}
+	
 	@Override
 	public void setCenterOfMass(Point centerOfMass) {
 		// get previous center of mass
@@ -139,7 +211,7 @@ public class Sphere extends Surface {
 		y0.setValue( y0.getValue() + prevCenterOfMass.getY0() - currCenterOfMass.getY0() );
 		z0.setValue( z0.getValue() + prevCenterOfMass.getZ0() - currCenterOfMass.getZ0() );
 	}
-
+	
 	@Override
 	public void reverseCenterOfMass(UpperSymmPackMatrix Dp) {
 		Point centerOfMass = this.getCenterOfMass();
@@ -154,10 +226,15 @@ public class Sphere extends Surface {
 	}
 	
 	@Override
+	public Collection<Restriction> getRestrictions() {
+		return List.of(this.vectorLengthRestriction);
+	}
+	
+	@Override
 	public Collection<UnknownParameter> getUnknownParameters() {
 		return this.parameters.values();
 	}
-	
+
 	@Override
 	public UnknownParameter getUnknownParameter(ParameterType parameterType) {
 		return this.parameters.get(parameterType);
@@ -175,18 +252,38 @@ public class Sphere extends Surface {
 		this.parameters.put(ParameterType.ORIGIN_COORDINATE_X, new UnknownParameter(ParameterType.ORIGIN_COORDINATE_X, true));
 		this.parameters.put(ParameterType.ORIGIN_COORDINATE_Y, new UnknownParameter(ParameterType.ORIGIN_COORDINATE_Y, true));
 		this.parameters.put(ParameterType.ORIGIN_COORDINATE_Z, new UnknownParameter(ParameterType.ORIGIN_COORDINATE_Z, true));
-		this.parameters.put(ParameterType.RADIUS, new UnknownParameter(ParameterType.RADIUS, true));
+		
+		this.parameters.put(ParameterType.VECTOR_X, new UnknownParameter(ParameterType.VECTOR_X, true, 0));
+		this.parameters.put(ParameterType.VECTOR_Y, new UnknownParameter(ParameterType.VECTOR_Y, true, 0));
+		this.parameters.put(ParameterType.VECTOR_Z, new UnknownParameter(ParameterType.VECTOR_Z, true, 1));
+		
+		this.parameters.put(ParameterType.MAJOR_AXIS_COEFFICIENT, new UnknownParameter(ParameterType.MAJOR_AXIS_COEFFICIENT, true));
+		this.parameters.put(ParameterType.MINOR_AXIS_COEFFICIENT, new UnknownParameter(ParameterType.MINOR_AXIS_COEFFICIENT, true));
+		
+		this.parameters.put(ParameterType.VECTOR_LENGTH, new UnknownParameter(ParameterType.VECTOR_LENGTH, true, 1.0, true, ProcessingType.FIXED));
+		
+		UnknownParameter normalX = this.parameters.get(ParameterType.VECTOR_X);
+		UnknownParameter normalY = this.parameters.get(ParameterType.VECTOR_Y);
+		UnknownParameter normalZ = this.parameters.get(ParameterType.VECTOR_Z);
+		UnknownParameter vectorLength = this.parameters.get(ParameterType.VECTOR_LENGTH);
+
+		List<UnknownParameter> normalVector = List.of(normalX, normalY, normalZ);
+		this.vectorLengthRestriction = new ProductSumRestriction(true, normalVector, normalVector, vectorLength);
 	}
-	
+
 	@Override
 	public PrimitiveType getPrimitiveType() {
-		return PrimitiveType.SPHERE;
+		return PrimitiveType.TORUS;
 	}
 	
 	@Override
 	public String toLaTex() {
-		return "$\\vert \\mathbf{P}_i - \\mathbf{P}_0 \\vert = r"
+		return "$(f_i - a)^2 + g_i^2 = c^2"
+				+ " \\\\  \\\\ "
+				+ "g_i = \\mathbf{n^\\mathrm{T}} \\left(\\mathbf{P}_i - \\mathbf{P}_0\\right)"
 				+ " \\\\ "
-				+ "\\mathbf{P}_0 = \\left( \\begin{array}{c} x_0 \\\\ y_0 \\\\ z_0 \\end{array} \\right)$";
+				+ "f_i = \\sqrt{\\vert \\mathbf{P}_i - \\mathbf{P}_0 \\vert^2 - g^2}"
+				+ " \\\\ \\\\ "
+				+ "\\mathbf{P}_0 = \\left( \\begin{array}{c} x_0 \\\\ y_0 \\\\ z_0 \\end{array} \\right), \\mathbf{n} = \\left( \\begin{array}{c} n_x \\\\ n_y \\\\ n_z \\end{array} \\right)$";
 	}
 }

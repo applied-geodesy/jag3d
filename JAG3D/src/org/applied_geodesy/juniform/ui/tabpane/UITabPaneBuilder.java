@@ -162,6 +162,7 @@ public class UITabPaneBuilder {
 		case CYLINDER:
 		case CONE:
 		case PARABOLOID:
+		case TORUS:
 		case QUADRATIC_SURFACE:
 			GeometricPrimitive geometry = null;
 			if (this.lastTreeItemValue instanceof CurveTreeItemValue)

@@ -38,6 +38,7 @@ import org.applied_geodesy.adjustment.geometry.surface.primitive.Paraboloid;
 import org.applied_geodesy.adjustment.geometry.surface.primitive.Plane;
 import org.applied_geodesy.adjustment.geometry.surface.primitive.QuadraticSurface;
 import org.applied_geodesy.adjustment.geometry.surface.primitive.Sphere;
+import org.applied_geodesy.adjustment.geometry.surface.primitive.Torus;
 import org.applied_geodesy.juniform.ui.i18n.I18N;
 
 import javafx.application.Platform;
@@ -146,6 +147,8 @@ public class GeometricPrimitiveDialog {
 			return new Cone();
 		case PARABOLOID:
 			return new Paraboloid();
+		case TORUS:
+			return new Torus();
 		case QUADRATIC_SURFACE:
 			return new QuadraticSurface();
 		}
@@ -249,6 +252,9 @@ public class GeometricPrimitiveDialog {
 			
 		case PARABOLOID:
 			return i18N.getString("GeometricPrimitiveDialog.primitive.type.surface.paraboloid.label", "Paraboloid");
+			
+		case TORUS:
+			return i18N.getString("GeometricPrimitiveDialog.primitive.type.surface.torus.label", "Torus");
 			
 		case QUADRATIC_SURFACE:
 			return i18N.getString("GeometricPrimitiveDialog.primitive.type.surface.quadratic.label", "Quadratic surface");
