@@ -128,7 +128,7 @@ public class PlaneFeature extends SurfaceFeature {
 				indexMinEigVal = i;
 			}
 		}
-
+		
 		// Normal vector n of the plane is eigenvector which corresponds to the smallest eigenvalue 
 		double nx = eigVec.get(0, indexMinEigVal);
 		double ny = eigVec.get(1, indexMinEigVal);

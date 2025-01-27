@@ -45,6 +45,7 @@ import org.applied_geodesy.adjustment.geometry.surface.SpatialCircleFeature;
 import org.applied_geodesy.adjustment.geometry.surface.SpatialEllipseFeature;
 import org.applied_geodesy.adjustment.geometry.surface.SpatialLineFeature;
 import org.applied_geodesy.adjustment.geometry.surface.SphereFeature;
+import org.applied_geodesy.adjustment.geometry.surface.TorusFeature;
 import org.applied_geodesy.juniform.io.reader.FeaturePointFileReader;
 import org.applied_geodesy.juniform.ui.JUniForm;
 import org.applied_geodesy.juniform.ui.dialog.AboutDialog;
@@ -209,6 +210,10 @@ class MenuEventHandler implements EventHandler<ActionEvent> {
 			
 		case PARABOLOID:
 			feature = new ParaboloidFeature();
+			break;
+			
+		case TORUS:
+			feature = new TorusFeature();
 			break;
 			
 		case QUADRATIC_SURFACE:

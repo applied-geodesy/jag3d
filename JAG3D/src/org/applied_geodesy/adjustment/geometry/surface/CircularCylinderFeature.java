@@ -290,6 +290,4 @@ public class CircularCylinderFeature extends SurfaceFeature {
 
 		return new Pair<Double, Circle>(epsilon, circle);
 	}
-	
-	
 }

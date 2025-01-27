@@ -39,6 +39,7 @@ public enum TreeItemType {
 	CYLINDER,
 	CONE,
 	PARABOLOID,
+	TORUS,
 	QUADRATIC_SURFACE,
 	
 	;

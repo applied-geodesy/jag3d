@@ -237,6 +237,8 @@ public class UIMenuBuilder implements FeatureChangeListener {
 		RadioMenuItem cicularCylinderItem = createRadioMenuItem(i18n.getString("UIMenuBuilder.menu.feature.surface.cylinder.circular.label", "Circular cylinder"), true, MenuItemType.CIRCULAR_CYLINDER, null, this.menuEventHandler, true);
 		RadioMenuItem cylinderItem        = createRadioMenuItem(i18n.getString("UIMenuBuilder.menu.feature.surface.cylinder.elliptic.label", "Cylinder"), true, MenuItemType.CYLINDER, null, this.menuEventHandler, true);
 		
+		RadioMenuItem torusItem = createRadioMenuItem(i18n.getString("UIMenuBuilder.menu.feature.surface.torus.label", "Torus"), true, MenuItemType.TORUS, null, this.menuEventHandler, true);
+		
 		RadioMenuItem quadraticSurfaceItem = createRadioMenuItem(i18n.getString("UIMenuBuilder.menu.feature.surface.quadric.label", "Quadratic surface"), true, MenuItemType.QUADRATIC_SURFACE, null, this.menuEventHandler, true);
 		
 		RadioMenuItem modifiedSurfaceItem = createRadioMenuItem(i18n.getString("UIMenuBuilder.menu.feature.surface.userdefined.label", "User defined surface"), true, MenuItemType.MODIFIABLE_SURFACE, null, this.menuEventHandler, true);
@@ -254,6 +256,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 				coneItem,
 				circularParaboloidItem,
 				paraboloidItem,
+				torusItem,
 				quadraticSurfaceItem,
 				modifiedSurfaceItem
 		);
@@ -272,6 +275,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 				coneItem,
 				circularParaboloidItem,
 				paraboloidItem,
+				torusItem,
 				quadraticSurfaceItem,
 				new SeparatorMenuItem(),
 				modifiedSurfaceItem
@@ -363,6 +367,7 @@ public class UIMenuBuilder implements FeatureChangeListener {
 				case CONE:
 				case CIRCULAR_PARABOLOID:
 				case PARABOLOID:
+				case TORUS:
 				case QUADRATIC_SURFACE:
 				case MODIFIABLE_SURFACE:
 					if (disableStateType == DisableStateType.CURVE_TYPE || disableStateType == DisableStateType.SURFACE_TYPE)

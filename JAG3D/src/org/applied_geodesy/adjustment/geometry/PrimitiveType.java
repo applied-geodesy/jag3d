@@ -37,7 +37,7 @@ public enum PrimitiveType {
 	CONE(FeatureType.SURFACE),
 	PARABOLOID(FeatureType.SURFACE),
 	QUADRATIC_SURFACE(FeatureType.SURFACE),
-	
+	TORUS(FeatureType.SURFACE),
 	;
 	
 	private final FeatureType featureType;
