@@ -30,6 +30,8 @@
 									Kegel
 								<#elseif geometry.type == "PARABOLOID">
 									Paraboloid
+								<#elseif geometry.type == "TORUS">
+									Torus
 								<#elseif geometry.type == "QUADRATIC_SURFACE">
 									Fl&auml;che 2. Ordnung
 								<#else>
