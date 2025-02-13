@@ -30,6 +30,8 @@
 									Cone
 								<#elseif geometry.type == "PARABOLOID">
 									Paraboloid
+								<#elseif geometry.type == "TORUS">
+									Torus
 								<#elseif geometry.type == "QUADRATIC_SURFACE">
 									Quadratic surface
 								<#else>
