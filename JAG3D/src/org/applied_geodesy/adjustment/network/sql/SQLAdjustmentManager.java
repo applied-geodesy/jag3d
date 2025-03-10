@@ -1635,18 +1635,20 @@ public class SQLAdjustmentManager {
 			for ( int i=0; i<parameters.length; i++ ) {
 				int idx = 1;
 				TestStatisticParameterSet set = parameters[i];
-				stmt.setDouble(idx++, set.getNumeratorDof());
-				stmt.setDouble(idx++, set.getDenominatorDof());
-				stmt.setDouble(idx++, set.getProbabilityValue());
-				stmt.setDouble(idx++, set.getPowerOfTest());
-				// Speichere fuer den kritischen Wert des Tests k = max(1.0, k), 
-				// da nur damit die Forderung nach sigam2aprio == sigma2apost eingehalten werden kann
-				stmt.setDouble(idx++, Math.max(1.0 + Constant.EPS, set.getQuantile()));
-				stmt.setDouble(idx++, set.getNoncentralityParameter());
-				stmt.setDouble(idx++, set.getLogarithmicProbabilityValue());
+				if (set.getNumeratorDof() > 0 && set.getDenominatorDof() > 0) {
+					stmt.setDouble(idx++, set.getNumeratorDof());
+					stmt.setDouble(idx++, set.getDenominatorDof());
+					stmt.setDouble(idx++, set.getProbabilityValue());
+					stmt.setDouble(idx++, set.getPowerOfTest());
+					// Speichere fuer den kritischen Wert des Tests k = max(1.0, k), 
+					// da nur damit die Forderung nach sigam2aprio == sigma2apost eingehalten werden kann
+					stmt.setDouble(idx++, Math.max(1.0 + Constant.EPS, set.getQuantile()));
+					stmt.setDouble(idx++, set.getNoncentralityParameter());
+					stmt.setDouble(idx++, set.getLogarithmicProbabilityValue());
 
-				stmt.addBatch();
-				hasBatch = true;
+					stmt.addBatch();
+					hasBatch = true;
+				}
 			}
 			if (hasBatch)
 				stmt.executeLargeBatch();
