@@ -32,6 +32,7 @@ import no.uib.cipr.matrix.Vector;
 public class ConfidenceRegion {
 	private final Matrix covarianceMatrix; 
 	private final int dimension;
+	private double degreeOfFreedom, varianceOfUnitWeight;
 	private double eigenvalues[], minimalDetectableBias[];
 	private Matrix eigenvectors;
 	private final int sortOrder[];
@@ -39,30 +40,32 @@ public class ConfidenceRegion {
 	private double helmertEllipseAngle = 0;
 	private TestStatisticParameters testStatisticParameters;
 
-	public ConfidenceRegion(TestStatisticParameters testStatisticParameters, Matrix covarianceMatrix) throws IllegalArgumentException, NotConvergedException {
-		this(covarianceMatrix);
+	public ConfidenceRegion(TestStatisticParameters testStatisticParameters, Matrix covarianceMatrix, double varianceOfUnitWeight, double degreeOfFreedom) throws IllegalArgumentException, NotConvergedException {
 		this.testStatisticParameters = testStatisticParameters;
-	}
-	
-	public ConfidenceRegion(Matrix covarianceMatrix) throws IllegalArgumentException, NotConvergedException {
+		this.degreeOfFreedom         = degreeOfFreedom > 0 ? degreeOfFreedom : Double.POSITIVE_INFINITY;
+		this.varianceOfUnitWeight    = varianceOfUnitWeight > 0 ? varianceOfUnitWeight : 1.0;
+		
+		this.covarianceMatrix = covarianceMatrix;
+		this.dimension        = covarianceMatrix.numColumns();
+		
 		if (!covarianceMatrix.isSquare())
 			throw new IllegalArgumentException(this.getClass() + " Matrix must be a squared matrix!");
 		
 		for (int i=0; i<covarianceMatrix.numColumns(); i++) {
 			for (int j=0; j<covarianceMatrix.numRows(); j++) {
 				if (Double.isInfinite(covarianceMatrix.get(i,j)) || Double.isNaN(covarianceMatrix.get(i,j)) ) {
-					throw new IllegalArgumentException(this.getClass()+" Matrix contains Inf or NaN values! " +i+"x"+j+" "+covarianceMatrix.get(i,j));
+					throw new IllegalArgumentException(this.getClass() + " Matrix contains Inf or NaN values! " +i+"x"+j+" "+covarianceMatrix.get(i,j));
 				}
 			}
 		}
 		
-		this.covarianceMatrix   = covarianceMatrix;
-		this.dimension     = covarianceMatrix.numColumns();
-		
 		this.SVD();
 		this.sortOrder = this.getSortOrder();
-		
 		this.calculateHelmertEllipse();
+	}
+	
+	public ConfidenceRegion(Matrix covarianceMatrix) throws IllegalArgumentException, NotConvergedException {
+		this(null, covarianceMatrix, 1.0, Double.POSITIVE_INFINITY);
 	}
 		
 	/**
@@ -71,7 +74,7 @@ public class ConfidenceRegion {
 	 * @return axis
 	 */
 	public double getConfidenceAxis(int index) {
-		return Math.sqrt( this.getEigenvalue(index) * this.dimension * this.getQuantile(this.dimension) );
+		return Math.sqrt( this.varianceOfUnitWeight * this.getEigenvalue(index) * (double)this.dimension * this.getQuantile(this.dimension) );
 	}
 	
 	/**
@@ -184,7 +187,7 @@ public class ConfidenceRegion {
 		double maxEval = 0;
 		int indexMaxEval = 0;
 		
-		for (int i=0; i<this.dimension; i++) {
+		for (int i=0; i < this.dimension; i++) {
 			double eval = Math.abs(this.eigenvalues[i]);
 			if (eval > maxEval) {
 				maxEval = eval;
@@ -203,7 +206,7 @@ public class ConfidenceRegion {
 
 		// Spalten == Eigenvektoren
 		this.minimalDetectableBias = new double[this.dimension];
-		for (int i=0; i<this.dimension; i++) {
+		for (int i = 0; i < this.dimension; i++) {
 			this.minimalDetectableBias[i] = Math.sqrt(maxEval) * this.eigenvectors.get(i, indexMaxEval);
 		}
 	}	
@@ -249,7 +252,7 @@ public class ConfidenceRegion {
 	 * @return axis
 	 */
 	public double getConfidenceAxis2D(int index, boolean isHelmertEllipse) {
-		return this.helmertEllipseAxes[index] * (isHelmertEllipse ? 1.0 : Math.sqrt((double)this.dimension * this.getQuantile(this.dimension)));
+		return this.helmertEllipseAxes[index] * (isHelmertEllipse ? 1.0 : Math.sqrt(this.varianceOfUnitWeight * (double)this.dimension * this.getQuantile(this.dimension)));
 	}
 	
 	/**
@@ -273,12 +276,12 @@ public class ConfidenceRegion {
 			double b = qxx+qyy-w > 0 ? Math.sqrt(0.5*(qxx+qyy-w)) : 0;
 			this.helmertEllipseAxes[0] = a;
 			this.helmertEllipseAxes[1] = b;
-			this.helmertEllipseAngle = MathExtension.MOD(0.5*Math.atan2(2.0*qxy, qxx-qyy), 2.0*Math.PI);
+			this.helmertEllipseAngle   = MathExtension.MOD(0.5*Math.atan2(2.0*qxy, qxx-qyy), 2.0*Math.PI);
 		}
 		else { // 1D-Fall
 			this.helmertEllipseAxes[0] = Math.sqrt(this.covarianceMatrix.get(0, 0));
 			this.helmertEllipseAxes[1] = 0.0;
-			this.helmertEllipseAngle = 0.0;
+			this.helmertEllipseAngle   = 0.0;
 		}
 	}
 	
@@ -289,7 +292,7 @@ public class ConfidenceRegion {
 	 */
 	private double getQuantile(int dimension) {
 		if (this.testStatisticParameters != null)
-			return this.testStatisticParameters.getTestStatisticParameter(dimension, Double.POSITIVE_INFINITY).getQuantile();		
+			return this.testStatisticParameters.getTestStatisticParameter(dimension, this.degreeOfFreedom).getQuantile();		
 		return 1.0;
 	}
 }
