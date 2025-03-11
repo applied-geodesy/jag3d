@@ -95,10 +95,11 @@ public class VerticalDeflectionX extends VerticalDeflection {
 		// Bestimmung der Testgroessen
 		double omega = sigma2apost*(double)redundancy;
 		final int dim = 2;
-		double sigma2apostDeflection = (redundancy-dim)>0?(omega-this.nablaCoVarNable)/(redundancy-dim):0.0;
+		double sigma2apostDeflection = (redundancy - dim) > 0 ? (omega - this.nablaCoVarNable)/(redundancy - dim) : 0.0;
 		
-		this.setTprio(this.nablaCoVarNable/dim);
-		this.setTpost((applyAposterioriVarianceOfUnitWeight && sigma2apost > VerticalDeflectionX.ZERO) ? this.nablaCoVarNable/(dim*sigma2apostDeflection):0.0);
+		double tPrio = this.nablaCoVarNable/dim;
+		this.setTprio(tPrio);
+		this.setTpost((applyAposterioriVarianceOfUnitWeight && (redundancy - dim) > 0 && sigma2apostDeflection > VerticalDeflectionX.ZERO) ? tPrio/sigma2apostDeflection : 0.0);
 	}
 	
 	@Override
