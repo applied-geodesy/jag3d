@@ -246,16 +246,16 @@ public abstract class Point extends UnknownParameter {
 		// Bestimmung der Testgroessen
 		double omega = sigma2apost*(double)redundancy;
 		int dim = this.getDimension();
-		double sigma2apostPoint = (redundancy-dim)>0?(omega-this.nablaCoVarNable)/(redundancy-dim):0.0;
+		double sigma2apostPoint = (redundancy - dim) > 0 ? (omega - this.nablaCoVarNable)/(redundancy - dim) : 0.0;
 		
 		this.Tprio = this.nablaCoVarNable/dim;
-		this.Tpost = (applyAposterioriVarianceOfUnitWeight && sigma2apostPoint > Point.ZERO) ? this.nablaCoVarNable/(dim*sigma2apostPoint) : 0.0;
+		this.Tpost = (applyAposterioriVarianceOfUnitWeight && (redundancy - dim) > 0 && sigma2apostPoint > Point.ZERO) ? this.Tprio/sigma2apostPoint : 0.0;
 
-		// Berechnung der Standardabweichungen
-		for (int i=0; i<this.sigma.length; i++) {
-			if (sigma[i]>0)
-				this.sigma[i] = Math.sqrt(sigma2apost*this.sigma[i]*this.sigma[i]);
-		}
+//		// Berechnung der Standardabweichungen
+//		for (int i=0; i<this.sigma.length; i++) {
+//			if (sigma[i] > 0)
+//				this.sigma[i] = Math.sqrt(sigma2apost*this.sigma[i]*this.sigma[i]);
+//		}
 	}
 
 	public void setProbabilityValues(double pPrio, double pPost) {

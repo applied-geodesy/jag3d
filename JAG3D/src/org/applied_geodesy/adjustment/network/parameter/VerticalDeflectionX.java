@@ -58,15 +58,7 @@ public class VerticalDeflectionX extends VerticalDeflection {
 		if (ncn>=0)
 			this.nablaCoVarNable = ncn;
 	}
-
-	public void setTprio(double t) {
-		this.tPrio = t;
-	}
-
-	public void setTpost(double t) {
-		this.tPost = t;
-	}
-
+	
 	public void setPprio(double p) {
 		this.pPrio = p;
 	}
@@ -93,13 +85,12 @@ public class VerticalDeflectionX extends VerticalDeflection {
 
 	public void calcStochasticParameters(double sigma2apost, int redundancy, boolean applyAposterioriVarianceOfUnitWeight) {
 		// Bestimmung der Testgroessen
-		double omega = sigma2apost*(double)redundancy;
 		final int dim = 2;
+		double omega = sigma2apost*(double)redundancy;
 		double sigma2apostDeflection = (redundancy - dim) > 0 ? (omega - this.nablaCoVarNable)/(redundancy - dim) : 0.0;
 		
-		double tPrio = this.nablaCoVarNable/dim;
-		this.setTprio(tPrio);
-		this.setTpost((applyAposterioriVarianceOfUnitWeight && (redundancy - dim) > 0 && sigma2apostDeflection > VerticalDeflectionX.ZERO) ? tPrio/sigma2apostDeflection : 0.0);
+		this.tPrio = this.nablaCoVarNable/dim;
+		this.tPost = applyAposterioriVarianceOfUnitWeight && (redundancy - dim) > 0 && sigma2apostDeflection > VerticalDeflectionX.ZERO ? this.tPrio/sigma2apostDeflection : 0.0;
 	}
 	
 	@Override
