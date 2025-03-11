@@ -252,7 +252,8 @@ public class ConfidenceRegion {
 	 * @return axis
 	 */
 	public double getConfidenceAxis2D(int index, boolean isHelmertEllipse) {
-		return this.helmertEllipseAxes[index] * (isHelmertEllipse ? 1.0 : Math.sqrt(this.varianceOfUnitWeight * (double)this.dimension * this.getQuantile(this.dimension)));
+		int dimension = Math.min(this.dimension, 2); 
+		return this.helmertEllipseAxes[index] * (isHelmertEllipse ? 1.0 : Math.sqrt(this.varianceOfUnitWeight * (double)dimension * this.getQuantile(dimension)));
 	}
 	
 	/**
