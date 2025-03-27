@@ -688,19 +688,16 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 			}
 		}
 		
-		if (!valid) {
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					table.refresh();
-					table.requestFocus();
-					table.getSelectionModel().clearSelection();
-					table.getSelectionModel().select(rowData);
-				}
-			});
-		}
-		else if (this.isComplete(rowData))
-			this.table.sort();
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				table.refresh();
+				table.requestFocus();
+				table.getSelectionModel().clearSelection();
+				table.getSelectionModel().select(rowData);
+				table.sort();
+			}
+		});
 	}
 
 	@Override
