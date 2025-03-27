@@ -752,24 +752,17 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 				e.printStackTrace();
 			}
 		}
-//		this.table.refresh();
-//		this.table.requestFocus();
-//		this.table.getSelectionModel().clearSelection();
-//		this.table.getSelectionModel().select(rowData);
-		
-		if (!valid) {
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					table.refresh();
-					table.requestFocus();
-					table.getSelectionModel().clearSelection();
-					table.getSelectionModel().select(rowData);
-				}
-			});
-		}
-		else if (this.isComplete(rowData))
-			this.table.sort();
+
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				table.refresh();
+				table.requestFocus();
+				table.getSelectionModel().clearSelection();
+				table.getSelectionModel().select(rowData);
+				table.sort();
+			}
+		});
 	}
 	
 	private boolean isComplete(TerrestrialObservationRow row) {
