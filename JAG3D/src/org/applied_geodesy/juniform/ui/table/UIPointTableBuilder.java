@@ -449,61 +449,49 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<FeaturePoint> im
 
 	@Override
 	void setValue(FeaturePoint featurePoint, int columnIndex, Object oldValue, Object newValue) {
-		boolean valid = (oldValue == null || oldValue.toString().trim().isEmpty()) && (newValue == null || newValue.toString().trim().isEmpty());
 		switch (columnIndex) {
 		case 0:
 			featurePoint.setEnable(newValue != null && newValue instanceof Boolean && (Boolean)newValue);
-			valid = true;
 			break;
 		case 1:
-			if (newValue != null && !newValue.toString().trim().isEmpty()) {
+			if (newValue != null && !newValue.toString().trim().isEmpty())
 				featurePoint.setName(newValue.toString().trim());
-				valid = true;
-			}
 			else
 				featurePoint.setName(oldValue == null ? null : oldValue.toString().trim());
 			break;
 		case 2:
-			if (newValue != null && newValue instanceof Double) {
+			if (newValue != null && newValue instanceof Double)
 				featurePoint.setX0((Double)newValue);	
-				valid = true;
-			}
 			else
 				featurePoint.setX0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		case 3:
-			if (newValue != null && newValue instanceof Double) {
+			if (newValue != null && newValue instanceof Double)
 				featurePoint.setY0((Double)newValue);	
-				valid = true;
-			}
 			else
 				featurePoint.setY0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		case 5:
-			if (newValue != null && newValue instanceof Double) {
+			if (newValue != null && newValue instanceof Double)
 				featurePoint.setZ0((Double)newValue);	
-				valid = true;
-			}
 			else
 				featurePoint.setZ0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		default:
 			System.err.println(this.getClass().getSimpleName() + " : Editable column exceed " + columnIndex);
-			valid = false;
 			break;
 		}
 		
-		if (!valid) {
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					table.refresh();
-					table.requestFocus();
-					table.getSelectionModel().clearSelection();
-					table.getSelectionModel().select(featurePoint);
-				}
-			});
-		}
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				table.refresh();
+				table.requestFocus();
+				table.getSelectionModel().clearSelection();
+				table.getSelectionModel().select(featurePoint);
+				table.sort();
+			}
+		});
 	}
 	
 	private void setPointsToFeature(Feature feature) {
