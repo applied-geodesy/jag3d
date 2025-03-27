@@ -598,86 +598,68 @@ public class UIHomologousFramePositionPairTableBuilder extends UIEditableTableBu
 
 	@Override
 	void setValue(HomologousFramePositionPair framePositionPair, int columnIndex, Object oldValue, Object newValue) {
-		boolean valid = (oldValue == null || oldValue.toString().trim().isEmpty()) && (newValue == null || newValue.toString().trim().isEmpty());
 		switch (columnIndex) {
 		case 0:
 			framePositionPair.setEnable(newValue != null && newValue instanceof Boolean && (Boolean)newValue);
-			valid = true;
 			break;
 		case 1:
-			if (newValue != null && !newValue.toString().trim().isEmpty()) {
+			if (newValue != null && !newValue.toString().trim().isEmpty())
 				framePositionPair.setName(newValue.toString().trim());
-				valid = true;
-			}
 			else
 				framePositionPair.setName(oldValue == null ? null : oldValue.toString().trim());
 			break;
 		case 2:
-			if (newValue != null && newValue instanceof Double) {
+			if (newValue != null && newValue instanceof Double)
 				framePositionPair.getSourceSystemPosition().setX0((Double)newValue);	
-				valid = true;
-			}
 			else
 				framePositionPair.getSourceSystemPosition().setX0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		case 3:
-			if (newValue != null && newValue instanceof Double) {
+			if (newValue != null && newValue instanceof Double)
 				framePositionPair.getSourceSystemPosition().setY0((Double)newValue);	
-				valid = true;
-			}
 			else
 				framePositionPair.getSourceSystemPosition().setY0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		case 4:
-			if (newValue != null && newValue instanceof Double) {
+			if (newValue != null && newValue instanceof Double)
 				framePositionPair.getSourceSystemPosition().setZ0((Double)newValue);	
-				valid = true;
-			}
 			else
 				framePositionPair.getSourceSystemPosition().setZ0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		case 5:
-			if (newValue != null && newValue instanceof Double) {
+			if (newValue != null && newValue instanceof Double)
 				framePositionPair.getTargetSystemPosition().setX0((Double)newValue);	
-				valid = true;
-			}
 			else
 				framePositionPair.getTargetSystemPosition().setX0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		case 6:
-			if (newValue != null && newValue instanceof Double) {
+			if (newValue != null && newValue instanceof Double)
 				framePositionPair.getTargetSystemPosition().setY0((Double)newValue);	
-				valid = true;
-			}
 			else
 				framePositionPair.getTargetSystemPosition().setY0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 		case 7:
-			if (newValue != null && newValue instanceof Double) {
+			if (newValue != null && newValue instanceof Double) 
 				framePositionPair.getTargetSystemPosition().setZ0((Double)newValue);	
-				valid = true;
-			}
 			else
 				framePositionPair.getTargetSystemPosition().setZ0(oldValue != null && oldValue instanceof Double ? (Double)oldValue : null);
 			break;
 			
 		default:
 			System.err.println(this.getClass().getSimpleName() + " : Editable column exceed " + columnIndex);
-			valid = false;
 			break;
 		}
 		
-		if (!valid) {
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					table.refresh();
-					table.requestFocus();
-					table.getSelectionModel().clearSelection();
-					table.getSelectionModel().select(framePositionPair);
-				}
-			});
-		}
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				table.refresh();
+				table.requestFocus();
+				table.getSelectionModel().clearSelection();
+				table.getSelectionModel().select(framePositionPair);
+				table.sort();
+			}
+		});
 	}
 	
 	private void setPositionsToTransformation(Transformation transformation) {
