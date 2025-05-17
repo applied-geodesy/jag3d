@@ -1419,8 +1419,8 @@ public class SQLManager {
 		
 		int id = 1;
 		while (rs.next()) {
-			double numeratorDegreeOfFreedom   = rs.getDouble("d1");
-			double denominatorDegreeOfFreedom = rs.getDouble("d2");
+			double numeratorDegreesOfFreedom   = rs.getDouble("d1");
+			double denominatorDegreesOfFreedom = rs.getDouble("d2");
 			
 			double probabilityValue = rs.getDouble("probability_value");
 			double powerOfTest      = rs.getDouble("power_of_test");
@@ -1434,8 +1434,8 @@ public class SQLManager {
 			TestStatisticRow row = new TestStatisticRow();
 			
 			row.setId(id++);
-			row.setNumeratorDegreeOfFreedom(numeratorDegreeOfFreedom);
-			row.setDenominatorDegreeOfFreedom(denominatorDegreeOfFreedom);
+			row.setNumeratorDegreesOfFreedom(numeratorDegreesOfFreedom);
+			row.setDenominatorDegreesOfFreedom(denominatorDegreesOfFreedom);
 			row.setProbabilityValue(probabilityValue);
 			row.setPowerOfTest(powerOfTest);
 			row.setQuantile(quantile);

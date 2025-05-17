@@ -26,8 +26,8 @@ import javafx.beans.property.SimpleObjectProperty;
 
 public class TestStatisticRow extends Row {
 
-	private ObjectProperty<Double> numeratorDegreeOfFreedom = new SimpleObjectProperty<Double>(this, "numeratorDegreeOfFreedom");
-	private ObjectProperty<Double> denominatorDegreeOfFreedom = new SimpleObjectProperty<Double>(this, "denominatorDegreeOfFreedom");
+	private ObjectProperty<Double> numeratorDegreesOfFreedom = new SimpleObjectProperty<Double>(this, "numeratorDegreesOfFreedom");
+	private ObjectProperty<Double> denominatorDegreesOfFreedom = new SimpleObjectProperty<Double>(this, "denominatorDegreesOfFreedom");
 	
 	private ObjectProperty<Double> powerOfTest      = new SimpleObjectProperty<Double>(this, "powerOfTest");
 	private ObjectProperty<Double> probabilityValue = new SimpleObjectProperty<Double>(this, "probabilityValue");
@@ -37,28 +37,28 @@ public class TestStatisticRow extends Row {
 	private ObjectProperty<Double> pValue = new SimpleObjectProperty<Double>(this, "pValue");
 	private ObjectProperty<Double> quantile = new SimpleObjectProperty<Double>(this, "quantile");
 	
-	public final ObjectProperty<Double> numeratorDegreeOfFreedomProperty() {
-		return this.numeratorDegreeOfFreedom;
+	public final ObjectProperty<Double> numeratorDegreesOfFreedomProperty() {
+		return this.numeratorDegreesOfFreedom;
 	}
 	
-	public final Double getNumeratorDegreeOfFreedom() {
-		return this.numeratorDegreeOfFreedomProperty().get();
+	public final Double getNumeratorDegreesOfFreedom() {
+		return this.numeratorDegreesOfFreedomProperty().get();
 	}
 	
-	public final void setNumeratorDegreeOfFreedom(final Double numeratorDegreeOfFreedom) {
-		this.numeratorDegreeOfFreedomProperty().set(numeratorDegreeOfFreedom);
+	public final void setNumeratorDegreesOfFreedom(final Double numeratorDegreesOfFreedom) {
+		this.numeratorDegreesOfFreedomProperty().set(numeratorDegreesOfFreedom);
 	}
 	
-	public final ObjectProperty<Double> denominatorDegreeOfFreedomProperty() {
-		return this.denominatorDegreeOfFreedom;
+	public final ObjectProperty<Double> denominatorDegreesOfFreedomProperty() {
+		return this.denominatorDegreesOfFreedom;
 	}
 	
-	public final Double getDenominatorDegreeOfFreedom() {
-		return this.denominatorDegreeOfFreedomProperty().get();
+	public final Double getDenominatorDegreesOfFreedom() {
+		return this.denominatorDegreesOfFreedomProperty().get();
 	}
 	
-	public final void setDenominatorDegreeOfFreedom(final Double denominatorDegreeOfFreedom) {
-		this.denominatorDegreeOfFreedomProperty().set(denominatorDegreeOfFreedom);
+	public final void setDenominatorDegreesOfFreedom(final Double denominatorDegreesOfFreedom) {
+		this.denominatorDegreesOfFreedomProperty().set(denominatorDegreesOfFreedom);
 	}
 	
 	public final ObjectProperty<Double> powerOfTestProperty() {

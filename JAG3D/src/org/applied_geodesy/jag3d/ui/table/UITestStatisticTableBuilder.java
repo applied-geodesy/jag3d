@@ -52,20 +52,20 @@ public class UITestStatisticTableBuilder extends UITableBuilder<TestStatisticRow
 		CellValueType cellValueTypeStatistic = CellValueType.STATISTIC;
 		CellValueType cellValueTypePercent   = CellValueType.PERCENTAGE;
 		
-		// Degree of freedom numerator
+		// Degrees of freedom numerator
 		int columnIndex = table.getColumns().size(); 
-		String labelText   = i18n.getString("UITestStatisticTableBuilder.tableheader.degree_of_freedom_numerator.label", "d1");
-		String tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.degree_of_freedom_numerator.tooltip", "Numerator degree of freedom");
+		String labelText   = i18n.getString("UITestStatisticTableBuilder.tableheader.degrees_of_freedom_numerator.label", "d1");
+		String tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.degrees_of_freedom_numerator.tooltip", "Numerator degrees of freedom");
 		ColumnTooltipHeader header = new ColumnTooltipHeader(cellValueTypeStatistic, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::numeratorDegreeOfFreedomProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::numeratorDegreesOfFreedomProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 
-		// Degree of freedom denominator
+		// Degrees of freedom denominator
 		columnIndex = table.getColumns().size(); 
-		labelText   = i18n.getString("UITestStatisticTableBuilder.tableheader.degree_of_freedom_denominator.label", "d2");
-		tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.degree_of_freedom_denominator.tooltip", "Denominator degree of freedom");
+		labelText   = i18n.getString("UITestStatisticTableBuilder.tableheader.degrees_of_freedom_denominator.label", "d2");
+		tooltipText = i18n.getString("UITestStatisticTableBuilder.tableheader.degrees_of_freedom_denominator.tooltip", "Denominator degrees of freedom");
 		header = new ColumnTooltipHeader(cellValueTypeStatistic, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::denominatorDegreeOfFreedomProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
+		doubleColumn = this.<Double>getColumn(header, TestStatisticRow::denominatorDegreesOfFreedomProperty, getDoubleCallback(cellValueTypeStatistic), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
 	
 		// Probability value
