@@ -151,7 +151,7 @@ public class ObservationGroup  {
 			ComponentType avgSubType = null;
 
 			if (avgType == ObservationType.GNSS1D || avgType == ObservationType.GNSS2D || avgType == ObservationType.GNSS3D)
-				avgSubType = ((GNSSBaseline)avgObs).getComponent();
+				avgSubType = ((GNSSBaseline)avgObs).getComponentType();
 			
 			for (int j=i+1; j<this.size(); j++) {
 				Observation obs = this.get(j);
@@ -160,7 +160,7 @@ public class ObservationGroup  {
 				ObservationType obsType = obs.getObservationType();
 				ComponentType obsSubType = null;
 				if (obsType == ObservationType.GNSS1D || obsType == ObservationType.GNSS2D || obsType == ObservationType.GNSS3D)
-					obsSubType = ((GNSSBaseline)obs).getComponent();
+					obsSubType = ((GNSSBaseline)obs).getComponentType();
 				
 				double obsIh = obs.getStartPointHeight();
 				double obsTh = obs.getEndPointHeight();

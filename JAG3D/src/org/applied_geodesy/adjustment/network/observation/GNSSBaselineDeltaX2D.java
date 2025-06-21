@@ -78,7 +78,7 @@ public class GNSSBaselineDeltaX2D extends GNSSBaseline2D {
 	}
 
 	@Override
-	public ComponentType getComponent() {
+	public ComponentType getComponentType() {
 		return ComponentType.X;
 	}
 }

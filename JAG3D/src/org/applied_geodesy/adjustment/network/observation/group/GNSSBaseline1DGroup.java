@@ -139,7 +139,7 @@ public class GNSSBaseline1DGroup extends ObservationGroup {
 					targetSystem.add(trgPoint);
 				}
 				
-				if (baseline.getComponent() == ComponentType.Z)
+				if (baseline.getComponentType() == ComponentType.Z)
 					trgPoint.setZ(baseline.getValueApriori() + baseline.getEndPointHeight() - baseline.getStartPointHeight());
 				
 				Point srcPoint = sourceSystem.get(id);
