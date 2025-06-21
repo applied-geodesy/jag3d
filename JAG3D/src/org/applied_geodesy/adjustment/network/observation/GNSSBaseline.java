@@ -44,7 +44,7 @@ public abstract class GNSSBaseline extends Observation {
 	
 	public GNSSBaseline(int id, Point startPoint, Point endPoint, double startPointHeight, double endPointHeight, double observation, double sigma) {
 		super(id, startPoint, endPoint, startPointHeight, endPointHeight, observation, sigma, Math.abs(observation));
-		this.baselineComponents.put(this.getComponent(), this);
+		this.baselineComponents.put(this.getComponentType(), this);
 	}
 
 	/**
@@ -52,8 +52,8 @@ public abstract class GNSSBaseline extends Observation {
 	 * @param baselineComp
 	 */
 	public void addAssociatedBaselineComponent(GNSSBaseline baseline) {
-		if (this.getId() == baseline.getId() && !this.baselineComponents.containsKey(baseline.getComponent()) && !this.baselineComponents.containsValue(baseline))
-			this.baselineComponents.put(baseline.getComponent(), baseline);
+		if (this.getId() == baseline.getId() && !this.baselineComponents.containsKey(baseline.getComponentType()) && !this.baselineComponents.containsValue(baseline))
+			this.baselineComponents.put(baseline.getComponentType(), baseline);
 	}
 	
 	/**
@@ -148,9 +148,9 @@ public abstract class GNSSBaseline extends Observation {
 	
 	/**
 	 * Gibt Auskunft ueber den Anteil (X,Y,Z) der Basislinie
-	 * @return omp
+	 * @return comp
 	 */
-	public abstract ComponentType getComponent();
+	public abstract ComponentType getComponentType();
 
 	@Override
 	public double diffVerticalDeflectionXs() {

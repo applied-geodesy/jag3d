@@ -115,7 +115,7 @@ public class GNSSBaselineDeltaZ3D extends GNSSBaseline3D {
 	}
 	
 	@Override
-	public ComponentType getComponent() {
+	public ComponentType getComponentType() {
 		return ComponentType.Z;
 	}
 }

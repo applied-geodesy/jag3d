@@ -58,7 +58,7 @@ public class AveragedObservationRow extends Row {
 		else if (obsType == ObservationType.ZENITH_ANGLE && ((ZenithAngle)observation).getFace() == FaceType.TWO) 
 			value = MathExtension.MOD(2.0 * Math.PI - value, 2.0 * Math.PI);
 		else if (obsType == ObservationType.GNSS1D || obsType == ObservationType.GNSS2D || obsType == ObservationType.GNSS3D) {
-			compType = ((GNSSBaseline)observation).getComponent();
+			compType = ((GNSSBaseline)observation).getComponentType();
 		}
 		
 		this.setComponentType(compType);

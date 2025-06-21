@@ -171,11 +171,11 @@ public class GNSSBaseline3DGroup extends ObservationGroup {
 					targetSystem.add(trgPoint);
 				}
 				
-				if (baseline.getComponent() == ComponentType.X)
+				if (baseline.getComponentType() == ComponentType.X)
 					trgPoint.setX(baseline.getValueApriori());
-				else if (baseline.getComponent() == ComponentType.Y)
+				else if (baseline.getComponentType() == ComponentType.Y)
 					trgPoint.setY(baseline.getValueApriori());
-				else if (baseline.getComponent() == ComponentType.Z)
+				else if (baseline.getComponentType() == ComponentType.Z)
 					trgPoint.setZ(baseline.getValueApriori() + baseline.getEndPointHeight() - baseline.getStartPointHeight());
 				
 				Point srcPoint = sourceSystem.get(id);

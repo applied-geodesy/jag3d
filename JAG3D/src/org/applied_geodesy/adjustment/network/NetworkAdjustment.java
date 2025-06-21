@@ -4460,9 +4460,6 @@ public class NetworkAdjustment implements Runnable {
 
 		int deltaH2PointsWithKnownDeflections       = 0;
 		int zenithangleStationsWithKnownDeflections = 0;
-		int gnss1DCount = 0;
-		int gnss2DCount = 0;
-		int gnss3DCount = 0;
 		
 		Set<Pair<String,String>> zenithangleStationNamesWithKnownDeflections = new HashSet<Pair<String,String>>();
 		
@@ -4561,23 +4558,37 @@ public class NetworkAdjustment implements Runnable {
 			else if (observation instanceof GNSSBaseline1D) {
 				if (((GNSSBaseline1D)observation).getDimension() >= 1) {
 					double gnssZ = ((GNSSBaseline1D)observation).getBaselineComponent(ComponentType.Z).getValueApriori();
-					gnss1DCount++;
-					if (gnss1DCount > 2) {
-						if (gnssZ != 0) {
-							if (!is3DNet) {
-								if (!((GNSSBaseline1D)observation).getScale().isEnable())
-									this.rankDefect.setScaleZ(DefectType.FIXED);
-								else if (this.rankDefect.getScaleZ() != DefectType.FIXED)
-									this.rankDefect.setScaleZ(DefectType.FREE);
-							}
-							else {
-								if (!((GNSSBaseline1D)observation).getScale().isEnable())
-									this.rankDefect.setScaleXYZ(DefectType.FIXED);
-								else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
-									this.rankDefect.setScaleXYZ(DefectType.FREE);
-							}
+					
+					// ermittle die Anzahl an Basislinienkomponenten, die der Start- bzw. Zielpunkt hat (eine Basislinie == eine Komponenten)
+					ObservationGroup startPointObservations = observation.getStartPoint().getObservations();
+					ObservationGroup endPointObservations   = observation.getEndPoint().getObservations();
+					int gnssCompCntStart = 0;
+					for (int j=0; j<startPointObservations.size(); j++) {
+						if (startPointObservations.get(j) instanceof GNSSBaseline1D && ((GNSSBaseline1D)observation).getDimension() >= 1 && ++gnssCompCntStart > 1) 
+							break;
+					}
+					int gnssCompCntEnd = 0;
+					for (int j=0; j<endPointObservations.size(); j++) {
+						if (endPointObservations.get(j) instanceof GNSSBaseline1D && ((GNSSBaseline1D)observation).getDimension() >= 1 && ++gnssCompCntEnd > 1) 
+							break;
+					}
+					
+					if (gnssZ != 0) {
+						if (!is3DNet) {
+							if (!((GNSSBaseline1D)observation).getScale().isEnable())
+								this.rankDefect.setScaleZ(DefectType.FIXED);
+							else if (this.rankDefect.getScaleZ() != DefectType.FIXED)
+								this.rankDefect.setScaleZ(DefectType.FREE);
 						}
-
+						else {
+							if (!((GNSSBaseline1D)observation).getScale().isEnable())
+								this.rankDefect.setScaleXYZ(DefectType.FIXED);
+							else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
+								this.rankDefect.setScaleXYZ(DefectType.FREE);
+						}
+					}
+					
+					if (gnssCompCntStart > 1 || gnssCompCntEnd > 1) {
 						if (!((GNSSBaseline1D)observation).getRotationX().isEnable())
 							this.rankDefect.setRotationX(DefectType.FIXED);
 						else if (this.rankDefect.getRotationX() != DefectType.FIXED)
@@ -4595,25 +4606,38 @@ public class NetworkAdjustment implements Runnable {
 					double gnssX = ((GNSSBaseline2D)observation).getBaselineComponent(ComponentType.X).getValueApriori();
 					double gnssY = ((GNSSBaseline2D)observation).getBaselineComponent(ComponentType.Y).getValueApriori();
 					if (gnssX != 0 || gnssY != 0) {
-						gnss2DCount++;
-						if (gnss2DCount > 1) {
+						// ermittle die Anzahl an Basislinienkomponenten, die der Start- bzw. Zielpunkt hat (eine Basislinie == zwei Komponenten)
+						ObservationGroup startPointObservations = observation.getStartPoint().getObservations();
+						ObservationGroup endPointObservations   = observation.getEndPoint().getObservations();
+						int gnssCompCntStart = 0;
+						for (int j=0; j<startPointObservations.size(); j++) {
+							if (startPointObservations.get(j) instanceof GNSSBaseline2D && ((GNSSBaseline2D)observation).getDimension() >= 2 && ++gnssCompCntStart > 2) 
+								break;
+						}
+						int gnssCompCntEnd = 0;
+						for (int j=0; j<endPointObservations.size(); j++) {
+							if (endPointObservations.get(j) instanceof GNSSBaseline2D && ((GNSSBaseline2D)observation).getDimension() >= 2 && ++gnssCompCntEnd > 2) 
+								break;
+						}
+						
+						if (!is3DNet) {
+							if (!((GNSSBaseline2D)observation).getScale().isEnable())
+								this.rankDefect.setScaleXY(DefectType.FIXED);
+							else if (this.rankDefect.getScaleXY() != DefectType.FIXED)
+								this.rankDefect.setScaleXY(DefectType.FREE);
+						}
+						else {
+							if (!((GNSSBaseline2D)observation).getScale().isEnable())
+								this.rankDefect.setScaleXYZ(DefectType.FIXED);
+							else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
+								this.rankDefect.setScaleXYZ(DefectType.FREE);
+						}
+						
+						if (gnssCompCntStart > 2 || gnssCompCntEnd > 2) {
 							if (!((GNSSBaseline2D)observation).getRotationZ().isEnable())
 								this.rankDefect.setRotationZ(DefectType.FIXED);
 							else if (this.rankDefect.getRotationZ() != DefectType.FIXED)
 								this.rankDefect.setRotationZ(DefectType.FREE);
-
-							if (!is3DNet) {
-								if (!((GNSSBaseline2D)observation).getScale().isEnable())
-									this.rankDefect.setScaleXY(DefectType.FIXED);
-								else if (this.rankDefect.getScaleXY() != DefectType.FIXED)
-									this.rankDefect.setScaleXY(DefectType.FREE);
-							}
-							else {
-								if (!((GNSSBaseline2D)observation).getScale().isEnable())
-									this.rankDefect.setScaleXYZ(DefectType.FIXED);
-								else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
-									this.rankDefect.setScaleXYZ(DefectType.FREE);
-							}
 						}
 					}
 				}
@@ -4622,15 +4646,28 @@ public class NetworkAdjustment implements Runnable {
 				if (((GNSSBaseline3D)observation).getDimension() >= 3) { // Ist vollstaendige Baseline X, Y und Z vorhanden
 					double gnssX = ((GNSSBaseline3D)observation).getBaselineComponent(ComponentType.X).getValueApriori();
 					double gnssY = ((GNSSBaseline3D)observation).getBaselineComponent(ComponentType.Y).getValueApriori();
-					double gnssZ = ((GNSSBaseline3D)observation).getBaselineComponent(ComponentType.Z).getValueApriori();
+					double gnssZ = ((GNSSBaseline3D)observation).getBaselineComponent(ComponentType.Z).getValueApriori();				
 					if (gnssX != 0 || gnssY != 0 || gnssZ != 0) {
-						gnss3DCount++;
-						if (gnss3DCount > 3) {
-							if (!((GNSSBaseline3D)observation).getScale().isEnable())
-								this.rankDefect.setScaleXYZ(DefectType.FIXED);
-							else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
-								this.rankDefect.setScaleXYZ(DefectType.FREE);
+						// ermittle die Anzahl an Basislinienkomponenten, die der Start- bzw. Zielpunkt hat (eine Basislinie == drei Komponenten)
+						ObservationGroup startPointObservations = observation.getStartPoint().getObservations();
+						ObservationGroup endPointObservations   = observation.getEndPoint().getObservations();
+						int gnssCompCntStart = 0;
+						for (int j=0; j<startPointObservations.size(); j++) {
+							if (startPointObservations.get(j) instanceof GNSSBaseline3D && ((GNSSBaseline3D)observation).getDimension() >= 3 && ++gnssCompCntStart > 3) 
+								break;
+						}
+						int gnssCompCntEnd = 0;
+						for (int j=0; j<endPointObservations.size(); j++) {
+							if (endPointObservations.get(j) instanceof GNSSBaseline3D && ((GNSSBaseline3D)observation).getDimension() >= 3 && ++gnssCompCntEnd > 3) 
+								break;
+						}
 
+						if (!((GNSSBaseline3D)observation).getScale().isEnable())
+							this.rankDefect.setScaleXYZ(DefectType.FIXED);
+						else if (this.rankDefect.getScaleXYZ() != DefectType.FIXED)
+							this.rankDefect.setScaleXYZ(DefectType.FREE);
+						
+						if (gnssCompCntStart > 3 || gnssCompCntEnd > 3) {
 							if (gnssY != 0 || gnssZ != 0) {
 								if (!((GNSSBaseline3D)observation).getRotationX().isEnable())
 									this.rankDefect.setRotationX(DefectType.FIXED);
