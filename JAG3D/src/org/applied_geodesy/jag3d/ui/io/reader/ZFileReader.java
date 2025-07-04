@@ -539,7 +539,8 @@ public class ZFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(I18N.getInstance().getString("ZFileReader.extension.z", "Cremer Caplan"), "*.z", "*.Z")
+				new ExtensionFilter(I18N.getInstance().getString("ZFileReader.extension.z", "Cremer Caplan"), "*.z", "*.Z"),
+				new ExtensionFilter(I18N.getInstance().getString("FlatFileReader.extension", "All files"), "*.*")
 		};
 	}
 	

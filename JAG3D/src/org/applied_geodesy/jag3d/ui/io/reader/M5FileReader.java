@@ -318,7 +318,8 @@ public class M5FileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(I18N.getInstance().getString("M5FileReader.extension.m5", "M5 (DiNi)"), "*.m5", "*.rec", "*.dat", "*.din", "*.M5", "*.REC", "*.DAT", "*.DIN")
+				new ExtensionFilter(I18N.getInstance().getString("M5FileReader.extension.m5", "M5 (DiNi)"), "*.m5", "*.rec", "*.dat", "*.din", "*.M5", "*.REC", "*.DAT", "*.DIN"),
+				new ExtensionFilter(I18N.getInstance().getString("FlatFileReader.extension", "All files"), "*.*")
 		};
 	}
 
