@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.applied_geodesy.adjustment.Constant;
+import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
@@ -331,6 +332,12 @@ public class ZFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				// Direction
 				if (c1 == 2 || c1 == 5 || c1 == 8) {
 					double dir = Double.parseDouble(line.substring(44, 56).trim()) * Constant.RHO_GRAD2RAD;
+					try {
+						boolean isFaceII = (c1 == 2 || c1 == 4) && Double.parseDouble(line.substring(56, 68).trim()) * Constant.RHO_GRAD2RAD > Math.PI;
+						if (isFaceII) // reduce FaceII --> FaceI
+							dir = MathExtension.MOD(dir + Math.PI, 2.0*Math.PI);
+					} catch(NumberFormatException e) {}
+					
 					TerrestrialObservationRow direction = this.getObservation(this.startPointName, endPointId, this.is2DStartPoint ? 0 : this.ih, is2DEndPoint ? 0 : th, dir);
 					if (dist > 0)
 						direction.setDistanceApriori(dist);
@@ -344,6 +351,9 @@ public class ZFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 				// Zenith
 				if ((c1 == 2 || c1 == 4) && !this.is2DStartPoint && !is2DEndPoint) {
 					double zenith = Double.parseDouble(line.substring(56, 68).trim()) * Constant.RHO_GRAD2RAD;
+					if (zenith > Math.PI) // reduce FaceII --> FaceI
+						zenith = MathExtension.MOD(2.0*Math.PI - zenith, 2.0*Math.PI);
+					
 					TerrestrialObservationRow zenithangle = this.getObservation(this.startPointName, endPointId, this.ih, th, zenith);
 					if (dist > 0)
 						zenithangle.setDistanceApriori(dist);
