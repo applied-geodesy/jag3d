@@ -298,7 +298,8 @@ public class GKAFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 	
 	public static ExtensionFilter[] getExtensionFilters() {
 		return new ExtensionFilter[] {
-				new ExtensionFilter(I18N.getInstance().getString("GKAFileReader.extension.gka", "GKA (Trimble)"), "*.gka", "*.GKA")
+				new ExtensionFilter(I18N.getInstance().getString("GKAFileReader.extension.gka", "GKA (Trimble)"), "*.gka", "*.GKA"),
+				new ExtensionFilter(I18N.getInstance().getString("FlatFileReader.extension", "All files"), "*.*")
 		};
 	}
 
