@@ -152,7 +152,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		Label iterationLabel = new Label(i18N.getString("LeastSquaresSettingDialog.iterations.label", "Maximum number of iterations:"));
 		Label dampingLabel   = new Label(i18N.getString("LeastSquaresSettingDialog.lm.damping.label", "Levenberg-Marquardt damping value \u03BB:"));
 		
-		this.iterationSpinner = UiUtil.createIntegerSpinner(0, DefaultValue.getMaximalNumberOfIterations(), 10, i18N.getString("LeastSquaresSettingDialog.iterations.tooltip", "Set maximum permissible iteration value"));
+		this.iterationSpinner = UiUtil.createIntegerSpinner(0, DefaultValue.getMaximumNumberOfIterations(), 10, i18N.getString("LeastSquaresSettingDialog.iterations.tooltip", "Set maximum permissible iteration value"));
 		this.lmDampingSpinner = UiUtil.createDoubleSpinner(CellValueType.STATISTIC, 0.0, 100.0, 0.01, i18N.getString("LeastSquaresSettingDialog.lm.damping.tooltip", "Set damping value of Levenberg-Marquardt algorithm. The algorithm will be applied, if \u03BB \u003E 0"));
 		
 		iterationLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);

@@ -43,12 +43,12 @@ import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
 import org.applied_geodesy.adjustment.geometry.point.Point;
 import org.applied_geodesy.adjustment.geometry.restriction.Restriction;
 import org.applied_geodesy.adjustment.statistic.BaardaMethodTestStatistic;
+import org.applied_geodesy.adjustment.statistic.DefaultTestStatistic;
 import org.applied_geodesy.adjustment.statistic.SidakTestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameters;
 import org.applied_geodesy.adjustment.statistic.TestStatistic;
-import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.adjustment.statistic.UnadjustedTestStatitic;
 
 import javafx.collections.FXCollections;
@@ -80,11 +80,11 @@ public class FeatureAdjustment {
 	private EstimationStateType currentEstimationStatus = EstimationStateType.BUSY;
 	private EstimationType estimationType = EstimationType.L2NORM;
 	
-	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition(TestStatisticType.BAARDA_METHOD, DefaultValue.getProbabilityValue(), DefaultValue.getPowerOfTest(), false);
+	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition(DefaultTestStatistic.getTestStatisticType(), DefaultTestStatistic.getProbabilityValue(), DefaultTestStatistic.getPowerOfTest(), false);
 	private TestStatisticParameters testStatisticParameters = null;
 	
 	private static double SQRT_EPS = Math.sqrt(Constant.EPS);
-	private int maximalNumberOfIterations = DefaultValue.getMaximalNumberOfIterations(),
+	private int maximalNumberOfIterations = DefaultValue.getMaximumNumberOfIterations(),
 			iterationStep                 = 0,
 			numberOfModelEquations        = 0,
 			numberOfUnknownParameters     = 0,

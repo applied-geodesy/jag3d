@@ -69,6 +69,7 @@ import org.applied_geodesy.adjustment.network.point.Point;
 import org.applied_geodesy.adjustment.network.point.Point3D;
 import org.applied_geodesy.adjustment.statistic.BaardaMethodTestStatistic;
 import org.applied_geodesy.adjustment.statistic.BinomialTestStatisticParameters;
+import org.applied_geodesy.adjustment.statistic.DefaultTestStatistic;
 import org.applied_geodesy.adjustment.statistic.SidakTestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
@@ -104,7 +105,7 @@ public class NetworkAdjustment implements Runnable {
 	private UpperSymmPackMatrix Qxx = null;
 	private SphericalDeflectionModel sphericalDeflectionModel = null;
 	
-	private int maximalNumberOfIterations        = DefaultValue.getMaximalNumberOfIterations(),
+	private int maximalNumberOfIterations        = DefaultValue.getMaximumNumberOfIterations(),
 				iterationStep                    = 0,
 				numberOfStochasticPointRows      = 0,
 				numberOfStochasticDeflectionRows = 0,
@@ -133,7 +134,7 @@ public class NetworkAdjustment implements Runnable {
 	private EstimationStateType currentEstimationStatus = EstimationStateType.BUSY;
 	private double currentMaxAbsDx = maxDx;
 	
-	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition(TestStatisticType.BAARDA_METHOD, DefaultValue.getProbabilityValue(), DefaultValue.getPowerOfTest(), false);
+	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition(DefaultTestStatistic.getTestStatisticType(), DefaultTestStatistic.getProbabilityValue(), DefaultTestStatistic.getPowerOfTest(), false);
 	private TestStatisticParameters significanceTestStatisticParameters = null;
 	private BinomialTestStatisticParameters binomialTestStatisticParameters = null;
 	
@@ -5021,8 +5022,8 @@ public class NetworkAdjustment implements Runnable {
 	 * @param newMaxIterations Iterationen
 	 */
 	public void setMaximalNumberOfIterations(int maximalNumberOfIterations) {
-		if (maximalNumberOfIterations < 0 || maximalNumberOfIterations > DefaultValue.getMaximalNumberOfIterations() )
-			this.maximalNumberOfIterations = DefaultValue.getMaximalNumberOfIterations();
+		if (maximalNumberOfIterations < 0 || maximalNumberOfIterations > DefaultValue.getMaximumNumberOfIterations() )
+			this.maximalNumberOfIterations = DefaultValue.getMaximumNumberOfIterations();
 		else
 			this.maximalNumberOfIterations = maximalNumberOfIterations;
 	}

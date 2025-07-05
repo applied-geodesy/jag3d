@@ -21,21 +21,19 @@
 
 package org.applied_geodesy.adjustment.statistic;
 
-import org.applied_geodesy.adjustment.DefaultValue;
-
 public class TestStatisticDefinition {
 	private TestStatisticType testStatisticType;
 	private double probabilityValue, powerOfTest;
 	private boolean familywiseErrorRate = false;
 	
 	public TestStatisticDefinition() {
-		this(TestStatisticType.BAARDA_METHOD, DefaultValue.getProbabilityValue(), DefaultValue.getPowerOfTest(), false);
+		this(DefaultTestStatistic.getTestStatisticType(), DefaultTestStatistic.getProbabilityValue(), DefaultTestStatistic.getPowerOfTest(), false);
 	}
 	
 	public TestStatisticDefinition(TestStatisticType testStatisticType, double probabilityValue, double powerOfTest, boolean familywiseErrorRate) {
-		this.testStatisticType = testStatisticType == null ? TestStatisticType.BAARDA_METHOD : testStatisticType;
-		this.probabilityValue  = probabilityValue > 0 && probabilityValue < 1 ? probabilityValue : DefaultValue.getProbabilityValue();
-		this.powerOfTest       = powerOfTest > 0 && powerOfTest < 1 ? powerOfTest : DefaultValue.getPowerOfTest();
+		this.testStatisticType = testStatisticType != null ? testStatisticType : DefaultTestStatistic.getTestStatisticType();
+		this.probabilityValue  = probabilityValue > 0 && probabilityValue < 1 ? probabilityValue : DefaultTestStatistic.getProbabilityValue();
+		this.powerOfTest       = powerOfTest > 0 && powerOfTest < 1 ? powerOfTest : DefaultTestStatistic.getPowerOfTest();
 		this.familywiseErrorRate = familywiseErrorRate;
 	}
 

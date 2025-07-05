@@ -80,8 +80,8 @@ public class LeastSquaresSettingDialog {
 		private ObjectProperty<Double> robustEstimationLimit  = new SimpleObjectProperty<Double>(DefaultValue.getRobustEstimationLimit());
 		private BooleanProperty orientation                   = new SimpleBooleanProperty(Boolean.TRUE);
 		private BooleanProperty congruenceAnalysis            = new SimpleBooleanProperty(Boolean.FALSE);
-		private BooleanProperty applyVarianceOfUnitWeight     = new SimpleBooleanProperty(Boolean.TRUE);
-		private ObjectProperty<EstimationType> estimationType = new SimpleObjectProperty<EstimationType>(EstimationType.L2NORM);
+		private BooleanProperty applyVarianceOfUnitWeight     = new SimpleBooleanProperty(DefaultValue.applyVarianceOfUnitWeight());
+		private ObjectProperty<EstimationType> estimationType = new SimpleObjectProperty<EstimationType>(DefaultValue.getEstimationType());
 		private ObjectProperty<Double> scalingParameterAlphaUT = new SimpleObjectProperty<Double>(UnscentedTransformationParameter.getAlpha());
 		private ObjectProperty<Double> dampingParameterBetaUT  = new SimpleObjectProperty<Double>(UnscentedTransformationParameter.getBeta());
 		private ObjectProperty<Double> weightZero = new SimpleObjectProperty<Double>(UnscentedTransformationParameter.getWeightZero());
@@ -282,7 +282,7 @@ public class LeastSquaresSettingDialog {
 	private Node createPane() {
 		VBox contentPane = new VBox();
 		
-		this.estimationTypeComboBox = this.createEstimationTypeComboBox(EstimationType.L2NORM, i18n.getString("LeastSquaresSettingDialog.estimationtype.tooltip", "Set estimation method")); 
+		this.estimationTypeComboBox = this.createEstimationTypeComboBox(DefaultValue.getEstimationType(), i18n.getString("LeastSquaresSettingDialog.estimationtype.tooltip", "Set estimation method")); 
 		this.settings.estimationTypeProperty().addListener(new EstimationTypeChangeListener());
 		this.estimationTypeComboBox.getSelectionModel().selectedItemProperty().addListener(new EstimationTypeChangeListener());
 		VBox.setMargin(this.estimationTypeComboBox, new Insets(0, 0, 5, 0)); // oben, recht, unten, links
@@ -382,7 +382,7 @@ public class LeastSquaresSettingDialog {
 	
 	private Node createGeneralSettingPane() {
 		Label iterationLabel = new Label(i18n.getString("LeastSquaresSettingDialog.iterations.label", "Maximum number of iterations:"));
-		this.iterationSpinner = this.createIntegerSpinner(0, DefaultValue.getMaximalNumberOfIterations(), 10, i18n.getString("LeastSquaresSettingDialog.iterations.tooltip", "Set maximum permissible iteration value"));
+		this.iterationSpinner = this.createIntegerSpinner(0, DefaultValue.getMaximumNumberOfIterations(), 10, i18n.getString("LeastSquaresSettingDialog.iterations.tooltip", "Set maximum permissible iteration value"));
 		iterationLabel.setLabelFor(this.iterationSpinner);
 		iterationLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
