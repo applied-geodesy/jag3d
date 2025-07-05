@@ -1,0 +1,12 @@
+# !!! This is an example file and will not be used by JAG3D. Please !!!
+# !!! create a copy of this file named "teststatistic.default",     !!!
+# !!! located in the same directory. Modify the copied file w.r.t.  !!!
+# !!! the desired values.                                           !!!
+#
+# Comments are indicated by # as first character
+#
+# The following values are the default values of JAG3D
+#
+TEST_STATISTIC_TYPE     = BAARDA_METHOD
+PROBABILITY_VALUE       = 0.001
+POWER_OF_TEST           = 0.8

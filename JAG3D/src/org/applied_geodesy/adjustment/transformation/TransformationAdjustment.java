@@ -36,12 +36,12 @@ import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.NormalEquationSystem;
 import org.applied_geodesy.adjustment.statistic.BaardaMethodTestStatistic;
+import org.applied_geodesy.adjustment.statistic.DefaultTestStatistic;
 import org.applied_geodesy.adjustment.statistic.SidakTestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameters;
-import org.applied_geodesy.adjustment.statistic.TestStatisticType;
 import org.applied_geodesy.adjustment.statistic.UnadjustedTestStatitic;
 import org.applied_geodesy.adjustment.transformation.TransformationEvent.TransformationEventType;
 import org.applied_geodesy.adjustment.transformation.equation.TransformationEquations;
@@ -94,8 +94,8 @@ public class TransformationAdjustment {
 	private List<UnknownParameter> parameters = new ArrayList<UnknownParameter>();
 	private List<Restriction> restrictions    = new ArrayList<Restriction>();
 	private TransformationEquations transformationEquations;
-	
-	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition(TestStatisticType.BAARDA_METHOD, DefaultValue.getProbabilityValue(), DefaultValue.getPowerOfTest(), false);
+
+	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition(DefaultTestStatistic.getTestStatisticType(), DefaultTestStatistic.getProbabilityValue(), DefaultTestStatistic.getPowerOfTest(), false);
 	private TestStatisticParameters testStatisticParameters = null;
 	
 	private EstimationStateType currentEstimationStatus = EstimationStateType.BUSY;
@@ -107,7 +107,7 @@ public class TransformationAdjustment {
 			preconditioning                       = true,
 			deriveFirstAdaptedDampingValue        = false;
 	
-	private int maximalNumberOfIterations = DefaultValue.getMaximalNumberOfIterations(),
+	private int maximalNumberOfIterations = DefaultValue.getMaximumNumberOfIterations(),
 			iterationStep                 = 0,
 			numberOfModelEquations        = 0,
 			numberOfUnknownParameters     = 0;

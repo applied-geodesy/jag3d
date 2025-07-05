@@ -21,6 +21,8 @@
 
 package org.applied_geodesy.adjustment.geometry;
 
+import org.applied_geodesy.adjustment.DefaultValue;
+
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -30,7 +32,7 @@ import javafx.beans.value.ObservableObjectValue;
 
 public class VarianceComponent {
 	private ReadOnlyObjectProperty<VarianceComponentType> varianceComponentType;
-	private ObjectProperty<Boolean> applyAposterioriVarianceOfUnitWeight = new SimpleObjectProperty<Boolean>(this, "applyAposterioriVarianceOfUnitWeight", Boolean.TRUE);
+	private ObjectProperty<Boolean> applyAposterioriVarianceOfUnitWeight = new SimpleObjectProperty<Boolean>(this, "applyAposterioriVarianceOfUnitWeight", DefaultValue.applyVarianceOfUnitWeight());
 	private ObjectProperty<Double> variance0     = new SimpleObjectProperty<Double>(this, "variance0", 1.0);
 	private ObjectProperty<Double> redundancy    = new SimpleObjectProperty<Double>(this, "redundancy", 0.0);
 	private ObjectProperty<Integer> numberOfObservations = new SimpleObjectProperty<Integer>(this, "numberOfObservations", 0);

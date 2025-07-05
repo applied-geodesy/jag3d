@@ -35,7 +35,7 @@ import org.applied_geodesy.adjustment.network.VerticalDeflectionGroupUncertainty
 import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
-import org.applied_geodesy.adjustment.statistic.TestStatisticType;
+import org.applied_geodesy.adjustment.statistic.DefaultTestStatistic;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.io.reader.ImportOption;
@@ -87,7 +87,7 @@ class SQLDatabase {
 		sqls.put(20180106.0404, "INSERT INTO \"RankDefect\" (\"id\") VALUES (1);\r\n");
 		
 		sqls.put(20180106.0501, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TestStatistic\"(\"d1\" DOUBLE NOT NULL,\"d2\" DOUBLE NOT NULL,\"probability_value\" DOUBLE NOT NULL,\"power_of_test\" DOUBLE NOT NULL,\"quantile\" DOUBLE NOT NULL,\"non_centrality_parameter\" DOUBLE NOT NULL,\"p_value\" DOUBLE NOT NULL,PRIMARY KEY(\"d1\",\"d2\",\"probability_value\",\"power_of_test\"));\r\n");
-		sqls.put(20180106.0502, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TestStatisticDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + TestStatisticType.BAARDA_METHOD.getId() + " NOT NULL, \"probability_value\" DOUBLE DEFAULT " + DefaultValue.getProbabilityValue() + " NOT NULL,\"power_of_test\" DOUBLE DEFAULT " + DefaultValue.getPowerOfTest() + " NOT NULL,\"familywise_error_rate\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
+		sqls.put(20180106.0502, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TestStatisticDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + DefaultTestStatistic.getTestStatisticType().getId() + " NOT NULL, \"probability_value\" DOUBLE DEFAULT " + DefaultTestStatistic.getProbabilityValue() + " NOT NULL,\"power_of_test\" DOUBLE DEFAULT " + DefaultTestStatistic.getPowerOfTest() + " NOT NULL,\"familywise_error_rate\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
 		sqls.put(20180106.0503, "INSERT INTO \"TestStatisticDefinition\" (\"id\") VALUES (1);\r\n");
 
 		sqls.put(20180106.0504, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ProjectionDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + ProjectionType.LOCAL_CARTESIAN.getId() + " NOT NULL,\"reference_height\" DOUBLE DEFAULT 0 NOT NULL);\r\n");
