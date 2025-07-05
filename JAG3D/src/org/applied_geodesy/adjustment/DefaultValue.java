@@ -75,7 +75,7 @@ public class DefaultValue {
 	
 	public static boolean applyVarianceOfUnitWeight() {
 		boolean value = APPLY_VARIANCE_OF_UNIT_WEIGHT;
-		try { value = Boolean.parseBoolean(PROPERTIES.getProperty("APPLY_VARIANCE_OF_UNIT_WEIGHT")); } catch (Exception e) {}
+		try { value = PROPERTIES.getProperty("APPLY_VARIANCE_OF_UNIT_WEIGHT") != null && PROPERTIES.getProperty("APPLY_VARIANCE_OF_UNIT_WEIGHT").equalsIgnoreCase("FALSE") ? Boolean.FALSE : Boolean.TRUE; } catch (Exception e) {}
 		return value;
 	}
 }
