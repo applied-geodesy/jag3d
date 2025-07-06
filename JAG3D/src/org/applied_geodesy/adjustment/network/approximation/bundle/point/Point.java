@@ -206,9 +206,7 @@ public abstract class Point {
 				// permutiere ueber alle Bundle um das Optimale == meisten identischen Punkte zu ermitteln
 				for (int i=0; i<this.bundles.size(); i++) {
 					PointBundle b1 = this.bundles.get(i);
-					for (int j=0; j<this.bundles.size(); j++) {
-						if (i==j)
-							continue;
+					for (int j=i+1; j<this.bundles.size(); j++) {
 						PointBundle b2 = this.bundles.get(j);
 						Transformation t = this.getTransformation(b1, b2);
 						
