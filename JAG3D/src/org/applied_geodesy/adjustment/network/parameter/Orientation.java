@@ -102,37 +102,50 @@ public class Orientation extends AdditionalUnknownParameter {
 
 		if (!(this.getObservations().get(0) instanceof Direction) || length == 0)
 			return 0.0;
-
-		double averageOrientation = 0;
-		double maxUncertainty = Double.MIN_VALUE;
-		double o[] = new double[length];
+		
+		// Bestimme mittlere Orientation ohne Beruecksichtigung der Lage
+		double orientations[] = new double[length];
 		for (int i = 0; i < length; i++) {
 			Observation observation = this.getObservations().get(i);
-			double tmp_o = observation.getValueAposteriori() - observation.getValueApriori();
-			maxUncertainty = Math.max(observation.getStdApriori(), maxUncertainty);
-			tmp_o = MathExtension.MOD(tmp_o, 2.0*Math.PI);
-			if (i > 0 && (2.0*Math.PI) - Math.abs(o[i-1] - tmp_o) < 0.5) {
-				if (tmp_o < o[i-1])
-					tmp_o += 2.0*Math.PI;
-				else
-					tmp_o -= 2.0*Math.PI;
-			}
-			o[i] = tmp_o;
-			averageOrientation += tmp_o;
+			double orientation = observation.getValueAposteriori() - observation.getValueApriori();
+			orientations[i] = MathExtension.MOD(orientation, 2.0*Math.PI);
 		}
 		
-		java.util.Arrays.sort(o);
-		double medianOrientation = o[(int)((length - 1)/2)];
+		// Bestimme mittlere Orientation mit Beruecksichtigung der Lage
+		java.util.Arrays.sort(orientations);
+		double medianOrientation = orientations[(int)((length - 1)/2)];
+		double averageOrientation = 0;
+		double maxUncertainty = Double.MIN_VALUE;
+		orientations = new double[length];
+		for (int i = 0; i < length; i++) {
+			Observation observation = this.getObservations().get(i);
+			double orientation = observation.getValueAposteriori() - observation.getValueApriori();
+			maxUncertainty = Math.max(observation.getStdApriori(), maxUncertainty);
+			orientation = MathExtension.MOD(orientation, 2.0*Math.PI);
+			// Wenn kein Ausreisser und gute Naeherungen vorliegen, dann sollte hier nur ~2pi oder ~0 rauskommen
+			if (2.0*Math.PI - Math.abs(medianOrientation - orientation) < Math.PI) { 
+				if (orientation < medianOrientation)
+					orientation += 2.0*Math.PI;
+				else
+					orientation -= 2.0*Math.PI;
+			}
+			orientations[i] = orientation;
+			averageOrientation += orientation;
+		}
+		
+		java.util.Arrays.sort(orientations);
+		medianOrientation = orientations[(int)((length - 1)/2)];
 		averageOrientation = averageOrientation / (double)length;
 		maxUncertainty = Math.max(DefaultAverageThreshold.getThresholdDirection(), 100.0 * maxUncertainty);
+	
 		if (Math.abs(averageOrientation - medianOrientation) < maxUncertainty)
 			return averageOrientation;
 		
 		averageOrientation = 0;
 		int count = 0;
 		for (int i = 0; i < length; i++) {
-			if (Math.abs(o[i] - medianOrientation) < maxUncertainty) {
-				averageOrientation += o[i];
+			if (Math.abs(orientations[i] - medianOrientation) < maxUncertainty) {
+				averageOrientation += orientations[i];
 				count++;
 			}
 		}
