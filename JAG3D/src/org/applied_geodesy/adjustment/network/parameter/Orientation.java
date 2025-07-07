@@ -122,8 +122,8 @@ public class Orientation extends AdditionalUnknownParameter {
 			double orientation = observation.getValueAposteriori() - observation.getValueApriori();
 			maxUncertainty = Math.max(observation.getStdApriori(), maxUncertainty);
 			orientation = MathExtension.MOD(orientation, 2.0*Math.PI);
-			// Wenn kein Ausreisser und gute Naeherungen vorliegen, dann sollte hier nur ~2pi oder ~0 rauskommen
-			if (2.0*Math.PI - Math.abs(medianOrientation - orientation) < Math.PI) { 
+			// Wenn kein Ausreisser und gute Naeherungen vorliegen, dann sollte im ersten Ausruck nur ~2pi oder ~0 rauskommen, wenn 2 pi --> reduizieren
+			if (Math.abs(2.0*Math.PI - Math.abs(medianOrientation - orientation)) < Math.abs(medianOrientation - orientation)) { 
 				if (orientation < medianOrientation)
 					orientation += 2.0*Math.PI;
 				else
