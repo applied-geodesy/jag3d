@@ -23,11 +23,14 @@ package org.applied_geodesy.jag3d.ui.graphic.layer;
 
 import java.util.List;
 
+import org.applied_geodesy.adjustment.DefaultValue;
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
 
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.canvas.GraphicsContext;
@@ -37,6 +40,7 @@ public abstract class ConfidenceLayer<T extends Layer> extends Layer {
 
 	private ObjectProperty<Color> strokeColor = new SimpleObjectProperty<Color>(Color.BLACK);
 	private List<T> referenceLayers = FXCollections.observableArrayList();
+	private DoubleProperty confidenceLevel = null;
 
 	ConfidenceLayer(LayerType layerType) {
 		super(layerType);
@@ -67,6 +71,20 @@ public abstract class ConfidenceLayer<T extends Layer> extends Layer {
 
 	public void setStrokeColor(final Color borderColor) {
 		this.strokeColorProperty().set(borderColor);
+	}
+	
+	public DoubleProperty confidenceLevelProperty() {
+		if (this.confidenceLevel == null)
+			this.confidenceLevel = new SimpleDoubleProperty(DefaultValue.getConfidenceLevel());
+		return this.confidenceLevel;
+	}
+
+	public double getConfidenceLevel() {
+		return this.confidenceLevelProperty().get();
+	}
+
+	public void setConfidenceLevel(final double confidenceLevel) {
+		this.confidenceLevelProperty().set(confidenceLevel);
 	}
 
 	@Override

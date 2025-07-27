@@ -174,6 +174,7 @@ public class SQLGraphicManager {
 	}
 	
 	public void load(LayerManager layerManager) throws SQLException {
+		double confidenceLevel = this.getConfidenceLevel();
 		this.initLayer(layerManager);
 		
 		Map<String, GraphicPoint> completeAprioriPointMap     = new HashMap<String, GraphicPoint>();
@@ -189,6 +190,9 @@ public class SQLGraphicManager {
 				LayerType.NEW_POINT_APRIORI,
 				LayerType.REFERENCE_POINT_APRIORI,
 				LayerType.STOCHASTIC_POINT_APRIORI,
+				
+				LayerType.ABSOLUTE_CONFIDENCE,
+				LayerType.RELATIVE_CONFIDENCE,
 		};
 		
 		for (LayerType layerType : layerTypes) {
@@ -208,6 +212,12 @@ public class SQLGraphicManager {
 				PointLayer pointAprioriLayer = (PointLayer) layerManager.getLayer(layerType);
 				completeAprioriPointMap.putAll(this.loadPoints(pointAprioriLayer));
 				break;
+				
+			case ABSOLUTE_CONFIDENCE:
+			case RELATIVE_CONFIDENCE:
+				ConfidenceLayer<?> confidenceLayer = (ConfidenceLayer<?>) layerManager.getLayer(layerType);
+				confidenceLayer.setConfidenceLevel(confidenceLevel);
+				break;
 
 			case POINT_SHIFT_HORIZONTAL:
 			case POINT_SHIFT_VERTICAL:
@@ -217,8 +227,6 @@ public class SQLGraphicManager {
 			case POINT_RESIDUAL_VERTICAL:
 			case OBSERVATION_APOSTERIORI:
 			case OBSERVATION_APRIORI:
-			case ABSOLUTE_CONFIDENCE:
-			case RELATIVE_CONFIDENCE:
 			case LEGEND:
 				break;
 			}
@@ -325,8 +333,8 @@ public class SQLGraphicManager {
 					+ "\"name\", " 
 					+ "\"y0\", \"x0\", " 
 					+ "\"y\",  \"x\", " 
-					+ "\"helmert_major_axis\", \"helmert_minor_axis\", " 
-					+ "0.5 * PI() + \"helmert_alpha\" AS \"helmert_alpha\", "  // switch over to geodetic system north == x etc.
+					+ "\"confidence_ellipse_major_axis\", \"confidence_ellipse_minor_axis\", " 
+					+ "0.5 * PI() + \"confidence_ellipse_angle\" AS \"confidence_ellipse_angle\", "  // switch over to geodetic system north == x etc.
 					+ "\"y0\" - \"y\" AS \"residual_y\", \"x0\" - \"x\" AS \"residual_x\", \"z0\" - \"z\" AS \"residual_z\", " 
 					+ "\"first_principal_component_y\", \"first_principal_component_x\", \"first_principal_component_z\", " 
 					+ "(CASE "
@@ -383,9 +391,9 @@ public class SQLGraphicManager {
 					if (rs.wasNull())
 						continue;
 
-					double majorAxis = rs.getDouble("helmert_major_axis");
-					double minorAxis = rs.getDouble("helmert_minor_axis");
-					double angle     = rs.getDouble("helmert_alpha");
+					double majorAxis = rs.getDouble("confidence_ellipse_major_axis");
+					double minorAxis = rs.getDouble("confidence_ellipse_minor_axis");
+					double angle     = rs.getDouble("confidence_ellipse_angle");
 					double pPrio     = rs.getDouble("p_prio");
 					
 					double principleComponentX = rs.getDouble("first_principal_component_x");
@@ -636,9 +644,9 @@ public class SQLGraphicManager {
 				+ "\"EndPointAposteriori\".\"x\" AS \"xe\", "
 				+ "\"EndPointAposteriori\".\"y\" AS \"ye\", "
 				+ "\"EndPointAposteriori\".\"z\" AS \"ze\", "
-				+ "\"CongruenceAnalysisPointPairAposteriori\".\"confidence_major_axis_2d\", "
-				+ "\"CongruenceAnalysisPointPairAposteriori\".\"confidence_minor_axis_2d\", "
-				+ "0.5 * PI() + \"CongruenceAnalysisPointPairAposteriori\".\"confidence_alpha_2d\" AS \"confidence_alpha_2d\", "
+				+ "\"CongruenceAnalysisPointPairAposteriori\".\"confidence_ellipse_major_axis\", "
+				+ "\"CongruenceAnalysisPointPairAposteriori\".\"confidence_ellipse_minor_axis\", "
+				+ "0.5 * PI() + \"CongruenceAnalysisPointPairAposteriori\".\"confidence_ellipse_angle\" AS \"confidence_ellipse_angle\", "
 				+ "\"CongruenceAnalysisPointPairAposteriori\".\"significant\" "
 				+ "FROM \"CongruenceAnalysisPointPairApriori\" "
 				+ "JOIN \"CongruenceAnalysisPointPairAposteriori\" ON \"CongruenceAnalysisPointPairApriori\".\"id\" = \"CongruenceAnalysisPointPairAposteriori\".\"id\" "
@@ -663,9 +671,9 @@ public class SQLGraphicManager {
 				+ "\"x\" + 0.5 * \"gross_error_x\" AS \"xe\", "
 				+ "\"y\" + 0.5 * \"gross_error_y\" AS \"ye\", "
 				+ "\"z\" + 0.5 * \"gross_error_z\" AS \"ze\", "
-				+ "0 AS \"confidence_major_axis_2d\", "
-				+ "0 AS \"confidence_minor_axis_2d\", "
-				+ "0 AS \"confidence_alpha_2d\", "
+				+ "0 AS \"confidence_ellipse_major_axis\", "
+				+ "0 AS \"confidence_ellipse_minor_axis\", "
+				+ "0 AS \"confidence_ellipse_angle\", "
 				+ "\"significant\" "
 				+ "FROM \"PointApriori\" "
 				+ "JOIN \"PointAposteriori\" ON \"PointApriori\".\"id\" =  \"PointAposteriori\".\"id\" "
@@ -684,9 +692,9 @@ public class SQLGraphicManager {
 			String endPointName   = rs.getString("end_point_name");
 			int dimension         = rs.getInt("dimension");
 			
-			double majorAxis      = rs.getDouble("confidence_major_axis_2d");
-			double minorAxis      = rs.getDouble("confidence_minor_axis_2d");
-			double angle          = rs.getDouble("confidence_alpha_2d");
+			double majorAxis      = rs.getDouble("confidence_ellipse_major_axis");
+			double minorAxis      = rs.getDouble("confidence_ellipse_minor_axis");
+			double angle          = rs.getDouble("confidence_ellipse_angle");
 		
 			if (!completePointMap.containsKey(startPointName) || !completePointMap.containsKey(endPointName))
 				continue;
@@ -1377,5 +1385,17 @@ public class SQLGraphicManager {
 				properties.setVisible(visible);
 			}
 		}
+	}
+	
+	private double getConfidenceLevel() throws SQLException {
+		String sql = "SELECT "
+				+ "\"confidence_level\" "
+				+ "FROM \"AdjustmentDefinition\" WHERE \"id\" = 1 LIMIT 1";
+
+		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+		if (rs.next())
+			return rs.getDouble("confidence_level");
+		return -1;
 	}
 }

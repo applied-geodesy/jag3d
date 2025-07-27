@@ -163,11 +163,11 @@ public class TestStatisticDialog implements FormatterChangedListener {
 		gridPane.setPadding(new Insets(5,15,5,15)); // oben, recht, unten, links
 		//gridPane.setGridLinesVisible(true);
 		
-		probabilityValueLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
-		testPowerLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		this.probabilityValueLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		this.testPowerLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
-		probabilityValueLabel.setMaxWidth(Double.MAX_VALUE);
-		testPowerLabel.setMaxWidth(Double.MAX_VALUE);
+		this.probabilityValueLabel.setMaxWidth(Double.MAX_VALUE);
+		this.testPowerLabel.setMaxWidth(Double.MAX_VALUE);
 		
 		GridPane.setHgrow(probabilityValueLabel, Priority.NEVER);
 		GridPane.setHgrow(testPowerLabel, Priority.NEVER);
@@ -182,10 +182,10 @@ public class TestStatisticDialog implements FormatterChangedListener {
 		gridPane.add(this.testStatisticTypeComboBox,   0, ++row, 2, 1);
 		gridPane.add(this.familywiseErrorRateCheckBox, 0, ++row, 2, 1);
 
-		gridPane.add(probabilityValueLabel,            0, ++row);
+		gridPane.add(this.probabilityValueLabel,       0, ++row);
 		gridPane.add(this.probabilityValueSpinner,     1, row);
 
-		gridPane.add(testPowerLabel,                   0, ++row);
+		gridPane.add(this.testPowerLabel,              0, ++row);
 		gridPane.add(this.testPowerSpinner,            1, row);
 
 		Platform.runLater(new Runnable() {
@@ -267,16 +267,15 @@ public class TestStatisticDialog implements FormatterChangedListener {
 
 			SpinnerValueFactory.DoubleSpinnerValueFactory probabilityValueSpinnerFactory = (SpinnerValueFactory.DoubleSpinnerValueFactory)this.probabilityValueSpinner.getValueFactory();
 			SpinnerValueFactory.DoubleSpinnerValueFactory testPowerSpinnerFactory        = (SpinnerValueFactory.DoubleSpinnerValueFactory)this.testPowerSpinner.getValueFactory();
-
+			
 			double probabilityValue = testStatistic.getProbabilityValue();
 			double powerOfTest      = testStatistic.getPowerOfTest();
-
+			
 			probabilityValue = Math.max(Math.min(this.options.convertPercentToView(probabilityValue), probabilityValueSpinnerFactory.getMax()), probabilityValueSpinnerFactory.getMin());
 			powerOfTest      = Math.max(Math.min(this.options.convertPercentToView(powerOfTest), testPowerSpinnerFactory.getMax()), testPowerSpinnerFactory.getMin());
-	
+			
 			probabilityValueSpinnerFactory.setValue(probabilityValue);
 			testPowerSpinnerFactory.setValue(powerOfTest);
-
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
@@ -312,7 +311,7 @@ public class TestStatisticDialog implements FormatterChangedListener {
 			String frmPercentUnit        = this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().toFormattedAbbreviation();
 			String labelProbabilityValue = String.format(Locale.ENGLISH, "%s%s:", i18n.getString("TestStatisticDialog.probability.label", "Probability value \u03B1"), frmPercentUnit.isBlank() ? "" : " " + frmPercentUnit);
 			String labelTestPower        = String.format(Locale.ENGLISH, "%s%s:", i18n.getString("TestStatisticDialog.testpower.label", "Power of test 1 - \u03B2"), frmPercentUnit.isBlank() ? "" : " " + frmPercentUnit);
-
+			
 			this.probabilityValueLabel.setText(labelProbabilityValue);
 			this.testPowerLabel.setText(labelTestPower);
 		}

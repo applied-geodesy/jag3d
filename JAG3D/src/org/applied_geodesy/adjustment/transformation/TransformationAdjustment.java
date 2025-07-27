@@ -36,7 +36,6 @@ import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.MathExtension;
 import org.applied_geodesy.adjustment.NormalEquationSystem;
 import org.applied_geodesy.adjustment.statistic.BaardaMethodTestStatistic;
-import org.applied_geodesy.adjustment.statistic.DefaultTestStatistic;
 import org.applied_geodesy.adjustment.statistic.SidakTestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
@@ -95,7 +94,7 @@ public class TransformationAdjustment {
 	private List<Restriction> restrictions    = new ArrayList<Restriction>();
 	private TransformationEquations transformationEquations;
 
-	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition(DefaultTestStatistic.getTestStatisticType(), DefaultTestStatistic.getProbabilityValue(), DefaultTestStatistic.getPowerOfTest(), false);
+	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition();
 	private TestStatisticParameters testStatisticParameters = null;
 	
 	private EstimationStateType currentEstimationStatus = EstimationStateType.BUSY;

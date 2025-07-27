@@ -4368,7 +4368,7 @@ public class SQLManager {
 				+ "\"type\", \"number_of_iterations\", \"robust_estimation_limit\", "
 				+ "\"number_of_principal_components\", \"apply_variance_of_unit_weight\", "
 				+ "\"estimate_direction_set_orientation_approximation\", "
-				+ "\"congruence_analysis\", "
+				+ "\"congruence_analysis\", \"confidence_level\", "
 				+ "\"scaling\", \"damping\", \"weight_zero\" "
 				+ "FROM \"AdjustmentDefinition\" "
 				+ "JOIN \"UnscentedTransformation\" "
@@ -4388,6 +4388,7 @@ public class SQLManager {
 				settings.setApplyVarianceOfUnitWeight(rs.getBoolean("apply_variance_of_unit_weight"));
 				settings.setOrientation(rs.getBoolean("estimate_direction_set_orientation_approximation"));
 				settings.setCongruenceAnalysis(rs.getBoolean("congruence_analysis"));
+				settings.setConfidenceLevel(rs.getDouble("confidence_level"));
 				
 				settings.setScalingParameterAlphaUT(rs.getDouble("scaling"));
 				settings.setDampingParameterBetaUT(rs.getDouble("damping"));
@@ -4401,8 +4402,8 @@ public class SQLManager {
 			return;
 	
 		String sql = "MERGE INTO \"AdjustmentDefinition\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN)) "
-				+ ") AS \"vals\" (\"id\", \"type\", \"number_of_iterations\", \"robust_estimation_limit\", \"number_of_principal_components\", \"apply_variance_of_unit_weight\", \"estimate_direction_set_orientation_approximation\", \"congruence_analysis\") ON \"AdjustmentDefinition\".\"id\" = \"vals\".\"id\" AND \"AdjustmentDefinition\".\"id\" = 1 "
+				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS DOUBLE))"
+				+ ") AS \"vals\" (\"id\", \"type\", \"number_of_iterations\", \"robust_estimation_limit\", \"number_of_principal_components\", \"apply_variance_of_unit_weight\", \"estimate_direction_set_orientation_approximation\", \"congruence_analysis\", \"confidence_level\") ON \"AdjustmentDefinition\".\"id\" = \"vals\".\"id\" AND \"AdjustmentDefinition\".\"id\" = 1 "
 				+ "WHEN MATCHED THEN UPDATE SET "
 				+ "\"AdjustmentDefinition\".\"type\"                            = \"vals\".\"type\", "
 				+ "\"AdjustmentDefinition\".\"number_of_iterations\"            = \"vals\".\"number_of_iterations\", "
@@ -4410,7 +4411,8 @@ public class SQLManager {
 				+ "\"AdjustmentDefinition\".\"number_of_principal_components\"  = \"vals\".\"number_of_principal_components\", "
 				+ "\"AdjustmentDefinition\".\"apply_variance_of_unit_weight\"   = \"vals\".\"apply_variance_of_unit_weight\", "
 				+ "\"AdjustmentDefinition\".\"estimate_direction_set_orientation_approximation\" = \"vals\".\"estimate_direction_set_orientation_approximation\", "
-				+ "\"AdjustmentDefinition\".\"congruence_analysis\"             = \"vals\".\"congruence_analysis\" "
+				+ "\"AdjustmentDefinition\".\"congruence_analysis\"             = \"vals\".\"congruence_analysis\", "
+				+ "\"AdjustmentDefinition\".\"confidence_level\"                = \"vals\".\"confidence_level\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"type\", "
@@ -4419,7 +4421,8 @@ public class SQLManager {
 				+ "\"vals\".\"number_of_principal_components\", "
 				+ "\"vals\".\"apply_variance_of_unit_weight\", "
 				+ "\"vals\".\"estimate_direction_set_orientation_approximation\", "
-				+ "\"vals\".\"congruence_analysis\" ";
+				+ "\"vals\".\"congruence_analysis\", "
+				+ "\"vals\".\"confidence_level\" ";
 		
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -4433,6 +4436,7 @@ public class SQLManager {
 		stmt.setBoolean(idx++,  settings.isApplyVarianceOfUnitWeight());
 		stmt.setBoolean(idx++,  settings.isOrientation());
 		stmt.setBoolean(idx++,  settings.isCongruenceAnalysis());
+		stmt.setDouble(idx++,   settings.getConfidenceLevel());
 
 		stmt.execute();
 		

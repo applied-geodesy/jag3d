@@ -290,7 +290,7 @@ public class FTLReport {
 		String sql = "SELECT "
 				+ "\"type\", \"number_of_iterations\", "
 				+ "\"robust_estimation_limit\", \"estimate_direction_set_orientation_approximation\", "
-				+ "\"congruence_analysis\" "
+				+ "\"congruence_analysis\", \"confidence_level\" "
 				+ "FROM \"AdjustmentDefinition\" WHERE \"id\" = 1 LIMIT 1";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -304,6 +304,8 @@ public class FTLReport {
 			this.setParam("robust_estimation_limit", rs.getDouble("robust_estimation_limit"));
 			this.setParam("congruence_analysis", rs.getBoolean("congruence_analysis"));
 			this.setParam("number_of_iterations", rs.getBoolean("number_of_iterations"));
+			this.setParam("confidence_level", options.convertPercentToView(rs.getDouble("confidence_level")));
+
 		}
 	}
 
@@ -917,7 +919,7 @@ public class FTLReport {
 				"CASEWHEN(\"sigma_x\" < 0, 0.0, \"sigma_x\") AS \"sigma_x\", " +
 				"CASEWHEN(\"sigma_y\" < 0, 0.0, \"sigma_y\") AS \"sigma_y\", " +
 				"CASEWHEN(\"sigma_z\" < 0, 0.0, \"sigma_z\") AS \"sigma_z\", " +
-				"\"helmert_major_axis\", \"helmert_minor_axis\", \"helmert_alpha\", " + 
+				"\"confidence_ellipse_major_axis\", \"confidence_ellipse_minor_axis\", \"confidence_ellipse_angle\", " + 
 				"\"confidence_major_axis\", \"confidence_middle_axis\", \"confidence_minor_axis\", " +
 				"\"confidence_alpha\", \"confidence_beta\", \"confidence_gamma\", " +
 				"\"redundancy_x\", \"redundancy_y\", \"redundancy_z\", \"number_of_observations\", " +
@@ -992,15 +994,15 @@ public class FTLReport {
 					case "confidence_major_axis":
 					case "confidence_middle_axis":
 					case "confidence_minor_axis":
-					case "helmert_major_axis":
-					case "helmert_minor_axis":
+					case "confidence_ellipse_major_axis":
+					case "confidence_ellipse_minor_axis":
 						h.put(key, options.convertLengthUncertaintyToView(pointSet.getDouble(i)));
 						break;
 
 					case "confidence_alpha":
 					case "confidence_beta":
 					case "confidence_gamma":
-					case "helmert_alpha":
+					case "confidence_ellipse_angle":
 						h.put(key, options.convertAngleToView(pointSet.getDouble(i)));
 						break;
 
@@ -1924,8 +1926,8 @@ public class FTLReport {
 				+ "\"sigma_y\",\"sigma_x\",\"sigma_z\","
 				+ "\"confidence_major_axis\",\"confidence_middle_axis\",\"confidence_minor_axis\","
 				+ "\"confidence_alpha\",\"confidence_beta\",\"confidence_gamma\","
-				+ "\"confidence_major_axis_2d\",\"confidence_minor_axis_2d\","
-				+ "\"confidence_alpha_2d\","
+				+ "\"confidence_ellipse_major_axis\",\"confidence_ellipse_minor_axis\","
+				+ "\"confidence_ellipse_angle\","
 				+ "\"gross_error_y\",\"gross_error_x\",\"gross_error_z\","
 				+ "\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\",\"minimal_detectable_bias_z\","
 				+ "\"p_prio\",\"p_post\",\"t_prio\",\"t_post\",\"significant\" "
@@ -1971,15 +1973,15 @@ public class FTLReport {
 					case "confidence_major_axis":
 					case "confidence_middle_axis":
 					case "confidence_minor_axis":
-					case "confidence_major_axis_2d":
-					case "confidence_minor_axis_2d":
+					case "confidence_ellipse_major_axis":
+					case "confidence_ellipse_minor_axis":
 						h.put(key, options.convertLengthUncertaintyToView(pointPairSet.getDouble(i)));
 						break;
 
 					case "confidence_alpha":
 					case "confidence_beta":
 					case "confidence_gamma":
-					case "confidence_alpha_2d":
+					case "confidence_ellipse_angle":
 						h.put(key, options.convertAngleToView(pointPairSet.getDouble(i)));
 						break;
 

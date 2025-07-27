@@ -15,15 +15,15 @@
 			<#assign plot_network = true>
 			<#list group.points as point>
 				<#if min_x?? && min_y?? && max_x?? && max_y??>
-					<#assign min_x = [point.x - point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, min_x]?min>
-					<#assign min_y = [point.y - point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, min_y]?min>
-					<#assign max_x = [point.x + point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, max_x]?max>
-					<#assign max_y = [point.y + point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, max_y]?max>
+					<#assign min_x = [point.x - point.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, min_x]?min>
+					<#assign min_y = [point.y - point.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, min_y]?min>
+					<#assign max_x = [point.x + point.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, max_x]?max>
+					<#assign max_y = [point.y + point.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, max_y]?max>
 				<#else>
-					<#assign min_x = point.x - point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length>
-					<#assign min_y = point.y - point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length>
-					<#assign max_x = point.x + point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length>
-					<#assign max_y = point.y + point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length>
+					<#assign min_x = point.x - point.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length>
+					<#assign min_y = point.y - point.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length>
+					<#assign max_x = point.x + point.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length>
+					<#assign max_y = point.y + point.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length>
 				</#if>
 				<#assign points = {point.name : point} + points>
 			</#list>
@@ -44,10 +44,10 @@
 						<#assign x = point1.x + 0.5*dx>
 						<#assign y = point1.y + 0.5*dy>
 						
-						<#assign min_x = [x - point_pair.confidence_major_axis_2d * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, min_x]?min>
-						<#assign min_y = [y - point_pair.confidence_major_axis_2d * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, min_y]?min>
-						<#assign max_x = [x + point_pair.confidence_major_axis_2d * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, max_x]?max>
-						<#assign max_y = [y + point_pair.confidence_major_axis_2d * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, max_y]?max>
+						<#assign min_x = [x - point_pair.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, min_x]?min>
+						<#assign min_y = [y - point_pair.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, min_y]?min>
+						<#assign max_x = [x + point_pair.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, max_x]?max>
+						<#assign max_y = [y + point_pair.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length, max_y]?max>
 						
 						<#if group.dimension != 1 && (layers["POINT_SHIFT_HORIZONTAL"]?? && layers["POINT_SHIFT_HORIZONTAL"].visible)>
 							<#assign min_x = [x + dx * vector_scale, min_x]?min>
@@ -120,9 +120,9 @@
 													<ellipse 
 														cx="0" 
 														cy="0" 
-														ry="<@printFormattedNumber value=point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>" 
-														rx="<@printFormattedNumber value=point.helmert_minor_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
-														transform="translate(<@printFormattedNumber value=point.y - avg_y format=df_svg/>, <@printFormattedNumber value=point.x - avg_x format=df_svg/>) scale(1, -1) rotate(<@printFormattedNumber value=point.helmert_alpha*unit_conversion_angle*180/Math.PI format=df_svg/>, 0, 0) " 
+														ry="<@printFormattedNumber value=point.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>" 
+														rx="<@printFormattedNumber value=point.confidence_ellipse_minor_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
+														transform="translate(<@printFormattedNumber value=point.y - avg_y format=df_svg/>, <@printFormattedNumber value=point.x - avg_x format=df_svg/>) scale(1, -1) rotate(<@printFormattedNumber value=point.confidence_ellipse_angle*unit_conversion_angle*180/Math.PI format=df_svg/>, 0, 0) " 
 														stroke="#000000" 
 														stroke-width="0.25" 
 														fill="#cccccc" 
@@ -131,9 +131,9 @@
 												<#elseif group.dimension == 1>
 													<line 
 														x1="<@printFormattedNumber value=point.y - avg_y format=df_svg/>"
-														y1="<@printFormattedNumber value=point.x - avg_x - 0.5*point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
+														y1="<@printFormattedNumber value=point.x - avg_x - 0.5*point.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
 														x2="<@printFormattedNumber value=point.y - avg_y format=df_svg/>"
-														y2="<@printFormattedNumber value=point.x - avg_x + 0.5*point.helmert_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
+														y2="<@printFormattedNumber value=point.x - avg_x + 0.5*point.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
 														stroke="#000000" 
 														stroke-width="2.5" 
 														vector-effect="non-scaling-stroke" 
@@ -159,9 +159,9 @@
 														<ellipse 
 															cx="0" 
 															cy="0" 
-															ry="<@printFormattedNumber value=point_pair.confidence_major_axis_2d * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>" 
-															rx="<@printFormattedNumber value=point_pair.confidence_minor_axis_2d * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
-															transform="translate(<@printFormattedNumber value=y format=df_svg/>, <@printFormattedNumber value=x format=df_svg/>) scale(1,-1) rotate(<@printFormattedNumber value=point_pair.confidence_alpha_2d*unit_conversion_angle*180/Math.PI format=df_svg/>, 0, 0) " 
+															ry="<@printFormattedNumber value=point_pair.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>" 
+															rx="<@printFormattedNumber value=point_pair.confidence_ellipse_minor_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
+															transform="translate(<@printFormattedNumber value=y format=df_svg/>, <@printFormattedNumber value=x format=df_svg/>) scale(1,-1) rotate(<@printFormattedNumber value=point_pair.confidence_ellipse_angle*unit_conversion_angle*180/Math.PI format=df_svg/>, 0, 0) " 
 															stroke="#000000" 
 															stroke-width="0.25" 
 															fill="#ffffe0" 
@@ -170,9 +170,9 @@
 													<#elseif group.dimension == 1 && layers["POINT_SHIFT_VERTICAL"].visible>
 														<line 
 															x1="<@printFormattedNumber value=y format=df_svg/>"
-															y1="<@printFormattedNumber value=x - 0.5*point_pair.confidence_major_axis_2d * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
+															y1="<@printFormattedNumber value=x - 0.5*point_pair.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
 															x2="<@printFormattedNumber value=y format=df_svg/>"
-															y2="<@printFormattedNumber value=x + 0.5*point_pair.confidence_major_axis_2d * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
+															y2="<@printFormattedNumber value=x + 0.5*point_pair.confidence_ellipse_major_axis * vector_scale * unit_conversion_length_uncertainty / unit_conversion_length format=df_svg/>"
 															stroke="#ffffe0" 
 															stroke-width="2.5" 
 															vector-effect="non-scaling-stroke" 

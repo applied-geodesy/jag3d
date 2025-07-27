@@ -55,8 +55,8 @@ public abstract class Point extends UnknownParameter {
                    confidenceAxis[]  = new double[this.getDimension()],
                    confidenceAngles[]= new double[3],
                    principalComponents[]= new double[this.getDimension()],
-                   confidenceAxis2D[] = new double[2],
-                   confidenceAngle2D = 0,
+                   confidenceEllipseAxis[] = new double[2],
+                   confidenceEllipseAngle = 0,
                    nablaCoVarNable = 0.0,
                    efsp  =  0.0,
     			   Tprio =  0.0,
@@ -404,20 +404,20 @@ public abstract class Point extends UnknownParameter {
 		return this.confidenceAngles[i];
 	}
 
-	public double getConfidenceAxis2D(int i) {
-		return this.confidenceAxis2D[i];
+	public double getConfidenceEllipseAxis(int i) {
+		return this.confidenceEllipseAxis[i];
 	}
 
-	public double getConfidenceAngle2D() {
-		return this.confidenceAngle2D;
+	public double getConfidenceEllipseAngle() {
+		return this.confidenceEllipseAngle;
 	}
 
 	public void setConfidenceRegion(ConfidenceRegion confidence) {
 		for (int i=0; i<this.getDimension(); i++) {
-			this.confidenceAxis[i]   = confidence.getConfidenceAxis(i);
+			this.confidenceAxis[i]   = confidence.getConfidenceRegionAxis(i);
 			
 			if (this.getDimension() == 1 && i == 0 || this.getDimension() > 1 && i < 2) 
-				this.confidenceAxis2D[i] = confidence.getConfidenceAxis2D(i, false);
+				this.confidenceEllipseAxis[i] = confidence.getConfidenceEllipseAxis(i);
 			
 //			if (this.getDimension() > 1 && i < 2) 
 //				this.confidenceAxis2D[i] = confidence.getConfidenceAxis2D(i, false);
@@ -426,8 +426,8 @@ public abstract class Point extends UnknownParameter {
 		}
 		
 		if (this.getDimension() > 1) {
-			this.confidenceAngle2D = confidence.getConfidenceAngle2D();
-			this.confidenceAngles  = confidence.getEulerAngles();
+			this.confidenceEllipseAngle = confidence.getConfidenceEllipseAngle();
+			this.confidenceAngles       = confidence.getEulerAngles();
 		}
 	}
 

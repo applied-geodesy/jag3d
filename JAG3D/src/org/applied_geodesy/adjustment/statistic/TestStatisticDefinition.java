@@ -27,13 +27,21 @@ public class TestStatisticDefinition {
 	private boolean familywiseErrorRate = false;
 	
 	public TestStatisticDefinition() {
-		this(DefaultTestStatistic.getTestStatisticType(), DefaultTestStatistic.getProbabilityValue(), DefaultTestStatistic.getPowerOfTest(), false);
+		this(DefaultTestStatisticValue.getTestStatisticType(), DefaultTestStatisticValue.getProbabilityValue(), DefaultTestStatisticValue.getPowerOfTest(), false);
+	}
+	
+	public TestStatisticDefinition(TestStatisticType testStatisticType) {
+		this(testStatisticType, DefaultTestStatisticValue.getProbabilityValue(), DefaultTestStatisticValue.getPowerOfTest(), false);
+	}
+	
+	public TestStatisticDefinition(TestStatisticType testStatisticType, double probabilityValue) {
+		this(testStatisticType, probabilityValue, DefaultTestStatisticValue.getPowerOfTest(), false);
 	}
 	
 	public TestStatisticDefinition(TestStatisticType testStatisticType, double probabilityValue, double powerOfTest, boolean familywiseErrorRate) {
-		this.testStatisticType = testStatisticType != null ? testStatisticType : DefaultTestStatistic.getTestStatisticType();
-		this.probabilityValue  = probabilityValue > 0 && probabilityValue < 1 ? probabilityValue : DefaultTestStatistic.getProbabilityValue();
-		this.powerOfTest       = powerOfTest > 0 && powerOfTest < 1 ? powerOfTest : DefaultTestStatistic.getPowerOfTest();
+		this.testStatisticType = testStatisticType != null ? testStatisticType : DefaultTestStatisticValue.getTestStatisticType();
+		this.probabilityValue  = probabilityValue > 0 && probabilityValue < 1 ? probabilityValue : DefaultTestStatisticValue.getProbabilityValue();
+		this.powerOfTest       = powerOfTest > 0 && powerOfTest < 1 ? powerOfTest : DefaultTestStatisticValue.getPowerOfTest();
 		this.familywiseErrorRate = familywiseErrorRate;
 	}
 

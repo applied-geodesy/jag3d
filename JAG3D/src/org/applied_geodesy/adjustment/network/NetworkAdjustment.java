@@ -69,7 +69,6 @@ import org.applied_geodesy.adjustment.network.point.Point;
 import org.applied_geodesy.adjustment.network.point.Point3D;
 import org.applied_geodesy.adjustment.statistic.BaardaMethodTestStatistic;
 import org.applied_geodesy.adjustment.statistic.BinomialTestStatisticParameters;
-import org.applied_geodesy.adjustment.statistic.DefaultTestStatistic;
 import org.applied_geodesy.adjustment.statistic.SidakTestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
@@ -134,9 +133,11 @@ public class NetworkAdjustment implements Runnable {
 	private EstimationStateType currentEstimationStatus = EstimationStateType.BUSY;
 	private double currentMaxAbsDx = maxDx;
 	
-	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition(DefaultTestStatistic.getTestStatisticType(), DefaultTestStatistic.getProbabilityValue(), DefaultTestStatistic.getPowerOfTest(), false);
+	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition();
+	private TestStatisticDefinition confidenceRegionDefinition = new TestStatisticDefinition(TestStatisticType.NONE, 1.0 - DefaultValue.getConfidenceLevel());
 	private TestStatisticParameters significanceTestStatisticParameters = null;
 	private BinomialTestStatisticParameters binomialTestStatisticParameters = null;
+	private TestStatisticParameters confidenceRegionParameters = null;
 	
 	private Map<String,Point> allPoints = new LinkedHashMap<String,Point>();
 	private List<Point> datumPoints = new ArrayList<Point>();
@@ -2972,6 +2973,7 @@ public class NetworkAdjustment implements Runnable {
 			// ermittle kritische Werte zur Bewertung der VCE
 			this.significanceTestStatisticParameters = this.getSignificanceTestStatisticParameters();
 			this.binomialTestStatisticParameters     = this.getBinomialTestStatisticParameters();
+			this.confidenceRegionParameters          = this.getConfidenceRegionParameters();
 
 			for (VarianceComponent varianceEstimation : this.varianceComponents.values()) {
 				if (varianceEstimation.getRedundancy() > 0) {
@@ -3356,7 +3358,7 @@ public class NetworkAdjustment implements Runnable {
 					}
 
 					try {
-						ConfidenceRegion confidenceRegion = new ConfidenceRegion(this.significanceTestStatisticParameters, subQxx, varianceOfUnitWeight, applyEmpiricalVarianceOfUnitWeight ? dof : Double.POSITIVE_INFINITY);
+						ConfidenceRegion confidenceRegion = new ConfidenceRegion(this.confidenceRegionParameters, subQxx, varianceOfUnitWeight, applyEmpiricalVarianceOfUnitWeight ? dof : Double.POSITIVE_INFINITY);
 						if (confidenceRegion != null)
 							point.setConfidenceRegion(confidenceRegion);
 					} catch (Exception e) {
@@ -3436,10 +3438,10 @@ public class NetworkAdjustment implements Runnable {
 						}
 
 						try {
-							ConfidenceRegion confidence = new ConfidenceRegion(this.significanceTestStatisticParameters, subQxx, varianceOfUnitWeight, applyEmpiricalVarianceOfUnitWeight ? dof : Double.POSITIVE_INFINITY);
+							ConfidenceRegion confidence = new ConfidenceRegion(this.confidenceRegionParameters, subQxx, varianceOfUnitWeight, applyEmpiricalVarianceOfUnitWeight ? dof : Double.POSITIVE_INFINITY);
 							if (confidence != null) {
-								deflectionX.setConfidence(confidence.getConfidenceAxis(0));
-								deflectionY.setConfidence(confidence.getConfidenceAxis(1));
+								deflectionX.setConfidence(confidence.getConfidenceRegionAxis(0));
+								deflectionY.setConfidence(confidence.getConfidenceRegionAxis(1));
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -3490,6 +3492,9 @@ public class NetworkAdjustment implements Runnable {
 					double lambda = tsPrio.getNoncentralityParameter();
 					double kPrio  = tsPrio.getQuantile();
 					double kPost  = tsPost != null ? tsPost.getQuantile() : Double.POSITIVE_INFINITY;
+					
+					TestStatisticParameterSet confLevelPrio = this.confidenceRegionParameters.getTestStatisticParameter(1, Double.POSITIVE_INFINITY);
+					TestStatisticParameterSet confLevelPost = applyEmpiricalVarianceOfUnitWeight && dof > 0 ? this.confidenceRegionParameters.getTestStatisticParameter(1, dof) : null;
 
 					double value = additionalUnknownParameter.getValue();
 					if (additionalUnknownParameter.getParameterType() == ParameterType.ORIENTATION ||
@@ -3516,7 +3521,7 @@ public class NetworkAdjustment implements Runnable {
 					additionalUnknownParameter.setGrossError(nabla);
 					additionalUnknownParameter.setSignificant(tPrio > kPrio || tPost > kPost);
 					additionalUnknownParameter.setMinimalDetectableBias(nabla0);
-					additionalUnknownParameter.setConfidence(Math.sqrt(qxxPost * (applyEmpiricalVarianceOfUnitWeight ? kPost : kPrio)));
+					additionalUnknownParameter.setConfidence(Math.sqrt(qxxPost * (applyEmpiricalVarianceOfUnitWeight && dof > 0 ? confLevelPost.getQuantile() : confLevelPrio.getQuantile())));
 				}
 				// Strain-Parameter und Lotabweichungen werden gesondert bearbeitet, da teilw. Hilfsparameter bestimmt werden, die keine Interpretation zulassen
 				else if (unknownParameter instanceof StrainParameter){}
@@ -3655,7 +3660,7 @@ public class NetworkAdjustment implements Runnable {
 								sigma[i] = Math.sqrt(Math.abs(varianceOfUnitWeight * tieQxx.get(i, i)));
 
 							try {
-								ConfidenceRegion confidenceRegion = new ConfidenceRegion(this.significanceTestStatisticParameters, tieQxx, varianceOfUnitWeight, applyEmpiricalVarianceOfUnitWeight ? dof : Double.POSITIVE_INFINITY);
+								ConfidenceRegion confidenceRegion = new ConfidenceRegion(this.confidenceRegionParameters, tieQxx, varianceOfUnitWeight, applyEmpiricalVarianceOfUnitWeight ? dof : Double.POSITIVE_INFINITY);
 								if (confidenceRegion != null) {
 									tie.setConfidenceRegion(confidenceRegion);
 									if (normNabla < SQRT_EPS) { // this.estimationType == EstimationType.SIMULATION) {
@@ -3691,13 +3696,18 @@ public class NetworkAdjustment implements Runnable {
 					int nor = strainAnalysisEquations.numberOfRestrictions();
 					int not = tieGroup.size(true);
 					if (this.congruenceAnalysis && this.freeNetwork && strainAnalysisEquations.hasUnconstraintParameters() && not * dim + nor >= nou) {
-						
+						// Teststatistik fuer Strain-Parameter
 						TestStatisticParameterSet tsPrioParam = this.significanceTestStatisticParameters.getTestStatisticParameter(1, Double.POSITIVE_INFINITY);
 						TestStatisticParameterSet tsPostParam = applyEmpiricalVarianceOfUnitWeight && dof > 0 ? this.significanceTestStatisticParameters.getTestStatisticParameter(1, dof) : null;
+						// Konfidenzbereich der Strain-Parameter
+						TestStatisticParameterSet confLevelPrio = this.confidenceRegionParameters.getTestStatisticParameter(1, Double.POSITIVE_INFINITY);
+						TestStatisticParameterSet confLevelPost = applyEmpiricalVarianceOfUnitWeight && dof > 0 ? this.confidenceRegionParameters.getTestStatisticParameter(1, dof) : null;
+						
 						double sqrtLambdaParam = Math.sqrt(Math.abs(tsPrioParam.getNoncentralityParameter()));
 						double kPrioParam = tsPrioParam.getQuantile();
 						double kPostParam = tsPostParam != null ? tsPostParam.getQuantile() : Double.POSITIVE_INFINITY;
 						
+						// Teststatistik fuer Verschiebungsvektoren
 						TestStatisticParameterSet tsPrioTie = this.significanceTestStatisticParameters.getTestStatisticParameter(dim, Double.POSITIVE_INFINITY);
 						TestStatisticParameterSet tsPostTie = applyEmpiricalVarianceOfUnitWeight && dof-dim > 0 ? this.significanceTestStatisticParameters.getTestStatisticParameter(dim, dof-dim) : null;
 						double sqrtLambdaTie = Math.sqrt(Math.abs(tsPrioTie.getNoncentralityParameter()));
@@ -3720,7 +3730,7 @@ public class NetworkAdjustment implements Runnable {
 							double tPost = applyEmpiricalVarianceOfUnitWeight && dof > 0 ? parameter.getTpost() : 0.0;
 							double pPrio = TestStatistic.getLogarithmicProbabilityValue(tPrio, 1);
 							double pPost = applyEmpiricalVarianceOfUnitWeight && dof > 0 ? TestStatistic.getLogarithmicProbabilityValue(tPost, 1, dof) : 0.0;
-							parameter.setConfidence(parameter.getStd() * (applyEmpiricalVarianceOfUnitWeight ? Math.sqrt( kPostParam ) : Math.sqrt( kPrioParam )));
+							parameter.setConfidence(parameter.getStd() * (applyEmpiricalVarianceOfUnitWeight && dof > 0 ? Math.sqrt( confLevelPost.getQuantile() ) : Math.sqrt( confLevelPrio.getQuantile() )));
 							parameter.setPprio(pPrio);
 							parameter.setPpost(pPost);
 							parameter.setSignificant(tPrio > kPrioParam || tPost > kPostParam);
@@ -4872,6 +4882,17 @@ public class NetworkAdjustment implements Runnable {
 	}
 	
 	/**
+	 * Liefert die Parameter zur Bestimmung der Konfidenzbereiche
+	 * @return confidenceRegionParameters
+	 */
+	public TestStatisticParameters getConfidenceRegionParameters() {
+		if (this.confidenceRegionParameters != null)
+			return this.confidenceRegionParameters;
+		
+		return this.confidenceRegionParameters = new TestStatisticParameters(this.getTestStatistic(this.confidenceRegionDefinition));
+	}
+	
+	/**
 	 * Liefert die Teststatitikparameter fuer den Signifikanztest (Modellstoerungen)
 	 * @return significanceTestStatisticParameters
 	 */
@@ -4987,7 +5008,14 @@ public class NetworkAdjustment implements Runnable {
 	}
 	
 	/**
-	 * Setzt die Teststatistik fuer Hypothesentests
+	 * Setzt die Definition fuer die Konfidenzbereiche der Parameter
+	 */
+	public void setConfidenceRegionDefinition(TestStatisticDefinition confidenceRegionDefinition) {
+		this.confidenceRegionDefinition = confidenceRegionDefinition;		
+	}
+	
+	/**
+	 * Setzt die Teststatistikdefinition fuer Hypothesentests
 	 */
 	public void setTestStatisticDefinition(TestStatisticDefinition testStatisticDefinition) {
 		this.testStatisticDefinition = testStatisticDefinition;		
