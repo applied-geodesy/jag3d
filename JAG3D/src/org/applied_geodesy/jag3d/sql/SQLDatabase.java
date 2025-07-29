@@ -314,14 +314,16 @@ class SQLDatabase {
 		sqls.put(20230716.0003, "ALTER TABLE \"AdjustmentDefinition\" DROP COLUMN \"export_covariance_matrix\";\r\n");
 		
 		// add confidence level for parameters
-		sqls.put(20250726.0001, "ALTER TABLE \"AdjustmentDefinition\" ADD \"confidence_level\" DOUBLE DEFAULT " + DefaultValue.getConfidenceLevel() + " NOT NULL;\r\n");
-		sqls.put(20250726.0002, "ALTER TABLE \"PointAposteriori\" ALTER COLUMN \"helmert_major_axis\" RENAME TO \"confidence_ellipse_major_axis\";\r\n");
-		sqls.put(20250726.0003, "ALTER TABLE \"PointAposteriori\" ALTER COLUMN \"helmert_minor_axis\" RENAME TO \"confidence_ellipse_minor_axis\";\r\n");
-		sqls.put(20250726.0004, "ALTER TABLE \"PointAposteriori\" ALTER COLUMN \"helmert_alpha\" RENAME TO \"confidence_ellipse_angle\";\r\n");
+		sqls.put(20250727.0001, "ALTER TABLE \"AdjustmentDefinition\" ADD \"confidence_level\" DOUBLE DEFAULT " + DefaultValue.getConfidenceLevel() + " NOT NULL;\r\n");
+		
+		// rename columns of standard ellipse
+		sqls.put(20250727.0002, "ALTER TABLE \"PointAposteriori\" ALTER COLUMN \"helmert_major_axis\" RENAME TO \"confidence_ellipse_major_axis\";\r\n");
+		sqls.put(20250727.0003, "ALTER TABLE \"PointAposteriori\" ALTER COLUMN \"helmert_minor_axis\" RENAME TO \"confidence_ellipse_minor_axis\";\r\n");
+		sqls.put(20250727.0004, "ALTER TABLE \"PointAposteriori\" ALTER COLUMN \"helmert_alpha\"      RENAME TO \"confidence_ellipse_angle\";\r\n");
 
 		sqls.put(20250727.0005, "ALTER TABLE \"CongruenceAnalysisPointPairAposteriori\" ALTER COLUMN \"confidence_major_axis_2d\" RENAME TO \"confidence_ellipse_major_axis\";\r\n");
 		sqls.put(20250727.0006, "ALTER TABLE \"CongruenceAnalysisPointPairAposteriori\" ALTER COLUMN \"confidence_minor_axis_2d\" RENAME TO \"confidence_ellipse_minor_axis\";\r\n");
-		sqls.put(20250727.0007, "ALTER TABLE \"CongruenceAnalysisPointPairAposteriori\" ALTER COLUMN \"confidence_alpha_2d\" RENAME TO \"confidence_ellipse_angle\";\r\n");
+		sqls.put(20250727.0007, "ALTER TABLE \"CongruenceAnalysisPointPairAposteriori\" ALTER COLUMN \"confidence_alpha_2d\"      RENAME TO \"confidence_ellipse_angle\";\r\n");
 		
 		
 		return sqls;
