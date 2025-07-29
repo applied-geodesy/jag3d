@@ -24,7 +24,7 @@ package org.applied_geodesy.adjustment.statistic;
 import java.io.BufferedInputStream;
 import java.util.Properties;
 
-public class DefaultTestStatistic {
+public class DefaultTestStatisticValue {
 	private final static double PROBABILITY_VALUE       = 0.001;
 	private final static double POWER_OF_TEST           = 0.8;
 	
@@ -36,8 +36,8 @@ public class DefaultTestStatistic {
 		BufferedInputStream bis = null;
 		final String path = "properties/teststatistic.default";
 		try {
-			if (DefaultTestStatistic.class.getClassLoader().getResourceAsStream(path) != null) {
-				bis = new BufferedInputStream(DefaultTestStatistic.class.getClassLoader().getResourceAsStream(path));
+			if (DefaultTestStatisticValue.class.getClassLoader().getResourceAsStream(path) != null) {
+				bis = new BufferedInputStream(DefaultTestStatisticValue.class.getClassLoader().getResourceAsStream(path));
 				PROPERTIES.load(bis);
 			}  
 		} catch (Exception e) {
@@ -53,7 +53,7 @@ public class DefaultTestStatistic {
 		}
 	}
 	
-	private DefaultTestStatistic() {}
+	private DefaultTestStatisticValue() {}
 	
 	public static TestStatisticType getTestStatisticType() {
 		TestStatisticType value = null;

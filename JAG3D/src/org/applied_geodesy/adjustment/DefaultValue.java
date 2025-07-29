@@ -24,9 +24,12 @@ package org.applied_geodesy.adjustment;
 import java.io.BufferedInputStream;
 import java.util.Properties;
 
+import org.applied_geodesy.adjustment.statistic.DefaultTestStatisticValue;
+
 public class DefaultValue {
 	private final static int MAXIMUM_ITERATIONS                = 5000;
 	private final static double ROBUST_ESTIMATION_LIMIT        = 3.5;
+	private final static double CONFIDENCE_LEVEL               = 1.0 - DefaultTestStatisticValue.getProbabilityValue();
 	private final static EstimationType ESTIMATION_TYPE        = EstimationType.L2NORM;
 	private final static boolean APPLY_VARIANCE_OF_UNIT_WEIGHT = Boolean.TRUE;
 
@@ -77,5 +80,11 @@ public class DefaultValue {
 		boolean value = APPLY_VARIANCE_OF_UNIT_WEIGHT;
 		try { value = PROPERTIES.getProperty("APPLY_VARIANCE_OF_UNIT_WEIGHT") != null && PROPERTIES.getProperty("APPLY_VARIANCE_OF_UNIT_WEIGHT").equalsIgnoreCase("FALSE") ? Boolean.FALSE : Boolean.TRUE; } catch (Exception e) {}
 		return value;
+	}
+	
+	public static double getConfidenceLevel() {
+		double value = -1;
+		try { value = Double.parseDouble(PROPERTIES.getProperty("CONFIDENCE_LEVEL")); } catch (Exception e) {}
+		return value > 0 && value < 1 ? value : CONFIDENCE_LEVEL;
 	}
 }

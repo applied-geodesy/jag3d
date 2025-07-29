@@ -428,7 +428,7 @@ public class SQLAdjustmentManager {
 				+ "\"type\", \"number_of_iterations\", \"robust_estimation_limit\", "
 				+ "\"number_of_principal_components\", \"apply_variance_of_unit_weight\", "
 				+ "\"estimate_direction_set_orientation_approximation\", "
-				+ "\"congruence_analysis\", "
+				+ "\"congruence_analysis\", \"confidence_level\", "
 				+ "\"scaling\", \"damping\", \"weight_zero\" "
 				+ "FROM \"AdjustmentDefinition\" "
 				+ "JOIN \"UnscentedTransformation\" "
@@ -446,6 +446,7 @@ public class SQLAdjustmentManager {
 			this.estimateOrientationApproximation = rs.getBoolean("estimate_direction_set_orientation_approximation");
 			this.congruenceAnalysis               = rs.getBoolean("congruence_analysis");
 			boolean applyVarianceOfUnitWeight     = rs.getBoolean("apply_variance_of_unit_weight");
+			double confidenceLevel                = rs.getDouble("confidence_level");
 			
 			double scalingUT = rs.getDouble("scaling");
 			double dampingUT = rs.getDouble("damping");
@@ -462,6 +463,7 @@ public class SQLAdjustmentManager {
 			adjustment.setEstimationType(this.estimationType);
 			adjustment.setCongruenceAnalysis(this.congruenceAnalysis);
 			adjustment.setApplyAposterioriVarianceOfUnitWeight(applyVarianceOfUnitWeight);
+			adjustment.setConfidenceRegionDefinition(new TestStatisticDefinition(TestStatisticType.NONE, 1.0 - confidenceLevel));
 			
 			adjustment.setUnscentedTransformationScaling(scalingUT);
 			adjustment.setUnscentedTransformationDamping(dampingUT);
@@ -1205,7 +1207,7 @@ public class SQLAdjustmentManager {
 				+ "\"sigma_y\",\"sigma_x\",\"sigma_z\"," 
 				+ "\"confidence_major_axis\",\"confidence_middle_axis\",\"confidence_minor_axis\"," 
 				+ "\"confidence_alpha\",\"confidence_beta\",\"confidence_gamma\"," 
-				+ "\"helmert_major_axis\",\"helmert_minor_axis\",\"helmert_alpha\"," 
+				+ "\"confidence_ellipse_major_axis\",\"confidence_ellipse_minor_axis\",\"confidence_ellipse_angle\"," 
 				+ "\"residual_y\",\"residual_x\",\"residual_z\"," 
 				+ "\"redundancy_y\",\"redundancy_x\",\"redundancy_z\"," 
 				+ "\"gross_error_y\",\"gross_error_x\",\"gross_error_z\"," 
@@ -1247,9 +1249,9 @@ public class SQLAdjustmentManager {
 				stmt.setDouble(idx++, dimension > 2 ? point.getConfidenceAngle(1) : 0.0);
 				stmt.setDouble(idx++, dimension > 1 ? point.getConfidenceAngle(2) : 0.0);	
 
-				stmt.setDouble(idx++, point.getConfidenceAxis2D(0));
-				stmt.setDouble(idx++, dimension != 1 ? point.getConfidenceAxis2D(1) : 0.0);
-				stmt.setDouble(idx++, dimension != 1 ? point.getConfidenceAngle2D() : 0.0);
+				stmt.setDouble(idx++, point.getConfidenceEllipseAxis(0));
+				stmt.setDouble(idx++, dimension != 1 ? point.getConfidenceEllipseAxis(1) : 0.0);
+				stmt.setDouble(idx++, dimension != 1 ? point.getConfidenceEllipseAngle() : 0.0);
 				
 				// residuals epsilon = L - L0
 				stmt.setDouble(idx++, dimension != 1 ? point.getY() - point.getY0() : 0.0);
@@ -1802,7 +1804,7 @@ public class SQLAdjustmentManager {
 				+ "\"sigma_y\",\"sigma_x\",\"sigma_z\", "
 				+ "\"confidence_major_axis\",\"confidence_middle_axis\",\"confidence_minor_axis\", "
 				+ "\"confidence_alpha\",\"confidence_beta\",\"confidence_gamma\", "
-				+ "\"confidence_major_axis_2d\",\"confidence_minor_axis_2d\",\"confidence_alpha_2d\", "
+				+ "\"confidence_ellipse_major_axis\",\"confidence_ellipse_minor_axis\",\"confidence_ellipse_angle\", "
 				+ "\"gross_error_y\",\"gross_error_x\",\"gross_error_z\", "
 				+ "\"minimal_detectable_bias_y\",\"minimal_detectable_bias_x\",\"minimal_detectable_bias_z\", "
 				+ "\"p_prio\",\"p_post\", "
@@ -1839,9 +1841,9 @@ public class SQLAdjustmentManager {
 						stmt.setDouble(idx++, dimension > 2 ? pointPair.getConfidenceAngle(1) : 0.0);
 						stmt.setDouble(idx++, dimension > 1 ? pointPair.getConfidenceAngle(2) : 0.0);	
 
-						stmt.setDouble(idx++, pointPair.getConfidenceAxis2D(0));
-						stmt.setDouble(idx++, dimension != 1 ? pointPair.getConfidenceAxis2D(1) : 0.0);
-						stmt.setDouble(idx++, dimension != 1 ? pointPair.getConfidenceAngle2D() : 0.0);
+						stmt.setDouble(idx++, pointPair.getConfidenceEllipseAxis(0));
+						stmt.setDouble(idx++, dimension != 1 ? pointPair.getConfidenceEllipseAxis(1) : 0.0);
+						stmt.setDouble(idx++, dimension != 1 ? pointPair.getConfidenceEllipseAngle() : 0.0);
 
 						stmt.setDouble(idx++, dimension != 1 ? pointPair.getGrossErrorY() : 0.0);
 						stmt.setDouble(idx++, dimension != 1 ? pointPair.getGrossErrorX() : 0.0);

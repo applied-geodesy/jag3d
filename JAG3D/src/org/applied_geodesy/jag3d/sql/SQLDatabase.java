@@ -35,7 +35,7 @@ import org.applied_geodesy.adjustment.network.VerticalDeflectionGroupUncertainty
 import org.applied_geodesy.adjustment.network.VerticalDeflectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ProjectionType;
 import org.applied_geodesy.adjustment.network.observation.reduction.ReductionTaskType;
-import org.applied_geodesy.adjustment.statistic.DefaultTestStatistic;
+import org.applied_geodesy.adjustment.statistic.DefaultTestStatisticValue;
 import org.applied_geodesy.jag3d.ui.graphic.layer.LayerType;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.io.reader.ImportOption;
@@ -87,7 +87,7 @@ class SQLDatabase {
 		sqls.put(20180106.0404, "INSERT INTO \"RankDefect\" (\"id\") VALUES (1);\r\n");
 		
 		sqls.put(20180106.0501, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TestStatistic\"(\"d1\" DOUBLE NOT NULL,\"d2\" DOUBLE NOT NULL,\"probability_value\" DOUBLE NOT NULL,\"power_of_test\" DOUBLE NOT NULL,\"quantile\" DOUBLE NOT NULL,\"non_centrality_parameter\" DOUBLE NOT NULL,\"p_value\" DOUBLE NOT NULL,PRIMARY KEY(\"d1\",\"d2\",\"probability_value\",\"power_of_test\"));\r\n");
-		sqls.put(20180106.0502, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TestStatisticDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + DefaultTestStatistic.getTestStatisticType().getId() + " NOT NULL, \"probability_value\" DOUBLE DEFAULT " + DefaultTestStatistic.getProbabilityValue() + " NOT NULL,\"power_of_test\" DOUBLE DEFAULT " + DefaultTestStatistic.getPowerOfTest() + " NOT NULL,\"familywise_error_rate\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
+		sqls.put(20180106.0502, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"TestStatisticDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + DefaultTestStatisticValue.getTestStatisticType().getId() + " NOT NULL, \"probability_value\" DOUBLE DEFAULT " + DefaultTestStatisticValue.getProbabilityValue() + " NOT NULL,\"power_of_test\" DOUBLE DEFAULT " + DefaultTestStatisticValue.getPowerOfTest() + " NOT NULL,\"familywise_error_rate\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
 		sqls.put(20180106.0503, "INSERT INTO \"TestStatisticDefinition\" (\"id\") VALUES (1);\r\n");
 
 		sqls.put(20180106.0504, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ProjectionDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + ProjectionType.LOCAL_CARTESIAN.getId() + " NOT NULL,\"reference_height\" DOUBLE DEFAULT 0 NOT NULL);\r\n");
@@ -312,6 +312,19 @@ class SQLDatabase {
 		sqls.put(20230716.0001, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ExportResult\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" INTEGER DEFAULT " + ExportResultType.NONE.getId() + " NOT NULL);\r\n");
 		sqls.put(20230716.0002, "INSERT INTO \"ExportResult\" (\"id\", \"type\") SELECT \"id\", CASEWHEN(\"export_covariance_matrix\", " + ExportResultType.ASCII.getId() + ", " + ExportResultType.NONE.getId() + ") AS \"type\" FROM \"AdjustmentDefinition\" WHERE \"id\" = 1;\r\n");	
 		sqls.put(20230716.0003, "ALTER TABLE \"AdjustmentDefinition\" DROP COLUMN \"export_covariance_matrix\";\r\n");
+		
+		// add confidence level for parameters
+		sqls.put(20250727.0001, "ALTER TABLE \"AdjustmentDefinition\" ADD \"confidence_level\" DOUBLE DEFAULT " + DefaultValue.getConfidenceLevel() + " NOT NULL;\r\n");
+		
+		// rename columns of standard ellipse
+		sqls.put(20250727.0002, "ALTER TABLE \"PointAposteriori\" ALTER COLUMN \"helmert_major_axis\" RENAME TO \"confidence_ellipse_major_axis\";\r\n");
+		sqls.put(20250727.0003, "ALTER TABLE \"PointAposteriori\" ALTER COLUMN \"helmert_minor_axis\" RENAME TO \"confidence_ellipse_minor_axis\";\r\n");
+		sqls.put(20250727.0004, "ALTER TABLE \"PointAposteriori\" ALTER COLUMN \"helmert_alpha\"      RENAME TO \"confidence_ellipse_angle\";\r\n");
+
+		sqls.put(20250727.0005, "ALTER TABLE \"CongruenceAnalysisPointPairAposteriori\" ALTER COLUMN \"confidence_major_axis_2d\" RENAME TO \"confidence_ellipse_major_axis\";\r\n");
+		sqls.put(20250727.0006, "ALTER TABLE \"CongruenceAnalysisPointPairAposteriori\" ALTER COLUMN \"confidence_minor_axis_2d\" RENAME TO \"confidence_ellipse_minor_axis\";\r\n");
+		sqls.put(20250727.0007, "ALTER TABLE \"CongruenceAnalysisPointPairAposteriori\" ALTER COLUMN \"confidence_alpha_2d\"      RENAME TO \"confidence_ellipse_angle\";\r\n");
+		
 		
 		return sqls;
 	}

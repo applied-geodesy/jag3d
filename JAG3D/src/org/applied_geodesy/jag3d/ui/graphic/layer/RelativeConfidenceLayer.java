@@ -22,18 +22,21 @@
 package org.applied_geodesy.jag3d.ui.graphic.layer;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.sql.GraphicPoint;
 import org.applied_geodesy.jag3d.ui.graphic.sql.RelativeConfidence;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
+import org.applied_geodesy.util.FormatterOptions;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 public class RelativeConfidenceLayer extends ConfidenceLayer<PointShiftArrowLayer> {
-
+	private FormatterOptions options = FormatterOptions.getInstance();
+	
 	RelativeConfidenceLayer(LayerType layerType) {
 		super(layerType);
 		
@@ -118,7 +121,9 @@ public class RelativeConfidenceLayer extends ConfidenceLayer<PointShiftArrowLaye
 	
 	@Override
 	public String toString() {
-		return i18n.getString("RelativeConfidenceLayer.type", "Relative confidences");
+		double confidenceLevel = this.getConfidenceLevel();
+		String confidenceLevelLabel = confidenceLevel > 0 && confidenceLevel < 1 ? this.options.toPercentFormat(this.getConfidenceLevel(), true) : "";
+		return String.format(Locale.ENGLISH, i18n.getString("RelativeConfidenceLayer.type", "Relative confidences"), confidenceLevelLabel);
 	}
 
 	@Override

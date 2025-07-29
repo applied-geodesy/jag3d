@@ -34,8 +34,8 @@ public class CongruenceAnalysisPointPair {
 					confidenceAngles[] = new double[3],
 					grzw[] = null,
 					nabla[] = null,
-					confidenceAxis2D[] = new double[2],
-					confidenceAngle2D = 0;
+					confidenceEllipseAxis[] = new double[2],
+					confidenceEllipseAngle = 0;
 	
 	private double Tprio =  0.0,
 	   			   Tpost =  0.0,
@@ -159,24 +159,24 @@ public class CongruenceAnalysisPointPair {
 
 	public void setConfidenceRegion(ConfidenceRegion confidence) {
 		for (int i=0; i<this.getDimension(); i++) {
-			this.confidenceAxis[i] = confidence.getConfidenceAxis(i);
+			this.confidenceAxis[i] = confidence.getConfidenceRegionAxis(i);
 			
 			if (this.getDimension() == 1 && i == 0 || this.getDimension() > 1 && i < 2) 
-				this.confidenceAxis2D[i] = confidence.getConfidenceAxis2D(i, false);
+				this.confidenceEllipseAxis[i] = confidence.getConfidenceEllipseAxis(i);
 		}
 		
 		if (this.getDimension() > 1) {
-			this.confidenceAngle2D = confidence.getConfidenceAngle2D();
-			this.confidenceAngles  = confidence.getEulerAngles();
+			this.confidenceEllipseAngle = confidence.getConfidenceEllipseAngle();
+			this.confidenceAngles       = confidence.getEulerAngles();
 		}
 	}
 
-	public double getConfidenceAxis2D(int i) {
-		return this.confidenceAxis2D[i];
+	public double getConfidenceEllipseAxis(int i) {
+		return this.confidenceEllipseAxis[i];
 	}
 
-	public double getConfidenceAngle2D() {
-		return this.confidenceAngle2D;
+	public double getConfidenceEllipseAngle() {
+		return this.confidenceEllipseAngle;
 	}
 
 	public void setSignificant(boolean significant) {

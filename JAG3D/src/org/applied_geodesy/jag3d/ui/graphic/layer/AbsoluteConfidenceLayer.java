@@ -22,11 +22,13 @@
 package org.applied_geodesy.jag3d.ui.graphic.layer;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.applied_geodesy.jag3d.ui.graphic.coordinate.PixelCoordinate;
 import org.applied_geodesy.jag3d.ui.graphic.layer.symbol.SymbolBuilder;
 import org.applied_geodesy.jag3d.ui.graphic.sql.GraphicPoint;
 import org.applied_geodesy.jag3d.ui.graphic.util.GraphicExtent;
+import org.applied_geodesy.util.FormatterOptions;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -35,6 +37,7 @@ import javafx.scene.paint.Color;
 
 public class AbsoluteConfidenceLayer extends ConfidenceLayer<PointLayer> {
 	private DoubleProperty confidenceScale = null;
+	private FormatterOptions options = FormatterOptions.getInstance();
 	
 	AbsoluteConfidenceLayer(LayerType layerType) {
 		super(layerType);
@@ -126,7 +129,9 @@ public class AbsoluteConfidenceLayer extends ConfidenceLayer<PointLayer> {
 	
 	@Override
 	public String toString() {
-		return i18n.getString("AbsoluteConfidenceLayer.type", "Point confidences");
+		double confidenceLevel = this.getConfidenceLevel();
+		String confidenceLevelLabel = confidenceLevel > 0 && confidenceLevel < 1 ? this.options.toPercentFormat(this.getConfidenceLevel(), true) : "";
+		return String.format(Locale.ENGLISH, i18n.getString("AbsoluteConfidenceLayer.type", "Point confidences"), confidenceLevelLabel);
 	}
 	
 	@Override

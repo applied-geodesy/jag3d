@@ -37,6 +37,10 @@ import org.applied_geodesy.ui.spinner.DoubleSpinner;
 import org.applied_geodesy.ui.textfield.DoubleTextField;
 import org.applied_geodesy.ui.textfield.DoubleTextField.ValueSupport;
 import org.applied_geodesy.util.CellValueType;
+import org.applied_geodesy.util.FormatterChangedListener;
+import org.applied_geodesy.util.FormatterEvent;
+import org.applied_geodesy.util.FormatterEventType;
+import org.applied_geodesy.util.FormatterOptions;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 
 import javafx.application.Platform;
@@ -70,11 +74,9 @@ import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 
-public class LeastSquaresSettingDialog {
+public class LeastSquaresSettingDialog implements FormatterChangedListener {
 
 	public class LeastSquaresSettings {
-		
-		
 		private ObjectProperty<Integer> iteration             = new SimpleObjectProperty<Integer>(50);
 		private ObjectProperty<Integer> principalComponents   = new SimpleObjectProperty<Integer>(1);
 		private ObjectProperty<Double> robustEstimationLimit  = new SimpleObjectProperty<Double>(DefaultValue.getRobustEstimationLimit());
@@ -85,7 +87,9 @@ public class LeastSquaresSettingDialog {
 		private ObjectProperty<Double> scalingParameterAlphaUT = new SimpleObjectProperty<Double>(UnscentedTransformationParameter.getAlpha());
 		private ObjectProperty<Double> dampingParameterBetaUT  = new SimpleObjectProperty<Double>(UnscentedTransformationParameter.getBeta());
 		private ObjectProperty<Double> weightZero = new SimpleObjectProperty<Double>(UnscentedTransformationParameter.getWeightZero());
-
+		
+		private double confidenceLevel = DefaultValue.getConfidenceLevel();
+		
 		public ObjectProperty<Integer> iterationProperty() {
 			return this.iteration;
 		}
@@ -120,6 +124,14 @@ public class LeastSquaresSettingDialog {
 		
 		public void setRobustEstimationLimit(final double robustEstimationLimit) {
 			this.robustEstimationLimitProperty().set(robustEstimationLimit);
+		}
+		
+		public double getConfidenceLevel() {
+			return this.confidenceLevel;
+		}
+		
+		public void setConfidenceLevel(final double confidenceLevel) {
+			this.confidenceLevel = confidenceLevel;
 		}
 		
 		public BooleanProperty orientationProperty() {
@@ -217,6 +229,7 @@ public class LeastSquaresSettingDialog {
 
 	private boolean enableUnscentedTransformation = false;
 	private I18N i18n = I18N.getInstance();
+	private FormatterOptions options = FormatterOptions.getInstance();
 	private static LeastSquaresSettingDialog leastSquaresSettingDialog = new LeastSquaresSettingDialog();
 	private Dialog<LeastSquaresSettings> dialog = null;
 	private Window window;
@@ -224,9 +237,10 @@ public class LeastSquaresSettingDialog {
 	private LeastSquaresSettings settings = new LeastSquaresSettings();
 	private Spinner<Integer> iterationSpinner;
 	private Spinner<Integer> principalComponentSpinner;
-	private DoubleSpinner robustSpinner;
+	private DoubleSpinner robustSpinner, confidenceLevelSpinner;
 	private DoubleTextField alphaTextField, betaTextField, weight0TextField;
 	private CheckBox orientationApproximationCheckBox, congruenceAnalysisCheckBox, applyVarianceOfUnitWeightCheckBox;
+	private Label confidenceLevelLabel;
 	private LeastSquaresSettingDialog() {}
 
 	public static void setOwner(Window owner) {
@@ -277,6 +291,8 @@ public class LeastSquaresSettingDialog {
 				return null;
 			}
 		});
+		// add formatter listener
+		options.addFormatterChangedListener(this);
 	}
 	
 	private Node createPane() {
@@ -381,6 +397,8 @@ public class LeastSquaresSettingDialog {
 	}
 	
 	private Node createGeneralSettingPane() {
+		String frmPercentUnit = this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().toFormattedAbbreviation();
+		
 		Label iterationLabel = new Label(i18n.getString("LeastSquaresSettingDialog.iterations.label", "Maximum number of iterations:"));
 		this.iterationSpinner = this.createIntegerSpinner(0, DefaultValue.getMaximumNumberOfIterations(), 10, i18n.getString("LeastSquaresSettingDialog.iterations.tooltip", "Set maximum permissible iteration value"));
 		iterationLabel.setLabelFor(this.iterationSpinner);
@@ -392,9 +410,14 @@ public class LeastSquaresSettingDialog {
 		principalComponentLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 
 		Label robustLabel = new Label(i18n.getString("LeastSquaresSettingDialog.robust.label", "Robust estimation limit:"));
-		this.robustSpinner = this.createDoubleSpinner(1.5, Math.max(DefaultValue.getRobustEstimationLimit(), 6.0), 0.5, i18n.getString("LeastSquaresSettingDialog.robust.tooltip", "Set robust estimation limit of BIBER estimator"));
+		this.robustSpinner = this.createDoubleSpinner(CellValueType.STATISTIC, 1.5, Math.max(DefaultValue.getRobustEstimationLimit(), 6.0), 0.5, i18n.getString("LeastSquaresSettingDialog.robust.tooltip", "Set robust estimation limit of BIBER estimator"));
 		robustLabel.setLabelFor(this.robustSpinner);
 		robustLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		
+		this.confidenceLevelLabel   = new Label(String.format(Locale.ENGLISH, "%s%s:", i18n.getString("LeastSquaresSettingDialog.confidence.label", "Confidence level 1 - \u03B1"), frmPercentUnit.isBlank() ? "" : " " + frmPercentUnit));
+		this.confidenceLevelSpinner = this.createDoubleSpinner(CellValueType.PERCENTAGE, 0.0005, 1.0 - 0.0005, 0.01, i18n.getString("LeastSquaresSettingDialog.confidence.tooltip", "Set confidence level of parameters"));
+		this.confidenceLevelLabel.setLabelFor(this.confidenceLevelSpinner);
+		this.confidenceLevelLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 		
 		this.orientationApproximationCheckBox = this.createCheckBox(
 			i18n.getString("LeastSquaresSettingDialog.orientation.label", "Orientation approximation"),
@@ -417,6 +440,7 @@ public class LeastSquaresSettingDialog {
 		this.iterationSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.iterationProperty());
 		this.principalComponentSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.principalComponentsProperty());
 		this.robustSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.robustEstimationLimitProperty());
+//		this.confidenceLevelSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.confidenceLevelProperty());
 
 		GridPane gridPane = new GridPane();
 		gridPane.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
@@ -430,12 +454,14 @@ public class LeastSquaresSettingDialog {
 		GridPane.setHgrow(iterationLabel, Priority.NEVER);
 		GridPane.setHgrow(principalComponentLabel, Priority.NEVER);
 		GridPane.setHgrow(robustLabel, Priority.NEVER);
+		GridPane.setHgrow(this.confidenceLevelLabel, Priority.NEVER);
 		
 		GridPane.setHgrow(this.orientationApproximationCheckBox, Priority.ALWAYS);
 		GridPane.setHgrow(this.applyVarianceOfUnitWeightCheckBox, Priority.ALWAYS);
 		GridPane.setHgrow(this.congruenceAnalysisCheckBox, Priority.ALWAYS);
 		
 		GridPane.setHgrow(this.robustSpinner, Priority.ALWAYS);
+		GridPane.setHgrow(this.confidenceLevelSpinner, Priority.ALWAYS);
 		GridPane.setHgrow(this.principalComponentSpinner, Priority.ALWAYS);
 		GridPane.setHgrow(this.iterationSpinner, Priority.ALWAYS);
 		
@@ -450,6 +476,9 @@ public class LeastSquaresSettingDialog {
 		
 		GridPane.setMargin(this.congruenceAnalysisCheckBox, insetsTop);
 
+		GridPane.setMargin(this.confidenceLevelLabel, insetsLeft);
+		GridPane.setMargin(this.confidenceLevelSpinner, insetsRight);
+		
 		GridPane.setMargin(iterationLabel, insetsLeft);
 		GridPane.setMargin(this.iterationSpinner, insetsRight);
 
@@ -463,9 +492,12 @@ public class LeastSquaresSettingDialog {
 		gridPane.add(this.applyVarianceOfUnitWeightCheckBox, 0, ++row, 2, 1);
 		gridPane.add(this.orientationApproximationCheckBox,  0, ++row, 2, 1);
 
+		gridPane.add(this.confidenceLevelLabel,   0, ++row);
+		gridPane.add(this.confidenceLevelSpinner, 1,   row);
+		
 		gridPane.add(iterationLabel,        0, ++row);
 		gridPane.add(this.iterationSpinner, 1,   row);
-
+		
 		gridPane.add(robustLabel,        0, ++row);
 		gridPane.add(this.robustSpinner, 1,   row);
 		
@@ -603,8 +635,8 @@ public class LeastSquaresSettingDialog {
 		return integerSpinner;
 	}
 	
-	private DoubleSpinner createDoubleSpinner(double min, double max, double amountToStepBy, String tooltip) {
-		DoubleSpinner doubleSpinner = new DoubleSpinner(CellValueType.STATISTIC, min, max, amountToStepBy);
+	private DoubleSpinner createDoubleSpinner(CellValueType cellValueType, double min, double max, double amountToStepBy, String tooltip) {
+		DoubleSpinner doubleSpinner = new DoubleSpinner(cellValueType, min, max, amountToStepBy);
 		doubleSpinner.setMinWidth(75);
 		doubleSpinner.setPrefWidth(100);
 		doubleSpinner.setMaxWidth(Double.MAX_VALUE);
@@ -614,6 +646,7 @@ public class LeastSquaresSettingDialog {
 		
 	private void save() {
 		try {
+			this.settings.setConfidenceLevel(this.confidenceLevelSpinner.getNumber().doubleValue());
 			SQLManager.getInstance().save(this.settings);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -633,6 +666,13 @@ public class LeastSquaresSettingDialog {
 	private void load() {
 		try {
 			SQLManager.getInstance().load(this.settings);
+			
+			SpinnerValueFactory.DoubleSpinnerValueFactory confidenceLevelSpinnerFactory = (SpinnerValueFactory.DoubleSpinnerValueFactory)this.confidenceLevelSpinner.getValueFactory();
+			double confidenceLevel = this.settings.getConfidenceLevel();
+
+			confidenceLevel = Math.max(Math.min(this.options.convertPercentToView(confidenceLevel), confidenceLevelSpinnerFactory.getMax()), confidenceLevelSpinnerFactory.getMin());
+			confidenceLevelSpinnerFactory.setValue(confidenceLevel);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			Platform.runLater(new Runnable() {
@@ -650,5 +690,15 @@ public class LeastSquaresSettingDialog {
 	
 	public static void setEnableUnscentedTransformation(boolean enable) {
 		leastSquaresSettingDialog.enableUnscentedTransformation = enable;
+	}
+	
+	@Override
+	public void formatterChanged(FormatterEvent evt) {
+		if (evt != null && evt.getCellType() == CellValueType.PERCENTAGE && evt.getEventType() == FormatterEventType.UNIT_CHANGED) {
+			String frmPercentUnit        = this.options.getFormatterOptions().get(CellValueType.PERCENTAGE).getUnit().toFormattedAbbreviation();
+			String labelConfidenceLevel  = String.format(Locale.ENGLISH, "%s%s:", i18n.getString("LeastSquaresSettingDialog.confidence.label", "Confidence level 1 - \u03B1"), frmPercentUnit.isBlank() ? "" : " " + frmPercentUnit);
+
+			this.confidenceLevelLabel.setText(labelConfidenceLevel);
+		}
 	}
 }

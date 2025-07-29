@@ -43,7 +43,6 @@ import org.applied_geodesy.adjustment.geometry.point.FeaturePoint;
 import org.applied_geodesy.adjustment.geometry.point.Point;
 import org.applied_geodesy.adjustment.geometry.restriction.Restriction;
 import org.applied_geodesy.adjustment.statistic.BaardaMethodTestStatistic;
-import org.applied_geodesy.adjustment.statistic.DefaultTestStatistic;
 import org.applied_geodesy.adjustment.statistic.SidakTestStatistic;
 import org.applied_geodesy.adjustment.statistic.TestStatisticDefinition;
 import org.applied_geodesy.adjustment.statistic.TestStatisticParameterSet;
@@ -80,7 +79,7 @@ public class FeatureAdjustment {
 	private EstimationStateType currentEstimationStatus = EstimationStateType.BUSY;
 	private EstimationType estimationType = EstimationType.L2NORM;
 	
-	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition(DefaultTestStatistic.getTestStatisticType(), DefaultTestStatistic.getProbabilityValue(), DefaultTestStatistic.getPowerOfTest(), false);
+	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition();
 	private TestStatisticParameters testStatisticParameters = null;
 	
 	private static double SQRT_EPS = Math.sqrt(Constant.EPS);

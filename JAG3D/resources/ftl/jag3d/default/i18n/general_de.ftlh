@@ -53,6 +53,8 @@
 				</#if>
 			</dd>
 			
+			<dt>Konfidenzniveau der Parameter (1-&alpha;)</dt><dd>${confidence_level?string[df_percentage]}&nbsp;${unit_abbr_percentage}</dd>
+			
 			<#if projection_type??>
 				<dt>Koordinatensystem</dt>
 				<dd>

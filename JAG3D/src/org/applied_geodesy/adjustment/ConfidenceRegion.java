@@ -36,14 +36,15 @@ public class ConfidenceRegion {
 	private double eigenvalues[], minimalDetectableBias[];
 	private Matrix eigenvectors;
 	private final int sortOrder[];
-	private double helmertEllipseAxes[] = new double[2];
-	private double helmertEllipseAngle = 0;
-	private TestStatisticParameters testStatisticParameters;
+	private double standardEllipseAxes[] = new double[2];
+	private double standardEllipseAngle = 0;
+	private TestStatisticParameters confidenceRegionParameters;
 
-	public ConfidenceRegion(TestStatisticParameters testStatisticParameters, Matrix covarianceMatrix, double varianceOfUnitWeight, double degreeOfFreedom) throws IllegalArgumentException, NotConvergedException {
-		this.testStatisticParameters = testStatisticParameters;
-		this.degreeOfFreedom         = degreeOfFreedom > 0 ? degreeOfFreedom : Double.POSITIVE_INFINITY;
-		this.varianceOfUnitWeight    = varianceOfUnitWeight > 0 ? varianceOfUnitWeight : 1.0;
+	public ConfidenceRegion(TestStatisticParameters confidenceRegionParameters, Matrix covarianceMatrix, double varianceOfUnitWeight, double degreeOfFreedom) throws IllegalArgumentException, NotConvergedException {
+		this.confidenceRegionParameters = confidenceRegionParameters;
+		
+		this.degreeOfFreedom      = degreeOfFreedom > 0 ? degreeOfFreedom : Double.POSITIVE_INFINITY;
+		this.varianceOfUnitWeight = varianceOfUnitWeight > 0 ? varianceOfUnitWeight : 1.0;
 		
 		this.covarianceMatrix = covarianceMatrix;
 		this.dimension        = covarianceMatrix.numColumns();
@@ -61,7 +62,7 @@ public class ConfidenceRegion {
 		
 		this.SVD();
 		this.sortOrder = this.getSortOrder();
-		this.calculateHelmertEllipse();
+		this.calculateStandardConfidenceEllipseParameters();
 	}
 	
 	public ConfidenceRegion(Matrix covarianceMatrix) throws IllegalArgumentException, NotConvergedException {
@@ -73,7 +74,7 @@ public class ConfidenceRegion {
 	 * @param index
 	 * @return axis
 	 */
-	public double getConfidenceAxis(int index) {
+	public double getConfidenceRegionAxis(int index) {
 		return Math.sqrt( this.varianceOfUnitWeight * this.getEigenvalue(index) * (double)this.dimension * this.getQuantile(this.dimension) );
 	}
 	
@@ -248,26 +249,25 @@ public class ConfidenceRegion {
 	/**
 	 * Liefert die Halbachse der 2D-Konfidenzellipse
 	 * @param index
-	 * @param isHelmertEllipse
 	 * @return axis
 	 */
-	public double getConfidenceAxis2D(int index, boolean isHelmertEllipse) {
+	public double getConfidenceEllipseAxis(int index) {
 		int dimension = Math.min(this.dimension, 2); 
-		return this.helmertEllipseAxes[index] * (isHelmertEllipse ? 1.0 : Math.sqrt(this.varianceOfUnitWeight * (double)dimension * this.getQuantile(dimension)));
+		return this.standardEllipseAxes[index] * Math.sqrt(this.varianceOfUnitWeight * (double)dimension * this.getQuantile(dimension));
 	}
 	
 	/**
 	 * Liefert dem Drehwinkel der 2D-Konfidenzellipse
 	 * @return angle
 	 */
-	public double getConfidenceAngle2D() {
-		return this.helmertEllipseAngle;
+	public double getConfidenceEllipseAngle() {
+		return this.standardEllipseAngle;
 	}
 	
 	/**
 	 * Berechnet die einfache Konfidenzellipse nach HELMERT
 	 */
-	private void calculateHelmertEllipse() {
+	private void calculateStandardConfidenceEllipseParameters() {
 		if (this.dimension > 1) {
 			double qxx = this.covarianceMatrix.get(0, 0);
 			double qyy = this.covarianceMatrix.get(1, 1);
@@ -275,14 +275,14 @@ public class ConfidenceRegion {
 			double w = Math.sqrt( (qxx-qyy)*(qxx-qyy) + 4*qxy*qxy );
 			double a = qxx+qyy+w > 0 ? Math.sqrt(0.5*(qxx+qyy+w)) : 0;
 			double b = qxx+qyy-w > 0 ? Math.sqrt(0.5*(qxx+qyy-w)) : 0;
-			this.helmertEllipseAxes[0] = a;
-			this.helmertEllipseAxes[1] = b;
-			this.helmertEllipseAngle   = MathExtension.MOD(0.5*Math.atan2(2.0*qxy, qxx-qyy), 2.0*Math.PI);
+			this.standardEllipseAxes[0] = a;
+			this.standardEllipseAxes[1] = b;
+			this.standardEllipseAngle   = MathExtension.MOD(0.5*Math.atan2(2.0*qxy, qxx-qyy), 2.0*Math.PI);
 		}
 		else { // 1D-Fall
-			this.helmertEllipseAxes[0] = Math.sqrt(this.covarianceMatrix.get(0, 0));
-			this.helmertEllipseAxes[1] = 0.0;
-			this.helmertEllipseAngle   = 0.0;
+			this.standardEllipseAxes[0] = Math.sqrt(this.covarianceMatrix.get(0, 0));
+			this.standardEllipseAxes[1] = 0.0;
+			this.standardEllipseAngle   = 0.0;
 		}
 	}
 	
@@ -292,8 +292,8 @@ public class ConfidenceRegion {
 	 * @return quantil
 	 */
 	private double getQuantile(int dimension) {
-		if (this.testStatisticParameters != null)
-			return this.testStatisticParameters.getTestStatisticParameter(dimension, this.degreeOfFreedom).getQuantile();		
+		if (this.confidenceRegionParameters != null)
+			return this.confidenceRegionParameters.getTestStatisticParameter(dimension, this.degreeOfFreedom).getQuantile();		
 		return 1.0;
 	}
 }
