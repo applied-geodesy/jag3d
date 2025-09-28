@@ -432,11 +432,15 @@ public class UITreeBuilder {
 			return;
 
 		if (this.remove(itemValue)) {
-			setIgnoreEvent(true);
-			CheckBoxTreeItem<TreeItemValue> parent = this.directoryItemMap.get(parentType); 
-			parent.getChildren().remove(treeItem);
-			updateSelectionStageOfParentNode(parent);
-			setIgnoreEvent(false);
+			try {
+				setIgnoreEvent(true);
+				CheckBoxTreeItem<TreeItemValue> parent = this.directoryItemMap.get(parentType); 
+				parent.getChildren().remove(treeItem);
+				updateSelectionStageOfParentNode(parent);
+			}
+			finally {
+				setIgnoreEvent(false);
+			}
 		}
 	}
 
@@ -446,48 +450,49 @@ public class UITreeBuilder {
 				(TreeItemType.isPointTypeLeaf(newItemType) || TreeItemType.isVerticalDeflectionTypeLeaf(newItemType))) {
 			CheckBoxTreeItem<TreeItemValue> newParent = this.directoryItemMap.get(newParentType);
 			TreeItem<TreeItemValue> lastItem = null;
-			this.setIgnoreEvent(true);
-			for (TreeItem<TreeItemValue> selectedItem : selectedItems) {
-				if (selectedItem != null && selectedItem.isLeaf() && selectedItem.getValue() != null) {
+			try {
+				this.setIgnoreEvent(true);
+				for (TreeItem<TreeItemValue> selectedItem : selectedItems) {
+					if (selectedItem != null && selectedItem.isLeaf() && selectedItem.getValue() != null) {
 
-					TreeItemValue itemValue;
-					if (selectedItem.getValue() instanceof PointTreeItemValue)
-						itemValue = (PointTreeItemValue)selectedItem.getValue();
-					else if (selectedItem.getValue() instanceof VerticalDeflectionTreeItemValue)
-						itemValue = (VerticalDeflectionTreeItemValue)selectedItem.getValue();
-					else
-						continue;
-
-					TreeItemType oldItemType   = itemValue.getItemType();
-					TreeItemType oldParentType = TreeItemType.getDirectoryByLeafType(oldItemType);
-					if (this.directoryItemMap.containsKey(oldParentType)) {
-						itemValue.setItemType(newItemType);
-						if (!this.save(itemValue)) {
-							itemValue.setItemType(oldItemType);
+						TreeItemValue itemValue;
+						if (selectedItem.getValue() instanceof PointTreeItemValue)
+							itemValue = (PointTreeItemValue)selectedItem.getValue();
+						else if (selectedItem.getValue() instanceof VerticalDeflectionTreeItemValue)
+							itemValue = (VerticalDeflectionTreeItemValue)selectedItem.getValue();
+						else
 							continue;
+
+						TreeItemType oldItemType   = itemValue.getItemType();
+						TreeItemType oldParentType = TreeItemType.getDirectoryByLeafType(oldItemType);
+						if (this.directoryItemMap.containsKey(oldParentType)) {
+							itemValue.setItemType(newItemType);
+							if (!this.save(itemValue)) {
+								itemValue.setItemType(oldItemType);
+								continue;
+							}
+							lastItem = selectedItem;
+							CheckBoxTreeItem<TreeItemValue> oldParent = this.directoryItemMap.get(oldParentType);
+							// Remove Item
+							oldParent.getChildren().remove(selectedItem);
+							updateSelectionStageOfParentNode(oldParent);
+							// add Item
+							newParent.getChildren().add(selectedItem);
+							//updateSelectionStageOfParentNode(newParent);
+							expand(selectedItem, true);
 						}
-						lastItem = selectedItem;
-						CheckBoxTreeItem<TreeItemValue> oldParent = this.directoryItemMap.get(oldParentType);
-						// Remove Item
-						oldParent.getChildren().remove(selectedItem);
-						updateSelectionStageOfParentNode(oldParent);
-						// add Item
-						newParent.getChildren().add(selectedItem);
-						//updateSelectionStageOfParentNode(newParent);
-						expand(selectedItem, true);
 					}
 				}
+				if (lastItem != null)
+					updateSelectionStageOfParentNode(newParent);
 			}
-
-			if (lastItem != null) {
-				TreeItem<TreeItemValue> lastSelectedItem = lastItem;
-				updateSelectionStageOfParentNode(newParent);
+			finally {
 				setIgnoreEvent(false);
-				this.treeView.getSelectionModel().select(lastSelectedItem);
+				if (lastItem != null)
+					this.treeView.getSelectionModel().select(lastItem);
 			}
 		}
 	}
-	
 	
 	public void addEmptyGroup(TreeItemType parentType) {
 		if (this.directoryItemMap.containsKey(parentType)) {
