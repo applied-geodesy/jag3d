@@ -4,10 +4,19 @@ Java·Applied·Geodesy·3D (JAG3D) is one of the most popular open source least-
 
 ![Java Applied Geodesy 3D (JAG3D)](/.images/jag3d.png?raw=true "Java·Applied·Geodesy·3D (JAG3D)")
 
-International Course on Engineering Surveying
+International Course on Engineering Surveying 2026
+---------------------------------------------
+The method of least-squares developed by Gauss is one of the most important analytical tools in geodesy and metrology for ensuring accurate and reliable data analysis. In engineering geodesy, it plays a crucial role in analysing both planned and existing geodetic networks and in verifying their congruence. Beside the coordinates of network, the method provides the dispersion of the estimated parameters and essential quantities for quality evaluation.
+At the _21th International Course on Engineering Surveying_, the principles of geodetic network adjustment are recapitulated within the specific tutorial named _network analysis_. The conference will be held at TU Graz from February 10 to 13, 2026 - save the date. The network analysis tutorial offers a practical introduction to the fundamentals of adjustment calculations. Through guided case studies, participants will explore how adjustment methods work and gain a deeper understanding of the key parameters involved. Based on this knowledge, the congruence of networks is evaluated within the framework of deformation analysis. Moreover, the tutorial demonstrates how the adjustment results can be integrated into existing workflows and further processed. For the practical part, the open source least-squares software package Java·Applied·Geodesy·3D is used. 
+Join fellow users, get hands-on experience with JAG3D, connect directly with the developer, and expand your professional network during the [Course on Engineering Surveying](https://ingenieurvermessungskurs.com/). See you soon in Graz!
+
+[![International Course on Engineering Surveying](https://raw.githubusercontent.com/applied-geodesy/jag3d/master/.images/ingenieurvermessung26.png?raw=true "International Course on Engineering Surveying 2026")](https://ingenieurvermessungskurs.com/)
+
+<!---
+[comment] International Course on Engineering Surveying
 ---------------------------------------------
 Diagnosis adjustment of planned networks as well as the analysis of existing geodetic networks by means of least-squares adjustment is a principal task in geodetic and metrological sciences such as surveying engineering. The network adjustment yields not only the estimated coordinates and the related fully populated dispersion but also parameters to evaluate the reliability of the network. At the *20th International Course on Engineering Surveying*, the principles of geodetic network adjustment were recapitulated within the specific tutorial named [network analysis](https://software.applied-geodesy.org/en/quality_assurance). The conference was held at ETH Zurich from April 11 to 14, 2023. The open source least-squares software package Java·Applied·Geodesy·3D was used to analyse local terrestrial networks, to interpret the adjustment results, and to evaluate network reliability. The principles of Baarda's DIA approach for detection, identification and adaptation of misspecified models were generalised and applied to evaluate network deformations. In complex analysis procedures, the network adjustment is only a cog in the wheel. For that reason, interfaces for data exchange and processing of adjustment results in external applications was addressed.
-
+-->
 
 Evaluation of Compatibility among Network Adjustment Software
 -------------------------------------------------------------
