@@ -611,7 +611,7 @@ public class UITreeBuilder {
 						break;
 
 					default:
-						System.err.println(this.getClass().getSimpleName() + " : Error, unsupported TreeItemType (only directories) " + itemValue.getItemType());
+						// System.err.println(this.getClass().getSimpleName() + " : Error, unsupported TreeItemType (only directories) " + itemValue.getItemType());
 						this.tabPaneBuilder.setTreeItemValue(itemValue);
 						break;
 					}
