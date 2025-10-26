@@ -18,7 +18,7 @@
     <path>%JAVA_HOME%;%PATH%</path>
     <requiresJdk>false</requiresJdk>
     <requires64Bit>true</requires64Bit>
-    <minVersion></minVersion>
+    <minVersion>25.0.0</minVersion>
     <maxVersion></maxVersion>
   </jre>
   <versionInfo>
