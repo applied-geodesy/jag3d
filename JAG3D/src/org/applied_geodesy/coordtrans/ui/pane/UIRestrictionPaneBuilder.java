@@ -284,7 +284,7 @@ public class UIRestrictionPaneBuilder implements TransformationChangeListener {
 		header.setSpacing(0);
 		header.getChildren().setAll(titledPane.getGraphic(), spacer, this.transformationMenuBar);
 		titledPane.setGraphic(header);
-		header.minWidthProperty().bind(titledPane.widthProperty().subtract(this.transformationMenuBar.widthProperty()));
+//		header.minWidthProperty().bind(titledPane.widthProperty().subtract(this.transformationMenuBar.widthProperty()));
 		
 		return titledPane;
 	}
