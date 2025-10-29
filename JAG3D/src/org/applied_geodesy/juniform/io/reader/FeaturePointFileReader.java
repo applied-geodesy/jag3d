@@ -39,6 +39,7 @@ import no.uib.cipr.matrix.UpperSymmBandMatrix;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
 
 public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueList<FeaturePoint>> {
+	private static long id = 0;
 	private final FeatureType featureType;
 	private ObservableUniqueList<FeaturePoint> points;
 	
@@ -79,6 +80,7 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 		if (this.points == null)
 			 this.points = new ObservableUniqueList<FeaturePoint>(10000);
 		this.points.clear();
+		FeaturePointFileReader.id = 0;
 	}
 
 	@Override
@@ -108,7 +110,14 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 	private static FeaturePoint scanCurvePoint(String str) throws NumberFormatException {
 		FormatterOptions options = FormatterOptions.getInstance();
 		String columns[] = str.trim().split("[\\s;]+");
-
+		
+		if (columns.length == 2) {
+			String name = String.valueOf(++FeaturePointFileReader.id); 
+			double x = options.convertLengthToModel(Double.parseDouble(columns[0].replace(',', '.'))); 
+			double y = options.convertLengthToModel(Double.parseDouble(columns[1].replace(',', '.')));
+			return new FeaturePoint(name, x, y);
+		}
+		
 		if (columns.length < 3)
 			return null;
 		
@@ -172,6 +181,14 @@ public class FeaturePointFileReader extends SourceFileReader<ObservableUniqueLis
 	private static FeaturePoint scanSurfacePoint(String str) throws NumberFormatException {
 		FormatterOptions options = FormatterOptions.getInstance();
 		String columns[] = str.trim().split("[\\s;]+");
+		
+		if (columns.length == 3) {
+			String name = String.valueOf(++FeaturePointFileReader.id); 
+			double x = options.convertLengthToModel(Double.parseDouble(columns[0].replace(',', '.'))); 
+			double y = options.convertLengthToModel(Double.parseDouble(columns[1].replace(',', '.')));
+			double z = options.convertLengthToModel(Double.parseDouble(columns[2].replace(',', '.')));
+			return new FeaturePoint(name, x, y, z);
+		}
 		
 		if (columns.length < 4)
 			return null;
