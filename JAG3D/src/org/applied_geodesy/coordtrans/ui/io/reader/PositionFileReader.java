@@ -38,6 +38,7 @@ import no.uib.cipr.matrix.UpperSymmBandMatrix;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
 
 public class PositionFileReader extends SourceFileReader<Map<String, ObservedFramePosition>> {
+	private static long id = 0;
 	private Map<String, ObservedFramePosition> positions;
 	private final TransformationType transformationType;
 	public PositionFileReader(TransformationType transformationType) {
@@ -74,7 +75,8 @@ public class PositionFileReader extends SourceFileReader<Map<String, ObservedFra
 
 	@Override
 	public void reset() {
-		 this.positions = new LinkedHashMap<String, ObservedFramePosition>(10000);
+		this.positions = new LinkedHashMap<String, ObservedFramePosition>(10000);
+		id = 0;
 	}
 
 	@Override
@@ -104,6 +106,14 @@ public class PositionFileReader extends SourceFileReader<Map<String, ObservedFra
 		FormatterOptions options = FormatterOptions.getInstance();
 		String columns[] = str.trim().split("[\\s;]+");
 
+		if (columns.length == 1) {
+			String name = String.valueOf(++PositionFileReader.id); 
+			double z = options.convertLengthToModel(Double.parseDouble(columns[0].replace(',', '.'))); 
+			ObservedFramePosition position = new ObservedFramePosition(z);
+			positionMap.put(name, position);
+			return true;
+		}
+		
 		if (columns.length < 2)
 			return false;
 		
@@ -130,6 +140,15 @@ public class PositionFileReader extends SourceFileReader<Map<String, ObservedFra
 	private static boolean scanPlanarPosition(Map<String, ObservedFramePosition> positionMap, String str) throws NumberFormatException, IllegalArgumentException {
 		FormatterOptions options = FormatterOptions.getInstance();
 		String columns[] = str.trim().split("[\\s;]+");
+
+		if (columns.length == 2) {
+			String name = String.valueOf(++PositionFileReader.id); 
+			double x = options.convertLengthToModel(Double.parseDouble(columns[0].replace(',', '.'))); 
+			double y = options.convertLengthToModel(Double.parseDouble(columns[1].replace(',', '.')));
+			ObservedFramePosition position = new ObservedFramePosition(x, y);
+			positionMap.put(name, position);
+			return true;
+		}
 
 		if (columns.length < 3)
 			return false;
@@ -196,6 +215,16 @@ public class PositionFileReader extends SourceFileReader<Map<String, ObservedFra
 	private static boolean scanSpatialPosition(Map<String, ObservedFramePosition> positionMap, String str) throws NumberFormatException, IllegalArgumentException {
 		FormatterOptions options = FormatterOptions.getInstance();
 		String columns[] = str.trim().split("[\\s;]+");
+		
+		if (columns.length == 3) {
+			String name = String.valueOf(++PositionFileReader.id); 
+			double x = options.convertLengthToModel(Double.parseDouble(columns[0].replace(',', '.'))); 
+			double y = options.convertLengthToModel(Double.parseDouble(columns[1].replace(',', '.')));
+			double z = options.convertLengthToModel(Double.parseDouble(columns[2].replace(',', '.')));
+			ObservedFramePosition position = new ObservedFramePosition(x, y, z);
+			positionMap.put(name, position);
+			return true;
+		}
 		
 		if (columns.length < 4)
 			return false;
