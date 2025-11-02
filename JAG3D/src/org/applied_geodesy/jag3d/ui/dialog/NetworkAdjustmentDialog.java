@@ -467,7 +467,7 @@ public class NetworkAdjustmentDialog {
 					case EXPORT_ADJUSTMENT_RESULTS_FAILED:
 						OptionDialog.showErrorDialog(
 								i18n.getString("NetworkAdjustmentDialog.message.error.failed.export.title",  "I/O error"),
-								i18n.getString("NetworkAdjustmentDialog.message.error.failed.export.header", "Export adjustment result"),
+								i18n.getString("NetworkAdjustmentDialog.message.error.failed.export.header", "Export adjustment result failed"),
 								i18n.getString("NetworkAdjustmentDialog.message.error.failed.export.message", "Error, could not export network adjustment result.")
 								);
 						break;
