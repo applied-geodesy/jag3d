@@ -22,6 +22,7 @@
 package org.applied_geodesy.coordtrans.ui.menu;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -147,10 +148,10 @@ public class UIMenuBuilder implements TransformationChangeListener {
 		MenuItem matlabItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.report.matlab.label", "_Matlab file"), true, MenuItemType.EXPORT_MATLAB, new KeyCodeCombination(KeyCode.M, KeyCombination.SHORTCUT_DOWN), this.menuEventHandler, true);
 		parentMenu.getItems().add(matlabItem);
 		
-		List<File> templateFiles = FTLReport.getTemplates();
-		if (templateFiles != null && !templateFiles.isEmpty()) {
-			for (File templateFile : templateFiles) {
-				MenuItem templateFileItem = createMenuItem(templateFile.getName(), false, MenuItemType.REPORT, templateFile, null, this.menuEventHandler, true);
+		List<Path> templates = FTLReport.getTemplates();
+		if (templates != null && !templates.isEmpty()) {
+			for (Path templatePath : templates) {
+				MenuItem templateFileItem = createMenuItem(templatePath.getFileName().toString(), false, MenuItemType.REPORT, templatePath, null, this.menuEventHandler, true);
 				parentMenu.getItems().add(templateFileItem);
 			}
 		}
@@ -185,9 +186,9 @@ public class UIMenuBuilder implements TransformationChangeListener {
 		return menuItem;
 	}
 
-	private static MenuItem createMenuItem(String label, boolean mnemonicParsing, MenuItemType menuItemType, File file, KeyCodeCombination keyCodeCombination, MenuEventHandler menuEventHandler, boolean disable) {
-		FileMenuItem menuItem = (FileMenuItem)createMenuItem(new FileMenuItem(label), mnemonicParsing, menuItemType, keyCodeCombination, menuEventHandler, disable);
-		menuItem.setFile(file);
+	private static MenuItem createMenuItem(String label, boolean mnemonicParsing, MenuItemType menuItemType, Path path, KeyCodeCombination keyCodeCombination, MenuEventHandler menuEventHandler, boolean disable) {
+		PathMenuItem menuItem = (PathMenuItem)createMenuItem(new PathMenuItem(label), mnemonicParsing, menuItemType, keyCodeCombination, menuEventHandler, disable);
+		menuItem.setPath(path);
 		return menuItem;
 	}
 	
@@ -353,13 +354,13 @@ public class UIMenuBuilder implements TransformationChangeListener {
 		}
 	}
 	
-	void createReport(File templateFile) {
+	void createReport(Path template) {
 		try {
 			if (UITreeBuilder.getInstance().getTransformationAdjustment().getTransformation() == null)
 				return;
 
 			Pattern pattern = Pattern.compile(".*?\\.(\\.)?(\\w+)\\.ftlh$", Pattern.CASE_INSENSITIVE);
-			Matcher matcher = pattern.matcher(templateFile.getName().toLowerCase());
+			Matcher matcher = pattern.matcher(template.getFileName().toString().toLowerCase());
 			String extension = "html";
 			boolean openFileInSystemApplication = true;
 			ExtensionFilter extensionFilter = new ExtensionFilter(i18n.getString("UIMenuBuilder.report.extension.html", "Hypertext Markup Language"), "*.html", "*.htm", "*.HTML", "*.HTM");
@@ -379,8 +380,8 @@ public class UIMenuBuilder implements TransformationChangeListener {
 					extensionFilter
 			);
 			if (reportFile != null && ftl != null) {
-				ftl.setTemplate(templateFile.getName());
-				ftl.toFile(reportFile, openFileInSystemApplication);
+				ftl.setTemplate(template.getFileName().toString());
+				ftl.toFilePath(reportFile.toPath(), openFileInSystemApplication);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

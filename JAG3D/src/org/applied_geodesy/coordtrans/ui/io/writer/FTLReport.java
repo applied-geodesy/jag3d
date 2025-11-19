@@ -21,14 +21,14 @@
 
 package org.applied_geodesy.coordtrans.ui.io.writer;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -91,9 +91,9 @@ public class FTLReport {
 
 	private void init() {
 		try {
-			File path = new File(FTLReport.class.getClassLoader().getResource(TEMPLATE_PATH).toURI());
+			Path path = Paths.get(FTLReport.class.getClassLoader().getResource(FTLReport.TEMPLATE_PATH).toURI());
 
-			this.cfg.setDirectoryForTemplateLoading( path );
+			this.cfg.setDirectoryForTemplateLoading( path.toFile() );
 			this.cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 			this.cfg.setLogTemplateExceptions(false);
 		}
@@ -137,16 +137,17 @@ public class FTLReport {
 		this.addEulerAngles();
 	}
 	
-	public void toFile(File report, boolean openFile) throws ClassNotFoundException, TemplateException, IOException {
-		if (report != null) {
-			this.createReport();
-			Writer file = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(report), StandardCharsets.UTF_8));
-			this.template.process(this.data, file);
-			file.flush();
-			file.close();
+	public void toFilePath(Path report, boolean openFile) throws ClassNotFoundException, TemplateException, IOException {
+		if (report == null)
+			return;
+		
+		this.createReport();
+		try (Writer writer = Files.newBufferedWriter(report, StandardCharsets.UTF_8) ) {
+			this.template.process(this.data, writer);
+			writer.flush();
 
 			if (hostServices != null && openFile)
-				hostServices.showDocument(report.getAbsolutePath());
+				hostServices.showDocument(report.toAbsolutePath().normalize().toString());
 		}
 	}
 
@@ -740,30 +741,38 @@ public class FTLReport {
 			this.setParam("vce", vces); 
 	}
 
-	public static List<File> getTemplates() {
-		File root = null;
+	public static List<Path> getTemplates() {
+		List<Path> templates = new ArrayList<>();
+		
 		try {
-			root = new File(FTLReport.class.getClassLoader().getResource(FTLReport.TEMPLATE_PATH).toURI());
+		    URL url = FTLReport.class.getClassLoader().getResource(FTLReport.TEMPLATE_PATH);
+		    if (url == null) {
+		        System.err.println("Template path not found");
+		        return null;
+		    }
+		    
+		    DirectoryStream.Filter<? super Path> ftlhFilter = new DirectoryStream.Filter<Path>() {
+		    	@Override
+		    	public boolean accept(Path entry) throws IOException {
+		    		String name = entry.getFileName().toString();
+		    		return name.toLowerCase().endsWith(".ftlh");
+		    	}
+		    };
+		    
+		    Path root = Paths.get(url.toURI()); 
+		    // try (DirectoryStream<Path> stream = Files.newDirectoryStream(root, "*.ftlh")) {
+		    try (DirectoryStream<Path> stream = Files.newDirectoryStream(root, ftlhFilter)) {
+		        for (Path p : stream) {
+		            if (Files.isRegularFile(p) && Files.isReadable(p)) {
+		                templates.add(p);
+		            }
+		        }
+		    }
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+		    e.printStackTrace();
+		    return null;
 		}
 
-		File[] files = root.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.toLowerCase().endsWith(".ftlh");
-			}
-		});
-
-		if (files == null)
-			return null;
-		List<File> templates = new ArrayList<File>(files.length);
-		for (int i=0; i<files.length; i++) {
-			if (files[i].exists() && files[i].isFile() && files[i].canRead()) {
-				templates.add(files[i]);
-			}
-		}
 		return templates;
 	}
 }

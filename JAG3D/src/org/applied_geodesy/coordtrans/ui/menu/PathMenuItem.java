@@ -21,21 +21,21 @@
 
 package org.applied_geodesy.coordtrans.ui.menu;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import javafx.scene.control.MenuItem;
 
-public class FileMenuItem extends MenuItem {
-	private File file;
-	FileMenuItem(String label) {
+public class PathMenuItem extends MenuItem {
+	private Path path;
+	PathMenuItem(String label) {
 		super(label);
 	}
-
-	public void setFile(File file) {
-		this.file = file;
+	
+	public void setPath(Path path) {
+		this.path = path;
 	}
-
-	public File getFile() {
-		return this.file;
+	
+	public Path getPath() {
+		return this.path;
 	}
 }

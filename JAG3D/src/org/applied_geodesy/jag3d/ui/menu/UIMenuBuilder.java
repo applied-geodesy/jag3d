@@ -222,11 +222,10 @@ public class UIMenuBuilder {
 	}
 
 	private void createReportMenu(Menu parentMenu) {
-		List<File> templateFiles = FTLReport.getTemplates();
-		if (templateFiles != null && !templateFiles.isEmpty()) {
-			for (File templateFile : templateFiles) {
-				MenuItem templateFileItem = createMenuItem(templateFile.getName(), false, MenuItemType.REPORT, templateFile, null, this.menuEventHandler, true);
-
+		List<Path> templates = FTLReport.getTemplates();
+		if (templates != null && !templates.isEmpty()) {
+			for (Path templatePath : templates) {
+				MenuItem templateFileItem = createMenuItem(templatePath.getFileName().toString(), false, MenuItemType.REPORT, templatePath, null, this.menuEventHandler, true);
 				parentMenu.getItems().add(templateFileItem);
 			}
 		}
@@ -323,9 +322,9 @@ public class UIMenuBuilder {
 		try {
 			pw = new PrintWriter(new BufferedWriter(new FileWriter( this.historyFile )));
 			for (int i = 0 ; i < items.size(); i++) {
-				if (items.get(i) instanceof FileMenuItem) {
-					FileMenuItem fileMenuItem = (FileMenuItem)items.get(i);
-					pw.printf(Locale.ENGLISH, "%s\r\n", fileMenuItem.getFile());
+				if (items.get(i) instanceof PathMenuItem) {
+					PathMenuItem pathMenuItem = (PathMenuItem)items.get(i);
+					pw.printf(Locale.ENGLISH, "%s\r\n", pathMenuItem.getPath());
 				}
 			}
 		} catch (Exception e) {
@@ -336,15 +335,15 @@ public class UIMenuBuilder {
 		}
 	}
 
-	private void addHistoryFile(File file) { 
+	private void addHistoryFile(Path path) { 
 		try {
 			List<MenuItem> items = new ArrayList<MenuItem>(this.historyMenu.getItems());
 			Collections.reverse(items);
 			int removeIndex = -1;
 			for (int i = 0 ; i < items.size(); i++) {
-				if (items.get(i) instanceof FileMenuItem) {
-					FileMenuItem fileMenuItem = (FileMenuItem)items.get(i);
-					if (file.getCanonicalPath().equals(fileMenuItem.getFile().getCanonicalPath())) {
+				if (items.get(i) instanceof PathMenuItem) {
+					PathMenuItem pathMenuItem = (PathMenuItem)items.get(i);
+					if (path.toAbsolutePath().normalize().equals(pathMenuItem.getPath().toAbsolutePath().normalize())) { // .toRealPath() 
 						removeIndex = i;
 						break;
 					}
@@ -354,12 +353,12 @@ public class UIMenuBuilder {
 				items.remove(removeIndex);
 
 
-			String itemName = file.toString();
-			String parent   = file.getParent();
+			String itemName = path.toAbsolutePath().normalize().toString();
+			String parent   = path.getParent().toString();
 			if (parent.length() > 60)
-				itemName = parent.substring(0, 50) + "\u2026" + File.separator + file.getName();
+				itemName = parent.substring(0, 50) + "\u2026" + File.separator + path.getFileName().toString();
 
-			MenuItem newFileItem = createMenuItem(itemName, false, MenuItemType.RECENTLY_USED, file, null, this.menuEventHandler, false);
+			MenuItem newFileItem = createMenuItem(itemName, false, MenuItemType.RECENTLY_USED, path, null, this.menuEventHandler, false);
 			items.add(newFileItem);
 
 			while (items.size() >= 10)
@@ -394,14 +393,14 @@ public class UIMenuBuilder {
 					scanner = new Scanner(this.historyFile);
 					while (scanner.hasNext()) {
 						String string = scanner.nextLine().trim();
-						File file = new File(string);
-						if (!string.isEmpty() && string.matches(regex) && Files.exists(file.toPath()) && Files.isRegularFile(file.toPath())) {
-							String itemName = file.toString();
-							String parent   = file.getParent();
+						Path projectPath = Path.of(string);
+						if (!string.isEmpty() && string.matches(regex) && Files.exists(projectPath) && Files.isRegularFile(projectPath)) {
+							String itemName = projectPath.toAbsolutePath().normalize().toString();
+							String parent   = projectPath.getParent().toString();
 							if (parent.length() > 60)
-								itemName = parent.substring(0, 50) + "\u2026" + File.separator + file.getName();
+								itemName = parent.substring(0, 50) + "\u2026" + File.separator + projectPath.getFileName().toString();
 
-							MenuItem fileItem = createMenuItem(itemName, false, MenuItemType.RECENTLY_USED, file, null, this.menuEventHandler, false);
+							MenuItem fileItem = createMenuItem(itemName, false, MenuItemType.RECENTLY_USED, projectPath, null, this.menuEventHandler, false);
 							newItems.add(fileItem);
 						}
 						if (newItems.size() == 10)
@@ -615,9 +614,9 @@ public class UIMenuBuilder {
 		return menuItem;
 	}
 
-	private static MenuItem createMenuItem(String label, boolean mnemonicParsing, MenuItemType menuItemType, File file, KeyCodeCombination keyCodeCombination, MenuEventHandler menuEventHandler, boolean disable) {
-		FileMenuItem menuItem = (FileMenuItem)createMenuItem(new FileMenuItem(label), mnemonicParsing, menuItemType, keyCodeCombination, menuEventHandler, disable);
-		menuItem.setFile(file);
+	private static MenuItem createMenuItem(String label, boolean mnemonicParsing, MenuItemType menuItemType, Path path, KeyCodeCombination keyCodeCombination, MenuEventHandler menuEventHandler, boolean disable) {
+		PathMenuItem menuItem = (PathMenuItem)createMenuItem(new PathMenuItem(label), mnemonicParsing, menuItemType, keyCodeCombination, menuEventHandler, disable);
+		menuItem.setPath(path);
 		return menuItem;
 	}
 
@@ -638,7 +637,7 @@ public class UIMenuBuilder {
 				if (project != null) {
 					SQLManager.createNewProject(new HSQLDB(project));
 					JAG3D.setTitle(path.getFileName() == null ? null : path.getFileName().toString().replaceFirst(regex, "$1"));
-					this.addHistoryFile(selectedFile);
+					this.addHistoryFile(selectedFile.toPath());
 				}
 			}
 		}
@@ -699,7 +698,7 @@ public class UIMenuBuilder {
 			
 			// open copied database
 			if (Files.exists(selectedFile.toPath(), LinkOption.NOFOLLOW_LINKS) && Files.isRegularFile(selectedFile.toPath(), LinkOption.NOFOLLOW_LINKS))
-				this.openProject(selectedFile);
+				this.openProject(selectedFile.toPath());
 			
 		} 
 		catch (Exception e) {
@@ -722,13 +721,12 @@ public class UIMenuBuilder {
 				);
 
 		if (selectedFile != null)
-			this.openProject(selectedFile);
+			this.openProject(selectedFile.toPath());
 	}
 
-	void openProject(File selectedFile) {
+	void openProject(Path path) {
 		try {
-			if (selectedFile != null) {
-				Path path = selectedFile.toPath();
+			if (path != null) {
 				String regex = "(?i)(.+?)(\\.)(backup$|data$|properties$|script$)";
 				String dataBaseName = Files.exists(path, LinkOption.NOFOLLOW_LINKS) ? path.toAbsolutePath().toString().replaceFirst(regex, "$1") : null;
 
@@ -747,12 +745,12 @@ public class UIMenuBuilder {
 				if (dataBaseName != null) {
 					SQLManager.openExistingProject(new HSQLDB(dataBaseName));
 					JAG3D.setTitle(path.getFileName() == null ? null : path.getFileName().toString().replaceFirst(regex, "$1"));
-					this.addHistoryFile(selectedFile);
+					this.addHistoryFile(path);
 					this.historyMenu.getParentMenu().hide();
-					DefaultFileChooser.setLastSelectedDirectory(selectedFile);
+					DefaultFileChooser.setLastSelectedDirectory(path.getFileName().toFile());
 				}
 				else {
-					throw new FileNotFoundException(selectedFile.toString());
+					throw new FileNotFoundException(path.toString());
 				}
 			}
 		}
@@ -1063,10 +1061,10 @@ public class UIMenuBuilder {
 		treeView.getSelectionModel().select(0);
 	}
 	
-	void createReport(File templateFile) {
+	void createReport(Path template) {
 		try {
 			Pattern pattern = Pattern.compile(".*?\\.(\\.)?(\\w+)\\.ftlh$", Pattern.CASE_INSENSITIVE);
-			Matcher matcher = pattern.matcher(templateFile.getName().toLowerCase());
+			Matcher matcher = pattern.matcher(template.getFileName().toString().toLowerCase());
 			String extension = "html";
 			boolean openFileInSystemApplication = true;
 			ExtensionFilter extensionFilter = new ExtensionFilter(i18n.getString("UIMenuBuilder.extension.html", "Hypertext Markup Language"), "*.html", "*.htm", "*.HTML", "*.HTM");
@@ -1095,8 +1093,8 @@ public class UIMenuBuilder {
 					extensionFilter
 					);
 			if (reportFile != null && ftl != null) {
-				ftl.setTemplate(templateFile.getName());
-				ftl.toFile(reportFile, openFileInSystemApplication);
+				ftl.setTemplate(template.getFileName().toString());
+				ftl.toFilePath(reportFile.toPath(), openFileInSystemApplication);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
