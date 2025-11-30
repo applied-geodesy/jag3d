@@ -21,7 +21,7 @@
 
 package org.applied_geodesy.juniform.ui.menu;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import org.applied_geodesy.adjustment.geometry.Feature;
 import org.applied_geodesy.adjustment.geometry.FeatureType;
@@ -46,6 +46,7 @@ import org.applied_geodesy.adjustment.geometry.surface.SpatialEllipseFeature;
 import org.applied_geodesy.adjustment.geometry.surface.SpatialLineFeature;
 import org.applied_geodesy.adjustment.geometry.surface.SphereFeature;
 import org.applied_geodesy.adjustment.geometry.surface.TorusFeature;
+import org.applied_geodesy.jag3d.ui.menu.PathMenuItem;
 import org.applied_geodesy.juniform.io.reader.FeaturePointFileReader;
 import org.applied_geodesy.juniform.ui.JUniForm;
 import org.applied_geodesy.juniform.ui.dialog.AboutDialog;
@@ -85,7 +86,7 @@ class MenuEventHandler implements EventHandler<ActionEvent> {
 	void handleAction(MenuItem menuItem) {
 		Feature feature = null;
 		MenuItemType menuItemType = null;
-		File file = null;
+		Path path = null;
 		
 		if (menuItem.getUserData() instanceof GeometricPrimitive) {
 			this.menuBuilder.importInitialGuess((GeometricPrimitive)menuItem.getUserData());
@@ -93,7 +94,7 @@ class MenuEventHandler implements EventHandler<ActionEvent> {
 		}
 		else if (menuItem.getUserData() instanceof MenuItemType) {
 			menuItemType = (MenuItemType)menuItem.getUserData();
-			file = menuItem instanceof FileMenuItem ? ((FileMenuItem)menuItem).getFile() : null;
+			path = menuItem instanceof PathMenuItem ? ((PathMenuItem)menuItem).getPath() : null;
 		}
 		
 		if (menuItemType == null)
@@ -229,7 +230,7 @@ class MenuEventHandler implements EventHandler<ActionEvent> {
 			break;
 			
 		case REPORT:
-			this.menuBuilder.createReport(file);
+			this.menuBuilder.createReport(path);
 			break;
 			
 		case EXPORT_MATLAB:

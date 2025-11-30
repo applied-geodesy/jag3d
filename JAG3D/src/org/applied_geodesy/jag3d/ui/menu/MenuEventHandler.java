@@ -21,7 +21,7 @@
 
 package org.applied_geodesy.jag3d.ui.menu;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.JAG3D;
@@ -55,13 +55,13 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 			MenuItem menuItem = (MenuItem)event.getSource();
 			if (menuItem.getUserData() instanceof MenuItemType) {
 				MenuItemType menuItemType = (MenuItemType)menuItem.getUserData();
-				File file = menuItem instanceof FileMenuItem ? ((FileMenuItem)menuItem).getFile() : null;
-				handleAction(menuItemType, file);
+				Path path = menuItem instanceof PathMenuItem ? ((PathMenuItem)menuItem).getPath() : null;
+				handleAction(menuItemType, path);
 			}
 		}
 	}
 	
-	private void handleAction(MenuItemType menuItemType, File file) {
+	private void handleAction(MenuItemType menuItemType, Path path) {
 		switch(menuItemType) {
 		case EXIT:
 			JAG3D.close();
@@ -205,11 +205,11 @@ public class MenuEventHandler implements EventHandler<ActionEvent> {
 			break;
 
 		case REPORT:
-			this.menuBuilder.createReport(file);
+			this.menuBuilder.createReport(path);
 			break;
 			
 		case RECENTLY_USED:
-			this.menuBuilder.openProject(file);
+			this.menuBuilder.openProject(path);
 			break;
 		}
 	}

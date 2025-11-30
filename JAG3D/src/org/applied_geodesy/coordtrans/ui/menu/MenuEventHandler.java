@@ -21,7 +21,7 @@
 
 package org.applied_geodesy.coordtrans.ui.menu;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import org.applied_geodesy.adjustment.transformation.VarianceComponent;
 import org.applied_geodesy.adjustment.transformation.VarianceComponentType;
@@ -33,6 +33,7 @@ import org.applied_geodesy.coordtrans.ui.dialog.QuantilesDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.VarianceComponentsDialog;
 import org.applied_geodesy.coordtrans.ui.tree.UITreeBuilder;
+import org.applied_geodesy.jag3d.ui.menu.PathMenuItem;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -56,11 +57,11 @@ class MenuEventHandler implements EventHandler<ActionEvent> {
 	
 	void handleAction(MenuItem menuItem) {
 		MenuItemType menuItemType = null;
-		File file = null;
+		Path path = null;
 		
 		if (menuItem.getUserData() instanceof MenuItemType) {
 			menuItemType = (MenuItemType)menuItem.getUserData();
-			file = menuItem instanceof FileMenuItem ? ((FileMenuItem)menuItem).getFile() : null;
+			path = menuItem instanceof PathMenuItem ? ((PathMenuItem)menuItem).getPath() : null;
 		}
 		
 		if (menuItemType == null)
@@ -104,7 +105,7 @@ class MenuEventHandler implements EventHandler<ActionEvent> {
 			break;
 			
 		case REPORT:
-			this.menuBuilder.createReport(file);
+			this.menuBuilder.createReport(path);
 			break;
 			
 		case ABOUT:
