@@ -46,7 +46,6 @@ import org.applied_geodesy.adjustment.geometry.surface.SpatialEllipseFeature;
 import org.applied_geodesy.adjustment.geometry.surface.SpatialLineFeature;
 import org.applied_geodesy.adjustment.geometry.surface.SphereFeature;
 import org.applied_geodesy.adjustment.geometry.surface.TorusFeature;
-import org.applied_geodesy.jag3d.ui.menu.PathMenuItem;
 import org.applied_geodesy.juniform.io.reader.FeaturePointFileReader;
 import org.applied_geodesy.juniform.ui.JUniForm;
 import org.applied_geodesy.juniform.ui.dialog.AboutDialog;
