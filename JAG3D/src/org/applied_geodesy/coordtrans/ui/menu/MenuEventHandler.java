@@ -33,7 +33,6 @@ import org.applied_geodesy.coordtrans.ui.dialog.QuantilesDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.TestStatisticDialog;
 import org.applied_geodesy.coordtrans.ui.dialog.VarianceComponentsDialog;
 import org.applied_geodesy.coordtrans.ui.tree.UITreeBuilder;
-import org.applied_geodesy.jag3d.ui.menu.PathMenuItem;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
