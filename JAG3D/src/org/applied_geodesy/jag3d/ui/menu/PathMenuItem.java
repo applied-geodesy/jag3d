@@ -25,7 +25,7 @@ import java.nio.file.Path;
 
 import javafx.scene.control.MenuItem;
 
-public class PathMenuItem extends MenuItem {
+class PathMenuItem extends MenuItem {
 	private Path path;
 	PathMenuItem(String label) {
 		super(label);
