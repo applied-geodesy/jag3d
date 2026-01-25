@@ -161,7 +161,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.y0.label", "\u03B6y0");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.y0.tooltip", "A-priori y-component of point deflection");
-		cellValueType = CellValueType.ANGLE_RESIDUAL;
+		cellValueType = CellValueType.ANGLE;
 		columnContentType = ColumnContentType.VALUE_Y_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::yAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_DEFLECTION, columnIndex, true, true);
@@ -171,7 +171,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.x0.label", "\u03B6x0");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.x0.tooltip", "A-priori x-component of point deflection");
-		cellValueType = CellValueType.ANGLE_RESIDUAL;
+		cellValueType = CellValueType.ANGLE;
 		columnContentType = ColumnContentType.VALUE_X_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::xAprioriProperty, getDoubleCallback(cellValueType), ColumnType.APRIORI_DEFLECTION, columnIndex, true, true);
@@ -182,7 +182,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.y0.label", "\u03C3y0");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.y0.tooltip", "A-priori uncertainty of y-component");
-		cellValueType = CellValueType.ANGLE_RESIDUAL;
+		cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 		columnContentType = ColumnContentType.UNCERTAINTY_Y_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::sigmaYaprioriProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APRIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, true, true);
@@ -193,7 +193,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.x0.label", "\u03C3x0");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.sigma.x0.tooltip", "A-priori uncertainty of x-component");
-		cellValueType = CellValueType.ANGLE_RESIDUAL;
+		cellValueType = CellValueType.ANGLE_UNCERTAINTY;
 		columnContentType = ColumnContentType.UNCERTAINTY_X_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::sigmaXaprioriProperty, getDoubleCallback(cellValueType), this.type == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION ? ColumnType.APRIORI_DEFLECTION : ColumnType.HIDDEN, columnIndex, true, true);
@@ -207,7 +207,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.y.label", "\u03B6y");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.y.tooltip", "Y-component of deflection of the vertical");
-		cellValueType = CellValueType.ANGLE_RESIDUAL;
+		cellValueType = CellValueType.ANGLE;
 		columnContentType = ColumnContentType.VALUE_Y_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::yAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_DEFLECTION, columnIndex, false, true);
@@ -217,7 +217,7 @@ public class UIVerticalDeflectionTableBuilder extends UIEditableTableBuilder<Ver
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.x.label", "\u03B6x");
 		tooltipText = i18n.getString("UIVerticalDeflectionTableBuilder.tableheader.x.tooltip", "X-component of deflection of the vertical");
-		cellValueType = CellValueType.ANGLE_RESIDUAL;
+		cellValueType = CellValueType.ANGLE;
 		columnContentType = ColumnContentType.VALUE_X_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
 		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, VerticalDeflectionRow::xAposterioriProperty, getDoubleCallback(cellValueType), ColumnType.APOSTERIORI_DEFLECTION, columnIndex, false, true);

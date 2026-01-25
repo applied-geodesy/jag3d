@@ -1210,6 +1210,9 @@ public class FTLReport {
 					case "y0":
 					case "x":
 					case "y":
+						h.put(key, options.convertAngleToView(verticalDeflectionSet.getDouble(i)));
+						break;
+						
 					case "residual_y":
 					case "residual_x":
 					case "gross_error_x":

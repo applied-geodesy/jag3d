@@ -2,8 +2,8 @@
 	<#list group.deflections as deflection>
 		<tr>
 			<th>${deflection.name}</th>
-			<td><@printFormattedNumber value=deflection.y0 format=df_angle_residual/></td>
-			<td><@printFormattedNumber value=deflection.x0 format=df_angle_residual/></td>
+			<td><@printFormattedNumber value=deflection.y0 format=df_angle/></td>
+			<td><@printFormattedNumber value=deflection.x0 format=df_angle/></td>
 			
 			<#if group.type == "STOCHASTIC_VERTICAL_DEFLECTION">
 				<td><@printFormattedNumber value=deflection.sigma_y0 format=df_angle_uncertainty/></td>
@@ -11,8 +11,8 @@
 			</#if>
 			
 			<#if group.type != "REFERENCE_VERTICAL_DEFLECTION">
-				<td><@printFormattedNumber value=deflection.y format=df_angle_residual/></td>
-				<td><@printFormattedNumber value=deflection.x format=df_angle_residual/></td>
+				<td><@printFormattedNumber value=deflection.y format=df_angle/></td>
+				<td><@printFormattedNumber value=deflection.x format=df_angle/></td>
 				
 				<td><@printFormattedNumber value=deflection.sigma_y format=df_angle_uncertainty/></td>
 				<td><@printFormattedNumber value=deflection.sigma_x format=df_angle_uncertainty/></td>
