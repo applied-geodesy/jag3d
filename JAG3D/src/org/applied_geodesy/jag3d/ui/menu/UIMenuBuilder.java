@@ -747,7 +747,7 @@ public class UIMenuBuilder {
 					JAG3D.setTitle(path.getFileName() == null ? null : path.getFileName().toString().replaceFirst(regex, "$1"));
 					this.addHistoryFile(path);
 					this.historyMenu.getParentMenu().hide();
-					DefaultFileChooser.setLastSelectedDirectory(path.getFileName().toFile());
+					DefaultFileChooser.setLastSelectedDirectory(path.toFile());
 				}
 				else {
 					throw new FileNotFoundException(path.toString());
