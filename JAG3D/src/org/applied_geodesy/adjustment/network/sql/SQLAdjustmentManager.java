@@ -1340,9 +1340,9 @@ public class SQLAdjustmentManager {
 					continue;
 				
 				stmt.setString(idx++, point.getName());
-
-				stmt.setDouble(idx++, point.getVerticalDeflectionY().getValue());
-				stmt.setDouble(idx++, point.getVerticalDeflectionX().getValue());
+				
+				stmt.setDouble(idx++, MathExtension.MOD(point.getVerticalDeflectionY().getValue(), 2.0*Math.PI));
+				stmt.setDouble(idx++, MathExtension.MOD(point.getVerticalDeflectionX().getValue(), 2.0*Math.PI));
 
 				stmt.setDouble(idx++, (point.getVerticalDeflectionY().getStdApriori() > 0 ? point.getVerticalDeflectionY().getStdApriori() : 0.0));
 				stmt.setDouble(idx++, (point.getVerticalDeflectionX().getStdApriori() > 0 ? point.getVerticalDeflectionX().getStdApriori() : 0.0));
@@ -1354,8 +1354,10 @@ public class SQLAdjustmentManager {
 				stmt.setDouble(idx++, Math.min(point.getVerticalDeflectionX().getConfidence(), point.getVerticalDeflectionY().getConfidence()));
 
 				// residuals epsilon = L - L0
-				stmt.setDouble(idx++, point.getVerticalDeflectionY().getValue() - point.getVerticalDeflectionY().getValue0());
-				stmt.setDouble(idx++, point.getVerticalDeflectionX().getValue() - point.getVerticalDeflectionX().getValue0());
+				double errorY = MathExtension.MOD(point.getVerticalDeflectionY().getValue() - point.getVerticalDeflectionY().getValue0(), 2.0*Math.PI);
+				double errorX = MathExtension.MOD(point.getVerticalDeflectionX().getValue() - point.getVerticalDeflectionX().getValue0(), 2.0*Math.PI);
+				stmt.setDouble(idx++, (Math.abs(errorY - 2.0*Math.PI) < Math.abs(errorY)) ? errorY - 2.0*Math.PI : errorY);
+				stmt.setDouble(idx++, (Math.abs(errorX - 2.0*Math.PI) < Math.abs(errorX)) ? errorX - 2.0*Math.PI : errorX);
 
 				stmt.setDouble(idx++, point.getVerticalDeflectionY().getRedundancy());
 				stmt.setDouble(idx++, point.getVerticalDeflectionX().getRedundancy());

@@ -643,8 +643,12 @@ public class NetworkAdjustment implements Runnable {
 		}
 		
 		int diag = 0;
-		double vx = (deflectionX.getValue() - deflectionX.getValue0());
-		double vy = (deflectionY.getValue() - deflectionY.getValue0());
+		double vx = MathExtension.MOD(deflectionX.getValue() - deflectionX.getValue0(), 2.0*Math.PI);
+		double vy = MathExtension.MOD(deflectionY.getValue() - deflectionY.getValue0(), 2.0*Math.PI);
+		if (Math.abs(vx - 2.0*Math.PI) < Math.abs(vx))
+			vx = vx - 2.0*Math.PI;
+		if (Math.abs(vy - 2.0*Math.PI) < Math.abs(vy))
+			vy = vy - 2.0*Math.PI;
 
 		qll[diag]    = deflectionX.getStdApriori()*deflectionX.getStdApriori();
 		qll0[diag]   = u[diag] == null ? qll[diag] : u[diag];
@@ -1656,13 +1660,22 @@ public class NetworkAdjustment implements Runnable {
 				VerticalDeflection deflectionX = point.getVerticalDeflectionX();
 				int col = deflectionX.getColInJacobiMatrix();
 				double qll = deflectionX.getStdApriori() * deflectionX.getStdApriori();
-				n.add(col, (deflectionX.getValue0()-deflectionX.getValue())/qll);
+				double delta = MathExtension.MOD(deflectionX.getValue0() - deflectionX.getValue(), 2.0*Math.PI);
+				
+				if (Math.abs(delta - 2.0*Math.PI) < Math.abs(delta))
+					delta = delta - 2.0*Math.PI;
+				
+				n.add(col, delta/qll);
 				N.add(col, col, 1.0/qll);
 				
 				VerticalDeflection deflectionY = point.getVerticalDeflectionY();
 				col = deflectionY.getColInJacobiMatrix();
 				qll = deflectionY.getStdApriori() * deflectionY.getStdApriori();
-				n.add(col, (deflectionY.getValue0()-deflectionY.getValue())/qll);
+				delta = MathExtension.MOD(deflectionY.getValue0() - deflectionY.getValue(), 2.0*Math.PI);
+				if (Math.abs(delta - 2.0*Math.PI) < Math.abs(delta))
+					delta = delta - 2.0*Math.PI;
+							
+				n.add(col, delta/qll);
 				N.add(col, col, 1.0/qll);
 			}
 		}
@@ -1673,16 +1686,16 @@ public class NetworkAdjustment implements Runnable {
 				int col = point.getColInJacobiMatrix();
 				if (point.getDimension() != 1) {
 					double qll = point.getStdXApriori()*point.getStdXApriori();
-					n.add(col, (point.getX0()-point.getX())/qll);
+					n.add(col, (point.getX0() - point.getX())/qll);
 					N.add(col, col++, 1.0/qll);
 
 					qll = point.getStdYApriori()*point.getStdYApriori();
-					n.add(col, (point.getY0()-point.getY())/qll);
+					n.add(col, (point.getY0() - point.getY())/qll);
 					N.add(col, col++, 1.0/qll);
 				}
 				if (point.getDimension() != 2) {
 					double qll = point.getStdZApriori()*point.getStdZApriori();
-					n.add(col, (point.getZ0()-point.getZ())/qll);
+					n.add(col, (point.getZ0() - point.getZ())/qll);
 					N.add(col, col, 1.0/qll);
 				}
 			}
