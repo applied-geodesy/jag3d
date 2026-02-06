@@ -340,7 +340,7 @@ public class SearchAndReplaceDialog {
 			
 			// masking values
 			if (!regExp)
-				search = "^\\Q"+search+"\\E";
+				search = "^\\Q"+search+"\\E$";
 			
 			boolean deleteCollisions = this.deleteCollisionsCheckBox.isSelected();
 
