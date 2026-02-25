@@ -192,9 +192,10 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		@Override
 		public void handle(DragEvent event) {
 			if (event.getEventType() == DragEvent.DRAG_OVER) {
-				if (acceptTransfer(event))
+				if (acceptTransfer(event)) {
 					event.acceptTransferModes(TransferMode.MOVE);
-				//event.consume();
+					event.consume();
+				}
 			}
 			else if (event.getEventType() == DragEvent.DRAG_DROPPED) {
 
@@ -356,16 +357,18 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 					}
 				}
 				event.setDropCompleted(success);
+				event.consume();
 			}
-			event.consume();
 		}
 
 		private boolean acceptTransfer(DragEvent event) {
 			Dragboard db = event.getDragboard();
+			TreeItem<TreeItemValue> item = getTreeItem();
 			TreeItemValue itemValue = getItem();
+			TreeItemType parentItemType = item != null && item.getParent() != null && item.getParent().getValue() != null && item.getParent().getValue().getItemType() != null ? item.getParent().getValue().getItemType() : null;
 			TreeItemType itemType = itemValue != null && itemValue.getItemType() != null ? itemValue.getItemType() : null;
 			Set<Integer> groupItemIdsDnD = new HashSet<Integer>(0);
-
+			
 			if (db.hasContent(TREE_ITEMS_DATA_FORMAT)) {
 				List<?> groupItemsDnD = (List<?>)db.getContent(TREE_ITEMS_DATA_FORMAT);
 				groupItemIdsDnD = new HashSet<Integer>(groupItemsDnD.size());
@@ -377,8 +380,8 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 					groupItemIdsDnD.add(itemDnD.getGroupId());
 				}
 			}
-
-			return (itemType != null && 
+			
+			return (itemType != null && parentItemType != null && 
 					(event.getGestureSource() instanceof TableRow || event.getGestureSource() instanceof EditableMenuCheckBoxTreeCell) && 
 					db.hasContent(TREE_ITEM_TYPE_DATA_FORMAT) &&
 					db.hasContent(GROUP_ID_DATA_FORMAT) &&
@@ -411,7 +414,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 							||
 
 							// points
-							((db.hasContent(POINT_ROWS_DATA_FORMAT) || db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
+							((db.hasContent(POINT_ROWS_DATA_FORMAT) || parentItemType == db.getContent(TREE_PARENT_ITEM_TYPE_DATA_FORMAT) && db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
 									TreeItemType.isPointTypeLeaf(itemType) && 
 									TreeItemType.isPointTypeLeaf((TreeItemType)db.getContent(TREE_ITEM_TYPE_DATA_FORMAT)) && 
 									itemValue instanceof PointTreeItemValue &&
@@ -422,7 +425,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 							||
 
 							// deflection
-							((db.hasContent(VERTICAL_DEFLECTION_ROWS_DATA_FORMAT) || db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
+							((db.hasContent(VERTICAL_DEFLECTION_ROWS_DATA_FORMAT) || parentItemType == db.getContent(TREE_PARENT_ITEM_TYPE_DATA_FORMAT) && db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
 									TreeItemType.isVerticalDeflectionTypeLeaf(itemType) &&
 									TreeItemType.isVerticalDeflectionTypeLeaf((TreeItemType)db.getContent(TREE_ITEM_TYPE_DATA_FORMAT)) && 
 									//itemType == db.getContent(TREE_ITEM_TYPE_DATA_FORMAT) && // if enabled, dnd is restricted to identical type
