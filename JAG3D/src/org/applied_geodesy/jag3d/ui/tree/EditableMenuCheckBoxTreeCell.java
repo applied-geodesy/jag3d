@@ -72,7 +72,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TableView;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
@@ -379,7 +379,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 			}
 
 			return (itemType != null && 
-					(event.getGestureSource() instanceof TableView || event.getGestureSource() instanceof EditableMenuCheckBoxTreeCell) && 
+					(event.getGestureSource() instanceof TableRow || event.getGestureSource() instanceof EditableMenuCheckBoxTreeCell) && 
 					db.hasContent(TREE_ITEM_TYPE_DATA_FORMAT) &&
 					db.hasContent(GROUP_ID_DATA_FORMAT) &&
 					db.hasContent(DIMENSION_DATA_FORMAT) &&
