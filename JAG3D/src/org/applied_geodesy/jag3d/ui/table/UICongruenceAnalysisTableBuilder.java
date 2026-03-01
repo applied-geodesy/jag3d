@@ -51,12 +51,12 @@ import org.applied_geodesy.ui.table.ColumnType;
 import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -422,15 +422,18 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 			}
 		});
 		table.getColumns().add(booleanColumn);
-
-		this.addContextMenu(table, this.createContextMenu(ContextMenuType.DEFAULT));
+		
 		this.addDynamicRowAdder(table);
 		this.addColumnOrderSequenceListeners(tableContentType, table);
-
+		
 		this.tables.put(this.dimension, table);
 		this.table = table;
 	}
 
+	@Override
+	ContextMenu getContextMenu() {
+		return this.createContextMenu(ContextMenuType.DEFAULT);
+	}
 	
 	@Override
 	public CongruenceAnalysisRow getEmptyRow() {
@@ -491,16 +494,19 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 			}
 		}
 
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				table.refresh();
-				table.requestFocus();
-				table.getSelectionModel().clearSelection();
-				table.getSelectionModel().select(rowData);
+//		Platform.runLater(new Runnable() {
+//			@Override
+//			public void run() {
+//				table.refresh();
+			table.requestFocus();
+			int index = table.getItems().indexOf(rowData);
+			if (index >= 0)
+				table.getSelectionModel().clearAndSelect(index);
+
+			if (!table.getSortOrder().isEmpty())
 				table.sort();
-			}
-		});
+//			}
+//		});
 	}
 	
 	private boolean isComplete(CongruenceAnalysisRow row) {
@@ -510,34 +516,47 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 	}
 	
 	@Override
-	void enableDragSupport() {
-		this.table.setOnDragDetected(new EventHandler<MouseEvent>() {
-		    public void handle(MouseEvent event) {
-		    	List<CongruenceAnalysisRow> selectedRows = new ArrayList<CongruenceAnalysisRow>(table.getSelectionModel().getSelectedItems());
-		    	if (selectedRows != null && !selectedRows.isEmpty()) {
+	TableRow<CongruenceAnalysisRow> createRow(TableView<CongruenceAnalysisRow> tableView) {
+	    TableRow<CongruenceAnalysisRow> row = super.createRow(tableView);
+	    row.setOnDragDetected(new EventHandler<MouseEvent>() {
 
-		    		List<CongruenceAnalysisRowDnD> rowsDnD = new ArrayList<CongruenceAnalysisRowDnD>(selectedRows.size());
-		    		for (CongruenceAnalysisRow selectedRow : selectedRows) {
-		    			CongruenceAnalysisRowDnD rowDnD = null;
-		    			if (isComplete(selectedRow) && (rowDnD = CongruenceAnalysisRowDnD.fromCongruenceAnalysisRow(selectedRow)) != null) {
-		    				rowsDnD.add(rowDnD);
-		    			}
-		    		}
+	    	@Override
+	    	public void handle(MouseEvent event) {
+	    		// Nur wenn die Row nicht leer ist
+	    		if (row.isEmpty())
+	    			return;
 
-		    		if (!rowsDnD.isEmpty()) {
-		    			Dragboard db = table.startDragAndDrop(TransferMode.MOVE);
-		    			ClipboardContent content = new ClipboardContent();
-		    			content.put(EditableMenuCheckBoxTreeCell.TREE_ITEM_TYPE_DATA_FORMAT, congruenceAnalysisItemValue.getItemType());
-		    			content.put(EditableMenuCheckBoxTreeCell.GROUP_ID_DATA_FORMAT,       congruenceAnalysisItemValue.getGroupId());
-		    			content.put(EditableMenuCheckBoxTreeCell.DIMENSION_DATA_FORMAT,      dimension);
-		    			content.put(EditableMenuCheckBoxTreeCell.CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT, rowsDnD);
+	    		List<CongruenceAnalysisRow> selectedRows = new ArrayList<CongruenceAnalysisRow>(table.getSelectionModel().getSelectedItems());
+	    		if (selectedRows == null || selectedRows.isEmpty())
+	    			return;
 
-		    			db.setContent(content);
-		    		}
-		    	}
-		        event.consume();
-		    }
-		});
+	    		List<CongruenceAnalysisRowDnD> rowsDnD = new ArrayList<CongruenceAnalysisRowDnD>(selectedRows.size());
+
+	    		for (CongruenceAnalysisRow selectedRow : selectedRows) {
+	    			CongruenceAnalysisRowDnD rowDnD = null;
+	    			if (isComplete(selectedRow) && (rowDnD = CongruenceAnalysisRowDnD.fromCongruenceAnalysisRow(selectedRow)) != null) {
+	    				rowsDnD.add(rowDnD);
+	    			}
+	    		}
+
+	    		if (!rowsDnD.isEmpty()) {
+
+	    			Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
+
+	    			ClipboardContent content = new ClipboardContent();
+		    		content.put(EditableMenuCheckBoxTreeCell.TREE_ITEM_TYPE_DATA_FORMAT, congruenceAnalysisItemValue.getItemType());
+		    		content.put(EditableMenuCheckBoxTreeCell.GROUP_ID_DATA_FORMAT,       congruenceAnalysisItemValue.getGroupId());
+		    		content.put(EditableMenuCheckBoxTreeCell.DIMENSION_DATA_FORMAT,      dimension);
+		    		content.put(EditableMenuCheckBoxTreeCell.CONGRUENCE_ANALYSIS_ROWS_DATA_FORMAT, rowsDnD);
+
+	    			db.setContent(content);
+
+	    			event.consume(); // Nur hier konsumieren!
+	    		}
+	    	}
+	    });
+
+		return row;
 	}
 	
 	@Override

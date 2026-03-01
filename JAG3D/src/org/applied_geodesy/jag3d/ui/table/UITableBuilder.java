@@ -117,7 +117,7 @@ public abstract class UITableBuilder<T extends Row> {
 				// Erzeuge eine tiefe Kopie
 				List<T> selectedItems = new ArrayList<T>(table.getSelectionModel().getSelectedItems()); 
 				if (selectedItems == null || selectedItems.isEmpty() || !selectedItems.contains(this.rowData)) {
-					selectedItems = new ArrayList<T>(1);
+					selectedItems.clear();
 					selectedItems.add(this.rowData);
 				}
 				
@@ -128,8 +128,11 @@ public abstract class UITableBuilder<T extends Row> {
 					table.refresh();
 				
 				// Entferne Selektion da Tabelle ggf. direkt sortiert wird 
-				table.getSelectionModel().clearSelection();
-				table.getSelectionModel().select(this.rowData); 
+				int index = table.getItems().indexOf(this.rowData);
+				if (index >= 0) 
+				    table.getSelectionModel().clearAndSelect(index);
+////				table.getSelectionModel().clearSelection();
+////				table.getSelectionModel().select(this.rowData); 
 			}
 		}
 	}
@@ -227,6 +230,7 @@ public abstract class UITableBuilder<T extends Row> {
 		this.table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		this.table.setOnKeyPressed(new TableKeyEventHandler());
 		tableModel.add(this.getEmptyRow());
+		this.setTableRowFactory(this.table);
 		return this.table;
 	}
 
@@ -284,26 +288,36 @@ public abstract class UITableBuilder<T extends Row> {
 			}
 		};
 	}
+	
+	TableRow<T> createRow(TableView<T> tableView) {
+		final TableRow<T> row = new TableRow<T>() {
+			@Override
+			public void updateItem(T item, boolean empty) {
+				super.updateItem(item, empty);
+				// highlight current row
+				highlightTableRow(this);
+			}
+		};
+		
+		ContextMenu contextMenu = this.getContextMenu();
+		if (contextMenu != null) {
+			// Set context menu on row, but use a binding to make it only show for non-empty rows:  
+			row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu)null).otherwise(contextMenu));
+		}
+		return row;  
+	}
+	
+	ContextMenu getContextMenu() {
+		return null;
+	}
 
-	void addContextMenu(TableView<T> table, ContextMenu contextMenu) {
-		table.setRowFactory(new Callback<TableView<T>, TableRow<T>>() {  
-			@Override  
-			public TableRow<T> call(TableView<T> tableView) {  
-				final TableRow<T> row = new TableRow<T>() {
-					@Override
-					public void updateItem(T item, boolean empty) {
-						super.updateItem(item, empty);
-						// highlight current row
-						highlightTableRow(this);
-					}
-				};
-				// Set context menu on row, but use a binding to make it only show for non-empty rows:  
-				row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu)null).otherwise(contextMenu)); 
-				return row;  
-			} 
-			
-			
-		}); 
+	void setTableRowFactory(TableView<T> table) {
+		table.setRowFactory(new Callback<TableView<T>, TableRow<T>>() {
+		    @Override
+		    public TableRow<T> call(TableView<T> tableView) {
+		        return createRow(tableView);
+		    }
+		});
 	}
 
 	void addDynamicRowAdder(TableView<T> table) {

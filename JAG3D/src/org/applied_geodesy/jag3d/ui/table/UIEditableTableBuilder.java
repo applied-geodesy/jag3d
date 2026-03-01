@@ -110,7 +110,6 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 	TableView<T> createTable() {
 		this.table = super.createTable();
 		this.table.setEditable(true);
-		this.enableDragSupport();
 		this.addTableKeyEvents();
 		
 		return this.table;
@@ -263,8 +262,7 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 		Menu menu = new Menu(label);
 		return menu;
 	}
-
-	abstract void enableDragSupport();
+	
 	abstract void removeRows();
 	abstract void duplicateRows();
 	abstract void moveRows(ContextMenuItemType type);

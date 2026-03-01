@@ -72,7 +72,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TableView;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
@@ -192,9 +192,10 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 		@Override
 		public void handle(DragEvent event) {
 			if (event.getEventType() == DragEvent.DRAG_OVER) {
-				if (acceptTransfer(event))
+				if (acceptTransfer(event)) {
 					event.acceptTransferModes(TransferMode.MOVE);
-				//event.consume();
+					event.consume();
+				}
 			}
 			else if (event.getEventType() == DragEvent.DRAG_DROPPED) {
 
@@ -356,16 +357,17 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 					}
 				}
 				event.setDropCompleted(success);
+				event.consume();
 			}
-			event.consume();
 		}
 
 		private boolean acceptTransfer(DragEvent event) {
 			Dragboard db = event.getDragboard();
+			//TreeItem<TreeItemValue> item = getTreeItem();
 			TreeItemValue itemValue = getItem();
 			TreeItemType itemType = itemValue != null && itemValue.getItemType() != null ? itemValue.getItemType() : null;
 			Set<Integer> groupItemIdsDnD = new HashSet<Integer>(0);
-
+			
 			if (db.hasContent(TREE_ITEMS_DATA_FORMAT)) {
 				List<?> groupItemsDnD = (List<?>)db.getContent(TREE_ITEMS_DATA_FORMAT);
 				groupItemIdsDnD = new HashSet<Integer>(groupItemsDnD.size());
@@ -377,18 +379,19 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 					groupItemIdsDnD.add(itemDnD.getGroupId());
 				}
 			}
-
-			return (itemType != null && 
-					(event.getGestureSource() instanceof TableView || event.getGestureSource() instanceof EditableMenuCheckBoxTreeCell) && 
+			
+			return (itemType != null &&  
+					(event.getGestureSource() instanceof TableRow || event.getGestureSource() instanceof EditableMenuCheckBoxTreeCell) && 
 					db.hasContent(TREE_ITEM_TYPE_DATA_FORMAT) &&
 					db.hasContent(GROUP_ID_DATA_FORMAT) &&
 					db.hasContent(DIMENSION_DATA_FORMAT) &&
 
 					(
-							// DnD is it the parent node
+							/** hovered parent node **/
 							db.hasContent(TREE_ITEMS_DATA_FORMAT) && db.hasContent(TREE_PARENT_ITEM_TYPE_DATA_FORMAT) && itemType == db.getContent(TREE_PARENT_ITEM_TYPE_DATA_FORMAT)
 							||
 							
+							/** hovered child nodes leafs **/
 							// Terrestrial observations
 							((db.hasContent(TERRESTRIAL_OBSERVATION_ROWS_DATA_FORMAT) || db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
 									TreeItemType.isObservationTypeLeaf(itemType) &&
@@ -411,7 +414,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 							||
 
 							// points
-							((db.hasContent(POINT_ROWS_DATA_FORMAT) || db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
+							((db.hasContent(POINT_ROWS_DATA_FORMAT) || itemType == db.getContent(TREE_ITEM_TYPE_DATA_FORMAT) && db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
 									TreeItemType.isPointTypeLeaf(itemType) && 
 									TreeItemType.isPointTypeLeaf((TreeItemType)db.getContent(TREE_ITEM_TYPE_DATA_FORMAT)) && 
 									itemValue instanceof PointTreeItemValue &&
@@ -422,10 +425,9 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 							||
 
 							// deflection
-							((db.hasContent(VERTICAL_DEFLECTION_ROWS_DATA_FORMAT) || db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
+							((db.hasContent(VERTICAL_DEFLECTION_ROWS_DATA_FORMAT) || itemType == db.getContent(TREE_ITEM_TYPE_DATA_FORMAT) && db.hasContent(TREE_ITEMS_DATA_FORMAT)) && 
 									TreeItemType.isVerticalDeflectionTypeLeaf(itemType) &&
 									TreeItemType.isVerticalDeflectionTypeLeaf((TreeItemType)db.getContent(TREE_ITEM_TYPE_DATA_FORMAT)) && 
-									//itemType == db.getContent(TREE_ITEM_TYPE_DATA_FORMAT) && // if enabled, dnd is restricted to identical type
 									itemValue instanceof VerticalDeflectionTreeItemValue &&
 									((VerticalDeflectionTreeItemValue)itemValue).getGroupId() != (Integer)db.getContent(GROUP_ID_DATA_FORMAT)) &&
 									!groupItemIdsDnD.contains(((VerticalDeflectionTreeItemValue)itemValue).getGroupId())

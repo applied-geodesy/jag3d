@@ -52,12 +52,12 @@ import org.applied_geodesy.ui.table.ColumnType;
 import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -758,8 +758,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 			}
 		});
 		table.getColumns().add(booleanColumn);
-
-		this.addContextMenu(table, this.createContextMenu(ContextMenuType.POINT));
+		
 		this.addDynamicRowAdder(table);
 		this.addColumnOrderSequenceListeners(tableContentType, table);
 
@@ -767,6 +766,10 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		this.table = table;
 	}
 
+	@Override
+	ContextMenu getContextMenu() {
+		return this.createContextMenu(ContextMenuType.POINT);
+	}
 	
 	@Override
 	public PointRow getEmptyRow() {
@@ -856,16 +859,19 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 			}
 		}
 
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				table.refresh();
-				table.requestFocus();
-				table.getSelectionModel().clearSelection();
-				table.getSelectionModel().select(rowData);
+//		Platform.runLater(new Runnable() {
+//			@Override
+//			public void run() {
+//				table.refresh();
+			table.requestFocus();
+			int index = table.getItems().indexOf(rowData);
+			if (index >= 0)
+				table.getSelectionModel().clearAndSelect(index);
+
+			if (!table.getSortOrder().isEmpty())
 				table.sort();
-			}
-		});
+//			}
+//		});
 	}
 	
 	private boolean isComplete(PointRow row) {
@@ -876,34 +882,47 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 	}
 	
 	@Override
-	void enableDragSupport() {
-		this.table.setOnDragDetected(new EventHandler<MouseEvent>() {
-		    public void handle(MouseEvent event) {
-		    	List<PointRow> selectedRows = new ArrayList<PointRow>(table.getSelectionModel().getSelectedItems());
-		    	if (selectedRows != null && !selectedRows.isEmpty()) {
+	TableRow<PointRow> createRow(TableView<PointRow> tableView) {
+	    TableRow<PointRow> row = super.createRow(tableView);
+	    row.setOnDragDetected(new EventHandler<MouseEvent>() {
 
-		    		List<PointRowDnD> rowsDnD = new ArrayList<PointRowDnD>(selectedRows.size());
-		    		for (PointRow selectedRow : selectedRows) {
-		    			PointRowDnD rowDnD = null;
-		    			if (isComplete(selectedRow) && (rowDnD = PointRowDnD.fromPointRow(selectedRow)) != null) {
-		    				rowsDnD.add(rowDnD);
-		    			}
-		    		}
+	    	@Override
+	    	public void handle(MouseEvent event) {
+	    		// Nur wenn die Row nicht leer ist
+	    		if (row.isEmpty())
+	    			return;
 
-		    		if (!rowsDnD.isEmpty()) {
-		    			Dragboard db = table.startDragAndDrop(TransferMode.MOVE);
-		    			ClipboardContent content = new ClipboardContent();
-		    			content.put(EditableMenuCheckBoxTreeCell.TREE_ITEM_TYPE_DATA_FORMAT, pointItemValue.getItemType());
-		    			content.put(EditableMenuCheckBoxTreeCell.GROUP_ID_DATA_FORMAT,       pointItemValue.getGroupId());
-		    			content.put(EditableMenuCheckBoxTreeCell.DIMENSION_DATA_FORMAT,      dimension);
-		    			content.put(EditableMenuCheckBoxTreeCell.POINT_ROWS_DATA_FORMAT, rowsDnD);
+	    		List<PointRow> selectedRows = new ArrayList<PointRow>(table.getSelectionModel().getSelectedItems());
+	    		if (selectedRows == null || selectedRows.isEmpty())
+	    			return;
 
-		    			db.setContent(content);
-		    		}
-		    	}
-		        event.consume();
-		    }
-		});
+	    		List<PointRowDnD> rowsDnD = new ArrayList<PointRowDnD>(selectedRows.size());
+
+	    		for (PointRow selectedRow : selectedRows) {
+	    			PointRowDnD rowDnD = null;
+	    			if (isComplete(selectedRow) && (rowDnD = PointRowDnD.fromPointRow(selectedRow)) != null) {
+	    				rowsDnD.add(rowDnD);
+	    			}
+	    		}
+
+	    		if (!rowsDnD.isEmpty()) {
+
+	    			Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
+
+	    			ClipboardContent content = new ClipboardContent();
+	    			content.put(EditableMenuCheckBoxTreeCell.TREE_ITEM_TYPE_DATA_FORMAT, pointItemValue.getItemType());
+	    			content.put(EditableMenuCheckBoxTreeCell.GROUP_ID_DATA_FORMAT,       pointItemValue.getGroupId());
+	    			content.put(EditableMenuCheckBoxTreeCell.DIMENSION_DATA_FORMAT,      dimension);
+	    			content.put(EditableMenuCheckBoxTreeCell.POINT_ROWS_DATA_FORMAT, rowsDnD);
+
+	    			db.setContent(content);
+
+	    			event.consume(); // Nur hier konsumieren!
+	    		}
+	    	}
+	    });
+
+		return row;
 	}
 	
 	@Override
