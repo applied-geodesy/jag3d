@@ -77,8 +77,8 @@ import javafx.util.StringConverter;
 public class LeastSquaresSettingDialog implements FormatterChangedListener {
 
 	public class LeastSquaresSettings {
-		private ObjectProperty<Integer> iteration             = new SimpleObjectProperty<Integer>(50);
-		private ObjectProperty<Integer> principalComponents   = new SimpleObjectProperty<Integer>(1);
+		private ObjectProperty<Integer> iteration             = new SimpleObjectProperty<Integer>(DefaultValue.getNumberOfIterations());
+		private ObjectProperty<Integer> principalComponents   = new SimpleObjectProperty<Integer>(DefaultValue.getNumberOfPrincipalComponents());
 		private ObjectProperty<Double> robustEstimationLimit  = new SimpleObjectProperty<Double>(DefaultValue.getRobustEstimationLimit());
 		private BooleanProperty orientation                   = new SimpleBooleanProperty(Boolean.TRUE);
 		private BooleanProperty congruenceAnalysis            = new SimpleBooleanProperty(Boolean.FALSE);

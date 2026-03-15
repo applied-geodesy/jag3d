@@ -22,16 +22,20 @@
 package org.applied_geodesy.adjustment;
 
 import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.util.Properties;
 
 import org.applied_geodesy.adjustment.statistic.DefaultTestStatisticValue;
 
 public class DefaultValue {
-	private final static int MAXIMUM_ITERATIONS                = 5000;
+	private final static int MAXIMUM_ITERATIONS                = 10000;
+	private final static int ITERATIONS                        = 50;
+	private final static int PRINCIPAL_COMPONENTS              = 1;
 	private final static double ROBUST_ESTIMATION_LIMIT        = 3.5;
 	private final static double CONFIDENCE_LEVEL               = 1.0 - DefaultTestStatisticValue.getProbabilityValue();
 	private final static EstimationType ESTIMATION_TYPE        = EstimationType.L2NORM;
 	private final static boolean APPLY_VARIANCE_OF_UNIT_WEIGHT = Boolean.TRUE;
+	
 
 	private final static Properties PROPERTIES = new Properties();
 	
@@ -39,8 +43,9 @@ public class DefaultValue {
 		BufferedInputStream bis = null;
 		final String path = "properties/leastsquares.default";
 		try {
-			if (DefaultValue.class.getClassLoader().getResourceAsStream(path) != null) {
-				bis = new BufferedInputStream(DefaultValue.class.getClassLoader().getResourceAsStream(path));
+			InputStream in = null;
+			if ((in = DefaultValue.class.getClassLoader().getResourceAsStream(path)) != null) {
+				bis = new BufferedInputStream(in);
 				PROPERTIES.load(bis);
 			}  
 		} catch (Exception e) {
@@ -62,6 +67,18 @@ public class DefaultValue {
 		EstimationType value = null;
 		try { value = EstimationType.valueOf(PROPERTIES.getProperty("ESTIMATION_TYPE")); } catch (Exception e) {}
 		return value != null ? value : ESTIMATION_TYPE;
+	}
+	
+	public static int getNumberOfPrincipalComponents() {
+		int value = -1;
+		try { value = Integer.parseInt(PROPERTIES.getProperty("PRINCIPAL_COMPONENTS")); } catch (Exception e) {}
+		return value >= 0 ? value : PRINCIPAL_COMPONENTS;
+	}
+	
+	public static int getNumberOfIterations() {
+		int value = -1;
+		try { value = Integer.parseInt(PROPERTIES.getProperty("ITERATIONS")); } catch (Exception e) {}
+		return value >= 0 ? Math.min(value, getMaximumNumberOfIterations()) : Math.min(ITERATIONS, getMaximumNumberOfIterations());
 	}
 	
 	public static int getMaximumNumberOfIterations() {
