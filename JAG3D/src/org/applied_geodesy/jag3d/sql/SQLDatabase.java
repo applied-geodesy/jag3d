@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.DefaultValue;
-import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.UnscentedTransformationParameter;
 import org.applied_geodesy.adjustment.network.DefaultAverageThreshold;
 import org.applied_geodesy.adjustment.network.ObservationType;
@@ -93,7 +92,7 @@ class SQLDatabase {
 		sqls.put(20180106.0504, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ProjectionDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + ProjectionType.LOCAL_CARTESIAN.getId() + " NOT NULL,\"reference_height\" DOUBLE DEFAULT 0 NOT NULL);\r\n");
 		sqls.put(20180106.0505, "INSERT INTO \"ProjectionDefinition\" (\"id\") VALUES (1);\r\n");
 		
-		sqls.put(20180106.0506, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"AdjustmentDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + EstimationType.L2NORM.getId() + " NOT NULL, \"number_of_iterations\" INTEGER DEFAULT 50 NOT NULL, \"robust_estimation_limit\" DOUBLE DEFAULT " + DefaultValue.getRobustEstimationLimit() + " NOT NULL, \"number_of_principal_components\" INTEGER DEFAULT 1 NOT NULL, \"estimate_direction_set_orientation_approximation\" BOOLEAN DEFAULT TRUE NOT NULL, \"congruence_analysis\" BOOLEAN DEFAULT FALSE NOT NULL, \"export_covariance_matrix\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
+		sqls.put(20180106.0506, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"AdjustmentDefinition\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"type\" SMALLINT DEFAULT " + DefaultValue.getEstimationType().getId() + " NOT NULL, \"number_of_iterations\" INTEGER DEFAULT " + DefaultValue.getNumberOfIterations() + " NOT NULL, \"robust_estimation_limit\" DOUBLE DEFAULT " + DefaultValue.getRobustEstimationLimit() + " NOT NULL, \"number_of_principal_components\" INTEGER DEFAULT " + DefaultValue.getNumberOfPrincipalComponents() + " NOT NULL, \"estimate_direction_set_orientation_approximation\" BOOLEAN DEFAULT TRUE NOT NULL, \"congruence_analysis\" BOOLEAN DEFAULT FALSE NOT NULL, \"export_covariance_matrix\" BOOLEAN DEFAULT FALSE NOT NULL);\r\n");
 		sqls.put(20180106.0507, "INSERT INTO \"AdjustmentDefinition\" (\"id\") VALUES (1);\r\n");
 		
 		sqls.put(20180106.0508, "CREATE " + TABLE_STORAGE_TYPE + " TABLE \"ProjectMetadata\"(\"id\" INTEGER NOT NULL PRIMARY KEY, \"name\" VARCHAR(256) DEFAULT '' NOT NULL, \"operator\" VARCHAR(256) DEFAULT '' NOT NULL, \"description\" VARCHAR(10000) DEFAULT '' NOT NULL, \"date\" TIMESTAMP(6) DEFAULT NOW() NOT NULL, \"customer_id\" VARCHAR(256) DEFAULT '' NOT NULL, \"project_id\" VARCHAR(256) DEFAULT '' NOT NULL);\r\n");
@@ -158,7 +157,7 @@ class SQLDatabase {
 		sqls.put(20180411.0022, "INSERT INTO \"TableRowHighlightScheme\" (\"id\") VALUES (1);\r\n");
 
 		// add variance of unit weight
-		sqls.put(20180430.0001, "ALTER TABLE \"AdjustmentDefinition\" ADD \"apply_variance_of_unit_weight\" BOOLEAN DEFAULT TRUE NOT NULL\r\n");
+		sqls.put(20180430.0001, "ALTER TABLE \"AdjustmentDefinition\" ADD \"apply_variance_of_unit_weight\" BOOLEAN DEFAULT " + DefaultValue.applyVarianceOfUnitWeight() + " NOT NULL\r\n");
 		
 		// add order id of items
 		sqls.put(20190225.0001, "ALTER TABLE \"ObservationGroup\" ADD \"order\" INTEGER DEFAULT 0 NOT NULL\r\n");

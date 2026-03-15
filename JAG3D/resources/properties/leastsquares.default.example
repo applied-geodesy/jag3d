@@ -1,0 +1,16 @@
+# !!! This is an example file and will not be used by JAG3D. Please !!!
+# !!! create a copy of this file named "leastsquares.default",      !!!
+# !!! located in the same directory. Modify the copied file w.r.t.  !!!
+# !!! the desired values.                                           !!!
+#
+# Comments are indicated by # as first character
+#
+# The following values are the default values of JAG3D
+#
+ESTIMATION_TYPE               = L2NORM
+ITERATIONS                    = 50
+MAXIMUM_ITERATIONS            = 10000
+PRINCIPAL_COMPONENTS          = 1
+ROBUST_ESTIMATION_LIMIT       = 3.5
+APPLY_VARIANCE_OF_UNIT_WEIGHT = TRUE
+CONFIDENCE_LEVEL              = 0.999
