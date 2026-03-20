@@ -78,28 +78,34 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 		@Override
 		public void handle(ActionEvent event) {
 			if (event.getSource() instanceof MenuItem && ((MenuItem)event.getSource()).getUserData() instanceof ContextMenuItemType) {
-				ContextMenuItemType contextMenuType = (ContextMenuItemType)((MenuItem)event.getSource()).getUserData();
-				switch(contextMenuType) {
-				case REMOVE:
-					removeTableRows();
-					break;
-				case SELECT_GROUPS:
-					selectGroups();
-				case MOVETO:
-				case MOVETO_REFERENCE:
-				case MOVETO_STOCHASTIC:
-				case MOVETO_DATUM:
-				case MOVETO_NEW:
-					moveRows(contextMenuType);
-					break;
-				case DUPLICATE:
-					duplicateRows();
-					break;
-				case ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT:
-				case SEARCH_AND_REPLACE:
-					showDialog(contextMenuType);
-					break;
-				}
+				final ContextMenuItemType contextMenuType = (ContextMenuItemType)((MenuItem)event.getSource()).getUserData();
+				
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {	
+						switch(contextMenuType) {
+						case REMOVE:
+							removeTableRows();
+							break;
+						case SELECT_GROUPS:
+							selectGroups();
+						case MOVETO:
+						case MOVETO_REFERENCE:
+						case MOVETO_STOCHASTIC:
+						case MOVETO_DATUM:
+						case MOVETO_NEW:
+							moveRows(contextMenuType);
+							break;
+						case DUPLICATE:
+							duplicateRows();
+							break;
+						case ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT:
+						case SEARCH_AND_REPLACE:
+							showDialog(contextMenuType);
+							break;
+						}
+					}
+				});
 			}
 		}
 	}
