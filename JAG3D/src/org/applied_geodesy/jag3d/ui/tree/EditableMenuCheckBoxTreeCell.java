@@ -456,62 +456,69 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 					&& newValue.getUserData() instanceof ContextMenuType
 					&& getTreeItem() != null && getTreeItem().getValue() != null 
 					&& getTreeItem().getValue() instanceof PointTreeItemValue) {// newValue instanceof RadioMenuItem &&
-				ContextMenuType menuItemType = (ContextMenuType)newValue.getUserData();
-				PointTreeItemValue itemValue = (PointTreeItemValue)getTreeItem().getValue();
+				
+				final ContextMenuType menuItemType = (ContextMenuType)newValue.getUserData();
+				final PointTreeItemValue itemValue = (PointTreeItemValue)getTreeItem().getValue();
+				final int dimension = itemValue.getDimension();
+				final PointType pointType = TreeItemType.getPointTypeByTreeItemType(itemValue.getItemType());
 
-				int dimension = itemValue.getDimension();
-				PointType pointType = TreeItemType.getPointTypeByTreeItemType(itemValue.getItemType());
+				contextMenu.hide();
 
-				switch(menuItemType) {
-				case CHANGE_TO_REFERENCE_POINT_GROUP:
-					if (pointType == PointType.REFERENCE_POINT)
-						return;
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {	
+						switch(menuItemType) {
+						case CHANGE_TO_REFERENCE_POINT_GROUP:
+							if (pointType == PointType.REFERENCE_POINT)
+								return;
 
-					if (dimension == 1)
-						changeGroupType(TreeItemType.REFERENCE_POINT_1D_LEAF);
-					else if (dimension == 2)
-						changeGroupType(TreeItemType.REFERENCE_POINT_2D_LEAF);
-					else if (dimension == 3)
-						changeGroupType(TreeItemType.REFERENCE_POINT_3D_LEAF);
-					break;
-				case CHANGE_TO_STOCHASTIC_POINT_GROUP:
-					if (pointType == PointType.STOCHASTIC_POINT)
-						return;
+							if (dimension == 1)
+								changeGroupType(TreeItemType.REFERENCE_POINT_1D_LEAF);
+							else if (dimension == 2)
+								changeGroupType(TreeItemType.REFERENCE_POINT_2D_LEAF);
+							else if (dimension == 3)
+								changeGroupType(TreeItemType.REFERENCE_POINT_3D_LEAF);
+							break;
+						case CHANGE_TO_STOCHASTIC_POINT_GROUP:
+							if (pointType == PointType.STOCHASTIC_POINT)
+								return;
 
-					if (dimension == 1)
-						changeGroupType(TreeItemType.STOCHASTIC_POINT_1D_LEAF);
-					else if (dimension == 2)
-						changeGroupType(TreeItemType.STOCHASTIC_POINT_2D_LEAF);
-					else if (dimension == 3)
-						changeGroupType(TreeItemType.STOCHASTIC_POINT_3D_LEAF);
-					break;
-				case CHANGE_TO_DATUM_POINT_GROUP:
-					if (pointType == PointType.DATUM_POINT)
-						return;
+							if (dimension == 1)
+								changeGroupType(TreeItemType.STOCHASTIC_POINT_1D_LEAF);
+							else if (dimension == 2)
+								changeGroupType(TreeItemType.STOCHASTIC_POINT_2D_LEAF);
+							else if (dimension == 3)
+								changeGroupType(TreeItemType.STOCHASTIC_POINT_3D_LEAF);
+							break;
+						case CHANGE_TO_DATUM_POINT_GROUP:
+							if (pointType == PointType.DATUM_POINT)
+								return;
 
-					if (dimension == 1)
-						changeGroupType(TreeItemType.DATUM_POINT_1D_LEAF);
-					else if (dimension == 2)
-						changeGroupType(TreeItemType.DATUM_POINT_2D_LEAF);
-					else if (dimension == 3)
-						changeGroupType(TreeItemType.DATUM_POINT_3D_LEAF);
-					break;
-				case CHANGE_TO_NEW_POINT_GROUP:
-					if (pointType == PointType.NEW_POINT)
-						return;
+							if (dimension == 1)
+								changeGroupType(TreeItemType.DATUM_POINT_1D_LEAF);
+							else if (dimension == 2)
+								changeGroupType(TreeItemType.DATUM_POINT_2D_LEAF);
+							else if (dimension == 3)
+								changeGroupType(TreeItemType.DATUM_POINT_3D_LEAF);
+							break;
+						case CHANGE_TO_NEW_POINT_GROUP:
+							if (pointType == PointType.NEW_POINT)
+								return;
 
-					if (dimension == 1)
-						changeGroupType(TreeItemType.NEW_POINT_1D_LEAF);
-					else if (dimension == 2)
-						changeGroupType(TreeItemType.NEW_POINT_2D_LEAF);
-					else if (dimension == 3)
-						changeGroupType(TreeItemType.NEW_POINT_3D_LEAF);
-					break;
+							if (dimension == 1)
+								changeGroupType(TreeItemType.NEW_POINT_1D_LEAF);
+							else if (dimension == 2)
+								changeGroupType(TreeItemType.NEW_POINT_2D_LEAF);
+							else if (dimension == 3)
+								changeGroupType(TreeItemType.NEW_POINT_3D_LEAF);
+							break;
 
-				default:
-					System.err.println(EditableMenuCheckBoxTreeCell.class.getSimpleName() + " : Error, unsupported context menu item type " + menuItemType);
-					break;
-				}
+						default:
+							System.err.println(EditableMenuCheckBoxTreeCell.class.getSimpleName() + " : Error, unsupported context menu item type " + menuItemType);
+							break;
+						}
+					}
+				});
 			}
 		}
 	}
@@ -526,32 +533,38 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 					&& newValue.getUserData() instanceof ContextMenuType
 					&& getTreeItem() != null && getTreeItem().getValue() != null 
 					&& getTreeItem().getValue() instanceof VerticalDeflectionTreeItemValue) {// newValue instanceof RadioMenuItem &&
-				ContextMenuType menuItemType = (ContextMenuType)newValue.getUserData();
-				VerticalDeflectionTreeItemValue itemValue = (VerticalDeflectionTreeItemValue)getTreeItem().getValue();
+				final ContextMenuType menuItemType = (ContextMenuType)newValue.getUserData();
+				final VerticalDeflectionTreeItemValue itemValue = (VerticalDeflectionTreeItemValue)getTreeItem().getValue();
+				final VerticalDeflectionType verticalDeflectionType = TreeItemType.getVerticalDeflectionTypeByTreeItemType(itemValue.getItemType());
+				
+				contextMenu.hide();
+				
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {	
+						switch(menuItemType) {
+						case CHANGE_TO_REFERENCE_DEFLECTION_GROUP:
+							if (verticalDeflectionType == VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION)
+								return;
+							changeGroupType(TreeItemType.REFERENCE_VERTICAL_DEFLECTION_LEAF);
+							break;
+						case CHANGE_TO_STOCHASTIC_DEFLECTION_GROUP:
+							if (verticalDeflectionType == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION)
+								return;
+							changeGroupType(TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_LEAF);
+							break;
+						case CHANGE_TO_UNKNOWN_DEFLECTION_GROUP:
+							if (verticalDeflectionType == VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION)
+								return;
+							changeGroupType(TreeItemType.UNKNOWN_VERTICAL_DEFLECTION_LEAF);
+							break;
 
-				VerticalDeflectionType verticalDeflectionType = TreeItemType.getVerticalDeflectionTypeByTreeItemType(itemValue.getItemType());
-
-				switch(menuItemType) {
-				case CHANGE_TO_REFERENCE_DEFLECTION_GROUP:
-					if (verticalDeflectionType == VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION)
-						return;
-					changeGroupType(TreeItemType.REFERENCE_VERTICAL_DEFLECTION_LEAF);
-					break;
-				case CHANGE_TO_STOCHASTIC_DEFLECTION_GROUP:
-					if (verticalDeflectionType == VerticalDeflectionType.STOCHASTIC_VERTICAL_DEFLECTION)
-						return;
-					changeGroupType(TreeItemType.STOCHASTIC_VERTICAL_DEFLECTION_LEAF);
-					break;
-				case CHANGE_TO_UNKNOWN_DEFLECTION_GROUP:
-					if (verticalDeflectionType == VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION)
-						return;
-					changeGroupType(TreeItemType.UNKNOWN_VERTICAL_DEFLECTION_LEAF);
-					break;
-
-				default:
-					System.err.println(EditableMenuCheckBoxTreeCell.class.getSimpleName() + " : Error, unsupported context menu item type " + menuItemType);
-					break;
-				}
+						default:
+							System.err.println(EditableMenuCheckBoxTreeCell.class.getSimpleName() + " : Error, unsupported context menu item type " + menuItemType);
+							break;
+						}
+					}
+				});
 			}
 		}
 	}
@@ -565,34 +578,40 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 			if (!isIgnoreEvent() && event.getSource() instanceof MenuItem 
 					&& ((MenuItem)event.getSource()).getUserData() instanceof ContextMenuType
 					&& getTreeItem() != null && getTreeItem().getValue() != null) {
-				ContextMenuType contextMenuType = (ContextMenuType)((MenuItem)event.getSource()).getUserData();
-				TreeItem<TreeItemValue> selectedItem = getTreeItem();
-				TreeItemValue itemValue = selectedItem.getValue();
+				final ContextMenuType contextMenuType = (ContextMenuType)((MenuItem)event.getSource()).getUserData();
+				final TreeItem<TreeItemValue> selectedItem = getTreeItem();
+				final TreeItemValue itemValue = selectedItem.getValue();
+				
+				contextMenu.hide();
 
-				switch(contextMenuType) {
-				case ADD:
-					addNewEmptyGroup(itemValue.getItemType());
-					break;
-				case REMOVE:
-					removeSelectedGroups();
-					break;
-				case EXPORT:
-					exportTableData(itemValue);
-					break;
-				case SEARCH_AND_REPLACE:
-					searchAndReplace(selectedItem);
-					break;
-				case ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT:
-					adaptInstrumentAndReflectorHeights(selectedItem);
-					break;
-				case MERGE:
-					mergeSelectedGroups(selectedItem);
-					break;
-				default:
-					System.out.println(this.getClass().getSimpleName() + " : " + event);
-					break;
-
-				}
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {	
+						switch(contextMenuType) {
+						case ADD:
+							addNewEmptyGroup(itemValue.getItemType());
+							break;
+						case REMOVE:
+							removeSelectedGroups();
+							break;
+						case EXPORT:
+							exportTableData(itemValue);
+							break;
+						case SEARCH_AND_REPLACE:
+							searchAndReplace(selectedItem);
+							break;
+						case ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT:
+							adaptInstrumentAndReflectorHeights(selectedItem);
+							break;
+						case MERGE:
+							mergeSelectedGroups(selectedItem);
+							break;
+						default:
+							System.out.println(this.getClass().getSimpleName() + " : " + event);
+							break;
+						}
+					}
+				});
 			}
 		}
 	}			
@@ -963,9 +982,10 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 	}
 
 	private void changeGroupType(TreeItemType newItemType) {
-		List<TreeItem<TreeItemValue>> selectedItems = this.getTreeView().getSelectionModel().getSelectedItems();
+		final List<TreeItem<TreeItemValue>> selectedItems = new ArrayList<TreeItem<TreeItemValue>>(this.getTreeView().getSelectionModel().getSelectedItems());
+		this.getTreeView().getSelectionModel().clearSelection();
 		if (newItemType != null && selectedItems != null && !selectedItems.isEmpty())
-			UITreeBuilder.getInstance().moveItems(newItemType, new ArrayList<TreeItem<TreeItemValue>>(selectedItems));
+			UITreeBuilder.getInstance().moveItems(newItemType, selectedItems);
 	}
 
 	private void addNewEmptyGroup(TreeItemType itemType) {
@@ -984,7 +1004,8 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 	}
 	
 	private void mergeSelectedGroups(TreeItem<TreeItemValue> selectedItem) {
-		List<TreeItem<TreeItemValue>> selectedItems = this.getTreeView().getSelectionModel().getSelectedItems();
+		final List<TreeItem<TreeItemValue>> selectedItems = new ArrayList<TreeItem<TreeItemValue>>(this.getTreeView().getSelectionModel().getSelectedItems());
+		this.getTreeView().getSelectionModel().clearSelection();
 		if (selectedItem != null && selectedItem.getValue() != null && selectedItems != null && selectedItems.size() > 1) {
 			TreeItemValue selectedItemValue = selectedItem.getValue();
 			List<TreeItem<TreeItemValue>> removeItems = new ArrayList<TreeItem<TreeItemValue>>(selectedItems.size());
@@ -1034,7 +1055,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 	}
 	
 	private void adaptInstrumentAndReflectorHeights(TreeItem<TreeItemValue> selectedItem) {
-		List<TreeItem<TreeItemValue>> selectedItems = this.getTreeView().getSelectionModel().getSelectedItems();
+		final List<TreeItem<TreeItemValue>> selectedItems = new ArrayList<TreeItem<TreeItemValue>>(this.getTreeView().getSelectionModel().getSelectedItems());
 
 		TreeItemValue selectedTreeItemValues[] = new TreeItemValue[selectedItems != null ? selectedItems.size() : 0];
 		for (int i=0; i<selectedItems.size(); i++) {
@@ -1047,7 +1068,7 @@ public class EditableMenuCheckBoxTreeCell extends CheckBoxTreeCell<TreeItemValue
 	}
 	
 	private void searchAndReplace(TreeItem<TreeItemValue> selectedItem) {
-		List<TreeItem<TreeItemValue>> selectedItems = this.getTreeView().getSelectionModel().getSelectedItems();
+		final List<TreeItem<TreeItemValue>> selectedItems = new ArrayList<TreeItem<TreeItemValue>>(this.getTreeView().getSelectionModel().getSelectedItems());
 
 		TreeItemValue selectedTreeItemValues[] = new TreeItemValue[selectedItems != null ? selectedItems.size() : 0];
 		for (int i=0; i<selectedItems.size(); i++) {
