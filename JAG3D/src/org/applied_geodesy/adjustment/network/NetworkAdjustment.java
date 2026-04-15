@@ -4298,11 +4298,9 @@ public class NetworkAdjustment implements Runnable {
 					"ID " + point.getName() + " existiert bereits!");
 			return false;
 		}
-		else if (dim > point.getObservations().size()) {
-			System.err.println(this.getClass() + "\nFehler, Punkt "+point.getName()+" besitzt nicht genuegend " +
-					"Beobachtungen um bestimmt zu werden! Punkt wird ignoriert. Dim = "+ dim +", Obs = " + point.getObservations().size() );
+		else if (dim > point.getObservations().size()) 
 			return false;
-		}
+
 		this.addUnknownParameter( point );
 		this.allPoints.put(point.getName(), point);
 		
@@ -4327,12 +4325,9 @@ public class NetworkAdjustment implements Runnable {
 		}
 		// Verhindern, dass Gruppenparameter von leere Gruppen in die 
 		// AGL einbezogen werden (bspw. leerer Richtungssatz --> eine Orientierung)
-		else if (additionalUnknownParameter.getObservations().size() == 0){
-			System.err.println(this.getClass() + "\nFehler, Parameter hat keine " +
-					"Verknuepfung zu Beobachtungen und kann somit\nnicht bestimmt werden! " +
-					"Parameter wird ignoriert.\n"+additionalUnknownParameter);
+		else if (additionalUnknownParameter.getObservations().size() == 0)
 			return false;
-		}
+
 		this.addUnknownParameter(additionalUnknownParameter);
 		return true;
 	}

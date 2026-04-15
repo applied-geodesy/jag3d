@@ -28,8 +28,8 @@ import org.applied_geodesy.version.VersionType;
 public class Version {
 	private final static Map<VersionType, Integer> versions = Map.of(
 			VersionType.ADJUSTMENT_CORE,   20250621,
-			VersionType.DATABASE,          20250729,
-			VersionType.USER_INTERFACE,    20260320
+			VersionType.DATABASE,          20260414,
+			VersionType.USER_INTERFACE,    20260414
 	);
 	
 	private Version() {}

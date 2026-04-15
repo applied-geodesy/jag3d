@@ -226,7 +226,7 @@ public class SQLAdjustmentManager {
 			String name = point.getName();
 			int dimension = point.getDimension();
 			VerticalDeflectionType type = null;
-			if (dimension != 2) { // dimension == 3
+			if (dimension != 2) {
 				if (this.completePointsWithReferenceDeflections.containsKey(name))
 					type = VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION;
 				else if (this.completePointsWithStochasticDeflections.containsKey(name))
@@ -234,7 +234,9 @@ public class SQLAdjustmentManager {
 				else if (this.completePointsWithUnknownDeflections.containsKey(name))
 					type = VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION;
 			}
-			this.networkAdjustment.addNewPoint( point, type );
+			if (!this.networkAdjustment.addNewPoint( point, type )) 
+				this.removePoint(point);
+				
 		}
 
 		// Nutze Deformationsvektoren zur Bildung von relativen Konfidenzbereichen (nicht nur bei freier AGL/Defo.-Analyse)
@@ -250,7 +252,7 @@ public class SQLAdjustmentManager {
 				String name = point.getName();
 				int dimension = point.getDimension();
 				VerticalDeflectionType type = null;
-				if (dimension != 2) { // dimension == 3
+				if (dimension != 2) {
 					if (this.completePointsWithReferenceDeflections.containsKey(name))
 						type = VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION;
 					else if (this.completePointsWithStochasticDeflections.containsKey(name))
@@ -258,9 +260,9 @@ public class SQLAdjustmentManager {
 					else if (this.completePointsWithUnknownDeflections.containsKey(name))
 						type = VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION;
 				}
-				this.networkAdjustment.addDatumPoint( point, type );
+				if (!this.networkAdjustment.addDatumPoint( point, type ))
+					this.removePoint(point);
 			}
-			
 		}
 		else {
 			for ( Point point : referencePoints.values() ) {
@@ -275,14 +277,15 @@ public class SQLAdjustmentManager {
 					else if (this.completePointsWithUnknownDeflections.containsKey(name))
 						type = VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION;
 				}
-				this.networkAdjustment.addReferencePoint( point, type );
+				if (!this.networkAdjustment.addReferencePoint( point, type ))
+					this.removePoint(point);
 			}
 			
 			for ( Point point : stochasticPoints.values() ) {
 				String name = point.getName();
 				int dimension = point.getDimension();
 				VerticalDeflectionType type = null;
-				if (dimension != 2) { // dimension == 3
+				if (dimension != 2) {
 					if (this.completePointsWithReferenceDeflections.containsKey(name))
 						type = VerticalDeflectionType.REFERENCE_VERTICAL_DEFLECTION;
 					else if (this.completePointsWithStochasticDeflections.containsKey(name))
@@ -290,7 +293,8 @@ public class SQLAdjustmentManager {
 					else if (this.completePointsWithUnknownDeflections.containsKey(name))
 						type = VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION;
 				}
-				this.networkAdjustment.addStochasticPoint( point, type );
+				if (!this.networkAdjustment.addStochasticPoint( point, type ))
+					this.removePoint(point);
 			}
 		}
 		// Auszugleichende Zusatzparameter
@@ -298,6 +302,15 @@ public class SQLAdjustmentManager {
 			this.networkAdjustment.addAdditionalUnknownParameter( parameter );
 
 		return networkAdjustment;
+	}
+	
+	private void removePoint(Point point) {
+		this.completePoints.remove(point.getName());
+		this.completeNewPoints.remove(point.getName());
+		
+		this.completePointsWithReferenceDeflections.remove(point.getName());
+		this.completePointsWithStochasticDeflections.remove(point.getName());
+		this.completePointsWithUnknownDeflections.remove(point.getName());
 	}
 	
 	public void clear() {

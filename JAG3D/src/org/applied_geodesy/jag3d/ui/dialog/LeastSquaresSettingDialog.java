@@ -77,13 +77,14 @@ import javafx.util.StringConverter;
 public class LeastSquaresSettingDialog implements FormatterChangedListener {
 
 	public class LeastSquaresSettings {
-		private ObjectProperty<Integer> iteration             = new SimpleObjectProperty<Integer>(DefaultValue.getNumberOfIterations());
-		private ObjectProperty<Integer> principalComponents   = new SimpleObjectProperty<Integer>(DefaultValue.getNumberOfPrincipalComponents());
-		private ObjectProperty<Double> robustEstimationLimit  = new SimpleObjectProperty<Double>(DefaultValue.getRobustEstimationLimit());
-		private BooleanProperty orientation                   = new SimpleBooleanProperty(Boolean.TRUE);
-		private BooleanProperty congruenceAnalysis            = new SimpleBooleanProperty(Boolean.FALSE);
-		private BooleanProperty applyVarianceOfUnitWeight     = new SimpleBooleanProperty(DefaultValue.applyVarianceOfUnitWeight());
-		private ObjectProperty<EstimationType> estimationType = new SimpleObjectProperty<EstimationType>(DefaultValue.getEstimationType());
+		private ObjectProperty<Integer> iteration              = new SimpleObjectProperty<Integer>(DefaultValue.getNumberOfIterations());
+		private ObjectProperty<Integer> principalComponents    = new SimpleObjectProperty<Integer>(DefaultValue.getNumberOfPrincipalComponents());
+		private ObjectProperty<Double> robustEstimationLimit   = new SimpleObjectProperty<Double>(DefaultValue.getRobustEstimationLimit());
+		private BooleanProperty orientation                    = new SimpleBooleanProperty(Boolean.TRUE);
+		private BooleanProperty congruenceAnalysis             = new SimpleBooleanProperty(Boolean.FALSE);
+		private BooleanProperty applyVarianceOfUnitWeight      = new SimpleBooleanProperty(DefaultValue.applyVarianceOfUnitWeight());
+		private BooleanProperty excludeUnderdeterminedPoints   = new SimpleBooleanProperty(DefaultValue.excludeUnderdeterminedPoints());
+		private ObjectProperty<EstimationType> estimationType  = new SimpleObjectProperty<EstimationType>(DefaultValue.getEstimationType());
 		private ObjectProperty<Double> scalingParameterAlphaUT = new SimpleObjectProperty<Double>(UnscentedTransformationParameter.getAlpha());
 		private ObjectProperty<Double> dampingParameterBetaUT  = new SimpleObjectProperty<Double>(UnscentedTransformationParameter.getBeta());
 		private ObjectProperty<Double> weightZero = new SimpleObjectProperty<Double>(UnscentedTransformationParameter.getWeightZero());
@@ -144,6 +145,18 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		
 		public void setOrientation(final boolean orientation) {
 			this.orientationProperty().set(orientation);
+		}
+
+		public BooleanProperty excludeUnderdeterminedPointsProperty() {
+			return this.excludeUnderdeterminedPoints;
+		}
+
+		public boolean isExcludeUnderdeterminedPoints() {
+			return this.excludeUnderdeterminedPointsProperty().get();
+		}
+		
+		public void setExcludeUnderdeterminedPoints(final boolean excludeUnderdeterminedPoints) {
+			this.excludeUnderdeterminedPointsProperty().set(excludeUnderdeterminedPoints);
 		}
 		
 		public BooleanProperty congruenceAnalysisProperty() {
@@ -239,7 +252,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 	private Spinner<Integer> principalComponentSpinner;
 	private DoubleSpinner robustSpinner, confidenceLevelSpinner;
 	private DoubleTextField alphaTextField, betaTextField, weight0TextField;
-	private CheckBox orientationApproximationCheckBox, congruenceAnalysisCheckBox, applyVarianceOfUnitWeightCheckBox;
+	private CheckBox orientationApproximationCheckBox, congruenceAnalysisCheckBox, applyVarianceOfUnitWeightCheckBox, excludeUnderdeterminedPointsCheckBox;
 	private Label confidenceLevelLabel;
 	private LeastSquaresSettingDialog() {}
 
@@ -434,9 +447,15 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 				i18n.getString("LeastSquaresSettingDialog.applyvarianceofunitweight.tooltip", "If checked, the estimated variance of the unit weight will be applied to scale the variance-covariance matrix")
 		);
 		
+		this.excludeUnderdeterminedPointsCheckBox = this.createCheckBox(
+				i18n.getString("LeastSquaresSettingDialog.underdeterminedpoints.label", "Underdetermined points exclusion"),
+				i18n.getString("LeastSquaresSettingDialog.underdeterminedpoints.tooltip", "If checked, underdetermined points will be automatically excluded from adjustment procedure")
+		);
+		
 		this.orientationApproximationCheckBox.selectedProperty().bindBidirectional(this.settings.orientationProperty());
 		this.congruenceAnalysisCheckBox.selectedProperty().bindBidirectional(this.settings.congruenceAnalysisProperty());
 		this.applyVarianceOfUnitWeightCheckBox.selectedProperty().bindBidirectional(this.settings.applyVarianceOfUnitWeightProperty());
+		this.excludeUnderdeterminedPointsCheckBox.selectedProperty().bindBidirectional(this.settings.excludeUnderdeterminedPointsProperty());
 		this.iterationSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.iterationProperty());
 		this.principalComponentSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.principalComponentsProperty());
 		this.robustSpinner.getValueFactory().valueProperty().bindBidirectional(this.settings.robustEstimationLimitProperty());
@@ -458,6 +477,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		
 		GridPane.setHgrow(this.orientationApproximationCheckBox, Priority.ALWAYS);
 		GridPane.setHgrow(this.applyVarianceOfUnitWeightCheckBox, Priority.ALWAYS);
+		GridPane.setHgrow(this.excludeUnderdeterminedPointsCheckBox, Priority.ALWAYS);
 		GridPane.setHgrow(this.congruenceAnalysisCheckBox, Priority.ALWAYS);
 		
 		GridPane.setHgrow(this.robustSpinner, Priority.ALWAYS);
@@ -473,9 +493,10 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		
 		GridPane.setMargin(this.applyVarianceOfUnitWeightCheckBox, insetsTop);
 		GridPane.setMargin(this.orientationApproximationCheckBox, insetsCenter);
+		GridPane.setMargin(this.excludeUnderdeterminedPointsCheckBox, insetsCenter);
 		
 		GridPane.setMargin(this.congruenceAnalysisCheckBox, insetsTop);
-
+		
 		GridPane.setMargin(this.confidenceLevelLabel, insetsLeft);
 		GridPane.setMargin(this.confidenceLevelSpinner, insetsRight);
 		
@@ -489,8 +510,9 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		GridPane.setMargin(this.principalComponentSpinner, insetsRight);
 		
 		int row = 0;
-		gridPane.add(this.applyVarianceOfUnitWeightCheckBox, 0, ++row, 2, 1);
-		gridPane.add(this.orientationApproximationCheckBox,  0, ++row, 2, 1);
+		gridPane.add(this.applyVarianceOfUnitWeightCheckBox,    0, ++row, 2, 1);
+		gridPane.add(this.orientationApproximationCheckBox,     0, ++row, 2, 1);
+		gridPane.add(this.excludeUnderdeterminedPointsCheckBox, 0, ++row, 2, 1);
 
 		gridPane.add(this.confidenceLevelLabel,   0, ++row);
 		gridPane.add(this.confidenceLevelSpinner, 1,   row);
@@ -503,7 +525,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		
 		gridPane.add(principalComponentLabel,         0, ++row);
 		gridPane.add(this.principalComponentSpinner,  1,   row);
-
+		
 		gridPane.add(this.congruenceAnalysisCheckBox, 0, ++row, 2, 1);
 
 		return gridPane;

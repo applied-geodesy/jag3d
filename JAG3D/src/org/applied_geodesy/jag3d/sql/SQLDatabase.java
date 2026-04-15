@@ -324,6 +324,8 @@ class SQLDatabase {
 		sqls.put(20250727.0006, "ALTER TABLE \"CongruenceAnalysisPointPairAposteriori\" ALTER COLUMN \"confidence_minor_axis_2d\" RENAME TO \"confidence_ellipse_minor_axis\";\r\n");
 		sqls.put(20250727.0007, "ALTER TABLE \"CongruenceAnalysisPointPairAposteriori\" ALTER COLUMN \"confidence_alpha_2d\"      RENAME TO \"confidence_ellipse_angle\";\r\n");
 		
+		// add auto exclusion of underdetermined points
+		sqls.put(20250729.0001, "ALTER TABLE \"AdjustmentDefinition\" ADD \"exclude_underdetermined_points\" BOOLEAN DEFAULT " + DefaultValue.excludeUnderdeterminedPoints() + " NOT NULL\r\n");
 		
 		return sqls;
 	}
