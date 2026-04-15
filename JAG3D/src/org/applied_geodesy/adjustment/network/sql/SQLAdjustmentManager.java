@@ -293,7 +293,7 @@ public class SQLAdjustmentManager {
 					else if (this.completePointsWithUnknownDeflections.containsKey(name))
 						type = VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION;
 				}
-				if (this.networkAdjustment.addStochasticPoint( point, type ))
+				if (!this.networkAdjustment.addStochasticPoint( point, type ))
 					this.removePoint(point);
 			}
 		}
