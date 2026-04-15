@@ -3712,14 +3712,29 @@ public class SQLManager {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
 		
-		String sqlCountPointGroups  = "SELECT COUNT(\"PointApriori\".\"id\") AS \"number_of_points\", \"PointGroup\".\"type\" FROM \"PointApriori\" JOIN \"PointGroup\" ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" WHERE \"PointApriori\".\"enable\" = TRUE AND \"PointGroup\".\"enable\" = TRUE AND \"PointGroup\".\"type\" IN (?,?,?) GROUP BY \"PointGroup\".\"type\" ORDER BY  \"PointGroup\".\"type\" ASC";
+		String sqlAutoExcludeUnderdeterminedPoints = "SELECT "
+				+ "\"exclude_underdetermined_points\" "
+				+ "FROM \"AdjustmentDefinition\" "
+				+ "WHERE \"id\" = 1 LIMIT 1";
+		
+		String sqlCountPointGroups  = "SELECT "
+				+ "COUNT(\"PointApriori\".\"id\") AS \"number_of_points\", "
+				+ "\"PointGroup\".\"type\" "
+				+ "FROM \"PointApriori\" "
+				+ "JOIN \"PointGroup\" "
+				+ "ON \"PointApriori\".\"group_id\" = \"PointGroup\".\"id\" "
+				+ "WHERE \"PointApriori\".\"enable\" = TRUE "
+				+ "AND \"PointGroup\".\"enable\" = TRUE "
+				+ "AND \"PointGroup\".\"type\" IN (?,?,?) "
+				+ "GROUP BY \"PointGroup\".\"type\" "
+				+ "ORDER BY  \"PointGroup\".\"type\" ASC";
 		
 		String sqlCountObservations = "SELECT "
 				// Tmp Tabelle aufbauen
 				+ "\"UnionTable\".\"name\", SUM(\"UnionTable\".\"number_of_observations\") AS \"number_of_observations\", \"UnionTable\".\"dimension\" FROM ( "
 
 				// Alle Punkte abfragen, die bestimmt werden muessen
-				+ "SELECT"
+				+ "SELECT "
 				
 				+ "\"name\", 0 AS \"number_of_observations\", "
 				+ "CAST(CASE WHEN \"VerticalDeflectionGroup\".\"type\" = ? THEN \"PointGroup\".\"dimension\" + 2 ELSE \"PointGroup\".\"dimension\" END AS INTEGER) AS \"dimension\" "
@@ -3864,52 +3879,60 @@ public class SQLManager {
 				numberOfReferencePoints += cnt;
 		}
 
-		if (numberOfReferencePoints > 0 && numberOfDatumPoints > 0) {
+		if (numberOfReferencePoints > 0 && numberOfDatumPoints > 0)
 			throw new PointTypeMismatchException("Error, the project contains reference points as well as datum points.");
-		}
-
-		// Gibt es Punkte, die weniger Beobachtungen haben als deren 
-		// Dimension erfordert? Pruefe nur Neu- und Datumspunkte.
-
-		stmt = this.dataBase.getPreparedStatement(sqlCountObservations);
-		int idx = 1;
-		// Alle Punkte abfragen, die bestimmt werden muessen
-		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
-		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
-		stmt.setInt(idx++, PointType.NEW_POINT.getId());
-
-		// Alle Standpunkte abfragen und terr. Beobachtungen zaehlen
-		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
-		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
-		stmt.setInt(idx++, PointType.NEW_POINT.getId());
-
-		// Alle Zielpunkte abfragen und terr. Beobachtungen zaehlen
-		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
-		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
-		stmt.setInt(idx++, PointType.NEW_POINT.getId());
-
-		// Alle Standpunkte abfragen und GNSS-Beobachtungen zaehlen
-		stmt.setInt(idx++, ObservationType.GNSS3D.getId());
-		stmt.setInt(idx++, ObservationType.GNSS2D.getId());
-		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
-		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
-		stmt.setInt(idx++, PointType.NEW_POINT.getId());
-
-		// Alle Zielpunkte abfragen und GNSS-Beobachtungen zaehlen
-		stmt.setInt(idx++, ObservationType.GNSS3D.getId());
-		stmt.setInt(idx++, ObservationType.GNSS2D.getId());
-		stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
-		stmt.setInt(idx++, PointType.DATUM_POINT.getId());
-		stmt.setInt(idx++, PointType.NEW_POINT.getId());
-
+		
+		// Sollen unterbestimmte Punkte automatisch ignoriert werden
+		boolean autoExclusionOfUnderdeterminedPoints = Boolean.FALSE;
+		stmt = this.dataBase.getPreparedStatement(sqlAutoExcludeUnderdeterminedPoints);
 		rs = stmt.executeQuery();
+		if (rs.next())
+			autoExclusionOfUnderdeterminedPoints = rs.getBoolean("exclude_underdetermined_points");
 
-		if (rs.next()) {
-			String pointName = rs.getString("name");
-			int dimension    = rs.getInt("dimension");
-			int numberOfObservations = rs.getInt("number_of_observations");
+		if (!autoExclusionOfUnderdeterminedPoints) {
+			// Gibt es Punkte, die weniger Beobachtungen haben als deren 
+			// Dimension erfordert? Pruefe nur Neu- und Datumspunkte.
 
-			throw new UnderDeterminedPointException("Error, the point " + pointName + " of dimension " + dimension + " has not enough observations to be estimable.", pointName, dimension, numberOfObservations);
+			stmt = this.dataBase.getPreparedStatement(sqlCountObservations);
+			int idx = 1;
+			// Alle Punkte abfragen, die bestimmt werden muessen
+			stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
+			stmt.setInt(idx++, PointType.DATUM_POINT.getId());
+			stmt.setInt(idx++, PointType.NEW_POINT.getId());
+
+			// Alle Standpunkte abfragen und terr. Beobachtungen zaehlen
+			stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
+			stmt.setInt(idx++, PointType.DATUM_POINT.getId());
+			stmt.setInt(idx++, PointType.NEW_POINT.getId());
+
+			// Alle Zielpunkte abfragen und terr. Beobachtungen zaehlen
+			stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
+			stmt.setInt(idx++, PointType.DATUM_POINT.getId());
+			stmt.setInt(idx++, PointType.NEW_POINT.getId());
+
+			// Alle Standpunkte abfragen und GNSS-Beobachtungen zaehlen
+			stmt.setInt(idx++, ObservationType.GNSS3D.getId());
+			stmt.setInt(idx++, ObservationType.GNSS2D.getId());
+			stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
+			stmt.setInt(idx++, PointType.DATUM_POINT.getId());
+			stmt.setInt(idx++, PointType.NEW_POINT.getId());
+
+			// Alle Zielpunkte abfragen und GNSS-Beobachtungen zaehlen
+			stmt.setInt(idx++, ObservationType.GNSS3D.getId());
+			stmt.setInt(idx++, ObservationType.GNSS2D.getId());
+			stmt.setInt(idx++, VerticalDeflectionType.UNKNOWN_VERTICAL_DEFLECTION.getId());
+			stmt.setInt(idx++, PointType.DATUM_POINT.getId());
+			stmt.setInt(idx++, PointType.NEW_POINT.getId());
+
+			rs = stmt.executeQuery();
+
+			if (rs.next()) {
+				String pointName = rs.getString("name");
+				int dimension    = rs.getInt("dimension");
+				int numberOfObservations = rs.getInt("number_of_observations");
+
+				throw new UnderDeterminedPointException("Error, the point " + pointName + " of dimension " + dimension + " has not enough observations to be estimable.", pointName, dimension, numberOfObservations);
+			}
 		}
 	}
 	
@@ -4368,7 +4391,7 @@ public class SQLManager {
 				+ "\"type\", \"number_of_iterations\", \"robust_estimation_limit\", "
 				+ "\"number_of_principal_components\", \"apply_variance_of_unit_weight\", "
 				+ "\"estimate_direction_set_orientation_approximation\", "
-				+ "\"congruence_analysis\", \"confidence_level\", "
+				+ "\"congruence_analysis\", \"exclude_underdetermined_points\", \"confidence_level\", "
 				+ "\"scaling\", \"damping\", \"weight_zero\" "
 				+ "FROM \"AdjustmentDefinition\" "
 				+ "JOIN \"UnscentedTransformation\" "
@@ -4388,6 +4411,7 @@ public class SQLManager {
 				settings.setApplyVarianceOfUnitWeight(rs.getBoolean("apply_variance_of_unit_weight"));
 				settings.setOrientation(rs.getBoolean("estimate_direction_set_orientation_approximation"));
 				settings.setCongruenceAnalysis(rs.getBoolean("congruence_analysis"));
+				settings.setExcludeUnderdeterminedPoints(rs.getBoolean("exclude_underdetermined_points"));
 				settings.setConfidenceLevel(rs.getDouble("confidence_level"));
 				
 				settings.setScalingParameterAlphaUT(rs.getDouble("scaling"));
@@ -4402,8 +4426,8 @@ public class SQLManager {
 			return;
 	
 		String sql = "MERGE INTO \"AdjustmentDefinition\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS DOUBLE))"
-				+ ") AS \"vals\" (\"id\", \"type\", \"number_of_iterations\", \"robust_estimation_limit\", \"number_of_principal_components\", \"apply_variance_of_unit_weight\", \"estimate_direction_set_orientation_approximation\", \"congruence_analysis\", \"confidence_level\") ON \"AdjustmentDefinition\".\"id\" = \"vals\".\"id\" AND \"AdjustmentDefinition\".\"id\" = 1 "
+				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS INT), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN), CAST(? AS DOUBLE))"
+				+ ") AS \"vals\" (\"id\", \"type\", \"number_of_iterations\", \"robust_estimation_limit\", \"number_of_principal_components\", \"apply_variance_of_unit_weight\", \"estimate_direction_set_orientation_approximation\", \"congruence_analysis\", \"exclude_underdetermined_points\", \"confidence_level\") ON \"AdjustmentDefinition\".\"id\" = \"vals\".\"id\" AND \"AdjustmentDefinition\".\"id\" = 1 "
 				+ "WHEN MATCHED THEN UPDATE SET "
 				+ "\"AdjustmentDefinition\".\"type\"                            = \"vals\".\"type\", "
 				+ "\"AdjustmentDefinition\".\"number_of_iterations\"            = \"vals\".\"number_of_iterations\", "
@@ -4412,6 +4436,7 @@ public class SQLManager {
 				+ "\"AdjustmentDefinition\".\"apply_variance_of_unit_weight\"   = \"vals\".\"apply_variance_of_unit_weight\", "
 				+ "\"AdjustmentDefinition\".\"estimate_direction_set_orientation_approximation\" = \"vals\".\"estimate_direction_set_orientation_approximation\", "
 				+ "\"AdjustmentDefinition\".\"congruence_analysis\"             = \"vals\".\"congruence_analysis\", "
+				+ "\"AdjustmentDefinition\".\"exclude_underdetermined_points\"  = \"vals\".\"exclude_underdetermined_points\", "
 				+ "\"AdjustmentDefinition\".\"confidence_level\"                = \"vals\".\"confidence_level\" "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"id\", "
@@ -4422,6 +4447,7 @@ public class SQLManager {
 				+ "\"vals\".\"apply_variance_of_unit_weight\", "
 				+ "\"vals\".\"estimate_direction_set_orientation_approximation\", "
 				+ "\"vals\".\"congruence_analysis\", "
+				+ "\"vals\".\"exclude_underdetermined_points\", "
 				+ "\"vals\".\"confidence_level\" ";
 		
 		int idx = 1;
@@ -4436,6 +4462,7 @@ public class SQLManager {
 		stmt.setBoolean(idx++,  settings.isApplyVarianceOfUnitWeight());
 		stmt.setBoolean(idx++,  settings.isOrientation());
 		stmt.setBoolean(idx++,  settings.isCongruenceAnalysis());
+		stmt.setBoolean(idx++,  settings.isExcludeUnderdeterminedPoints());
 		stmt.setDouble(idx++,   settings.getConfidenceLevel());
 
 		stmt.execute();

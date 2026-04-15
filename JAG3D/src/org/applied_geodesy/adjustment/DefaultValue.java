@@ -28,14 +28,14 @@ import java.util.Properties;
 import org.applied_geodesy.adjustment.statistic.DefaultTestStatisticValue;
 
 public class DefaultValue {
-	private final static int MAXIMUM_ITERATIONS                = 10000;
-	private final static int ITERATIONS                        = 50;
-	private final static int PRINCIPAL_COMPONENTS              = 1;
-	private final static double ROBUST_ESTIMATION_LIMIT        = 3.5;
-	private final static double CONFIDENCE_LEVEL               = 1.0 - DefaultTestStatisticValue.getProbabilityValue();
-	private final static EstimationType ESTIMATION_TYPE        = EstimationType.L2NORM;
-	private final static boolean APPLY_VARIANCE_OF_UNIT_WEIGHT = Boolean.TRUE;
-	
+	private final static int MAXIMUM_ITERATIONS                 = 10000;
+	private final static int ITERATIONS                         = 50;
+	private final static int PRINCIPAL_COMPONENTS               = 1;
+	private final static double ROBUST_ESTIMATION_LIMIT         = 3.5;
+	private final static double CONFIDENCE_LEVEL                = 1.0 - DefaultTestStatisticValue.getProbabilityValue();
+	private final static EstimationType ESTIMATION_TYPE         = EstimationType.L2NORM;
+	private final static boolean APPLY_VARIANCE_OF_UNIT_WEIGHT  = Boolean.TRUE;
+	private final static boolean EXCLUDE_UNDERDETERMINED_POINTS = Boolean.FALSE;
 
 	private final static Properties PROPERTIES = new Properties();
 	
@@ -96,6 +96,12 @@ public class DefaultValue {
 	public static boolean applyVarianceOfUnitWeight() {
 		boolean value = APPLY_VARIANCE_OF_UNIT_WEIGHT;
 		try { value = PROPERTIES.getProperty("APPLY_VARIANCE_OF_UNIT_WEIGHT") != null && PROPERTIES.getProperty("APPLY_VARIANCE_OF_UNIT_WEIGHT").equalsIgnoreCase("FALSE") ? Boolean.FALSE : Boolean.TRUE; } catch (Exception e) {}
+		return value;
+	}
+	
+	public static boolean excludeUnderdeterminedPoints() {
+		boolean value = EXCLUDE_UNDERDETERMINED_POINTS;
+		try { value = PROPERTIES.getProperty("EXCLUDE_UNDERDETERMINED_POINTS") != null && !PROPERTIES.getProperty("EXCLUDE_UNDERDETERMINED_POINTS").equalsIgnoreCase("FALSE") ? Boolean.TRUE : Boolean.FALSE; } catch (Exception e) {}
 		return value;
 	}
 	
