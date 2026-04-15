@@ -33,6 +33,14 @@ public class ObservationTreeItemValue extends TreeItemValue implements Sortable,
 	private IntegerProperty groupId = new SimpleIntegerProperty(-1);
 	private int orderId;
 	
+	private final TabType[] tabTypes = new TabType[] {
+			TabType.RAW_DATA,
+			TabType.PROPERTIES,
+			TabType.RESULT_DATA,
+			TabType.ADDITIONAL_PARAMETER,
+			TabType.VARIANCE_COMPONENT
+	};
+	
 	ObservationTreeItemValue(int groupId, TreeItemType type, String name, int orderId) throws IllegalArgumentException {
 		this(groupId, type, name, Boolean.TRUE, orderId);
 	}
@@ -72,13 +80,7 @@ public class ObservationTreeItemValue extends TreeItemValue implements Sortable,
 		
 	@Override
 	public TabType[] getTabTypes() {
-		return new TabType[] {
-				TabType.RAW_DATA,
-				TabType.PROPERTIES,
-				TabType.RESULT_DATA,
-				TabType.ADDITIONAL_PARAMETER,
-				TabType.VARIANCE_COMPONENT
-		};
+		return this.tabTypes;
 	}
 	
 	public static ParameterType[] getParameterTypes(TreeItemType itemType) {
