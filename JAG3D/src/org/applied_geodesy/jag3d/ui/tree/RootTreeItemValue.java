@@ -24,6 +24,11 @@ package org.applied_geodesy.jag3d.ui.tree;
 import org.applied_geodesy.jag3d.ui.tabpane.TabType;
 
 public class RootTreeItemValue extends TreeItemValue {
+	private final TabType[] tabTypes = new TabType[] {
+			TabType.META_DATA,
+			TabType.RESULT_DATA,
+			TabType.GRAPHIC
+	};
 	
 	RootTreeItemValue(String name) throws IllegalArgumentException {
 		super(TreeItemType.ROOT, name);
@@ -31,11 +36,6 @@ public class RootTreeItemValue extends TreeItemValue {
 
 	@Override
 	public TabType[] getTabTypes() {
-		TabType[] tabTypes = new TabType[] {
-				TabType.META_DATA,
-				TabType.RESULT_DATA,
-				TabType.GRAPHIC
-		};
-		return tabTypes;
+		return this.tabTypes;
 	}
 }

@@ -21,6 +21,10 @@
 
 package org.applied_geodesy.jag3d.ui.tabpane;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.applied_geodesy.jag3d.ui.graphic.UIGraphicPaneBuilder;
 import org.applied_geodesy.jag3d.ui.metadata.UIMetaDataPaneBuilder;
 import org.applied_geodesy.jag3d.ui.propertiespane.UICongruenceAnalysisPropertiesPaneBuilder;
@@ -72,8 +76,6 @@ public class UITabPaneBuilder {
 	private class TabSelectionChangeListener implements ChangeListener<Tab> {
 		@Override
 		public void changed(ObservableValue<? extends Tab> observable, Tab oldTab, Tab newTab) {
-			lastSelectedTab = newTab == null ? lastSelectedTab : newTab;
-
 			// remove old Content
 			if (oldTab != null)
 				oldTab.setContent(null);
@@ -102,7 +104,8 @@ public class UITabPaneBuilder {
 
 	private ObservableMap<TabType, Tab> tapMap = FXCollections.observableHashMap();
 	private TreeItemValue lastTreeItemValue = null;
-	private Tab lastSelectedTab = null;
+	private TabType[] tabPaneTypes = null;
+	private Map<TreeItemType, TabType> selectionHistoryMap = new HashMap<TreeItemType, TabType>();
 
 	public static UITabPaneBuilder getInstance() {
 		return tabPaneBuilder;
@@ -186,6 +189,8 @@ public class UITabPaneBuilder {
 
 		Node node = null;
 		TreeItemType treeItemType = this.lastTreeItemValue.getItemType();
+		this.selectionHistoryMap.put(treeItemType, tabType);
+		
 		switch(treeItemType) {
 		case ROOT:
 			if (tabType == TabType.META_DATA)
@@ -383,68 +388,46 @@ public class UITabPaneBuilder {
 		SingleSelectionModel<Tab> selectionModel = this.tabPane.getSelectionModel();
 		try {
 			//selectionModel.selectedItemProperty().removeListener(this.tabSelectionChangeListener);
-			this.lastSelectedTab = this.lastSelectedTab != null ? this.lastSelectedTab : selectionModel.getSelectedItem();
-			selectionModel.clearSelection();
-
-			this.lastTreeItemValue = treeItemValue;
 			if (this.tabPane != null && treeItemValue != null) {
-				TabType[] newTabTypes = treeItemValue.getTabTypes();
-				if (newTabTypes != null && newTabTypes.length > 0) {
-					Tab selectedTab = null;
-
-					ObservableList<Tab> oldTabList = tabPane.getTabs();
-					boolean equalTabOrderAndTypes = oldTabList.size() == newTabTypes.length;
-
-					if (equalTabOrderAndTypes) {
-						for (int idx = 0; idx < newTabTypes.length; idx++) {
-							Tab tab = oldTabList.get(idx);
-							if (tab.getUserData() == null || tab.getUserData() != newTabTypes[idx]) {
-								equalTabOrderAndTypes = false;
-								break;
-							}
-						}
-					}
-
-					if (!equalTabOrderAndTypes) {
+				this.lastTreeItemValue = treeItemValue;
+				TabType lastSelectedTabType = this.selectionHistoryMap.get(treeItemValue.getItemType());
+				TabType[] selectedItemTabTypes = treeItemValue.getTabTypes();
+				
+				if (selectedItemTabTypes != null && selectedItemTabTypes.length > 0) {
+					Tab lastSelectedTab = null;
+					
+					if (!Arrays.equals(this.tabPaneTypes, selectedItemTabTypes)) {
 						ObservableList<Tab> newTabList = FXCollections.observableArrayList();
 						
-						this.tabPane.getTabs().clear();
-						for (TabType tabType : newTabTypes) {
-							if (this.tapMap.containsKey(tabType)) {
+						this.tabPane.getTabs().clear(); // to keep order of tabs 
+						for (TabType tabType : selectedItemTabTypes) {
+							if (this.tapMap.containsKey(tabType))
 								newTabList.add(this.tapMap.get(tabType));
-								if (this.lastSelectedTab != null && this.lastSelectedTab.getUserData() == tabType) {
-									selectedTab = this.tapMap.get(tabType);
-								}
-							}
 						}
+						this.tabPaneTypes = selectedItemTabTypes;
 						this.tabPane.getTabs().setAll(newTabList);
 					}
-					else {
-						boolean validLastSelectedTabType = false;
-						for (TabType newType : newTabTypes) {
-							if (this.lastSelectedTab.getUserData() == newType) {
-								validLastSelectedTabType = true;
-								break;
-							}
-						}
-
-						selectedTab = validLastSelectedTabType ? this.lastSelectedTab : null;
+					
+					for (Tab tab : this.tabPane.getTabs()) {
+						if (tab.getUserData() == lastSelectedTabType)
+							lastSelectedTab = tab;
 					}
 
-					if (selectedTab == null && this.tabPane.getTabs().size() > 0)
-						selectedTab = this.tabPane.getTabs().get(0);
+					if (lastSelectedTab == null && this.tabPane.getTabs().size() > 0)
+						lastSelectedTab = this.tabPane.getTabs().get(0);
 
-					selectionModel.select(selectedTab);
-
-					// setContent() is called by TabSelectionChangeListener
-					//					if (selectedTab != null && selectedTab.getUserData() instanceof TabType) {
-					//						TabType tabType = (TabType)selectedTab.getUserData();
-					//						selectedTab.setContent(getNode(tabType));
-					//					}
+					if (lastSelectedTab != null) {
+						final Tab selectTab = lastSelectedTab;
+						Platform.runLater(new Runnable() {
+							@Override public void run() {
+								selectionModel.select(selectTab);
+							}
+						});
+					}
 				}
 				else {
-					tabPane.getTabs().clear();
-					//System.out.println(this.getClass().getSimpleName() + " : No known tab types " + newTabTypes + " for " + treeItemValue);
+					this.tabPane.getTabs().clear();
+					this.tabPaneTypes = null;
 				}
 			}
 		}
