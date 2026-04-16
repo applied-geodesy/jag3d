@@ -559,7 +559,8 @@ public class NetworkAdjustmentDialog {
 					}
 					throwable.printStackTrace();
 				}
-				UITreeBuilder.getInstance().getTree().getSelectionModel().select(0);
+				//UITreeBuilder.getInstance().getTree().getSelectionModel().select(0);
+				UITreeBuilder.getInstance().handleTreeSelections();
 			}
 		});
 
