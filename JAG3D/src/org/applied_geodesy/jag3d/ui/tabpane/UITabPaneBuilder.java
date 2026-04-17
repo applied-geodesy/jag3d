@@ -76,18 +76,12 @@ public class UITabPaneBuilder {
 	private class TabSelectionChangeListener implements ChangeListener<Tab> {
 		@Override
 		public void changed(ObservableValue<? extends Tab> observable, Tab oldTab, Tab newTab) {
-			// remove old Content
+			// remove old content
 			if (oldTab != null)
-				oldTab.setContent(null);
-
-			if (newTab != null && newTab.getUserData() instanceof TabType) {
-				TabType tabType = (TabType)newTab.getUserData();
-				newTab.setContent(getNode(tabType));
-				
-//				// re-draw network plot
-//				if (lastTreeItemValue != null && tabType != null && lastTreeItemValue.getItemType() == TreeItemType.ROOT && tabType == TabType.GRAPHIC)
-//					UIGraphicPaneBuilder.getInstance().getLayerManager().redraw();
-			}
+				clearTabContent(oldTab);
+			// set new content
+			if (newTab != null)
+				setTabContent(newTab);
 		}
 	}
 
@@ -420,7 +414,10 @@ public class UITabPaneBuilder {
 						final Tab selectTab = lastSelectedTab;
 						Platform.runLater(new Runnable() {
 							@Override public void run() {
-								selectionModel.select(selectTab);
+								if (selectionModel.getSelectedItem() != selectTab)
+									selectionModel.select(selectTab);
+								else
+									setTabContent(selectTab);
 							}
 						});
 					}
@@ -434,5 +431,18 @@ public class UITabPaneBuilder {
 		finally {
 			//selectionModel.selectedItemProperty().addListener(this.tabSelectionChangeListener);
 		}
+	}
+	
+	private void clearTabContent(Tab tab) {
+		if (tab != null)
+			tab.setContent(null);
+	}
+	
+	private void setTabContent(Tab tab) {
+		if (tab == null || tab.getUserData() == null || !(tab.getUserData() instanceof TabType))
+			return;
+		
+		TabType tabType = (TabType)tab.getUserData();
+		tab.setContent(this.getNode(tabType));
 	}
 }
