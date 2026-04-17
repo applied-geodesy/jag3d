@@ -545,29 +545,32 @@ public class UITreeBuilder {
 	}
 
 	private void handleTreeSelections(TreeItem<TreeItemValue> currentTreeItem) {
-		// Save last option
-		this.lastValidSelectedTreeItem = currentTreeItem;
-		
 		if (currentTreeItem == null)
 			return;
 		
+		// Save last option
+		this.lastValidSelectedTreeItem = currentTreeItem;
 		MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = this.treeView.getSelectionModel();
 		try {
-//			selectionModel.selectedItemProperty().removeListener(this.treeSelectionChangeListener);
-//			selectionModel.getSelectedItems().removeListener(this.treeListSelectionChangeListener);
 			this.ignoreTreeSelection = true;
 			
 			TreeItemType currentItemType = currentTreeItem.getValue().getItemType();
 			boolean isValidSelection = true;
 
 			ObservableList<TreeItem<TreeItemValue>> treeItems = selectionModel.getSelectedItems();
-			for (TreeItem<TreeItemValue> item : treeItems) {
-				if (item == null || item.getValue() == null || item.getValue().getItemType() != currentItemType) {
-					isValidSelection = false;
-					break;
+			if (treeItems.isEmpty()) {
+				selectionModel.select(currentTreeItem);
+				treeItems = selectionModel.getSelectedItems();
+			}
+			else {	
+				for (TreeItem<TreeItemValue> item : treeItems) {
+					if (item == null || item.getValue() == null || item.getValue().getItemType() != currentItemType) {
+						isValidSelection = false;
+						break;
+					}
 				}
 			}
-
+			
 			if (!isValidSelection) {
 				Platform.runLater(new Runnable() {
 					@Override public void run() {
@@ -632,8 +635,6 @@ public class UITreeBuilder {
 			}
 		}
 		finally {
-//			selectionModel.selectedItemProperty().addListener(this.treeSelectionChangeListener);
-//			selectionModel.getSelectedItems().addListener(this.treeListSelectionChangeListener);
 			this.ignoreTreeSelection = false;
 		}
 	}
