@@ -113,6 +113,9 @@ public class PointTreeItemValue extends TreeItemValue implements Sortable, Group
 		case DATUM_POINT_1D_LEAF:
 		case DATUM_POINT_2D_LEAF:
 		case DATUM_POINT_3D_LEAF:
+		case NEW_POINT_1D_LEAF:
+		case NEW_POINT_2D_LEAF:
+		case NEW_POINT_3D_LEAF:
 			tabTyps.add(TabType.RESULT_CONGRUENCE_ANALYSIS);
 			break;
 		default:

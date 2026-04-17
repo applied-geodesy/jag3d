@@ -150,7 +150,7 @@ public class UITabPaneBuilder {
 				);
 
 		this.createTab(
-				i18n.getString("UITabPaneBuilder.tab.congruence.point.label", "Congruence of points"), 
+				i18n.getString("UITabPaneBuilder.tab.congruence.point.label", "Congruence analysis"), 
 				i18n.getString("UITabPaneBuilder.tab.congruence.point.tooltip", "Result of congruence analysis of point"), 
 				TabType.RESULT_CONGRUENCE_ANALYSIS, null
 				);
