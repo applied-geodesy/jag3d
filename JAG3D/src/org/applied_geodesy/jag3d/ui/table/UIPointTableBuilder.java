@@ -512,7 +512,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.GROSS_ERROR_Y;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::grossErrorYProperty, getDoubleCallback(cellValueType), this.dimension != 1 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 1 && this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::grossErrorYProperty, getDoubleCallback(cellValueType), this.dimension != 1 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 1 && (this.type == PointType.DATUM_POINT || this.type == PointType.NEW_POINT) ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -523,7 +523,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.GROSS_ERROR_X;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::grossErrorXProperty, getDoubleCallback(cellValueType), this.dimension != 1 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 1 && this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::grossErrorXProperty, getDoubleCallback(cellValueType), this.dimension != 1 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 1 && (this.type == PointType.DATUM_POINT || this.type == PointType.NEW_POINT) ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -534,7 +534,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.GROSS_ERROR_Z;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::grossErrorZProperty, getDoubleCallback(cellValueType), this.dimension != 2 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 2 && this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::grossErrorZProperty, getDoubleCallback(cellValueType), this.dimension != 2 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 2 && (this.type == PointType.DATUM_POINT || this.type == PointType.NEW_POINT) ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 		
@@ -580,7 +580,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_Y;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::minimalDetectableBiasYProperty, getDoubleCallback(cellValueType), this.dimension != 1 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 1 && this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::minimalDetectableBiasYProperty, getDoubleCallback(cellValueType), this.dimension != 1 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 1 && (this.type == PointType.DATUM_POINT || this.type == PointType.NEW_POINT) ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -591,7 +591,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_X;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::minimalDetectableBiasXProperty, getDoubleCallback(cellValueType), this.dimension != 1 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 1 && this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::minimalDetectableBiasXProperty, getDoubleCallback(cellValueType), this.dimension != 1 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 1 && (this.type == PointType.DATUM_POINT || this.type == PointType.NEW_POINT) ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -602,7 +602,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		cellValueType = CellValueType.LENGTH_RESIDUAL;
 		columnContentType = ColumnContentType.MINIMAL_DETECTABLE_BIAS_Z;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText, options.getFormatterOptions().get(cellValueType).getUnit());
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::minimalDetectableBiasZProperty, getDoubleCallback(cellValueType), this.dimension != 2 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 2 && this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::minimalDetectableBiasZProperty, getDoubleCallback(cellValueType), this.dimension != 2 && (this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT) ? ColumnType.APOSTERIORI_POINT : this.dimension != 2 && (this.type == PointType.DATUM_POINT || this.type == PointType.NEW_POINT) ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -703,7 +703,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.P_VALUE_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::pValueAprioriProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::pValueAprioriProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : (this.type == PointType.DATUM_POINT || this.type == PointType.NEW_POINT) ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -714,7 +714,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.P_VALUE_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::pValueAposterioriProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::pValueAposterioriProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : (this.type == PointType.DATUM_POINT || this.type == PointType.NEW_POINT) ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -725,7 +725,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.TEST_STATISTIC_APRIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::testStatisticAprioriProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::testStatisticAprioriProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : (this.type == PointType.DATUM_POINT || this.type == PointType.NEW_POINT) ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -736,7 +736,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		cellValueType = CellValueType.STATISTIC;
 		columnContentType = ColumnContentType.TEST_STATISTIC_APOSTERIORI;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::testStatisticAposterioriProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		doubleColumn = this.<Double>getColumn(tableContentType, columnContentType, header, PointRow::testStatisticAposterioriProperty, getDoubleCallback(cellValueType), this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : (this.type == PointType.DATUM_POINT || this.type == PointType.NEW_POINT) ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		doubleColumn.setComparator(new AbsoluteValueComparator());
 		table.getColumns().add(doubleColumn);
 
@@ -748,7 +748,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		cellValueType = CellValueType.BOOLEAN;
 		columnContentType = ColumnContentType.SIGNIFICANT;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
-		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, PointRow::significantProperty, getBooleanCallback(), this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : this.type == PointType.DATUM_POINT ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
+		booleanColumn = this.<Boolean>getColumn(tableContentType, columnContentType, header, PointRow::significantProperty, getBooleanCallback(), this.type == PointType.STOCHASTIC_POINT || this.type == PointType.REFERENCE_POINT ? ColumnType.APOSTERIORI_POINT : (this.type == PointType.DATUM_POINT || this.type == PointType.NEW_POINT) ? ColumnType.APOSTERIORI_POINT_CONGRUENCE : ColumnType.HIDDEN, columnIndex, false, true);
 		booleanColumn.setCellValueFactory(new Callback<CellDataFeatures<PointRow, Boolean>, ObservableValue<Boolean>>() {
 			@Override
 			public ObservableValue<Boolean> call(CellDataFeatures<PointRow, Boolean> param) {
@@ -914,7 +914,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 	    			content.put(EditableMenuCheckBoxTreeCell.TREE_ITEM_TYPE_DATA_FORMAT, pointItemValue.getItemType());
 	    			content.put(EditableMenuCheckBoxTreeCell.GROUP_ID_DATA_FORMAT,       pointItemValue.getGroupId());
 	    			content.put(EditableMenuCheckBoxTreeCell.DIMENSION_DATA_FORMAT,      dimension);
-	    			content.put(EditableMenuCheckBoxTreeCell.POINT_ROWS_DATA_FORMAT, rowsDnD);
+	    			content.put(EditableMenuCheckBoxTreeCell.POINT_ROWS_DATA_FORMAT,     rowsDnD);
 
 	    			db.setContent(content);
 
