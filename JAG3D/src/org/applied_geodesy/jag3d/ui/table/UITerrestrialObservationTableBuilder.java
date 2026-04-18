@@ -52,6 +52,7 @@ import org.applied_geodesy.ui.table.ColumnType;
 import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -814,7 +815,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 	    		if (row.isEmpty())
 	    			return;
 
-	    		List<TerrestrialObservationRow> selectedRows = new ArrayList<TerrestrialObservationRow>(table.getSelectionModel().getSelectedItems());
+	    		final List<TerrestrialObservationRow> selectedRows = new ArrayList<TerrestrialObservationRow>(table.getSelectionModel().getSelectedItems());
 	    		if (selectedRows == null || selectedRows.isEmpty())
 	    			return;
 
@@ -839,7 +840,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 
 	    			db.setContent(content);
 
-	    			event.consume(); // Nur hier konsumieren!
+	    			event.consume();
 	    		}
 	    	}
 	    });
@@ -849,7 +850,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 	
 	@Override
 	void duplicateRows() {
-		List<TerrestrialObservationRow> selectedRows = new ArrayList<TerrestrialObservationRow>(this.table.getSelectionModel().getSelectedItems());
+		final List<TerrestrialObservationRow> selectedRows = new ArrayList<TerrestrialObservationRow>(this.table.getSelectionModel().getSelectedItems());
 		if (selectedRows == null || selectedRows.isEmpty())
 			return;
 
@@ -880,7 +881,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 	
 	@Override
 	void removeRows() {
-		List<TerrestrialObservationRow> selectedRows = new ArrayList<TerrestrialObservationRow>(this.table.getSelectionModel().getSelectedItems());
+		final List<TerrestrialObservationRow> selectedRows = new ArrayList<TerrestrialObservationRow>(this.table.getSelectionModel().getSelectedItems());
 		if (selectedRows == null || selectedRows.isEmpty())
 			return;
 		
@@ -911,14 +912,13 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		if (type != ContextMenuItemType.MOVETO)
 			return;
 
-		List<TerrestrialObservationRow> selectedRows = new ArrayList<TerrestrialObservationRow>(this.table.getSelectionModel().getSelectedItems());
-
-		if (selectedRows == null || selectedRows.isEmpty())
+		final List<TerrestrialObservationRow> selectedRows = new ArrayList<TerrestrialObservationRow>(this.table.getSelectionModel().getSelectedItems());
+		TreeItemType parentType = TreeItemType.getDirectoryByLeafType(this.observationItemValue.getItemType());
+		
+		if (parentType == null || selectedRows == null || selectedRows.isEmpty())
 			return;
 
-		TreeItemType parentType = TreeItemType.getDirectoryByLeafType(this.observationItemValue.getItemType());
-		TreeItem<TreeItemValue> newTreeItem = UITreeBuilder.getInstance().addItem(parentType, false);
-
+		final TreeItem<TreeItemValue> newTreeItem = UITreeBuilder.getInstance().addItem(parentType, false);
 		try {
 			SQLManager.getInstance().saveGroup((ObservationTreeItemValue)newTreeItem.getValue());
 		} catch (Exception e) {
@@ -941,13 +941,18 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			return;
 		}
 
-		MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
-		selectionModel.clearSelection();
-		selectionModel.select(newTreeItem);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {	
+				MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
+				selectionModel.clearSelection();
+				selectionModel.select(newTreeItem);
+			}
+		});
 	}
 	
 	public void export(File file, boolean aprioriValues) throws IOException {
-		List<TerrestrialObservationRow> rows = this.table.getItems();
+		final List<TerrestrialObservationRow> rows = this.table.getItems();
 
 		String exportFormatString = "%15s \t";
 		//String exportFormatDouble = "%+15.6f \t";

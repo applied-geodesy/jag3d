@@ -931,8 +931,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		final List<PointRow> selectedRows = new ArrayList<PointRow>(this.table.getSelectionModel().getSelectedItems());
 		if (selectedRows == null || selectedRows.isEmpty())
 			return;
-
-		this.table.getSelectionModel().clearSelection();
+		
 		List<PointRow> clonedRows = new ArrayList<PointRow>(selectedRows.size());
 		for (PointRow row : selectedRows) {
 			PointRow clonedRow = PointRow.cloneRowApriori(row);
@@ -1038,12 +1037,8 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		
 		if (parentType == null || selectedRows == null || selectedRows.isEmpty())
 			return;
-		
-		this.table.getSelectionModel().clearSelection();
-		MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
-		selectionModel.clearSelection();
-		
-		TreeItem<TreeItemValue> newTreeItem = UITreeBuilder.getInstance().addItem(parentType, false);
+				
+		final TreeItem<TreeItemValue> newTreeItem = UITreeBuilder.getInstance().addItem(parentType, false);
 		try {
 			SQLManager.getInstance().saveGroup((PointTreeItemValue)newTreeItem.getValue());
 		} 
@@ -1070,6 +1065,7 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {	
+				MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
 				selectionModel.clearSelection();
 				selectionModel.select(newTreeItem);
 			}
