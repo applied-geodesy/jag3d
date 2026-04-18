@@ -82,7 +82,7 @@
 			</#if>
 		</#if>
 
-		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>
+		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || congruence_analysis>
 			<#if group.dimension != 1>
 				<td><@printFormattedNumber value=group.max_gross_error_y format=df_length_residual/></td>
 				<td><@printFormattedNumber value=group.max_gross_error_x format=df_length_residual/></td>
@@ -117,7 +117,7 @@
 			</#if>
 		</#if>
 		
-		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>
+		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || congruence_analysis>
 			<#if group.dimension != 1>
 				<td></td>
 				<td></td>
@@ -143,7 +143,7 @@
 			<td><@printFormattedNumber value=group.omega format=df_statistic/></td>
 		</#if>
 		
-		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>
+		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || congruence_analysis>
 			<td></td>
 			<td></td>
 			

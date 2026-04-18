@@ -25,6 +25,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -140,6 +141,7 @@ public class NetworkAdjustment implements Runnable {
 	private TestStatisticParameters confidenceRegionParameters = null;
 	
 	private Map<String,Point> allPoints = new LinkedHashMap<String,Point>();
+	private List<Point> referencePoints = new ArrayList<Point>();
 	private List<Point> datumPoints = new ArrayList<Point>();
 	private List<Point> stochasticPoints = new ArrayList<Point>();
 	
@@ -147,7 +149,7 @@ public class NetworkAdjustment implements Runnable {
 	private List<Point> pointsWithStochasticDeflection = new ArrayList<Point>();
 	private List<Point> pointsWithReferenceDeflection = new ArrayList<Point>();
 	
-	private List<Point> referencePoints = new ArrayList<Point>();
+	
 	private PrincipalComponent principalComponents[] = new PrincipalComponent[0];
 	private List<CongruenceAnalysisGroup> congruenceAnalysisGroup = new ArrayList<CongruenceAnalysisGroup>();
 	private Map<VarianceComponentType, VarianceComponent> varianceComponents = new LinkedHashMap<VarianceComponentType, VarianceComponent>();
@@ -2995,20 +2997,20 @@ public class NetworkAdjustment implements Runnable {
 				}
 			}
 
-			List<Point> points = null;
+			Collection<Point> points = null;
 			if (this.congruenceAnalysis && this.freeNetwork) {
-				// Pruefung der Stabilpunkte
-				points = this.datumPoints;
+				// Pruefung der Datums- und Neupunkte
+				points = this.allPoints.values();
 			}
 			else {
 				// Pruefung der Festpunkte
 				points = this.referencePoints;
 			}
 
-			for (int i=0; i<points.size(); i++) {
+			for (Point point : points) {
 				if (this.interrupt)
 					return;
-				Point point = points.get(i);
+				
 				ObservationGroup observations = point.getObservations();
 				int dim = point.getDimension();
 				if (!this.freeNetwork) {
@@ -3023,15 +3025,18 @@ public class NetworkAdjustment implements Runnable {
 				Matrix BTPQvvPB = new DenseMatrix(dim,dim);
 				Vector BTPv     = new DenseVector(dim);
 
-				// Flag zur Pruefung, ob Datumspunkt in Referenzepoche ueberhaut Beobachtungen besitzt.
-				// Wenn Datumspunkt nur in Folgeepoche vorhanden, kann kein Stabilpunkttest durchgefuehrt werden.
+				// Flag zur Pruefung, ob Punkt in Referenz- und Kontrollepoche ueberhaut Beobachtungen besitzt.
+				// Wenn Punkt nur in einer Epoche vorhanden, kann kein Stabilpunkttest durchgefuehrt werden.
 				boolean hasObservationInReferenceEpoch = !(this.congruenceAnalysis && this.freeNetwork);
+				boolean hasObservationInControlEpoch   = !(this.congruenceAnalysis && this.freeNetwork);
 				for (int k=0; k<observations.size(); k++) {
 					Observation observationB = observations.get(k);
 					if (this.congruenceAnalysis && this.freeNetwork && observationB.getObservationGroup().getEpoch() == Epoch.REFERENCE) {
 						hasObservationInReferenceEpoch = true;
 						continue;
 					}
+
+					hasObservationInControlEpoch = true;
 					double qB = observationB.getStdApriori()*observationB.getStdApriori();
 					double vB = this.estimationType == EstimationType.SIMULATION ? 0.0 : -observationB.getObservationalError();
 					double b  = 0.0;
@@ -3058,8 +3063,10 @@ public class NetworkAdjustment implements Runnable {
 
 						for (int j=0; j<observations.size(); j++) {
 							Observation observationBT = observations.get(j);
-							if (this.congruenceAnalysis && this.freeNetwork && observationBT.getObservationGroup().getEpoch() == Epoch.REFERENCE)
+							if (this.congruenceAnalysis && this.freeNetwork && observationBT.getObservationGroup().getEpoch() == Epoch.REFERENCE) {
+								hasObservationInReferenceEpoch = true;
 								continue;
+							}
 							double qll = this.getQllElement(observationBT, observationB);
 							double qBT = observationBT.getStdApriori()*observationBT.getStdApriori();
 							// P*Qvv*P
@@ -3092,14 +3099,18 @@ public class NetworkAdjustment implements Runnable {
 								BTPQvvPB.set(r,c, BTPQvvPB.get(r,c) + bT*pqvvp*b);
 							}
 						}
-					}					
+						if (!hasObservationInReferenceEpoch)
+							break;
+					}
+					if (!hasObservationInReferenceEpoch)
+						break;
 				}
 				Matrix Qnn = new DenseMatrix(dim, dim);
 				Vector nabla = new DenseVector(dim);
 				boolean isCalculated = false;
 				ConfidenceRegion confidenceRegion = null;
 
-				if (hasObservationInReferenceEpoch && observations.size() >= dim) {
+				if (hasObservationInReferenceEpoch && hasObservationInControlEpoch && observations.size() >= dim) {
 					try {
 						Qnn = MathExtension.pinv(BTPQvvPB, -1);
 						confidenceRegion = new ConfidenceRegion(Qnn);

@@ -82,7 +82,7 @@
 			</#if>
 		</#if>
 		
-		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>
+		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || congruence_analysis>
 			<#if group.dimension != 1>
 				<th><#outputformat "plainText">&nabla;<sub>y</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 				<th><#outputformat "plainText">&nabla;<sub>x</sub><span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
@@ -117,7 +117,7 @@
 			</#if>
 		</#if>
 		
-		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>
+		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || congruence_analysis>
 			<#if group.dimension != 1>
 				<th><#outputformat "plainText">&nabla;<sub>y</sub>(&lambda;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
 				<th><#outputformat "plainText">&nabla;<sub>x</sub>(&lambda;)<span class="unit">${unit_abbr_length_residual}</span></#outputformat></th>
@@ -143,7 +143,7 @@
 			<th><#outputformat "plainText">&Omega;</#outputformat></th>
 		</#if>
 		
-		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || (congruence_analysis && group.type == "DATUM_POINT")>
+		<#if group.type == "REFERENCE_POINT" || group.type == "STOCHASTIC_POINT" || congruence_analysis>
 			<th><#outputformat "plainText">log(p<sub>prio</sub>)</#outputformat></th>
 			<th><#outputformat "plainText">log(p<sub>post</sub>)</#outputformat></th>
 			
