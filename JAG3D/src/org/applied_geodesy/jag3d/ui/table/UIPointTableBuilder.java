@@ -952,12 +952,17 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 		}
 
 		if (clonedRows != null && !clonedRows.isEmpty()) {
-			ObservableList<PointRow> tableModel = this.getTableModel(this.table);
-			tableModel.addAll(clonedRows);
-			this.table.getSelectionModel().clearSelection();
-			for (PointRow clonedRow : clonedRows)
-				this.table.getSelectionModel().select(clonedRow);
-			this.table.scrollTo(clonedRows.get(0));
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {	
+					ObservableList<PointRow> tableModel = getTableModel(table);
+					tableModel.addAll(clonedRows);
+					table.getSelectionModel().clearSelection();
+					for (PointRow clonedRow : clonedRows)
+						table.getSelectionModel().select(clonedRow);
+					table.scrollTo(clonedRows.get(0));
+				}
+			});
 		}
 	}
 	
@@ -984,10 +989,15 @@ public class UIPointTableBuilder extends UIEditableTableBuilder<PointRow> {
 			removedRows.add(row);
 		}
 		if (removedRows != null && !removedRows.isEmpty()) {
-			ObservableList<PointRow> tableModel = this.getTableModel(this.table);
-			tableModel.removeAll(removedRows);
-			if (tableModel.isEmpty())
-				tableModel.setAll(getEmptyRow());
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {	
+					ObservableList<PointRow> tableModel = getTableModel(table);
+					tableModel.removeAll(removedRows);
+					if (tableModel.isEmpty())
+						tableModel.setAll(getEmptyRow());
+				}
+			});
 		}
 	}
 	

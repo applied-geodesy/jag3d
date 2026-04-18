@@ -870,12 +870,17 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 		}
 
 		if (clonedRows != null && !clonedRows.isEmpty()) {
-			ObservableList<TerrestrialObservationRow> tableModel = this.getTableModel(this.table);
-			tableModel.addAll(clonedRows);
-			this.table.getSelectionModel().clearSelection();
-			for (TerrestrialObservationRow clonedRow : clonedRows)
-				this.table.getSelectionModel().select(clonedRow);
-			this.table.scrollTo(clonedRows.get(0));
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {	
+					ObservableList<TerrestrialObservationRow> tableModel = getTableModel(table);
+					tableModel.addAll(clonedRows);
+					table.getSelectionModel().clearSelection();
+					for (TerrestrialObservationRow clonedRow : clonedRows)
+						table.getSelectionModel().select(clonedRow);
+					table.scrollTo(clonedRows.get(0));
+				}
+			});
 		}
 	}
 	
@@ -899,11 +904,16 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			removedRows.add(row);
 		}
 		if (removedRows != null && !removedRows.isEmpty()) {
-			this.table.getSelectionModel().clearSelection();
-			ObservableList<TerrestrialObservationRow> tableModel = this.getTableModel(this.table);
-			tableModel.removeAll(removedRows);
-			if (tableModel.isEmpty())
-				tableModel.setAll(getEmptyRow());
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {	
+					table.getSelectionModel().clearSelection();
+					ObservableList<TerrestrialObservationRow> tableModel = getTableModel(table);
+					tableModel.removeAll(removedRows);
+					if (tableModel.isEmpty())
+						tableModel.setAll(getEmptyRow());
+				}
+			});
 		}
 	}
 	

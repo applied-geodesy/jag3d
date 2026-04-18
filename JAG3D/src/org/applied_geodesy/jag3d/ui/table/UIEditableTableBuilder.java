@@ -43,6 +43,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
@@ -80,32 +81,27 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 			if (event.getSource() instanceof MenuItem && ((MenuItem)event.getSource()).getUserData() instanceof ContextMenuItemType) {
 				final ContextMenuItemType contextMenuType = (ContextMenuItemType)((MenuItem)event.getSource()).getUserData();
 				
-				Platform.runLater(new Runnable() {
-					@Override
-					public void run() {	
-						switch(contextMenuType) {
-						case REMOVE:
-							removeTableRows();
-							break;
-						case SELECT_GROUPS:
-							selectGroups();
-						case MOVETO:
-						case MOVETO_REFERENCE:
-						case MOVETO_STOCHASTIC:
-						case MOVETO_DATUM:
-						case MOVETO_NEW:
-							moveRows(contextMenuType);
-							break;
-						case DUPLICATE:
-							duplicateRows();
-							break;
-						case ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT:
-						case SEARCH_AND_REPLACE:
-							showDialog(contextMenuType);
-							break;
-						}
-					}
-				});
+				switch(contextMenuType) {
+				case REMOVE:
+					removeTableRows();
+					break;
+				case SELECT_GROUPS:
+					selectGroups();
+				case MOVETO:
+				case MOVETO_REFERENCE:
+				case MOVETO_STOCHASTIC:
+				case MOVETO_DATUM:
+				case MOVETO_NEW:
+					moveRows(contextMenuType);
+					break;
+				case DUPLICATE:
+					duplicateRows();
+					break;
+				case ADAPT_INSTRUMENT_AND_REFLECTOR_HEIGHT:
+				case SEARCH_AND_REPLACE:
+					showDialog(contextMenuType);
+					break;
+				}
 			}
 		}
 	}
@@ -274,7 +270,7 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 	abstract void moveRows(ContextMenuItemType type);
 	private void selectGroups() {
 		try {
-			List<GroupRow> selectedRows = new ArrayList<GroupRow>(this.table.getSelectionModel().getSelectedItems());
+			final List<GroupRow> selectedRows = new ArrayList<GroupRow>(this.table.getSelectionModel().getSelectedItems());
 			Set<Integer> groupIds = new HashSet<Integer>();
 			for (GroupRow selectedRow : selectedRows)
 				groupIds.add(selectedRow.getGroupId());
@@ -282,9 +278,10 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 			if (groupIds == null || groupIds.isEmpty())
 				return;
 
-			List<TreeItem<TreeItemValue>> selectedTreeItems = new ArrayList<TreeItem<TreeItemValue>>(UITreeBuilder.getInstance().getTree().getSelectionModel().getSelectedItems());
+			MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
+			final List<TreeItem<TreeItemValue>> selectedTreeItems = new ArrayList<TreeItem<TreeItemValue>>(selectionModel.getSelectedItems());
 			if (selectedTreeItems.size() > 1) {
-				List<Integer> selectedTreeItemIndices = new ArrayList<Integer>(UITreeBuilder.getInstance().getTree().getSelectionModel().getSelectedIndices());
+				List<Integer> selectedTreeItemIndices = new ArrayList<Integer>(selectionModel.getSelectedIndices());
 				int indices[] = new int[groupIds.size()];
 
 				for (int i = 0, j = 0; i < selectedTreeItems.size(); i++) {
@@ -297,8 +294,8 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 				}
 				Platform.runLater(new Runnable() {
 					@Override public void run() {
-						UITreeBuilder.getInstance().getTree().getSelectionModel().clearSelection();
-						UITreeBuilder.getInstance().getTree().getSelectionModel().selectIndices(indices[0], indices);
+						selectionModel.clearSelection();
+						selectionModel.selectIndices(indices[0], indices);
 					}
 				});
 			}
@@ -330,11 +327,11 @@ public abstract class UIEditableTableBuilder<T extends GroupRow> extends UITable
 	private void showDialog(ContextMenuItemType contextMenuItemType) {
 		TreeView<TreeItemValue> treeView = UITreeBuilder.getInstance().getTree();
 		
-		TreeItem<TreeItemValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
+		final TreeItem<TreeItemValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
 		if (selectedItem == null)
 			return;
 		
-		List<TreeItem<TreeItemValue>> selectedItems = treeView.getSelectionModel().getSelectedItems();
+		final List<TreeItem<TreeItemValue>> selectedItems = new ArrayList<TreeItem<TreeItemValue>>(treeView.getSelectionModel().getSelectedItems());
 		TreeItemValue selectedTreeItemValues[] = new TreeItemValue[selectedItems != null ? selectedItems.size() : 0];
 		
 		for (int i=0; i<selectedItems.size(); i++)
