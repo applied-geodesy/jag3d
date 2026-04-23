@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.network.Epoch;
 import org.applied_geodesy.adjustment.network.ObservationGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.ParameterType;
@@ -215,7 +216,7 @@ public class UIObservationPropertiesPane {
 	private ObservationTreeItemValue selectedObservationItemValues[] = null;
 	
 	private LineChart<Number,Number> lineChart;
-    private double maxDistanceForUncertaintyChart = 150.0;
+    private double maxDistanceForUncertaintyChart = 150;
 	
 	private FormatterOptions options = FormatterOptions.getInstance();
 
@@ -729,7 +730,8 @@ public class UIObservationPropertiesPane {
 	}
 
 	private Node createUncertaintyChartPane() {
-		double max = Math.ceil((this.maxDistanceForUncertaintyChart * 1.05)/10)*10;
+		double maxDistanceForUncertaintyChartView = this.options.convertLengthToView(this.maxDistanceForUncertaintyChart);
+		double max = Math.ceil((maxDistanceForUncertaintyChartView * 1.05)/10)*10;
 		NumberAxis xAxis = new NumberAxis(0, max, max/10);
         NumberAxis yAxis = new NumberAxis();
         
@@ -1085,13 +1087,18 @@ public class UIObservationPropertiesPane {
 	private void updateTickLabels(LineChart<Number,Number> lineChart) {
 		NumberAxis xAxis = (NumberAxis)lineChart.getXAxis();
 		NumberAxis yAxis = (NumberAxis)lineChart.getYAxis();
-		double min = this.maxDistanceForUncertaintyChart * 0.05;
-		double max = Math.ceil((this.maxDistanceForUncertaintyChart * 1.05)/10)*10;
+		double maxDistanceForUncertaintyChartView = this.options.convertLengthToView(this.maxDistanceForUncertaintyChart);
+		double min = maxDistanceForUncertaintyChartView * 0.05;
+		double max = Math.ceil((maxDistanceForUncertaintyChartView * 1.05)/10)*10;
 
 		xAxis.setLowerBound(0);
 		xAxis.setUpperBound(max);
 		xAxis.setTickUnit(max/10);
+		
+		int exp = lineChart.getUserData() != null && lineChart.getUserData() instanceof Number ? ((Number)lineChart.getUserData()).intValue() : -1;
 
+		String numberFormat = "%."+exp+"f";
+		
 		CellValueType cellValueType;
 		switch(this.type) {
 		case DIRECTION_LEAF:
@@ -1109,7 +1116,12 @@ public class UIObservationPropertiesPane {
 		yAxis.setTickLabelFormatter(new StringConverter<Number>() {
 			@Override
 			public String toString(Number number) {
-				return options.toViewFormat(cellValueType, number.doubleValue(), false);
+				if (exp < 0)
+					return options.toViewFormat(cellValueType, number.doubleValue(), false);
+//				else if (exp > 6)
+//					return String.format(Locale.ENGLISH, "%.6e", number.doubleValue());
+				else
+					return String.format(Locale.ENGLISH, numberFormat, number.doubleValue());
 			}
 
 			@Override
@@ -1173,12 +1185,17 @@ public class UIObservationPropertiesPane {
         if (group == null)
         	return;
 
-        double min = this.maxDistanceForUncertaintyChart * 0.05;
-        double max = Math.ceil((this.maxDistanceForUncertaintyChart * 1.05)/10)*10 - min;
+        double maxDistanceForUncertaintyChartView = this.options.convertLengthToView(this.maxDistanceForUncertaintyChart);
+        double min = maxDistanceForUncertaintyChartView * 0.05;
+        double max = Math.ceil((maxDistanceForUncertaintyChartView * 1.05)/10)*10 - min;
+        
+        double minUncertainty = Double.MAX_VALUE;
+        double maxUncertainty = -1;
         
         double inc = (max - min)/500;
         for (double distanceInViewUnit = min; distanceInViewUnit <= max; distanceInViewUnit += inc) {
-        	double distanceInModelUnit = options.convertLengthToModel(distanceInViewUnit); // distance in meter
+        	double distanceInModelUnit = this.options.convertLengthToModel(distanceInViewUnit); // distance in meter
+        	
         	Observation observation = this.createObservation(this.type, distanceInModelUnit);
         	if (observation == null)
         		break;
@@ -1189,15 +1206,23 @@ public class UIObservationPropertiesPane {
         	switch(this.type) {
         	case DIRECTION_LEAF:
         	case ZENITH_ANGLE_LEAF:
-        		uncertaintyInViewUnit = options.convertAngleUncertaintyToView(uncertaintyInModelUnit);
+        		uncertaintyInViewUnit = this.options.convertAngleUncertaintyToView(uncertaintyInModelUnit);
         		break;
         	default:
-        		uncertaintyInViewUnit = options.convertLengthUncertaintyToView(uncertaintyInModelUnit);
+        		uncertaintyInViewUnit = this.options.convertLengthUncertaintyToView(uncertaintyInModelUnit);
         		break;
         	}
+        	
+        	minUncertainty = Math.min(minUncertainty, uncertaintyInViewUnit);
+        	maxUncertainty = Math.max(maxUncertainty, uncertaintyInViewUnit);
         	uncertaintyChartSeries.getData().add(new XYChart.Data<Number,Number>(distanceInViewUnit, uncertaintyInViewUnit));
         }
-
+        
+        double diff = (Math.abs(maxUncertainty - minUncertainty) > Math.sqrt(Constant.EPS)) ? Math.abs(maxUncertainty - minUncertainty) : Math.abs(maxUncertainty);
+        int maxItr = 15;
+        int exp = 0;
+        while (maxItr-- > 0 && Math.rint(diff*Math.pow(10, exp++)) == 0);
+        this.lineChart.setUserData(Integer.valueOf(exp));
         this.lineChart.getData().clear();
         this.lineChart.getData().add(uncertaintyChartSeries);
         
