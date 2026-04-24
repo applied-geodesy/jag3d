@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.applied_geodesy.adjustment.Constant;
 import org.applied_geodesy.adjustment.network.Epoch;
 import org.applied_geodesy.adjustment.network.ObservationGroupUncertaintyType;
 import org.applied_geodesy.adjustment.network.ParameterType;
@@ -96,6 +97,18 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 
 public class UIObservationPropertiesPane {
+	private class UncertaintyRange {
+		private int resolution;
+		
+		UncertaintyRange(double minUncertainty, double maxUncertainty) {		
+			double diff = (Math.abs(maxUncertainty - minUncertainty) > Math.sqrt(Constant.EPS)) ? Math.abs(maxUncertainty - minUncertainty) : Math.abs(maxUncertainty);
+			
+			int maxItr = 15;
+	        this.resolution = 0;
+	        while (maxItr-- > 0 && Math.rint(diff*Math.pow(10, this.resolution++)) == 0);
+		}
+		
+	}
 	private class TickFormatChangedListener implements FormatterChangedListener {
 		@Override
 		public void formatterChanged(FormatterEvent evt) {
@@ -215,8 +228,7 @@ public class UIObservationPropertiesPane {
 	private ObservationTreeItemValue selectedObservationItemValues[] = null;
 	
 	private LineChart<Number,Number> lineChart;
-	private final double minDistanceForUncertaintyChart = 5.0;
-    private final double maxDistanceForUncertaintyChart = 150.0;
+    private double maxDistanceForUncertaintyChart = 150;
 	
 	private FormatterOptions options = FormatterOptions.getInstance();
 
@@ -294,47 +306,75 @@ public class UIObservationPropertiesPane {
 		this.setRefractionIndex(refraction, false);
 	}
 	
-	public boolean setZeroPointOffsetUncertainty(Double value) {
+	private boolean setZeroPointOffsetUncertainty(Double value) {
 		if (this.zeroPointOffsetUncertaintyField == null)
 			return false;
-		this.ignoreValueUpdate = true;
-		this.zeroPointOffsetUncertaintyField.setValue(value != null && value > 0 ? value : null);
-		//this.zeroPointOffsetUncertaintyField.setStyle("-fx-border-color: red; -fx-border-width: 2px;");
-		this.updateUncertaintyChart(this.lineChart);
-        this.updateTickLabels(this.lineChart);
-		this.ignoreValueUpdate = false;
+		try {
+			this.ignoreValueUpdate = true;
+			this.zeroPointOffsetUncertaintyField.setValue(value != null && value > 0 ? value : null);
+			this.updateUncertaintyChart(this.lineChart);
+			this.updateTickLabels(this.lineChart);
+		}
+		finally {
+			this.ignoreValueUpdate = false;
+		}
 		return true;
 	}
 	
-	public boolean setSquareRootDistanceDependentUncertainty(Double value) {
+	private boolean setSquareRootDistanceDependentUncertainty(Double value) {
 		if (this.squareRootDistanceDependentUncertaintyField == null)
 			return false;
-		this.ignoreValueUpdate = true;
-		this.squareRootDistanceDependentUncertaintyField.setValue(value != null && value >= 0 ? value : null);
-		this.updateUncertaintyChart(this.lineChart);
-        this.updateTickLabels(this.lineChart);
-		this.ignoreValueUpdate = false;
+		try {
+			this.ignoreValueUpdate = true;
+			this.squareRootDistanceDependentUncertaintyField.setValue(value != null && value >= 0 ? value : null);
+			this.updateUncertaintyChart(this.lineChart);
+			this.updateTickLabels(this.lineChart);
+		}
+		finally {
+			this.ignoreValueUpdate = false;
+		}
 		return true;
 	}
 	
-	public boolean setDistanceDependentUncertainty(Double value) {
+	private boolean setDistanceDependentUncertainty(Double value) {
 		if (this.distanceDependentUncertaintyField == null)
 			return false;
-		this.ignoreValueUpdate = true;
-		this.distanceDependentUncertaintyField.setValue(value != null && value >= 0 ? value : null);
-		this.updateUncertaintyChart(this.lineChart);
-        this.updateTickLabels(this.lineChart);
-		this.ignoreValueUpdate = false;
+		try {
+			this.ignoreValueUpdate = true;
+			this.distanceDependentUncertaintyField.setValue(value != null && value >= 0 ? value : null);
+			this.updateUncertaintyChart(this.lineChart);
+			this.updateTickLabels(this.lineChart);
+		}
+		finally {
+			this.ignoreValueUpdate = false;
+		}
 		return true;
 	}
-	
+
 	public boolean setReferenceEpoch(Boolean referenceEpoch) {
 		if (this.referenceEpochRadioButton == null || this.controlEpochRadioButton == null)
 			return false;
-		this.ignoreValueUpdate = true;
-		this.referenceEpochRadioButton.setSelected(referenceEpoch != null && referenceEpoch == Boolean.TRUE);
-		this.controlEpochRadioButton.setSelected(referenceEpoch == null || referenceEpoch == Boolean.FALSE);
-		this.ignoreValueUpdate = false;
+		try {
+			this.ignoreValueUpdate = true;
+			this.referenceEpochRadioButton.setSelected(referenceEpoch != null && referenceEpoch == Boolean.TRUE);
+			this.controlEpochRadioButton.setSelected(referenceEpoch == null || referenceEpoch == Boolean.FALSE);
+		}
+		finally {
+			this.ignoreValueUpdate = false;
+		}
+		return true;
+	}
+	
+	public boolean setMaximumDistance(double value) {
+		try {
+			this.ignoreValueUpdate = true;
+			this.maxDistanceForUncertaintyChart = value < 1 ? 150 : Math.max(10, value);
+			this.updateUncertaintyChart(this.lineChart);
+			this.updateTickLabels(this.lineChart);
+		}
+		finally {
+			this.ignoreValueUpdate = false;
+		}
 		return true;
 	}
 	
@@ -343,7 +383,7 @@ public class UIObservationPropertiesPane {
 			this.warningIconNodes.get(type).setVisible(displayWarningIcon);
 			this.warningIconNodes.get(type).setManaged(displayWarningIcon);
 		}
-
+		
 		switch(type) {
 		case ZERO_POINT_OFFSET:
 			return this.setZeroPointOffsetUncertainty(value);
@@ -381,74 +421,102 @@ public class UIObservationPropertiesPane {
 			return false;	
 		}
 	}
-	
-	public boolean setZeroPointOffset(Double value, Boolean enable) {
+
+	private boolean setZeroPointOffset(Double value, Boolean enable) {
 		if (this.zeroPointOffsetCheckBox == null || this.zeroPointOffsetField == null)
 			return false;
-		this.ignoreValueUpdate = true;
-		this.zeroPointOffsetCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
-		this.zeroPointOffsetField.setValue(value);
-		this.ignoreValueUpdate = false;
+		try {
+			this.ignoreValueUpdate = true;
+			this.zeroPointOffsetCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
+			this.zeroPointOffsetField.setValue(value);
+		}
+		finally {
+			this.ignoreValueUpdate = false;
+		}
 		return true;
 	}
-	
-	public boolean setScale(Double value, Boolean enable) {
+
+	private boolean setScale(Double value, Boolean enable) {
 		if (this.scaleCheckBox == null || this.scaleField == null)
 			return false;
-		this.ignoreValueUpdate = true;
-		this.scaleCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
-		this.scaleField.setValue(value);
-		this.ignoreValueUpdate = false;
+		try {
+			this.ignoreValueUpdate = true;
+			this.scaleCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
+			this.scaleField.setValue(value);
+		}
+		finally {
+			this.ignoreValueUpdate = false;
+		}
 		return true;
 	}
-	
-	public boolean setRotationX(Double value, Boolean enable) {
+
+	private boolean setRotationX(Double value, Boolean enable) {
 		if (this.rotationXCheckBox == null || this.rotationXField == null)
 			return false;
-		this.ignoreValueUpdate = true;
-		this.rotationXCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
-		this.rotationXField.setValue(value);
-		this.ignoreValueUpdate = false;
+		try {
+			this.ignoreValueUpdate = true;
+			this.rotationXCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
+			this.rotationXField.setValue(value);
+		}
+		finally {
+			this.ignoreValueUpdate = false;
+		}
 		return true;
 	}
-	
-	public boolean setRotationY(Double value, Boolean enable) {
+
+	private boolean setRotationY(Double value, Boolean enable) {
 		if (this.rotationYCheckBox == null || this.rotationYField == null)
 			return false;
-		this.ignoreValueUpdate = true;
-		this.rotationYCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
-		this.rotationYField.setValue(value);
-		this.ignoreValueUpdate = false;
+		try {
+			this.ignoreValueUpdate = true;
+			this.rotationYCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
+			this.rotationYField.setValue(value);
+		}
+		finally {
+			this.ignoreValueUpdate = false;
+		}
 		return true;
 	}
-	
-	public boolean setRotationZ(Double value, Boolean enable) {
+
+	private boolean setRotationZ(Double value, Boolean enable) {
 		if (this.rotationZCheckBox == null || this.rotationZField == null)
 			return false;
-		this.ignoreValueUpdate = true;
-		this.rotationZCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
-		this.rotationZField.setValue(value);
-		this.ignoreValueUpdate = false;
+		try {
+			this.ignoreValueUpdate = true;
+			this.rotationZCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
+			this.rotationZField.setValue(value);
+		}
+		finally {
+			this.ignoreValueUpdate = false;
+		}
 		return true;
 	}
-	
-	public boolean setOrientation(Double value, Boolean enable) {
+
+	private boolean setOrientation(Double value, Boolean enable) {
 		if (this.orientationOffsetCheckBox == null || this.orientationOffsetField == null)
 			return false;
-		this.ignoreValueUpdate = true;
-		this.orientationOffsetCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
-		this.orientationOffsetField.setValue(value);
-		this.ignoreValueUpdate = false;
+		try {
+			this.ignoreValueUpdate = true;
+			this.orientationOffsetCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
+			this.orientationOffsetField.setValue(value);
+		}
+		finally {
+			this.ignoreValueUpdate = false;
+		}
 		return true;
 	}
-	
-	public boolean setRefractionIndex(Double value, Boolean enable) {
+
+	private boolean setRefractionIndex(Double value, Boolean enable) {
 		if (this.refractionIndexCheckBox == null || this.refractionIndexField == null)
 			return false;
-		this.ignoreValueUpdate = true;
-		this.refractionIndexCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
-		this.refractionIndexField.setValue(value);
-		this.ignoreValueUpdate = false;
+		try {
+			this.ignoreValueUpdate = true;
+			this.refractionIndexCheckBox.setSelected(enable != null && enable == Boolean.TRUE);
+			this.refractionIndexField.setValue(value);
+		}
+		finally {
+			this.ignoreValueUpdate = false;
+		}
 		return true;
 	}
 
@@ -618,18 +686,6 @@ public class UIObservationPropertiesPane {
 		uncertaintyTypeALabel.setLabelFor(this.zeroPointOffsetUncertaintyField);
 		uncertaintyTypeBLabel.setLabelFor(this.squareRootDistanceDependentUncertaintyField);
 		uncertaintyTypeCLabel.setLabelFor(this.distanceDependentUncertaintyField);
-				
-//		GridPane.setHgrow(uncertaintyTypeALabel, Priority.SOMETIMES);
-//		GridPane.setHgrow(this.zeroPointOffsetUncertaintyField, Priority.ALWAYS);
-//		GridPane.setHgrow(databaseTransactionUncertaintyTypeAProgressIndicator, Priority.NEVER);
-//		
-//		GridPane.setHgrow(uncertaintyTypeBLabel, Priority.SOMETIMES);
-//		GridPane.setHgrow(this.squareRootDistanceDependentUncertaintyField, Priority.ALWAYS);
-//		GridPane.setHgrow(databaseTransactionUncertaintyTypeBProgressIndicator, Priority.NEVER);
-//		
-//		GridPane.setHgrow(uncertaintyTypeCLabel, Priority.SOMETIMES);
-//		GridPane.setHgrow(this.distanceDependentUncertaintyField, Priority.ALWAYS);
-//		GridPane.setHgrow(databaseTransactionUncertaintyTypeCProgressIndicator, Priority.NEVER);
 		
 		gridPane.add(uncertaintyTypeALabel, 0, 0);
 		gridPane.add(this.zeroPointOffsetUncertaintyField, 1, 0);
@@ -674,7 +730,9 @@ public class UIObservationPropertiesPane {
 	}
 
 	private Node createUncertaintyChartPane() {
-		NumberAxis xAxis = new NumberAxis(0, 155, 10);
+		double maxDistanceForUncertaintyChartView = this.options.convertLengthToView(this.maxDistanceForUncertaintyChart);
+		double max = Math.ceil((maxDistanceForUncertaintyChartView * 1.05)/10)*10;
+		NumberAxis xAxis = new NumberAxis(0, max, max/10);
         NumberAxis yAxis = new NumberAxis();
         
         xAxis.setForceZeroInRange(true);
@@ -722,7 +780,6 @@ public class UIObservationPropertiesPane {
 		this.selectionInfoLabel.setPadding(new Insets(1,5,2,10));
 		this.selectionInfoLabel.setFont(new Font(10.5));
 		this.propertiesNode = new VBox(scroller, spacer, this.selectionInfoLabel);
-//		this.propertiesNode = scroller;
 		
 		FadeTransition fadeIn  = new FadeTransition(Duration.millis(150));
 		FadeTransition fadeOut = new FadeTransition(Duration.millis(150));
@@ -1029,7 +1086,17 @@ public class UIObservationPropertiesPane {
 	private void updateTickLabels(LineChart<Number,Number> lineChart) {
 		NumberAxis xAxis = (NumberAxis)lineChart.getXAxis();
 		NumberAxis yAxis = (NumberAxis)lineChart.getYAxis();
+		double maxDistanceForUncertaintyChartView = this.options.convertLengthToView(this.maxDistanceForUncertaintyChart);
+		double min = maxDistanceForUncertaintyChartView * 0.05;
+		double max = Math.ceil((maxDistanceForUncertaintyChartView * 1.05)/10)*10;
 
+		xAxis.setLowerBound(0);
+		xAxis.setUpperBound(max);
+		xAxis.setTickUnit(max/10);
+		
+		int resolution = lineChart.getUserData() != null && lineChart.getUserData() instanceof UncertaintyRange ? ((UncertaintyRange)lineChart.getUserData()).resolution : -1;
+		String numberFormat = "%."+resolution+"f";
+		
 		CellValueType cellValueType;
 		switch(this.type) {
 		case DIRECTION_LEAF:
@@ -1047,7 +1114,7 @@ public class UIObservationPropertiesPane {
 		yAxis.setTickLabelFormatter(new StringConverter<Number>() {
 			@Override
 			public String toString(Number number) {
-				return options.toViewFormat(cellValueType, number.doubleValue(), false);
+				return (resolution < 0) ? options.toViewFormat(cellValueType, number.doubleValue(), false) : String.format(Locale.ENGLISH, numberFormat, number.doubleValue());
 			}
 
 			@Override
@@ -1059,7 +1126,7 @@ public class UIObservationPropertiesPane {
 		xAxis.setTickLabelFormatter(new StringConverter<Number>() {
 			@Override
 			public String toString(Number number) {
-				return (number.doubleValue() > maxDistanceForUncertaintyChart) ? "" : String.format(Locale.ENGLISH, "%.0f", number.doubleValue());
+				return (number.doubleValue() > (max - min)) ? "" : String.format(Locale.ENGLISH, "%.0f", number.doubleValue());
 			}
 
 			@Override
@@ -1111,8 +1178,17 @@ public class UIObservationPropertiesPane {
         if (group == null)
         	return;
 
-        for (double distanceInViewUnit = this.minDistanceForUncertaintyChart; distanceInViewUnit <= this.maxDistanceForUncertaintyChart; distanceInViewUnit += 0.25) {
-        	double distanceInModelUnit = options.convertLengthToModel(distanceInViewUnit); // distance in meter
+        double maxDistanceForUncertaintyChartView = this.options.convertLengthToView(this.maxDistanceForUncertaintyChart);
+        double min = maxDistanceForUncertaintyChartView * 0.05;
+        double max = Math.ceil((maxDistanceForUncertaintyChartView * 1.05)/10)*10 - min;
+        
+        double minUncertainty = Double.MAX_VALUE;
+        double maxUncertainty = -1;
+        
+        double inc = (max - min)/500;
+        for (double distanceInViewUnit = min; distanceInViewUnit <= max; distanceInViewUnit += inc) {
+        	double distanceInModelUnit = this.options.convertLengthToModel(distanceInViewUnit); // distance in meter
+        	
         	Observation observation = this.createObservation(this.type, distanceInModelUnit);
         	if (observation == null)
         		break;
@@ -1123,15 +1199,19 @@ public class UIObservationPropertiesPane {
         	switch(this.type) {
         	case DIRECTION_LEAF:
         	case ZENITH_ANGLE_LEAF:
-        		uncertaintyInViewUnit = options.convertAngleUncertaintyToView(uncertaintyInModelUnit);
+        		uncertaintyInViewUnit = this.options.convertAngleUncertaintyToView(uncertaintyInModelUnit);
         		break;
         	default:
-        		uncertaintyInViewUnit = options.convertLengthUncertaintyToView(uncertaintyInModelUnit);
+        		uncertaintyInViewUnit = this.options.convertLengthUncertaintyToView(uncertaintyInModelUnit);
         		break;
         	}
+        	
+        	minUncertainty = Math.min(minUncertainty, uncertaintyInViewUnit);
+        	maxUncertainty = Math.max(maxUncertainty, uncertaintyInViewUnit);
         	uncertaintyChartSeries.getData().add(new XYChart.Data<Number,Number>(distanceInViewUnit, uncertaintyInViewUnit));
         }
-
+        
+        this.lineChart.setUserData(new UncertaintyRange(minUncertainty, maxUncertainty));
         this.lineChart.getData().clear();
         this.lineChart.getData().add(uncertaintyChartSeries);
         

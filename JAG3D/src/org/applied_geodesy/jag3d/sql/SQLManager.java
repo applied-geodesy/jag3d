@@ -1989,10 +1989,6 @@ public class SQLManager {
 		UIObservationPropertiesPane propertiesPane = propertiesPaneBuilder.getObservationPropertiesPane(observationItemValue.getItemType());
 		propertiesPane.setTreeItemValue(observationItemValue.getName(), selectedObservationItemValues);
 
-		String sqlUncertainty = "SELECT \"type\", \"value\" "
-				+ "FROM \"ObservationGroupUncertainty\" "
-				+ "WHERE \"group_id\" = ?";
-
 		StringBuilder inArrayValues = new StringBuilder("?");
 		for (int i = 1; i < selectedObservationItemValues.length; i++)
 			inArrayValues.append(",?");
@@ -2005,10 +2001,29 @@ public class SQLManager {
 				+ "\"ObservationGroupUncertainty\".\"type\" = ? AND "
 				+ "CASEWHEN(GREATEST(?, \"value\") > 0, ABS(\"value\" - ?) / GREATEST(?, \"value\"), 0) < ?";
 		
+		String sqlMaxDistance = "SELECT " + 
+				"MAX(\"distance_0\") AS \"max_distance\" " + 
+				"FROM \"ObservationApriori\" " + 
+				"WHERE \"group_id\" IN (" + inArrayValues + ")";
+		
+		String sqlUncertainty = "SELECT \"type\", \"value\" "
+				+ "FROM \"ObservationGroupUncertainty\" "
+				+ "WHERE \"group_id\" = ?";
+		
+		PreparedStatement stmtDistance  = this.dataBase.getPreparedStatement(sqlMaxDistance);
 		PreparedStatement stmtIdentical = this.dataBase.getPreparedStatement(sqlIdentical);
 		int idx = 1;
-		for (int i = 0; i < selectedObservationItemValues.length; i++)
-			stmtIdentical.setInt(idx++, selectedObservationItemValues[i].getGroupId());
+		for (int i = 0; i < selectedObservationItemValues.length; i++) {
+			stmtDistance.setInt(idx, selectedObservationItemValues[i].getGroupId());
+			stmtIdentical.setInt(idx, selectedObservationItemValues[i].getGroupId());
+			idx++;
+		}
+		
+		ResultSet rsDistance = stmtDistance.executeQuery();
+		if (rsDistance.next()) {
+			double distance = rsDistance.getDouble("max_distance");
+			propertiesPane.setMaximumDistance(distance);
+		}
 		
 		PreparedStatement stmtUncertainty = this.dataBase.getPreparedStatement(sqlUncertainty);
 		stmtUncertainty.setInt(1, observationItemValue.getGroupId());
