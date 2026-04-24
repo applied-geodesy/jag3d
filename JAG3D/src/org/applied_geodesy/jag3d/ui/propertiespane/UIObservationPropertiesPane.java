@@ -97,6 +97,18 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 
 public class UIObservationPropertiesPane {
+	private class UncertaintyRange {
+		private int resolution;
+		
+		UncertaintyRange(double minUncertainty, double maxUncertainty) {		
+			double diff = (Math.abs(maxUncertainty - minUncertainty) > Math.sqrt(Constant.EPS)) ? Math.abs(maxUncertainty - minUncertainty) : Math.abs(maxUncertainty);
+			
+			int maxItr = 15;
+	        this.resolution = 0;
+	        while (maxItr-- > 0 && Math.rint(diff*Math.pow(10, this.resolution++)) == 0);
+		}
+		
+	}
 	private class TickFormatChangedListener implements FormatterChangedListener {
 		@Override
 		public void formatterChanged(FormatterEvent evt) {
@@ -674,18 +686,6 @@ public class UIObservationPropertiesPane {
 		uncertaintyTypeALabel.setLabelFor(this.zeroPointOffsetUncertaintyField);
 		uncertaintyTypeBLabel.setLabelFor(this.squareRootDistanceDependentUncertaintyField);
 		uncertaintyTypeCLabel.setLabelFor(this.distanceDependentUncertaintyField);
-				
-//		GridPane.setHgrow(uncertaintyTypeALabel, Priority.SOMETIMES);
-//		GridPane.setHgrow(this.zeroPointOffsetUncertaintyField, Priority.ALWAYS);
-//		GridPane.setHgrow(databaseTransactionUncertaintyTypeAProgressIndicator, Priority.NEVER);
-//		
-//		GridPane.setHgrow(uncertaintyTypeBLabel, Priority.SOMETIMES);
-//		GridPane.setHgrow(this.squareRootDistanceDependentUncertaintyField, Priority.ALWAYS);
-//		GridPane.setHgrow(databaseTransactionUncertaintyTypeBProgressIndicator, Priority.NEVER);
-//		
-//		GridPane.setHgrow(uncertaintyTypeCLabel, Priority.SOMETIMES);
-//		GridPane.setHgrow(this.distanceDependentUncertaintyField, Priority.ALWAYS);
-//		GridPane.setHgrow(databaseTransactionUncertaintyTypeCProgressIndicator, Priority.NEVER);
 		
 		gridPane.add(uncertaintyTypeALabel, 0, 0);
 		gridPane.add(this.zeroPointOffsetUncertaintyField, 1, 0);
@@ -780,7 +780,6 @@ public class UIObservationPropertiesPane {
 		this.selectionInfoLabel.setPadding(new Insets(1,5,2,10));
 		this.selectionInfoLabel.setFont(new Font(10.5));
 		this.propertiesNode = new VBox(scroller, spacer, this.selectionInfoLabel);
-//		this.propertiesNode = scroller;
 		
 		FadeTransition fadeIn  = new FadeTransition(Duration.millis(150));
 		FadeTransition fadeOut = new FadeTransition(Duration.millis(150));
@@ -1095,9 +1094,8 @@ public class UIObservationPropertiesPane {
 		xAxis.setUpperBound(max);
 		xAxis.setTickUnit(max/10);
 		
-		int exp = lineChart.getUserData() != null && lineChart.getUserData() instanceof Number ? ((Number)lineChart.getUserData()).intValue() : -1;
-
-		String numberFormat = "%."+exp+"f";
+		int resolution = lineChart.getUserData() != null && lineChart.getUserData() instanceof UncertaintyRange ? ((UncertaintyRange)lineChart.getUserData()).resolution : -1;
+		String numberFormat = "%."+resolution+"f";
 		
 		CellValueType cellValueType;
 		switch(this.type) {
@@ -1116,12 +1114,7 @@ public class UIObservationPropertiesPane {
 		yAxis.setTickLabelFormatter(new StringConverter<Number>() {
 			@Override
 			public String toString(Number number) {
-				if (exp < 0)
-					return options.toViewFormat(cellValueType, number.doubleValue(), false);
-//				else if (exp > 6)
-//					return String.format(Locale.ENGLISH, "%.6e", number.doubleValue());
-				else
-					return String.format(Locale.ENGLISH, numberFormat, number.doubleValue());
+				return (resolution < 0) ? options.toViewFormat(cellValueType, number.doubleValue(), false) : String.format(Locale.ENGLISH, numberFormat, number.doubleValue());
 			}
 
 			@Override
@@ -1218,11 +1211,7 @@ public class UIObservationPropertiesPane {
         	uncertaintyChartSeries.getData().add(new XYChart.Data<Number,Number>(distanceInViewUnit, uncertaintyInViewUnit));
         }
         
-        double diff = (Math.abs(maxUncertainty - minUncertainty) > Math.sqrt(Constant.EPS)) ? Math.abs(maxUncertainty - minUncertainty) : Math.abs(maxUncertainty);
-        int maxItr = 15;
-        int exp = 0;
-        while (maxItr-- > 0 && Math.rint(diff*Math.pow(10, exp++)) == 0);
-        this.lineChart.setUserData(Integer.valueOf(exp));
+        this.lineChart.setUserData(new UncertaintyRange(minUncertainty, maxUncertainty));
         this.lineChart.getData().clear();
         this.lineChart.getData().add(uncertaintyChartSeries);
         
