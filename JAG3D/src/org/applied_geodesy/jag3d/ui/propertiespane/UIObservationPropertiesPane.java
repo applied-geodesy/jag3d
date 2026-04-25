@@ -228,7 +228,7 @@ public class UIObservationPropertiesPane {
 	private ObservationTreeItemValue selectedObservationItemValues[] = null;
 	
 	private LineChart<Number,Number> lineChart;
-    private double maxDistanceForUncertaintyChart = 150;
+    private double maxDistanceForUncertaintyChart = 50;
 	
 	private FormatterOptions options = FormatterOptions.getInstance();
 
@@ -368,7 +368,7 @@ public class UIObservationPropertiesPane {
 	public boolean setMaximumDistance(double value) {
 		try {
 			this.ignoreValueUpdate = true;
-			this.maxDistanceForUncertaintyChart = value < 1 ? 150 : Math.max(10, value);
+			this.maxDistanceForUncertaintyChart = Math.max(1, value);
 			this.updateUncertaintyChart(this.lineChart);
 			this.updateTickLabels(this.lineChart);
 		}
@@ -731,7 +731,8 @@ public class UIObservationPropertiesPane {
 
 	private Node createUncertaintyChartPane() {
 		double maxDistanceForUncertaintyChartView = this.options.convertLengthToView(this.maxDistanceForUncertaintyChart);
-		double max = Math.ceil((maxDistanceForUncertaintyChartView * 1.05)/10)*10;
+		double max = Math.ceil(Math.ceil(maxDistanceForUncertaintyChartView/10)/5)*50;
+		
 		NumberAxis xAxis = new NumberAxis(0, max, max/10);
         NumberAxis yAxis = new NumberAxis();
         
@@ -1087,9 +1088,8 @@ public class UIObservationPropertiesPane {
 		NumberAxis xAxis = (NumberAxis)lineChart.getXAxis();
 		NumberAxis yAxis = (NumberAxis)lineChart.getYAxis();
 		double maxDistanceForUncertaintyChartView = this.options.convertLengthToView(this.maxDistanceForUncertaintyChart);
-		double min = maxDistanceForUncertaintyChartView * 0.05;
-		double max = Math.ceil((maxDistanceForUncertaintyChartView * 1.05)/10)*10;
-
+		double max = Math.ceil(Math.ceil(maxDistanceForUncertaintyChartView/10)/5)*50;
+		
 		xAxis.setLowerBound(0);
 		xAxis.setUpperBound(max);
 		xAxis.setTickUnit(max/10);
@@ -1126,7 +1126,7 @@ public class UIObservationPropertiesPane {
 		xAxis.setTickLabelFormatter(new StringConverter<Number>() {
 			@Override
 			public String toString(Number number) {
-				return (number.doubleValue() > (max - min)) ? "" : String.format(Locale.ENGLISH, "%.0f", number.doubleValue());
+				return (number.doubleValue() > (max - 5)) ? "" : String.format(Locale.ENGLISH, "%.0f", number.doubleValue());
 			}
 
 			@Override
@@ -1179,8 +1179,8 @@ public class UIObservationPropertiesPane {
         	return;
 
         double maxDistanceForUncertaintyChartView = this.options.convertLengthToView(this.maxDistanceForUncertaintyChart);
-        double min = maxDistanceForUncertaintyChartView * 0.05;
-        double max = Math.ceil((maxDistanceForUncertaintyChartView * 1.05)/10)*10 - min;
+        double max = 0.975 * Math.ceil(Math.ceil(maxDistanceForUncertaintyChartView/10)/5)*50;
+		double min = 0.025 * max;
         
         double minUncertainty = Double.MAX_VALUE;
         double maxUncertainty = -1;
