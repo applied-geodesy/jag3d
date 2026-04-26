@@ -1980,7 +1980,7 @@ public class SQLManager {
 			tableBuilder.getTableModel(table).setAll(tableBuilder.getEmptyRow());
 		table.sort();
 	}
-
+	
 	private void loadUncertainties(ObservationTreeItemValue observationItemValue, ObservationTreeItemValue... selectedObservationItemValues) throws SQLException {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return;
@@ -1993,6 +1993,20 @@ public class SQLManager {
 		for (int i = 1; i < selectedObservationItemValues.length; i++)
 			inArrayValues.append(",?");
 		
+		String sqlDistance;
+		if (TreeItemType.isGNSSObservationTypeLeaf(observationItemValue.getItemType())) {
+			sqlDistance = "SELECT " + 
+					"MAX(GREATEST(ABS(\"y0\"), ABS(\"x0\"), ABS(\"z0\"))) AS \"max_distance\" " +  
+					"FROM \"GNSSObservationApriori\" " + 
+					"WHERE \"group_id\" IN (" + inArrayValues + ")";
+		}
+		else {
+			sqlDistance = "SELECT " + 
+					"MAX(\"distance_0\") AS \"max_distance\" " + 
+					"FROM \"ObservationApriori\" " + 
+					"WHERE \"group_id\" IN (" + inArrayValues + ")";
+		}
+		
 		String sqlIdentical = "SELECT "
 				+ "COUNT(\"value\") AS \"counter\" "
 				+ "FROM \"ObservationGroupUncertainty\" "
@@ -2001,24 +2015,18 @@ public class SQLManager {
 				+ "\"ObservationGroupUncertainty\".\"type\" = ? AND "
 				+ "CASEWHEN(GREATEST(?, \"value\") > 0, ABS(\"value\" - ?) / GREATEST(?, \"value\"), 0) < ?";
 		
-		String sqlMaxDistance = "SELECT " + 
-				"MAX(\"distance_0\") AS \"max_distance\" " + 
-				"FROM \"ObservationApriori\" " + 
-				"WHERE \"group_id\" IN (" + inArrayValues + ")";
-		
 		String sqlUncertainty = "SELECT \"type\", \"value\" "
 				+ "FROM \"ObservationGroupUncertainty\" "
 				+ "WHERE \"group_id\" = ?";
 		
-		PreparedStatement stmtDistance  = this.dataBase.getPreparedStatement(sqlMaxDistance);
+		PreparedStatement stmtDistance = this.dataBase.getPreparedStatement(sqlDistance);
 		PreparedStatement stmtIdentical = this.dataBase.getPreparedStatement(sqlIdentical);
 		int idx = 1;
 		for (int i = 0; i < selectedObservationItemValues.length; i++) {
-			stmtDistance.setInt(idx, selectedObservationItemValues[i].getGroupId());
-			stmtIdentical.setInt(idx, selectedObservationItemValues[i].getGroupId());
-			idx++;
+			stmtDistance.setInt(idx,    selectedObservationItemValues[i].getGroupId());
+			stmtIdentical.setInt(idx++, selectedObservationItemValues[i].getGroupId());	
 		}
-		
+
 		ResultSet rsDistance = stmtDistance.executeQuery();
 		if (rsDistance.next()) {
 			double distance = rsDistance.getDouble("max_distance");
