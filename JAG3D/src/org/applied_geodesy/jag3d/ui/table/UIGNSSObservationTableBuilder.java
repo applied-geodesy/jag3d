@@ -35,6 +35,8 @@ import java.util.Map;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dnd.GNSSObservationRowDnD;
+import org.applied_geodesy.jag3d.ui.propertiespane.UIObservationPropertiesPane;
+import org.applied_geodesy.jag3d.ui.propertiespane.UIObservationPropertiesPaneBuilder;
 import org.applied_geodesy.jag3d.ui.table.column.ColumnContentType;
 import org.applied_geodesy.jag3d.ui.table.column.TableContentType;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
@@ -629,7 +631,8 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 			break;
 		case 3:
 			if (newValue != null && newValue instanceof Double) {
-				rowData.setYApriori((Double)newValue);	
+				rowData.setYApriori((Double)newValue);
+				this.updateMaximumDistanceApriori();
 				valid = true;
 			}
 			else
@@ -637,7 +640,8 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 			break;
 		case 4:
 			if (newValue != null && newValue instanceof Double) {
-				rowData.setXApriori((Double)newValue);	
+				rowData.setXApriori((Double)newValue);
+				this.updateMaximumDistanceApriori();
 				valid = true;
 			}
 			else
@@ -645,7 +649,8 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 			break;
 		case 5:
 			if (newValue != null && newValue instanceof Double) {
-				rowData.setZApriori((Double)newValue);	
+				rowData.setZApriori((Double)newValue);
+				this.updateMaximumDistanceApriori();
 				valid = true;
 			}
 			else
@@ -706,6 +711,23 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 				    table.sort();
 //			}
 //		});
+	}
+	
+	private void updateMaximumDistanceApriori() {
+		double maxDistance = 0;
+		ObservableList<GNSSObservationRow> items = this.getTableModel(this.table);
+		for (GNSSObservationRow gnssRow : items) {
+			double dX = gnssRow.getXApriori() != null ? gnssRow.getXApriori().doubleValue() : 0;
+			double dY = gnssRow.getYApriori() != null ? gnssRow.getYApriori().doubleValue() : 0;
+			double dZ = gnssRow.getZApriori() != null ? gnssRow.getZApriori().doubleValue() : 0;
+			
+			maxDistance = Math.max(maxDistance, Math.abs(dX));
+			maxDistance = Math.max(maxDistance, Math.abs(dY));
+			maxDistance = Math.max(maxDistance, Math.abs(dZ));
+		}
+		UIObservationPropertiesPaneBuilder propertiesPaneBuilder = UIObservationPropertiesPaneBuilder.getInstance();
+		UIObservationPropertiesPane propertiesPane = propertiesPaneBuilder.getObservationPropertiesPane(this.observationItemValue.getItemType());
+		propertiesPane.setMaximumDistance(maxDistance);
 	}
 
 	@Override

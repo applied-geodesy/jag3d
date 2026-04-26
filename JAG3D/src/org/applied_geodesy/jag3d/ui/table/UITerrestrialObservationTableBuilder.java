@@ -35,6 +35,8 @@ import java.util.Map;
 import org.applied_geodesy.adjustment.network.ObservationType;
 import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.dnd.TerrestrialObservationRowDnD;
+import org.applied_geodesy.jag3d.ui.propertiespane.UIObservationPropertiesPane;
+import org.applied_geodesy.jag3d.ui.propertiespane.UIObservationPropertiesPaneBuilder;
 import org.applied_geodesy.jag3d.ui.table.column.ColumnContentType;
 import org.applied_geodesy.jag3d.ui.table.column.TableContentType;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
@@ -726,6 +728,7 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 			break;
 		case 7:
 			rowData.setDistanceApriori(newValue == null ? null : newValue instanceof Double && (Double)newValue > 0 ? (Double)newValue : null);
+			this.updateMaximumDistanceApriori();
 			valid = true;
 			break;
 		default:
@@ -773,6 +776,19 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 //		});
 	}
 	
+	private void updateMaximumDistanceApriori() {
+		double maxDistance = 0;
+		ObservableList<TerrestrialObservationRow> items = this.getTableModel(this.table);
+		for (TerrestrialObservationRow observationRow : items) {
+			Double distance = observationRow.getDistanceApriori();
+			if (distance != null && distance.doubleValue() > 0)
+				maxDistance = Math.max(maxDistance, distance.doubleValue());
+		}
+		UIObservationPropertiesPaneBuilder propertiesPaneBuilder = UIObservationPropertiesPaneBuilder.getInstance();
+		UIObservationPropertiesPane propertiesPane = propertiesPaneBuilder.getObservationPropertiesPane(this.observationItemValue.getItemType());
+		propertiesPane.setMaximumDistance(maxDistance);
+	}
+	
 	private boolean isComplete(TerrestrialObservationRow row) {
 		return row.getStartPointName() != null && !row.getStartPointName().isBlank() &&
 				row.getEndPointName() != null  && !row.getEndPointName().isBlank() &&
@@ -785,9 +801,9 @@ public class UITerrestrialObservationTableBuilder extends UIEditableTableBuilder
 	@Override
 	public TerrestrialObservationRow getEmptyRow() {
 		TerrestrialObservationRow emptyRow = new TerrestrialObservationRow();
+		ObservableList<TerrestrialObservationRow> items = this.getTableModel(this.table);
 		// use the start point name of an existing row as default value, if observations are set of directions
-		if (this.type == ObservationType.DIRECTION && !this.table.getItems().isEmpty()) {
-			List<TerrestrialObservationRow> items = this.table.getItems();
+		if (this.type == ObservationType.DIRECTION && !items.isEmpty()) {
 			String startPointName = null;
 			for (TerrestrialObservationRow observationRow : items) {
 				if (!this.isComplete(observationRow))
