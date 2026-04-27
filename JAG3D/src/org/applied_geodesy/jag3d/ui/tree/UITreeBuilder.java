@@ -388,7 +388,7 @@ public class UITreeBuilder {
 
 		this.directoryItemMap.get(parentType).getChildren().add(newItem);
 		this.treeView.getSelectionModel().clearSelection();
-		
+
 		this.expand(newItem, true);
 		if (select)
 			this.treeView.getSelectionModel().select(newItem);
@@ -430,18 +430,19 @@ public class UITreeBuilder {
 		
 		if (parentType == null || !this.directoryItemMap.containsKey(parentType))
 			return;
-
-		if (this.remove(itemValue)) {
-			try {
-				setIgnoreEvent(true);
+		
+		try {
+			if (this.remove(itemValue)) {
+				this.setIgnoreEvent(true);
 				CheckBoxTreeItem<TreeItemValue> parent = this.directoryItemMap.get(parentType); 
 				parent.getChildren().remove(treeItem);
 				updateSelectionStageOfParentNode(parent);
 			}
-			finally {
-				setIgnoreEvent(false);
-			}
 		}
+		finally {
+			this.setIgnoreEvent(false);
+		}
+
 	}
 
 	public void moveItems(TreeItemType newItemType, List<TreeItem<TreeItemValue>> selectedItems) {
@@ -471,7 +472,7 @@ public class UITreeBuilder {
 								itemValue.setItemType(oldItemType);
 								continue;
 							}
-							lastItem = selectedItem;
+							lastItem = selectedItem != null ? selectedItem : null;
 							CheckBoxTreeItem<TreeItemValue> oldParent = this.directoryItemMap.get(oldParentType);
 							// Remove Item
 							oldParent.getChildren().remove(selectedItem);
@@ -479,17 +480,26 @@ public class UITreeBuilder {
 							// add Item
 							newParent.getChildren().add(selectedItem);
 							//updateSelectionStageOfParentNode(newParent);
-							expand(selectedItem, true);
+							//expand(selectedItem, true);
 						}
 					}
 				}
-				if (lastItem != null)
+				if (lastItem != null) {
 					updateSelectionStageOfParentNode(newParent);
+					expand(lastItem, true);	
+				}
 			}
 			finally {
 				setIgnoreEvent(false);
-				if (lastItem != null)
-					this.treeView.getSelectionModel().select(lastItem);
+				if (lastItem != null) {
+					final TreeItem<TreeItemValue> item = lastItem;
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {	
+							treeView.getSelectionModel().select(item);    	
+						}
+					});
+				}
 			}
 		}
 	}
@@ -731,15 +741,15 @@ public class UITreeBuilder {
 		}
 	}
 
-	final BooleanProperty ignoreEventProperty() {
+	private final BooleanProperty ignoreEventProperty() {
 		return this.ignoreEvent;
 	}
 
-	final boolean isIgnoreEvent() {
+	private final boolean isIgnoreEvent() {
 		return this.ignoreEventProperty().get();
 	}
 
-	final void setIgnoreEvent(final boolean ignoreEvent) {
+	private final void setIgnoreEvent(final boolean ignoreEvent) {
 		this.ignoreEventProperty().set(ignoreEvent);
 	}
 	

@@ -54,6 +54,7 @@ import org.applied_geodesy.ui.table.ColumnType;
 import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -754,7 +755,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 	    		if (row.isEmpty())
 	    			return;
 
-	    		List<GNSSObservationRow> selectedRows = new ArrayList<GNSSObservationRow>(table.getSelectionModel().getSelectedItems());
+	    		final List<GNSSObservationRow> selectedRows = new ArrayList<GNSSObservationRow>(table.getSelectionModel().getSelectedItems());
 	    		if (selectedRows == null || selectedRows.isEmpty())
 	    			return;
 
@@ -779,7 +780,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 
 	    			db.setContent(content);
 
-	    			event.consume(); // Nur hier konsumieren!
+	    			event.consume();
 	    		}
 	    	}
 	    });
@@ -789,7 +790,7 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 	
 	@Override
 	void duplicateRows() {
-		List<GNSSObservationRow> selectedRows = new ArrayList<GNSSObservationRow>(this.table.getSelectionModel().getSelectedItems());
+		final List<GNSSObservationRow> selectedRows = new ArrayList<GNSSObservationRow>(this.table.getSelectionModel().getSelectedItems());
 		if (selectedRows == null || selectedRows.isEmpty())
 			return;
 
@@ -809,18 +810,23 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		}
 
 		if (clonedRows != null && !clonedRows.isEmpty()) {
-			ObservableList<GNSSObservationRow> tableModel = this.getTableModel(this.table);
-			tableModel.addAll(clonedRows);
-			this.table.getSelectionModel().clearSelection();
-			for (GNSSObservationRow clonedRow : clonedRows)
-				this.table.getSelectionModel().select(clonedRow);
-			this.table.scrollTo(clonedRows.get(0));
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {	
+					ObservableList<GNSSObservationRow> tableModel = getTableModel(table);
+					tableModel.addAll(clonedRows);
+					table.getSelectionModel().clearSelection();
+					for (GNSSObservationRow clonedRow : clonedRows)
+						table.getSelectionModel().select(clonedRow);
+					table.scrollTo(clonedRows.get(0));
+				}
+			});
 		}
 	}
 	
 	@Override
 	void removeRows() {
-		List<GNSSObservationRow> selectedRows = new ArrayList<GNSSObservationRow>(this.table.getSelectionModel().getSelectedItems());
+		final List<GNSSObservationRow> selectedRows = new ArrayList<GNSSObservationRow>(this.table.getSelectionModel().getSelectedItems());
 		if (selectedRows == null || selectedRows.isEmpty())
 			return;
 		
@@ -838,11 +844,16 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 			removedRows.add(row);
 		}
 		if (removedRows != null && !removedRows.isEmpty()) {
-			this.table.getSelectionModel().clearSelection();
-			ObservableList<GNSSObservationRow> tableModel = this.getTableModel(this.table);
-			tableModel.removeAll(removedRows);
-			if (tableModel.isEmpty())
-				tableModel.setAll(getEmptyRow());
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {	
+					table.getSelectionModel().clearSelection();
+					ObservableList<GNSSObservationRow> tableModel = getTableModel(table);
+					tableModel.removeAll(removedRows);
+					if (tableModel.isEmpty())
+						tableModel.setAll(getEmptyRow());
+				}
+			});
 		}
 	}
 	
@@ -851,12 +862,13 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 		if (type != ContextMenuItemType.MOVETO)
 			return;
 		
-		List<GNSSObservationRow> selectedRows = new ArrayList<GNSSObservationRow>(this.table.getSelectionModel().getSelectedItems());
-		if (selectedRows == null || selectedRows.isEmpty())
+		final List<GNSSObservationRow> selectedRows = new ArrayList<GNSSObservationRow>(this.table.getSelectionModel().getSelectedItems());
+		TreeItemType parentType = TreeItemType.getDirectoryByLeafType(this.observationItemValue.getItemType());
+		
+		if (parentType == null || selectedRows == null || selectedRows.isEmpty())
 			return;
 		
-		TreeItemType parentType = TreeItemType.getDirectoryByLeafType(this.observationItemValue.getItemType());
-		TreeItem<TreeItemValue> newTreeItem = UITreeBuilder.getInstance().addItem(parentType, false);
+		final TreeItem<TreeItemValue> newTreeItem = UITreeBuilder.getInstance().addItem(parentType, false);
 		try {
 			SQLManager.getInstance().saveGroup((ObservationTreeItemValue)newTreeItem.getValue());		
 		} catch (Exception e) {
@@ -879,9 +891,14 @@ public class UIGNSSObservationTableBuilder extends UIEditableTableBuilder<GNSSOb
 			return;
 		}
 		
-		MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
-		selectionModel.clearSelection();
-		selectionModel.select(newTreeItem);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {	
+				MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
+				selectionModel.clearSelection();
+				selectionModel.select(newTreeItem);
+			}
+		});
 	}
 	
 	public void export(File file, boolean aprioriValues) throws IOException {

@@ -51,6 +51,7 @@ import org.applied_geodesy.ui.table.ColumnType;
 import org.applied_geodesy.ui.table.NaturalOrderTableColumnComparator;
 import org.applied_geodesy.util.CellValueType;
 
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -526,7 +527,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 	    		if (row.isEmpty())
 	    			return;
 
-	    		List<CongruenceAnalysisRow> selectedRows = new ArrayList<CongruenceAnalysisRow>(table.getSelectionModel().getSelectedItems());
+	    		final List<CongruenceAnalysisRow> selectedRows = new ArrayList<CongruenceAnalysisRow>(table.getSelectionModel().getSelectedItems());
 	    		if (selectedRows == null || selectedRows.isEmpty())
 	    			return;
 
@@ -551,7 +552,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 
 	    			db.setContent(content);
 
-	    			event.consume(); // Nur hier konsumieren!
+	    			event.consume();
 	    		}
 	    	}
 	    });
@@ -561,7 +562,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 	
 	@Override
 	void duplicateRows() {
-		List<CongruenceAnalysisRow> selectedRows = new ArrayList<CongruenceAnalysisRow>(this.table.getSelectionModel().getSelectedItems());
+		final List<CongruenceAnalysisRow> selectedRows = new ArrayList<CongruenceAnalysisRow>(this.table.getSelectionModel().getSelectedItems());
 		if (selectedRows == null || selectedRows.isEmpty())
 			return;
 
@@ -598,7 +599,7 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 	
 	@Override
 	void removeRows() {
-		List<CongruenceAnalysisRow> selectedRows = new ArrayList<CongruenceAnalysisRow>(this.table.getSelectionModel().getSelectedItems());
+		final List<CongruenceAnalysisRow> selectedRows = new ArrayList<CongruenceAnalysisRow>(this.table.getSelectionModel().getSelectedItems());
 		if (selectedRows == null || selectedRows.isEmpty())
 			return;
 		
@@ -630,12 +631,13 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 		if (type != ContextMenuItemType.MOVETO)
 			return;
 				
-		List<CongruenceAnalysisRow> selectedRows = new ArrayList<CongruenceAnalysisRow>(this.table.getSelectionModel().getSelectedItems());
-		if (selectedRows == null || selectedRows.isEmpty())
+		final List<CongruenceAnalysisRow> selectedRows = new ArrayList<CongruenceAnalysisRow>(this.table.getSelectionModel().getSelectedItems());
+		TreeItemType parentType = TreeItemType.getDirectoryByLeafType(this.congruenceAnalysisItemValue.getItemType());
+		
+		if (parentType == null || selectedRows == null || selectedRows.isEmpty())
 			return;
 		
-		TreeItemType parentType = TreeItemType.getDirectoryByLeafType(this.congruenceAnalysisItemValue.getItemType());
-		TreeItem<TreeItemValue> newTreeItem = UITreeBuilder.getInstance().addItem(parentType, false);
+		final TreeItem<TreeItemValue> newTreeItem = UITreeBuilder.getInstance().addItem(parentType, false);
 		try {
 			SQLManager.getInstance().saveGroup((CongruenceAnalysisTreeItemValue)newTreeItem.getValue());
 		} 
@@ -658,10 +660,15 @@ public class UICongruenceAnalysisTableBuilder extends UIEditableTableBuilder<Con
 			e.printStackTrace();
 			return;
 		}
-		
-		MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
-		selectionModel.clearSelection();
-		selectionModel.select(newTreeItem);
+
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {	
+				MultipleSelectionModel<TreeItem<TreeItemValue>> selectionModel = UITreeBuilder.getInstance().getTree().getSelectionModel();
+				selectionModel.clearSelection();
+				selectionModel.select(newTreeItem);
+			}
+		});
 	}
 	
 	public void export(File file, boolean aprioriValues) throws IOException {
