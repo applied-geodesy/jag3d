@@ -59,6 +59,8 @@ Diagnosis adjustment of planned networks as well as the analysis of existing geo
 
 # References
 
+- Lösler, M., Eschelbach, C., Mähler, S., Guillory, J., Truong, D., Wallerand, J.-P.: Operator-Software Impact in Local Tie Networks: Case study at Geodetic Observatory Wettzell. Applied Geomatics, 15, pp. 77-95, 2023. DOI: [10.1007/s12518-022-00477-5](https://10.1007/s12518-022-00477-5)
+
 - Heißelmann, D., Franke, M.: Java·Applied·Geodesy·3D - Evaluation software based on least-squares method for coordinate measuring machines. Traceability for Computational-Intensive Metrology, No. Y4QG8HDUOS76HT5S, Physikalisch-Technische Bundesanstalt, Braunschweig, 2023. [10.5281/zenodo.8217114](https://doi.org/10.5281/zenodo.8217114)
 
 - Lösler, M.: Evaluation of Compatibility among Network Adjustment Software - Results from the JAG3D software package. Data-Set, 2023. [10.5281/zenodo.7468733](https://doi.org/10.5281/zenodo.7468733)
