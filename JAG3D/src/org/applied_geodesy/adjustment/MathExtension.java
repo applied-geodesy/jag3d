@@ -45,6 +45,25 @@ public final class MathExtension {
 	}
 	
 	/**
+	 * Bestimmt den Binomialkoeffizienten n ueber k, d.h. <code>n! / (k!*(n-k)!)</code>
+	 * @param n
+	 * @param k
+	 * @return binomial
+	 */
+	public static long binomial(int n, int k) {
+		if (k < 0 || k > n) 
+			return 0;
+
+		if (k > n - k) 
+			k = n - k;
+
+		long result = 1;
+		for (int i = 1; i <= k; i++)
+			result = result * (n - k + i) / i;
+		return result;
+	}
+	
+	/**
 	 * Liefert in Abhaengigkeit vom Vorzeichen von b den Wert a positiv oder negativ.
 	 * Das Vorzeichen von a wird ignoriert.
 	 * @param a
