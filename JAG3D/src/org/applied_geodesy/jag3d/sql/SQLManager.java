@@ -310,7 +310,6 @@ public class SQLManager {
 			}
 
 			if (databaseVersion > Version.get(VersionType.DATABASE)) {
-				//this.closeDataBase();
 				throw new DatabaseVersionMismatchException("Error, database version of the stored project is greater than accepted database version of the application: " + databaseVersion + " > " +  Version.get(VersionType.DATABASE));
 			}
 			
@@ -340,6 +339,8 @@ public class SQLManager {
 			stmt.execute();
 
 		}
+		else
+			throw new SQLException(this.getClass().getSimpleName() + " : Error, could not detect database version. Database update failed!");
 	}
 
 	private boolean isOADBVersionFX() throws SQLException {
