@@ -21,6 +21,7 @@
 
 package org.applied_geodesy.coordtrans.ui.io.writer;
 
+import java.awt.Desktop;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URL;
@@ -146,8 +147,19 @@ public class FTLReport {
 			this.template.process(this.data, writer);
 			writer.flush();
 
-			if (hostServices != null && openFile)
-				hostServices.showDocument(report.toAbsolutePath().normalize().toString());
+			if (openFile && Files.exists(report)) {
+				if (Desktop.isDesktopSupported()) {
+					try {
+						Desktop desktop = Desktop.getDesktop();
+						if (desktop.isSupported(Desktop.Action.OPEN)) {
+							desktop.open(report.toAbsolutePath().normalize().toFile());
+							openFile = false;
+						}
+					} catch (Exception e) {}
+				}
+				if (openFile && hostServices != null)
+					hostServices.showDocument(report.toAbsolutePath().normalize().toUri().toString());
+			}
 		}
 	}
 
