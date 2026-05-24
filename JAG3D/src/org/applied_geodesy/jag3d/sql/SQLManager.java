@@ -4636,11 +4636,11 @@ public class SQLManager {
 			UITreeBuilder treeBuilder = UITreeBuilder.getInstance();
 			TreeItemType[] itemTypes = TreeItemType.values();
 			for (TreeItemType itemType : itemTypes) {
-				if (TreeItemType.isPointTypeDirectory(itemType) && scopeType == ScopeType.PROJECT ||
-						TreeItemType.isObservationTypeDirectory(itemType) ||
-						TreeItemType.isGNSSObservationTypeDirectory(itemType) ||
-						TreeItemType.isVerticalDeflectionTypeDirectory(itemType) && scopeType == ScopeType.PROJECT ||
-						TreeItemType.isCongruenceAnalysisTypeDirectory(itemType) && scopeType == ScopeType.PROJECT) {
+				if (TreeItemType.isObservationTypeDirectory(itemType) || 
+						TreeItemType.isGNSSObservationTypeDirectory(itemType) || 
+						TreeItemType.isCongruenceAnalysisTypeDirectory(itemType) || 
+						TreeItemType.isPointTypeDirectory(itemType) && scopeType == ScopeType.PROJECT || 
+						TreeItemType.isVerticalDeflectionTypeDirectory(itemType) && scopeType == ScopeType.PROJECT) {
 
 					TreeItem<TreeItemValue> parent = treeBuilder.getDirectoryItemByType(itemType);
 
@@ -4953,11 +4953,28 @@ public class SQLManager {
 		if (!this.hasDatabase() || !this.dataBase.isOpen())
 			return 0;
 		
-		String sql = "SELECT "
-				+ "\"id\", \"start_point_name\", \"end_point_name\" "
-				+ "FROM \"CongruenceAnalysisPointPairApriori\" "
-				+ "WHERE \"group_id\" = ? "
-				+ "AND (REGEXP_MATCHES(\"start_point_name\", ?) OR REGEXP_MATCHES(\"end_point_name\", ?))"; 
+		String sql;
+		if (scopeType == ScopeType.REFERENCE_EPOCH) {
+			sql = "SELECT "
+					+ "\"id\", \"start_point_name\", \"end_point_name\" "
+					+ "FROM \"CongruenceAnalysisPointPairApriori\" "
+					+ "WHERE \"group_id\" = ? "
+					+ "AND (REGEXP_MATCHES(\"start_point_name\", ?) OR REGEXP_MATCHES(\"start_point_name\", ?))"; 
+		}
+		else if (scopeType == ScopeType.CONTROL_EPOCH) {
+			sql = "SELECT "
+					+ "\"id\", \"start_point_name\", \"end_point_name\" "
+					+ "FROM \"CongruenceAnalysisPointPairApriori\" "
+					+ "WHERE \"group_id\" = ? "
+					+ "AND (REGEXP_MATCHES(\"end_point_name\", ?) OR REGEXP_MATCHES(\"end_point_name\", ?))"; 
+		}
+		else {
+			sql = "SELECT "
+					+ "\"id\", \"start_point_name\", \"end_point_name\" "
+					+ "FROM \"CongruenceAnalysisPointPairApriori\" "
+					+ "WHERE \"group_id\" = ? "
+					+ "AND (REGEXP_MATCHES(\"start_point_name\", ?) OR REGEXP_MATCHES(\"end_point_name\", ?))";
+		}
 
 		int cnt = 0;
 		for (CongruenceAnalysisTreeItemValue congruenceAnalysisTreeItemValue : selectedTreeItemValues) {
@@ -4976,8 +4993,8 @@ public class SQLManager {
 				String oldStartPointName = rs.getString("start_point_name");
 				String oldEndPointName   = rs.getString("end_point_name");
 				
-				String newStartPointName = oldStartPointName.replaceFirst(searchRegex, replaceRegex);
-				String newEndPointName   = oldEndPointName.replaceFirst(searchRegex, replaceRegex);
+				String newStartPointName = scopeType != ScopeType.CONTROL_EPOCH ? oldStartPointName.replaceFirst(searchRegex, replaceRegex) : oldStartPointName;
+				String newEndPointName   = scopeType != ScopeType.REFERENCE_EPOCH ? oldEndPointName.replaceFirst(searchRegex, replaceRegex) : oldEndPointName;
 				
 				newStartPointName = newStartPointName.substring(0, Math.min(newStartPointName.length(), 255));
 				newEndPointName   = newEndPointName.substring(0, Math.min(newEndPointName.length(), 255));
