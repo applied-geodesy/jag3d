@@ -296,9 +296,9 @@ public class SearchAndReplaceDialog {
 				case PROJECT:
 					return i18n.getString("SearchAndReplaceDialog.scope.project.label", "Whole project");
 				case REFERENCE_EPOCH:
-					return i18n.getString("SearchAndReplaceDialog.scope.reference_epoch.label", "Observations of reference epoch");
+					return i18n.getString("SearchAndReplaceDialog.scope.reference_epoch.label", "Data of reference epoch");
 				case CONTROL_EPOCH:
-					return i18n.getString("SearchAndReplaceDialog.scope.control_epoch.label", "Observations of control epoch");
+					return i18n.getString("SearchAndReplaceDialog.scope.control_epoch.label", "Data of control epoch");
 				}
 				return null;
 			}
