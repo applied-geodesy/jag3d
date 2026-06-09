@@ -468,6 +468,7 @@ public class UIMenuBuilder {
 		MenuItem gsi2DHFileItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.hexagon.gsi.2dh.label", "GSI 2D+H"), true, MenuItemType.IMPORT_GSI2DH, null, this.menuEventHandler, true);
 		MenuItem gsi3DFileItem  = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.hexagon.gsi.3d.label",  "GSI 3D"),   true, MenuItemType.IMPORT_GSI3D,  null, this.menuEventHandler, true);
 
+		MenuItem hexml1DFileItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.hexagon.landxml.1d.label", "LandXML 1.2 1D"), true, MenuItemType.IMPORT_LAND_XML1D, null, this.menuEventHandler, true);
 		MenuItem hexml2DFileItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.hexagon.landxml.2d.label", "LandXML 1.2 2D"), true, MenuItemType.IMPORT_LAND_XML2D, null, this.menuEventHandler, true);
 		MenuItem hexml3DFileItem = createMenuItem(i18n.getString("UIMenuBuilder.menu.import.hexagon.landxml.3d.label", "LandXML 1.2 3D"), true, MenuItemType.IMPORT_LAND_XML3D, null, this.menuEventHandler, true);
 
@@ -492,6 +493,7 @@ public class UIMenuBuilder {
 				gsi2DHFileItem,
 				gsi3DFileItem,
 				new SeparatorMenuItem(),
+				hexml1DFileItem,
 				hexml2DFileItem,
 				hexml3DFileItem
 				);
@@ -986,6 +988,9 @@ public class UIMenuBuilder {
 			this.importFile(new JobXMLFileReader(DimensionType.SPATIAL), JobXMLFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.jobxml.3d.title", "Import 3D data from JobXML files"));
 			break;
 
+		case IMPORT_LAND_XML1D:
+			this.importFile(new HeXMLFileReader(DimensionType.HEIGHT), HeXMLFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.landxml.1d.title", "Import 1D data from LandXML/HeXML files"));
+			break;
 		case IMPORT_LAND_XML2D:
 			this.importFile(new HeXMLFileReader(DimensionType.PLAN), HeXMLFileReader.getExtensionFilters(), i18n.getString("UIMenuBuilder.filechooser.import.landxml.2d.title", "Import 2D data from LandXML/HeXML files"));
 			break;

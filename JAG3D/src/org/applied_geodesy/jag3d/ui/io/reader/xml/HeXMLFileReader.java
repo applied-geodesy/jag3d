@@ -44,6 +44,7 @@ import org.applied_geodesy.jag3d.sql.SQLManager;
 import org.applied_geodesy.jag3d.ui.i18n.I18N;
 import org.applied_geodesy.jag3d.ui.io.reader.DimensionType;
 import org.applied_geodesy.jag3d.ui.io.reader.ImportOption;
+import org.applied_geodesy.jag3d.ui.io.reader.LevelingData;
 import org.applied_geodesy.jag3d.ui.table.row.GNSSObservationRow;
 import org.applied_geodesy.jag3d.ui.table.row.PointRow;
 import org.applied_geodesy.jag3d.ui.table.row.TerrestrialObservationRow;
@@ -100,6 +101,7 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 	
 	private List<TerrestrialObservationRow> slopeDistances = null;
 	private List<TerrestrialObservationRow> zenithAngles   = null;
+	private List<TerrestrialObservationRow> leveling       = null;
 	
 	private List<PointRow> points2d = null;
 	private List<PointRow> points3d = null;
@@ -111,13 +113,13 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 	private TreeItem<TreeItemValue> lastTreeItem = null;
 	
 	public HeXMLFileReader(DimensionType dim) {
-		this.dim = dim == DimensionType.PLAN ? DimensionType.PLAN : DimensionType.SPATIAL;
+		this.dim = dim == DimensionType.HEIGHT ? DimensionType.HEIGHT : dim == DimensionType.PLAN ? DimensionType.PLAN : DimensionType.SPATIAL;
 		this.reset();
 	}
 	
 	public HeXMLFileReader(Path p, DimensionType dim) {
 		super(p);
-		this.dim = dim == DimensionType.PLAN ? DimensionType.PLAN : DimensionType.SPATIAL;
+		this.dim = dim == DimensionType.HEIGHT ? DimensionType.HEIGHT : dim == DimensionType.PLAN ? DimensionType.PLAN : DimensionType.SPATIAL;
 		this.reset();
 	}
 
@@ -210,6 +212,8 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 			this.slopeDistances = new ArrayList<TerrestrialObservationRow>();
 		if (this.zenithAngles == null)
 			this.zenithAngles = new ArrayList<TerrestrialObservationRow>();
+		if (this.leveling == null)
+			this.leveling = new ArrayList<TerrestrialObservationRow>();
 		
 		if (this.gnss2D == null)
 			this.gnss2D = new ArrayList<GNSSObservationRow>();
@@ -239,6 +243,7 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 
 		this.slopeDistances.clear();
 		this.zenithAngles.clear();
+		this.leveling.clear();
 		
 		this.gnss2D.clear();
 		this.gnss3D.clear();
@@ -260,6 +265,7 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 			Document document = builder.parse(xmlFile);
 			
 			HeXMLNamespaceContext namespaceContext = new HeXMLNamespaceContext(document);
+			final String itemName = this.createItemName(null, null);
 					
 			// Bestimme Applikation auf dem Instrument
 			String xpathPattern = "//landxml:LandXML/landxml:Application/@name";
@@ -301,296 +307,419 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 					this.angularUnit = AngularUnit.RADIAN;
 			}
 
-			// Ermittle alle Punkte (Koordinaten) im Projekt und die SetupIDs
-			xpathPattern = "//landxml:LandXML/landxml:CgPoints/landxml:CgPoint[@name] | "
-					+ "//landxml:LandXML/landxml:Survey//landxml:Backsight/landxml:BacksightPoint[@name] | "
-					+ "//landxml:LandXML/landxml:Survey//landxml:TargetPoint[@name] |"
-					+ "//landxml:LandXML/landxml:Survey//landxml:InstrumentSetup[@stationName]/landxml:InstrumentPoint";
+			if (this.dim == DimensionType.PLAN || this.dim == DimensionType.SPATIAL) {
+				// Ermittle alle Punkte (Koordinaten) im Projekt und die SetupIDs
+				xpathPattern = "//landxml:LandXML/landxml:CgPoints/landxml:CgPoint[@name] | "
+						+ "//landxml:LandXML/landxml:Survey//landxml:Backsight/landxml:BacksightPoint[@name] | "
+						+ "//landxml:LandXML/landxml:Survey//landxml:TargetPoint[@name] |"
+						+ "//landxml:LandXML/landxml:Survey//landxml:InstrumentSetup[@stationName]/landxml:InstrumentPoint";
 
-			NodeList nodeList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, namespaceContext, XPathConstants.NODESET);
-			for (int i=0; i<nodeList.getLength(); i++) {
-				Node node = nodeList.item(i);
-				if (node.hasChildNodes() && node.getFirstChild().getNodeType() == Node.TEXT_NODE && !node.getFirstChild().getNodeValue().trim().isEmpty()) {
-					NamedNodeMap attr = node.getAttributes();
-					String pointName = "";
-					String code = null;
-					String setupId = "";
-					double ih = 0.0;
-					PointRow point = null;
-					boolean isDeleted = false;
-					if (node.getNodeName().equalsIgnoreCase("CgPoint")) {
-						pointName = attr.getNamedItem("oID") == null ? attr.getNamedItem("name").getNodeValue() : attr.getNamedItem("oID").getNodeValue();
-						code = attr.getNamedItem("code") == null ? null : attr.getNamedItem("code").getNodeValue();
-						// boolean isReferencePoint = attr.getNamedItem("role") != null && attr.getNamedItem("role").getNodeValue().equalsIgnoreCase("control point");
-					}
-					else if (node.getNodeName().equalsIgnoreCase("InstrumentPoint")) {
-						NamedNodeMap parentNodeAttr = node.getParentNode().getAttributes();
-						pointName = parentNodeAttr.getNamedItem("stationName").getNodeValue();
-						Node status = parentNodeAttr.getNamedItem("status");
-						isDeleted = status != null && status.getNodeValue() != null && status.getNodeValue().equalsIgnoreCase("deleted");
-						// ermittle die Setup-ID
-						setupId = parentNodeAttr.getNamedItem("id") == null ? "" : parentNodeAttr.getNamedItem("id").getNodeValue();
-						
-						//try {ih = attr.getNamedItem("instrumentHeight") == null ? 0.0 : this.convertToMeter(Double.parseDouble(attr.getNamedItem("instrumentHeight").getNodeValue()));}catch (NumberFormatException e) {ih = 0.0;}
-						try {ih = parentNodeAttr.getNamedItem("instrumentHeight") == null ? 0.0 : this.convertToMeter(Double.parseDouble(parentNodeAttr.getNamedItem("instrumentHeight").getNodeValue()));}catch (NumberFormatException e) {ih = 0.0;}
-					}
-					else {
-						pointName = attr.getNamedItem("name").getNodeValue();
-					}
-					
-					pointName = pointName.trim();
-					
-					if (!isDeleted && !pointName.isEmpty() && !this.pointNames.contains(pointName)) {
-						this.pointNames.add(pointName);
-						String pointContent[] = node.getFirstChild().getNodeValue().trim().split("\\s+");
-						double xyz[] = new double[pointContent.length];
-						try {
-							for (int p=0; p<pointContent.length; p++)
-								xyz[p] = this.convertToMeter(Double.parseDouble(pointContent[p]));
-						} 
-						catch (NumberFormatException e) {
-							xyz = null;
-						}
-
-						if (xyz != null && pointContent.length > 1) {
-							point = new PointRow();
-							point.setName(pointName);
-							point.setCode(code);
-							double x = 0, y = 0, z = 0;
-							if (xyz.length != 1) {
-								x = xyz[0];
-								y = xyz[1];
-								
-								point.setXApriori(x);
-								point.setYApriori(y);
-							}
-							if (xyz.length != 2) {
-								z = xyz[xyz.length-1];
-								point.setZApriori(z);
-							}
-							
-							if (xyz.length == 2 || this.dim == DimensionType.PLAN) {
-								if (!this.reservedNames.contains(pointName))
-									this.points2d.add(point);
-							}
-							else {
-								if (!this.reservedNames.contains(pointName))
-									this.points3d.add(point);
-								this.point3DName.add(pointName);
-							}
-						}
-					}
-					if (!setupId.isEmpty() && !pointName.isEmpty() && this.pointNames.contains(pointName))
-						this.setups.put(setupId, new InstrumentSetup(pointName, ih));
-				}
-			}
-			// ermittle Beobachtungen zwischen den Punkten
-			xpathPattern = "//landxml:LandXML/landxml:Survey//landxml:RawObservation[@setupID=\"%s\"]";
-			boolean applyAtmosphericCorrection = applicationName == null || !applicationName.equalsIgnoreCase("LandXML Export");
-			for (String setupId : this.setups.keySet()) {
-				InstrumentSetup setup = this.setups.get(setupId);
-				nodeList = (NodeList)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, setupId), namespaceContext, XPathConstants.NODESET);
+				NodeList nodeList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, namespaceContext, XPathConstants.NODESET);
 				for (int i=0; i<nodeList.getLength(); i++) {
-					Node node = nodeList.item(i);				
-					double th = 0.0;
-					Double dir = null, zenith = null, dist2d = null, dist3d = null;
-					Boolean isDeleted = false;
-					
+					Node node = nodeList.item(i);
+					if (node.hasChildNodes() && node.getFirstChild().getNodeType() == Node.TEXT_NODE && !node.getFirstChild().getNodeValue().trim().isEmpty()) {
+						NamedNodeMap attr = node.getAttributes();
+						String pointName = "";
+						String code = null;
+						String setupId = "";
+						double ih = 0.0;
+						PointRow point = null;
+						boolean isDeleted = false;
+						if (node.getNodeName().equalsIgnoreCase("CgPoint")) {
+							pointName = attr.getNamedItem("oID") == null ? attr.getNamedItem("name").getNodeValue() : attr.getNamedItem("oID").getNodeValue();
+							code = attr.getNamedItem("code") == null ? null : attr.getNamedItem("code").getNodeValue();
+							// boolean isReferencePoint = attr.getNamedItem("role") != null && attr.getNamedItem("role").getNodeValue().equalsIgnoreCase("control point");
+						}
+						else if (node.getNodeName().equalsIgnoreCase("InstrumentPoint")) {
+							NamedNodeMap parentNodeAttr = node.getParentNode().getAttributes();
+							pointName = parentNodeAttr.getNamedItem("stationName").getNodeValue();
+							Node status = parentNodeAttr.getNamedItem("status");
+							isDeleted = status != null && status.getNodeValue() != null && status.getNodeValue().equalsIgnoreCase("deleted");
+							// ermittle die Setup-ID
+							setupId = parentNodeAttr.getNamedItem("id") == null ? "" : parentNodeAttr.getNamedItem("id").getNodeValue();
+
+							//try {ih = attr.getNamedItem("instrumentHeight") == null ? 0.0 : this.convertToMeter(Double.parseDouble(attr.getNamedItem("instrumentHeight").getNodeValue()));}catch (NumberFormatException e) {ih = 0.0;}
+							try {ih = parentNodeAttr.getNamedItem("instrumentHeight") == null ? 0.0 : this.convertToMeter(Double.parseDouble(parentNodeAttr.getNamedItem("instrumentHeight").getNodeValue()));}catch (NumberFormatException e) {ih = 0.0;}
+						}
+						else {
+							pointName = attr.getNamedItem("name").getNodeValue();
+						}
+
+						pointName = pointName.trim();
+
+						if (!isDeleted && !pointName.isBlank() && !this.pointNames.contains(pointName)) {
+							this.pointNames.add(pointName);
+							String pointContent[] = node.getFirstChild().getNodeValue().trim().split("\\s+");
+							double xyz[] = new double[pointContent.length];
+							try {
+								for (int p=0; p<pointContent.length; p++)
+									xyz[p] = this.convertToMeter(Double.parseDouble(pointContent[p]));
+							} 
+							catch (NumberFormatException e) {
+								xyz = null;
+							}
+
+							if (xyz != null && xyz.length > 1) {
+								point = new PointRow();
+								point.setName(pointName);
+								point.setCode(code);
+								double x = 0, y = 0, z = 0;
+								if (xyz.length != 1) {
+									x = xyz[0];
+									y = xyz[1];
+
+									point.setXApriori(x);
+									point.setYApriori(y);
+								}
+								if (xyz.length != 2) {
+									z = xyz[xyz.length-1];
+									point.setZApriori(z);
+								}
+
+								if (xyz.length == 2 || this.dim == DimensionType.PLAN) {
+									if (!this.reservedNames.contains(pointName))
+										this.points2d.add(point);
+								}
+								else {
+									if (!this.reservedNames.contains(pointName))
+										this.points3d.add(point);
+									this.point3DName.add(pointName);
+								}
+							}
+						}
+						if (!setupId.isBlank() && !pointName.isBlank() && this.pointNames.contains(pointName))
+							this.setups.put(setupId, new InstrumentSetup(pointName, ih));
+					}
+				}
+			
+				// ermittle Beobachtungen zwischen den Punkten
+				xpathPattern = "//landxml:LandXML/landxml:Survey//landxml:RawObservation[@setupID=\"%s\"]";
+				boolean applyAtmosphericCorrection = applicationName == null || !applicationName.equalsIgnoreCase("LandXML Export");
+				for (String setupId : this.setups.keySet()) {
+					InstrumentSetup setup = this.setups.get(setupId);
+					nodeList = (NodeList)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, setupId), namespaceContext, XPathConstants.NODESET);
+					for (int i=0; i<nodeList.getLength(); i++) {
+						Node node = nodeList.item(i);				
+						double th = 0.0;
+						Double dir = null, zenith = null, dist2d = null, dist3d = null;
+						Boolean isDeleted = false;
+
+						NamedNodeMap attr = node.getAttributes();
+						try {isDeleted = attr.getNamedItem("status") == null ? false : attr.getNamedItem("status").getNodeValue().equalsIgnoreCase("deleted");} catch (Exception e) {isDeleted = false;}
+						if (isDeleted)
+							continue;
+
+						try {th     = attr.getNamedItem("targetHeight")  == null ? 0.0  : this.convertToMeter(Double.parseDouble(attr.getNamedItem("targetHeight").getNodeValue())); } catch (NumberFormatException e) {th     = 0.0;}
+						try {dir    = attr.getNamedItem("horizAngle")    == null ? null : this.convertToRadian(Double.parseDouble(attr.getNamedItem("horizAngle").getNodeValue()));  } catch (NumberFormatException e) {dir    = null;}
+						try {zenith = attr.getNamedItem("zenithAngle")   == null ? null : this.convertToRadian(Double.parseDouble(attr.getNamedItem("zenithAngle").getNodeValue())); } catch (NumberFormatException e) {zenith = null;}
+						try {dist2d = attr.getNamedItem("horizDistance") == null ? null : this.convertToMeter(Double.parseDouble(attr.getNamedItem("horizDistance").getNodeValue()));} catch (NumberFormatException e) {dist2d = null;}
+						try {dist3d = attr.getNamedItem("slopeDistance") == null ? null : this.convertToMeter(Double.parseDouble(attr.getNamedItem("slopeDistance").getNodeValue()));} catch (NumberFormatException e) {dist3d = null;}
+
+						boolean isFaceI = true;
+						if (attr.getNamedItem("directFace") != null && !attr.getNamedItem("directFace").getNodeValue().equalsIgnoreCase("TRUE") || zenith != null && !Double.isNaN(zenith) && !Double.isInfinite(zenith) && zenith > Math.PI) {
+							isFaceI = false;
+						}
+
+						// Reduziere auf Lage I
+						if (!isFaceI) {
+							if (dir != null)
+								dir = MathExtension.MOD(dir + Math.PI, 2.0*Math.PI);
+							if (this.dim == DimensionType.SPATIAL && zenith != null && zenith > Math.PI)
+								zenith = MathExtension.MOD(2.0*Math.PI - zenith, 2.0*Math.PI);
+						}
+
+						String xpath = "./landxml:TargetPoint/@name";
+						String endPointName = (String)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.STRING);
+
+						if (endPointName != null)
+							endPointName = endPointName.trim();
+
+						int targetPointDim = this.point3DName.contains(endPointName) ? 3 : this.pointNames.contains(endPointName) ? 2 : this.dim == DimensionType.PLAN ? 2 : 3;
+						int startPointDim  = this.point3DName.contains(setup.getSetupPointName()) ? 3 : this.pointNames.contains(setup.getSetupPointName()) ? 2 : this.dim == DimensionType.PLAN ? 2 : 3;
+						int obsDim = Math.min(targetPointDim, startPointDim);
+
+						double distanceForUncertaintyModel = 0;
+						if (this.dim == DimensionType.SPATIAL && obsDim == 3) {
+							// Bestimme Korrekturparameter fuer 3D-Strecke, sofern es nicht das 1200er System ist
+							if (dist3d != null) {
+								xpath = "./landxml:Feature[@code=\"observationInfo\"]/landxml:Property[@label=\"TPSCorrectionRef\"]/@value";
+								String tpsCorr = (String)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.STRING);
+
+								xpath = "./landxml:TargetPoint/@pntRef";
+								tpsCorr = tpsCorr == null || tpsCorr.isEmpty() ? (String)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.STRING) : tpsCorr;
+
+								// HeXML
+								xpath = "1.0 + //landxml:LandXML/hexml:HexagonLandXML/hexml:Survey/hexml:TPSCorrection[@uniqueID = ./../hexml:InstrumentSetup[@uniqueID=\"%s\"]/hexml:RawObservation[@targetPntRef=\"%s\"]/@tpsCorrectionRef ]/@atmosphericPPM * 0.000001";
+								Double scale = (Double)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpath, setupId, tpsCorr), namespaceContext, XPathConstants.NUMBER);
+
+								xpath = "//landxml:LandXML/hexml:HexagonLandXML/hexml:Survey/hexml:InstrumentSetup[@uniqueID=\"%s\"]/hexml:RawObservation[@targetPntRef=\"%s\"]/@reflectorConstant";
+								Double add = (Double)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpath, setupId, tpsCorr), namespaceContext, XPathConstants.NUMBER);
+
+								// LandXML
+								xpath = "1.0 + //landxml:LandXML/landxml:Survey//landxml:Corrections/landxml:Feature[@code=\"TPSCorrection\"]/landxml:Property[@label=\"oID\"][@value = \"%s\"]/../landxml:Property[@label=\"atmosphericPPM\"]/@value * 0.000001";
+								scale = scale == null || Double.isNaN(scale) ? (Double)XMLUtilities.xpathSearch(node, String.format(Locale.ENGLISH, xpath, tpsCorr), namespaceContext, XPathConstants.NUMBER) : scale;
+
+								xpath = "./landxml:Feature[@code=\"observationInfo\"]/landxml:Property[@label=\"reflectorConstant\"]/@value";
+								add = add == null || Double.isNaN(add) ? (Double)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.NUMBER) : add;
+
+								// Validiere Korrekturwerte
+								scale = !applyAtmosphericCorrection || scale == null || Double.isNaN(scale) ? 1.0 : scale;
+								add = !applyAtmosphericCorrection || add == null || Double.isNaN(add)       ? 0.0 : add;
+								add = this.convertToMeter(add);
+
+								// Koorigiere Schraegstrecke
+								dist3d = (dist3d - add) * scale + add;
+								distanceForUncertaintyModel = dist3d;
+
+								TerrestrialObservationRow slopeDistances = new TerrestrialObservationRow();
+								slopeDistances.setInstrumentHeight(setup.getInstrumentHeight());
+								slopeDistances.setStartPointName(setup.getSetupPointName());
+								slopeDistances.setReflectorHeight(th);
+								slopeDistances.setEndPointName(endPointName);
+								slopeDistances.setValueApriori(dist3d);
+								slopeDistances.setDistanceApriori(distanceForUncertaintyModel);
+								if (dist3d > 0)
+									this.slopeDistances.add(slopeDistances);
+							}
+							if (zenith != null) {
+								TerrestrialObservationRow zenithAngles = new TerrestrialObservationRow();
+								zenithAngles.setInstrumentHeight(setup.getInstrumentHeight());
+								zenithAngles.setStartPointName(setup.getSetupPointName());
+								zenithAngles.setReflectorHeight(th);
+								zenithAngles.setEndPointName(endPointName);
+								zenithAngles.setValueApriori(zenith);
+								if (distanceForUncertaintyModel > 0) {
+									zenithAngles.setDistanceApriori(distanceForUncertaintyModel);
+									// Bestimme Horizontalstrecke fuer Richtungsunsicherheit
+									distanceForUncertaintyModel = Math.abs(zenith) > SQRT_EPS ? distanceForUncertaintyModel * Math.sin(zenith) : distanceForUncertaintyModel * Math.sin(SQRT_EPS);
+								}
+								this.zenithAngles.add(zenithAngles);							
+							}
+						}
+						else if (dist2d != null){
+							distanceForUncertaintyModel = dist2d;
+							TerrestrialObservationRow horizontalDistances = new TerrestrialObservationRow();
+							horizontalDistances.setInstrumentHeight(setup.getInstrumentHeight());
+							horizontalDistances.setStartPointName(setup.getSetupPointName());
+							horizontalDistances.setReflectorHeight(th);
+							horizontalDistances.setEndPointName(endPointName);
+							horizontalDistances.setValueApriori(dist2d);
+							horizontalDistances.setDistanceApriori(distanceForUncertaintyModel);
+							if (dist2d > 0)
+								this.horizontalDistances.add(horizontalDistances);
+						}
+
+						if (dir != null) {
+							distanceForUncertaintyModel = dist2d != null && dist2d > 0 ? dist2d : distanceForUncertaintyModel;
+							TerrestrialObservationRow directions = new TerrestrialObservationRow();
+							directions.setInstrumentHeight(setup.getInstrumentHeight());
+							directions.setStartPointName(setup.getSetupPointName());
+							directions.setReflectorHeight(th);
+							directions.setEndPointName(endPointName);
+							directions.setValueApriori(dir);
+							if (distanceForUncertaintyModel > 0)
+								directions.setDistanceApriori(distanceForUncertaintyModel);
+							this.directions.add(directions);
+						}
+					}
+					// Speichere Richtungen, da diese Satzweise zu halten sind
+					this.saveObservationGroups(false);
+				}
+
+				// GNSS-Vector
+				xpathPattern = "//landxml:LandXML/landxml:Survey//landxml:GPSVector";
+				nodeList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, namespaceContext, XPathConstants.NODESET);
+				for (int i=0; i<nodeList.getLength(); i++) {
+					Node node = nodeList.item(i);
 					NamedNodeMap attr = node.getAttributes();
-					try {isDeleted = attr.getNamedItem("status") == null ? false : attr.getNamedItem("status").getNodeValue().equalsIgnoreCase("deleted");} catch (Exception e) {isDeleted = false;}
-					if (isDeleted)
+
+					String startPointName  = attr.getNamedItem("setupID_A") == null ? null : attr.getNamedItem("setupID_A").getNodeValue();
+					String endPointName = attr.getNamedItem("setupID_B") == null ? null : attr.getNamedItem("setupID_B").getNodeValue();
+
+					if (startPointName == null || endPointName == null)
+						continue;
+
+					xpathPattern = "//landxml:LandXML/landxml:Survey//landxml:GPSSetup[@id=\"%s\"]//landxml:TargetPoint[1]";
+					Node startNode  = (Node)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, startPointName),  namespaceContext, XPathConstants.NODE);
+					Node targetNode = (Node)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, endPointName), namespaceContext, XPathConstants.NODE);
+
+					if (startNode == null || targetNode == null)
+						continue;
+
+					// Bestimme Punktnummern der Basislinien
+					startPointName  = startNode.getAttributes().getNamedItem("name") == null  ? null : startNode.getAttributes().getNamedItem("name").getNodeValue();
+					endPointName = targetNode.getAttributes().getNamedItem("name") == null ? null : targetNode.getAttributes().getNamedItem("name").getNodeValue();
+
+					if (startPointName == null || startPointName.isBlank() || endPointName == null || endPointName.isBlank())
 						continue;
 					
-					try {th     = attr.getNamedItem("targetHeight")  == null ? 0.0  : this.convertToMeter(Double.parseDouble(attr.getNamedItem("targetHeight").getNodeValue())); } catch (NumberFormatException e) {th     = 0.0;}
-					try {dir    = attr.getNamedItem("horizAngle")    == null ? null : this.convertToRadian(Double.parseDouble(attr.getNamedItem("horizAngle").getNodeValue()));  } catch (NumberFormatException e) {dir    = null;}
-					try {zenith = attr.getNamedItem("zenithAngle")   == null ? null : this.convertToRadian(Double.parseDouble(attr.getNamedItem("zenithAngle").getNodeValue())); } catch (NumberFormatException e) {zenith = null;}
-					try {dist2d = attr.getNamedItem("horizDistance") == null ? null : this.convertToMeter(Double.parseDouble(attr.getNamedItem("horizDistance").getNodeValue()));} catch (NumberFormatException e) {dist2d = null;}
-					try {dist3d = attr.getNamedItem("slopeDistance") == null ? null : this.convertToMeter(Double.parseDouble(attr.getNamedItem("slopeDistance").getNodeValue()));} catch (NumberFormatException e) {dist3d = null;}
-					
-					boolean isFaceI = true;
-					if (attr.getNamedItem("directFace") != null && !attr.getNamedItem("directFace").getNodeValue().equalsIgnoreCase("TRUE") || zenith != null && !Double.isNaN(zenith) && !Double.isInfinite(zenith) && zenith > Math.PI) {
-						isFaceI = false;
-					}
-					
-					// Reduziere auf Lage I
-					if (!isFaceI) {
-						if (dir != null)
-							dir = MathExtension.MOD(dir + Math.PI, 2.0*Math.PI);
-						if (this.dim == DimensionType.SPATIAL && zenith != null && zenith > Math.PI)
-							zenith = MathExtension.MOD(2.0*Math.PI - zenith, 2.0*Math.PI);
-					}
+					startPointName = startPointName.trim();
+					endPointName = endPointName.trim();
 
-					String xpath = "./landxml:TargetPoint/@name";
-					String endPointName = (String)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.STRING);
-					
-					if (endPointName != null)
-						endPointName = endPointName.trim();
-					
-					int targetPointDim = this.point3DName.contains(endPointName) ? 3 : this.pointNames.contains(endPointName) ? 2 : this.dim == DimensionType.PLAN ? 2 : 3;
-					int startPointDim  = this.point3DName.contains(setup.getSetupPointName()) ? 3 : this.pointNames.contains(setup.getSetupPointName()) ? 2 : this.dim == DimensionType.PLAN ? 2 : 3;
-					int obsDim = Math.min(targetPointDim, startPointDim);
-					
-//					System.out.println("DIM " +dim+"   "+obsDim);
-//					System.out.println("Polar " +dir+"  "+zenit+"  "+dist2d+"  "+dist3d);
-					double distanceForUncertaintyModel = 0;
-					if (this.dim == DimensionType.SPATIAL && obsDim == 3) {
-						// Bestimme Korrekturparameter fuer 3D-Strecke, sofern es nicht das 1200er System ist
-						if (dist3d != null) {
-							xpath = "./landxml:Feature[@code=\"observationInfo\"]/landxml:Property[@label=\"TPSCorrectionRef\"]/@value";
-							String tpsCorr = (String)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.STRING);
-							
-							xpath = "./landxml:TargetPoint/@pntRef";
-							tpsCorr = tpsCorr == null || tpsCorr.isEmpty() ? (String)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.STRING) : tpsCorr;
-													
-							// HeXML
-							xpath = "1.0 + //landxml:LandXML/hexml:HexagonLandXML/hexml:Survey/hexml:TPSCorrection[@uniqueID = ./../hexml:InstrumentSetup[@uniqueID=\"%s\"]/hexml:RawObservation[@targetPntRef=\"%s\"]/@tpsCorrectionRef ]/@atmosphericPPM * 0.000001";
-							Double scale = (Double)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpath, setupId, tpsCorr), namespaceContext, XPathConstants.NUMBER);
-						
-							xpath = "//landxml:LandXML/hexml:HexagonLandXML/hexml:Survey/hexml:InstrumentSetup[@uniqueID=\"%s\"]/hexml:RawObservation[@targetPntRef=\"%s\"]/@reflectorConstant";
-							Double add = (Double)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpath, setupId, tpsCorr), namespaceContext, XPathConstants.NUMBER);
+					// Bestimme Koordinaten *in Gebrauchslage* und berechne dx, dy, dz - nutze *nicht* WGS84-Werte, da diese ggf. Undulationen nicht beruecksichtigen
+					String startPointContent[]  = startNode.getFirstChild().getNodeValue().trim().split("\\s+");
+					String targetPointContent[] = targetNode.getFirstChild().getNodeValue().trim().split("\\s+");
 
-							// LandXML
-							xpath = "1.0 + //landxml:LandXML/landxml:Survey//landxml:Corrections/landxml:Feature[@code=\"TPSCorrection\"]/landxml:Property[@label=\"oID\"][@value = \"%s\"]/../landxml:Property[@label=\"atmosphericPPM\"]/@value * 0.000001";
-							scale = scale == null || Double.isNaN(scale) ? (Double)XMLUtilities.xpathSearch(node, String.format(Locale.ENGLISH, xpath, tpsCorr), namespaceContext, XPathConstants.NUMBER) : scale;
-							
-							xpath = "./landxml:Feature[@code=\"observationInfo\"]/landxml:Property[@label=\"reflectorConstant\"]/@value";
-							add = add == null || Double.isNaN(add) ? (Double)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.NUMBER) : add;
-	
-							// Validiere Korrekturwerte
-							scale = !applyAtmosphericCorrection || scale == null || Double.isNaN(scale) ? 1.0 : scale;
-							add = !applyAtmosphericCorrection || add == null || Double.isNaN(add)       ? 0.0 : add;
-							add = this.convertToMeter(add);
-							
-							// Koorigiere Schraegstrecke
-							dist3d = (dist3d - add) * scale + add;
-							distanceForUncertaintyModel = dist3d;
-							
-							TerrestrialObservationRow slopeDistances = new TerrestrialObservationRow();
-							slopeDistances.setInstrumentHeight(setup.getInstrumentHeight());
-							slopeDistances.setStartPointName(setup.getSetupPointName());
-							slopeDistances.setReflectorHeight(th);
-							slopeDistances.setEndPointName(endPointName);
-							slopeDistances.setValueApriori(dist3d);
-							slopeDistances.setDistanceApriori(distanceForUncertaintyModel);
-							if (dist3d > 0)
-								this.slopeDistances.add(slopeDistances);
+					int vecdim = Math.min(Math.min(startPointContent.length, targetPointContent.length), this.dim == DimensionType.PLAN ? 2 : 3);
+
+					double sxyz[] = new double[vecdim];
+					double txyz[] = new double[vecdim];
+					try {
+						for (int p=0; p<vecdim; p++) {
+							sxyz[p] = this.convertToMeter(Double.parseDouble(startPointContent[p]));
+							txyz[p] = this.convertToMeter(Double.parseDouble(targetPointContent[p]));
 						}
-						if (zenith != null) {
-							TerrestrialObservationRow zenithAngles = new TerrestrialObservationRow();
-							zenithAngles.setInstrumentHeight(setup.getInstrumentHeight());
-							zenithAngles.setStartPointName(setup.getSetupPointName());
-							zenithAngles.setReflectorHeight(th);
-							zenithAngles.setEndPointName(endPointName);
-							zenithAngles.setValueApriori(zenith);
-							if (distanceForUncertaintyModel > 0) {
-								zenithAngles.setDistanceApriori(distanceForUncertaintyModel);
-								// Bestimme Horizontalstrecke fuer Richtungsunsicherheit
-								distanceForUncertaintyModel = Math.abs(zenith) > SQRT_EPS ? distanceForUncertaintyModel * Math.sin(zenith) : distanceForUncertaintyModel * Math.sin(SQRT_EPS);
+					} 
+					catch (NumberFormatException e) {
+						sxyz = null;
+						txyz = null;
+					}
+
+					// erzeuge Vektor
+					if (sxyz != null && txyz != null) {
+						GNSSObservationRow gnss = new GNSSObservationRow();
+						gnss.setStartPointName(startPointName);
+						gnss.setEndPointName(endPointName);
+						if (vecdim != 1) {
+							gnss.setXApriori( this.convertToMeter( txyz[0] - sxyz[0]) );
+							gnss.setYApriori( this.convertToMeter( txyz[1] - sxyz[1]) );
+						}
+						if (vecdim != 2) 
+							gnss.setZApriori( this.convertToMeter( txyz[vecdim-1] - sxyz[vecdim-1]) );
+
+						if (vecdim == 2)
+							this.gnss2D.add(gnss);
+						else
+							this.gnss3D.add(gnss);
+					}				
+				}
+			}
+			
+			else if (this.dim == DimensionType.HEIGHT) {
+				// Leveling data from e.g. LS15
+				xpathPattern = "//landxml:LandXML//hexml:HexagonLandXML/hexml:Survey/hexml:LevelSetups";
+				NodeList nodeList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, namespaceContext, XPathConstants.NODESET);
+				
+				for (int loopIdx=0; loopIdx<nodeList.getLength(); loopIdx++) {
+					Node node = nodeList.item(loopIdx);
+					NamedNodeMap attr = node.getAttributes();
+
+					String loopName = attr.getNamedItem("name") == null || attr.getNamedItem("name").getNodeValue().isBlank() ? itemName : attr.getNamedItem("name").getNodeValue();
+
+					String xpath = "./hexml:LevelSetup";
+					NodeList loopSetupNodeList = (NodeList)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.NODESET);
+
+					for (int setIdx=0; setIdx<loopSetupNodeList.getLength(); setIdx++) {
+						Node setupNode = loopSetupNodeList.item(setIdx);
+
+						LevelingData levelingData = null;
+						xpath = "./hexml:LevelRawObservation";
+						NodeList observations = (NodeList)XMLUtilities.xpathSearch(setupNode, xpath, namespaceContext, XPathConstants.NODESET);
+						for (int obsIdx=0; obsIdx<observations.getLength(); obsIdx++) {
+							Node observation = observations.item(obsIdx);
+							NamedNodeMap obsAttr = observation.getAttributes();
+							
+							Node pointNode = (Node)XMLUtilities.xpathSearch(observation, "./hexml:TargetPoint",  namespaceContext, XPathConstants.NODE);
+							if (pointNode == null)
+								continue;
+							
+							NamedNodeMap pointAttr = pointNode.getAttributes();
+							String pointName = pointAttr.getNamedItem("name") == null ? null : pointAttr.getNamedItem("name").getNodeValue();
+							if (pointName == null || pointName.isBlank())
+								continue;
+							
+							pointName = pointName.trim();
+							
+							if (!this.pointNames.contains(pointName)) {
+								this.pointNames.add(pointName);
+								String pointContent[] = pointNode.getFirstChild().getNodeValue().trim().split("\\s+");
+								double xyz[] = new double[pointContent.length];
+								try {
+									for (int p=0; p<pointContent.length; p++)
+										xyz[p] = this.convertToMeter(Double.parseDouble(pointContent[p]));
+								} 
+								catch (NumberFormatException e) {
+									xyz = null;
+								}
+								
+								if (xyz != null && xyz.length > 0 && xyz.length != 2) {
+									PointRow point = new PointRow();
+									point.setName(pointName);
+
+									double x = 0, y = 0, z = 0;
+									if (xyz.length != 1) {
+										x = xyz[0];
+										y = xyz[1];
+
+										point.setXApriori(x);
+										point.setYApriori(y);
+									}
+									if (xyz.length != 2) {
+										z = xyz[xyz.length-1];
+										point.setZApriori(z);
+									}
+
+									if (!this.reservedNames.contains(pointName))
+										this.points3d.add(point);
+								}
 							}
-							this.zenithAngles.add(zenithAngles);							
+
+							String purposeType = obsAttr.getNamedItem("purpose") == null ? null : obsAttr.getNamedItem("purpose").getNodeValue();
+							Double staffReading = null;
+							Double horizDistance = null;
+
+							try {staffReading  = obsAttr.getNamedItem("staffReading") == null  ? null : this.convertToMeter(Double.parseDouble(obsAttr.getNamedItem("staffReading").getNodeValue()));}  catch (NumberFormatException e) {staffReading  = null;}
+							try {horizDistance = obsAttr.getNamedItem("horizDistance") == null ? null : this.convertToMeter(Double.parseDouble(obsAttr.getNamedItem("horizDistance").getNodeValue()));} catch (NumberFormatException e) {horizDistance = null;}
+							
+							if (purposeType != null && staffReading != null) {
+								if (levelingData == null)
+									levelingData = new LevelingData();
+
+								switch(purposeType) {
+								case "backsight":
+									levelingData.addBackSightReading(pointName, staffReading, horizDistance);
+									break;
+
+								case "foresight":
+									levelingData.addForeSightReading(pointName, staffReading, horizDistance);
+									break;
+								}
+							}
 						}
+
+						if (levelingData != null && levelingData.getStartPointName() != null && levelingData.getEndPointName() != null) {
+							double dist2D = levelingData.getDistance();
+							double deltaH = levelingData.getDeltaH();
+
+							TerrestrialObservationRow obs = new TerrestrialObservationRow();
+							obs.setStartPointName(levelingData.getStartPointName());
+							obs.setEndPointName(levelingData.getEndPointName());
+
+							obs.setInstrumentHeight(0.0);
+							obs.setReflectorHeight(0.0);
+
+							if (dist2D > 0)
+								obs.setDistanceApriori(dist2D);
+
+							obs.setValueApriori(deltaH);
+							this.leveling.add(obs);
+						}				
 					}
-					else if (dist2d != null){
-						distanceForUncertaintyModel = dist2d;
-						TerrestrialObservationRow horizontalDistances = new TerrestrialObservationRow();
-						horizontalDistances.setInstrumentHeight(setup.getInstrumentHeight());
-						horizontalDistances.setStartPointName(setup.getSetupPointName());
-						horizontalDistances.setReflectorHeight(th);
-						horizontalDistances.setEndPointName(endPointName);
-						horizontalDistances.setValueApriori(dist2d);
-						horizontalDistances.setDistanceApriori(distanceForUncertaintyModel);
-						if (dist2d > 0)
-							this.horizontalDistances.add(horizontalDistances);
-					}
-					
-					if (dir != null) {
-						distanceForUncertaintyModel = dist2d != null && dist2d > 0 ? dist2d : distanceForUncertaintyModel;
-						TerrestrialObservationRow directions = new TerrestrialObservationRow();
-						directions.setInstrumentHeight(setup.getInstrumentHeight());
-						directions.setStartPointName(setup.getSetupPointName());
-						directions.setReflectorHeight(th);
-						directions.setEndPointName(endPointName);
-						directions.setValueApriori(dir);
-						if (distanceForUncertaintyModel > 0)
-							directions.setDistanceApriori(distanceForUncertaintyModel);
-						this.directions.add(directions);
-					}
+
+					// Speichere Nivellierlinien, da diese Linienweise bzw. Schleifenweise zu halten sind
+					this.lastTreeItem = this.saveTerrestrialObservations(loopName, TreeItemType.LEVELING_LEAF, this.leveling);
 				}
-				// Speichere Richtungen, da diese Satzweise zu halten sind
-				this.saveObservationGroups(false);
 			}
 
-			// GNSS-Vector
-			xpathPattern = "//landxml:LandXML/landxml:Survey//landxml:GPSVector";
-			nodeList = (NodeList)XMLUtilities.xpathSearch(document, xpathPattern, namespaceContext, XPathConstants.NODESET);
-			for (int i=0; i<nodeList.getLength(); i++) {
-				Node node = nodeList.item(i);
-				NamedNodeMap attr = node.getAttributes();
-
-				String startPointName  = attr.getNamedItem("setupID_A") == null ? null : attr.getNamedItem("setupID_A").getNodeValue();
-				String endPointName = attr.getNamedItem("setupID_B") == null ? null : attr.getNamedItem("setupID_B").getNodeValue();
-				
-				if (startPointName == null || endPointName == null)
-					continue;
-				
-				xpathPattern = "//landxml:LandXML/landxml:Survey//landxml:GPSSetup[@id=\"%s\"]//landxml:TargetPoint[1]";
-				Node startNode  = (Node)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, startPointName),  namespaceContext, XPathConstants.NODE);
-				Node targetNode = (Node)XMLUtilities.xpathSearch(document, String.format(Locale.ENGLISH, xpathPattern, endPointName), namespaceContext, XPathConstants.NODE);
-				
-				if (startNode == null || targetNode == null)
-					continue;
-				
-				// Bestimme Punktnummern der Basislinien
-				startPointName  = startNode.getAttributes().getNamedItem("name") == null  ? null : startNode.getAttributes().getNamedItem("name").getNodeValue();
-				endPointName = targetNode.getAttributes().getNamedItem("name") == null ? null : targetNode.getAttributes().getNamedItem("name").getNodeValue();
-					
-				if (startPointName == null || endPointName == null)
-					continue;
-				
-				// Bestimme Koordinaten *in Gebrauchslage* und berechne dx, dy, dz - nutze *nicht* WGS84-Werte, da diese ggf. Undulationen nicht beruecksichtigen
-				String startPointContent[]  = startNode.getFirstChild().getNodeValue().trim().split("\\s+");
-				String targetPointContent[] = targetNode.getFirstChild().getNodeValue().trim().split("\\s+");
-				
-				int vecdim = Math.min(Math.min(startPointContent.length, targetPointContent.length), this.dim == DimensionType.PLAN ? 2 : 3);
-
-				double sxyz[] = new double[vecdim];
-				double txyz[] = new double[vecdim];
-				try {
-					for (int p=0; p<vecdim; p++) {
-						sxyz[p] = this.convertToMeter(Double.parseDouble(startPointContent[p]));
-						txyz[p] = this.convertToMeter(Double.parseDouble(targetPointContent[p]));
-					}
-				} 
-				catch (NumberFormatException e) {
-					sxyz = null;
-					txyz = null;
-				}
-				
-				// erzeuge Vektor
-				if (sxyz != null && txyz != null) {
-					GNSSObservationRow gnss = new GNSSObservationRow();
-					gnss.setStartPointName(startPointName);
-					gnss.setEndPointName(endPointName);
-					if (vecdim != 1) {
-						gnss.setXApriori( this.convertToMeter(txyz[0] - sxyz[0]) );
-						gnss.setYApriori( this.convertToMeter(txyz[1] - sxyz[1]) );
-					}
-					if (vecdim != 2) 
-						gnss.setZApriori( this.convertToMeter(txyz[vecdim-1] - sxyz[vecdim-1]) );
-					
-					if (vecdim == 2)
-						this.gnss2D.add(gnss);
-					else
-						this.gnss3D.add(gnss);
-				}				
-			}
-
-			String itemName = this.createItemName(null, null);
+			
 
 			// Speichere Punkte
-			if (!this.points2d.isEmpty()) 
+			if (this.dim != DimensionType.HEIGHT && !this.points2d.isEmpty()) 
 				this.lastTreeItem = this.savePoints(itemName, TreeItemType.DATUM_POINT_2D_LEAF, this.points2d);
 
+			if (this.dim == DimensionType.HEIGHT && !this.points3d.isEmpty()) 
+				this.lastTreeItem = this.savePoints(itemName, TreeItemType.DATUM_POINT_1D_LEAF, this.points3d);
+			
 			if (this.dim == DimensionType.SPATIAL && !this.points3d.isEmpty()) 
 				this.lastTreeItem = this.savePoints(itemName, TreeItemType.DATUM_POINT_3D_LEAF, this.points3d);
 
@@ -629,6 +758,9 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 	
 	private void saveObservationGroups(boolean forceSaving) throws SQLException {
 		// Import von terrestrischen Beobachtungen
+		if (!this.leveling.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.LEVELING)))
+			this.lastTreeItem = this.saveObservationGroup(TreeItemType.LEVELING_LEAF, this.leveling);
+		
 		if (!this.directions.isEmpty() && (forceSaving || ImportOption.getInstance().isGroupSeparation(ObservationType.DIRECTION)))
 			this.lastTreeItem = this.saveObservationGroup(TreeItemType.DIRECTION_LEAF, this.directions);
 		
@@ -656,7 +788,6 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 			String itemName = this.createItemName(null, isGroupWithEqualStation && observations.get(0).getStartPointName() != null ? " (" + observations.get(0).getStartPointName() + ")" : null); 
 			treeItem = this.saveTerrestrialObservations(itemName, itemType, observations);
 		}
-		observations.clear();
 		return treeItem;
 	}
 	
@@ -667,7 +798,6 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 			String itemName = this.createItemName(null, isGroupWithEqualStation && observations.get(0).getStartPointName() != null ? " (" + observations.get(0).getStartPointName() + ")" : null); 
 			treeItem = this.saveGNSSObservations(itemName, itemType, observations);
 		}
-		observations.clear();
 		return treeItem;
 	}
 
@@ -696,6 +826,7 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 			throw new SQLException(e);
 		}			
 
+		observations.clear();
 		return newTreeItem;
 	}
 	
@@ -724,6 +855,7 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 			throw new SQLException(e);
 		}			
 
+		gnssObservations.clear();
 		return newTreeItem;
 	}
 	
