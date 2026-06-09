@@ -338,6 +338,8 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 						pointName = attr.getNamedItem("name").getNodeValue();
 					}
 					
+					pointName = pointName.trim();
+					
 					if (!isDeleted && !pointName.isEmpty() && !this.pointNames.contains(pointName)) {
 						this.pointNames.add(pointName);
 						String pointContent[] = node.getFirstChild().getNodeValue().trim().split("\\s+");
@@ -420,6 +422,9 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 
 					String xpath = "./landxml:TargetPoint/@name";
 					String endPointName = (String)XMLUtilities.xpathSearch(node, xpath, namespaceContext, XPathConstants.STRING);
+					
+					if (endPointName != null)
+						endPointName = endPointName.trim();
 					
 					int targetPointDim = this.point3DName.contains(endPointName) ? 3 : this.pointNames.contains(endPointName) ? 2 : this.dim == DimensionType.PLAN ? 2 : 3;
 					int startPointDim  = this.point3DName.contains(setup.getSetupPointName()) ? 3 : this.pointNames.contains(setup.getSetupPointName()) ? 2 : this.dim == DimensionType.PLAN ? 2 : 3;
@@ -725,7 +730,7 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 	private TreeItem<TreeItemValue> savePoints(String itemName, TreeItemType treeItemType, List<PointRow> points) throws SQLException {
 		if (points == null || points.isEmpty())
 			return null;
-
+		
 		TreeItemType parentType = TreeItemType.getDirectoryByLeafType(treeItemType);
 		TreeItem<TreeItemValue> newTreeItem = UITreeBuilder.getInstance().addItem(parentType, -1, itemName, true, false);
 		try {
