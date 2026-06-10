@@ -59,37 +59,47 @@ public class LevelingData {
 	}
 	
 	public double getDistance() {
-		double dr = 0;
+		return this.getBackSightDistance() + this.getForeSightDistance();
+	}
+		
+	public double getForeSightDistance() {
 		double dv = 0;
-		
-		if (this.dr1 != null && this.dr2 != null && this.dr1 > 0 && this.dr2 > 0)
-			dr = 0.5 * (this.dr1 + this.dr2);
-		else if (this.dr1 != null && this.dr1 > 0)
-			dr = this.dr1;
-		
 		if (this.dv1 != null && this.dv2 != null && this.dv1 > 0 && this.dv2 > 0)
 			dv = 0.5 * (this.dv1 + this.dv2);
 		else if (this.dv1 != null && this.dv1 > 0)
 			dv = this.dv1;
-
-		return dr + dv;
+		return dv;
+	}
+	
+	public double getBackSightDistance() {
+		double dr = 0;
+		if (this.dr1 != null && this.dr2 != null && this.dr1 > 0 && this.dr2 > 0)
+			dr = 0.5 * (this.dr1 + this.dr2);
+		else if (this.dr1 != null && this.dr1 > 0)
+			dr = this.dr1;
+		return dr;
 	}
 	
 	public double getDeltaH() {
-		double r = 0;
+		return this.getBackSight() - this.getForeSight();	
+	}
+	
+	public double getForeSight() {
 		double v = 0;
-		
-		if (this.r1 != null && this.r2 != null)
-			r = 0.5 * (this.r1 + this.r2);
-		else if (this.r1 != null)
-			r = this.r1;
-		
 		if (this.v1 != null && this.v2 != null)
 			v = 0.5 * (this.v1 + this.v2);
 		else if (this.v1 != null)
 			v = this.v1;
-
-		return r - v;	
+		return v;
+	}
+	
+	public double getBackSight() {
+		double r = 0;
+		if (this.r1 != null && this.r2 != null)
+			r = 0.5 * (this.r1 + this.r2);
+		else if (this.r1 != null)
+			r = this.r1;
+		return r;
 	}
 	
 	public String getStartPointName() {

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -615,11 +616,14 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 						LevelingData levelingData = null;
 						xpath = "./hexml:LevelRawObservation";
 						NodeList observations = (NodeList)XMLUtilities.xpathSearch(setupNode, xpath, namespaceContext, XPathConstants.NODESET);
+						
+						xpath = "./hexml:TargetPoint";
+						List<LevelingData> levelingDataList = new ArrayList<LevelingData>(observations.getLength());
 						for (int obsIdx=0; obsIdx<observations.getLength(); obsIdx++) {
 							Node observation = observations.item(obsIdx);
 							NamedNodeMap obsAttr = observation.getAttributes();
 							
-							Node pointNode = (Node)XMLUtilities.xpathSearch(observation, "./hexml:TargetPoint",  namespaceContext, XPathConstants.NODE);
+							Node pointNode = (Node)XMLUtilities.xpathSearch(observation, xpath,  namespaceContext, XPathConstants.NODE);
 							if (pointNode == null)
 								continue;
 							
@@ -683,26 +687,41 @@ public class HeXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> i
 								case "foresight":
 									levelingData.addForeSightReading(pointName, staffReading, horizDistance);
 									break;
+									
+								case "sideshot":
+									LevelingData sideshot = new LevelingData();
+									sideshot.addForeSightReading(pointName, staffReading, horizDistance);
+									levelingDataList.add(sideshot);
+									break;
 								}
 							}
 						}
-
+						
 						if (levelingData != null && levelingData.getStartPointName() != null && levelingData.getEndPointName() != null) {
-							double dist2D = levelingData.getDistance();
-							double deltaH = levelingData.getDeltaH();
+							double backsightReading  = levelingData.getBackSight();
+							double backsightDistance = levelingData.getBackSightDistance();
+							String pointName = levelingData.getStartPointName();
+							for (LevelingData sideshot : levelingDataList) 
+								sideshot.addBackSightReading(pointName, backsightReading, backsightDistance);
+							
+							levelingDataList.add(0, levelingData);							
+							for (LevelingData leveling : levelingDataList) {
+								double dist2D = leveling.getDistance();
+								double deltaH = leveling.getDeltaH();
 
-							TerrestrialObservationRow obs = new TerrestrialObservationRow();
-							obs.setStartPointName(levelingData.getStartPointName());
-							obs.setEndPointName(levelingData.getEndPointName());
+								TerrestrialObservationRow obs = new TerrestrialObservationRow();
+								obs.setStartPointName(leveling.getStartPointName());
+								obs.setEndPointName(leveling.getEndPointName());
 
-							obs.setInstrumentHeight(0.0);
-							obs.setReflectorHeight(0.0);
+								obs.setInstrumentHeight(0.0);
+								obs.setReflectorHeight(0.0);
 
-							if (dist2D > 0)
-								obs.setDistanceApriori(dist2D);
+								if (dist2D > 0)
+									obs.setDistanceApriori(dist2D);
 
-							obs.setValueApriori(deltaH);
-							this.leveling.add(obs);
+								obs.setValueApriori(deltaH);
+								this.leveling.add(obs);
+							}
 						}				
 					}
 
