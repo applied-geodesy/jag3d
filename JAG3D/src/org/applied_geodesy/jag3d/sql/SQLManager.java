@@ -291,6 +291,7 @@ public class SQLManager {
 
 		this.updateDatabase();
 		this.initFormatterOptions();
+		UIGraphicPaneBuilder.getInstance().getLayerManager().load();
 	}
 
 	private void updateDatabase() throws SQLException, DatabaseVersionMismatchException {

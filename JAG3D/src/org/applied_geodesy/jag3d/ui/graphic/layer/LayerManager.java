@@ -23,6 +23,7 @@ package org.applied_geodesy.jag3d.ui.graphic.layer;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
@@ -558,6 +559,15 @@ public class LayerManager {
 		}
 	}
 	
+	public void load() throws SQLException {
+		SQLGraphicManager sqlGraphicManager = SQLManager.getInstance().getSQLGraphicManager();
+		if (sqlGraphicManager == null) 
+			return;
+		
+		sqlGraphicManager.load(this);
+		sqlGraphicManager.loadEllipseScale(this);
+	}
+	
 	public void redraw() {
 		SQLGraphicManager sqlGraphicManager = SQLManager.getInstance().getSQLGraphicManager();
 		if (sqlGraphicManager == null) 
@@ -565,8 +575,7 @@ public class LayerManager {
 
 		try {
 			this.ignoreChangeEvent = true;
-			sqlGraphicManager.load(this);
-			sqlGraphicManager.loadEllipseScale(this);
+			this.load();
 			if (!sqlGraphicManager.load(this.getCurrentGraphicExtent()))
 				this.expand();
 		} catch (Exception e) {
@@ -583,7 +592,6 @@ public class LayerManager {
 			});
 		} finally {
 			this.ignoreChangeEvent = false;
-			//this.expand();
 			this.draw();
 		}
 	}
