@@ -82,7 +82,8 @@ public class FeatureAdjustment {
 	private TestStatisticDefinition testStatisticDefinition = new TestStatisticDefinition();
 	private TestStatisticParameters testStatisticParameters = null;
 	
-	private static double SQRT_EPS = Math.sqrt(Constant.EPS);
+	private static double EPS = Constant.EPS;
+	private static double SQRT_EPS = Math.sqrt(EPS);
 	private int maximalNumberOfIterations = DefaultValue.getMaximumNumberOfIterations(),
 			iterationStep                 = 0,
 			numberOfModelEquations        = 0,
@@ -97,6 +98,7 @@ public class FeatureAdjustment {
 
 	private double maxAbsDx     = 0.0,
 			maxAbsRestriction   = 0.0,
+			maxAbsResidualDiff  = 0.0,
 			lastValidmaxAbsDx   = 0.0,
 			dampingValue        = 0.0,
 			adaptedDampingValue = 0.0,
@@ -297,9 +299,10 @@ public class FeatureAdjustment {
 				int runs = this.maximalNumberOfIterations - 1;
 				boolean isEstimated = false, estimateCompleteModel = false, isFirstIteration = true;
 				
-				this.maxAbsDx          = 0.0;
-				this.maxAbsRestriction = 0.0;
-				this.lastValidmaxAbsDx = 0.0;
+				this.maxAbsDx           = 0.0;
+				this.maxAbsResidualDiff = 0.0;
+				this.maxAbsRestriction  = 0.0;
+				this.lastValidmaxAbsDx  = 0.0;
 
 				if (this.maximalNumberOfIterations == 0) {
 					estimateCompleteModel = isEstimated = true;
@@ -307,7 +310,7 @@ public class FeatureAdjustment {
 					this.adaptedDampingValue = 0;
 				}
 
-				double sigma2apriori = this.getEstimateVarianceOfUnitWeightApriori();
+				double sigma2apriori = this.estimationType == EstimationType.LInfNORM ? 1.0 : this.getEstimateVarianceOfUnitWeightApriori();
 				this.varianceComponentOfUnitWeight.setVariance0(1.0);
 				this.varianceComponentOfUnitWeight.setOmega(0.0);
 				this.varianceComponentOfUnitWeight.setNumberOfObservations(numberOfObservations);
@@ -322,8 +325,9 @@ public class FeatureAdjustment {
 				}
 
 				do {
-					this.maxAbsDx = 0.0;
-					this.maxAbsRestriction = 0.0;
+					this.maxAbsDx           = 0.0;
+					this.maxAbsResidualDiff = 0.0;
+					this.maxAbsRestriction  = 0.0;
 					this.iterationStep = this.maximalNumberOfIterations-runs;
 					this.currentEstimationStatus = EstimationStateType.ITERATE;
 					this.change.firePropertyChange(this.currentEstimationStatus.name(), this.maximalNumberOfIterations, this.iterationStep);
@@ -351,16 +355,16 @@ public class FeatureAdjustment {
 
 					try {
 						if ((estimateCompleteModel && estimationStep == (numberOfEstimationSteps - 1)) || this.estimationType == EstimationType.L1NORM) {
-							this.calculateStochasticParameters = (this.estimationType != EstimationType.L1NORM && estimateCompleteModel);
+							this.calculateStochasticParameters = (this.estimationType != EstimationType.L1NORM && this.estimationType != EstimationType.LInfNORM && estimateCompleteModel);
 
-							if (this.estimationType != EstimationType.L1NORM) {
+							if (this.estimationType == EstimationType.L2NORM || this.estimationType == EstimationType.SIMULATION) {
 								this.currentEstimationStatus = EstimationStateType.INVERT_NORMAL_EQUATION_MATRIX;
 								this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
 							}
 
 							// in-place estimation normal system N * x = n: N <-- Qxx, n <-- dx 
-							MathExtension.solve(N, n, !applyUnscentedTransformation);
-							if (!applyUnscentedTransformation) {
+							MathExtension.solve(N, n, this.estimationType == EstimationType.L2NORM || this.estimationType == EstimationType.SIMULATION);
+							if (this.estimationType == EstimationType.L2NORM || this.estimationType == EstimationType.SIMULATION) {
 								if (this.preconditioning)
 									this.applyPrecondition(neq.getPreconditioner(), N, n);	
 								
@@ -445,18 +449,19 @@ public class FeatureAdjustment {
 						this.interrupt = false;
 						return this.currentEstimationStatus;
 					}
-
-					if (Double.isInfinite(this.maxAbsDx) || Double.isNaN(this.maxAbsDx)) {
+					
+					double maxAbsDeviation = Math.max(Math.max(this.maxAbsDx, this.maxAbsResidualDiff), this.maxAbsRestriction);
+					if (Double.isInfinite(maxAbsDeviation) || Double.isNaN(maxAbsDeviation)) {
 						if (applyUnscentedTransformation && SigmaUT != null) 
 							this.prepareSphericalSimplexUnscentedTransformationObservation(-1, SigmaUT, 0);
 						this.currentEstimationStatus = EstimationStateType.NO_CONVERGENCE;
 						this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
 						throw new NotConvergedException(Reason.Breakdown, "Error, iteration process breaks down!");
 					}
-					else if (!isFirstIteration && this.maxAbsDx <= SQRT_EPS && this.maxAbsRestriction <= SQRT_EPS && runs > 0 && this.adaptedDampingValue == 0) {
+					else if (!isFirstIteration && maxAbsDeviation <= SQRT_EPS && runs > 0 && this.adaptedDampingValue == 0) {
 						isEstimated = true;
 						this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
-						this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, Math.max(this.maxAbsDx, this.maxAbsRestriction));
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, maxAbsDeviation);
 					}
 					else if (runs-- <= 1) {
 						if (estimateCompleteModel) {
@@ -465,21 +470,21 @@ public class FeatureAdjustment {
 									this.prepareSphericalSimplexUnscentedTransformationObservation(-1, SigmaUT, 0);
 								this.currentEstimationStatus = EstimationStateType.ROBUST_ESTIMATION_FAILED;
 								this.change.firePropertyChange(this.currentEstimationStatus.name(), false, true);
-								throw new NotConvergedException(Reason.Iterations, "Error, equation system does not converge! Last iterate max|dx| = " + this.maxAbsDx + " (" + SQRT_EPS + ").");
+								throw new NotConvergedException(Reason.Iterations, "Error, equation system does not converge! Last iterate max|dx| = " + maxAbsDeviation + " (" + SQRT_EPS + ").");
 							}
 							else {
 								if (applyUnscentedTransformation && SigmaUT != null) 
 									this.prepareSphericalSimplexUnscentedTransformationObservation(-1, SigmaUT, 0);
 								this.currentEstimationStatus = EstimationStateType.NO_CONVERGENCE;
 								this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxAbsDx);
-								throw new NotConvergedException(Reason.Iterations, "Error, equation system does not converge! Last iterate max|dx| = " + this.maxAbsDx + " (" + SQRT_EPS + ").");
+								throw new NotConvergedException(Reason.Iterations, "Error, equation system does not converge! Last iterate max|dx| = " + maxAbsDeviation + " (" + SQRT_EPS + ").");
 							}
 						}
 						isEstimated = true;
 					}
 					else {
 						this.currentEstimationStatus = EstimationStateType.CONVERGENCE;
-						this.change.firePropertyChange(this.currentEstimationStatus.name(), isFirstIteration ? 0 : SQRT_EPS, Math.max(this.maxAbsDx, this.maxAbsRestriction));
+						this.change.firePropertyChange(this.currentEstimationStatus.name(), isFirstIteration ? 0 : SQRT_EPS, maxAbsDeviation);
 					}
 					isFirstIteration = false;
 
@@ -509,7 +514,7 @@ public class FeatureAdjustment {
 
 		if (this.currentEstimationStatus.getId() == EstimationStateType.BUSY.getId() || this.calculateStochasticParameters) {
 			this.currentEstimationStatus = EstimationStateType.ERROR_FREE_ESTIMATION;
-			this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, this.maxAbsDx);
+			this.change.firePropertyChange(this.currentEstimationStatus.name(), SQRT_EPS, Math.max(Math.max(this.maxAbsDx, this.maxAbsResidualDiff), this.maxAbsRestriction));
 		}
 
 //		System.out.println("max(|dx|) = " + this.maxAbsDx + "; omega = " + this.varianceComponentOfUnitWeight.getOmega() + "; itr = " + this.iterationStep);
@@ -818,16 +823,15 @@ public class FeatureAdjustment {
 			// global test statistic
 			if (this.varianceComponentOfUnitWeight.getRedundancy() > 0) {
 				TestStatisticParameterSet globalTestStatistic = this.testStatisticParameters.getTestStatisticParameter(this.varianceComponentOfUnitWeight.getRedundancy(), Double.POSITIVE_INFINITY, Boolean.TRUE);
-				double quantil = Math.max(globalTestStatistic.getQuantile(), 1.0 + Math.sqrt(Constant.EPS));
+				double quantil = Math.max(globalTestStatistic.getQuantile(), 1.0 + SQRT_EPS);
 				boolean significant = this.varianceComponentOfUnitWeight.getVariance() / this.varianceComponentOfUnitWeight.getVariance0() > quantil; 
 				this.varianceComponentOfUnitWeight.setSignificant(significant);
 			}
 			
-			if (this.Qxx != null) {
-				for (UnknownParameter unknownParameter : this.parameters) {
-					int column = unknownParameter.getColumn();
-					unknownParameter.setUncertainty( column >= 0 ? Math.sqrt(Math.abs(varianceOfUnitWeight * this.Qxx.get(column, column))) : 0.0 );
-				}
+
+			for (UnknownParameter unknownParameter : this.parameters) {
+				int column = unknownParameter.getColumn();
+				unknownParameter.setUncertainty( column >= 0 && this.Qxx != null ? Math.sqrt(Math.abs(varianceOfUnitWeight * this.Qxx.get(column, column))) : 0.0 );
 			}
 		}
 	}
@@ -933,6 +937,8 @@ public class FeatureAdjustment {
 		double omega = 0;
 
 		int nou = this.numberOfUnknownParameters;
+		double maxLogWeights = Double.NEGATIVE_INFINITY;
+		double maxResidualNorm = 0;
 		for (FeaturePoint point : this.points) {
 			if (this.interrupt)
 				return 0;
@@ -991,15 +997,37 @@ public class FeatureAdjustment {
 			if (!estimateStochasticParameters)
 				Jv = null;
 			
-			Matrix D = point.getDispersionApriori();
+			Matrix D;
+			if (this.estimationType == EstimationType.LInfNORM) {
+				D = new UpperSymmBandMatrix(dim, 0);
+				double variance = Math.exp(-point.getLogWeight());
+				for (int i=0; i < dim; i++)
+					D.set(i,i, variance);
+			}
+			else 
+				D = point.getDispersionApriori();
 			D.mult(-1.0/this.varianceComponentOfUnitWeight.getVariance0(), JvTWv, residuals); 
 			
+			if (this.estimationType == EstimationType.LInfNORM) {
+				double residualNorm = Math.sqrt(residuals.dot(residuals));
+				double logWeight = point.getLogWeight() + Math.log(Math.max(residualNorm, Double.MIN_NORMAL));
+				point.setLogWeight(logWeight);
+				maxLogWeights = Math.max(maxLogWeights, logWeight);
+				maxResidualNorm = Math.max(maxResidualNorm, residualNorm);
+			}
+
 			if (dim != 1) {
+				this.maxAbsResidualDiff = Math.max(this.maxAbsResidualDiff, Math.abs(point.getResidualX() - residuals.get(0)));
+				this.maxAbsResidualDiff = Math.max(this.maxAbsResidualDiff, Math.abs(point.getResidualY() - residuals.get(1)));
+				
 				point.setResidualX(residuals.get(0));
 				point.setResidualY(residuals.get(1));
 			}
-			if (dim != 2)
+			if (dim != 2) {
+				this.maxAbsResidualDiff = Math.max(this.maxAbsResidualDiff, Math.abs(point.getResidualZ() - residuals.get(dim - 1)));
 				point.setResidualZ(residuals.get(dim - 1));
+			}
+				
 		
 			// residuals are estimated - needed for deriving nabla
 			if (estimateStochasticParameters) {
@@ -1018,13 +1046,30 @@ public class FeatureAdjustment {
 				this.addStochasticParameters(point, Jx, Jv, Ww, noncentralityParameter);
 			}
 		}
+		
+		if (this.estimationType == EstimationType.LInfNORM) {
+			omega = maxResidualNorm;
+			for (FeaturePoint point : this.points) 
+				point.setLogWeight(Math.max(point.getLogWeight() - maxLogWeights, 0.75*Math.log(EPS)));
+		}
+		
 		return omega;
 	}
 	
 	private UpperSymmPackMatrix getDispersionOfMisclosures(FeaturePoint point, Matrix Jv) {
 		int dim = point.getDimension();
 		int nog = point.getNumberOfGeomtries();
-		Matrix D = point.getDispersionApriori();
+		
+		Matrix D;
+		if (this.estimationType == EstimationType.LInfNORM) {
+			D = new UpperSymmBandMatrix(dim, 0);
+			double variance = Math.exp(-point.getLogWeight());
+			for (int i=0; i < dim; i++)
+				D.set(i,i, variance);
+		}
+		else 
+			D = point.getDispersionApriori();
+		
 		UpperSymmPackMatrix Dw = new UpperSymmPackMatrix(nog); 
 		
 		Matrix JvD = new DenseMatrix(nog, dim);
@@ -1510,7 +1555,7 @@ public class FeatureAdjustment {
 	}
 	
 	public void setEstimationType(EstimationType estimationType) throws IllegalArgumentException {
-		if (estimationType == EstimationType.L2NORM || estimationType == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION)
+		if (estimationType == EstimationType.L2NORM || estimationType == EstimationType.LInfNORM || estimationType == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION)
 			this.estimationType = estimationType;
 		else
 			throw new IllegalArgumentException("Error, unsupported estimation type " + estimationType + "!");

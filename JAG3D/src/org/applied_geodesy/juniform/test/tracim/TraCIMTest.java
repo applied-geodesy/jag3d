@@ -24,6 +24,7 @@ package org.applied_geodesy.juniform.test.tracim;
 import java.util.List;
 
 import org.applied_geodesy.adjustment.EstimationStateType;
+import org.applied_geodesy.adjustment.EstimationType;
 import org.applied_geodesy.adjustment.geometry.Feature;
 import org.applied_geodesy.adjustment.geometry.FeatureAdjustment;
 import org.applied_geodesy.adjustment.geometry.GeometricPrimitive;
@@ -33,13 +34,21 @@ import no.uib.cipr.matrix.MatrixSingularException;
 import no.uib.cipr.matrix.NotConvergedException;
 
 class TraCIMTest {
+	private final EstimationType estimationType;
+	public TraCIMTest() {
+		this(EstimationType.L2NORM);
+	}
+	public TraCIMTest(EstimationType estimationType) {
+		this.estimationType = estimationType;
+	}
 
-	public Feature adjust(Feature feature, List<FeaturePoint> points) {
+	public FeatureAdjustment adjust(Feature feature, List<FeaturePoint> points) {
 		return this.adjust(feature, points, 0);
 	}
 	
-	public Feature adjust(Feature feature, List<FeaturePoint> points, double lambda) {
+	public FeatureAdjustment adjust(Feature feature, List<FeaturePoint> points, double lambda) {
 		FeatureAdjustment adjustment = new FeatureAdjustment();
+		adjustment.setEstimationType(this.estimationType);
 
 		for (GeometricPrimitive geometricPrimitive : feature)
 			geometricPrimitive.getFeaturePoints().addAll(points);
@@ -55,7 +64,7 @@ class TraCIMTest {
 			EstimationStateType type = adjustment.estimateModel();
 
 			if (type == EstimationStateType.ERROR_FREE_ESTIMATION)
-				return feature;
+				return adjustment;
 
 		} catch (MatrixSingularException | IllegalArgumentException | UnsupportedOperationException | NotConvergedException e) {
 			e.printStackTrace();

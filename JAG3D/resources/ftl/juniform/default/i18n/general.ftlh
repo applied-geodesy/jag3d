@@ -47,7 +47,9 @@
 			<dt>Adjustment Type</dt>
 			<dd>
 				<#if estimation_type == 'L2NORM'>
-					Least squares adjustment (L<sub>2</sub>Norm)
+					Least Squares Adjustment (L<sub>2</sub>-Norm)
+				<#elseif estimation_type == 'LInfNORM'>
+					Chebyshev-Lawson Approximation (L<sub>&infin;</sub>-Norm)
 				<#elseif estimation_type == 'SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION'>
 					Spherical Simplex Unscented Transformation
 				</#if>

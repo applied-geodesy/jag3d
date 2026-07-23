@@ -47,7 +47,9 @@
 			<dt>Ausgleichungsmodus</dt>
 			<dd>
 				<#if estimation_type == 'L2NORM'>
-					Methode der kleinsten Quadrate (L<sub>2</sub>Norm)
+					Methode der kleinsten Quadrate (L<sub>2</sub>-Norm)
+				<#elseif estimation_type == 'LInfNORM'>
+					Tschebyschew-Lawson-Approximation (L<sub>&infin;</sub>-Norm)
 				<#elseif estimation_type == 'SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION'>
 					Sph&auml;rische Simplex Unscented Transformation
 				</#if>

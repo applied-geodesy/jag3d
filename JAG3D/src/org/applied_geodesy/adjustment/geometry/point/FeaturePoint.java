@@ -69,6 +69,7 @@ public class FeaturePoint extends Point implements Iterable<GeometricPrimitive> 
 	private ObjectProperty<Double> cofactorX = new SimpleObjectProperty<Double>(this, "cofactorX", 0.0);
 	private ObjectProperty<Double> cofactorY = new SimpleObjectProperty<Double>(this, "cofactorY", 0.0);
 	private ObjectProperty<Double> cofactorZ = new SimpleObjectProperty<Double>(this, "cofactorZ", 0.0);
+	private ObjectProperty<Double> logWeight = new SimpleObjectProperty<Double>(this, "logWeight", 0.0);
 	
 	private ObjectBinding<Double> x;
 	private ObjectBinding<Double> y;
@@ -491,6 +492,18 @@ public class FeaturePoint extends Point implements Iterable<GeometricPrimitive> 
 	
 	public ObjectProperty<Double> cofactorZProperty() {
 		return this.cofactorZ;
+	}
+	
+	public double getLogWeight() {
+		return this.logWeight.get();
+	}
+	
+	public void setLogWeight(double w) {
+		this.logWeight.set(w);
+	}
+	
+	public ObjectProperty<Double> logWeightProperty() {
+		return this.logWeight;
 	}
 	
 	private void checkDispersionMatrix(Matrix dispersion) throws IllegalArgumentException {
