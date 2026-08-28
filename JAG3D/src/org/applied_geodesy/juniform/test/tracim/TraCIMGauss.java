@@ -73,7 +73,7 @@ import org.xml.sax.SAXException;
 // Certificate of PTB may not be in list of trusted services defined by Java and must be added
 // C:\Program Files\Java\jdk\bin\keytool.exe -import -alias tracim -keystore  "C:\Program Files\Java\jdk\lib\security\cacerts" -file tracimlx.ptb.de.crt
 // Password: changeit
-public class TraCIM {
+public class TraCIMGauss {
 	private final String orderId;
 	private final String baseURI  = "https://tracim.ptb.de/tracim/api";
 	private final String customer = "Steinbeis Transfer Centre Applied Geodesy";
@@ -83,7 +83,7 @@ public class TraCIM {
 	private final String revision = String.valueOf(Version.get()).substring(4);
 	private String processId;
 	
-	public TraCIM(String orderId) {
+	public TraCIMGauss(String orderId) {
 		this.orderId = orderId;
 	}
 	
@@ -306,8 +306,8 @@ public class TraCIM {
 			
 			switch(object) {
 			case "LINE_3D":
-				feature = traCIMTest.adjust(new SpatialLineFeature(), points);
-				if (feature == null) {
+				feature = new SpatialLineFeature();
+				if (traCIMTest.adjust(feature, points) == null) {
 					System.err.println("Error, least-squares failed for " + object + ", " + bId);
 					continue;
 				}
@@ -332,8 +332,8 @@ public class TraCIM {
 				break;
 				
 			case "PLANE":
-				feature = traCIMTest.adjust(new PlaneFeature(), points);
-				if (feature == null) {
+				feature = new PlaneFeature();
+				if (traCIMTest.adjust(feature, points) == null) {
 					System.err.println("Error, least-squares failed for " + object + ", " + bId);
 					continue;
 				}
@@ -372,8 +372,8 @@ public class TraCIM {
 				break;
 				
 			case "CIRCLE":
-				feature = traCIMTest.adjust(new SpatialCircleFeature(), points);
-				if (feature == null) {
+				feature = new SpatialCircleFeature();
+				if (traCIMTest.adjust(feature, points) == null) {
 					System.err.println("Error, least-squares failed for " + object + ", " + bId);
 					continue;
 				}
@@ -401,8 +401,8 @@ public class TraCIM {
 				break;
 				
 			case "CYLINDER":
-				feature = traCIMTest.adjust(new CircularCylinderFeature(), points);
-				if (feature == null) {
+				feature = new CircularCylinderFeature();
+				if (traCIMTest.adjust(feature, points) == null) {
 					System.err.println("Error, least-squares failed for " + object + ", " + bId);
 					continue;
 				}
@@ -430,8 +430,8 @@ public class TraCIM {
 				break;
 				
 			case "CONE":
-				feature = traCIMTest.adjust(new CircularConeFeature(), points, 0.0001);
-				if (feature == null) {
+				feature = new CircularConeFeature();
+				if (traCIMTest.adjust(feature, points, 0.0001) == null) {
 					System.err.println("Error, least-squares failed for " + object + ", " + bId);
 					continue;
 				}
@@ -482,8 +482,8 @@ public class TraCIM {
 				break;
 				
 			case "SPHERE":
-				feature = traCIMTest.adjust(new SphereFeature(), points);
-				if (feature == null) {
+				feature = new SphereFeature();
+				if (traCIMTest.adjust(feature, points) == null) {
 					System.err.println("Error, least-squares failed for " + object + ", " + bId);
 					continue;
 				}
@@ -578,10 +578,10 @@ public class TraCIM {
     	}
 	}
 	
-	public final static boolean READ_DATA_FROM_LOCAL_FILE = false;
+	public final static boolean READ_DATA_FROM_LOCAL_FILE = true;
 	public final static String NUMBER_TEMPLATE = "%+.20f";
 	public final static String BASE_PATH = "./tracim";
-	public final static boolean STORE_COMPLETE_TRANSACTION = true;
+	public final static boolean STORE_COMPLETE_TRANSACTION = false;
 	
 	public static void main(String[] args) {
 		System.setProperty("com.github.fommil.netlib.BLAS",   "com.github.fommil.netlib.F2jBLAS");
@@ -590,7 +590,7 @@ public class TraCIM {
 		
 		final String processKey = "";
 		try {
-			TraCIM traCIM = new TraCIM(processKey);
+			TraCIMGauss traCIM = new TraCIMGauss(processKey);
 			Document document = traCIM.getTestData();
 			String xmlResult = traCIM.getResultAsXMLString(document);
 

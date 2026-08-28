@@ -24,6 +24,7 @@ package org.applied_geodesy.adjustment;
 public enum EstimationType {
 	L1NORM(1),
 	L2NORM(2),
+	LInfNORM(6),
 	SIMULATION(3),
 	MODIFIED_UNSCENTED_TRANSFORMATION(4),
 	SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION(5);

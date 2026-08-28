@@ -23,7 +23,6 @@ package org.applied_geodesy.jag3d.ui.dialog;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -534,16 +533,14 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 	
 	private ComboBox<EstimationType> createEstimationTypeComboBox(EstimationType item, String tooltip) {
 		ComboBox<EstimationType> typeComboBox = new ComboBox<EstimationType>();
-		EstimationType[] estimationTypeArray = EstimationType.values();
-		if (!this.enableUnscentedTransformation) {
-			List<EstimationType> estimationTypeList = new ArrayList<EstimationType>(Arrays.asList(estimationTypeArray));
-			estimationTypeList.remove(EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION);
-			estimationTypeList.remove(EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION);
-			estimationTypeArray = estimationTypeList.toArray(new EstimationType[estimationTypeList.size()]);
-			if (item == EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION || item == EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION)
+		List<EstimationType> estimationTypes = new ArrayList<EstimationType>(List.of(EstimationType.L1NORM, EstimationType.L2NORM, EstimationType.SIMULATION));
+		if (this.enableUnscentedTransformation) 
+			estimationTypes.addAll(List.of(EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION, EstimationType.MODIFIED_UNSCENTED_TRANSFORMATION));
+
+		if (!estimationTypes.contains(item)) 
 				item = EstimationType.L2NORM;
-		}
-		typeComboBox.getItems().setAll(estimationTypeArray);  // EstimationType.values()
+
+		typeComboBox.getItems().setAll(estimationTypes);
 		typeComboBox.getSelectionModel().select(item);
 		typeComboBox.setConverter(new StringConverter<EstimationType>() {
 
@@ -562,6 +559,8 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 					return i18n.getString("LeastSquaresSettingDialog.estimationtype.mut.label", "Modified unscented transformation (MUT)");
 				case SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION:
 					return i18n.getString("LeastSquaresSettingDialog.estimationtype.sut.label", "Spherical simplex unscented transformation (SUT)");
+				case LInfNORM:
+					return null;
 				}
 				return null;
 			}

@@ -70,8 +70,8 @@ public class MatlabFeatureAdjustmentResultWriter {
 		
 		no.uib.cipr.matrix.Matrix correlationMatrix = adjustment.getCorrelationMatrix();
 		
-		int cols = correlationMatrix.numColumns();
-		int rows = correlationMatrix.numRows();
+		int cols = correlationMatrix == null ? 0 : correlationMatrix.numColumns();
+		int rows = correlationMatrix == null ? 0 : correlationMatrix.numRows();
 		
 		Matrix correlations = Mat5.newMatrix(rows, cols, MatlabType.Double);
 		for (int rowIdx = 0; rowIdx < rows; rowIdx++) {

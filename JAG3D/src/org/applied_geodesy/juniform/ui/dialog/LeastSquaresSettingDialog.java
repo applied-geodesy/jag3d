@@ -21,6 +21,7 @@
 
 package org.applied_geodesy.juniform.ui.dialog;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.applied_geodesy.adjustment.DefaultValue;
@@ -104,6 +105,7 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		this.applyVarianceOfUnitWeightCheckBox.setSelected(this.adjustment.getVarianceComponentOfUnitWeight().isApplyAposterioriVarianceOfUnitWeight());
 		this.adjustModelParametersOnlyCheckBox.setSelected(this.adjustment.isAdjustModelParametersOnly());
 		this.preconditioningCheckBox.setSelected(this.adjustment.isPreconditioning());
+		this.estimationTypeComboBox.setValue(this.adjustment.getEstimationType());
 				
 		this.estimateCenterOfMassCheckBox.setDisable(true);
 		this.estimateInitialGuessCheckBox.setDisable(true);
@@ -122,7 +124,6 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		iterationSpinnerFactory.setValue(iteration);
 		
 		if (this.enableUnscentedTransformation) {
-			this.estimationTypeComboBox.setValue(this.adjustment.getEstimationType());
 			this.utAlphaTextField.setValue(this.adjustment.getUnscentedTransformationScaling());
 			this.utBetaTextField.setValue(this.adjustment.getUnscentedTransformationDamping());
 			this.utWeight0TextField.setValue(this.adjustment.getUnscentedTransformationWeightZero());
@@ -165,9 +166,9 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 					adjustment.setPreconditioning(preconditioningCheckBox.isSelected());
 					adjustment.setMaximalNumberOfIterations(iterationSpinner.getValue());
 					adjustment.setLevenbergMarquardtDampingValue(lmDampingSpinner.getValue());
+					adjustment.setEstimationType(estimationTypeComboBox.getValue());
 
 					if (enableUnscentedTransformation) {
-						adjustment.setEstimationType(estimationTypeComboBox.getValue());
 						adjustment.setUnscentedTransformationScaling(utAlphaTextField.getNumber());
 						adjustment.setUnscentedTransformationDamping(utBetaTextField.getNumber());
 						adjustment.setUnscentedTransformationWeightZero(utWeight0TextField.getNumber());
@@ -192,32 +193,34 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 	private Node createPane() {
 		VBox contentPane = new VBox();
 		
+		List<EstimationType> estimationTypes = this.enableUnscentedTransformation ? List.of(EstimationType.L2NORM, EstimationType.LInfNORM, EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION) : List.of(EstimationType.L2NORM, EstimationType.LInfNORM);	
+
+		this.estimationTypeComboBox = DialogUtil.createEstimationTypeComboBox(estimationTypeStringConverter(),
+				i18N.getString("LeastSquaresSettingDialog.estimationtype.tooltip", "Select estimation type"));
+		this.estimationTypeComboBox.getItems().setAll(estimationTypes);
+		this.estimationTypeComboBox.setValue(EstimationType.L2NORM);
+
+		VBox.setMargin(this.estimationTypeComboBox, new Insets(5, 5, 5, 5)); // oben, recht, unten, links
+
+		contentPane.getChildren().add(this.estimationTypeComboBox);
 		if (this.enableUnscentedTransformation) {
-			this.estimationTypeComboBox = DialogUtil.createEstimationTypeComboBox(estimationTypeStringConverter(),
-					i18N.getString("LeastSquaresSettingDialog.estimationtype.tooltip", "Select estimation type"));
-			this.estimationTypeComboBox.getItems().setAll(EstimationType.L2NORM, EstimationType.SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION);
-			this.estimationTypeComboBox.setValue(EstimationType.L2NORM);
-			
-			VBox.setMargin(this.estimationTypeComboBox, new Insets(5, 5, 5, 5)); // oben, recht, unten, links
-			
-			contentPane.getChildren().add(this.estimationTypeComboBox);
 			TabPane tabPane = new TabPane();
 			Tab tabGen = new Tab(i18N.getString("LeastSquaresSettingDialog.tab.leastsquares.label", "Least-squares"), this.createGeneralSettingPane());
 			tabGen.setTooltip(new Tooltip(i18N.getString("LeastSquaresSettingDialog.tab.leastsquares.tooltip", "Least-squares options")));
 			tabGen.setClosable(false);
 			tabPane.getTabs().add(tabGen);
-		
+
 			Tab tabUT  = new Tab(i18N.getString("LeastSquaresSettingDialog.tab.unscented_transformation.label", "Unscented transformation"), this.createUnscentedTransformationSettingPane());
 			tabUT.setTooltip(new Tooltip(i18N.getString("LeastSquaresSettingDialog.tab.unscented_transformation.tooltip", "Unscented transformation parameters")));
 			tabUT.setClosable(false);
 			tabPane.getTabs().add(tabUT);
-			
+
 			tabPane.setPadding(new Insets(5, 0, 0, 0)); // oben, recht, unten, links
 			tabPane.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
 			tabPane.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
-			
+
 			contentPane.getChildren().add(tabPane);
-			
+
 			Platform.runLater(new Runnable() {
 				@Override public void run() {
 					estimationTypeComboBox.requestFocus();
@@ -398,6 +401,8 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 				switch(type) {
 				case L2NORM:
 					return i18N.getString("LeastSquaresSettingDialog.estimationtype.l2norm.label", "Least-squares adjustment (L2-Norm)");
+				case LInfNORM:
+					return i18N.getString("LeastSquaresSettingDialog.estimationtype.linfnorm.label", "Chebyshev-Lawson approximation (L\u221E-Norm)");
 				case SPHERICAL_SIMPLEX_UNSCENTED_TRANSFORMATION:
 					return i18N.getString("LeastSquaresSettingDialog.estimationtype.sut.label", "Spherical simplex unscented transformation (SUT)");
 				default:
