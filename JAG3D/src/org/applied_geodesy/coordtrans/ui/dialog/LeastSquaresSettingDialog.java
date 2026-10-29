@@ -170,8 +170,8 @@ public class LeastSquaresSettingDialog implements FormatterChangedListener {
 		);
 		
 		this.adjustModelParametersOnlyCheckBox = UiUtil.createCheckBox(
-				i18N.getString("LeastSquaresSettingDialog.adjustperametersonly.label", "Adjust only model parameters"),
-				i18N.getString("LeastSquaresSettingDialog.adjustperametersonly.tooltip", "If checked, the model parameters will be adjusted but no outlier test will be carried out")
+				i18N.getString("LeastSquaresSettingDialog.adjustperametersonly.label", "Adjust only transformation parameters"),
+				i18N.getString("LeastSquaresSettingDialog.adjustperametersonly.tooltip", "If checked, the transformation parameters will be adjusted but no outlier test will be carried out")
 		);
 		
 		this.preconditioningCheckBox = UiUtil.createCheckBox(

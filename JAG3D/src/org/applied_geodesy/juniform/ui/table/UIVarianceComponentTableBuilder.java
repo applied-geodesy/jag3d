@@ -100,7 +100,7 @@ public class UIVarianceComponentTableBuilder extends UITableBuilder<VarianceComp
 		// Omega
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIVarianceComponentTableBuilder.tableheader.omega.label", "\u03A9");
-		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.omega.tooltip", "Squared weigthed residuals");
+		tooltipText = i18n.getString("UIVarianceComponentTableBuilder.tableheader.omega.tooltip", "Squared weighted residuals");
 		cellValueType = CellValueType.STATISTIC;
 		header = new ColumnTooltipHeader(cellValueType, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, VarianceComponent::unitOmegaProperty, getDoubleCallback(cellValueType), ColumnType.VISIBLE, columnIndex, false); 

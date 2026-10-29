@@ -242,7 +242,7 @@ public class MatrixDialog {
 		GridPane gridPane = DialogUtil.createGridPane();
 		
 		this.matrixTypeToggleGroup = new ToggleGroup();
-		RadioButton identityRadioButton = DialogUtil.createRadioButton(i18n.getString("MatrixDialog.matrix.type.identity.label", "Identiy matrix"), 
+		RadioButton identityRadioButton = DialogUtil.createRadioButton(i18n.getString("MatrixDialog.matrix.type.identity.label", "Identity matrix"), 
 				i18n.getString("MatrixDialog.matrix.type.identity.tooltip", "If selected, the matrix type is set to the identity type"),
 				this.matrixTypeToggleGroup);
 		RadioButton diagonalRadioButton = DialogUtil.createRadioButton(i18n.getString("MatrixDialog.matrix.type.diagonal.label", "Diagonal matrix"), 

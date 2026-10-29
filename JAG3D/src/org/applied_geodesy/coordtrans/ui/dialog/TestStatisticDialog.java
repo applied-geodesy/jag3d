@@ -155,8 +155,8 @@ public class TestStatisticDialog implements FormatterChangedListener {
 		String tooltipProbabilityValue = i18N.getString("TestStatisticDialog.probability.tooltip", "Set probability value (type I error)");
 		String tooltipTestPower        = i18N.getString("TestStatisticDialog.testpower.tooltip", "Set power of test (type II error)");
 
-		String labelFamilywiseErrorRate   = i18N.getString("TestStatisticDialog.familywiseerror.label", "Familywise error rate");
-		String tooltipFamilywiseErrorRate = i18N.getString("TestStatisticDialog.familywiseerror.tooltip", "If checked, probability value \u03B1 defines familywise error rate");
+		String labelFamilywiseErrorRate   = i18N.getString("TestStatisticDialog.familywiseerror.label", "Family-wise error rate");
+		String tooltipFamilywiseErrorRate = i18N.getString("TestStatisticDialog.familywiseerror.tooltip", "If checked, probability value \u03B1 defines family-wise error rate");
 
 		this.probabilityValueLabel = new Label(labelProbabilityValue);
 		this.testPowerLabel        = new Label(labelTestPower);

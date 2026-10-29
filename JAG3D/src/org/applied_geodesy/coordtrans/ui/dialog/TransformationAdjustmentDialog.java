@@ -476,7 +476,7 @@ public class TransformationAdjustmentDialog {
 							@Override public void run() {
 								OptionDialog.showThrowableDialog (
 								i18n.getString("TransformationAdjustmentDialog.message.error.failed.singularmatrix.title",  "Parameter adjustment failed"),
-								i18n.getString("TransformationAdjustmentDialog.message.error.failed.singularmatrix.header", "Singular normal euqation matrix"),
+								i18n.getString("TransformationAdjustmentDialog.message.error.failed.singularmatrix.header", "Singular normal equation matrix"),
 								i18n.getString("TransformationAdjustmentDialog.message.error.failed.singularmatrix.message", "Error, could not invert normal equation matrix."),
 								throwable
 								);
@@ -490,7 +490,7 @@ public class TransformationAdjustmentDialog {
 								OptionDialog.showThrowableDialog (
 										i18n.getString("TransformationAdjustmentDialog.message.error.failed.outofmemory.title",  "Parameter adjustment failed"),
 										i18n.getString("TransformationAdjustmentDialog.message.error.failed.outofmemory.header", "Out of memory"),
-										i18n.getString("TransformationAdjustmentDialog.message.error.failed.outofmemory.message", "Error, not enough memory to adjust transformtion parameters. Please allocate more memory."),
+										i18n.getString("TransformationAdjustmentDialog.message.error.failed.outofmemory.message", "Error, not enough memory to adjust transformation parameters. Please allocate more memory."),
 								throwable
 								);
 							}

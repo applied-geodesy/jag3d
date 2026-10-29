@@ -101,7 +101,7 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		// Parameter type
 		int columnIndex = table.getColumns().size(); 
 		String labelText   = i18n.getString("UIParameterTableBuilder.tableheader.type.label", "Type");
-		String tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.type.tooltip", "Type of the model parameter");
+		String tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.type.tooltip", "Type of transformation parameter");
 		ColumnTooltipHeader header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		parameterTypeColumn = this.<ParameterType>getColumn(header, UnknownParameter::parameterTypeProperty, getParameterTypeCallback(), ColumnType.VISIBLE, columnIndex, false); 
 		parameterTypeColumn.setComparator(new NaturalOrderComparator<ParameterType>());
@@ -111,7 +111,7 @@ public class UIParameterTableBuilder extends UIEditableTableBuilder<UnknownParam
 		// Parameter value
 		columnIndex = table.getColumns().size(); 
 		labelText   = i18n.getString("UIParameterTableBuilder.tableheader.value.aposteriori.label", "Estimated value");
-		tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.value.aposteriori.tooltip", "Estimated value of model parameter");
+		tooltipText = i18n.getString("UIParameterTableBuilder.tableheader.value.aposteriori.tooltip", "Estimated value of transformation parameter");
 		header = new ColumnTooltipHeader(CellValueType.STRING, labelText, tooltipText);
 		doubleColumn = this.<Double>getColumn(header, UnknownParameter::valueProperty, getDoubleValueWithUnitCallback(DisplayCellFormatType.NORMAL), ColumnType.VISIBLE, columnIndex, false);
 		table.getColumns().add(doubleColumn);
