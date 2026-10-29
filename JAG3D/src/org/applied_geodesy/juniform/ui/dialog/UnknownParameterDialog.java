@@ -299,7 +299,7 @@ public class UnknownParameterDialog {
 				CellValueType.LENGTH, 0.0, 
 				i18N.getString("UnknownParameterDialog.initial.guess.tooltip", "Initial guess of parameter"));
 		this.nameTextField = DialogUtil.createTextField(
-				i18N.getString("UnknownParameterDialog.parameter.name.tooltip", "Name of parameter"),
+				i18N.getString("UnknownParameterDialog.parameter.name.tooltip", "Name of new unknwon parameter"),
 				i18N.getString("UnknownParameterDialog.parameter.name.prompt", "Parameter name"));
 		this.descriptionTextField = DialogUtil.createTextField(
 				i18N.getString("UnknownParameterDialog.parameter.description.tooltip", "Description of parameter or properties"),
