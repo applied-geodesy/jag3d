@@ -27,7 +27,11 @@ Proper handling of measured values is complex and requires not only the consider
 
 ## Adaptable and Flexible
 
-The JAG3D report uses the powerful [FreeMarker](https://freemarker.apache.org) Template Language to generate text output via customized templates. Users have the option of creating specific templates for their individual workflow – without programming experience in Java. In addition to column-based flat files, complex HTML or XML files are also supported. In software packages for computer-aided design (CAD), the Drawing Interchange Format (DXF) is often used for the exchange between different applications. As these examples are pure text files, specific FreeMarker templates can be defined to generate the content of the files. The JAG3D [download package](https://github.com/applied-geodesy/jag3d/releases/latest) contains an template for creating the standard HTML report. Sample templates for creating simple ASCII or DXF files can be found in the [template collection](https://github.com/loesler/jag3d_templates).
+The JAG3D report uses the powerful [FreeMarker](https://freemarker.apache.org) Template Language to generate text output via customized templates. Users have the option of creating specific templates for their individual workflow – without programming experience in Java. In addition to column-based flat files, complex HTML or XML files are also supported. In software packages for computer-aided design (CAD), the Drawing Interchange Format (DXF) is often used for the exchange between different applications. As these examples are pure text files, specific FreeMarker templates can be defined to generate the content of the files. The JAG3D [download package](https://github.com/applied-geodesy/jag3d/releases/latest) contains an template for creating the standard HTML report. Sample templates for creating simple ASCII or DXF files can be found in the [template collection](https://github.com/loesler/jag3d_templates). 
+Stefan Klein provides an [extension](https://github.com/htw9056/jag3d-klein-methode) of the least-squares adjustment software JAG3D, which iteratively adapts the stochastic model by means of variance component estimation and robust down-weighting of questionable observations.
+
+
+
 
 
 ## System Requirements
