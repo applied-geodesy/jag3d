@@ -1784,7 +1784,9 @@ public class SQLAdjustmentManager {
 				+ "\"ry\" = ?,\"rx\" = ?,\"rz\" = ?,"
 				+ "\"sy\" = ?,\"sx\" = ?,\"sz\" = ?,"
 				+ "\"my\" = ?,\"mx\" = ?,\"mz\" = ?,"
-				+ "\"mxy\" = ?,\"mxyz\" = ? WHERE \"id\" = 1";
+				+ "\"mxy\" = ?,\"mxyz\" = ? "
+				+ "WHERE \"id\" = 1 "
+				+ "AND \"user_defined\" = FALSE";
 
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
 		int idx = 1;
