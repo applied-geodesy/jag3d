@@ -80,7 +80,7 @@ import freemarker.template.Version;
 import javafx.application.HostServices;
 
 public class FTLReport {
-	private final static Version VERSION = Configuration.VERSION_2_3_33;
+	private final static Version VERSION = Configuration.VERSION_2_3_35;
 	private FormatterOptions options = FormatterOptions.getInstance();
 	private Template template = null;
 	private final DataBase dataBase;
