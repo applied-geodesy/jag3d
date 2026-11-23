@@ -4409,8 +4409,6 @@ public class NetworkAdjustment implements Runnable {
 		boolean is2DNet = false;
 		boolean is1DNet = false;
 		
-		int eigenValueDefectCounter = -1;
-		
 		for (int i=0; i<this.datumPoints.size(); i++) {
 			Point point = this.datumPoints.get(i);
 			if (point.getDimension() != 2)
@@ -4430,15 +4428,36 @@ public class NetworkAdjustment implements Runnable {
 				is1DNet = true;
 		}
 		
+		if (is3DNet) {
+			boolean is2DHNet = true;
+			for (int i=0; i<this.numberOfObservations; i++) {
+				Observation observation = this.projectObservations.get(i);
+				if (observation.getObservationType() == ObservationType.SLOPE_DISTANCE || 
+						observation.getObservationType() == ObservationType.ZENITH_ANGLE || 
+						observation.getObservationType() == ObservationType.GNSS3D) {
+					is2DHNet = false; // Es existieren echte 3D Beobachtungen
+					break;
+				}
+			}
+			if (is2DHNet) {
+				is3DNet = false; // kein echtes 3D Netz sondern
+				is2DNet = true;  // ein Kombinationsnetz aus 
+				is1DNet = true;  // Lage und Hoehe
+			}
+		}
+		
+		int eigenValueDefectCounter = -1;
 		if (this.proofOfDatumDefectDetection) {
 			try {
 				int maxDefect = 0;
-				if (is1DNet)
-					maxDefect = 2;
+				if (is1DNet && is2DNet) // 2D+H
+					maxDefect = 8; // tx,ty,tz, rx,ry,rz, m2D, m1D
+				else if (is1DNet)
+					maxDefect = 2; // tz, m1D
 				else if (is2DNet)
-					maxDefect = 4;
+					maxDefect = 4; // tx,ty, rz, m2D
 				else
-					maxDefect = 7;
+					maxDefect = 7; // tx,ty,tz, rx,ry,rz, m3D
 				maxDefect = Math.min(maxDefect, this.numberOfUnknownParameters); 
 				// Der Index ist Eins-Index-basierend, d.h., der kleinste Eigenwert hat den Index Eins und der groesste ist am Index n!
 				NormalEquationSystem neq = this.createNormalEquation();
@@ -4451,17 +4470,17 @@ public class NetworkAdjustment implements Runnable {
 				for (int i = 0; i < maxDefect; i++) {
 					values[i] = Math.abs(eig[0].get(i, i));
 					if (is1DNet && i < 1)
-						threshold += values[i];
+						threshold = Math.max(threshold, values[i]);
 					else if (is2DNet && i < 2)
-						threshold += values[i] / 2.0;
+						threshold = Math.max(threshold, values[i]);
 					else if (is3DNet && i < 3)
-						threshold += values[i] / 3.0;
+						threshold = Math.max(threshold, values[i]);
 				}
 				threshold = 10 * (threshold + SQRT_EPS);
-
+				
 				eigenValueDefectCounter = 0;
 				for (int i = 0; i < maxDefect; i++)
-					eigenValueDefectCounter += Math.abs(eig[0].get(i, i)) < threshold ? 1 : 0;
+					eigenValueDefectCounter += Math.abs(eig[0].get(i, i)) <= threshold ? 1 : 0;
 			} 
 			catch (IllegalArgumentException | NotConvergedException e) {
 				eigenValueDefectCounter = -1;
@@ -4472,6 +4491,12 @@ public class NetworkAdjustment implements Runnable {
 		// Setzte alle mgl. Defekte, die von den Beobachtungen 
 		// anschließend festgesetzt werden koennen. Translation
 		// ist bereits festgesetzt in Schleife drueber	
+		// In einem reinen Richtungs- und/oder Zenitwinkelnetz gibts 
+		// keine Strecken/Hoehenunterschiede, die den Massstab festhalten. 
+		// Er muss demnach als Bedingung in die freie Ausgleichung eingefuehrt 
+		// werden. In einem reinen 2D+H (is1DNet + is2DNet != is3DNet) Netz 
+		// koennen zwei Massstabsrestriktionen vorkommen, wenn sowohl die 
+		// 2D-Strecken als auch die Hoehenunterschiede den Massstab nicht definieren.
 		if (is1DNet) {
 			this.rankDefect.setScaleZ(DefectType.FREE);
 			this.rankDefect.setRotationX(DefectType.FREE);
@@ -4521,9 +4546,6 @@ public class NetworkAdjustment implements Runnable {
 						this.rankDefect.setScaleZ(DefectType.FIXED);
 					else if (this.rankDefect.getScaleZ() != DefectType.FIXED)
 						this.rankDefect.setScaleZ(DefectType.FREE);
-
-//					this.rankDefect.setRotationX(DefectType.FIXED);
-//					this.rankDefect.setRotationY(DefectType.FIXED);
 				}
 				else {
 					if (!((DeltaZ)observation).getScale().isEnable())
@@ -4747,15 +4769,7 @@ public class NetworkAdjustment implements Runnable {
 			else if (this.rankDefect.getRotationY() == DefectType.FREE)
 				this.rankDefect.setRotationY(DefectType.FIXED);
 		}
-
-		// In einem reinen Richtungs- und/oder Zenitwinkelnetz gibts 
-		// keine Strecken, die den Massstab festhalten. Er muss demnach 
-		// als Bedingung in die freie Ausgleichung eingefuehrt werden
-		if (is2DNet && this.rankDefect.getScaleXY() == DefectType.NOT_SET) 
-			this.rankDefect.setScaleXY(DefectType.FREE);
-		if (is3DNet && this.rankDefect.getScaleXYZ() == DefectType.NOT_SET)
-			this.rankDefect.setScaleXYZ(DefectType.FREE);
-
+		
 		if (this.proofOfDatumDefectDetection && eigenValueDefectCounter != -1 && eigenValueDefectCounter != this.rankDefect.getDefect())
 			System.err.println("Error, the defect of the normal equations system is not "
 					+ "equal to its theoretical value: " + eigenValueDefectCounter + " vs. " + this.rankDefect.getDefect());
