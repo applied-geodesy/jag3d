@@ -444,7 +444,7 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 							}
 
 							double distance2d = dist2d + kDist2DRefra + kDist2DEarth;
-							double leveling   = dist3d * Math.cos(zenith) + kDeltaHRefra + kDeltaHEarth;
+							double leveling   = dist3d * Math.cos(zenith) + kDeltaHRefra + kDeltaHEarth + station.getInstrumentHeight() - targetHeight;
 
 							distanceForUncertaintyModel = distance2d;
 							
@@ -459,9 +459,9 @@ public class JobXMLFileReader extends SourceFileReader<TreeItem<TreeItemValue>> 
 							
 							if (this.dim == DimensionType.PLAN_AND_HEIGHT) {
 								TerrestrialObservationRow levelingRow = new TerrestrialObservationRow();
-								levelingRow.setInstrumentHeight(station.getInstrumentHeight());
+								levelingRow.setInstrumentHeight(0.0); // station.getInstrumentHeight() --> in dh integriert
 								levelingRow.setStartPointName(station.getStationName());
-								levelingRow.setReflectorHeight(targetHeight);
+								levelingRow.setReflectorHeight(0.0);  // targetHeight --> in dh integriert
 								levelingRow.setEndPointName(targetName);
 								levelingRow.setValueApriori(leveling);
 								if (distanceForUncertaintyModel > 0)

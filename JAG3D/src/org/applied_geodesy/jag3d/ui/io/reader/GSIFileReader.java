@@ -503,8 +503,8 @@ public class GSIFileReader extends SourceFileReader<TreeItem<TreeItemValue>> {
 					obs.setEndPointName(this.endPointName);
 
 					// Delta-Hs sind bereits um ih und th korrigiert, daher Null
-					//obs.setInstrumentHeight(this.ih);
-					//obs.setReflectorHeight(this.th);
+					obs.setInstrumentHeight(0.0);
+					obs.setReflectorHeight(0.0);
 
 					obs.setInstrumentHeight(0.0);
 					obs.setReflectorHeight(0.0);
