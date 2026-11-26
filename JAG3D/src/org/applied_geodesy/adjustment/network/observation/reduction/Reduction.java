@@ -31,6 +31,7 @@ public class Reduction {
 	private ProjectionType projectionType = ProjectionType.LOCAL_CARTESIAN;
 	private PrincipalPoint principalPoint = new PrincipalPoint();
 	private Ellipsoid ellipsoid = Ellipsoid.SPHERE;
+	private double offsetY = 0.0; // false easting offset
 	private Set<ReductionTaskType> reductionTypes = new HashSet<ReductionTaskType>(ReductionTaskType.values().length);
 
 	public double getEarthRadius() {
@@ -39,6 +40,14 @@ public class Reduction {
 	
 	public PrincipalPoint getPrincipalPoint() {
 		return this.principalPoint;
+	}
+	
+	public void setFalseEastingOffset(double offsetY) {
+		this.offsetY = offsetY;
+	}
+	
+	public double getFalseEastingOffset() {
+		return this.offsetY;
 	}
 	
 	public void setEllipsoid(Ellipsoid ellipsoid) {

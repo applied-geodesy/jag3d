@@ -326,6 +326,9 @@ class SQLDatabase {
 		
 		// add auto exclusion of underdetermined points
 		sqls.put(20250729.0001, "ALTER TABLE \"AdjustmentDefinition\" ADD \"exclude_underdetermined_points\" BOOLEAN DEFAULT " + DefaultValue.excludeUnderdeterminedPoints() + " NOT NULL\r\n");
+
+		// add false easting y-offset
+		sqls.put(20260428.0001, "ALTER TABLE \"ReductionDefinition\" ADD \"false_easting\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
 		
 		return sqls;
 	}

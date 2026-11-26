@@ -4110,8 +4110,8 @@ public class SQLManager {
 			return;
 		
 		String sql = "MERGE INTO \"ReductionDefinition\" USING (VALUES "
-				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
-				+ ") AS \"vals\" (\"id\", \"projection_type\", \"reference_latitude\", \"reference_longitude\", \"reference_height\", \"major_axis\", \"minor_axis\", \"x0\", \"y0\", \"z0\") ON \"ReductionDefinition\".\"id\" = \"vals\".\"id\" AND \"ReductionDefinition\".\"id\" = 1 "
+				+ "(CAST(? AS INT), CAST(? AS INT), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE), CAST(? AS DOUBLE)) "
+				+ ") AS \"vals\" (\"id\", \"projection_type\", \"reference_latitude\", \"reference_longitude\", \"reference_height\", \"major_axis\", \"minor_axis\", \"x0\", \"y0\", \"z0\", \"false_easting\") ON \"ReductionDefinition\".\"id\" = \"vals\".\"id\" AND \"ReductionDefinition\".\"id\" = 1 "
 				+ "WHEN MATCHED THEN UPDATE SET "
 				+ "\"ReductionDefinition\".\"projection_type\"     = \"vals\".\"projection_type\", "
 				+ "\"ReductionDefinition\".\"reference_latitude\"  = \"vals\".\"reference_latitude\", "
@@ -4121,7 +4121,8 @@ public class SQLManager {
 				+ "\"ReductionDefinition\".\"minor_axis\"          = \"vals\".\"minor_axis\", "
 				+ "\"ReductionDefinition\".\"x0\"                  = \"vals\".\"x0\", "
 				+ "\"ReductionDefinition\".\"y0\"                  = \"vals\".\"y0\", "
-				+ "\"ReductionDefinition\".\"z0\"                  = \"vals\".\"z0\"  "
+				+ "\"ReductionDefinition\".\"z0\"                  = \"vals\".\"z0\",  "
+				+ "\"ReductionDefinition\".\"false_easting\"       = \"vals\".\"false_easting\"  "
 				+ "WHEN NOT MATCHED THEN INSERT VALUES "
 				+ "\"vals\".\"id\", "
 				+ "\"vals\".\"projection_type\", "
@@ -4132,7 +4133,8 @@ public class SQLManager {
 				+ "\"vals\".\"minor_axis\", "
 				+ "\"vals\".\"x0\", "
 				+ "\"vals\".\"y0\", "
-				+ "\"vals\".\"z0\" ";
+				+ "\"vals\".\"z0\", "
+				+ "\"vals\".\"false_easting\" ";
 		
 		
 		int idx = 1;
@@ -4148,6 +4150,7 @@ public class SQLManager {
 		stmt.setDouble(idx++, reduction.getPrincipalPoint().getX());
 		stmt.setDouble(idx++, reduction.getPrincipalPoint().getY());
 		stmt.setDouble(idx++, reduction.getPrincipalPoint().getZ());
+		stmt.setDouble(idx++, reduction.getFalseEastingOffset());
 		stmt.execute();
 
 		this.clearReductionTasks();
@@ -4242,6 +4245,7 @@ public class SQLManager {
 					+ "\"projection_type\", "
 					+ "\"reference_latitude\", \"reference_longitude\", \"reference_height\", "
 					+ "\"major_axis\", \"minor_axis\", "
+					+ "\"false_easting\" "
 					+ "\"x0\", \"y0\", \"z0\", \"type\" AS \"task_type\" "
 					+ "FROM \"ReductionTask\" "
 					+ "RIGHT JOIN \"ReductionDefinition\" "
@@ -4261,6 +4265,7 @@ public class SQLManager {
 				double referenceHeight        = rs.getDouble("reference_height");
 				double majorAxis              = rs.getDouble("major_axis");
 				double minorAxis              = rs.getDouble("minor_axis");
+				double offsetY                = rs.getDouble("false_easting");
 				double x0                     = rs.getDouble("x0");
 				double y0                     = rs.getDouble("y0");
 				double z0                     = rs.getDouble("z0");
@@ -4268,6 +4273,7 @@ public class SQLManager {
 				reductions.setProjectionType(projectionType);
 				reductions.setEllipsoid(Ellipsoid.createEllipsoidFromMinorAxis(majorAxis, minorAxis));
 				reductions.getPrincipalPoint().setCoordinates(x0, y0, z0, referenceLatitude, referenceLongitude, referenceHeight);
+				reductions.setFalseEastingOffset(offsetY);
 
 				if (hasTaskType) {
 					ReductionTaskType taskType = ReductionTaskType.getEnumByValue(taskTypeId);

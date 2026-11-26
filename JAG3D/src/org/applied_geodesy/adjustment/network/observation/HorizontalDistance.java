@@ -412,13 +412,14 @@ public class HorizontalDistance extends Observation {
 		
 		// Streckenreduktion bzgl. Projektion
 	    if ((reductions.getProjectionType() == ProjectionType.GAUSS_KRUEGER || reductions.getProjectionType() == ProjectionType.UTM) && reductions.applyReductionTask(ReductionTaskType.DISTANCE)) {
+	    	double offsetY = reductions.getFalseEastingOffset();
 	    	double m0 = reductions.getProjectionType() == ProjectionType.UTM ? 0.9996 : 1.0;
 	    	double yS = this.getStartPoint().getY();
 	    	double yE = this.getEndPoint().getY();
 
 	    	// Reduziere Rechtswert
-	    	yS = ((yS/1000000.0)%1)*1000000.0-500000.0;
-	    	yE = ((yE/1000000.0)%1)*1000000.0-500000.0;
+	    	yS = (((yS + offsetY)/1000000.0)%1)*1000000.0-500000.0;
+	    	yE = (((yE + offsetY)/1000000.0)%1)*1000000.0-500000.0;
 
 	    	double k = (yS*yS + yS*yE + yE*yE)/6.0/R/R;
 	    	obsDist = m0 * (1.0 + k) * obsDist;

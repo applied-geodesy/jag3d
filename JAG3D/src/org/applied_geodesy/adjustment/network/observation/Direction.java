@@ -385,6 +385,7 @@ public class Direction extends Observation {
 	    // Richtungsreduktion
 		if ((reductions.getProjectionType() == ProjectionType.GAUSS_KRUEGER || reductions.getProjectionType() == ProjectionType.UTM) && reductions.applyReductionTask(ReductionTaskType.DIRECTION)) {
 			double R = reductions.getEarthRadius();
+			double offsetY = reductions.getFalseEastingOffset();
 	    	double scale = reductions.getProjectionType() == ProjectionType.UTM ? 0.9996 : 1.0;
 	    	double yS = this.getStartPoint().getY();
 	    	double xS = this.getStartPoint().getX();
@@ -392,8 +393,8 @@ public class Direction extends Observation {
 	    	double xE = this.getEndPoint().getX();
 	    	
 	    	// Reduziere Rechtswert
-	    	yS = ((yS/1000000.0)%1)*1000000.0-500000.0;
-	    	yE = ((yE/1000000.0)%1)*1000000.0-500000.0;
+	    	yS = (((yS + offsetY)/1000000.0)%1)*1000000.0-500000.0;
+	    	yE = (((yE + offsetY)/1000000.0)%1)*1000000.0-500000.0;
 
 	    	double k = -(xE - xS) * (2.0*yS + yE)/(6.0*R*R*scale*scale);
 	    	obsDir = MathExtension.MOD(obsDir + k, 2.0*Math.PI);

@@ -327,6 +327,7 @@ public class SQLAdjustmentManager {
 		
 		this.reductions.setProjectionType(ProjectionType.LOCAL_CARTESIAN);
 		this.reductions.getPrincipalPoint().setCoordinates(0, 0, 0,  0, 0, 0);
+		this.reductions.setFalseEastingOffset(0);
 		this.reductions.clear();
 
 		if (this.networkAdjustment != null) {
@@ -340,6 +341,7 @@ public class SQLAdjustmentManager {
 				+ "\"projection_type\", "
 				+ "\"reference_latitude\", \"reference_longitude\", \"reference_height\", "
 				+ "\"major_axis\", \"minor_axis\", "
+				+ "\"false_easting\", "
 				+ "\"x0\", \"y0\", \"z0\", \"type\" AS \"task_type\" "
 				+ "FROM \"ReductionTask\" "
 				+ "RIGHT JOIN \"ReductionDefinition\" "
@@ -362,10 +364,12 @@ public class SQLAdjustmentManager {
 			double x0                     = rs.getDouble("x0");
 			double y0                     = rs.getDouble("y0");
 			double z0                     = rs.getDouble("z0");
+			double offsetY                = rs.getDouble("false_easting");
 
 			this.reductions.setProjectionType(projectionType);
 			this.reductions.getPrincipalPoint().setCoordinates(x0, y0, z0, referenceLatitude, referenceLongitude, referenceHeight);
 			this.reductions.setEllipsoid(Ellipsoid.createEllipsoidFromMinorAxis(Math.max(majorAxis, minorAxis), Math.min(majorAxis, minorAxis)));
+			this.reductions.setFalseEastingOffset(offsetY);
 
 			if (hasTaskType) {
 				ReductionTaskType taskType = ReductionTaskType.getEnumByValue(taskTypeId);
@@ -551,6 +555,7 @@ public class SQLAdjustmentManager {
 				+ "ORDER BY \"dimension\" ASC, \"PointGroup\".\"id\" ASC, \"PointApriori\".\"id\" ASC";
 
 		Map<String, Point> points = new LinkedHashMap<String,Point>();
+		double offsetY = this.reductions.getFalseEastingOffset();
 
 		int idx = 1;
 		PreparedStatement stmt = this.dataBase.getPreparedStatement(sql);
@@ -590,14 +595,14 @@ public class SQLAdjustmentManager {
 				
 				
 				this.pure1DNetwork = false;
-				if (y0 < 1100000 || y0 > 59800000 )
+				if ((y0 + offsetY) < 1100000 || (y0 + offsetY) > 59800000 )
 					this.applicableHorizontalProjection = false;
 				break;
 			case 3:
 				point = new Point3D(name, x0, y0, z0, sigmaX0, sigmaY0, sigmaZ0);
 
 				this.pure1DNetwork = false;
-				if (y0 < 1100000 || y0 > 59800000 )
+				if ((y0 + offsetY) < 1100000 || (y0 + offsetY) > 59800000 )
 					this.applicableHorizontalProjection = false;
 				break;
 			}

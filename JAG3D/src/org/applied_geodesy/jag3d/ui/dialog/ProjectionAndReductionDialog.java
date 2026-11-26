@@ -121,6 +121,8 @@ public class ProjectionAndReductionDialog {
 			principalPointZ0TextField.setDisable(!ellipsoidalProjectionRadioButton.isSelected());
 			referenceLongitudeTextField.setDisable(!ellipsoidalProjectionRadioButton.isSelected());
 			
+			offsetYTextField.setDisable(!gaussKruegerProjectionRadioButton.isSelected() && !utmProjectionRadioButton.isSelected());
+			
 			if (utmProjectionRadioButton.isSelected() || gaussKruegerProjectionRadioButton.isSelected()) {
 				distanceReductionCheckBox.setDisable(Boolean.FALSE);
 				directionReductionCheckBox.setDisable(Boolean.FALSE);
@@ -134,6 +136,7 @@ public class ProjectionAndReductionDialog {
 	private Window window;
 	private DoubleTextField referenceHeightTextField, referenceLatitudeTextField, referenceLongitudeTextField;
 	private DoubleTextField principalPointX0TextField, principalPointY0TextField, principalPointZ0TextField;
+	private DoubleTextField offsetYTextField;
 	private DoubleTextField majorAxisTextField, minorAxisTextField;
 	private CheckBox directionReductionCheckBox;
 	private CheckBox heightReductionCheckBox;
@@ -203,6 +206,7 @@ public class ProjectionAndReductionDialog {
 					double x0 = principalPointX0TextField.getNumber();
 					double y0 = principalPointY0TextField.getNumber();
 					double z0 = principalPointZ0TextField.getNumber();
+					double offsetY = offsetYTextField.getNumber();
 					
 					ProjectionType projectionType = ProjectionType.LOCAL_CARTESIAN;
 					if (utmProjectionRadioButton.isSelected())
@@ -215,6 +219,7 @@ public class ProjectionAndReductionDialog {
 					reductions.setEllipsoid(Ellipsoid.createEllipsoidFromMinorAxis(Math.max(majorAxis, minorAxis), Math.min(majorAxis, minorAxis)));
 					reductions.getPrincipalPoint().setCoordinates(x0, y0, z0, referenceLatitude, referenceLongitude, referenceHeight);
 					reductions.setProjectionType(projectionType);
+					reductions.setFalseEastingOffset(offsetY);
 					
 					if (directionReductionCheckBox.isSelected()) 
 						reductions.addReductionTaskType(ReductionTaskType.DIRECTION);
@@ -406,6 +411,12 @@ public class ProjectionAndReductionDialog {
 		this.principalPointZ0TextField.setPrefWidth(50);
 		this.principalPointZ0TextField.setMaxWidth(Double.MAX_VALUE);
 		
+		this.offsetYTextField = new DoubleTextField(0.0, CellValueType.LENGTH, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
+		this.offsetYTextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.offset.false_easting.tooltip", "y-offset of truncated coordinates")));
+		this.offsetYTextField.setMinWidth(30);
+		this.offsetYTextField.setPrefWidth(50);
+		this.offsetYTextField.setMaxWidth(Double.MAX_VALUE);
+
 		
 		Label majorAxisLabel = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.ellipsoid.major_axis.label", "Major axis a:"));
 		majorAxisLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
@@ -454,6 +465,12 @@ public class ProjectionAndReductionDialog {
 		principalPointPointZ0Label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		principalPointPointZ0Label.setPadding(new Insets(0,0,0,3));
 		principalPointPointZ0Label.setLabelFor(this.principalPointZ0TextField);
+		
+		Label offsetYLabel = new Label(i18n.getString("ProjectionAndReductionDialog.parameter.offset.false_easting.label", "False easting offset \u0394y:"));
+		offsetYLabel.setMinSize(Control.USE_PREF_SIZE, Control.USE_PREF_SIZE);
+		offsetYLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		offsetYLabel.setPadding(new Insets(0,0,0,3));
+		offsetYLabel.setLabelFor(this.offsetYTextField);
 
 		
 		HBox ellipsoidHbox = new HBox();
@@ -481,7 +498,9 @@ public class ProjectionAndReductionDialog {
 		GridPane.setHgrow(principalPointPointX0Label,       Priority.SOMETIMES);	
 		GridPane.setHgrow(this.principalPointX0TextField,   Priority.ALWAYS);	
 		GridPane.setHgrow(principalPointPointZ0Label,       Priority.SOMETIMES);	
-		GridPane.setHgrow(this.principalPointZ0TextField,   Priority.ALWAYS);	
+		GridPane.setHgrow(this.principalPointZ0TextField,   Priority.ALWAYS);
+		GridPane.setHgrow(offsetYLabel,                     Priority.SOMETIMES);	
+		GridPane.setHgrow(this.offsetYTextField,            Priority.ALWAYS);	
 		
 		int row = 0;
 		gridPane.add(majorAxisLabel,                   0, ++row, 1, 1);
@@ -489,6 +508,8 @@ public class ProjectionAndReductionDialog {
 		gridPane.add(ellipsoidHbox,                    1,   row, 1, 1);
 		gridPane.add(minorAxisLabel,                   0, ++row, 1, 1);
 		gridPane.add(this.minorAxisTextField,          1,   row, 1, 1);
+		gridPane.add(offsetYLabel,                     0, ++row, 1, 1);
+		gridPane.add(this.offsetYTextField,            1,   row, 1, 1);
 		gridPane.add(principalPointPointY0Label,       0, ++row, 1, 1);
 		gridPane.add(this.principalPointY0TextField,   1,   row, 1, 1);
 		gridPane.add(principalPointPointX0Label,       0, ++row, 1, 1);
@@ -520,6 +541,8 @@ public class ProjectionAndReductionDialog {
 			this.principalPointX0TextField.setValue(reductions.getPrincipalPoint().getX());
 			this.principalPointY0TextField.setValue(reductions.getPrincipalPoint().getY());
 			this.principalPointZ0TextField.setValue(reductions.getPrincipalPoint().getZ());
+			
+			this.offsetYTextField.setValue(reductions.getFalseEastingOffset());
 			
 			this.directionReductionCheckBox.setSelected(reductions.applyReductionTask(ReductionTaskType.DIRECTION));
 			this.distanceReductionCheckBox.setSelected(reductions.applyReductionTask(ReductionTaskType.DISTANCE));
