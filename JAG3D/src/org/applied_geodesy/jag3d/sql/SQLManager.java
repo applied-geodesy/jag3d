@@ -4245,7 +4245,7 @@ public class SQLManager {
 					+ "\"projection_type\", "
 					+ "\"reference_latitude\", \"reference_longitude\", \"reference_height\", "
 					+ "\"major_axis\", \"minor_axis\", "
-					+ "\"false_easting\" "
+					+ "\"false_easting\", "
 					+ "\"x0\", \"y0\", \"z0\", \"type\" AS \"task_type\" "
 					+ "FROM \"ReductionTask\" "
 					+ "RIGHT JOIN \"ReductionDefinition\" "

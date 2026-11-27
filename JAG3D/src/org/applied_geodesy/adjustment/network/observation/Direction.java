@@ -392,9 +392,9 @@ public class Direction extends Observation {
 	    	double yE = this.getEndPoint().getY();
 	    	double xE = this.getEndPoint().getX();
 	    	
-	    	// Reduziere Rechtswert
-	    	yS = (((yS + offsetY)/1000000.0)%1)*1000000.0-500000.0;
-	    	yE = (((yE + offsetY)/1000000.0)%1)*1000000.0-500000.0;
+	    	// Reduziere Rechtswert um false easting
+	    	yS = yS - offsetY;
+	    	yE = yE - offsetY;
 
 	    	double k = -(xE - xS) * (2.0*yS + yE)/(6.0*R*R*scale*scale);
 	    	obsDir = MathExtension.MOD(obsDir + k, 2.0*Math.PI);

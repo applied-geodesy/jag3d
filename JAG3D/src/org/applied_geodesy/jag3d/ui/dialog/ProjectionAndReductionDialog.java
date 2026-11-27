@@ -412,7 +412,7 @@ public class ProjectionAndReductionDialog {
 		this.principalPointZ0TextField.setMaxWidth(Double.MAX_VALUE);
 		
 		this.offsetYTextField = new DoubleTextField(0.0, CellValueType.LENGTH, true, ValueSupport.NON_NULL_VALUE_SUPPORT);
-		this.offsetYTextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.offset.false_easting.tooltip", "y-offset of truncated coordinates")));
+		this.offsetYTextField.setTooltip(new Tooltip(i18n.getString("ProjectionAndReductionDialog.parameter.offset.false_easting.tooltip", "y-offset to relocate the coordinate system's origin w.r.t. reference meridian")));
 		this.offsetYTextField.setMinWidth(30);
 		this.offsetYTextField.setPrefWidth(50);
 		this.offsetYTextField.setMaxWidth(Double.MAX_VALUE);

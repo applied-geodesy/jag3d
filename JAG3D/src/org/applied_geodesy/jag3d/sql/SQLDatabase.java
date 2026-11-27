@@ -329,6 +329,7 @@ class SQLDatabase {
 
 		// add false easting y-offset
 		sqls.put(20260428.0001, "ALTER TABLE \"ReductionDefinition\" ADD \"false_easting\" DOUBLE DEFAULT 0 NOT NULL;\r\n");
+		sqls.put(20260428.0002, "UPDATE \"ReductionDefinition\" SET \"false_easting\" = (SELECT CASEWHEN(AVG(\"y0\") > 1E6, FLOOR(AVG(\"y0\")/1E6)*1E6+5E5, 0) FROM \"PointApriori\") WHERE \"id\" = 1 AND \"projection_type\" IN (" + ProjectionType.GAUSS_KRUEGER.getId() + ", " + ProjectionType.UTM.getId() +");\r\n");
 		
 		return sqls;
 	}

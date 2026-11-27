@@ -205,7 +205,7 @@ public class SQLAdjustmentManager {
 			if (this.pure1DNetwork)
 				throw new IllegalProjectionPropertyException("Projection cannot be applied to observations of leveling network! " + this.reductions.getProjectionType());
 			else
-				throw new IllegalProjectionPropertyException("Projection cannot be applied to observations because the coordinates are invalid, e.g. missing zone number! " + this.reductions.getProjectionType());
+				throw new IllegalProjectionPropertyException("Projection cannot be applied to observations because the coordinates are invalid for selected projection: " + this.reductions.getProjectionType() + "! The distance to the reference meridian is too large due to an incorrect false easting (" + this.reductions.getFalseEastingOffset() + ") value.");
 		}
 		
 		if (this.reductions.getProjectionType() == ProjectionType.LOCAL_ELLIPSOIDAL) {
@@ -595,14 +595,14 @@ public class SQLAdjustmentManager {
 				
 				
 				this.pure1DNetwork = false;
-				if ((y0 + offsetY) < 1100000 || (y0 + offsetY) > 59800000 )
+				if (Math.abs(y0 - offsetY) > 1E6)
 					this.applicableHorizontalProjection = false;
 				break;
 			case 3:
 				point = new Point3D(name, x0, y0, z0, sigmaX0, sigmaY0, sigmaZ0);
 
 				this.pure1DNetwork = false;
-				if ((y0 + offsetY) < 1100000 || (y0 + offsetY) > 59800000 )
+				if (Math.abs(y0 - offsetY) > 1E6)
 					this.applicableHorizontalProjection = false;
 				break;
 			}

@@ -416,11 +416,12 @@ public class HorizontalDistance extends Observation {
 	    	double m0 = reductions.getProjectionType() == ProjectionType.UTM ? 0.9996 : 1.0;
 	    	double yS = this.getStartPoint().getY();
 	    	double yE = this.getEndPoint().getY();
+	    	
+	    	// Reduziere Rechtswert um false easting
+	    	yS = yS - offsetY;
+	    	yE = yE - offsetY;
 
-	    	// Reduziere Rechtswert
-	    	yS = (((yS + offsetY)/1000000.0)%1)*1000000.0-500000.0;
-	    	yE = (((yE + offsetY)/1000000.0)%1)*1000000.0-500000.0;
-
+	    	// Joeckel & Stober (1999), S. 182, Gl (7-45)
 	    	double k = (yS*yS + yS*yE + yE*yE)/6.0/R/R;
 	    	obsDist = m0 * (1.0 + k) * obsDist;
 	    }
